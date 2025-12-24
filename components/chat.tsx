@@ -23,6 +23,7 @@ import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { Vote } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
 import type { Attachment, ChatMessage } from "@/lib/types";
+import { isCustomDataPart, isDataUsagePart } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
@@ -97,9 +98,11 @@ export function Chat({
       },
     }),
     onData: (dataPart) => {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-      if (dataPart.type === "data-usage") {
-        setUsage(dataPart.data);
+      if (isCustomDataPart(dataPart)) {
+        setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
+        if (isDataUsagePart(dataPart)) {
+          setUsage(dataPart.data);
+        }
       }
     },
     onFinish: () => {

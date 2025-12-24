@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import type { DataUIPart } from "ai";
+import { useEffect } from "react";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
+import type { CustomUIDataTypes } from "@/lib/types";
 import { artifactDefinitions } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 
 export function DataStreamHandler() {
-  const { dataStream,setDataStream } = useDataStream();
+  const { dataStream, setDataStream } = useDataStream();
 
   const { artifact, setArtifact, setMetadata } = useArtifact();
 
@@ -19,6 +21,7 @@ export function DataStreamHandler() {
     setDataStream([]);
 
     for (const delta of newDeltas) {
+      const part = delta as DataUIPart<CustomUIDataTypes>;
       const artifactDefinition = artifactDefinitions.find(
         (currentArtifactDefinition) =>
           currentArtifactDefinition.kind === artifact.kind
@@ -26,7 +29,7 @@ export function DataStreamHandler() {
 
       if (artifactDefinition?.onStreamPart) {
         artifactDefinition.onStreamPart({
-          streamPart: delta,
+          streamPart: part,
           setArtifact,
           setMetadata,
         });
@@ -37,25 +40,25 @@ export function DataStreamHandler() {
           return { ...initialArtifactData, status: "streaming" };
         }
 
-        switch (delta.type) {
+        switch (part.type) {
           case "data-id":
             return {
               ...draftArtifact,
-              documentId: delta.data,
+              documentId: part.data,
               status: "streaming",
             };
 
           case "data-title":
             return {
               ...draftArtifact,
-              title: delta.data,
+              title: part.data,
               status: "streaming",
             };
 
           case "data-kind":
             return {
               ...draftArtifact,
-              kind: delta.data,
+              kind: part.data,
               status: "streaming",
             };
 
@@ -77,7 +80,7 @@ export function DataStreamHandler() {
         }
       });
     }
-  }, [dataStream, setArtifact, setMetadata, artifact]);
+  }, [dataStream, setArtifact, setMetadata, artifact, setDataStream]);
 
   return null;
 }

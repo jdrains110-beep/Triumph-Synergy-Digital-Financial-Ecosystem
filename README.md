@@ -69,3 +69,50 @@ pnpm dev
 ```
 
 Your app template should now be running on [localhost:3000](http://localhost:3000).
+
+## Migrations, CI, and Vercel deployment
+
+Long-term migration strategy (recommended):
+
+- Migrations must be run from CI or an administrative job before deploying the app.
+- Do NOT run migrations automatically during Vercel builds. Instead, run them from GitHub Actions or another controlled environment where secrets are available.
+
+How it works in this repository:
+
+- The build script runs `scripts/run-migrations-if-present.ts` before `next build`.
+- That script will only run migrations when the environment variable `RUN_MIGRATIONS` is set to `true`.
+- If `RUN_MIGRATIONS=true` but `POSTGRES_URL` is missing, the build will fail — this is intentional to avoid silent misconfiguration.
+
+Local development:
+
+1. Copy `.env.local.example` to `.env.local` and fill in `POSTGRES_URL`.
+2. To run migrations locally before build (explicit):
+
+```powershell
+# Windows PowerShell
+$env:RUN_MIGRATIONS="true"
+$env:POSTGRES_URL="postgres://user:pass@localhost:5432/db"
+pnpm run build
+```
+
+Or run migrations directly:
+
+```powershell
+npx tsx lib/db/migrate.ts
+```
+
+CI (GitHub Actions):
+
+- Add a repository secret `POSTGRES_URL` with the connection string.
+- Add a repository secret `RUN_MIGRATIONS` set to `true` to enable the migrations step in the provided workflow `.github/workflows/build-and-migrate.yml`.
+- The workflow will fail if `RUN_MIGRATIONS=true` and `POSTGRES_URL` is not set.
+
+Vercel deployment guidance:
+
+- Prefer running migrations in CI (GitHub Actions) prior to triggering a Vercel deploy.
+- If you must run migrations from Vercel, use a protected deployment hook or an external job that sets `RUN_MIGRATIONS=true` and provides `POSTGRES_URL` securely.
+
+Security note:
+
+- Never commit real DB credentials. Use repository/project-level secrets in CI/Vercel.
+
