@@ -6,8 +6,8 @@
     "dev": "next dev --turbo",
     "build": "tsx scripts/run-migrations-if-present.ts && next build",
     "start": "next start",
-    "lint": "npx ultracite@latest check",
-    "format": "npx ultracite@latest fix",
+    "lint": "npx ultracite@5.3.9 check",
+    "format": "npx ultracite@5.3.9 fix",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "npx tsx lib/db/migrate.ts",
     "db:studio": "drizzle-kit studio",
@@ -110,3 +110,4 @@
   },
   "packageManager": "pnpm@9.12.3"
 }
+
