@@ -63,16 +63,10 @@ export function isDataUsagePart(
 export function isCustomDataPart(
   part: unknown
 ): part is DataUIPart<CustomUIDataTypes> {
-  if (!part || typeof part !== "object") {
-    return false;
-  }
+  if (!part || typeof part !== "object") return false;
   const t = (part as any).type;
-  if (typeof t !== "string") {
-    return false;
-  }
-  if (!t.startsWith("data-")) {
-    return false;
-  }
+  if (typeof t !== "string") return false;
+  if (!t.startsWith("data-")) return false;
 
   const allowed = new Set([
     "data-textDelta",
