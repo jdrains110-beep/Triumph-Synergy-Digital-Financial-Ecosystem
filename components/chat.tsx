@@ -27,6 +27,7 @@ import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
+import { isDataUsagePart, isCustomDataPart } from "@/lib/types";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
@@ -97,9 +98,11 @@ export function Chat({
       },
     }),
     onData: (dataPart) => {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-      if (dataPart.type === "data-usage") {
-        setUsage(dataPart.data);
+      if (isCustomDataPart(dataPart)) {
+        setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
+        if (isDataUsagePart(dataPart)) {
+          setUsage(dataPart.data);
+        }
       }
     },
     onFinish: () => {

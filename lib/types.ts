@@ -1,4 +1,4 @@
-import type { InferUITool, UIMessage } from "ai";
+import type { InferUITool, UIMessage, DataUIPart } from "ai";
 import { z } from "zod";
 import type { ArtifactKind } from "@/components/artifact";
 import type { createDocument } from "./ai/tools/create-document";
@@ -50,6 +50,38 @@ export type ChatMessage = UIMessage<
   CustomUIDataTypes,
   ChatTools
 >;
+
+export function isDataUsagePart(
+  part: DataUIPart<any>
+): part is DataUIPart<CustomUIDataTypes> & { type: "data-usage"; data: AppUsage } {
+  return part.type === "data-usage";
+}
+
+export function isCustomDataPart(
+  part: unknown
+): part is DataUIPart<CustomUIDataTypes> {
+  if (!part || typeof part !== "object") return false;
+  const t = (part as any).type;
+  if (typeof t !== "string") return false;
+  if (!t.startsWith("data-")) return false;
+
+  const allowed = new Set([
+    "data-textDelta",
+    "data-imageDelta",
+    "data-sheetDelta",
+    "data-codeDelta",
+    "data-suggestion",
+    "data-appendMessage",
+    "data-id",
+    "data-title",
+    "data-kind",
+    "data-clear",
+    "data-finish",
+    "data-usage",
+  ]);
+
+  return allowed.has(t);
+}
 
 export type Attachment = {
   name: string;

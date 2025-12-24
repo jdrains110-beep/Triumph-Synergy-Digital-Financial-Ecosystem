@@ -7,9 +7,7 @@ import type { CustomUIDataTypes } from "@/lib/types";
 
 type DataStreamContextValue = {
   dataStream: DataUIPart<CustomUIDataTypes>[];
-  setDataStream: React.Dispatch<
-    React.SetStateAction<DataUIPart<CustomUIDataTypes>[]>
-  >;
+  setDataStream: React.Dispatch<React.SetStateAction<DataUIPart<CustomUIDataTypes>[]>>;
 };
 
 const DataStreamContext = createContext<DataStreamContextValue | null>(null);
@@ -19,9 +17,7 @@ export function DataStreamProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [dataStream, setDataStream] = useState<DataUIPart<CustomUIDataTypes>[]>(
-    []
-  );
+  const [dataStream, setDataStream] = useState<DataUIPart<CustomUIDataTypes>[]>([]);
 
   const value = useMemo(() => ({ dataStream, setDataStream }), [dataStream]);
 
