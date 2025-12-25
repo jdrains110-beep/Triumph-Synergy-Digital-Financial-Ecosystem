@@ -1,4 +1,4 @@
-import { config } from "dotenv";
+$env:GITHUB_TOKEN = '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$env:GITHUB_TOKEN = 'PASTE_YOUR_TOKEN_HERE''import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
