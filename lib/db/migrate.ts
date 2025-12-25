@@ -1,32 +1,31 @@
-$env:GITHUB_TOKEN = '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$env:GITHUB_TOKEN = 'PASTE_YOUR_TOKEN_HERE''import { config } from "dotenv";
+import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
-config({
-  path: ".env.local",
-});
+config({ path: ".env.local" });
 
-const runMigrate = async () => {
-  if (!process.env.POSTGRES_URL) {
-    throw new Error("POSTGRES_URL is not defined");
+async function runMigrate() {
+  const url = process.env.POSTGRES_URL;
+  if (!url) {
+    console.error("POSTGRES_URL is not defined. Set it in .env.local or environment.");
+    process.exit(1);
   }
 
-  const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
-  const db = drizzle(connection);
+  const sql = postgres(url, { max: 1 });
+  const db = drizzle(sql);
 
   console.log("⏳ Running migrations...");
-
   const start = Date.now();
-  await migrate(db, { migrationsFolder: "./lib/db/migrations" });
-  const end = Date.now();
 
-  console.log("✅ Migrations completed in", end - start, "ms");
-  process.exit(0);
-};
+  try {
+    await migrate(db, { migrationsFolder: "./lib/db/migrations" });
+    console.log("✅ Migrations completed in", Date.now() - start, "ms");
+    process.exit(0);
+  } catch (err) {
+    console.error("❌ Migration failed", err);
+    process.exit(1);
+  }
+}
 
-runMigrate().catch((err) => {
-  console.error("❌ Migration failed");
-  console.error(err);
-  process.exit(1);
-});
+runMigrate();
