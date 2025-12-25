@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run migrations (only if RUN_MIGRATIONS=true)
         if: env.RUN_MIGRATIONS == 'true'
@@ -35,3 +35,30 @@ jobs:
   # Note: To run migrations in GitHub Actions, set repository secret `RUN_MIGRATIONS` to `true`
   # and add `POSTGRES_URL` as a secret. For Vercel, prefer running migrations from CI or
   # a dedicated deployment hook rather than during Vercel build.
+
+
+
+e2e:
+  needs: build-and-migrate
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 8
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Install dependencies (no frozen lockfile)
+      run: pnpm install --no-frozen-lockfile
+    - name: Start production server
+      run: |
+        pnpm run start &
+        npx wait-on http://localhost:3000/ping -t 120000
+    - name: Run Playwright tests
+      env:
+        CI: true
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 'false'
+      run: pnpm run test
+
