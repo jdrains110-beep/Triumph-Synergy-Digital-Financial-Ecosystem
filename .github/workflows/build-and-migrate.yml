@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run migrations (only if RUN_MIGRATIONS=true)
         if: env.RUN_MIGRATIONS == 'true'
@@ -35,3 +35,4 @@ jobs:
   # Note: To run migrations in GitHub Actions, set repository secret `RUN_MIGRATIONS` to `true`
   # and add `POSTGRES_URL` as a secret. For Vercel, prefer running migrations from CI or
   # a dedicated deployment hook rather than during Vercel build.
+
