@@ -116,3 +116,18 @@ Security note:
 
 - Never commit real DB credentials. Use repository/project-level secrets in CI/Vercel.
 
+
+## Pi Node Configuration
+
+To configure Pi nodes for communication, ensure the following TCP/IP ports are open and configured:
+
+- 31400
+- 31401
+- 31402
+- 31403
+- 31404
+- 31405
+- 31406
+- 31407
+- 31408
+- 31409
