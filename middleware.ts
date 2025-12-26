@@ -16,3 +16,4 @@ export function middleware(request: NextRequest) {
   // Everything else just works normally (no more crash)
   return NextResponse.next();
 }
+
