@@ -9,12 +9,12 @@
     "start-server-for-tests": "pnpm exec next dev",
     "lint": "npx ultracite@5.3.9 check",
     "format": "npx ultracite@5.3.9 fix",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "npx drizzle-kit@latest generate",
     "db:migrate": "npx tsx lib/db/migrate.ts",
-    "db:studio": "drizzle-kit studio",
-    "db:push": "drizzle-kit push",
-    "db:pull": "drizzle-kit pull",
-    "db:check": "drizzle-kit check",
+    "db:studio": "npx drizzle-kit@latest studio",
+    "db:push": "npx drizzle-kit@latest push",
+    "db:pull": "npx drizzle-kit@latest pull",
+    "db:check": "npx drizzle-kit@latest check",
     "db:start": "docker-compose up -d",
     "db:stop": "docker-compose down",
     "test": "cross-env RUN_MIGRATIONS=true PLAYWRIGHT=True tsx scripts/run-migrations-if-present.ts && cross-env PLAYWRIGHT=True pnpm exec playwright test"
@@ -105,7 +105,6 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "baseline-browser-mapping": "^2.9.11",
     "cross-env": "^10.1.0",
-    "drizzle-kit": "^0.31.8",
     "postcss": "^8",
     "tailwindcss": "^4.1.13",
     "tsx": "^4.19.1",
@@ -117,5 +116,8 @@
     "esbuild": "^0.27.2"
   }
 }
+
+
+
 
 
