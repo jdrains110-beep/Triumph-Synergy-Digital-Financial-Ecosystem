@@ -6,9 +6,9 @@ import postgres from "postgres";
 config({ path: ".env.local" });
 
 async function runMigrate() {
-  const url = process.env.POSTGRES_URL;
+  const url = process.env.SUPABASE_DB_URL;
   if (!url) {
-    console.error("POSTGRES_URL is not defined. Set it in .env.local or environment.");
+    console.error("SUPABASE_DB_URL is not defined. Set it in .env.local or environment.");
     process.exit(1);
   }
 
