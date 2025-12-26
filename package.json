@@ -6,6 +6,7 @@
     "dev": "next dev --turbo",
     "build": "tsx scripts/run-migrations-if-present.ts && next build",
     "start": "next start",
+    "start-server-for-tests": "pnpm exec next dev",
     "lint": "npx ultracite@5.3.9 check",
     "format": "npx ultracite@5.3.9 fix",
     "db:generate": "drizzle-kit generate",
@@ -14,8 +15,9 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
-    "db:up": "drizzle-kit up",
-    "test": "cross-env PLAYWRIGHT=True pnpm exec playwright test"
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "test": "cross-env RUN_MIGRATIONS=true PLAYWRIGHT=True tsx scripts/run-migrations-if-present.ts && cross-env PLAYWRIGHT=True pnpm exec playwright test"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^1.0.15",
