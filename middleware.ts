@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, host } = request.nextUrl;
 
   // Let these paths go through without crashing
   if (
@@ -13,10 +13,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Everything else just works normally (no more crash)
+  // Redirect Vercel deployments to Pi App Studio
+  if (host.includes("vercel.app")) {
+    const piUrl = new URL(pathname, "https://triumphsynergy0576.pinet.com");
+    return NextResponse.redirect(piUrl);
+  }
+
+  // Everything else just works normally
   return NextResponse.next();
 }
-
-
-
-
