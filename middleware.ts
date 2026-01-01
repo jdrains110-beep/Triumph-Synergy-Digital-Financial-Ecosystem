@@ -4,11 +4,6 @@ import { NextResponse } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname, host } = request.nextUrl;
 
-  // Allow validation key to be served directly without redirect
-  if (pathname === "/validation-key.txt") {
-    return NextResponse.next();
-  }
-
   // Let these paths go through without crashing
   if (
     pathname.startsWith("/_next") ||
@@ -18,7 +13,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Redirect Vercel deployments to Pi App Studio (except validation key)
+  // Redirect Vercel deployments to Pi App Studio
   if (host.includes("vercel.app")) {
     const piUrl = new URL(pathname, "https://triumphsynergy0576.pinet.com");
     return NextResponse.redirect(piUrl);
@@ -27,3 +22,17 @@ export function middleware(request: NextRequest) {
   // Everything else just works normally
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - validation-key.txt (domain validation file)
+     */
+    "/((?!api|_next/static|_next/image|favicon\\.ico|validation-key\\.txt).*)",
+  ],
+};
