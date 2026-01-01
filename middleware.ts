@@ -8,7 +8,8 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/_next") ||
-    pathname.startsWith("/favicon.ico")
+    pathname.startsWith("/favicon.ico") ||
+    pathname.startsWith("/api/validation-key")
   ) {
     return NextResponse.next();
   }
@@ -25,13 +26,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api/validation-key (validation-key API endpoint)
-     */
-    "/((?!_next/static|_next/image|favicon\\.ico|api/validation-key).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico).*)",
   ],
 };
