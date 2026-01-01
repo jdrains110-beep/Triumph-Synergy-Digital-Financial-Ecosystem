@@ -1,7 +1,22 @@
 {
-  "buildCommand": "pnpm build",
-  "devCommand": "pnpm dev",
-  "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "outputDirectory": ".next"
+    "framework":  "nextjs",
+    "buildCommand":  "pnpm build",
+    "installCommand":  "pnpm install",
+    "headers":  [
+                    {
+                        "headers":  [
+                                        {
+                                            "key":  "Content-Type",
+                                            "value":  "text/plain"
+                                        },
+                                        {
+                                            "key":  "Cache-Control",
+                                            "value":  "public, max-age=3600"
+                                        }
+                                    ],
+                        "source":  "/validation-key.txt"
+                    }
+                ],
+    "outputDirectory":  ".next",
+    "devCommand":  "pnpm dev"
 }
