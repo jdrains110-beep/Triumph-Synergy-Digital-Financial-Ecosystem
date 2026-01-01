@@ -33,8 +33,8 @@ importers:
         specifier: ^6.1.2
         version: 6.1.3
       '@codemirror/view':
-        specifier: ^6.35.3
-        version: 6.39.7
+        specifier: ^6.39.8
+        version: 6.39.8
       '@icons-pack/react-simple-icons':
         specifier: ^13.7.0
         version: 13.8.0(react@18.2.0)
@@ -476,8 +476,8 @@ packages:
   '@codemirror/theme-one-dark@6.1.3':
     resolution: {integrity: sha512-NzBdIvEJmx6fjeremiGp3t/okrLPYT0d9orIc7AFun8oZcRk58aejkqhv6spnz4MLAevrKNPMQYXEWMg4s+sKA==}
 
-  '@codemirror/view@6.39.7':
-    resolution: {integrity: sha512-3Vif9hnNHJnl2YgOtkR/wzGzhYcQ8gy3LGdUhkLUU8xSBbgsTxrE8he/CMTpeINm5TgxLe2FmzvF6IYQL/BSAg==}
+  '@codemirror/view@6.39.8':
+    resolution: {integrity: sha512-1rASYd9Z/mE3tkbC9wInRlCNyCkSn+nLsiQKZhEDUUJiUfs/5FHDpCUDaQpoTIaNGeDc6/bhaEAyLmeEucEFPw==}
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
@@ -4482,14 +4482,14 @@ snapshots:
     dependencies:
       '@codemirror/language': 6.12.1
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
       '@lezer/common': 1.5.0
 
   '@codemirror/commands@6.10.1':
     dependencies:
       '@codemirror/language': 6.12.1
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
       '@lezer/common': 1.5.0
 
   '@codemirror/lang-javascript@6.2.4':
@@ -4498,7 +4498,7 @@ snapshots:
       '@codemirror/language': 6.12.1
       '@codemirror/lint': 6.9.2
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
       '@lezer/common': 1.5.0
       '@lezer/javascript': 1.5.4
 
@@ -4513,7 +4513,7 @@ snapshots:
   '@codemirror/language@6.12.1':
     dependencies:
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
       '@lezer/common': 1.5.0
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.5
@@ -4522,13 +4522,13 @@ snapshots:
   '@codemirror/lint@6.9.2':
     dependencies:
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
       crelt: 1.0.6
 
   '@codemirror/search@6.5.11':
     dependencies:
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
       crelt: 1.0.6
 
   '@codemirror/state@6.5.3':
@@ -4539,10 +4539,10 @@ snapshots:
     dependencies:
       '@codemirror/language': 6.12.1
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
       '@lezer/highlight': 1.2.3
 
-  '@codemirror/view@6.39.7':
+  '@codemirror/view@6.39.8':
     dependencies:
       '@codemirror/state': 6.5.3
       crelt: 1.0.6
@@ -6407,7 +6407,7 @@ snapshots:
       '@codemirror/lint': 6.9.2
       '@codemirror/search': 6.5.11
       '@codemirror/state': 6.5.3
-      '@codemirror/view': 6.39.7
+      '@codemirror/view': 6.39.8
 
   comma-separated-tokens@2.0.3: {}
 
