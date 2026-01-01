@@ -4,11 +4,6 @@ import { NextResponse } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname, host } = request.nextUrl;
 
-  // Allow validation-key API endpoint
-  if (pathname === "/api/validation-key") {
-    return NextResponse.next();
-  }
-
   // Let these paths go through without crashing
   if (
     pathname.startsWith("/_next") ||
@@ -35,7 +30,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - api/validation-key (validation-key API endpoint)
      */
-    "/((?!_next/static|_next/image|favicon\\.ico).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|api/validation-key).*)",
   ],
 };
