@@ -2,6 +2,18 @@
   "framework": "nextjs",
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
+  "env": {
+    "POSTGRES_URL": "postgres://user:pass@localhost:5432/triumph_dummy",
+    "REDIS_URL": "redis://localhost:6379",
+    "AUTH_SECRET": "dev-auth-secret",
+    "PI_API_KEY": "dev-pi-api-key",
+    "PI_INTERNAL_API_KEY": "dev-pi-internal-key",
+    "GITHUB_WEBHOOK_SECRET": "dev-github-webhook-secret",
+    "STELLAR_HORIZON_URL": "https://horizon-testnet.stellar.org",
+    "INTERNAL_PI_MULTIPLIER": "1.5",
+    "INTERNAL_PI_MIN_VALUE": "10.0",
+    "EXTERNAL_PI_MIN_VALUE": "1.0"
+  },
   "headers": [
     {
       "headers": [
