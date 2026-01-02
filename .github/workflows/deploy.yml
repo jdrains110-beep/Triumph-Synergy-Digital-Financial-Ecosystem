@@ -304,4 +304,3 @@ jobs:
           Commit: ${{ github.sha }}
           Author: ${{ github.actor }}
         webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-      if: secrets.SLACK_WEBHOOK != ''
