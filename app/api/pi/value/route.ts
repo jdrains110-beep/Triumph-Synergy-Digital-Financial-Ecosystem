@@ -86,17 +86,12 @@ async function verifyStellarTransaction(
       return false;
     }
 
-    // Verify consensus through ledger
-    const ledger = await server.ledgers().ledger(transaction.ledger).call();
-    
     // Stellar Consensus Protocol verification
-    // - Transaction is included in a closed ledger
-    // - Ledger has reached consensus
+    // Transaction is included in a closed ledger
     console.log(`✅ Stellar SCP Verification:`, {
       tx_hash: stellar_tx_id,
       ledger: transaction.ledger,
       successful: transaction.successful,
-      ledger_closed_at: ledger.closed_at,
     });
 
     return true;

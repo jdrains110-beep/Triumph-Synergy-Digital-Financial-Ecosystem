@@ -27,14 +27,14 @@ export async function GET(request: NextRequest) {
 
     const ledger = latestLedger.records[0];
 
-    // Get network status
+    // Get network status with safe property access
     const networkStatus = {
-      ledger_sequence: ledger.sequence,
-      closed_at: ledger.closed_at,
-      transaction_count: ledger.transaction_count,
-      operation_count: ledger.operation_count,
-      base_fee: ledger.base_fee_in_stroops,
-      protocol_version: ledger.protocol_version,
+      ledger_sequence: ledger.sequence || 0,
+      closed_at: ledger.closed_at || new Date().toISOString(),
+      transaction_count: (ledger as any).transaction_count || 0,
+      operation_count: (ledger as any).operation_count || 0,
+      base_fee: (ledger as any).base_fee_in_stroops || 0,
+      protocol_version: (ledger as any).protocol_version || 0,
     };
 
     // Calculate consensus metrics
@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
       last_ledger_age_seconds: Math.floor(
         (Date.now() - new Date(ledger.closed_at).getTime()) / 1000
       ),
-      transactions_per_ledger: ledger.transaction_count,
-      network_throughput: `${Math.floor(ledger.transaction_count / 5)} tx/sec average`,
+      transactions_per_ledger: networkStatus.transaction_count,
+      network_throughput: `${Math.floor(networkStatus.transaction_count / 5)} tx/sec average`,
     };
 
     // Get our system stats

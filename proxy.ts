@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   // Allow public access to validation key endpoints
   if (
     request.nextUrl.pathname === "/validation-key.txt" ||
