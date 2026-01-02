@@ -1,8 +1,6 @@
 // Triumph Synergy Advanced IAM & Security Configuration
 // Enterprise-grade identity and access management
 
-import { createHash, randomBytes } from 'crypto';
-
 export const iamConfig = {
   // Authentication providers
   authentication: {
@@ -527,14 +525,16 @@ export class IAMService {
   
   // Generate API key
   generateApiKey(): string {
+    const crypto = require('crypto');
     const prefix = iamConfig.apiAccess.authentication.apiKey.prefix;
-    const random = randomBytes(32).toString('hex');
+    const random = crypto.randomBytes(32).toString('hex');
     return `${prefix}${random}`;
   }
   
   // Hash API key for storage
   hashApiKey(key: string): string {
-    return createHash('sha256').update(key).digest('hex');
+    const crypto = require('crypto');
+    return crypto.createHash('sha256').update(key).digest('hex');
   }
 }
 

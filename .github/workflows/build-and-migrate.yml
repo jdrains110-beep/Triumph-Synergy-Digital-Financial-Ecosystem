@@ -22,8 +22,15 @@ jobs:
         env:
           # Provide dummy values for build-time environment variables
           POSTGRES_URL: postgresql://dummy:dummy@localhost:5432/dummy
-          AUTH_SECRET: dummy-secret-for-build-only
+          AUTH_SECRET: dummy-secret-for-build-only-must-be-32-chars-long
+          NEXTAUTH_SECRET: dummy-nextauth-secret-32-chars-long-minimum
           REDIS_URL: redis://localhost:6379
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teSIsInJvbGUiOiJhbm9uIn0.dummy
+          SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUifQ.dummy
+          PI_API_KEY: dummy-pi-key
+          PI_INTERNAL_API_KEY: dummy-pi-internal
+          STELLAR_HORIZON_URL: https://horizon-testnet.stellar.org
         run: pnpm run build
 
   # Note: To run migrations in GitHub Actions, set repository secret `RUN_MIGRATIONS` to `true`
