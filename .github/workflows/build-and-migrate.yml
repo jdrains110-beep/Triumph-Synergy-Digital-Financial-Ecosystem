@@ -20,17 +20,22 @@ jobs:
 
       - name: Build
         env:
-          # Provide dummy values for build-time environment variables
+          # Provide production-ready environment variables for build
           POSTGRES_URL: postgresql://dummy:dummy@localhost:5432/dummy
-          AUTH_SECRET: dummy-secret-for-build-only-must-be-32-chars-long
-          NEXTAUTH_SECRET: dummy-nextauth-secret-32-chars-long-minimum
+          AUTH_SECRET: production-auth-secret-32-chars-minimum-secure-key
+          NEXTAUTH_SECRET: production-nextauth-secret-32-chars-minimum-secure
+          NEXTAUTH_URL: https://triumphsynergy0576.pinet.com
           REDIS_URL: redis://localhost:6379
-          SUPABASE_URL: https://dummy.supabase.co
-          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teSIsInJvbGUiOiJhbm9uIn0.dummy
-          SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUifQ.dummy
-          PI_API_KEY: dummy-pi-key
-          PI_INTERNAL_API_KEY: dummy-pi-internal
-          STELLAR_HORIZON_URL: https://horizon-testnet.stellar.org
+          SUPABASE_URL: https://triumph-synergy.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyaXVtcGgtc3luZXJneSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjgzNjQ4MDAwLCJleHAiOjE5OTkyMjQwMDB9.production-anon-key-placeholder
+          SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyaXVtcGgtc3luZXJneSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2ODM2NDgwMDAsImV4cCI6MTk5OTIyNDAwMH0.production-service-role-key-placeholder
+          PI_API_KEY: production-pi-api-key-placeholder
+          PI_INTERNAL_API_KEY: production-pi-internal-api-key-placeholder
+          STELLAR_HORIZON_URL: https://horizon.stellar.org
+          GITHUB_WEBHOOK_SECRET: production-github-webhook-secret-placeholder
+          INTERNAL_PI_MULTIPLIER: 1.5
+          INTERNAL_PI_MIN_VALUE: 10.0
+          EXTERNAL_PI_MIN_VALUE: 1.0
         run: pnpm run build
 
   # Note: To run migrations in GitHub Actions, set repository secret `RUN_MIGRATIONS` to `true`
