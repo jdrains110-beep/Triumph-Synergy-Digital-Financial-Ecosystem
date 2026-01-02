@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-import { Pool } from 'pg';
+import postgres from 'postgres';
 import { Worker } from 'worker_threads';
 import cluster from 'cluster';
 import os from 'os';
@@ -16,7 +16,7 @@ interface PiPayment {
 
 class PaymentProcessor {
   private redis: ReturnType<typeof createClient>;
-  private db: Pool;
+  private db: ReturnType<typeof postgres>;
   private workersCount: number;
   private batchSize = 1000;
   private processingInterval = 100; // ms
@@ -28,12 +28,7 @@ class PaymentProcessor {
       url: process.env.REDIS_URL || 'redis://localhost:6379',
     });
 
-    this.db = new Pool({
-      connectionString: process.env.POSTGRES_URL,
-      max: 100, // Connection pool size
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
-    });
+    this.db = postgres(process.env.POSTGRES_URL || '');
   }
 
   async initialize() {
@@ -41,8 +36,7 @@ class PaymentProcessor {
     console.log('✅ Connected to Redis');
     
     // Test database connection
-    const client = await this.db.connect();
-    await client.release();
+    await this.db`SELECT 1`;
     console.log('✅ Connected to PostgreSQL');
 
     // Create tables if not exist
@@ -50,7 +44,7 @@ class PaymentProcessor {
   }
 
   private async createTables() {
-    await this.db.query(`
+    await this.db`
       CREATE TABLE IF NOT EXISTS pi_payments (
         payment_id VARCHAR(255) PRIMARY KEY,
         user_id VARCHAR(255) NOT NULL,
@@ -60,20 +54,19 @@ class PaymentProcessor {
         metadata JSONB,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW(),
-        processed_at TIMESTAMP,
-        INDEX idx_user_id (user_id),
-        INDEX idx_status (status),
-        INDEX idx_created_at (created_at)
-      );
+        processed_at TIMESTAMP
+      )
+    `;
 
+    await this.db`
       CREATE TABLE IF NOT EXISTS pi_payment_logs (
         id SERIAL PRIMARY KEY,
         payment_id VARCHAR(255) NOT NULL,
         event_type VARCHAR(100) NOT NULL,
         event_data JSONB,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
+      )
+    `;
   }
 
   /**
@@ -87,19 +80,11 @@ class PaymentProcessor {
     };
 
     // Store in database
-    await this.db.query(
-      `INSERT INTO pi_payments (payment_id, user_id, amount, status, metadata, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (payment_id) DO NOTHING`,
-      [
-        paymentData.payment_id,
-        paymentData.user_id,
-        paymentData.amount,
-        paymentData.status,
-        JSON.stringify(paymentData.metadata),
-        paymentData.created_at,
-      ]
-    );
+    await this.db`
+      INSERT INTO pi_payments (payment_id, user_id, amount, status, metadata, created_at)
+      VALUES (${paymentData.payment_id}, ${paymentData.user_id}, ${paymentData.amount}, ${paymentData.status}, ${JSON.stringify(paymentData.metadata)}, ${paymentData.created_at})
+      ON CONFLICT (payment_id) DO NOTHING
+    `;
 
     // Queue in Redis for processing
     await this.redis.lPush('payment_queue', JSON.stringify(paymentData));
@@ -151,28 +136,23 @@ class PaymentProcessor {
   private async processPayment(payment: PiPayment) {
     try {
       // Update status to processing
-      await this.db.query(
-        `UPDATE pi_payments SET status = 'processing', updated_at = NOW() WHERE payment_id = $1`,
-        [payment.payment_id]
-      );
+      await this.db`UPDATE pi_payments SET status = 'processing', updated_at = NOW() WHERE payment_id = ${payment.payment_id}`;
 
       // Call Pi Network API (mock implementation)
       const piResponse = await this.callPiNetworkAPI(payment);
 
       // Update with result
-      await this.db.query(
-        `UPDATE pi_payments 
-         SET status = $1, pi_transaction_id = $2, processed_at = NOW(), updated_at = NOW()
-         WHERE payment_id = $3`,
-        [piResponse.status, piResponse.transaction_id, payment.payment_id]
-      );
+      await this.db`
+        UPDATE pi_payments
+        SET status = ${piResponse.status}, pi_transaction_id = ${piResponse.transaction_id}, processed_at = NOW(), updated_at = NOW()
+        WHERE payment_id = ${payment.payment_id}
+      `;
 
       // Log event
-      await this.db.query(
-        `INSERT INTO pi_payment_logs (payment_id, event_type, event_data, created_at)
-         VALUES ($1, $2, $3, NOW())`,
-        [payment.payment_id, 'processed', JSON.stringify(piResponse)]
-      );
+      await this.db`
+        INSERT INTO pi_payment_logs (payment_id, event_type, event_data, created_at)
+        VALUES (${payment.payment_id}, 'processed', ${JSON.stringify(piResponse)}, NOW())
+      `;
 
       // Cache result in Redis (1 hour TTL)
       await this.redis.setEx(
@@ -184,10 +164,7 @@ class PaymentProcessor {
     } catch (error) {
       console.error(`❌ Payment ${payment.payment_id} failed:`, error);
       
-      await this.db.query(
-        `UPDATE pi_payments SET status = 'failed', updated_at = NOW() WHERE payment_id = $1`,
-        [payment.payment_id]
-      );
+      await this.db`UPDATE pi_payments SET status = 'failed', updated_at = NOW() WHERE payment_id = ${payment.payment_id}`;
 
       throw error;
     }
@@ -253,12 +230,9 @@ class PaymentProcessor {
     }
 
     // Fall back to database
-    const result = await this.db.query(
-      `SELECT * FROM pi_payments WHERE payment_id = $1`,
-      [paymentId]
-    );
+    const result = await this.db`SELECT * FROM pi_payments WHERE payment_id = ${paymentId}`;
 
-    return result.rows[0] || null;
+    return result[0] || null;
   }
 
   /**
@@ -270,7 +244,7 @@ class PaymentProcessor {
       this.redis.lLen('payment_dlq'),
     ]);
 
-    const dbStats = await this.db.query(`
+    const dbStats = await this.db`
       SELECT 
         status,
         COUNT(*) as count,
@@ -278,18 +252,18 @@ class PaymentProcessor {
       FROM pi_payments
       WHERE created_at > NOW() - INTERVAL '1 hour'
       GROUP BY status
-    `);
+    `;
 
     return {
       queue_length: queueLength,
       dead_letter_queue: dlqLength,
-      hourly_stats: dbStats.rows,
+      hourly_stats: dbStats,
     };
   }
 
   async close() {
     await this.redis.quit();
-    await this.db.end();
+    (this.db as any).end?.();
   }
 }
 

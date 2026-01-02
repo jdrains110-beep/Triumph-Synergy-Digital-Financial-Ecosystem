@@ -4,13 +4,14 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+COPY tsconfig.json ./
+RUN npm install
 
 # Copy source
 COPY . .
 
 # Build TypeScript
-RUN npm install -g typescript && tsc index.ts --outDir dist
+RUN npm run build && npm prune --omit=dev
 
 # Set memory limit
 ENV NODE_OPTIONS="--max-old-space-size=4096"

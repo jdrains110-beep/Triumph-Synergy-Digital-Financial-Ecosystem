@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { createClient } from 'redis';
 
-const redis = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-});
-
-redis.connect().catch(console.error);
+// Lazy Redis client to avoid build-time connection attempts
+let redis: ReturnType<typeof createClient> | null = null;
+function getRedis() {
+  if (!redis) {
+    redis = createClient({
+      url: process.env.REDIS_URL || 'redis://localhost:6379',
+    });
+    redis.connect().catch(console.error);
+  }
+  return redis;
+}
 
 /**
  * GitHub Webhook Handler for Smart Contracts
@@ -72,7 +78,8 @@ export async function POST(request: NextRequest) {
           timestamp: new Date().toISOString(),
         };
 
-        await redis.lPush('contract_jobs', JSON.stringify(job));
+        const redisClient = getRedis();
+        await redisClient.lPush('contract_jobs', JSON.stringify(job));
 
         return NextResponse.json({
           success: true,
@@ -112,7 +119,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const status = await redis.get(`contract_status:${job_id}`);
+    const redisClient = getRedis();
+    const status = await redisClient.get(`contract_status:${job_id}`);
 
     if (!status) {
       return NextResponse.json(

@@ -11,7 +11,7 @@ RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --prod=false
 
 # Rebuild the source code only when needed
 FROM base AS builder
