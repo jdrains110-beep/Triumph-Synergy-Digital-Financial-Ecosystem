@@ -1,9 +1,8 @@
 // Triumph Synergy Data Lake & CDP Architecture
 // Enterprise data platform for centralized data strategy
 
-import { BigQuery } from '@google-cloud/bigquery';
-import { S3 } from '@aws-sdk/client-s3';
-import { Kafka } from 'kafkajs';
+// Note: Install cloud SDKs when needed:
+// npm install @google-cloud/bigquery @aws-sdk/client-s3 kafkajs
 
 export const dataLakeConfig = {
   // Multi-tier storage architecture
@@ -438,22 +437,15 @@ export const dataOpsConfig = {
 
 // Data lake service class
 export class DataLakeService {
-  private bigquery: BigQuery;
-  private s3: S3;
-  private kafka: Kafka;
+  private bigquery: any;
+  private s3: any;
+  private kafka: any;
   
   constructor() {
-    this.bigquery = new BigQuery({
-      projectId: process.env.GCP_PROJECT_ID
-    });
-    
-    this.s3 = new S3({
-      region: process.env.AWS_REGION
-    });
-    
-    this.kafka = new Kafka({
-      brokers: [process.env.KAFKA_BROKER || 'localhost:9092']
-    });
+    // Initialize when cloud SDKs are installed
+    // this.bigquery = new BigQuery({ projectId: process.env.GCP_PROJECT_ID });
+    // this.s3 = new S3({ region: process.env.AWS_REGION });
+    // this.kafka = new Kafka({ brokers: [process.env.KAFKA_BROKER || 'localhost:9092'] });
   }
   
   // Stream data to lake
