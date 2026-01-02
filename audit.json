@@ -87,9 +87,7 @@
         "score": 5.3,
         "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N"
       },
-      "cwe": [
-        "CWE-346"
-      ],
+      "cwe": ["CWE-346"],
       "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99"
     },
     "1105770": {
@@ -111,9 +109,7 @@
       "reported_by": null,
       "title": "PrismJS DOM Clobbering vulnerability",
       "metadata": null,
-      "cves": [
-        "CVE-2024-53382"
-      ],
+      "cves": ["CVE-2024-53382"],
       "access": "public",
       "severity": "moderate",
       "module_name": "prismjs",
@@ -126,19 +122,14 @@
         "score": 4.9,
         "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:L/I:L/A:N"
       },
-      "cwe": [
-        "CWE-79",
-        "CWE-94"
-      ],
+      "cwe": ["CWE-79", "CWE-94"],
       "url": "https://github.com/advisories/GHSA-x7hr-w5r2-h6wg"
     },
     "1111095": {
       "findings": [
         {
           "version": "5.0.26",
-          "paths": [
-            ". > @ai-sdk/react@2.0.26 > ai@5.0.26"
-          ]
+          "paths": [". > @ai-sdk/react@2.0.26 > ai@5.0.26"]
         }
       ],
       "found_by": null,
@@ -151,9 +142,7 @@
       "reported_by": null,
       "title": "VercelΓÇÖs AI SDK's filetype whitelists can be bypassed when uploading files",
       "metadata": null,
-      "cves": [
-        "CVE-2025-48985"
-      ],
+      "cves": ["CVE-2025-48985"],
       "access": "public",
       "severity": "low",
       "module_name": "ai",
@@ -166,10 +155,7 @@
         "score": 3.7,
         "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
       },
-      "cwe": [
-        "CWE-20",
-        "CWE-682"
-      ],
+      "cwe": ["CWE-20", "CWE-682"],
       "url": "https://github.com/advisories/GHSA-rwvc-j5jr-mgvh"
     }
   },

@@ -1,15 +1,122 @@
-version: '3.8'
 services:
+  # PostgreSQL Database - Primary Data Store
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: triumph-postgres
     environment:
       POSTGRES_DB: triumph_synergy
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+      POSTGRES_MAX_CONNECTIONS: 1000
+      POSTGRES_SHARED_BUFFERS: 256MB
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - triumph-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - Caching & Queue Management
+  redis:
+    image: redis:7-alpine
+    container_name: triumph-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - triumph-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: triumph-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/triumph_synergy
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - triumph-network
+    restart: unless-stopped
+
+  # Smart Contract Processor (Rust-based) - Commented out until Rust toolchain available
+  # contract-processor:
+  #   build:
+  #     context: ./services/contract-processor
+  #     dockerfile: Dockerfile
+  #   container_name: triumph-contract-processor
+  #   environment:
+  #     - REDIS_URL=redis://redis:6379
+  #     - POSTGRES_URL=postgresql://postgres:password@postgres:5432/triumph_synergy
+  #     - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+  #   depends_on:
+  #     - redis
+  #     - postgres
+  #   networks:
+  #     - triumph-network
+  #   restart: unless-stopped
+
+  # Pi Payment Transaction Processor
+  payment-processor:
+    build:
+      context: ./services/payment-processor
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/triumph_synergy
+      - PI_API_KEY=${PI_API_KEY}
+      - PI_INTERNAL_API_KEY=${PI_INTERNAL_API_KEY}
+      - STELLAR_HORIZON_URL=${STELLAR_HORIZON_URL:-https://horizon.stellar.org}
+      - WORKER_THREADS=4
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - triumph-network
+    restart: unless-stopped
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: triumph-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - triumph-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  redis_data:
+
+networks:
+  triumph-network:
+    driver: bridge

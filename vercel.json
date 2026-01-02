@@ -1,22 +1,26 @@
 {
-    "framework":  "nextjs",
-    "buildCommand":  "pnpm build",
-    "installCommand":  "pnpm install",
-    "headers":  [
-                    {
-                        "headers":  [
-                                        {
-                                            "key":  "Content-Type",
-                                            "value":  "text/plain"
-                                        },
-                                        {
-                                            "key":  "Cache-Control",
-                                            "value":  "public, max-age=3600"
-                                        }
-                                    ],
-                        "source":  "/validation-key.txt"
-                    }
-                ],
-    "outputDirectory":  ".next",
-    "devCommand":  "pnpm dev"
+  "framework": "nextjs",
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
+  "headers": [
+    {
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ],
+      "source": "/validation-key.txt"
+    }
+  ],
+  "outputDirectory": ".next",
+  "devCommand": "pnpm dev",
+  "public": [
+    "/validation-key.txt",
+    "/api/validation-key"
+  ]
 }

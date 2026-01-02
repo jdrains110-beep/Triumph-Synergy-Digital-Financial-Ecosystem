@@ -1,0 +1,21 @@
+{
+  "name": "payment-processor",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "node --max-old-space-size=4096 -r ts-node/register index.ts",
+    "dev": "nodemon --exec ts-node index.ts"
+  },
+  "dependencies": {
+    "redis": "^4.6.12",
+    "pg": "^8.11.3",
+    "worker_threads": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/pg": "^8.10.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "nodemon": "^3.0.2"
+  }
+}

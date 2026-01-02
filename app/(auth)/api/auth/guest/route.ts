@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+﻿import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { signIn } from "@/app/(auth)/auth";
 import { isDevelopmentEnvironment } from "@/lib/constants";
