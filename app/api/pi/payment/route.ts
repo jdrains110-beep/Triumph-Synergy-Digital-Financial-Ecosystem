@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from 'redis';
-import { Pool } from 'pg';
+import postgres from 'postgres';
 
 const redis = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
 });
 
-const db = new Pool({
-  connectionString: process.env.POSTGRES_URL,
+const sql = postgres(process.env.POSTGRES_URL || '', {
   max: 20,
 });
 
@@ -47,11 +46,10 @@ export async function POST(request: NextRequest) {
     };
 
     // Queue payment for processing
-    await db.query(
-      `INSERT INTO pi_payments (payment_id, user_id, amount, status, metadata, created_at)
-       VALUES ($1, $2, $3, 'pending', $4, NOW())`,
-      [payment.payment_id, payment.user_id, payment.amount, JSON.stringify(payment.metadata)]
-    );
+    await sql`
+      INSERT INTO pi_payments (payment_id, user_id, amount, status, metadata, created_at)
+      VALUES (${payment.payment_id}, ${payment.user_id}, ${payment.amount}, 'pending', ${JSON.stringify(payment.metadata)}, NOW())
+    `;
 
     await redis.lPush('payment_queue', JSON.stringify(payment));
 
@@ -95,20 +93,19 @@ export async function GET(request: NextRequest) {
     }
 
     // Query database
-    const result = await db.query(
-      `SELECT payment_id, user_id, amount, status, pi_transaction_id, metadata, created_at, processed_at
-       FROM pi_payments WHERE payment_id = $1`,
-      [payment_id]
-    );
+    const result = await sql`
+      SELECT payment_id, user_id, amount, status, pi_transaction_id, metadata, created_at, processed_at
+      FROM pi_payments WHERE payment_id = ${payment_id}
+    `;
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return NextResponse.json(
         { error: 'Payment not found' },
         { status: 404 }
       );
     }
 
-    const payment = result.rows[0];
+    const payment = result[0];
 
     // Cache for 5 minutes
     await redis.setEx(`payment:${payment_id}`, 300, JSON.stringify(payment));

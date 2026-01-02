@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as StellarSdk from 'stellar-sdk';
 import { createClient } from 'redis';
-import { Pool } from 'pg';
+import postgres from 'postgres';
 
 const redis = createClient({ url: process.env.REDIS_URL });
-const db = new Pool({ connectionString: process.env.POSTGRES_URL });
+const sql = postgres(process.env.POSTGRES_URL || '');
 
 redis.connect().catch(console.error);
 
@@ -151,25 +151,19 @@ export async function POST(request: NextRequest) {
     const payment_id = `pi_val_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Store in database with value differentiation
-    await db.query(
-      `INSERT INTO pi_payments_valued (
+    await sql`
+      INSERT INTO pi_payments_valued (
         payment_id, user_id, 
         nominal_amount, internal_value, price_equivalent, 
         source, status, stellar_tx_id, stellar_verified, 
         metadata, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, 'pending', $7, $8, $9, NOW())`,
-      [
-        payment_id,
-        user_id,
-        piValue.nominal_amount,
-        piValue.internal_value,
-        piValue.price_equivalent,
-        piValue.source,
-        stellar_tx_id || null,
-        stellar_verified,
-        JSON.stringify({ memo, ...metadata }),
-      ]
-    );
+      ) VALUES (
+        ${payment_id}, ${user_id}, 
+        ${piValue.nominal_amount}, ${piValue.internal_value}, ${piValue.price_equivalent}, 
+        ${piValue.source}, 'pending', ${stellar_tx_id || null}, ${stellar_verified}, 
+        ${JSON.stringify({ memo, ...metadata })}, NOW()
+      )
+    `;
 
     // Queue for processing
     await redis.lPush('payment_value_queue', JSON.stringify({

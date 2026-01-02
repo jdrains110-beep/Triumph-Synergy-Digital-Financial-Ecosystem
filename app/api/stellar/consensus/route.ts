@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as StellarSdk from 'stellar-sdk';
 import { createClient } from 'redis';
-import { Pool } from 'pg';
+import postgres from 'postgres';
 
 const redis = createClient({ url: process.env.REDIS_URL });
-const db = new Pool({ connectionString: process.env.POSTGRES_URL });
+const sql = postgres(process.env.POSTGRES_URL || '');
 
 redis.connect().catch(console.error);
 
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Get our system stats
-    const systemStats = await db.query(`
+    const systemStats = await sql`
       SELECT 
         COUNT(*) FILTER (WHERE stellar_verified = true) as verified_count,
         COUNT(*) as total_payments,
@@ -57,12 +57,12 @@ export async function GET(request: NextRequest) {
         SUM(price_equivalent) as total_price_equivalent
       FROM pi_payments_valued
       WHERE created_at > NOW() - INTERVAL '24 hours'
-    `);
+    `;
 
     return NextResponse.json({
       stellar_network: networkStatus,
       consensus_health: consensusHealth,
-      triumph_synergy_stats: systemStats.rows[0] || {},
+      triumph_synergy_stats: systemStats[0] || {},
       integration: {
         status: 'active',
         verified_by_scp: true,
