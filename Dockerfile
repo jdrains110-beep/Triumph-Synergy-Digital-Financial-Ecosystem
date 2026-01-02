@@ -24,6 +24,7 @@ COPY . .
 # Set environment for build
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV RUN_MIGRATIONS false
+ENV DOCKER_BUILD true
 
 # Build application
 RUN pnpm build

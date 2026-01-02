@@ -8,8 +8,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Enable standalone output for Docker
-  output: "standalone",
+  // Enable standalone output for Docker only (not for Vercel)
+  output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
   // Optimize for production
   compress: true,
   poweredByHeader: false,
