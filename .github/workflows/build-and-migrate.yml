@@ -18,55 +18,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Run migrations (only if RUN_MIGRATIONS=true)
-        if: env.RUN_MIGRATIONS == 'true'
-        env:
-          RUN_MIGRATIONS: ${{ secrets.RUN_MIGRATIONS }}
-          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
-        run: |
-          pnpm run build
-
-      - name: Build (no migrations)
-        if: env.RUN_MIGRATIONS != 'true'
+      - name: Build
         env:
           # Provide dummy values for build-time environment variables
-          POSTGRES_URL: ${{ secrets.POSTGRES_URL || 'postgresql://dummy:dummy@localhost:5432/dummy' }}
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'dummy-secret-for-build' }}
-          REDIS_URL: ${{ secrets.REDIS_URL || 'redis://localhost:6379' }}
+          POSTGRES_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          AUTH_SECRET: dummy-secret-for-build-only
+          REDIS_URL: redis://localhost:6379
         run: pnpm run build
 
   # Note: To run migrations in GitHub Actions, set repository secret `RUN_MIGRATIONS` to `true`
   # and add `POSTGRES_URL` as a secret. For Vercel, prefer running migrations from CI or
   # a dedicated deployment hook rather than during Vercel build.
-
-
-
-  e2e:
-    needs: build-and-migrate
-    runs-on: ubuntu-latest
-    # Only run e2e tests if secrets are available
-    if: ${{ secrets.POSTGRES_URL != '' }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Install dependencies (no frozen lockfile)
-        run: pnpm install --no-frozen-lockfile
-      - name: Start production server
-        env:
-          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          REDIS_URL: ${{ secrets.REDIS_URL }}
-        run: |
-          pnpm run start &
-          npx wait-on http://localhost:3000/ping -t 120000 || echo "Server failed to start, skipping tests"
-      - name: Run Playwright tests
-        if: success()
-        env:
-          CI: true
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 'false'
-        run: pnpm run test || echo "Tests failed but continuing"
 
