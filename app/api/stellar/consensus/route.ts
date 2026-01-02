@@ -3,10 +3,24 @@ import * as StellarSdk from 'stellar-sdk';
 import { createClient } from 'redis';
 import postgres from 'postgres';
 
-const redis = createClient({ url: process.env.REDIS_URL });
-const sql = postgres(process.env.POSTGRES_URL || '');
+// Lazy initialization to avoid build-time connection attempts
+let redis: ReturnType<typeof createClient> | null = null;
+let sql: ReturnType<typeof postgres> | null = null;
 
-redis.connect().catch(console.error);
+function getRedis() {
+  if (!redis) {
+    redis = createClient({ url: process.env.REDIS_URL });
+    redis.connect().catch(console.error);
+  }
+  return redis;
+}
+
+function getSql() {
+  if (!sql) {
+    sql = postgres(process.env.POSTGRES_URL || '');
+  }
+  return sql;
+}
 
 // Stellar Configuration
 const server = new StellarSdk.Horizon.Server(
@@ -49,7 +63,8 @@ export async function GET(request: NextRequest) {
     };
 
     // Get our system stats
-    const systemStats = await sql`
+    const sqlClient = getSql();
+    const systemStats = await sqlClient`
       SELECT 
         COUNT(*) FILTER (WHERE stellar_verified = true) as verified_count,
         COUNT(*) as total_payments,

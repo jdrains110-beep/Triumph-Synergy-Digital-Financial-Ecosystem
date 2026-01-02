@@ -2,16 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from 'redis';
 import postgres from 'postgres';
 
-const redis = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-});
+// Lazy initialization to avoid build-time connection attempts
+let redis: ReturnType<typeof createClient> | null = null;
+let sql: ReturnType<typeof postgres> | null = null;
 
-const sql = postgres(process.env.POSTGRES_URL || '', {
-  max: 20,
-});
+function getRedis() {
+  if (!redis) {
+    redis = createClient({
+      url: process.env.REDIS_URL || 'redis://localhost:6379',
+    });
+    redis.connect().catch(console.error);
+  }
+  return redis;
+}
 
-// Initialize connections
-redis.connect().catch(console.error);
+function getSql() {
+  if (!sql) {
+    sql = postgres(process.env.POSTGRES_URL || '', {
+      max: 20,
+    });
+  }
+  return sql;
+}
 
 /**
  * Create Pi Payment
@@ -46,12 +58,15 @@ export async function POST(request: NextRequest) {
     };
 
     // Queue payment for processing
-    await sql`
+    const sqlClient = getSql();
+    const redisClient = getRedis();
+    
+    await sqlClient`
       INSERT INTO pi_payments (payment_id, user_id, amount, status, metadata, created_at)
       VALUES (${payment.payment_id}, ${payment.user_id}, ${payment.amount}, 'pending', ${JSON.stringify(payment.metadata)}, NOW())
     `;
 
-    await redis.lPush('payment_queue', JSON.stringify(payment));
+    await redisClient.lPush('payment_queue', JSON.stringify(payment));
 
     console.log(`✅ Payment queued: ${payment_id}`);
 
@@ -87,13 +102,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Try cache first
-    const cached = await redis.get(`payment:${payment_id}`);
+    const sqlClient = getSql();
+    const redisClient = getRedis();
+    
+    const cached = await redisClient.get(`payment:${payment_id}`);
     if (cached) {
       return NextResponse.json(JSON.parse(cached));
     }
 
     // Query database
-    const result = await sql`
+    const result = await sqlClient`
       SELECT payment_id, user_id, amount, status, pi_transaction_id, metadata, created_at, processed_at
       FROM pi_payments WHERE payment_id = ${payment_id}
     `;
@@ -108,7 +126,7 @@ export async function GET(request: NextRequest) {
     const payment = result[0];
 
     // Cache for 5 minutes
-    await redis.setEx(`payment:${payment_id}`, 300, JSON.stringify(payment));
+    await redisClient.setEx(`payment:${payment_id}`, 300, JSON.stringify(payment));
 
     return NextResponse.json(payment);
   } catch (error) {

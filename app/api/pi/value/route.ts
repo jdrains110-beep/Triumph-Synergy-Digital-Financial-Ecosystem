@@ -3,10 +3,24 @@ import * as StellarSdk from 'stellar-sdk';
 import { createClient } from 'redis';
 import postgres from 'postgres';
 
-const redis = createClient({ url: process.env.REDIS_URL });
-const sql = postgres(process.env.POSTGRES_URL || '');
+// Lazy initialization to avoid build-time connection attempts
+let redis: ReturnType<typeof createClient> | null = null;
+let sql: ReturnType<typeof postgres> | null = null;
 
-redis.connect().catch(console.error);
+function getRedis() {
+  if (!redis) {
+    redis = createClient({ url: process.env.REDIS_URL });
+    redis.connect().catch(console.error);
+  }
+  return redis;
+}
+
+function getSql() {
+  if (!sql) {
+    sql = postgres(process.env.POSTGRES_URL || '');
+  }
+  return sql;
+}
 
 // Stellar Configuration
 const server = new StellarSdk.Horizon.Server(
@@ -146,7 +160,10 @@ export async function POST(request: NextRequest) {
     const payment_id = `pi_val_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Store in database with value differentiation
-    await sql`
+    const sqlClient = getSql();
+    const redisClient = getRedis();
+    
+    await sqlClient`
       INSERT INTO pi_payments_valued (
         payment_id, user_id, 
         nominal_amount, internal_value, price_equivalent, 
@@ -161,7 +178,7 @@ export async function POST(request: NextRequest) {
     `;
 
     // Queue for processing
-    await redis.lPush('payment_value_queue', JSON.stringify({
+    await redisClient.lPush('payment_value_queue', JSON.stringify({
       payment_id,
       user_id,
       ...piValue,
