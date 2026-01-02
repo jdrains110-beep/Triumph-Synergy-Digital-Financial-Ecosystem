@@ -34,9 +34,5 @@
     }
   ],
   "outputDirectory": ".next",
-  "devCommand": "pnpm dev",
-  "public": [
-    "/validation-key.txt",
-    "/api/validation-key"
-  ]
+  "devCommand": "pnpm dev"
 }
