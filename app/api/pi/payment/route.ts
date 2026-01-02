@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from 'redis';
-import postgres from 'postgres';
+import { type NextRequest, NextResponse } from "next/server";
+import postgres from "postgres";
+import { createClient } from "redis";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;
@@ -9,7 +9,7 @@ let sql: ReturnType<typeof postgres> | null = null;
 function getRedis() {
   if (!redis) {
     redis = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
+      url: process.env.REDIS_URL || "redis://localhost:6379",
     });
     redis.connect().catch(console.error);
   }
@@ -18,7 +18,7 @@ function getRedis() {
 
 function getSql() {
   if (!sql) {
-    sql = postgres(process.env.POSTGRES_URL || '', {
+    sql = postgres(process.env.POSTGRES_URL || "", {
       max: 20,
     });
   }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!user_id || !amount || amount <= 0) {
       return NextResponse.json(
-        { error: 'Invalid payment data' },
+        { error: "Invalid payment data" },
         { status: 400 }
       );
     }
@@ -48,38 +48,40 @@ export async function POST(request: NextRequest) {
     const payment = {
       payment_id,
       user_id,
-      amount: parseFloat(amount),
+      amount: Number.parseFloat(amount),
       metadata: {
         memo,
         ...metadata,
-        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
-        user_agent: request.headers.get('user-agent'),
+        ip:
+          request.headers.get("x-forwarded-for") ||
+          request.headers.get("x-real-ip"),
+        user_agent: request.headers.get("user-agent"),
       },
     };
 
     // Queue payment for processing
     const sqlClient = getSql();
     const redisClient = getRedis();
-    
+
     await sqlClient`
       INSERT INTO pi_payments (payment_id, user_id, amount, status, metadata, created_at)
       VALUES (${payment.payment_id}, ${payment.user_id}, ${payment.amount}, 'pending', ${JSON.stringify(payment.metadata)}, NOW())
     `;
 
-    await redisClient.lPush('payment_queue', JSON.stringify(payment));
+    await redisClient.lPush("payment_queue", JSON.stringify(payment));
 
     console.log(`✅ Payment queued: ${payment_id}`);
 
     return NextResponse.json({
       success: true,
       payment_id,
-      status: 'pending',
-      message: 'Payment queued for processing',
+      status: "pending",
+      message: "Payment queued for processing",
     });
   } catch (error) {
-    console.error('Payment creation error:', error);
+    console.error("Payment creation error:", error);
     return NextResponse.json(
-      { error: 'Failed to create payment' },
+      { error: "Failed to create payment" },
       { status: 500 }
     );
   }
@@ -92,11 +94,11 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const payment_id = searchParams.get('payment_id');
+    const payment_id = searchParams.get("payment_id");
 
     if (!payment_id) {
       return NextResponse.json(
-        { error: 'payment_id required' },
+        { error: "payment_id required" },
         { status: 400 }
       );
     }
@@ -104,7 +106,7 @@ export async function GET(request: NextRequest) {
     // Try cache first
     const sqlClient = getSql();
     const redisClient = getRedis();
-    
+
     const cached = await redisClient.get(`payment:${payment_id}`);
     if (cached) {
       return NextResponse.json(JSON.parse(cached));
@@ -117,22 +119,23 @@ export async function GET(request: NextRequest) {
     `;
 
     if (result.length === 0) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
     const payment = result[0];
 
     // Cache for 5 minutes
-    await redisClient.setEx(`payment:${payment_id}`, 300, JSON.stringify(payment));
+    await redisClient.setEx(
+      `payment:${payment_id}`,
+      300,
+      JSON.stringify(payment)
+    );
 
     return NextResponse.json(payment);
   } catch (error) {
-    console.error('Payment status error:', error);
+    console.error("Payment status error:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch payment status' },
+      { error: "Failed to fetch payment status" },
       { status: 500 }
     );
   }

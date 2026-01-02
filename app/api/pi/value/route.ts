@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import * as StellarSdk from 'stellar-sdk';
-import { createClient } from 'redis';
-import postgres from 'postgres';
+import { type NextRequest, NextResponse } from "next/server";
+import postgres from "postgres";
+import { createClient } from "redis";
+import * as StellarSdk from "stellar-sdk";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;
@@ -17,24 +17,30 @@ function getRedis() {
 
 function getSql() {
   if (!sql) {
-    sql = postgres(process.env.POSTGRES_URL || '');
+    sql = postgres(process.env.POSTGRES_URL || "");
   }
   return sql;
 }
 
 // Stellar Configuration
 const server = new StellarSdk.Horizon.Server(
-  process.env.STELLAR_HORIZON_URL || 'https://horizon.stellar.org'
+  process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org"
 );
 
-const INTERNAL_PI_MULTIPLIER = parseFloat(process.env.INTERNAL_PI_MULTIPLIER || '1.5');
-const INTERNAL_PI_MIN_VALUE = parseFloat(process.env.INTERNAL_PI_MIN_VALUE || '10.0');
-const EXTERNAL_PI_MIN_VALUE = parseFloat(process.env.EXTERNAL_PI_MIN_VALUE || '1.0');
+const INTERNAL_PI_MULTIPLIER = Number.parseFloat(
+  process.env.INTERNAL_PI_MULTIPLIER || "1.5"
+);
+const INTERNAL_PI_MIN_VALUE = Number.parseFloat(
+  process.env.INTERNAL_PI_MIN_VALUE || "10.0"
+);
+const EXTERNAL_PI_MIN_VALUE = Number.parseFloat(
+  process.env.EXTERNAL_PI_MIN_VALUE || "1.0"
+);
 
 enum PiSource {
-  INTERNAL_MINED = 'internal_mined',
-  INTERNAL_CONTRIBUTED = 'internal_contributed',
-  EXTERNAL_EXCHANGE = 'external_exchange',
+  INTERNAL_MINED = "internal_mined",
+  INTERNAL_CONTRIBUTED = "internal_contributed",
+  EXTERNAL_EXCHANGE = "external_exchange",
 }
 
 interface PiPaymentRequest {
@@ -49,7 +55,10 @@ interface PiPaymentRequest {
 /**
  * Calculate Pi value based on source (Internal vs External)
  */
-function calculatePiValue(amount: number, source: PiSource): {
+function calculatePiValue(
+  amount: number,
+  source: PiSource
+): {
   nominal_amount: number;
   internal_value: number;
   price_equivalent: number;
@@ -93,8 +102,11 @@ async function verifyStellarTransaction(
   expected_amount: number
 ): Promise<boolean> {
   try {
-    const transaction = await server.transactions().transaction(stellar_tx_id).call();
-    
+    const transaction = await server
+      .transactions()
+      .transaction(stellar_tx_id)
+      .call();
+
     // Verify transaction was successful
     if (!transaction.successful) {
       return false;
@@ -102,7 +114,7 @@ async function verifyStellarTransaction(
 
     // Stellar Consensus Protocol verification
     // Transaction is included in a closed ledger
-    console.log(`✅ Stellar SCP Verification:`, {
+    console.log("✅ Stellar SCP Verification:", {
       tx_hash: stellar_tx_id,
       ledger: transaction.ledger,
       successful: transaction.successful,
@@ -110,7 +122,7 @@ async function verifyStellarTransaction(
 
     return true;
   } catch (error) {
-    console.error('❌ Stellar verification failed:', error);
+    console.error("❌ Stellar verification failed:", error);
     return false;
   }
 }
@@ -127,7 +139,7 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!user_id || !amount || amount <= 0 || !source) {
       return NextResponse.json(
-        { error: 'Invalid payment data. Required: user_id, amount, source' },
+        { error: "Invalid payment data. Required: user_id, amount, source" },
         { status: 400 }
       );
     }
@@ -135,7 +147,9 @@ export async function POST(request: NextRequest) {
     // Validate Pi source
     if (!Object.values(PiSource).includes(source)) {
       return NextResponse.json(
-        { error: `Invalid source. Must be one of: ${Object.values(PiSource).join(', ')}` },
+        {
+          error: `Invalid source. Must be one of: ${Object.values(PiSource).join(", ")}`,
+        },
         { status: 400 }
       );
     }
@@ -147,10 +161,10 @@ export async function POST(request: NextRequest) {
     let stellar_verified = false;
     if (stellar_tx_id) {
       stellar_verified = await verifyStellarTransaction(stellar_tx_id, amount);
-      
+
       if (!stellar_verified) {
         return NextResponse.json(
-          { error: 'Stellar transaction verification failed' },
+          { error: "Stellar transaction verification failed" },
           { status: 400 }
         );
       }
@@ -162,7 +176,7 @@ export async function POST(request: NextRequest) {
     // Store in database with value differentiation
     const sqlClient = getSql();
     const redisClient = getRedis();
-    
+
     await sqlClient`
       INSERT INTO pi_payments_valued (
         payment_id, user_id, 
@@ -178,15 +192,18 @@ export async function POST(request: NextRequest) {
     `;
 
     // Queue for processing
-    await redisClient.lPush('payment_value_queue', JSON.stringify({
-      payment_id,
-      user_id,
-      ...piValue,
-      stellar_tx_id,
-      stellar_verified,
-    }));
+    await redisClient.lPush(
+      "payment_value_queue",
+      JSON.stringify({
+        payment_id,
+        user_id,
+        ...piValue,
+        stellar_tx_id,
+        stellar_verified,
+      })
+    );
 
-    console.log(`✅ Pi payment queued with value differentiation:`, {
+    console.log("✅ Pi payment queued with value differentiation:", {
       payment_id,
       source,
       nominal: piValue.nominal_amount,
@@ -202,19 +219,20 @@ export async function POST(request: NextRequest) {
         internal_value: piValue.internal_value,
         price_equivalent: piValue.price_equivalent,
         source: piValue.source,
-        multiplier: source === PiSource.EXTERNAL_EXCHANGE ? 1.0 : INTERNAL_PI_MULTIPLIER,
+        multiplier:
+          source === PiSource.EXTERNAL_EXCHANGE ? 1.0 : INTERNAL_PI_MULTIPLIER,
       },
       stellar: {
         verified: stellar_verified,
         tx_id: stellar_tx_id || null,
       },
-      status: 'pending',
-      message: `Payment queued. ${source === PiSource.EXTERNAL_EXCHANGE ? 'External exchange Pi' : 'Internal contributed Pi with enhanced value'}`,
+      status: "pending",
+      message: `Payment queued. ${source === PiSource.EXTERNAL_EXCHANGE ? "External exchange Pi" : "Internal contributed Pi with enhanced value"}`,
     });
   } catch (error) {
-    console.error('Payment creation error:', error);
+    console.error("Payment creation error:", error);
     return NextResponse.json(
-      { error: 'Failed to create payment' },
+      { error: "Failed to create payment" },
       { status: 500 }
     );
   }
@@ -227,12 +245,13 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const amount = parseFloat(searchParams.get('amount') || '0');
-    const source = searchParams.get('source') as PiSource || PiSource.EXTERNAL_EXCHANGE;
+    const amount = Number.parseFloat(searchParams.get("amount") || "0");
+    const source =
+      (searchParams.get("source") as PiSource) || PiSource.EXTERNAL_EXCHANGE;
 
     if (amount <= 0) {
       return NextResponse.json(
-        { error: 'Amount must be greater than 0' },
+        { error: "Amount must be greater than 0" },
         { status: 400 }
       );
     }
@@ -243,8 +262,9 @@ export async function GET(request: NextRequest) {
       calculation: piValue,
       explanation: {
         internal_pi: `Mined/contributed Pi has ${INTERNAL_PI_MULTIPLIER}x multiplier for internal value`,
-        external_pi: 'Exchange-bought Pi maintains standard 1:1 value',
-        sustainability: '100-year model: Internal Pi sustains the ecosystem through higher utility value',
+        external_pi: "Exchange-bought Pi maintains standard 1:1 value",
+        sustainability:
+          "100-year model: Internal Pi sustains the ecosystem through higher utility value",
       },
       current_rates: {
         internal_multiplier: INTERNAL_PI_MULTIPLIER,
@@ -253,9 +273,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Value calculation error:', error);
+    console.error("Value calculation error:", error);
     return NextResponse.json(
-      { error: 'Failed to calculate value' },
+      { error: "Failed to calculate value" },
       { status: 500 }
     );
   }

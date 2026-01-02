@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import * as StellarSdk from 'stellar-sdk';
-import { createClient } from 'redis';
-import postgres from 'postgres';
+import { type NextRequest, NextResponse } from "next/server";
+import postgres from "postgres";
+import { createClient } from "redis";
+import * as StellarSdk from "stellar-sdk";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;
@@ -17,14 +17,14 @@ function getRedis() {
 
 function getSql() {
   if (!sql) {
-    sql = postgres(process.env.POSTGRES_URL || '');
+    sql = postgres(process.env.POSTGRES_URL || "");
   }
   return sql;
 }
 
 // Stellar Configuration
 const server = new StellarSdk.Horizon.Server(
-  process.env.STELLAR_HORIZON_URL || 'https://horizon.stellar.org'
+  process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org"
 );
 
 /**
@@ -34,10 +34,7 @@ const server = new StellarSdk.Horizon.Server(
 export async function GET(request: NextRequest) {
   try {
     // Get latest ledger from Stellar network
-    const latestLedger = await server.ledgers()
-      .order('desc')
-      .limit(1)
-      .call();
+    const latestLedger = await server.ledgers().order("desc").limit(1).call();
 
     const ledger = latestLedger.records[0];
 
@@ -54,7 +51,7 @@ export async function GET(request: NextRequest) {
     // Calculate consensus metrics
     const consensusHealth = {
       network_active: true,
-      consensus_protocol: 'Stellar Consensus Protocol (SCP)',
+      consensus_protocol: "Stellar Consensus Protocol (SCP)",
       last_ledger_age_seconds: Math.floor(
         (Date.now() - new Date(ledger.closed_at).getTime()) / 1000
       ),
@@ -79,17 +76,17 @@ export async function GET(request: NextRequest) {
       consensus_health: consensusHealth,
       triumph_synergy_stats: systemStats[0] || {},
       integration: {
-        status: 'active',
+        status: "active",
         verified_by_scp: true,
-        message: 'All transactions verified through Stellar Consensus Protocol',
+        message: "All transactions verified through Stellar Consensus Protocol",
       },
     });
   } catch (error) {
-    console.error('Stellar consensus error:', error);
+    console.error("Stellar consensus error:", error);
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch Stellar consensus data',
-        status: 'degraded',
+      {
+        error: "Failed to fetch Stellar consensus data",
+        status: "degraded",
       },
       { status: 500 }
     );
@@ -107,7 +104,9 @@ export async function POST(request: NextRequest) {
 
     if (!source_keypair || !destination || !amount) {
       return NextResponse.json(
-        { error: 'Missing required fields: source_keypair, destination, amount' },
+        {
+          error: "Missing required fields: source_keypair, destination, amount",
+        },
         { status: 400 }
       );
     }
@@ -119,19 +118,20 @@ export async function POST(request: NextRequest) {
     // Build transaction
     const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
       fee: StellarSdk.BASE_FEE,
-      networkPassphrase: process.env.STELLAR_NETWORK_PASSPHRASE || StellarSdk.Networks.PUBLIC,
+      networkPassphrase:
+        process.env.STELLAR_NETWORK_PASSPHRASE || StellarSdk.Networks.PUBLIC,
     })
       .addOperation(
         StellarSdk.Operation.payment({
           destination,
           asset: new StellarSdk.Asset(
-            process.env.STELLAR_ASSET_CODE || 'PI',
+            process.env.STELLAR_ASSET_CODE || "PI",
             process.env.STELLAR_ASSET_ISSUER || destination
           ),
           amount: amount.toString(),
         })
       )
-      .addMemo(StellarSdk.Memo.text(memo || 'Triumph Synergy Payment'))
+      .addMemo(StellarSdk.Memo.text(memo || "Triumph Synergy Payment"))
       .setTimeout(180)
       .build();
 
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     // Submit to Stellar network (will be verified by SCP)
     const result = await server.submitTransaction(transaction);
 
-    console.log(`✅ Transaction submitted to Stellar SCP:`, {
+    console.log("✅ Transaction submitted to Stellar SCP:", {
       hash: result.hash,
       ledger: result.ledger,
     });
@@ -150,14 +150,14 @@ export async function POST(request: NextRequest) {
       success: true,
       stellar_tx_id: result.hash,
       ledger: result.ledger,
-      consensus_status: 'confirmed',
-      message: 'Transaction confirmed by Stellar Consensus Protocol',
+      consensus_status: "confirmed",
+      message: "Transaction confirmed by Stellar Consensus Protocol",
     });
   } catch (error: any) {
-    console.error('Stellar transaction error:', error);
+    console.error("Stellar transaction error:", error);
     return NextResponse.json(
-      { 
-        error: 'Failed to submit transaction',
+      {
+        error: "Failed to submit transaction",
         details: error.message,
       },
       { status: 500 }

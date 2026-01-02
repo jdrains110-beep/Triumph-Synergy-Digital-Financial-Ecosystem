@@ -1,14 +1,14 @@
-import { createClient } from 'redis';
-import postgres from 'postgres';
-import { Worker } from 'worker_threads';
-import cluster from 'cluster';
-import os from 'os';
+import cluster from "cluster";
+import os from "os";
+import postgres from "postgres";
+import { createClient } from "redis";
+import { Worker } from "worker_threads";
 
 interface PiPayment {
   payment_id: string;
   user_id: string;
   amount: number;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   pi_transaction_id?: string;
   metadata: Record<string, any>;
   created_at: Date;
@@ -23,21 +23,21 @@ class PaymentProcessor {
 
   constructor() {
     this.workersCount = Number(process.env.WORKER_THREADS) || os.cpus().length;
-    
+
     this.redis = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
+      url: process.env.REDIS_URL || "redis://localhost:6379",
     });
 
-    this.db = postgres(process.env.POSTGRES_URL || '');
+    this.db = postgres(process.env.POSTGRES_URL || "");
   }
 
   async initialize() {
     await this.redis.connect();
-    console.log('✅ Connected to Redis');
-    
+    console.log("✅ Connected to Redis");
+
     // Test database connection
     await this.db`SELECT 1`;
-    console.log('✅ Connected to PostgreSQL');
+    console.log("✅ Connected to PostgreSQL");
 
     // Create tables if not exist
     await this.createTables();
@@ -72,10 +72,10 @@ class PaymentProcessor {
   /**
    * Queue payment for processing
    */
-  async queuePayment(payment: Omit<PiPayment, 'created_at' | 'status'>) {
+  async queuePayment(payment: Omit<PiPayment, "created_at" | "status">) {
     const paymentData: PiPayment = {
       ...payment,
-      status: 'pending',
+      status: "pending",
       created_at: new Date(),
     };
 
@@ -87,8 +87,8 @@ class PaymentProcessor {
     `;
 
     // Queue in Redis for processing
-    await this.redis.lPush('payment_queue', JSON.stringify(paymentData));
-    
+    await this.redis.lPush("payment_queue", JSON.stringify(paymentData));
+
     console.log(`✅ Queued payment: ${paymentData.payment_id}`);
     return paymentData;
   }
@@ -98,10 +98,14 @@ class PaymentProcessor {
    */
   async processBatch() {
     const startTime = Date.now();
-    
+
     // Get batch of payments
-    const payments: string[] = await this.redis.lRange('payment_queue', 0, this.batchSize - 1);
-    
+    const payments: string[] = await this.redis.lRange(
+      "payment_queue",
+      0,
+      this.batchSize - 1
+    );
+
     if (payments.length === 0) {
       return { processed: 0, duration: 0 };
     }
@@ -112,13 +116,13 @@ class PaymentProcessor {
       try {
         const payment: PiPayment = JSON.parse(paymentJson);
         await this.processPayment(payment);
-        
+
         // Remove from queue after successful processing
-        await this.redis.lRem('payment_queue', 1, paymentJson);
+        await this.redis.lRem("payment_queue", 1, paymentJson);
       } catch (error) {
-        console.error(`❌ Error processing payment:`, error);
+        console.error("❌ Error processing payment:", error);
         // Move to dead letter queue
-        await this.redis.lPush('payment_dlq', paymentJson);
+        await this.redis.lPush("payment_dlq", paymentJson);
       }
     });
 
@@ -136,7 +140,8 @@ class PaymentProcessor {
   private async processPayment(payment: PiPayment) {
     try {
       // Update status to processing
-      await this.db`UPDATE pi_payments SET status = 'processing', updated_at = NOW() WHERE payment_id = ${payment.payment_id}`;
+      await this
+        .db`UPDATE pi_payments SET status = 'processing', updated_at = NOW() WHERE payment_id = ${payment.payment_id}`;
 
       // Call Pi Network API (mock implementation)
       const piResponse = await this.callPiNetworkAPI(payment);
@@ -160,11 +165,11 @@ class PaymentProcessor {
         3600,
         JSON.stringify({ ...payment, ...piResponse })
       );
-
     } catch (error) {
       console.error(`❌ Payment ${payment.payment_id} failed:`, error);
-      
-      await this.db`UPDATE pi_payments SET status = 'failed', updated_at = NOW() WHERE payment_id = ${payment.payment_id}`;
+
+      await this
+        .db`UPDATE pi_payments SET status = 'failed', updated_at = NOW() WHERE payment_id = ${payment.payment_id}`;
 
       throw error;
     }
@@ -183,10 +188,10 @@ class PaymentProcessor {
     // });
 
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     return {
-      status: 'completed' as const,
+      status: "completed" as const,
       transaction_id: `pi_tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       confirmed: true,
     };
@@ -196,25 +201,29 @@ class PaymentProcessor {
    * Start continuous processing
    */
   async startProcessing() {
-    console.log(`🚀 Starting payment processor with ${this.workersCount} workers`);
+    console.log(
+      `🚀 Starting payment processor with ${this.workersCount} workers`
+    );
 
     while (true) {
       try {
         const stats = await this.processBatch();
-        
+
         // Log stats every 100 batches
-        const queueLength = await this.redis.lLen('payment_queue');
+        const queueLength = await this.redis.lLen("payment_queue");
         if (queueLength > 0) {
           console.log(`📊 Queue length: ${queueLength}`);
         }
 
         // Short sleep if no payments to process
         if (stats.processed === 0) {
-          await new Promise(resolve => setTimeout(resolve, this.processingInterval));
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.processingInterval)
+          );
         }
       } catch (error) {
-        console.error('❌ Processing error:', error);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.error("❌ Processing error:", error);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
   }
@@ -230,7 +239,8 @@ class PaymentProcessor {
     }
 
     // Fall back to database
-    const result = await this.db`SELECT * FROM pi_payments WHERE payment_id = ${paymentId}`;
+    const result = await this
+      .db`SELECT * FROM pi_payments WHERE payment_id = ${paymentId}`;
 
     return result[0] || null;
   }
@@ -240,8 +250,8 @@ class PaymentProcessor {
    */
   async getStats() {
     const [queueLength, dlqLength] = await Promise.all([
-      this.redis.lLen('payment_queue'),
-      this.redis.lLen('payment_dlq'),
+      this.redis.lLen("payment_queue"),
+      this.redis.lLen("payment_dlq"),
     ]);
 
     const dbStats = await this.db`
@@ -268,7 +278,7 @@ class PaymentProcessor {
 }
 
 // Cluster mode for multiple CPU cores
-if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
+if (cluster.isPrimary && process.env.NODE_ENV === "production") {
   const numCPUs = os.cpus().length;
   console.log(`🎯 Master process starting ${numCPUs} workers`);
 
@@ -276,7 +286,7 @@ if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
     cluster.fork();
   }
 
-  cluster.on('exit', (worker, code, signal) => {
+  cluster.on("exit", (worker, code, signal) => {
     console.log(`⚠️  Worker ${worker.process.pid} died. Starting new worker...`);
     cluster.fork();
   });
@@ -289,8 +299,8 @@ if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
   });
 
   // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    console.log('💤 Shutting down gracefully...');
+  process.on("SIGTERM", async () => {
+    console.log("💤 Shutting down gracefully...");
     await processor.close();
     process.exit(0);
   });

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export default function proxy(request: NextRequest) {
   // Allow public access to validation key endpoints
