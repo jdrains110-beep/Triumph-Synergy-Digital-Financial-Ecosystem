@@ -9,7 +9,7 @@ export interface ISO20022Message {
 }
 
 export interface PACS008Message extends ISO20022Message {
-  messageType: 'PACS.008';
+  messageType: "PACS.008";
   paymentInformation: {
     paymentId: string;
     paymentMethod: string;
@@ -37,9 +37,9 @@ export interface PACS008Message extends ISO20022Message {
 }
 
 export interface PACS002Message extends ISO20022Message {
-  messageType: 'PACS.002';
+  messageType: "PACS.002";
   originalMessageId: string;
-  paymentStatus: 'ACCC' | 'ACPT' | 'RJCT';
+  paymentStatus: "ACCC" | "ACPT" | "RJCT";
   statusReasonInformation?: string;
   transactionReference: string;
 }
@@ -47,7 +47,7 @@ export interface PACS002Message extends ISO20022Message {
 /**
  * ISO 20022 Compliance Service
  * Ensures all messages follow PACS/CAMT protocols
- * 
+ *
  * PACS = Payment Clearing and Settlement
  * CAMT = Cash Management and Transactions
  */
@@ -64,34 +64,42 @@ export class ISO20022ComplianceService {
     const warnings: string[] = [];
 
     // Required fields
-    if (!message.messageId) errors.push('messageId is required');
-    if (!message.creationDateTime) errors.push('creationDateTime is required');
-    if (!message.paymentInformation) errors.push('paymentInformation is required');
-    if (!message.endToEndReference) errors.push('endToEndReference is required (traceability)');
+    if (!message.messageId) errors.push("messageId is required");
+    if (!message.creationDateTime) errors.push("creationDateTime is required");
+    if (!message.paymentInformation)
+      errors.push("paymentInformation is required");
+    if (!message.endToEndReference)
+      errors.push("endToEndReference is required (traceability)");
 
     // Message structure
     const pi = message.paymentInformation;
     if (pi) {
-      if (!pi.debtorAccount) errors.push('paymentInformation.debtorAccount is required');
-      if (!pi.creditorAccount) errors.push('paymentInformation.creditorAccount is required');
-      if (!pi.transactionAmount) errors.push('paymentInformation.transactionAmount is required');
+      if (!pi.debtorAccount)
+        errors.push("paymentInformation.debtorAccount is required");
+      if (!pi.creditorAccount)
+        errors.push("paymentInformation.creditorAccount is required");
+      if (!pi.transactionAmount)
+        errors.push("paymentInformation.transactionAmount is required");
 
       // Amount validation
       if (pi.transactionAmount && pi.transactionAmount.amount <= 0) {
-        errors.push('Transaction amount must be > 0');
+        errors.push("Transaction amount must be > 0");
       }
 
       // Currency validation (ISO 4217)
-      if (pi.transactionAmount && !this.isValidCurrency(pi.transactionAmount.currency)) {
-        errors.push('Invalid currency code (must be ISO 4217)');
+      if (
+        pi.transactionAmount &&
+        !this.isValidCurrency(pi.transactionAmount.currency)
+      ) {
+        errors.push("Invalid currency code (must be ISO 4217)");
       }
 
       // Account format validation
       if (pi.debtorAccount && !this.isValidAccount(pi.debtorAccount.id)) {
-        errors.push('Invalid debtor account format');
+        errors.push("Invalid debtor account format");
       }
       if (pi.creditorAccount && !this.isValidAccount(pi.creditorAccount.id)) {
-        errors.push('Invalid creditor account format');
+        errors.push("Invalid creditor account format");
       }
     }
 
@@ -99,21 +107,23 @@ export class ISO20022ComplianceService {
     try {
       const date = new Date(message.creationDateTime);
       if (isNaN(date.getTime())) {
-        errors.push('creationDateTime must be valid ISO 8601 format');
+        errors.push("creationDateTime must be valid ISO 8601 format");
       }
     } catch (e) {
-      errors.push('creationDateTime parsing failed');
+      errors.push("creationDateTime parsing failed");
     }
 
     // Warnings
     if (!pi.remittanceInformation?.unstructured) {
-      warnings.push('remittanceInformation.unstructured is recommended for clarity');
+      warnings.push(
+        "remittanceInformation.unstructured is recommended for clarity"
+      );
     }
 
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -127,20 +137,25 @@ export class ISO20022ComplianceService {
     const errors: string[] = [];
 
     // Required fields
-    if (!message.messageId) errors.push('messageId is required');
-    if (!message.originalMessageId) errors.push('originalMessageId is required');
-    if (!message.paymentStatus) errors.push('paymentStatus is required');
-    if (!message.transactionReference) errors.push('transactionReference is required');
+    if (!message.messageId) errors.push("messageId is required");
+    if (!message.originalMessageId)
+      errors.push("originalMessageId is required");
+    if (!message.paymentStatus) errors.push("paymentStatus is required");
+    if (!message.transactionReference)
+      errors.push("transactionReference is required");
 
     // Status validation
-    const validStatuses = ['ACCC', 'ACPT', 'RJCT'];
-    if (message.paymentStatus && !validStatuses.includes(message.paymentStatus)) {
-      errors.push(`paymentStatus must be one of: ${validStatuses.join(', ')}`);
+    const validStatuses = ["ACCC", "ACPT", "RJCT"];
+    if (
+      message.paymentStatus &&
+      !validStatuses.includes(message.paymentStatus)
+    ) {
+      errors.push(`paymentStatus must be one of: ${validStatuses.join(", ")}`);
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -151,32 +166,32 @@ export class ISO20022ComplianceService {
     return {
       messageId: `MSG-${Date.now()}`,
       creationDateTime: new Date().toISOString(),
-      messageType: 'PACS.008',
-      version: '03.02',
+      messageType: "PACS.008",
+      version: "03.02",
       paymentInformation: {
         paymentId: piTransaction.id,
-        paymentMethod: 'TRF', // Transfer
+        paymentMethod: "TRF", // Transfer
         debtorAccount: {
           id: piTransaction.from,
-          name: piTransaction.senderName || '',
-          accountType: 'Pi Wallet'
+          name: piTransaction.senderName || "",
+          accountType: "Pi Wallet",
         },
         creditorAccount: {
           id: piTransaction.to,
-          name: piTransaction.recipientName || '',
-          accountType: 'Pi Wallet'
+          name: piTransaction.recipientName || "",
+          accountType: "Pi Wallet",
         },
         transactionAmount: {
           amount: piTransaction.amount,
-          currency: 'EUR' // Stablecoin value in EUR
+          currency: "EUR", // Stablecoin value in EUR
         },
         requestedExecutionDate: piTransaction.timestamp,
         remittanceInformation: {
-          unstructured: piTransaction.description || 'Pi Network Payment',
-          reference: piTransaction.hash
-        }
+          unstructured: piTransaction.description || "Pi Network Payment",
+          reference: piTransaction.hash,
+        },
       },
-      endToEndReference: piTransaction.hash // Blockchain tx hash ensures uniqueness
+      endToEndReference: piTransaction.hash, // Blockchain tx hash ensures uniqueness
     };
   }
 
@@ -185,19 +200,19 @@ export class ISO20022ComplianceService {
    */
   generatePACS002Status(
     originalMessage: PACS008Message,
-    status: 'ACCC' | 'ACPT' | 'RJCT',
+    status: "ACCC" | "ACPT" | "RJCT",
     transactionHash: string,
     reason?: string
   ): PACS002Message {
     return {
       messageId: `MSG-${Date.now()}`,
       creationDateTime: new Date().toISOString(),
-      messageType: 'PACS.002',
-      version: '03.02',
+      messageType: "PACS.002",
+      version: "03.02",
       originalMessageId: originalMessage.messageId,
       paymentStatus: status,
       statusReasonInformation: reason,
-      transactionReference: transactionHash
+      transactionReference: transactionHash,
     };
   }
 
@@ -207,8 +222,22 @@ export class ISO20022ComplianceService {
   private isValidCurrency(code: string): boolean {
     // ISO 4217 currency codes
     const validCurrencies = [
-      'EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD',
-      'CNY', 'INR', 'SGD', 'HKD', 'NOK', 'SEK', 'DKK', 'PLN'
+      "EUR",
+      "USD",
+      "GBP",
+      "JPY",
+      "CHF",
+      "CAD",
+      "AUD",
+      "NZD",
+      "CNY",
+      "INR",
+      "SGD",
+      "HKD",
+      "NOK",
+      "SEK",
+      "DKK",
+      "PLN",
     ];
     return validCurrencies.includes(code);
   }
@@ -243,14 +272,14 @@ export class ISO20022ComplianceService {
       to: pi.creditorAccount.id,
       amount: pi.transactionAmount.amount,
       reference: message.endToEndReference,
-      iso20022Message: message
+      iso20022Message: message,
     });
 
     return {
       settlementId: message.messageId,
-      status: 'SETTLED',
+      status: "SETTLED",
       settlementTime: new Date().toISOString(),
-      transactionHash: tx.hash
+      transactionHash: tx.hash,
     };
   }
 
@@ -258,10 +287,12 @@ export class ISO20022ComplianceService {
    * Create blockchain transaction
    * @private
    */
-  private async createBlockchainTransaction(tx: any): Promise<{ hash: string }> {
+  private async createBlockchainTransaction(
+    tx: any
+  ): Promise<{ hash: string }> {
     // In production: call blockchain service
     return {
-      hash: `0x${Math.random().toString(16).slice(2)}`
+      hash: `0x${Math.random().toString(16).slice(2)}`,
     };
   }
 }

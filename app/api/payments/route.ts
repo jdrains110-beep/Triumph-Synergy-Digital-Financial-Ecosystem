@@ -2,10 +2,10 @@
 // Unified Payment Processing API Endpoint
 // Routes all payments through Pi (PRIMARY) → Apple Pay (SECONDARY)
 
-import { NextRequest, NextResponse } from 'next/server';
-import UnifiedPaymentRouter from '@/lib/payments/unified-routing';
-import PiNetworkPaymentProcessor from '@/lib/payments/pi-network-primary';
-import ApplePayProcessor from '@/lib/payments/apple-pay-secondary';
+import { type NextRequest, NextResponse } from "next/server";
+import ApplePayProcessor from "@/lib/payments/apple-pay-secondary";
+import PiNetworkPaymentProcessor from "@/lib/payments/pi-network-primary";
+import UnifiedPaymentRouter from "@/lib/payments/unified-routing";
 
 // Initialize payment processors
 const router = new UnifiedPaymentRouter();
@@ -14,9 +14,9 @@ const appleProcessor = new ApplePayProcessor();
 
 /**
  * POST /api/payments
- * 
+ *
  * Process a payment through the unified payment system
- * 
+ *
  * Request body:
  * {
  *   "method": "pi_network" | "apple_pay",
@@ -29,7 +29,7 @@ const appleProcessor = new ApplePayProcessor();
  *   "paymentToken": "string",
  *   "currency": "USD"
  * }
- * 
+ *
  * Response:
  * {
  *   "success": boolean,
@@ -51,14 +51,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Missing required fields: method, orderId, amount'
+          error: "Missing required fields: method, orderId, amount",
         },
         { status: 400 }
       );
     }
 
     // Log payment attempt (for audit)
-    console.log(`[PAYMENT] Received ${method} payment for order ${orderId}: ${amount}`);
+    console.log(
+      `[PAYMENT] Received ${method} payment for order ${orderId}: ${amount}`
+    );
 
     // Route payment through unified system
     const result = await router.routePayment(method as string, body);
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
         orderId: orderId as string,
         amount: amount as number,
         timestamp: new Date().toISOString(),
-        status: 'confirmed'
+        status: "confirmed",
       });
 
       console.log(`[PAYMENT] ✅ Payment processed: ${result.paymentId}`);
@@ -85,28 +87,27 @@ export async function POST(request: NextRequest) {
         data: {
           orderId,
           amount,
-          method
-        }
-      });
-    } else {
-      console.error(`[PAYMENT] ❌ Payment failed: ${result.error}`);
-
-      return NextResponse.json(
-        {
-          success: false,
-          processor: result.processor,
-          error: result.error
+          method,
         },
-        { status: 402 } // Payment Required
-      );
+      });
     }
-  } catch (error) {
-    console.error('[PAYMENT] Unexpected error:', error);
+    console.error(`[PAYMENT] ❌ Payment failed: ${result.error}`);
 
     return NextResponse.json(
       {
         success: false,
-        error: 'Payment processing failed'
+        processor: result.processor,
+        error: result.error,
+      },
+      { status: 402 } // Payment Required
+    );
+  } catch (error) {
+    console.error("[PAYMENT] Unexpected error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Payment processing failed",
       },
       { status: 500 }
     );
@@ -115,21 +116,21 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/payments?method=pi_network&orderId=xxx
- * 
+ *
  * Get payment status
  */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const method = searchParams.get('method');
-    const paymentId = searchParams.get('paymentId');
-    const orderId = searchParams.get('orderId');
+    const method = searchParams.get("method");
+    const paymentId = searchParams.get("paymentId");
+    const orderId = searchParams.get("orderId");
 
     if (!paymentId && !orderId) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Provide either paymentId or orderId'
+          error: "Provide either paymentId or orderId",
         },
         { status: 400 }
       );
@@ -142,7 +143,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Payment not found'
+          error: "Payment not found",
         },
         { status: 404 }
       );
@@ -150,9 +151,9 @@ export async function GET(request: NextRequest) {
 
     // Get detailed status from processor
     let status;
-    if (payment.method === 'pi_network') {
+    if (payment.method === "pi_network") {
       status = await piProcessor.getPaymentStatus(payment.paymentId);
-    } else if (payment.method === 'apple_pay') {
+    } else if (payment.method === "apple_pay") {
       status = await appleProcessor.getPaymentStatus(payment.paymentId);
     }
 
@@ -165,15 +166,15 @@ export async function GET(request: NextRequest) {
       amount: payment.amount,
       status: status?.status || payment.status,
       createdAt: payment.timestamp,
-      data: status
+      data: status,
     });
   } catch (error) {
-    console.error('[PAYMENT_STATUS] Error:', error);
+    console.error("[PAYMENT_STATUS] Error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to retrieve payment status'
+        error: "Failed to retrieve payment status",
       },
       { status: 500 }
     );
@@ -182,30 +183,32 @@ export async function GET(request: NextRequest) {
 
 /**
  * GET /api/payments/stats
- * 
+ *
  * Get payment statistics and performance metrics
  */
 export async function getStats(request: NextRequest) {
   try {
-    if (!request.nextUrl.pathname.endsWith('/stats')) {
+    if (!request.nextUrl.pathname.endsWith("/stats")) {
       return null;
     }
 
-    const days = parseInt(request.nextUrl.searchParams.get('days') || '30');
+    const days = Number.parseInt(
+      request.nextUrl.searchParams.get("days") || "30"
+    );
     const stats = await router.getPaymentStats(days);
 
     return NextResponse.json({
       success: true,
       period: `${days} days`,
-      data: stats
+      data: stats,
     });
   } catch (error) {
-    console.error('[PAYMENT_STATS] Error:', error);
+    console.error("[PAYMENT_STATS] Error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to retrieve payment statistics'
+        error: "Failed to retrieve payment statistics",
       },
       { status: 500 }
     );
@@ -214,12 +217,12 @@ export async function getStats(request: NextRequest) {
 
 /**
  * GET /api/payments/config
- * 
+ *
  * Get available payment methods and configuration
  */
 export async function getConfig(request: NextRequest) {
   try {
-    if (!request.nextUrl.pathname.endsWith('/config')) {
+    if (!request.nextUrl.pathname.endsWith("/config")) {
       return null;
     }
 
@@ -232,24 +235,24 @@ export async function getConfig(request: NextRequest) {
       success: validation.ready,
       ready: validation.ready,
       status: validation.status,
-      methods: methods.map(m => ({
+      methods: methods.map((m) => ({
         id: m.id,
         name: m.name,
         type: m.type,
         priority: m.priority,
-        targetAdoption: m.targetAdoption
+        targetAdoption: m.targetAdoption,
       })),
       primary: router.getPrimaryMethod(),
       secondary: router.getSecondaryMethod(),
-      validation
+      validation,
     });
   } catch (error) {
-    console.error('[PAYMENT_CONFIG] Error:', error);
+    console.error("[PAYMENT_CONFIG] Error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to retrieve payment configuration'
+        error: "Failed to retrieve payment configuration",
       },
       { status: 500 }
     );
@@ -258,12 +261,15 @@ export async function getConfig(request: NextRequest) {
 
 /**
  * POST /api/payments/verify
- * 
+ *
  * Verify a payment on the blockchain
  */
 export async function verifyPayment(request: NextRequest) {
   try {
-    if (request.method !== 'POST' || !request.nextUrl.pathname.endsWith('/verify')) {
+    if (
+      request.method !== "POST" ||
+      !request.nextUrl.pathname.endsWith("/verify")
+    ) {
       return null;
     }
 
@@ -274,20 +280,20 @@ export async function verifyPayment(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Transaction hash required'
+          error: "Transaction hash required",
         },
         { status: 400 }
       );
     }
 
     let verified;
-    if (method === 'pi_network') {
+    if (method === "pi_network") {
       verified = await piProcessor.verifyPiPayment(transactionHash as string);
     } else {
       return NextResponse.json(
         {
           success: false,
-          error: 'Verification only available for Pi Network payments'
+          error: "Verification only available for Pi Network payments",
         },
         { status: 400 }
       );
@@ -297,15 +303,15 @@ export async function verifyPayment(request: NextRequest) {
       success: verified.valid,
       paymentId,
       verified: verified.confirmed,
-      confirmations: verified.confirmations
+      confirmations: verified.confirmations,
     });
   } catch (error) {
-    console.error('[PAYMENT_VERIFY] Error:', error);
+    console.error("[PAYMENT_VERIFY] Error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: 'Payment verification failed'
+        error: "Payment verification failed",
       },
       { status: 500 }
     );
@@ -327,11 +333,11 @@ async function storePaymentRecord(payment: {
 }): Promise<void> {
   try {
     // Store in appropriate table based on method
-    if (payment.method === 'pi_network') {
+    if (payment.method === "pi_network") {
       // INSERT INTO pi_payments (payment_id, order_id, amount, status, created_at)
       // VALUES ($1, $2, $3, $4, $5)
       console.log(`Stored Pi payment: ${payment.paymentId}`);
-    } else if (payment.method === 'apple_pay') {
+    } else if (payment.method === "apple_pay") {
       // INSERT INTO apple_pay_payments (payment_id, order_id, amount, processor, status, created_at)
       // VALUES ($1, $2, $3, $4, $5, $6)
       console.log(`Stored Apple Pay payment: ${payment.paymentId}`);
@@ -341,7 +347,7 @@ async function storePaymentRecord(payment: {
     // INSERT INTO payment_audit (payment_id, method, processor, amount, status, created_at)
     // VALUES ($1, $2, $3, $4, $5, $6)
   } catch (error) {
-    console.error('Failed to store payment record:', error);
+    console.error("Failed to store payment record:", error);
     throw error;
   }
 }
@@ -350,9 +356,7 @@ async function storePaymentRecord(payment: {
  * Retrieve payment record from database
  * @private
  */
-async function getPaymentRecord(
-  paymentIdOrOrderId: string
-): Promise<{
+async function getPaymentRecord(paymentIdOrOrderId: string): Promise<{
   paymentId: string;
   method: string;
   processor: string;
@@ -363,21 +367,21 @@ async function getPaymentRecord(
 } | null> {
   try {
     // Query payment_audit table
-    // SELECT * FROM payment_audit 
+    // SELECT * FROM payment_audit
     // WHERE payment_id = $1 OR order_id = $1
-    
+
     // Mock data - replace with actual database query
     return {
       paymentId: paymentIdOrOrderId,
-      method: 'pi_network',
-      processor: 'pi_network',
-      orderId: 'order-123',
+      method: "pi_network",
+      processor: "pi_network",
+      orderId: "order-123",
       amount: 100,
       timestamp: new Date().toISOString(),
-      status: 'confirmed'
+      status: "confirmed",
     };
   } catch (error) {
-    console.error('Failed to retrieve payment record:', error);
+    console.error("Failed to retrieve payment record:", error);
     return null;
   }
 }
@@ -386,7 +390,7 @@ async function getPaymentRecord(
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '1mb'
-    }
-  }
+      sizeLimit: "1mb",
+    },
+  },
 };

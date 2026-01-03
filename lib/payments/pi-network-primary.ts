@@ -2,7 +2,7 @@
 // Pi Network as PRIMARY Payment Method Configuration
 // 95% of transaction volume target
 
-import { Horizon, Networks, TransactionBuilder } from 'stellar-sdk';
+import { Horizon, Networks, TransactionBuilder } from "stellar-sdk";
 
 export interface PiPaymentConfig {
   enabled: boolean;
@@ -11,7 +11,7 @@ export interface PiPaymentConfig {
   externalMultiplier: number;
   minAmount: number;
   maxAmount: number;
-  settlementNetwork: 'stellar_mainnet' | 'stellar_testnet';
+  settlementNetwork: "stellar_mainnet" | "stellar_testnet";
 }
 
 // Primary payment configuration
@@ -21,10 +21,11 @@ export const piNetworkConfig: PiPaymentConfig = {
   internalMultiplier: 1.5, // 50% bonus for internal Pi
   externalMultiplier: 1.0, // No bonus for external Pi
   minAmount: 10, // Minimum 10 Pi
-  maxAmount: 100000, // Maximum 100,000 Pi
-  settlementNetwork: process.env.NODE_ENV === 'production' 
-    ? 'stellar_mainnet' 
-    : 'stellar_testnet'
+  maxAmount: 100_000, // Maximum 100,000 Pi
+  settlementNetwork:
+    process.env.NODE_ENV === "production"
+      ? "stellar_mainnet"
+      : "stellar_testnet",
 };
 
 /**
@@ -41,15 +42,16 @@ export class PiNetworkPaymentProcessor {
   };
 
   constructor() {
-    this.apiKey = process.env.PI_API_KEY || '';
-    this.internalApiKey = process.env.PI_INTERNAL_API_KEY || '';
+    this.apiKey = process.env.PI_API_KEY || "";
+    this.internalApiKey = process.env.PI_INTERNAL_API_KEY || "";
     this.stellar = {
-      account: process.env.STELLAR_PAYMENT_ACCOUNT || '',
-      secret: process.env.STELLAR_PAYMENT_SECRET || ''
+      account: process.env.STELLAR_PAYMENT_ACCOUNT || "",
+      secret: process.env.STELLAR_PAYMENT_SECRET || "",
     };
 
     // Initialize Stellar Horizon connection
-    const horizonUrl = process.env.STELLAR_HORIZON_URL || 'https://horizon.stellar.org';
+    const horizonUrl =
+      process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org";
     this.horizon = new Horizon.Server(horizonUrl);
   }
 
@@ -64,7 +66,7 @@ export class PiNetworkPaymentProcessor {
   async processPiPayment(
     orderId: string,
     amount: number,
-    source: 'internal' | 'external' = 'external',
+    source: "internal" | "external" = "external",
     userAddress: string
   ): Promise<{
     success: boolean;
@@ -78,21 +80,25 @@ export class PiNetworkPaymentProcessor {
   }> {
     try {
       // Validate amount
-      if (amount < piNetworkConfig.minAmount || amount > piNetworkConfig.maxAmount) {
+      if (
+        amount < piNetworkConfig.minAmount ||
+        amount > piNetworkConfig.maxAmount
+      ) {
         return {
           success: false,
-          paymentId: '',
+          paymentId: "",
           amount,
           appliedValue: 0,
           multiplier: 1,
-          error: `Amount must be between ${piNetworkConfig.minAmount} and ${piNetworkConfig.maxAmount} Pi`
+          error: `Amount must be between ${piNetworkConfig.minAmount} and ${piNetworkConfig.maxAmount} Pi`,
         };
       }
 
       // Calculate multiplier
-      const multiplier = source === 'internal' 
-        ? piNetworkConfig.internalMultiplier 
-        : piNetworkConfig.externalMultiplier;
+      const multiplier =
+        source === "internal"
+          ? piNetworkConfig.internalMultiplier
+          : piNetworkConfig.externalMultiplier;
       const appliedValue = amount * multiplier;
 
       // Create Pi payment on blockchain
@@ -105,11 +111,11 @@ export class PiNetworkPaymentProcessor {
       if (!piTransaction.success) {
         return {
           success: false,
-          paymentId: '',
+          paymentId: "",
           amount,
           appliedValue: 0,
           multiplier,
-          error: piTransaction.error
+          error: piTransaction.error,
         };
       }
 
@@ -129,17 +135,19 @@ export class PiNetworkPaymentProcessor {
         amount,
         appliedValue,
         multiplier,
-        stellarSettlement: stellarSettlement.success ? stellarSettlement.hash : undefined
+        stellarSettlement: stellarSettlement.success
+          ? stellarSettlement.hash
+          : undefined,
       };
     } catch (error) {
-      console.error('Pi payment processing error:', error);
+      console.error("Pi payment processing error:", error);
       return {
         success: false,
-        paymentId: '',
+        paymentId: "",
         amount,
         appliedValue: 0,
         multiplier: 1,
-        error: 'Pi payment processing failed'
+        error: "Pi payment processing failed",
       };
     }
   }
@@ -160,12 +168,12 @@ export class PiNetworkPaymentProcessor {
     try {
       // In production: Call Pi Network mainnet API
       // For now: Return mock successful transaction
-      
-      const response = await fetch('https://api.minepi.com/v2/payments', {
-        method: 'POST',
+
+      const response = await fetch("https://api.minepi.com/v2/payments", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           amount,
@@ -174,30 +182,30 @@ export class PiNetworkPaymentProcessor {
             orderId,
             userAddress,
             timestamp: new Date().toISOString(),
-            source: 'triumph-synergy'
+            source: "triumph-synergy",
           },
-          user_uid: userAddress
-        })
+          user_uid: userAddress,
+        }),
       });
 
       if (!response.ok) {
         const error = await response.text();
         return {
           success: false,
-          error: `Pi API error: ${response.status} ${error}`
+          error: `Pi API error: ${response.status} ${error}`,
         };
       }
 
-      const data = await response.json() as { txid: string };
+      const data = (await response.json()) as { txid: string };
 
       return {
         success: true,
-        transactionHash: data.txid
+        transactionHash: data.txid,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to create Pi transaction: ${error}`
+        error: `Failed to create Pi transaction: ${error}`,
       };
     }
   }
@@ -217,26 +225,28 @@ export class PiNetworkPaymentProcessor {
   }> {
     try {
       // Get source account for transaction
-      const sourceAccount = await this.horizon.loadAccount(this.stellar.account);
+      const sourceAccount = await this.horizon.loadAccount(
+        this.stellar.account
+      );
 
       // Create Stellar transaction
       const transaction = new TransactionBuilder(sourceAccount, {
         fee: 100,
-        networkPassphrase: Networks.PUBLIC_NETWORK_PASSPHRASE
+        networkPassphrase: Networks.PUBLIC_NETWORK_PASSPHRASE,
       })
         .addMemo({
-          type: 'text',
-          value: `Pi:${orderId}:${piTxHash}`
+          type: "text",
+          value: `Pi:${orderId}:${piTxHash}`,
         })
         .addOperation({
-          type: 'manageData',
-          name: 'pi_settlement',
+          type: "manageData",
+          name: "pi_settlement",
           value: JSON.stringify({
             orderId,
             amount,
             piTxHash,
-            timestamp: new Date().toISOString()
-          })
+            timestamp: new Date().toISOString(),
+          }),
         })
         .setTimeout(30)
         .build();
@@ -249,13 +259,13 @@ export class PiNetworkPaymentProcessor {
 
       return {
         success: true,
-        hash: result.hash
+        hash: result.hash,
       };
     } catch (error) {
-      console.error('Stellar settlement error:', error);
+      console.error("Stellar settlement error:", error);
       return {
         success: false,
-        error: `Stellar settlement failed: ${error}`
+        error: `Stellar settlement failed: ${error}`,
       };
     }
   }
@@ -265,7 +275,7 @@ export class PiNetworkPaymentProcessor {
    */
   async getPaymentStatus(paymentId: string): Promise<{
     id: string;
-    status: 'pending' | 'confirmed' | 'settled' | 'failed';
+    status: "pending" | "confirmed" | "settled" | "failed";
     amount: number;
     appliedValue: number;
     createdAt: string;
@@ -275,10 +285,10 @@ export class PiNetworkPaymentProcessor {
     // Return status with timestamps
     return {
       id: paymentId,
-      status: 'confirmed',
+      status: "confirmed",
       amount: 0,
       appliedValue: 0,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
   }
 
@@ -295,8 +305,8 @@ export class PiNetworkPaymentProcessor {
         `https://api.minepi.com/v2/transactions/${transactionHash}`,
         {
           headers: {
-            'Authorization': `Bearer ${this.apiKey}`
-          }
+            Authorization: `Bearer ${this.apiKey}`,
+          },
         }
       );
 
@@ -304,19 +314,19 @@ export class PiNetworkPaymentProcessor {
         return { valid: false, confirmed: false, confirmations: 0 };
       }
 
-      const data = await response.json() as { 
-        status: string; 
+      const data = (await response.json()) as {
+        status: string;
         confirmed_at?: string;
         confirmations?: number;
       };
 
       return {
         valid: true,
-        confirmed: data.status === 'confirmed',
-        confirmations: data.confirmations || 0
+        confirmed: data.status === "confirmed",
+        confirmations: data.confirmations || 0,
       };
     } catch (error) {
-      console.error('Payment verification error:', error);
+      console.error("Payment verification error:", error);
       return { valid: false, confirmed: false, confirmations: 0 };
     }
   }
@@ -329,7 +339,8 @@ export class StellarSettlement {
   private horizon: Horizon.Server;
 
   constructor() {
-    const horizonUrl = process.env.STELLAR_HORIZON_URL || 'https://horizon.stellar.org';
+    const horizonUrl =
+      process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org";
     this.horizon = new Horizon.Server(horizonUrl);
   }
 
@@ -345,7 +356,10 @@ export class StellarSettlement {
   /**
    * Monitor settlement completion
    */
-  async monitorSettlement(txHash: string, maxWaitTime: number = 60000): Promise<boolean> {
+  async monitorSettlement(
+    txHash: string,
+    maxWaitTime = 60_000
+  ): Promise<boolean> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < maxWaitTime) {
@@ -361,7 +375,7 @@ export class StellarSettlement {
       }
 
       // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
     return false;

@@ -1,23 +1,23 @@
 // lib/compliance/index.ts
 // Comprehensive Compliance Framework Export
 
-import MICAComplianceService from './mica-compliance';
-import ISO20022ComplianceService from './iso20022-compliance';
-import KYCAMLComplianceService from './kyc-aml-gdpr-compliance';
-import GDPRComplianceService from './gdpr-compliance';
-import EnergyEfficiencyComplianceService from './energy-efficiency-compliance';
+import EnergyEfficiencyComplianceService from "./energy-efficiency-compliance";
+import GDPRComplianceService from "./gdpr-compliance";
+import ISO20022ComplianceService from "./iso20022-compliance";
+import KYCAMLComplianceService from "./kyc-aml-gdpr-compliance";
+import MICAComplianceService from "./mica-compliance";
 
 export {
   MICAComplianceService,
   ISO20022ComplianceService,
   KYCAMLComplianceService,
   GDPRComplianceService,
-  EnergyEfficiencyComplianceService
+  EnergyEfficiencyComplianceService,
 };
 
 /**
  * Triumph Synergy Comprehensive Compliance Suite
- * 
+ *
  * This module provides integrated compliance management across:
  * - MICA (Markets in Crypto-Assets Regulation) - EU regulatory
  * - ISO 20022 (Financial messaging standard)
@@ -39,14 +39,14 @@ export class ComplianceOrchestrator {
       // but fall back to noop implementations if unavailable during static builds.
       // Bypass strict constructor signature check during build-time
       // by invoking as any — real args will be supplied at runtime.
-      // @ts-ignore
+      // @ts-expect-error
       this.mica = new (MICAComplianceService as any)();
     } catch (e) {
       // Provide lightweight noop fallback to avoid build-time errors
       // while preserving runtime behavior when real services are available.
-      // @ts-ignore
+      // @ts-expect-error
       this.mica = {
-        auditComplianceStatus: async () => ({})
+        auditComplianceStatus: async () => ({}),
       } as any;
     }
 
@@ -54,29 +54,36 @@ export class ComplianceOrchestrator {
       this.iso20022 = new ISO20022ComplianceService();
     } catch (e) {
       // Fallback stub
-      // @ts-ignore
+      // @ts-expect-error
       this.iso20022 = { validateFrameworkCompliance: () => ({}) } as any;
     }
 
     try {
       this.kycaml = new KYCAMLComplianceService();
     } catch (e) {
-      // @ts-ignore
+      // @ts-expect-error
       this.kycaml = { runAMLScreening: async () => ({}) } as any;
     }
 
     try {
       this.gdpr = new GDPRComplianceService();
     } catch (e) {
-      // @ts-ignore
+      // @ts-expect-error
       this.gdpr = { auditDataProtectionCompliance: () => ({}) } as any;
     }
 
     try {
       this.energy = new EnergyEfficiencyComplianceService();
     } catch (e) {
-      // @ts-ignore
-      this.energy = { calculateAnnualCarbonFootprint: () => ({ totalEmissions: 0, offsetPurchased: 0, netEmissions: 0 }), verifyOffsetCompliance: async () => ({}) } as any;
+      // @ts-expect-error
+      this.energy = {
+        calculateAnnualCarbonFootprint: () => ({
+          totalEmissions: 0,
+          offsetPurchased: 0,
+          netEmissions: 0,
+        }),
+        verifyOffsetCompliance: async () => ({}),
+      } as any;
     }
   }
 
@@ -89,15 +96,17 @@ export class ComplianceOrchestrator {
       auditResults: {
         mica: await ((this.mica as any).auditComplianceStatus?.() || {}),
         iso20022: (this.iso20022 as any).validateFrameworkCompliance?.(),
-        kycaml: await ((this.kycaml as any).runAMLScreening?.('BATCH') || {}),
+        kycaml: await ((this.kycaml as any).runAMLScreening?.("BATCH") || {}),
         gdpr: (this.gdpr as any).auditDataProtectionCompliance?.(),
         energy: {
-          footprint: (this.energy as any).calculateAnnualCarbonFootprint?.() || {},
-          offsets: await ((this.energy as any).verifyOffsetCompliance?.() || {})
-        }
+          footprint:
+            (this.energy as any).calculateAnnualCarbonFootprint?.() || {},
+          offsets: await ((this.energy as any).verifyOffsetCompliance?.() ||
+            {}),
+        },
       },
-      overallComplianceStatus: 'FULLY_COMPLIANT',
-      nextAuditDate: this.getNextAuditDate()
+      overallComplianceStatus: "FULLY_COMPLIANT",
+      nextAuditDate: this.getNextAuditDate(),
     };
   }
 
@@ -107,20 +116,25 @@ export class ComplianceOrchestrator {
   getComplianceDashboard() {
     return {
       jurisdictions: (this.mica as any).getCoveredJurisdictions?.() || [],
-      messagingStandard: 'ISO 20022',
+      messagingStandard: "ISO 20022",
       kycAMLStatus: (this.kycaml as any).getScreeningStatus?.() || {},
       gdprCompliance: (this.gdpr as any).getComplianceStatus?.() || {},
-      carbonNeutral: ((this.energy as any).calculateAnnualCarbonFootprint?.() || { netEmissions: 0 }).netEmissions === 0,
+      carbonNeutral:
+        (
+          (this.energy as any).calculateAnnualCarbonFootprint?.() || {
+            netEmissions: 0,
+          }
+        ).netEmissions === 0,
       lastAudit: new Date().toISOString(),
       nextAudit: this.getNextAuditDate(),
       certifications: [
-        'ISO 27001 (Information Security)',
-        'ISO 20022 (Financial Messaging)',
-        'SOC 2 Type II (Data Security)',
-        'GDPR Compliant',
-        'MICA Compliant',
-        'Carbon Neutral Certified'
-      ]
+        "ISO 27001 (Information Security)",
+        "ISO 20022 (Financial Messaging)",
+        "SOC 2 Type II (Data Security)",
+        "GDPR Compliant",
+        "MICA Compliant",
+        "Carbon Neutral Certified",
+      ],
     };
   }
 
@@ -128,15 +142,15 @@ export class ComplianceOrchestrator {
    * Schedule compliance task
    */
   scheduleComplianceTask(
-    taskType: 'AUDIT' | 'REPORT' | 'UPDATE' | 'VERIFICATION',
-    frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY'
+    taskType: "AUDIT" | "REPORT" | "UPDATE" | "VERIFICATION",
+    frequency: "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY" | "ANNUALLY"
   ) {
     const frequencies: { [key: string]: number } = {
-      'DAILY': 1,
-      'WEEKLY': 7,
-      'MONTHLY': 30,
-      'QUARTERLY': 91,
-      'ANNUALLY': 365
+      DAILY: 1,
+      WEEKLY: 7,
+      MONTHLY: 30,
+      QUARTERLY: 91,
+      ANNUALLY: 365,
     };
 
     return {
@@ -146,7 +160,7 @@ export class ComplianceOrchestrator {
       nextExecutionDate: new Date(
         Date.now() + frequencies[frequency] * 24 * 60 * 60 * 1000
       ),
-      automatedExecutionEnabled: true
+      automatedExecutionEnabled: true,
     };
   }
 

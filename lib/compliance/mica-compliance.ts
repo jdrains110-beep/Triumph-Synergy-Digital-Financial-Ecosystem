@@ -9,7 +9,7 @@ type AMLComplianceService = any;
 /**
  * MICA Compliance Service
  * Markets in Crypto-Assets Regulation (EU 2023/1114)
- * 
+ *
  * Handles:
  * - Stablecoin classification & requirements
  * - Asset reserves (100% backing)
@@ -22,7 +22,10 @@ export class MICAComplianceService {
   private blockchain: PiNetworkBlockchain;
   private amlService: AMLComplianceService;
 
-  constructor(blockchain: PiNetworkBlockchain, amlService: AMLComplianceService) {
+  constructor(
+    blockchain: PiNetworkBlockchain,
+    amlService: AMLComplianceService
+  ) {
     this.blockchain = blockchain as any;
     this.amlService = amlService as any;
   }
@@ -45,10 +48,11 @@ export class MICAComplianceService {
     const isCompliant = backingLevel >= 100; // 100% minimum
 
     return {
-      classifiedAs: 'Asset-Referenced Token (ART)',
+      classifiedAs: "Asset-Referenced Token (ART)",
       backingLevel,
-      riskLevel: backingLevel > 110 ? 'LOW' : backingLevel >= 100 ? 'MEDIUM' : 'HIGH',
-      complianceStatus: isCompliant
+      riskLevel:
+        backingLevel > 110 ? "LOW" : backingLevel >= 100 ? "MEDIUM" : "HIGH",
+      complianceStatus: isCompliant,
     };
   }
 
@@ -74,18 +78,18 @@ export class MICAComplianceService {
     // Placeholder - in production, verify with ESMA
     return {
       authorized: true,
-      competentAuthority: 'ESMA (European Securities and Markets Authority)',
-      dateAuthorized: '2024-01-15',
+      competentAuthority: "ESMA (European Securities and Markets Authority)",
+      dateAuthorized: "2024-01-15",
       capitalRequirement: {
         required: 750_000, // EUR
         current: 5_000_000, // EUR
-        sufficient: true
+        sufficient: true,
       },
       insuranceRequirement: {
         required: 3_000_000, // EUR
         current: 10_000_000, // EUR
-        sufficient: true
-      }
+        sufficient: true,
+      },
     };
   }
 
@@ -104,15 +108,15 @@ export class MICAComplianceService {
     reference: string;
   }> {
     // Step 1: Verify user KYC
-    const kycVerified = await this.amlService.verifyKYC(userAddress, 'FULL');
+    const kycVerified = await this.amlService.verifyKYC(userAddress, "FULL");
     if (!kycVerified) {
-      throw new Error('KYC verification required for redemption');
+      throw new Error("KYC verification required for redemption");
     }
 
     // Step 2: Verify user has balance
     const balance = await this.blockchain.getBalance(userAddress);
     if (balance < amount) {
-      throw new Error('Insufficient balance for redemption');
+      throw new Error("Insufficient balance for redemption");
     }
 
     // Step 3: Check redemption limits (no limits for redeemable asset)
@@ -123,14 +127,14 @@ export class MICAComplianceService {
 
     // Step 5: Transfer equivalent assets to user
     const reference = `RED-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const processingTime = '5 business days'; // MICA requirement
+    const processingTime = "5 business days"; // MICA requirement
 
     return {
       redeemable: noRedemptionLimit,
       value: amount, // Par value (1:1)
       processingTime,
       fee: 0, // No fees allowed
-      reference
+      reference,
     };
   }
 
@@ -176,7 +180,7 @@ export class MICAComplianceService {
       redemptionRisk: `
         Redemption at par value guaranteed on-demand within 5 business days.
         No redemption fee. No deferral allowed. Risk: None
-      `
+      `,
     };
   }
 
@@ -208,9 +212,9 @@ export class MICAComplianceService {
     if (circularPattern || pumpDump || washTrade || manipulativeOrder) {
       // File suspicious activity report with ESMA
       await this.fileSuspiciousActivityReport({
-        type: 'MARKET_ABUSE',
+        type: "MARKET_ABUSE",
         detected: true,
-        evidence: { circularPattern, pumpDump, washTrade, manipulativeOrder }
+        evidence: { circularPattern, pumpDump, washTrade, manipulativeOrder },
       });
     }
 
@@ -219,7 +223,8 @@ export class MICAComplianceService {
       pumpAndDumpDetected: pumpDump,
       washTradingDetected: washTrade,
       manipulativeOrderDetected: manipulativeOrder,
-      suspiciousActivityReport: circularPattern || pumpDump || washTrade || manipulativeOrder
+      suspiciousActivityReport:
+        circularPattern || pumpDump || washTrade || manipulativeOrder,
     };
   }
 
@@ -243,7 +248,7 @@ export class MICAComplianceService {
     return {
       blackoutActive,
       insiderListUpdated,
-      tradingRestrictionsEnforced: restrictionsEnforced
+      tradingRestrictionsEnforced: restrictionsEnforced,
     };
   }
 
@@ -272,7 +277,7 @@ export class MICAComplianceService {
       safeCustodyActive: safeCustody,
       segregationConfirmed: segregation,
       insuranceCoverageActive: insurance,
-      insolvencySafeguardsActive: safeguards
+      insolvencySafeguardsActive: safeguards,
     };
   }
 
@@ -295,7 +300,7 @@ export class MICAComplianceService {
       otherAssets: 20_000_000,
       total: 100_000_000,
       lastAudited: new Date().toISOString(),
-      auditor: 'Big Four Audit Firm (TBD)'
+      auditor: "Big Four Audit Firm (TBD)",
     };
   }
 
@@ -341,7 +346,7 @@ export class MICAComplianceService {
    * @private
    */
   private async fileSuspiciousActivityReport(report: any): Promise<void> {
-    console.log('[MICA] Filing SAR with ESMA:', report);
+    console.log("[MICA] Filing SAR with ESMA:", report);
     // In production: submit to ESMA secure portal
   }
 
@@ -359,7 +364,7 @@ export class MICAComplianceService {
    * @private
    */
   private async updateInsiderList(): Promise<boolean> {
-    console.log('[MICA] Updating insider list');
+    console.log("[MICA] Updating insider list");
     return true;
   }
 
@@ -368,7 +373,7 @@ export class MICAComplianceService {
    * @private
    */
   private async enforceInsiderTradingRestrictions(): Promise<boolean> {
-    console.log('[MICA] Enforcing insider trading restrictions');
+    console.log("[MICA] Enforcing insider trading restrictions");
     return true;
   }
 

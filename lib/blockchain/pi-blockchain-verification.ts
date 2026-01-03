@@ -17,7 +17,7 @@ export interface AddressVerification extends BlockchainVerification {
   reputation: number;
   totalTransactions: number;
   balance: number;
-  status: 'active' | 'suspended' | 'unverified';
+  status: "active" | "suspended" | "unverified";
 }
 
 export interface TransactionVerification extends BlockchainVerification {
@@ -45,7 +45,7 @@ export interface SmartContractVerification extends BlockchainVerification {
 /**
  * Pi Blockchain Verification Service
  * Core verification engine for Pi Network blockchain
- * 
+ *
  * Key Features:
  * ✅ Transaction verification (immutable records)
  * ✅ Address verification (KYC/AML compliance)
@@ -57,11 +57,9 @@ export interface SmartContractVerification extends BlockchainVerification {
 export class PiBlockchainVerification {
   private blockchainEndpoint: string;
   private apiKey: string;
-  private verificationCache: Map<
-    string,
-    { result: any; timestamp: number }
-  > = new Map();
-  private cacheExpiry = 60000; // 1 minute
+  private verificationCache: Map<string, { result: any; timestamp: number }> =
+    new Map();
+  private cacheExpiry = 60_000; // 1 minute
 
   constructor(blockchainEndpoint: string, apiKey: string) {
     this.blockchainEndpoint = blockchainEndpoint;
@@ -71,7 +69,7 @@ export class PiBlockchainVerification {
   /**
    * Verify transaction on blockchain
    * Confirms transaction authenticity and settlement
-   * 
+   *
    * @param transactionHash - Hash of transaction to verify
    * @returns Complete transaction verification
    */
@@ -91,7 +89,7 @@ export class PiBlockchainVerification {
       );
 
       if (!transaction) {
-        throw new Error('Transaction not found on blockchain');
+        throw new Error("Transaction not found on blockchain");
       }
 
       // Step 2: Verify cryptographic signature
@@ -101,16 +99,15 @@ export class PiBlockchainVerification {
       );
 
       if (!signatureValid) {
-        throw new Error('Transaction signature invalid');
+        throw new Error("Transaction signature invalid");
       }
 
       // Step 3: Verify transaction is in blockchain
-      const inBlockchain = await this.isTransactionInBlockchain(
-        transactionHash
-      );
+      const inBlockchain =
+        await this.isTransactionInBlockchain(transactionHash);
 
       if (!inBlockchain) {
-        throw new Error('Transaction not found in blockchain');
+        throw new Error("Transaction not found in blockchain");
       }
 
       // Step 4: Get confirmation count
@@ -130,10 +127,10 @@ export class PiBlockchainVerification {
         confirmed: confirmations >= 6, // 6 confirmations = final
         parties: {
           sender: transaction.from,
-          receiver: transaction.to
+          receiver: transaction.to,
         },
         amount: transaction.amount,
-        type: transaction.type || 'transfer',
+        type: transaction.type || "transfer",
       };
 
       // Cache result
@@ -153,7 +150,7 @@ export class PiBlockchainVerification {
   /**
    * Verify wallet address on blockchain
    * Confirms KYC/AML status and account validity
-   * 
+   *
    * @param address - Wallet address to verify
    * @returns Address verification with KYC status
    */
@@ -166,19 +163,17 @@ export class PiBlockchainVerification {
       console.log(`[Blockchain] Verifying address: ${address}`);
 
       // Step 1: Query address from blockchain
-      const accountData = await this.queryBlockchain(
-        `/accounts/${address}`
-      );
+      const accountData = await this.queryBlockchain(`/accounts/${address}`);
 
       if (!accountData) {
-        throw new Error('Address not found on blockchain');
+        throw new Error("Address not found on blockchain");
       }
 
       // Step 2: Verify address format (Pi format: pi_...)
       const addressValid = this.isValidPiAddress(address);
 
       if (!addressValid) {
-        throw new Error('Invalid Pi address format');
+        throw new Error("Invalid Pi address format");
       }
 
       // Step 3: Get KYC/AML status from blockchain
@@ -194,11 +189,11 @@ export class PiBlockchainVerification {
       const balance = await this.getBalance(address);
 
       // Step 7: Verify account status on blockchain
-      const accountStatus = accountData.status || 'active';
+      const accountStatus = accountData.status || "active";
 
       const verified: AddressVerification = {
-        valid: addressValid && accountStatus === 'active',
-        verified: accountStatus === 'active' && kycStatus.verified,
+        valid: addressValid && accountStatus === "active",
+        verified: accountStatus === "active" && kycStatus.verified,
         timestamp: Date.now(),
         blockNumber: accountData.lastBlockNumber || 0,
         address,
@@ -206,8 +201,8 @@ export class PiBlockchainVerification {
         reputation: reputation.score,
         totalTransactions: transactionCount,
         balance,
-        status: accountStatus as 'active' | 'suspended' | 'unverified',
-        confirmations: accountData.confirmations || 0
+        status: accountStatus as "active" | "suspended" | "unverified",
+        confirmations: accountData.confirmations || 0,
       };
 
       // Cache result
@@ -227,7 +222,7 @@ export class PiBlockchainVerification {
   /**
    * Verify smart contract execution
    * Ensures smart contract was executed correctly on blockchain
-   * 
+   *
    * @param contractAddress - Contract address
    * @param functionCall - Function call details
    * @returns Smart contract execution verification
@@ -251,14 +246,15 @@ export class PiBlockchainVerification {
       );
 
       if (!contract) {
-        throw new Error('Smart contract not found on blockchain');
+        throw new Error("Smart contract not found on blockchain");
       }
 
       // Step 2: Verify contract deployment
-      const deploymentValid = contract.isDeployed && contract.status === 'active';
+      const deploymentValid =
+        contract.isDeployed && contract.status === "active";
 
       if (!deploymentValid) {
-        throw new Error('Smart contract not properly deployed');
+        throw new Error("Smart contract not properly deployed");
       }
 
       // Step 3: Verify contract bytecode hasn't been tampered
@@ -268,7 +264,7 @@ export class PiBlockchainVerification {
       );
 
       if (!bytecodeValid) {
-        throw new Error('Smart contract bytecode verification failed');
+        throw new Error("Smart contract bytecode verification failed");
       }
 
       // Step 4: Execute contract function (read-only)
@@ -304,7 +300,7 @@ export class PiBlockchainVerification {
         functionName: functionCall.functionName,
         parameters: functionCall.parameters || {},
         confirmations: contract.confirmations || 0,
-        hash: contract.codeHash
+        hash: contract.codeHash,
       };
 
       console.log(
@@ -323,7 +319,7 @@ export class PiBlockchainVerification {
   /**
    * Verify multi-signature transaction
    * Ensures all required signatures present and valid
-   * 
+   *
    * @param transactionHash - Transaction hash
    * @param requiredSignatures - Number of required signatures
    * @returns Multi-sig verification result
@@ -339,9 +335,7 @@ export class PiBlockchainVerification {
     signers: string[];
   }> {
     try {
-      console.log(
-        `[Blockchain] Verifying multi-signature: ${transactionHash}`
-      );
+      console.log(`[Blockchain] Verifying multi-signature: ${transactionHash}`);
 
       // Query transaction with signatures
       const transaction = await this.queryBlockchain(
@@ -349,7 +343,7 @@ export class PiBlockchainVerification {
       );
 
       if (!transaction) {
-        throw new Error('Transaction not found');
+        throw new Error("Transaction not found");
       }
 
       const signatures = transaction.signatures || [];
@@ -373,10 +367,12 @@ export class PiBlockchainVerification {
         signaturesPresent: validSignatures,
         signaturesRequired: requiredSignatures,
         allSignaturesValid: allValid,
-        signers: signatures.map((s: any) => s.signer)
+        signers: signatures.map((s: any) => s.signer),
       };
     } catch (error) {
-      console.error(`[Blockchain] Multi-signature verification failed: ${error}`);
+      console.error(
+        `[Blockchain] Multi-signature verification failed: ${error}`
+      );
       throw error;
     }
   }
@@ -384,7 +380,7 @@ export class PiBlockchainVerification {
   /**
    * Verify Byzantine Fault Tolerance consensus
    * Confirms transaction passed through consensus mechanism
-   * 
+   *
    * @param transactionHash - Transaction hash
    * @returns Consensus verification
    */
@@ -395,12 +391,15 @@ export class PiBlockchainVerification {
       );
 
       if (!transaction) {
-        console.warn(`[Blockchain] Transaction not in consensus: ${transactionHash}`);
+        console.warn(
+          `[Blockchain] Transaction not in consensus: ${transactionHash}`
+        );
         return false;
       }
 
       // Pi uses Byzantine Fault Tolerance - requires 2/3 + 1 validator agreement
-      const requiredValidators = Math.floor((transaction.totalValidators * 2) / 3) + 1;
+      const requiredValidators =
+        Math.floor((transaction.totalValidators * 2) / 3) + 1;
       const agreeingValidators = transaction.agreeingValidators || 0;
 
       const consensusReached = agreeingValidators >= requiredValidators;
@@ -419,13 +418,15 @@ export class PiBlockchainVerification {
   /**
    * Get transaction balance
    * Query current balance of address on blockchain
-   * 
+   *
    * @param address - Wallet address
    * @returns Current balance in Pi
    */
   async getBalance(address: string): Promise<number> {
     try {
-      const account = await this.queryBlockchain(`/accounts/${address}/balance`);
+      const account = await this.queryBlockchain(
+        `/accounts/${address}/balance`
+      );
 
       if (!account) {
         return 0;
@@ -441,7 +442,7 @@ export class PiBlockchainVerification {
   /**
    * Get confirmation count for transaction
    * Higher confirmations = more secure
-   * 
+   *
    * @param transactionHash - Transaction hash
    * @returns Number of confirmations
    */
@@ -465,17 +466,17 @@ export class PiBlockchainVerification {
   /**
    * Query Pi blockchain directly
    * Makes authenticated API call to blockchain node
-   * 
+   *
    * @private
    */
   private async queryBlockchain(endpoint: string): Promise<any> {
     try {
       const response = await fetch(`${this.blockchainEndpoint}${endpoint}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
@@ -492,10 +493,13 @@ export class PiBlockchainVerification {
   /**
    * Verify transaction signature
    * Cryptographic validation
-   * 
+   *
    * @private
    */
-  private async verifySignature(address: string, signature: string): Promise<boolean> {
+  private async verifySignature(
+    address: string,
+    signature: string
+  ): Promise<boolean> {
     try {
       // In production: use cryptographic library
       // Verify that signature matches address's public key
@@ -512,7 +516,7 @@ export class PiBlockchainVerification {
 
   /**
    * Check if transaction is in blockchain
-   * 
+   *
    * @private
    */
   private async isTransactionInBlockchain(
@@ -525,7 +529,9 @@ export class PiBlockchainVerification {
 
       return tx?.exists || false;
     } catch (error) {
-      console.error(`[Blockchain] Transaction existence check failed: ${error}`);
+      console.error(
+        `[Blockchain] Transaction existence check failed: ${error}`
+      );
       return false;
     }
   }
@@ -533,7 +539,7 @@ export class PiBlockchainVerification {
   /**
    * Validate Pi address format
    * Pi addresses start with "pi_"
-   * 
+   *
    * @private
    */
   private isValidPiAddress(address: string): boolean {
@@ -542,7 +548,7 @@ export class PiBlockchainVerification {
 
   /**
    * Get KYC/AML status
-   * 
+   *
    * @private
    */
   private async getKYCStatus(address: string): Promise<{
@@ -556,17 +562,17 @@ export class PiBlockchainVerification {
       return {
         verified: kyc?.verified || false,
         verifiedAt: kyc?.verifiedAt ? new Date(kyc.verifiedAt) : undefined,
-        level: kyc?.level || 'unverified'
+        level: kyc?.level || "unverified",
       };
     } catch (error) {
       console.error(`[Blockchain] KYC status query failed: ${error}`);
-      return { verified: false, level: 'error' };
+      return { verified: false, level: "error" };
     }
   }
 
   /**
    * Get address reputation score
-   * 
+   *
    * @private
    */
   private async getAddressReputation(address: string): Promise<{
@@ -582,7 +588,7 @@ export class PiBlockchainVerification {
         score: rep?.score || 0,
         totalTransactions: rep?.totalTransactions || 0,
         successRate: rep?.successRate || 100,
-        averageRating: rep?.averageRating || 0
+        averageRating: rep?.averageRating || 0,
       };
     } catch (error) {
       console.error(`[Blockchain] Reputation query failed: ${error}`);
@@ -590,14 +596,14 @@ export class PiBlockchainVerification {
         score: 0,
         totalTransactions: 0,
         successRate: 0,
-        averageRating: 0
+        averageRating: 0,
       };
     }
   }
 
   /**
    * Get address transaction count
-   * 
+   *
    * @private
    */
   private async getAddressTransactionCount(address: string): Promise<number> {
@@ -613,7 +619,7 @@ export class PiBlockchainVerification {
 
   /**
    * Verify contract bytecode integrity
-   * 
+   *
    * @private
    */
   private async verifyContractBytecode(
@@ -634,7 +640,7 @@ export class PiBlockchainVerification {
 
   /**
    * Execute smart contract function
-   * 
+   *
    * @private
    */
   private async executeSmartContract(
@@ -649,7 +655,7 @@ export class PiBlockchainVerification {
 
       return {
         result: result?.result,
-        gasUsed: result?.gasUsed || 0
+        gasUsed: result?.gasUsed || 0,
       };
     } catch (error) {
       console.error(`[Blockchain] Contract execution failed: ${error}`);
@@ -659,10 +665,12 @@ export class PiBlockchainVerification {
 
   /**
    * Verify contract is on blockchain consensus
-   * 
+   *
    * @private
    */
-  private async verifyContractConsensus(contractAddress: string): Promise<boolean> {
+  private async verifyContractConsensus(
+    contractAddress: string
+  ): Promise<boolean> {
     try {
       const result = await this.queryBlockchain(
         `/contracts/${contractAddress}/on-consensus`
@@ -670,14 +678,16 @@ export class PiBlockchainVerification {
 
       return result?.onConsensus || false;
     } catch (error) {
-      console.error(`[Blockchain] Contract consensus verification failed: ${error}`);
+      console.error(
+        `[Blockchain] Contract consensus verification failed: ${error}`
+      );
       return false;
     }
   }
 
   /**
    * Cache management - Get from cache
-   * 
+   *
    * @private
    */
   private getFromCache(key: string): any {
@@ -697,13 +707,13 @@ export class PiBlockchainVerification {
 
   /**
    * Cache management - Set in cache
-   * 
+   *
    * @private
    */
   private setInCache(key: string, result: any): void {
     this.verificationCache.set(key, {
       result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 }

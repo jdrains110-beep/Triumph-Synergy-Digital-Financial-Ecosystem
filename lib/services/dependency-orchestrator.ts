@@ -4,9 +4,9 @@
  * Prevents cascade failures by verifying dependencies before use
  */
 
-import type { Logger } from 'pino';
+import type { Logger } from "pino";
 
-export type ServicePriority = 'critical' | 'high' | 'medium' | 'low';
+export type ServicePriority = "critical" | "high" | "medium" | "low";
 
 export interface ServiceDependency {
   name: string;
@@ -37,7 +37,9 @@ export class DependencyOrchestrator {
    */
   registerDependency(dependency: ServiceDependency): void {
     this.dependencies.set(dependency.name, dependency);
-    this.log(`📋 Registered dependency: ${dependency.name} (${dependency.priority})`);
+    this.log(
+      `📋 Registered dependency: ${dependency.name} (${dependency.priority})`
+    );
   }
 
   /**
@@ -45,14 +47,15 @@ export class DependencyOrchestrator {
    * Returns true if all critical services started successfully
    */
   async startup(): Promise<boolean> {
-    this.log('🚀 Starting Dependency Orchestration...');
+    this.log("🚀 Starting Dependency Orchestration...");
     const startTime = Date.now();
 
     try {
       // Sort by priority (critical -> high -> medium -> low)
-      const priorityOrder = ['critical', 'high', 'medium', 'low'];
+      const priorityOrder = ["critical", "high", "medium", "low"];
       const sorted = Array.from(this.dependencies.values()).sort(
-        (a, b) => priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
+        (a, b) =>
+          priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
       );
 
       let criticalsFailed = false;
@@ -60,7 +63,7 @@ export class DependencyOrchestrator {
       for (const dep of sorted) {
         const success = await this.startService(dep);
 
-        if (!success && dep.priority === 'critical') {
+        if (!success && dep.priority === "critical") {
           criticalsFailed = true;
           this.log(`❌ CRITICAL SERVICE FAILED: ${dep.name}`);
         }
@@ -70,11 +73,11 @@ export class DependencyOrchestrator {
       this.log(`⏱️  Startup completed in ${duration}ms`);
 
       if (criticalsFailed) {
-        this.log('❌ Startup failed: Critical services unavailable');
+        this.log("❌ Startup failed: Critical services unavailable");
         return false;
       }
 
-      this.log('✅ All critical services ready');
+      this.log("✅ All critical services ready");
       return true;
     } catch (error) {
       this.log(`❌ Unexpected error during startup: ${error}`);
@@ -112,7 +115,7 @@ export class DependencyOrchestrator {
           return true;
         }
 
-        lastError = new Error(`Health check returned false`);
+        lastError = new Error("Health check returned false");
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
       }
@@ -136,14 +139,16 @@ export class DependencyOrchestrator {
         this.log(`⚠️  ${name} failed, attempting fallback...`);
         await fallback();
         this.log(`⚠️  ${name} running in fallback mode`);
-        return priority !== 'critical'; // Allow non-critical to proceed with fallback
+        return priority !== "critical"; // Allow non-critical to proceed with fallback
       } catch (fallbackError) {
         this.log(`❌ Fallback for ${name} also failed: ${fallbackError}`);
         return false;
       }
     }
 
-    this.log(`❌ ${name} failed after ${retryPolicy.maxRetries} retries: ${lastError?.message}`);
+    this.log(
+      `❌ ${name} failed after ${retryPolicy.maxRetries} retries: ${lastError?.message}`
+    );
     return false;
   }
 
@@ -169,7 +174,9 @@ export class DependencyOrchestrator {
    * Get all dependencies that are critical
    */
   getCriticalDependencies(): ServiceDependency[] {
-    return Array.from(this.dependencies.values()).filter((d) => d.priority === 'critical');
+    return Array.from(this.dependencies.values()).filter(
+      (d) => d.priority === "critical"
+    );
   }
 
   /**
@@ -182,7 +189,7 @@ export class DependencyOrchestrator {
   /**
    * Perform periodic health checks
    */
-  async periodicHealthCheck(intervalMs: number = 30000): Promise<void> {
+  async periodicHealthCheck(intervalMs = 30_000): Promise<void> {
     setInterval(async () => {
       const checks: Record<string, boolean> = {};
 
@@ -192,7 +199,7 @@ export class DependencyOrchestrator {
             dep.healthCheck(),
             new Promise<boolean>((_, reject) =>
               setTimeout(
-                () => reject(new Error('Timeout')),
+                () => reject(new Error("Timeout")),
                 Math.min(dep.timeout, 5000)
               )
             ),
@@ -207,7 +214,7 @@ export class DependencyOrchestrator {
         const wasHealthy = this.healthStatus.get(name);
         if (healthy !== wasHealthy) {
           this.log(
-            `🔄 ${name} status changed: ${wasHealthy ? '✅' : '❌'} → ${healthy ? '✅' : '❌'}`
+            `🔄 ${name} status changed: ${wasHealthy ? "✅" : "❌"} → ${healthy ? "✅" : "❌"}`
           );
           this.healthStatus.set(name, healthy);
         }
@@ -241,67 +248,69 @@ export class DependencyOrchestrator {
 /**
  * Create and configure the global dependency orchestrator
  */
-export function createDependencyOrchestrator(logger?: Logger): DependencyOrchestrator {
+export function createDependencyOrchestrator(
+  logger?: Logger
+): DependencyOrchestrator {
   const orchestrator = new DependencyOrchestrator(logger);
 
   // Register critical dependencies
   orchestrator.registerDependency({
-    name: 'PostgreSQL Database',
-    priority: 'critical',
-    description: 'Primary data store for users, transactions, compliance',
+    name: "PostgreSQL Database",
+    priority: "critical",
+    description: "Primary data store for users, transactions, compliance",
     healthCheck: checkPostgres,
-    retryPolicy: { maxRetries: 5, initialDelayMs: 2000, maxDelayMs: 10000 },
+    retryPolicy: { maxRetries: 5, initialDelayMs: 2000, maxDelayMs: 10_000 },
     timeout: 5000,
     fallback: undefined, // No fallback for database
   });
 
   orchestrator.registerDependency({
-    name: 'Redis Cache',
-    priority: 'critical',
-    description: 'Session store and cache layer',
+    name: "Redis Cache",
+    priority: "critical",
+    description: "Session store and cache layer",
     healthCheck: checkRedis,
-    retryPolicy: { maxRetries: 5, initialDelayMs: 2000, maxDelayMs: 10000 },
+    retryPolicy: { maxRetries: 5, initialDelayMs: 2000, maxDelayMs: 10_000 },
     timeout: 5000,
     fallback: undefined, // No fallback for Redis
   });
 
   // Register high priority dependencies
   orchestrator.registerDependency({
-    name: 'Stellar Blockchain',
-    priority: 'high',
-    description: 'Settlement layer and blockchain verification',
+    name: "Stellar Blockchain",
+    priority: "high",
+    description: "Settlement layer and blockchain verification",
     healthCheck: checkStellar,
-    retryPolicy: { maxRetries: 3, initialDelayMs: 5000, maxDelayMs: 15000 },
-    timeout: 10000,
+    retryPolicy: { maxRetries: 3, initialDelayMs: 5000, maxDelayMs: 15_000 },
+    timeout: 10_000,
     fallback: fallbackStellar,
   });
 
   orchestrator.registerDependency({
-    name: 'Pi Network API',
-    priority: 'high',
-    description: 'Primary payment processor',
+    name: "Pi Network API",
+    priority: "high",
+    description: "Primary payment processor",
     healthCheck: checkPiNetwork,
-    retryPolicy: { maxRetries: 3, initialDelayMs: 5000, maxDelayMs: 15000 },
-    timeout: 10000,
+    retryPolicy: { maxRetries: 3, initialDelayMs: 5000, maxDelayMs: 15_000 },
+    timeout: 10_000,
     fallback: fallbackPiNetwork,
   });
 
   // Register medium priority dependencies
   orchestrator.registerDependency({
-    name: 'Compliance Framework',
-    priority: 'medium',
-    description: 'MICA, GDPR, KYC/AML, ISO 20022, Energy checks',
+    name: "Compliance Framework",
+    priority: "medium",
+    description: "MICA, GDPR, KYC/AML, ISO 20022, Energy checks",
     healthCheck: checkCompliance,
-    retryPolicy: { maxRetries: 2, initialDelayMs: 10000, maxDelayMs: 20000 },
-    timeout: 15000,
+    retryPolicy: { maxRetries: 2, initialDelayMs: 10_000, maxDelayMs: 20_000 },
+    timeout: 15_000,
     fallback: fallbackCompliance,
   });
 
   // Register low priority dependencies
   orchestrator.registerDependency({
-    name: 'Analytics & Monitoring',
-    priority: 'low',
-    description: 'Observability and performance monitoring',
+    name: "Analytics & Monitoring",
+    priority: "low",
+    description: "Observability and performance monitoring",
     healthCheck: checkAnalytics,
     retryPolicy: { maxRetries: 1, initialDelayMs: 5000, maxDelayMs: 5000 },
     timeout: 5000,
@@ -337,7 +346,8 @@ async function checkRedis(): Promise<boolean> {
 async function checkStellar(): Promise<boolean> {
   try {
     // Check Stellar horizon API availability
-    const url = process.env.STELLAR_HORIZON_URL || 'https://horizon.stellar.org';
+    const url =
+      process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org";
     const response = await fetch(`${url}/health`, {
       signal: AbortSignal.timeout(5000),
     });
@@ -386,24 +396,26 @@ async function checkAnalytics(): Promise<boolean> {
 
 async function fallbackStellar(): Promise<void> {
   // Use local ledger cache or delayed settlement
-  console.log('⚠️  Using Stellar fallback: Delaying settlement verification');
+  console.log("⚠️  Using Stellar fallback: Delaying settlement verification");
 }
 
 async function fallbackPiNetwork(): Promise<void> {
   // Switch to Apple Pay or other payment method
-  console.log('⚠️  Using Pi Network fallback: Routing to secondary payment processor');
+  console.log(
+    "⚠️  Using Pi Network fallback: Routing to secondary payment processor"
+  );
 }
 
 async function fallbackCompliance(): Promise<void> {
   // Use cached compliance results or require manual review
   console.log(
-    '⚠️  Using Compliance fallback: Transactions will require manual review'
+    "⚠️  Using Compliance fallback: Transactions will require manual review"
   );
 }
 
 async function fallbackAnalytics(): Promise<void> {
   // Disable analytics, log locally
-  console.log('⚠️  Using Analytics fallback: Logging locally instead of remote');
+  console.log("⚠️  Using Analytics fallback: Logging locally instead of remote");
 }
 
 // ============================================================================
@@ -413,14 +425,14 @@ async function fallbackAnalytics(): Promise<void> {
 export const globalOrchestrator = createDependencyOrchestrator();
 
 // Start orchestration on import if in server context
-if (typeof window === 'undefined') {
+if (typeof window === "undefined") {
   globalOrchestrator.startup().then((success) => {
     if (!success) {
-      console.error('❌ Critical dependencies failed to start');
+      console.error("❌ Critical dependencies failed to start");
       process.exit(1);
     }
   });
 
   // Run periodic checks every 30 seconds
-  globalOrchestrator.periodicHealthCheck(30000);
+  globalOrchestrator.periodicHealthCheck(30_000);
 }

@@ -8,9 +8,12 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app"),
+  metadataBase: new URL(
+    "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app"
+  ),
   title: "Triumph Synergy - Pi App Studio",
-  description: "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
+  description:
+    "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
   icons: {
     icon: "/favicon.ico",
   },

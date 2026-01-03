@@ -14,9 +14,9 @@ export interface ApplePayConfig {
 export const applePayConfig: ApplePayConfig = {
   enabled: true,
   isSecondary: true, // SECONDARY PAYMENT METHOD
-  processorBackends: ['stripe', 'paypal', 'square'], // Fallback order
+  processorBackends: ["stripe", "paypal", "square"], // Fallback order
   conversionToPi: true, // Can optionally convert to Pi at market rate
-  biometricRequired: true // Face/Touch ID required
+  biometricRequired: true, // Face/Touch ID required
 };
 
 /**
@@ -30,8 +30,8 @@ export class ApplePayProcessor {
   private paypalKey?: string;
 
   constructor() {
-    this.merchantId = process.env.APPLE_PAY_MERCHANT_ID || '';
-    this.merchantDomain = process.env.APPLE_PAY_DOMAIN || '';
+    this.merchantId = process.env.APPLE_PAY_MERCHANT_ID || "";
+    this.merchantDomain = process.env.APPLE_PAY_DOMAIN || "";
     this.stripeKey = process.env.STRIPE_API_KEY;
     this.paypalKey = process.env.PAYPAL_API_KEY;
   }
@@ -48,35 +48,35 @@ export class ApplePayProcessor {
     try {
       // Verify merchant domain is registered
       const response = await fetch(
-        `https://apple-pay-validation.apple.com/validate`,
+        "https://apple-pay-validation.apple.com/validate",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             merchantIdentifier: this.merchantId,
-            domainName: this.merchantDomain
-          })
+            domainName: this.merchantDomain,
+          }),
         }
       );
 
       if (!response.ok) {
         return {
           valid: false,
-          error: `Merchant validation failed: ${response.status}`
+          error: `Merchant validation failed: ${response.status}`,
         };
       }
 
       return {
         valid: true,
         merchantId: this.merchantId,
-        domain: this.merchantDomain
+        domain: this.merchantDomain,
       };
     } catch (error) {
       return {
         valid: false,
-        error: `Merchant validation error: ${error}`
+        error: `Merchant validation error: ${error}`,
       };
     }
   }
@@ -93,7 +93,7 @@ export class ApplePayProcessor {
     paymentToken: string,
     orderId: string,
     amount: number,
-    currency: string = 'USD'
+    currency = "USD"
   ): Promise<{
     success: boolean;
     paymentId: string;
@@ -101,7 +101,7 @@ export class ApplePayProcessor {
     processor?: string;
     amount: number;
     currency: string;
-    status: 'processing' | 'captured' | 'failed';
+    status: "processing" | "captured" | "failed";
     convertedToPi?: {
       amount: number;
       rate: number;
@@ -113,34 +113,34 @@ export class ApplePayProcessor {
       if (!this.isValidApplePayToken(paymentToken)) {
         return {
           success: false,
-          paymentId: '',
+          paymentId: "",
           amount,
           currency,
-          status: 'failed',
-          error: 'Invalid Apple Pay token'
+          status: "failed",
+          error: "Invalid Apple Pay token",
         };
       }
 
       // Try Stripe first (most reliable)
       let result = await this.processWithStripe(paymentToken, amount, currency);
-      let processor = 'stripe';
+      let processor = "stripe";
 
       // Fallback to PayPal if Stripe fails
       if (!result.success && this.paypalKey) {
-        console.log('Stripe failed, trying PayPal...');
+        console.log("Stripe failed, trying PayPal...");
         result = await this.processWithPayPal(paymentToken, amount, currency);
-        processor = 'paypal';
+        processor = "paypal";
       }
 
       if (!result.success) {
         return {
           success: false,
-          paymentId: '',
+          paymentId: "",
           amount,
           currency,
-          status: 'failed',
+          status: "failed",
           processor,
-          error: result.error
+          error: result.error,
         };
       }
 
@@ -152,7 +152,7 @@ export class ApplePayProcessor {
         const piAmount = await this.convertToPI(amount, currency);
         piConversion = {
           amount: piAmount,
-          rate: piAmount / (amount / 100) // Pi per USD
+          rate: piAmount / (amount / 100), // Pi per USD
         };
       }
 
@@ -163,18 +163,18 @@ export class ApplePayProcessor {
         processor,
         amount,
         currency,
-        status: 'captured',
-        convertedToPi: piConversion
+        status: "captured",
+        convertedToPi: piConversion,
       };
     } catch (error) {
-      console.error('Apple Pay processing error:', error);
+      console.error("Apple Pay processing error:", error);
       return {
         success: false,
-        paymentId: '',
+        paymentId: "",
         amount,
         currency,
-        status: 'failed',
-        error: 'Apple Pay processing failed'
+        status: "failed",
+        error: "Apple Pay processing failed",
       };
     }
   }
@@ -196,42 +196,42 @@ export class ApplePayProcessor {
       if (!this.stripeKey) {
         return {
           success: false,
-          error: 'Stripe not configured'
+          error: "Stripe not configured",
         };
       }
 
-      const response = await fetch('https://api.stripe.com/v1/charges', {
-        method: 'POST',
+      const response = await fetch("https://api.stripe.com/v1/charges", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.stripeKey}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
+          Authorization: `Bearer ${this.stripeKey}`,
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
           amount: amount.toString(),
           currency: currency.toLowerCase(),
           source: paymentToken,
-          description: `Apple Pay - Order via Triumph Synergy`
-        })
+          description: "Apple Pay - Order via Triumph Synergy",
+        }),
       });
 
       if (!response.ok) {
         const error = await response.text();
         return {
           success: false,
-          error: `Stripe error: ${response.status} ${error}`
+          error: `Stripe error: ${response.status} ${error}`,
         };
       }
 
-      const data = await response.json() as { id: string; status: string };
+      const data = (await response.json()) as { id: string; status: string };
 
       return {
-        success: data.status === 'succeeded',
-        transactionId: data.id
+        success: data.status === "succeeded",
+        transactionId: data.id,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Stripe processing failed: ${error}`
+        error: `Stripe processing failed: ${error}`,
       };
     }
   }
@@ -253,50 +253,55 @@ export class ApplePayProcessor {
       if (!this.paypalKey) {
         return {
           success: false,
-          error: 'PayPal not configured'
+          error: "PayPal not configured",
         };
       }
 
-      const response = await fetch('https://api.paypal.com/v2/checkout/orders', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.paypalKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          intent: 'CAPTURE',
-          purchase_units: [{
-            amount: {
-              currency_code: currency,
-              value: (amount / 100).toFixed(2)
-            }
-          }],
-          payment_source: {
-            apple_pay: {
-              id: paymentToken
-            }
-          }
-        })
-      });
+      const response = await fetch(
+        "https://api.paypal.com/v2/checkout/orders",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.paypalKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            intent: "CAPTURE",
+            purchase_units: [
+              {
+                amount: {
+                  currency_code: currency,
+                  value: (amount / 100).toFixed(2),
+                },
+              },
+            ],
+            payment_source: {
+              apple_pay: {
+                id: paymentToken,
+              },
+            },
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.text();
         return {
           success: false,
-          error: `PayPal error: ${response.status} ${error}`
+          error: `PayPal error: ${response.status} ${error}`,
         };
       }
 
-      const data = await response.json() as { id: string; status: string };
+      const data = (await response.json()) as { id: string; status: string };
 
       return {
-        success: data.status === 'COMPLETED',
-        transactionId: data.id
+        success: data.status === "COMPLETED",
+        transactionId: data.id,
       };
     } catch (error) {
       return {
         success: false,
-        error: `PayPal processing failed: ${error}`
+        error: `PayPal processing failed: ${error}`,
       };
     }
   }
@@ -305,7 +310,10 @@ export class ApplePayProcessor {
    * Convert USD to Pi at current market rate
    * @private
    */
-  private async convertToPI(amountCents: number, currency: string): Promise<number> {
+  private async convertToPI(
+    amountCents: number,
+    currency: string
+  ): Promise<number> {
     try {
       const amountUsd = amountCents / 100;
 
@@ -316,7 +324,7 @@ export class ApplePayProcessor {
 
       return amountUsd / piRate;
     } catch (error) {
-      console.error('Pi conversion error:', error);
+      console.error("Pi conversion error:", error);
       // Fallback to default rate
       return (amountCents / 100) * 2;
     }
@@ -342,7 +350,7 @@ export class ApplePayProcessor {
    */
   async getPaymentStatus(paymentId: string): Promise<{
     id: string;
-    status: 'processing' | 'captured' | 'failed' | 'refunded';
+    status: "processing" | "captured" | "failed" | "refunded";
     amount: number;
     currency: string;
     createdAt: string;
@@ -351,10 +359,10 @@ export class ApplePayProcessor {
     // Query database for payment record
     return {
       id: paymentId,
-      status: 'captured',
+      status: "captured",
       amount: 0,
-      currency: 'USD',
-      createdAt: new Date().toISOString()
+      currency: "USD",
+      createdAt: new Date().toISOString(),
     };
   }
 
@@ -372,20 +380,21 @@ export class ApplePayProcessor {
     error?: string;
   }> {
     try {
-      if (processor === 'stripe') {
+      if (processor === "stripe") {
         return await this.refundWithStripe(transactionId, amount);
-      } else if (processor === 'paypal') {
+      }
+      if (processor === "paypal") {
         return await this.refundWithPayPal(transactionId, amount);
       }
 
       return {
         success: false,
-        error: 'Unknown processor'
+        error: "Unknown processor",
       };
     } catch (error) {
       return {
         success: false,
-        error: `Refund failed: ${error}`
+        error: `Refund failed: ${error}`,
       };
     }
   }
@@ -406,43 +415,43 @@ export class ApplePayProcessor {
       if (!this.stripeKey) {
         return {
           success: false,
-          error: 'Stripe not configured'
+          error: "Stripe not configured",
         };
       }
 
       const params = new URLSearchParams({
-        charge: transactionId
+        charge: transactionId,
       });
 
       if (amount) {
-        params.append('amount', amount.toString());
+        params.append("amount", amount.toString());
       }
 
-      const response = await fetch('https://api.stripe.com/v1/refunds', {
-        method: 'POST',
+      const response = await fetch("https://api.stripe.com/v1/refunds", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.stripeKey}`
+          Authorization: `Bearer ${this.stripeKey}`,
         },
-        body: params
+        body: params,
       });
 
       if (!response.ok) {
         return {
           success: false,
-          error: `Stripe refund failed: ${response.status}`
+          error: `Stripe refund failed: ${response.status}`,
         };
       }
 
-      const data = await response.json() as { id: string; status: string };
+      const data = (await response.json()) as { id: string; status: string };
 
       return {
-        success: data.status === 'succeeded',
-        refundId: data.id
+        success: data.status === "succeeded",
+        refundId: data.id,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Stripe refund error: ${error}`
+        error: `Stripe refund error: ${error}`,
       };
     }
   }
@@ -463,41 +472,41 @@ export class ApplePayProcessor {
       if (!this.paypalKey) {
         return {
           success: false,
-          error: 'PayPal not configured'
+          error: "PayPal not configured",
         };
       }
 
       const response = await fetch(
         `https://api.paypal.com/v2/payments/captures/${transactionId}/refund`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${this.paypalKey}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${this.paypalKey}`,
+            "Content-Type": "application/json",
           },
           body: amount
             ? JSON.stringify({ amount: { value: (amount / 100).toString() } })
-            : JSON.stringify({})
+            : JSON.stringify({}),
         }
       );
 
       if (!response.ok) {
         return {
           success: false,
-          error: `PayPal refund failed: ${response.status}`
+          error: `PayPal refund failed: ${response.status}`,
         };
       }
 
-      const data = await response.json() as { id: string; status: string };
+      const data = (await response.json()) as { id: string; status: string };
 
       return {
-        success: data.status === 'COMPLETED',
-        refundId: data.id
+        success: data.status === "COMPLETED",
+        refundId: data.id,
       };
     } catch (error) {
       return {
         success: false,
-        error: `PayPal refund error: ${error}`
+        error: `PayPal refund error: ${error}`,
       };
     }
   }

@@ -15,6 +15,6 @@ export class WalletManager {
   }
 
   async sendTransaction(signedTx: any): Promise<any> {
-    return { success: true, txId: 'tx-placeholder' };
+    return { success: true, txId: "tx-placeholder" };
   }
 }

@@ -2,8 +2,8 @@
 // P2P Payment Service - Pi Network Blockchain Backbone
 // Direct peer-to-peer transfers powered by Pi blockchain
 
-import { PiNetworkBlockchain } from '@/lib/blockchain/pi-network-blockchain';
-import { WalletManager } from '@/lib/wallet/wallet-manager';
+import type { PiNetworkBlockchain } from "@/lib/blockchain/pi-network-blockchain";
+import type { WalletManager } from "@/lib/wallet/wallet-manager";
 
 export interface P2PPayment {
   id: string;
@@ -11,7 +11,7 @@ export interface P2PPayment {
   recipientAddress: string;
   amount: number;
   transactionHash?: string;
-  status: 'pending' | 'confirmed' | 'settled' | 'failed';
+  status: "pending" | "confirmed" | "settled" | "failed";
   createdAt: Date;
   confirmedAt?: Date;
   settlementTime?: number;
@@ -32,7 +32,7 @@ export interface P2PPeer {
 /**
  * P2P Payment Service
  * Handles peer-to-peer payments through Pi Network blockchain
- * 
+ *
  * Key Features:
  * ✅ Direct peer-to-peer transfers
  * ✅ Blockchain-verified settlements
@@ -46,10 +46,7 @@ export class P2PPaymentService {
   private walletManager: WalletManager;
   private peerCache: Map<string, P2PPeer> = new Map();
 
-  constructor(
-    blockchain: PiNetworkBlockchain,
-    walletManager: WalletManager
-  ) {
+  constructor(blockchain: PiNetworkBlockchain, walletManager: WalletManager) {
     this.blockchain = blockchain;
     this.walletManager = walletManager;
   }
@@ -57,7 +54,7 @@ export class P2PPaymentService {
   /**
    * Send payment directly to peer
    * Blockchain-verified, P2P settlement, zero intermediaries
-   * 
+   *
    * @param senderAddress - Sender's Pi wallet address
    * @param recipientAddress - Recipient's Pi wallet address
    * @param amount - Amount in Pi
@@ -73,26 +70,24 @@ export class P2PPaymentService {
     try {
       // Step 1: Verify sender on blockchain
       console.log(`[P2P] Verifying sender ${senderAddress}...`);
-      const senderVerification = await this.blockchain.verifyAddress(
-        senderAddress
-      );
+      const senderVerification =
+        await this.blockchain.verifyAddress(senderAddress);
 
       if (!senderVerification.valid) {
-        throw new Error('Sender not verified on blockchain');
+        throw new Error("Sender not verified on blockchain");
       }
 
       if (!senderVerification.kycVerified) {
-        throw new Error('Sender KYC not verified');
+        throw new Error("Sender KYC not verified");
       }
 
       // Step 2: Verify recipient on blockchain
       console.log(`[P2P] Verifying recipient ${recipientAddress}...`);
-      const recipientVerification = await this.blockchain.verifyAddress(
-        recipientAddress
-      );
+      const recipientVerification =
+        await this.blockchain.verifyAddress(recipientAddress);
 
       if (!recipientVerification.valid) {
-        throw new Error('Recipient not verified on blockchain');
+        throw new Error("Recipient not verified on blockchain");
       }
 
       // Step 3: Check sender balance
@@ -111,44 +106,44 @@ export class P2PPaymentService {
         from: senderAddress,
         to: recipientAddress,
         amount,
-        type: 'p2p_transfer',
+        type: "p2p_transfer",
         metadata: {
           paymentId,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
 
       // Step 5: Sign transaction with sender's private key
-      console.log(`[P2P] Signing transaction...`);
+      console.log("[P2P] Signing transaction...");
       const signedTx = await this.walletManager.signTransaction(
         senderAddress,
         transaction
       );
 
       // Step 6: Broadcast to P2P network
-      console.log(`[P2P] Broadcasting to P2P network...`);
+      console.log("[P2P] Broadcasting to P2P network...");
       const broadcastStartTime = Date.now();
       await this.blockchain.broadcastTransaction(signedTx);
 
       // Step 7: Wait for blockchain consensus (30 second timeout)
-      console.log(`[P2P] Waiting for blockchain consensus...`);
+      console.log("[P2P] Waiting for blockchain consensus...");
       const consensusAchieved = await this.blockchain.waitForConsensus(
         signedTx.hash,
-        30000
+        30_000
       );
 
       if (!consensusAchieved) {
-        throw new Error('Blockchain consensus timeout');
+        throw new Error("Blockchain consensus timeout");
       }
 
       // Step 8: Verify transaction on blockchain
-      console.log(`[P2P] Verifying transaction on blockchain...`);
+      console.log("[P2P] Verifying transaction on blockchain...");
       const verification = await this.blockchain.verifyTransaction(
         signedTx.hash
       );
 
       if (!verification.valid || !verification.confirmed) {
-        throw new Error('Transaction verification failed');
+        throw new Error("Transaction verification failed");
       }
 
       const settlementTime = Date.now() - broadcastStartTime;
@@ -164,10 +159,10 @@ export class P2PPaymentService {
         recipientAddress,
         amount,
         transactionHash: signedTx.hash,
-        status: 'settled',
+        status: "settled",
         createdAt: new Date(),
         confirmedAt: new Date(),
-        settlementTime
+        settlementTime,
       });
 
       return {
@@ -176,10 +171,10 @@ export class P2PPaymentService {
         recipientAddress,
         amount,
         transactionHash: signedTx.hash,
-        status: 'settled',
+        status: "settled",
         createdAt: new Date(),
         confirmedAt: new Date(),
-        settlementTime
+        settlementTime,
       };
     } catch (error) {
       console.error(`[P2P] Payment failed: ${error}`);
@@ -190,8 +185,8 @@ export class P2PPaymentService {
         senderAddress,
         recipientAddress,
         amount,
-        status: 'failed',
-        createdAt: new Date()
+        status: "failed",
+        createdAt: new Date(),
       });
 
       throw error;
@@ -201,7 +196,7 @@ export class P2PPaymentService {
   /**
    * Request payment from peer
    * Creates a blockchain-verified payment request
-   * 
+   *
    * @param requesterAddress - Address requesting payment
    * @param payerAddress - Address to pay
    * @param amount - Amount in Pi
@@ -219,12 +214,11 @@ export class P2PPaymentService {
   }> {
     try {
       // Step 1: Verify requester on blockchain
-      const requesterVerification = await this.blockchain.verifyAddress(
-        requesterAddress
-      );
+      const requesterVerification =
+        await this.blockchain.verifyAddress(requesterAddress);
 
       if (!requesterVerification.valid) {
-        throw new Error('Requester not verified on blockchain');
+        throw new Error("Requester not verified on blockchain");
       }
 
       // Step 2: Create payment request
@@ -237,7 +231,7 @@ export class P2PPaymentService {
         payer: payerAddress,
         amount,
         expiresAt: expiresAt.getTime(),
-        status: 'pending'
+        status: "pending",
       });
 
       // Step 3: Sign request
@@ -250,9 +244,8 @@ export class P2PPaymentService {
       await this.blockchain.broadcastPaymentRequest(signedRequest);
 
       // Step 5: Verify on blockchain
-      const verification = await this.blockchain.verifyPaymentRequest(
-        requestId
-      );
+      const verification =
+        await this.blockchain.verifyPaymentRequest(requestId);
 
       console.log(
         `[P2P] ✅ Payment request created: ${requestId} (expires: ${expiresAt.toISOString()})`
@@ -260,9 +253,9 @@ export class P2PPaymentService {
 
       return {
         requestId,
-        status: 'pending',
+        status: "pending",
         expiresAt,
-        blockchainVerified: verification.valid
+        blockchainVerified: verification.valid,
       };
     } catch (error) {
       console.error(`[P2P] Request creation failed: ${error}`);
@@ -273,7 +266,7 @@ export class P2PPaymentService {
   /**
    * Accept payment request
    * Automatically processes payment from pending request
-   * 
+   *
    * @param requestId - Payment request ID
    * @param payerAddress - Payer's wallet address
    * @returns Confirmation of payment
@@ -287,17 +280,17 @@ export class P2PPaymentService {
       const paymentRequest = await this.blockchain.getPaymentRequest(requestId);
 
       if (!paymentRequest) {
-        throw new Error('Payment request not found');
+        throw new Error("Payment request not found");
       }
 
       // Step 2: Verify request not expired
       if (paymentRequest.expiresAt < Date.now()) {
-        throw new Error('Payment request expired');
+        throw new Error("Payment request expired");
       }
 
       // Step 3: Verify payer address matches
       if (paymentRequest.payer !== payerAddress) {
-        throw new Error('Payer address mismatch');
+        throw new Error("Payer address mismatch");
       }
 
       // Step 4: Process payment
@@ -309,8 +302,8 @@ export class P2PPaymentService {
 
       // Step 5: Mark request as accepted
       await this.blockchain.updatePaymentRequest(requestId, {
-        status: 'accepted',
-        transactionHash: payment.transactionHash
+        status: "accepted",
+        transactionHash: payment.transactionHash,
       });
 
       console.log(`[P2P] ✅ Payment request accepted: ${requestId}`);
@@ -325,7 +318,7 @@ export class P2PPaymentService {
   /**
    * Discover peers on P2P network
    * Get verified peers for direct transactions
-   * 
+   *
    * @param filters - Optional filters for peer discovery
    * @returns List of verified peers
    */
@@ -361,7 +354,7 @@ export class P2PPaymentService {
             isOnline: peer.isOnline,
             lastSeen: new Date(peer.lastSeen),
             verifiedOnBlockchain: verification.valid,
-            kycVerified: verification.kycVerified
+            kycVerified: verification.kycVerified,
           };
 
           // Cache the result
@@ -383,7 +376,7 @@ export class P2PPaymentService {
   /**
    * Get peer reputation score
    * Higher reputation = more trusted peer
-   * 
+   *
    * @param peerAddress - Peer's wallet address
    * @returns Reputation score (0-100)
    */
@@ -392,24 +385,24 @@ export class P2PPaymentService {
     totalTransactions: number;
     successRate: number;
     averageRating: number;
-    trustLevel: 'unverified' | 'low' | 'medium' | 'high' | 'excellent';
+    trustLevel: "unverified" | "low" | "medium" | "high" | "excellent";
   }> {
     try {
       const reputation = await this.blockchain.getReputation(peerAddress);
 
-      let trustLevel: 'unverified' | 'low' | 'medium' | 'high' | 'excellent';
-      if (reputation.score < 20) trustLevel = 'unverified';
-      else if (reputation.score < 40) trustLevel = 'low';
-      else if (reputation.score < 60) trustLevel = 'medium';
-      else if (reputation.score < 80) trustLevel = 'high';
-      else trustLevel = 'excellent';
+      let trustLevel: "unverified" | "low" | "medium" | "high" | "excellent";
+      if (reputation.score < 20) trustLevel = "unverified";
+      else if (reputation.score < 40) trustLevel = "low";
+      else if (reputation.score < 60) trustLevel = "medium";
+      else if (reputation.score < 80) trustLevel = "high";
+      else trustLevel = "excellent";
 
       return {
         score: reputation.score,
         totalTransactions: reputation.totalTransactions,
         successRate: reputation.successRate,
         averageRating: reputation.averageRating,
-        trustLevel
+        trustLevel,
       };
     } catch (error) {
       console.error(`[P2P] Reputation fetch failed: ${error}`);
@@ -420,14 +413,14 @@ export class P2PPaymentService {
   /**
    * Get payment history for user
    * Retrieved from blockchain immutable ledger
-   * 
+   *
    * @param userAddress - User's wallet address
    * @param limit - Number of records to retrieve
    * @returns List of P2P payments
    */
   async getPaymentHistory(
     userAddress: string,
-    limit: number = 50
+    limit = 50
   ): Promise<P2PPayment[]> {
     try {
       // Get transactions from blockchain
@@ -442,12 +435,12 @@ export class P2PPaymentService {
         recipientAddress: tx.to,
         amount: tx.amount,
         transactionHash: tx.hash,
-        status: tx.confirmed ? 'settled' : 'confirmed',
+        status: tx.confirmed ? "settled" : "confirmed",
         createdAt: new Date(tx.timestamp),
         confirmedAt: tx.confirmationTime
           ? new Date(tx.confirmationTime)
           : undefined,
-        settlementTime: tx.settlementTime
+        settlementTime: tx.settlementTime,
       }));
 
       console.log(`[P2P] Retrieved ${payments.length} payment records`);
@@ -462,7 +455,7 @@ export class P2PPaymentService {
   /**
    * Verify payment on blockchain
    * Confirm transaction authenticity and settlement
-   * 
+   *
    * @param transactionHash - Transaction hash from blockchain
    * @returns Verification result
    */
@@ -476,9 +469,8 @@ export class P2PPaymentService {
     timestamp: Date;
   }> {
     try {
-      const verification = await this.blockchain.verifyTransaction(
-        transactionHash
-      );
+      const verification =
+        await this.blockchain.verifyTransaction(transactionHash);
 
       return {
         valid: verification.valid,
@@ -487,7 +479,7 @@ export class P2PPaymentService {
         sender: verification.parties.sender,
         receiver: verification.parties.receiver,
         amount: verification.amount,
-        timestamp: new Date(verification.timestamp)
+        timestamp: new Date(verification.timestamp),
       };
     } catch (error) {
       console.error(`[P2P] Payment verification failed: ${error}`);
@@ -498,7 +490,7 @@ export class P2PPaymentService {
   /**
    * Store payment record in database
    * For history and audit purposes
-   * 
+   *
    * @private
    */
   private async storePaymentRecord(payment: P2PPayment): Promise<void> {

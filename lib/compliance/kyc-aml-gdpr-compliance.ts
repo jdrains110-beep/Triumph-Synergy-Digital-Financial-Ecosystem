@@ -3,7 +3,7 @@
 
 export interface KYCVerificationResult {
   userId: string;
-  tier: 'TIER1' | 'TIER2' | 'TIER3';
+  tier: "TIER1" | "TIER2" | "TIER3";
   verified: boolean;
   kycScore: number; // 0-100
   verificationDate: string;
@@ -30,7 +30,7 @@ export interface AMLTransaction {
 
 /**
  * Comprehensive KYC/AML/GDPR Compliance Service
- * 
+ *
  * Covers:
  * - Know Your Customer (KYC) verification
  * - Anti-Money Laundering (AML) monitoring
@@ -50,40 +50,43 @@ export class KYCAMLGDPRComplianceService {
    * KYC Tier 1 Verification (Basic)
    * For users with < EUR 15,000/year
    */
-  async verifyTier1(userId: string, userData: any): Promise<KYCVerificationResult> {
+  async verifyTier1(
+    userId: string,
+    userData: any
+  ): Promise<KYCVerificationResult> {
     const errors: string[] = [];
 
     // 1. Full name verification
     if (!userData.fullName || userData.fullName.length < 3) {
-      errors.push('Full name required');
+      errors.push("Full name required");
     }
 
     // 2. Age verification (18+)
     const age = this.calculateAge(userData.dateOfBirth);
     if (age < 18) {
-      errors.push('Must be 18 years or older');
+      errors.push("Must be 18 years or older");
     }
 
     // 3. Email verification
     if (!this.isValidEmail(userData.email)) {
-      errors.push('Valid email required');
+      errors.push("Valid email required");
     }
 
     // 4. Phone verification
     if (!this.isValidPhone(userData.phone)) {
-      errors.push('Valid phone number required');
+      errors.push("Valid phone number required");
     }
 
     // 5. ID document verification
     const idVerified = await this.verifyIDDocument(userData.idDocument);
     if (!idVerified) {
-      errors.push('ID document verification failed');
+      errors.push("ID document verification failed");
     }
 
     // 6. OFAC screening
     const ofacResult = await this.screenOFAC(userData.fullName);
     if (ofacResult.flagged) {
-      errors.push('Customer flagged on OFAC list');
+      errors.push("Customer flagged on OFAC list");
     }
 
     const verified = errors.length === 0;
@@ -93,7 +96,7 @@ export class KYCAMLGDPRComplianceService {
       emailVerified: !errors[2],
       phoneVerified: !errors[3],
       idVerified,
-      ofacClear: !ofacResult.flagged
+      ofacClear: !ofacResult.flagged,
     });
 
     // Store personal data (GDPR consent collected)
@@ -104,24 +107,26 @@ export class KYCAMLGDPRComplianceService {
         email: userData.email,
         phone: userData.phone,
         createdAt: new Date().toISOString(),
-        gdprConsent: true
+        gdprConsent: true,
       });
     }
 
     return {
       userId,
-      tier: 'TIER1',
+      tier: "TIER1",
       verified,
       kycScore,
       verificationDate: new Date().toISOString(),
-      expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      expiryDate: new Date(
+        Date.now() + 365 * 24 * 60 * 60 * 1000
+      ).toISOString(),
       documents: {
         idDocument: idVerified,
         proofOfAddress: false, // Not required for Tier 1
         sourceOfFunds: false,
         pepScreening: false,
-        sanctionsScreening: ofacResult.passed
-      }
+        sanctionsScreening: ofacResult.passed,
+      },
     };
   }
 
@@ -129,19 +134,24 @@ export class KYCAMLGDPRComplianceService {
    * KYC Tier 2 Verification (Enhanced)
    * For users with EUR 15,000 - EUR 1,000,000/year
    */
-  async verifyTier2(userId: string, userData: any): Promise<KYCVerificationResult> {
+  async verifyTier2(
+    userId: string,
+    userData: any
+  ): Promise<KYCVerificationResult> {
     // First, pass Tier 1
     const tier1 = await this.verifyTier1(userId, userData);
     if (!tier1.verified) {
-      throw new Error('Tier 1 verification failed');
+      throw new Error("Tier 1 verification failed");
     }
 
     const errors: string[] = [];
 
     // 1. Proof of address (< 3 months old)
-    const addressVerified = await this.verifyProofOfAddress(userData.proofOfAddress);
+    const addressVerified = await this.verifyProofOfAddress(
+      userData.proofOfAddress
+    );
     if (!addressVerified) {
-      errors.push('Proof of address verification failed');
+      errors.push("Proof of address verification failed");
     }
 
     // 2. Source of funds verification
@@ -150,35 +160,37 @@ export class KYCAMLGDPRComplianceService {
       userData.sourceOfFunds
     );
     if (!sourceOfFundsVerified) {
-      errors.push('Source of funds verification failed');
+      errors.push("Source of funds verification failed");
     }
 
     // 3. Employment/occupation verification
     const employmentVerified = await this.verifyEmployment(userData.employment);
     if (!employmentVerified) {
-      errors.push('Employment verification failed');
+      errors.push("Employment verification failed");
     }
 
     // 4. PEP (Politically Exposed Person) screening
     const pepResult = await this.screenPEP(userData.fullName);
     if (pepResult.flagged) {
-      errors.push('Customer identified as PEP');
+      errors.push("Customer identified as PEP");
     }
 
     // 5. Enhanced sanctions screening (multiple databases)
-    const sanctionsResult = await this.screenEnhancedSanctions(userData.fullName);
+    const sanctionsResult = await this.screenEnhancedSanctions(
+      userData.fullName
+    );
     if (sanctionsResult.flagged) {
-      errors.push('Customer flagged on sanctions list');
+      errors.push("Customer flagged on sanctions list");
     }
 
     // 6. Beneficial ownership (if corporate)
     let beneficialOwnershipVerified = true;
-    if (userData.entityType === 'CORPORATE') {
+    if (userData.entityType === "CORPORATE") {
       beneficialOwnershipVerified = await this.verifyBeneficialOwnership(
         userData.beneficialOwners
       );
       if (!beneficialOwnershipVerified) {
-        errors.push('Beneficial ownership verification failed');
+        errors.push("Beneficial ownership verification failed");
       }
     }
 
@@ -195,7 +207,7 @@ export class KYCAMLGDPRComplianceService {
       employmentVerified,
       pepClear: !pepResult.flagged,
       sanctionsClear: !sanctionsResult.flagged,
-      beneficialOwnershipVerified
+      beneficialOwnershipVerified,
     });
 
     // Update personal data
@@ -203,23 +215,25 @@ export class KYCAMLGDPRComplianceService {
       ...userData,
       tier2VerifiedAt: new Date().toISOString(),
       pepStatus: pepResult.status,
-      sanctionsStatus: sanctionsResult.status
+      sanctionsStatus: sanctionsResult.status,
     });
 
     return {
       userId,
-      tier: 'TIER2',
+      tier: "TIER2",
       verified,
       kycScore,
       verificationDate: new Date().toISOString(),
-      expiryDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      expiryDate: new Date(
+        Date.now() + 3 * 365 * 24 * 60 * 60 * 1000
+      ).toISOString(),
       documents: {
         idDocument: tier1.documents.idDocument,
         proofOfAddress: addressVerified,
         sourceOfFunds: sourceOfFundsVerified,
         pepScreening: !pepResult.flagged,
-        sanctionsScreening: !sanctionsResult.flagged
-      }
+        sanctionsScreening: !sanctionsResult.flagged,
+      },
     };
   }
 
@@ -233,7 +247,7 @@ export class KYCAMLGDPRComplianceService {
     const recipientVerified = await this.verifyKYCStatus(transaction.to);
 
     if (!senderVerified || !recipientVerified) {
-      throw new Error('Transaction parties not KYC verified');
+      throw new Error("Transaction parties not KYC verified");
     }
 
     // 2. Calculate risk score
@@ -241,7 +255,7 @@ export class KYCAMLGDPRComplianceService {
       senderKYCAge: 30, // days since verification
       recipientKYCAge: 45,
       senderHistoryAvailable: true,
-      recipientHistoryAvailable: true
+      recipientHistoryAvailable: true,
     });
 
     // 3. Screen amount against threshold
@@ -255,10 +269,10 @@ export class KYCAMLGDPRComplianceService {
     const flagged = riskScore > 50 || isThresholdBreach || patterns.length > 0;
     const reason = flagged
       ? [
-          ...(riskScore > 50 ? ['High risk score'] : []),
-          ...(isThresholdBreach ? ['Above threshold'] : []),
-          ...patterns
-        ].join('; ')
+          ...(riskScore > 50 ? ["High risk score"] : []),
+          ...(isThresholdBreach ? ["Above threshold"] : []),
+          ...patterns,
+        ].join("; ")
       : undefined;
 
     if (flagged) {
@@ -267,7 +281,7 @@ export class KYCAMLGDPRComplianceService {
         transactionId: transaction.id,
         riskScore,
         reason,
-        fileDate: new Date().toISOString()
+        fileDate: new Date().toISOString(),
       });
     }
 
@@ -279,7 +293,7 @@ export class KYCAMLGDPRComplianceService {
       amount: transaction.amount,
       riskScore,
       flaggedForReview: flagged,
-      reason
+      reason,
     };
   }
 
@@ -305,19 +319,19 @@ export class KYCAMLGDPRComplianceService {
       consentRecords: personalData.consent,
       accessLogs: personalData.accessLogs,
       thirdPartyProcessors: [
-        'Vercel (Frontend CDN)',
-        'GCP (Backend)',
-        'AWS (Backup)',
-        'OFAC Screening (Third-party)',
-        'PEP Database (Third-party)'
-      ]
+        "Vercel (Frontend CDN)",
+        "GCP (Backend)",
+        "AWS (Backup)",
+        "OFAC Screening (Third-party)",
+        "PEP Database (Third-party)",
+      ],
     };
 
     return {
       requestId,
-      status: 'COMPLETED',
+      status: "COMPLETED",
       data: report,
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
     };
   }
 
@@ -338,19 +352,19 @@ export class KYCAMLGDPRComplianceService {
 
     // What can be erased
     const canErase = [
-      'Profile information (name, address, phone)',
-      'Preferences and settings',
-      'Marketing consent',
-      'Email addresses',
-      'Transaction notes'
+      "Profile information (name, address, phone)",
+      "Preferences and settings",
+      "Marketing consent",
+      "Email addresses",
+      "Transaction notes",
     ];
 
     // What must be retained (legal/regulatory)
     const mustRetain = [
-      'Transaction history (7 years - AML/CFT requirement)',
-      'KYC documentation (3 years - regulatory requirement)',
-      'Audit logs (2 years - security requirement)',
-      'Account status (account closure only)'
+      "Transaction history (7 years - AML/CFT requirement)",
+      "KYC documentation (3 years - regulatory requirement)",
+      "Audit logs (2 years - security requirement)",
+      "Account status (account closure only)",
     ];
 
     // Perform erasure
@@ -358,17 +372,21 @@ export class KYCAMLGDPRComplianceService {
 
     return {
       requestId,
-      status: 'COMPLETED',
+      status: "COMPLETED",
       erasedData: canErase,
       retainedData: mustRetain,
-      completionDate: new Date().toISOString()
+      completionDate: new Date().toISOString(),
     };
   }
 
   /**
    * GDPR: Consent Management
    */
-  async updateConsent(userId: string, consentType: string, granted: boolean): Promise<{
+  async updateConsent(
+    userId: string,
+    consentType: string,
+    granted: boolean
+  ): Promise<{
     consentId: string;
     type: string;
     granted: boolean;
@@ -383,7 +401,7 @@ export class KYCAMLGDPRComplianceService {
       type: consentType,
       granted,
       timestamp: new Date().toISOString(),
-      method: 'User Portal'
+      method: "User Portal",
     });
 
     return {
@@ -391,7 +409,7 @@ export class KYCAMLGDPRComplianceService {
       type: consentType,
       granted,
       timestamp: new Date().toISOString(),
-      ipAddress: '127.0.0.1' // Would be actual IP in production
+      ipAddress: "127.0.0.1", // Would be actual IP in production
     };
   }
 
@@ -413,7 +431,7 @@ export class KYCAMLGDPRComplianceService {
       employmentVerified: 5,
       pepClear: 5,
       sanctionsClear: 5,
-      beneficialOwnershipVerified: 5
+      beneficialOwnershipVerified: 5,
     };
 
     Object.entries(factors).forEach(([key, value]) => {
@@ -429,7 +447,10 @@ export class KYCAMLGDPRComplianceService {
    * Calculate Transaction Risk Score
    * @private
    */
-  private calculateTransactionRiskScore(transaction: any, context: any): number {
+  private calculateTransactionRiskScore(
+    transaction: any,
+    context: any
+  ): number {
     let score = 0;
 
     // Base factors
@@ -438,12 +459,14 @@ export class KYCAMLGDPRComplianceService {
     if (transaction.amount % 1000 === 0) score += 5; // Round amount (structuring)
 
     // Velocity indicators
-    if (context.senderHistoryAvailable && transaction.isUnusualSize) score += 15;
-    if (context.senderHistoryAvailable && transaction.isUnusualFrequency) score += 15;
+    if (context.senderHistoryAvailable && transaction.isUnusualSize)
+      score += 15;
+    if (context.senderHistoryAvailable && transaction.isUnusualFrequency)
+      score += 15;
 
     // Geography indicators
-    if (transaction.recipientCountry === 'HIGH-RISK') score += 20;
-    if (transaction.senderCountry === 'HIGH-RISK') score += 20;
+    if (transaction.recipientCountry === "HIGH-RISK") score += 20;
+    if (transaction.senderCountry === "HIGH-RISK") score += 20;
 
     // KYC age
     if (context.senderKYCAge < 7) score += 10; // Recently verified
@@ -461,17 +484,17 @@ export class KYCAMLGDPRComplianceService {
 
     // Layering detection
     if (transaction.isComplexChain) {
-      patterns.push('Complex transaction chain (layering)');
+      patterns.push("Complex transaction chain (layering)");
     }
 
     // Round amounts
     if (transaction.amount % 1000 === 0) {
-      patterns.push('Round amount (structuring indicator)');
+      patterns.push("Round amount (structuring indicator)");
     }
 
     // Circular trading
     if (transaction.isCircular) {
-      patterns.push('Circular trading pattern');
+      patterns.push("Circular trading pattern");
     }
 
     return patterns;
@@ -509,11 +532,15 @@ export class KYCAMLGDPRComplianceService {
     // Verify document is < 3 months old
     const docDate = new Date(document.date);
     const now = new Date();
-    const ageInDays = (now.getTime() - docDate.getTime()) / (1000 * 60 * 60 * 24);
+    const ageInDays =
+      (now.getTime() - docDate.getTime()) / (1000 * 60 * 60 * 24);
     return ageInDays <= 90;
   }
 
-  private async verifySourceOfFunds(userId: string, source: any): Promise<boolean> {
+  private async verifySourceOfFunds(
+    userId: string,
+    source: any
+  ): Promise<boolean> {
     // Verify source matches transaction patterns
     return true;
   }
@@ -523,14 +550,18 @@ export class KYCAMLGDPRComplianceService {
     return true;
   }
 
-  private async screenOFAC(name: string): Promise<{ flagged: boolean; passed: boolean }> {
+  private async screenOFAC(
+    name: string
+  ): Promise<{ flagged: boolean; passed: boolean }> {
     const flagged = this.ofacList.has(name.toUpperCase());
     return { flagged, passed: !flagged };
   }
 
-  private async screenPEP(name: string): Promise<{ flagged: boolean; status: string }> {
+  private async screenPEP(
+    name: string
+  ): Promise<{ flagged: boolean; status: string }> {
     const flagged = this.pepDatabase.has(name.toUpperCase());
-    return { flagged, status: flagged ? 'PEP' : 'CLEAR' };
+    return { flagged, status: flagged ? "PEP" : "CLEAR" };
   }
 
   private async screenEnhancedSanctions(name: string): Promise<{
@@ -538,7 +569,7 @@ export class KYCAMLGDPRComplianceService {
     status: string;
   }> {
     // Check multiple sanctions lists
-    return { flagged: false, status: 'CLEAR' };
+    return { flagged: false, status: "CLEAR" };
   }
 
   private async verifyBeneficialOwnership(owners: any[]): Promise<boolean> {
@@ -552,7 +583,7 @@ export class KYCAMLGDPRComplianceService {
   }
 
   private async fileSuspiciousActivityReport(sar: any): Promise<void> {
-    console.log('[AML] Filing SAR:', sar);
+    console.log("[AML] Filing SAR:", sar);
   }
 
   private async storePersonalData(userId: string, data: any): Promise<void> {
@@ -568,7 +599,10 @@ export class KYCAMLGDPRComplianceService {
     return this.dataSubjects.get(userId) || {};
   }
 
-  private async erasePersonalData(userId: string, fields: string[]): Promise<void> {
+  private async erasePersonalData(
+    userId: string,
+    fields: string[]
+  ): Promise<void> {
     const data = this.dataSubjects.get(userId);
     if (data) {
       // Erase specified fields
@@ -579,7 +613,7 @@ export class KYCAMLGDPRComplianceService {
   }
 
   private async logConsentChange(userId: string, change: any): Promise<void> {
-    console.log('[GDPR] Consent change:', change);
+    console.log("[GDPR] Consent change:", change);
   }
 
   private initializeWatchlists(): void {

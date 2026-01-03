@@ -16,7 +16,7 @@ export interface CarbonFootprintData {
 
 /**
  * Energy Efficiency & Carbon Compliance Service
- * 
+ *
  * Ensures:
  * - < 1g CO2 per blockchain transaction
  * - 100% carbon neutral operations
@@ -33,36 +33,36 @@ export class EnergyEfficiencyComplianceService {
     offsetStatus: string;
   } {
     // Pi Network uses Delegated Byzantine Fault Tolerance (very efficient)
-    let baseEmissions = 0.0001; // grams CO2 per transaction
+    const baseEmissions = 0.0001; // grams CO2 per transaction
 
     // Different transaction types have different weights
     const weights: { [key: string]: number } = {
-      'SIMPLE_TRANSFER': 1.0, // Base
-      'MULTI_SIG': 1.5, // More validation
-      'SMART_CONTRACT': 2.0, // Smart contract execution
-      'CROSS_CHAIN': 3.0, // Cross-chain settlement
-      'BATCH': 0.5 // Batch reduces per-tx cost
+      SIMPLE_TRANSFER: 1.0, // Base
+      MULTI_SIG: 1.5, // More validation
+      SMART_CONTRACT: 2.0, // Smart contract execution
+      CROSS_CHAIN: 3.0, // Cross-chain settlement
+      BATCH: 0.5, // Batch reduces per-tx cost
     };
 
     const emissions = baseEmissions * (weights[transactionType] || 1.0);
 
     // Comparisons for user transparency
     const comparisons: { [key: string]: string } = {
-      'SIMPLE_TRANSFER': `
+      SIMPLE_TRANSFER: `
         Your transaction: ${emissions.toFixed(6)}g CO2
         1 email: 4g CO2 (40,000× less carbon than email)
         1 traditional bank transfer: 2,000g CO2 (20,000,000× less carbon than bank)
       `,
-      'MULTI_SIG': 'Multi-signature transaction requires additional validation',
-      'SMART_CONTRACT': 'Smart contract execution is more carbon-intensive',
-      'CROSS_CHAIN': 'Cross-chain settlement requires additional infrastructure',
-      'BATCH': 'Batch processing is highly efficient (multiple transactions)'
+      MULTI_SIG: "Multi-signature transaction requires additional validation",
+      SMART_CONTRACT: "Smart contract execution is more carbon-intensive",
+      CROSS_CHAIN: "Cross-chain settlement requires additional infrastructure",
+      BATCH: "Batch processing is highly efficient (multiple transactions)",
     };
 
     return {
       grams: emissions,
-      comparison: comparisons[transactionType] || '',
-      offsetStatus: `✅ Carbon offset included in your transaction`
+      comparison: comparisons[transactionType] || "",
+      offsetStatus: "✅ Carbon offset included in your transaction",
     };
   }
 
@@ -77,19 +77,19 @@ export class EnergyEfficiencyComplianceService {
       totalTransactions: 10_000_000, // 10M transactions/year
       blockchainEmissions: {
         perTransaction: 0.0001, // grams
-        annual: 1 // kg (0.0001 * 10M / 1000)
+        annual: 1, // kg (0.0001 * 10M / 1000)
       },
       infrastructure: {
         gcp: 2500, // kg CO2 (GCP 82% renewable)
         aws: 1500, // kg CO2 (AWS backup)
         cdn: 800, // kg CO2 (Vercel CDN)
-        total: 4800
+        total: 4800,
       },
       operations: {
         office: 500, // kg CO2 (100% renewable energy)
         staffCommuting: 2000, // kg CO2 (mostly remote, train for office visits)
-        total: 2500
-      }
+        total: 2500,
+      },
     };
 
     const totalEmissions =
@@ -107,7 +107,7 @@ export class EnergyEfficiencyComplianceService {
       staffCommuting: metrics.operations.staffCommuting,
       totalEmissions,
       offsetPurchased: totalEmissions, // Full offsetting
-      netEmissions: 0 // Carbon neutral
+      netEmissions: 0, // Carbon neutral
     };
   }
 
@@ -126,9 +126,9 @@ export class EnergyEfficiencyComplianceService {
     return {
       offsetRequired: footprint.totalEmissions,
       offsetPurchased: footprint.offsetPurchased,
-      offsetSource: 'Gold Standard Renewable Energy Credits',
-      offsetVerification: 'Third-party audited and verified',
-      complianceStatus: footprint.offsetPurchased >= footprint.totalEmissions
+      offsetSource: "Gold Standard Renewable Energy Credits",
+      offsetVerification: "Third-party audited and verified",
+      complianceStatus: footprint.offsetPurchased >= footprint.totalEmissions,
     };
   }
 
@@ -154,8 +154,8 @@ export class EnergyEfficiencyComplianceService {
         wind: 35,
         hydro: 15,
         geothermal: 5,
-        fossil: 15 // Minimal residual
-      }
+        fossil: 15, // Minimal residual
+      },
     };
   }
 
@@ -185,20 +185,20 @@ export class EnergyEfficiencyComplianceService {
     return {
       traditionalBank: {
         perTransaction: 2.0, // grams CO2
-        annual: 20_000 // kg CO2
+        annual: 20_000, // kg CO2
       },
       bitcoinNetwork: {
         perTransaction: 4.73, // grams CO2
-        annual: 47_300 // kg CO2
+        annual: 47_300, // kg CO2
       },
       ethereumNetwork: {
         perTransaction: 0.04, // grams CO2
-        annual: 400 // kg CO2
+        annual: 400, // kg CO2
       },
       piNetwork: {
         perTransaction: 0.0001, // grams CO2
-        annual: 1 // kg CO2
-      }
+        annual: 1, // kg CO2
+      },
     };
   }
 
@@ -219,7 +219,7 @@ export class EnergyEfficiencyComplianceService {
       serverRefurbishment: 90, // 90% refurbished servers
       eWasteRecycling: 100, // 100% e-waste recycled
       remoteForcedPercentage: 100, // 100% remote work
-      greenSupplierPercentage: 95 // 95% green suppliers
+      greenSupplierPercentage: 95, // 95% green suppliers
     };
   }
 
@@ -240,7 +240,7 @@ export class EnergyEfficiencyComplianceService {
     const metrics = this.getSustainabilityMetrics();
 
     return {
-      title: 'Triumph Synergy Sustainability & Carbon Neutrality Report',
+      title: "Triumph Synergy Sustainability & Carbon Neutrality Report",
       year: new Date().getFullYear(),
       executiveSummary: `
         Triumph Synergy operates as a carbon-neutral digital financial platform.
@@ -252,30 +252,30 @@ export class EnergyEfficiencyComplianceService {
         totalEmissions: footprint.totalEmissions,
         emissionsPerTransaction: footprint.carbonPerTransaction,
         renewableEnergyPercentage: energyMix.renewable,
-        carbonNeutralStatus: footprint.netEmissions === 0
+        carbonNeutralStatus: footprint.netEmissions === 0,
       },
       goals: {
         shortTerm: {
           year: 2026,
-          target: 'Carbon Neutral',
-          status: 'On track'
+          target: "Carbon Neutral",
+          status: "On track",
         },
         longTerm: {
           year: 2030,
-          target: 'Carbon Negative (remove 1+ tonne CO2)',
-          mechanism: 'Reforestation + carbon capture R&D'
-        }
+          target: "Carbon Negative (remove 1+ tonne CO2)",
+          mechanism: "Reforestation + carbon capture R&D",
+        },
       },
       initiatives: [
-        '100% renewable energy sourcing from GCP/AWS',
-        '90% refurbished server hardware (circular economy)',
-        '100% e-waste recycling (ISO 14001 certified)',
-        '100% remote workforce (zero commute emissions)',
-        '95% of suppliers meet ESG standards',
-        'Annual carbon offset purchase (Gold Standard)',
-        'Quarterly ESG reporting to stakeholders'
+        "100% renewable energy sourcing from GCP/AWS",
+        "90% refurbished server hardware (circular economy)",
+        "100% e-waste recycling (ISO 14001 certified)",
+        "100% remote workforce (zero commute emissions)",
+        "95% of suppliers meet ESG standards",
+        "Annual carbon offset purchase (Gold Standard)",
+        "Quarterly ESG reporting to stakeholders",
       ],
-      verification: 'Third-party audited by [Audit Firm TBD]'
+      verification: "Third-party audited by [Audit Firm TBD]",
     };
   }
 
@@ -288,7 +288,7 @@ export class EnergyEfficiencyComplianceService {
     contribution: string;
   } {
     const transactionCount = 1; // Single transaction
-    const carbon = this.calculateTransactionCarbon('SIMPLE_TRANSFER');
+    const carbon = this.calculateTransactionCarbon("SIMPLE_TRANSFER");
 
     return {
       carbonSaved: `
@@ -297,13 +297,13 @@ export class EnergyEfficiencyComplianceService {
       `,
       comparison: `
         ${(totalTransactionAmount / 100).toFixed(2)} traditional transfers would emit
-        ${(totalTransactionAmount / 100 * 2).toFixed(2)}g CO2
+        ${((totalTransactionAmount / 100) * 2).toFixed(2)}g CO2
         Your transaction on Pi: ${carbon.grams.toFixed(6)}g CO2
       `,
       contribution: `
         Your use of Pi Network prevents ~73,000 tonnes of CO2 annually
         (if 10 million users make 10 transactions each vs traditional banking)
-      `
+      `,
     };
   }
 
@@ -327,11 +327,11 @@ export class EnergyEfficiencyComplianceService {
       compliancePercentage: 95,
       nonCompliantSuppliers: [
         {
-          name: 'Cloud Provider XYZ',
-          issue: 'Carbon intensity > 50g CO2/kWh',
-          action: 'Phasing out by Q3 2026'
-        }
-      ]
+          name: "Cloud Provider XYZ",
+          issue: "Carbon intensity > 50g CO2/kWh",
+          action: "Phasing out by Q3 2026",
+        },
+      ],
     };
   }
 
@@ -347,26 +347,26 @@ export class EnergyEfficiencyComplianceService {
   }[] {
     return [
       {
-        platform: 'GCP (Primary)',
-        location: 'Multiple regions (optimized)',
+        platform: "GCP (Primary)",
+        location: "Multiple regions (optimized)",
         renewablePercentage: 82,
-        carbonIntensity: '25g CO2/kWh (2023 average)',
-        status: 'VerifyOnce by 2030'
+        carbonIntensity: "25g CO2/kWh (2023 average)",
+        status: "VerifyOnce by 2030",
       },
       {
-        platform: 'AWS (Secondary)',
-        location: 'us-east-1 (renewable)',
+        platform: "AWS (Secondary)",
+        location: "us-east-1 (renewable)",
         renewablePercentage: 90,
-        carbonIntensity: '40g CO2/kWh (2025 target)',
-        status: 'Carbon Neutral by 2025'
+        carbonIntensity: "40g CO2/kWh (2025 target)",
+        status: "Carbon Neutral by 2025",
       },
       {
-        platform: 'Vercel (Frontend CDN)',
-        location: 'Global CDN (82% renewable)',
+        platform: "Vercel (Frontend CDN)",
+        location: "Global CDN (82% renewable)",
         renewablePercentage: 82,
-        carbonIntensity: 'Equivalent to GCP',
-        status: 'Carbon Neutral'
-      }
+        carbonIntensity: "Equivalent to GCP",
+        status: "Carbon Neutral",
+      },
     ];
   }
 }
