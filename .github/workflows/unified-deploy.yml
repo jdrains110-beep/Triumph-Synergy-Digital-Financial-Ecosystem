@@ -295,11 +295,7 @@ jobs:
     name: Health Check & Verification
     needs: deploy-vercel
     runs-on: ubuntu-latest
-    if: |
-      always() && 
-      github.ref == 'refs/heads/main' && 
-      github.event_name == 'push' &&
-      needs.deploy-vercel.result == 'success'
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.deploy-vercel.result == 'success'
     
     steps:
       - name: Wait for deployment
@@ -353,7 +349,7 @@ jobs:
       
       - name: Notify Slack (if configured)
         uses: slackapi/slack-github-action@v1
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        if: secrets.SLACK_WEBHOOK_URL != ''
         continue-on-error: true
         with:
           payload: |
