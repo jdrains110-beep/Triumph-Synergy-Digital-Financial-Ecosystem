@@ -477,7 +477,7 @@ function PureModelSelectorCompact({
 
   return (
     <PromptInputModelSelect
-      onValueChange={(modelName) => {
+      onValueChange={(modelName: string) => {
         const model = chatModels.find((m) => m.name === modelName);
         if (model) {
           setOptimisticModelId(model.id);
