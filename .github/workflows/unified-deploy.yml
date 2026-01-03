@@ -252,12 +252,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Check Vercel Secrets
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠️  Vercel secrets not configured - skipping deploy"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Deploy to Vercel
-        uses: vercel/action@master
+        if: steps.check-secrets.outputs.skip != 'true'
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./
           production: true
         env:
           VERCEL_ENV: production
@@ -282,7 +295,7 @@ jobs:
     name: Health Check & Verification
     needs: deploy-vercel
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.deploy-vercel.result == 'success'
     
     steps:
       - name: Wait for deployment
@@ -334,44 +347,5 @@ jobs:
             echo "emoji=❌" >> $GITHUB_OUTPUT
           fi
       
-      - name: Notify Slack (if configured)
-        uses: slackapi/slack-github-action@v1
-        if: secrets.SLACK_WEBHOOK_URL
-        with:
-          payload: |
-            {
-              "text": "${{ steps.status.outputs.emoji }} Triumph Synergy Deployment ${{ steps.status.outputs.status }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Deployment Status: ${{ steps.status.outputs.status }}*\nBranch: ${{ github.ref }}\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
-                  }
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "View Logs"
-                      },
-                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                    },
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "Visit App"
-                      },
-                      "url": "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app"
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      - name: Slack notification skipped
+        run: echo "⚠️  Slack notifications not configured"
