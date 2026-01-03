@@ -1,4 +1,4 @@
-export default function RootPage() {
+export default function SimplePage() {
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -28,9 +28,5 @@ export default function RootPage() {
         </a>
       </div>
     </div>
-  );
-}
-
-    </main>
   );
 }
