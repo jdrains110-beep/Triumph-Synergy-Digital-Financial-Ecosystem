@@ -347,54 +347,5 @@ jobs:
             echo "emoji=❌" >> $GITHUB_OUTPUT
           fi
       
-      - name: Check Slack webhook
-        id: check-slack
-        run: |
-          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
-            echo "enabled=true" >> $GITHUB_OUTPUT
-          else
-            echo "enabled=false" >> $GITHUB_OUTPUT
-          fi
-      
-      - name: Notify Slack (if configured)
-        uses: slackapi/slack-github-action@v1
-        if: steps.check-slack.outputs.enabled == 'true'
-        continue-on-error: true
-        with:
-          payload: |
-            {
-              "text": "${{ steps.status.outputs.emoji }} Triumph Synergy Deployment ${{ steps.status.outputs.status }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Deployment Status: ${{ steps.status.outputs.status }}*\nBranch: ${{ github.ref }}\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
-                  }
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "View Logs"
-                      },
-                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                    },
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "Visit App"
-                      },
-                      "url": "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app"
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      - name: Slack notification skipped
+        run: echo "⚠️  Slack notifications not configured"
