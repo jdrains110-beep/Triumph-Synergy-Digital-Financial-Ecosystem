@@ -10,6 +10,7 @@ export * as Progress from "@radix-ui/react-progress";
 export * as ScrollArea from "@radix-ui/react-scroll-area";
 export * as Select from "@radix-ui/react-select";
 export * as Separator from "@radix-ui/react-separator";
+export * as Tooltip from "@radix-ui/react-tooltip";
 
 // Export Slot as both namespace and named export for compatibility
 import * as SlotPrimitive from "@radix-ui/react-slot";
