@@ -20,7 +20,7 @@ export const chatModel = new MockLanguageModelV3({
   }),
 });
 
-export const reasoningModel = new MockLanguageModelV2({
+export const reasoningModel = new MockLanguageModelV3({
   doGenerate: async () => ({
     rawCall: { rawPrompt: null, rawSettings: {} },
     finishReason: "stop",
@@ -38,7 +38,7 @@ export const reasoningModel = new MockLanguageModelV2({
   }),
 });
 
-export const titleModel = new MockLanguageModelV2({
+export const titleModel = new MockLanguageModelV3({
   doGenerate: async () => ({
     rawCall: { rawPrompt: null, rawSettings: {} },
     finishReason: "stop",
@@ -65,7 +65,7 @@ export const titleModel = new MockLanguageModelV2({
   }),
 });
 
-export const artifactModel = new MockLanguageModelV2({
+export const artifactModel = new MockLanguageModelV3({
   doGenerate: async () => ({
     rawCall: { rawPrompt: null, rawSettings: {} },
     finishReason: "stop",
