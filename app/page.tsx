@@ -1,36 +1,39 @@
-export default function RootPage() {
-  return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      flexDirection: 'column',
-      fontFamily: 'system-ui, sans-serif',
-      backgroundColor: '#000',
-      color: '#fff'
-    }}>
-      <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Triumph Synergy</h1>
-      <p style={{ fontSize: '20px', color: '#888' }}>Advanced Payment Routing & Compliance Platform</p>
-      <p style={{ fontSize: '16px', marginTop: '40px', color: '#666' }}>
-        Platform Status: Operational ✓
-      </p>
-      <div style={{ marginTop: '40px' }}>
-        <a href="/chat" style={{ 
-          padding: '12px 24px', 
-          backgroundColor: '#0070f3', 
-          color: '#fff',
-          textDecoration: 'none',
-          borderRadius: '6px',
-          fontSize: '16px'
-        }}>
-          Launch Chat
-        </a>
-      </div>
-    </div>
-  );
-}
+'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Triumph Synergy - Loading',
+  description: 'Initializing application',
+};
+
+export default function RootPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to chat after brief delay
+    const timer = setTimeout(() => {
+      router.replace('/(chat)');
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-white dark:bg-black">
+      <div className="text-center space-y-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Triumph Synergy</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Advanced Payment Routing & Compliance
+          </p>
+        </div>
+        <div className="animate-pulse">
+          <p className="text-sm text-gray-500">Initializing application...</p>
+        </div>
+      </div>
     </main>
   );
 }
