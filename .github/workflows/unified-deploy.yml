@@ -252,12 +252,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Check Vercel Secrets
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠️  Vercel secrets not configured - skipping deploy"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Deploy to Vercel
-        uses: vercel/action@master
+        if: steps.check-secrets.outputs.skip != 'true'
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./
           production: true
         env:
           VERCEL_ENV: production
@@ -282,7 +295,11 @@ jobs:
     name: Health Check & Verification
     needs: deploy-vercel
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: |
+      always() && 
+      github.ref == 'refs/heads/main' && 
+      github.event_name == 'push' &&
+      needs.deploy-vercel.result == 'success'
     
     steps:
       - name: Wait for deployment
@@ -336,7 +353,8 @@ jobs:
       
       - name: Notify Slack (if configured)
         uses: slackapi/slack-github-action@v1
-        if: secrets.SLACK_WEBHOOK_URL
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        continue-on-error: true
         with:
           payload: |
             {

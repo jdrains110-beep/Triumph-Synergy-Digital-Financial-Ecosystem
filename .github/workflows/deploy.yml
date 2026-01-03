@@ -1,13 +1,10 @@
 # Triumph Synergy CI/CD Pipeline
 # GitHub Actions workflow for complete deployment
+# DISABLED: Replaced by unified-deploy.yml
 
-name: Deploy Triumph Synergy to Vercel
+name: Deploy Triumph Synergy to Vercel (Disabled)
 
 on:
-  push:
-    branches: [main, staging, development]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

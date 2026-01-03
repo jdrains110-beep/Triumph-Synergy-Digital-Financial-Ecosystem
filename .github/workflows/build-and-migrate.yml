@@ -1,8 +1,7 @@
-name: Build and (Optional) Migrate
+# DISABLED: Migrations now run in unified-deploy.yml
+name: Build and (Optional) Migrate (Disabled)
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
