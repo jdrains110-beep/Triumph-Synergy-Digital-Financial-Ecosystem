@@ -1,0 +1,6 @@
+// `middleware.ts` has been intentionally disabled.
+// Middleware logic has been consolidated into `proxy.ts` to avoid
+// conflicts with Next.js platform detection. Keep this placeholder
+// file to preserve history; do not export `middleware` here.
+
+export {}; 

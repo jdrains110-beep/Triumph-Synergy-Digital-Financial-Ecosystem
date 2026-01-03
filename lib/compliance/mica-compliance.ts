@@ -1,8 +1,10 @@
 // lib/compliance/mica-compliance.ts
 // MICA Compliance Framework for Pi Network Stablecoin
 
-import { PiNetworkBlockchain } from '@/lib/blockchain/pi-network-blockchain';
-import { AMLComplianceService } from '@/lib/compliance/aml-compliance';
+// Optional runtime dependencies (may not exist at static build time).
+// Use `any` to avoid hard dependency resolution during compile-time.
+type PiNetworkBlockchain = any;
+type AMLComplianceService = any;
 
 /**
  * MICA Compliance Service
@@ -21,8 +23,8 @@ export class MICAComplianceService {
   private amlService: AMLComplianceService;
 
   constructor(blockchain: PiNetworkBlockchain, amlService: AMLComplianceService) {
-    this.blockchain = blockchain;
-    this.amlService = amlService;
+    this.blockchain = blockchain as any;
+    this.amlService = amlService as any;
   }
 
   /**

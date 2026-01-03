@@ -2,12 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Triumph Synergy - Loading',
-  description: 'Initializing application',
-};
 
 export default function RootPage() {
   const router = useRouter();

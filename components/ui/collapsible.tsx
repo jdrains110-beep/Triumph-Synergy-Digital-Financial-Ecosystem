@@ -1,6 +1,6 @@
 "use client"
 
-import { Collapsible as CollapsiblePrimitive } from "radix-ui"
+import { Collapsible as CollapsiblePrimitive } from "@/components/ui/primitives"
 
 const Collapsible = CollapsiblePrimitive.Root
 
