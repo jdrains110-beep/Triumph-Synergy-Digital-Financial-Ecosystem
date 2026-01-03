@@ -347,9 +347,18 @@ jobs:
             echo "emoji=❌" >> $GITHUB_OUTPUT
           fi
       
+      - name: Check Slack webhook
+        id: check-slack
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Notify Slack (if configured)
         uses: slackapi/slack-github-action@v1
-        if: secrets.SLACK_WEBHOOK_URL != ''
+        if: steps.check-slack.outputs.enabled == 'true'
         continue-on-error: true
         with:
           payload: |
