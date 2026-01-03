@@ -1,5 +1,5 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "GitHub.copilot-chat",
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -31,5 +31,8 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
-  }
+  },
+  "DockerRun.DisableDockerrc": true,
+  "editor.codeActions.triggerOnFocusChange": true,
+  "files.autoSave": "afterDelay"
 }

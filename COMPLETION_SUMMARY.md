@@ -20,10 +20,12 @@ Triumph Synergy has been transformed into a **complete, production-ready, enterp
 - **12+ product categories** with AR/3D viewing
 - **Real-time inventory** across multiple warehouses
 - **Dynamic pricing** with AI optimization
-- **Global payments**: 20+ fiat currencies + crypto (BTC, ETH, XLM, PI)
+- **Primary Payments**: Pi Network (blockchain-native) with 1.5x internal Pi bonus
+- **Secondary Payments**: Apple Pay (seamless biometric checkout)
+- **Tertiary Payments**: 20+ fiat currencies + crypto (BTC, ETH, XLM)
 - **Smart fulfillment**: Same-day delivery, drone delivery
 - **B2B capabilities**: Bulk ordering, quote requests, net terms
-- **Subscriptions**: AI-powered smart reorder
+- **Subscriptions**: AI-powered smart reorder with Pi auto-payments
 
 ### 3. **Customer Data Platform (CDP)** 📊
 - **Customer 360 view** with identity resolution
@@ -71,7 +73,7 @@ Triumph Synergy has been transformed into a **complete, production-ready, enterp
 - **Notifications**: Slack integration
 
 ### 8. **Integrations** 🔌
-- **Payments**: Stripe, PayPal, Square, Adyen, Pi Network, Stellar
+- **Payments**: Pi Network (PRIMARY), Apple Pay (PRIMARY), Stripe, PayPal, Square, Adyen, Stellar (settlement)
 - **Shipping**: UPS, FedEx, DHL, USPS, Shippo
 - **Marketing**: SendGrid, Twilio, Firebase
 - **CRM**: Salesforce, HubSpot, Zendesk
