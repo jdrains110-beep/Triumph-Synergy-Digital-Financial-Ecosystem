@@ -1,0 +1,59 @@
+name: CI and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.12.3 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run DB migrations (optional)
+        if: ${{ secrets.POSTGRES_URL != '' }}
+        env:
+          RUN_MIGRATIONS: 'true'
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+        run: pnpm db:migrate
+
+      - name: Build (skip DB migrations during CI)
+        env:
+          RUN_MIGRATIONS: 'false'
+        run: pnpm build
+
+  deploy:
+    name: Deploy to Vercel (optional)
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: pnpm dlx --package vercel@33.2.0 vercel --version
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npx vercel --prod --confirm --token $VERCEL_TOKEN

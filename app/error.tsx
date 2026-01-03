@@ -1,11 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'System Diagnostic',
-};
 
 export default function ErrorPage({
   error,

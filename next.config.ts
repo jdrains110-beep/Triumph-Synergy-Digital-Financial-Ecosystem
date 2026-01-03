@@ -54,6 +54,8 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  // Provide an explicit (empty) turbopack config to avoid Turbopack detection
+  turbopack: {},
 };
 
 export default nextConfig;

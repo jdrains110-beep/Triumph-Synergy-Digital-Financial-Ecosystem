@@ -134,7 +134,6 @@ export class PiBlockchainVerification {
         },
         amount: transaction.amount,
         type: transaction.type || 'transfer',
-        blockNumber: transaction.blockNumber
       };
 
       // Cache result

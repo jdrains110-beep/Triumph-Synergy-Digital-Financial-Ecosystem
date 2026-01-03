@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Tooltip as TooltipPrimitive } from "radix-ui"
+import { Tooltip as TooltipPrimitive } from "@/components/ui/primitives"
 
 import { cn } from "@/lib/utils"
 

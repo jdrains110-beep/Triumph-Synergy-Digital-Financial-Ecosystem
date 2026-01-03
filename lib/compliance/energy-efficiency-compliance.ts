@@ -128,7 +128,7 @@ export class EnergyEfficiencyComplianceService {
       offsetPurchased: footprint.offsetPurchased,
       offsetSource: 'Gold Standard Renewable Energy Credits',
       offsetVerification: 'Third-party audited and verified',
-      complianceStatus: footprint.offsetPurchased >= footprint.offsetRequired
+      complianceStatus: footprint.offsetPurchased >= footprint.totalEmissions
     };
   }
 
