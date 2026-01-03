@@ -3,18 +3,9 @@
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
   "env": {
-    "POSTGRES_URL": "@POSTGRES_URL",
-    "REDIS_URL": "@REDIS_URL",
-    "AUTH_SECRET": "@AUTH_SECRET",
-    "NEXTAUTH_SECRET": "@NEXTAUTH_SECRET",
     "NEXTAUTH_URL": "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app",
-    "PI_API_KEY": "@PI_API_KEY",
-    "PI_INTERNAL_API_KEY": "@PI_INTERNAL_API_KEY",
-    "GITHUB_WEBHOOK_SECRET": "@GITHUB_WEBHOOK_SECRET",
     "STELLAR_HORIZON_URL": "https://horizon.stellar.org",
     "SUPABASE_URL": "https://triumph-synergy.supabase.co",
-    "SUPABASE_ANON_KEY": "@SUPABASE_ANON_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY": "@SUPABASE_SERVICE_ROLE_KEY",
     "INTERNAL_PI_MULTIPLIER": "1.5",
     "INTERNAL_PI_MIN_VALUE": "10.0",
     "EXTERNAL_PI_MIN_VALUE": "1.0"
