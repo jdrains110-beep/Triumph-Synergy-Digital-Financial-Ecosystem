@@ -1,3 +1,7 @@
 {
-  "recommendations": ["biomejs.biome"]
+  "recommendations": [
+    "biomejs.biome",
+    "ms-azuretools.vscode-azureterraform",
+    "firefox-devtools.vscode-firefox-debug"
+  ]
 }

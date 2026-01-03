@@ -20,16 +20,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
   
-  // Enable SWC minification (faster than Terser)
-  swcMinify: true,
-  
   // Experimental features for better performance
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
     },
-    // Optimize font loading
-    optimizeFonts: !process.env.DOCKER_BUILD,
   },
   
   // Ensure database connections aren't attempted during build

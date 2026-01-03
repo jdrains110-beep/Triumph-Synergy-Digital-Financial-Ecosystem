@@ -34,5 +34,6 @@
   },
   "DockerRun.DisableDockerrc": true,
   "editor.codeActions.triggerOnFocusChange": true,
-  "files.autoSave": "afterDelay"
+  "files.autoSave": "afterDelay",
+  "DockerRun.DisableAutoGenerateConfig": true
 }
