@@ -3,11 +3,11 @@
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
   "env": {
-    "POSTGRES_URL": "postgres://user:pass@localhost:5432/triumph_dummy",
-    "REDIS_URL": "redis://localhost:6379",
-    "AUTH_SECRET": "production-auth-secret-32-chars-minimum-secure-key",
-    "NEXTAUTH_SECRET": "production-nextauth-secret-32-chars-minimum-secure",
-    "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com",
+    "POSTGRES_URL": "@triumph-synergy-postgres-secret",
+    "REDIS_URL": "@triumph-synergy-redis-secret",
+    "AUTH_SECRET": "@triumph-synergy-auth-secret",
+    "NEXTAUTH_SECRET": "@triumph-synergy-nextauth-secret",
+    "NEXTAUTH_URL": "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app",
     "PI_API_KEY": "production-pi-api-key-placeholder",
     "PI_INTERNAL_API_KEY": "production-pi-internal-api-key-placeholder",
     "GITHUB_WEBHOOK_SECRET": "production-github-webhook-secret-placeholder",
@@ -20,6 +20,31 @@
     "EXTERNAL_PI_MIN_VALUE": "1.0"
   },
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=()"
+        }
+      ]
+    },
     {
       "headers": [
         {
@@ -35,5 +60,12 @@
     }
   ],
   "outputDirectory": ".next",
-  "devCommand": "pnpm dev"
+  "devCommand": "pnpm dev",
+  "regions": ["iad1"],
+  "functions": {
+    "api/**": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
 }

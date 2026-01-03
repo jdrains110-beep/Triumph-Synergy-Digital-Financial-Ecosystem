@@ -1,10 +1,11 @@
 {
-  "name": "ai-chatbot",
-  "version": "^4.0.0",
+  "name": "triumph-synergy",
+  "version": "1.0.0",
+  "description": "Triumph Synergy: Advanced payment routing with compliance automation powered by Pi Network",
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "tsx scripts/run-migrations-if-present.ts && next build",
+    "build": "pnpm db:migrate && next build",
     "start": "next start",
     "start-server-for-tests": "pnpm exec next dev --webpack",
     "lint": "npx ultracite@5.3.9 check",
