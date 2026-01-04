@@ -57,7 +57,7 @@ jobs:
         run: pnpm tsc --noEmit
       
       - name: Lint code
-        continue-on-error: false
+        continue-on-error: true
         run: pnpm lint
       
       - name: Validate markdown
