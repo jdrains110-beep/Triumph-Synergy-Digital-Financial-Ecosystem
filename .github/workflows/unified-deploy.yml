@@ -124,7 +124,7 @@ jobs:
           STELLAR_HORIZON_URL: https://horizon.stellar.org
           # Supabase: Use public keys (anon key)
           SUPABASE_URL: https://triumph-synergy.supabase.co
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_ANON_KEY: placeholder-build-time-key
         run: pnpm run build
       
       - name: Verify build output
@@ -255,7 +255,8 @@ jobs:
       - name: Check Vercel Secrets
         id: check-secrets
         run: |
-          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+          VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}"
+          if [ -z "$VERCEL_TOKEN" ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
             echo "⚠️  Vercel secrets not configured - skipping deploy"
           else
@@ -271,7 +272,6 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
           working-directory: ./
-          production: true
         env:
           VERCEL_ENV: production
       

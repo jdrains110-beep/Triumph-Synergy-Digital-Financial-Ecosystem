@@ -5,6 +5,7 @@
 ### 1. Infrastructure Health
 
 #### GCP Resources
+
 ```bash
 # Check GKE cluster status
 gcloud container clusters list
@@ -24,6 +25,7 @@ gsutil ls -L gs://triumph-synergy-assets
 ```
 
 #### AWS Resources
+
 ```bash
 # Check EKS cluster
 aws eks list-clusters
@@ -41,6 +43,7 @@ aws s3 ls s3://triumph-synergy-backup/
 ```
 
 ### 2. Kubernetes Health
+
 
 ```bash
 # Check all namespaces
@@ -179,9 +182,11 @@ gh run view <run-id> --log
 ### Issue: Pods not starting
 
 **Symptoms:**
+
 - `kubectl get pods` shows `Pending`, `CrashLoopBackOff`, or `ImagePullBackOff`
 
 **Solutions:**
+
 
 ```bash
 # 1. Check pod events
@@ -212,10 +217,12 @@ kubectl rollout restart deployment/triumph-app -n triumph-synergy
 ### Issue: Database connection failed
 
 **Symptoms:**
+
 - Pod logs show "connection refused"
 - `POSTGRES_URL` connection errors
 
 **Solutions:**
+
 
 ```bash
 # 1. Verify secret is created
@@ -246,10 +253,12 @@ kubectl rollout restart deployment/cloudsql-proxy -n triumph-synergy
 ### Issue: Redis connection failed
 
 **Symptoms:**
+
 - Cache operations failing
 - "Redis connection timeout"
 
 **Solutions:**
+
 
 ```bash
 # 1. Check Redis instance status
@@ -276,10 +285,12 @@ gcloud redis instances describe triumph-redis \
 ### Issue: Load Balancer not accessible
 
 **Symptoms:**
+
 - `curl http://<LB-IP>` times out or refuses connection
 - External IP shows `<pending>`
 
 **Solutions:**
+
 
 ```bash
 # 1. Check service status
@@ -312,10 +323,12 @@ gcloud compute project-info describe --project=$GCP_PROJECT_ID | grep -A5 QUOTA
 ### Issue: API returning 500 errors
 
 **Symptoms:**
+
 - `curl http://<LB-IP>/api/health` returns 500
 - Application endpoints fail
 
 **Solutions:**
+
 
 ```bash
 # 1. Check application logs
@@ -343,10 +356,12 @@ kubectl delete pod <pod-name> -n triumph-synergy
 ### Issue: Database replication lag
 
 **Symptoms:**
+
 - AWS reads show stale data
 - Replication lag in monitoring
 
 **Solutions:**
+
 
 ```bash
 # 1. Check replication status (on primary)
@@ -375,10 +390,12 @@ gcloud monitoring time-series list \
 ### Issue: Vercel deployment failing
 
 **Symptoms:**
+
 - Vercel build failing
 - Preview deployments not working
 
 **Solutions:**
+
 
 ```bash
 # 1. Check environment variables in Vercel
@@ -410,10 +427,12 @@ vercel env list | grep DOCKER
 ### Issue: GitHub Actions workflow failing
 
 **Symptoms:**
+
 - Workflow shows red X
 - Deployment didn't trigger
 
 **Solutions:**
+
 
 ```bash
 # 1. Check workflow status
@@ -676,6 +695,7 @@ psql $POSTGRES_URL -c "REINDEX DATABASE triumph_synergy"
 ### Scenario: Kubernetes Node Failure
 
 **Automatic handling:**
+
 - Kubernetes automatically reschedules pods
 - Pod Disruption Budgets prevent cascading failures
 - New nodes provisioned by cluster autoscaler
@@ -729,9 +749,9 @@ aws eks list-clusters
 
 ## Support Contacts
 
-- **GCP Support**: https://cloud.google.com/support
-- **AWS Support**: https://console.aws.amazon.com/support
-- **Kubernetes Issues**: https://kubernetes.io/docs/tasks/debug/
+- **GCP Support**: [Cloud Support](https://cloud.google.com/support)
+- **AWS Support**: [AWS Support Console](https://console.aws.amazon.com/support)
+- **Kubernetes Issues**: [Kubernetes Debug Guide](https://kubernetes.io/docs/tasks/debug/)
 - **Application Issues**: Check application logs via kubectl
 - **On-call Engineering**: [Add contact info]
 
