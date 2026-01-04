@@ -287,7 +287,7 @@ export async function verifyPayment(request: NextRequest) {
       );
     }
 
-    let verified: boolean = false;
+    let verified = false;
     if (method === "pi_network") {
       verified = await piProcessor.verifyPiPayment(transactionHash as string);
     } else {

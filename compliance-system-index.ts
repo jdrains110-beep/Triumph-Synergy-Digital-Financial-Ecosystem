@@ -477,7 +477,9 @@ function printSystemInfo() {
     "═══════════════════════════════════════════════════════════════════════════════════\n"
   );
 
-  for (const [_key, framework] of Object.entries(COMPLIANCE_SYSTEM.frameworks)) {
+  for (const [_key, framework] of Object.entries(
+    COMPLIANCE_SYSTEM.frameworks
+  )) {
     console.log(`✅ ${framework.name}`);
     console.log(`   Status: ${framework.status} | Score: ${framework.score}`);
     console.log(`   Implementation: ${framework.implementation}`);

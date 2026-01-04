@@ -189,7 +189,7 @@ export class DependencyOrchestrator {
   /**
    * Perform periodic health checks
    */
-  async periodicHealthCheck(intervalMs = 30_000): Promise<void> {
+  periodicHealthCheck(intervalMs = 30_000): void {
     setInterval(async () => {
       const checks: Record<string, boolean> = {};
 
@@ -324,7 +324,7 @@ export function createDependencyOrchestrator(
 // HEALTH CHECK FUNCTIONS
 // ============================================================================
 
-async function checkPostgres(): Promise<boolean> {
+function checkPostgres(): boolean {
   try {
     // This will be implemented by the actual database module
     // For now, we'll check if environment variable is set
@@ -334,7 +334,7 @@ async function checkPostgres(): Promise<boolean> {
   }
 }
 
-async function checkRedis(): Promise<boolean> {
+function checkRedis(): boolean {
   try {
     // This will be implemented by the actual Redis module
     return !!process.env.REDIS_URL;
@@ -357,7 +357,7 @@ async function checkStellar(): Promise<boolean> {
   }
 }
 
-async function checkPiNetwork(): Promise<boolean> {
+function checkPiNetwork(): boolean {
   try {
     // Check Pi Network API availability
     const apiKey = process.env.PI_API_KEY;
@@ -373,7 +373,7 @@ async function checkPiNetwork(): Promise<boolean> {
   }
 }
 
-async function checkCompliance(): Promise<boolean> {
+function checkCompliance(): boolean {
   try {
     // Check if compliance modules can be loaded
     // This would be a more comprehensive check in production
@@ -383,7 +383,7 @@ async function checkCompliance(): Promise<boolean> {
   }
 }
 
-async function checkAnalytics(): Promise<boolean> {
+function checkAnalytics(): boolean {
   try {
     // Analytics can always be disabled gracefully
     return true;
@@ -396,26 +396,26 @@ async function checkAnalytics(): Promise<boolean> {
 // FALLBACK FUNCTIONS
 // ============================================================================
 
-async function fallbackStellar(): Promise<void> {
+function fallbackStellar(): void {
   // Use local ledger cache or delayed settlement
   console.log("⚠️  Using Stellar fallback: Delaying settlement verification");
 }
 
-async function fallbackPiNetwork(): Promise<void> {
+function fallbackPiNetwork(): void {
   // Switch to Apple Pay or other payment method
   console.log(
     "⚠️  Using Pi Network fallback: Routing to secondary payment processor"
   );
 }
 
-async function fallbackCompliance(): Promise<void> {
+function fallbackCompliance(): void {
   // Use cached compliance results or require manual review
   console.log(
     "⚠️  Using Compliance fallback: Transactions will require manual review"
   );
 }
 
-async function fallbackAnalytics(): Promise<void> {
+function fallbackAnalytics(): void {
   // Disable analytics, log locally
   console.log("⚠️  Using Analytics fallback: Logging locally instead of remote");
 }

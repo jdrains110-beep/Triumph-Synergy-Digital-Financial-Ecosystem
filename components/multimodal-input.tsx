@@ -307,14 +307,14 @@ function PureMultimodalInput({
         )}
 
       <input
+        aria-label="File upload input"
         className="-top-4 -left-4 pointer-events-none fixed size-0.5 opacity-0"
         multiple
         onChange={handleFileChange}
         ref={fileInputRef}
         tabIndex={-1}
-        type="file"
-        aria-label="File upload input"
         title="Upload files"
+        type="file"
       />
 
       <PromptInput

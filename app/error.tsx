@@ -68,16 +68,16 @@ export default function ErrorPage({
 
           <div className="flex justify-center gap-4 pt-4">
             <button
-              type="button"
               className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
               onClick={() => reset()}
+              type="button"
             >
               Try Again
             </button>
             <button
-              type="button"
               className="rounded-lg bg-gray-600 px-4 py-2 text-white transition hover:bg-gray-700"
               onClick={() => window.location.reload()}
+              type="button"
             >
               Refresh Page
             </button>

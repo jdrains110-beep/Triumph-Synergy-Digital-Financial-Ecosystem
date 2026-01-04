@@ -365,7 +365,9 @@ function printComplianceReport() {
       `   Last Verified: ${new Date(req.lastVerified).toLocaleDateString()}`
     );
     console.log("   Evidence:");
-    req.evidence.forEach((ev) => console.log(`     • ${ev}`));
+    for (const ev of req.evidence) {
+      console.log(`     • ${ev}`);
+    }
     console.log(
       `   Next Review: ${new Date(req.nextReview).toLocaleDateString()}`
     );
@@ -439,11 +441,11 @@ function checkDeploymentReadiness(): boolean {
   } else {
     console.log("❌ DEPLOYMENT NOT READY");
     console.log("\nThe following compliance requirements need attention:");
-    report.requirements
-      .filter((r) => r.status !== "COMPLIANT")
-      .forEach((r) => {
-        console.log(`  ❌ ${r.requirement} (${r.status})`);
-      });
+    for (const r of report.requirements.filter(
+      (r) => r.status !== "COMPLIANT"
+    )) {
+      console.log(`  ❌ ${r.requirement} (${r.status})`);
+    }
   }
 
   console.log("\n");
