@@ -512,7 +512,9 @@ export class IAMService {
   }
 
   private matchesWildcard(parts: string[], pattern: string[]): boolean {
-    if (parts.length !== pattern.length) return false;
+    if (parts.length !== pattern.length) {
+      return false;
+    }
 
     for (let i = 0; i < parts.length; i++) {
       if (pattern[i] !== "*" && pattern[i] !== parts[i]) {
@@ -523,14 +525,14 @@ export class IAMService {
     return true;
   }
 
-  private async getUserRoles(userId: string): Promise<string[]> {
+  private async getUserRoles(_userId: string): Promise<string[]> {
     // Implementation would fetch from database
     return ["customer"];
   }
 
   // Generate API key
   generateApiKey(): string {
-    const crypto = require("crypto");
+    const crypto = require("node:crypto");
     const prefix = iamConfig.apiAccess.authentication.apiKey.prefix;
     const random = crypto.randomBytes(32).toString("hex");
     return `${prefix}${random}`;
@@ -538,7 +540,7 @@ export class IAMService {
 
   // Hash API key for storage
   hashApiKey(key: string): string {
-    const crypto = require("crypto");
+    const crypto = require("node:crypto");
     return crypto.createHash("sha256").update(key).digest("hex");
   }
 }

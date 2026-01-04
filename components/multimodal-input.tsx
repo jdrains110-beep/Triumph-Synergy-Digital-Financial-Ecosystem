@@ -313,6 +313,8 @@ function PureMultimodalInput({
         ref={fileInputRef}
         tabIndex={-1}
         type="file"
+        aria-label="File upload input"
+        title="Upload files"
       />
 
       <PromptInput

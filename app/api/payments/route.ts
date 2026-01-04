@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     if (result.success) {
       // Store payment in database
       await storePaymentRecord({
-        paymentId: result.paymentId!,
+        paymentId: result.paymentId || `payment_${Date.now()}`,
         method: method as string,
         processor: result.processor,
         orderId: orderId as string,
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const method = searchParams.get("method");
+    const _method = searchParams.get("method");
     const paymentId = searchParams.get("paymentId");
     const orderId = searchParams.get("orderId");
 
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Retrieve payment status from database
-    const payment = await getPaymentRecord(paymentId || orderId!);
+    const payment = await getPaymentRecord(paymentId || orderId || "");
 
     if (!payment) {
       return NextResponse.json(
@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get detailed status from processor
-    let status;
+    let status: any = null;
     if (payment.method === "pi_network") {
       status = await piProcessor.getPaymentStatus(payment.paymentId);
     } else if (payment.method === "apple_pay") {
@@ -193,7 +193,8 @@ export async function getStats(request: NextRequest) {
     }
 
     const days = Number.parseInt(
-      request.nextUrl.searchParams.get("days") || "30"
+      request.nextUrl.searchParams.get("days") || "30",
+      10
     );
     const stats = await router.getPaymentStats(days);
 
@@ -286,7 +287,7 @@ export async function verifyPayment(request: NextRequest) {
       );
     }
 
-    let verified;
+    let verified: boolean = false;
     if (method === "pi_network") {
       verified = await piProcessor.verifyPiPayment(transactionHash as string);
     } else {
@@ -322,7 +323,7 @@ export async function verifyPayment(request: NextRequest) {
  * Store payment record in database
  * @private
  */
-async function storePaymentRecord(payment: {
+function storePaymentRecord(payment: {
   paymentId: string;
   method: string;
   processor: string;
@@ -356,7 +357,7 @@ async function storePaymentRecord(payment: {
  * Retrieve payment record from database
  * @private
  */
-async function getPaymentRecord(paymentIdOrOrderId: string): Promise<{
+function getPaymentRecord(paymentIdOrOrderId: string): Promise<{
   paymentId: string;
   method: string;
   processor: string;

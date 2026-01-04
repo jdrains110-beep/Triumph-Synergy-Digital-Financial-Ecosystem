@@ -4,7 +4,7 @@
 
 import { Horizon, Networks, TransactionBuilder } from "stellar-sdk";
 
-export interface PiPaymentConfig {
+export type PiPaymentConfig = {
   enabled: boolean;
   isPrimary: boolean;
   internalMultiplier: number;
@@ -12,7 +12,7 @@ export interface PiPaymentConfig {
   minAmount: number;
   maxAmount: number;
   settlementNetwork: "stellar_mainnet" | "stellar_testnet";
-}
+};
 
 // Primary payment configuration
 export const piNetworkConfig: PiPaymentConfig = {
@@ -33,10 +33,9 @@ export const piNetworkConfig: PiPaymentConfig = {
  * Handles Pi payments and Stellar settlement
  */
 export class PiNetworkPaymentProcessor {
-  private apiKey: string;
-  private internalApiKey: string;
-  private horizon: Horizon.Server;
-  private stellar: {
+  private readonly apiKey: string;
+  private readonly horizon: Horizon.Server;
+  private readonly stellar: {
     account: string;
     secret: string;
   };
@@ -66,7 +65,7 @@ export class PiNetworkPaymentProcessor {
   async processPiPayment(
     orderId: string,
     amount: number,
-    source: "internal" | "external" = "external",
+    source: "internal" | "external",
     userAddress: string
   ): Promise<{
     success: boolean;
@@ -336,7 +335,7 @@ export class PiNetworkPaymentProcessor {
  * Stellar settlement utilities
  */
 export class StellarSettlement {
-  private horizon: Horizon.Server;
+  private readonly horizon: Horizon.Server;
 
   constructor() {
     const horizonUrl =
@@ -370,7 +369,7 @@ export class StellarSettlement {
           console.log(`Settlement confirmed in ledger ${tx.ledger_attr}`);
           return true;
         }
-      } catch (error) {
+      } catch (_error) {
         // Transaction not yet in ledger
       }
 

@@ -8,7 +8,7 @@ import type { Logger } from "pino";
 
 export type ServicePriority = "critical" | "high" | "medium" | "low";
 
-export interface ServiceDependency {
+export type ServiceDependency = {
   name: string;
   priority: ServicePriority;
   healthCheck: () => Promise<boolean>;
@@ -20,13 +20,13 @@ export interface ServiceDependency {
   timeout: number;
   fallback?: () => Promise<void>;
   description: string;
-}
+};
 
 export class DependencyOrchestrator {
-  private dependencies: Map<string, ServiceDependency> = new Map();
-  private healthStatus: Map<string, boolean> = new Map();
-  private startupLog: string[] = [];
-  private logger?: Logger;
+  private readonly dependencies: Map<string, ServiceDependency> = new Map();
+  private readonly healthStatus: Map<string, boolean> = new Map();
+  private readonly startupLog: string[] = [];
+  private readonly logger?: Logger;
 
   constructor(logger?: Logger) {
     this.logger = logger;
@@ -361,7 +361,9 @@ async function checkPiNetwork(): Promise<boolean> {
   try {
     // Check Pi Network API availability
     const apiKey = process.env.PI_API_KEY;
-    if (!apiKey) return false;
+    if (!apiKey) {
+      return false;
+    }
 
     // This would ping the actual Pi Network API
     // For now, just verify the key exists

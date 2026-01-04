@@ -443,16 +443,8 @@ export const dataOpsConfig = {
 
 // Data lake service class
 export class DataLakeService {
-  private bigquery: any;
-  private s3: any;
-  private kafka: any;
-
-  constructor() {
-    // Initialize when cloud SDKs are installed
-    // this.bigquery = new BigQuery({ projectId: process.env.GCP_PROJECT_ID });
-    // this.s3 = new S3({ region: process.env.AWS_REGION });
-    // this.kafka = new Kafka({ brokers: [process.env.KAFKA_BROKER || 'localhost:9092'] });
-  }
+  private readonly bigquery: any;
+  private readonly kafka: any;
 
   // Stream data to lake
   async streamEvent(event: any) {

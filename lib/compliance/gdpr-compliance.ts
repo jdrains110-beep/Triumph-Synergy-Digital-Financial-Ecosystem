@@ -1,7 +1,7 @@
 // lib/compliance/gdpr-compliance.ts
 // General Data Protection Regulation (GDPR) Compliance
 
-export interface DataSubjectRequest {
+export type DataSubjectRequest = {
   requestType:
     | "ACCESS"
     | "RECTIFICATION"
@@ -16,9 +16,9 @@ export interface DataSubjectRequest {
   processed: boolean;
   completionDate?: Date;
   notes?: string;
-}
+};
 
-export interface ConsentRecord {
+export type ConsentRecord = {
   userId: string;
   consentType:
     | "MARKETING"
@@ -32,7 +32,7 @@ export interface ConsentRecord {
   ipAddress: string;
   userAgent: string;
   version: string; // Policy version at time of consent
-}
+};
 
 /**
  * GDPR Compliance Service
@@ -71,7 +71,7 @@ export class GDPRComplianceService {
   /**
    * Right to Access (Data Subject Access Request)
    */
-  async grantRightToAccess(userId: string): Promise<{
+  async grantRightToAccess(_userId: string): Promise<{
     data: {
       personalData: any;
       processingPurposes: string[];
@@ -122,7 +122,7 @@ export class GDPRComplianceService {
    * Right to Rectification
    */
   async grantRightToRectification(
-    userId: string,
+    _userId: string,
     corrections: Record<string, any>
   ): Promise<{
     correctionId: string;
@@ -149,8 +149,8 @@ export class GDPRComplianceService {
    * Right to Erasure ("Right to be Forgotten")
    */
   async grantRightToErasure(
-    userId: string,
-    reason: string
+    _userId: string,
+    _reason: string
   ): Promise<{
     erasureId: string;
     erasureApproved: boolean;
@@ -186,7 +186,7 @@ export class GDPRComplianceService {
    * Right to Restrict Processing
    */
   async grantRightToRestriction(
-    userId: string,
+    _userId: string,
     processingType: string
   ): Promise<{
     restrictionId: string;
@@ -212,7 +212,7 @@ export class GDPRComplianceService {
   /**
    * Right to Data Portability
    */
-  async grantRightToPortability(userId: string): Promise<{
+  async grantRightToPortability(_userId: string): Promise<{
     portabilityId: string;
     formatAvailable: string[];
     dataIncluded: string[];
@@ -246,7 +246,7 @@ export class GDPRComplianceService {
    * Right to Object
    */
   async grantRightToObject(
-    userId: string,
+    _userId: string,
     processingBasis: string
   ): Promise<{
     objectionId: string;
@@ -289,7 +289,7 @@ export class GDPRComplianceService {
    * Automated consent withdrawal (for granular control)
    */
   async withdrawConsent(
-    userId: string,
+    _userId: string,
     consentType: string
   ): Promise<{
     withdrawalId: string;

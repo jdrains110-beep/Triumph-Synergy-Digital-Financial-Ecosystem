@@ -1,7 +1,7 @@
 // lib/compliance/energy-efficiency-compliance.ts
 // Energy Efficiency and Carbon Footprint Compliance
 
-export interface CarbonFootprintData {
+export type CarbonFootprintData = {
   year: number;
   totalTransactions: number;
   carbonPerTransaction: number; // grams CO2
@@ -12,7 +12,7 @@ export interface CarbonFootprintData {
   totalEmissions: number; // kg CO2
   offsetPurchased: number; // kg CO2
   netEmissions: number; // kg CO2 (should be 0 for carbon neutral)
-}
+};
 
 /**
  * Energy Efficiency & Carbon Compliance Service
@@ -180,7 +180,7 @@ export class EnergyEfficiencyComplianceService {
       annual: number;
     };
   } {
-    const transactions = 10_000_000; // annual
+    const _transactions = 10_000_000; // annual
 
     return {
       traditionalBank: {
@@ -237,7 +237,7 @@ export class EnergyEfficiencyComplianceService {
   } {
     const footprint = this.calculateAnnualCarbonFootprint();
     const energyMix = this.getEnergyMix();
-    const metrics = this.getSustainabilityMetrics();
+    const _metrics = this.getSustainabilityMetrics();
 
     return {
       title: "Triumph Synergy Sustainability & Carbon Neutrality Report",
@@ -287,7 +287,7 @@ export class EnergyEfficiencyComplianceService {
     comparison: string;
     contribution: string;
   } {
-    const transactionCount = 1; // Single transaction
+    const _transactionCount = 1; // Single transaction
     const carbon = this.calculateTransactionCarbon("SIMPLE_TRANSFER");
 
     return {

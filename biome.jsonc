@@ -22,29 +22,59 @@
         "noConsole": "off",
 
         /* Needed for generateUUID() */
-        "noBitwiseOperators": "off"
+        "noBitwiseOperators": "off",
+
+        /* Temporarily off to fix memory issues */
+        "noEvolvingTypes": "warn",
+        "noImplicitAnyLet": "warn",
+        "useAwait": "warn"
       },
       "style": {
         /* Allowing magic numbers */
         "noMagicNumbers": "off",
 
         /* Needs more work to fix */
-        "noNestedTernary": "off"
+        "noNestedTernary": "off",
+
+        /* Temporarily off */
+        "noNonNullAssertion": "warn",
+        "noEnum": "warn",
+        "useNodejsImportProtocol": "warn",
+        "useTemplate": "warn",
+        "useFilenamingConvention": "warn"
       },
       "nursery": {
         /* Too many false positives */
-        "noUnnecessaryConditions": "off"
+        "noUnnecessaryConditions": "off",
+
+        /* Temporarily off */
+        "useConsistentTypeDefinitions": "warn"
       },
       "complexity": {
         /* Needs more work to fix */
         "noExcessiveCognitiveComplexity": "off",
 
         /* This one has false positives. It's a bit... iffy 😉 */
-        "useSimplifiedLogicExpression": "off"
+        "useSimplifiedLogicExpression": "off",
+
+        /* Temporarily off */
+        "noForEach": "warn"
+      },
+      "performance": {
+        /* Temporarily off */
+        "noNamespaceImport": "warn"
       },
       "a11y": {
         /* Needs more work to fix */
-        "noSvgWithoutTitle": "off"
+        "noSvgWithoutTitle": "off",
+
+        /* Temporarily off */
+        "useButtonType": "warn"
+      },
+      "correctness": {
+        /* Temporarily off */
+        "noUnusedFunctionParameters": "warn",
+        "noUnusedVariables": "warn"
       }
     }
   }

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import postgres from "postgres";
 import { createClient } from "redis";
-import * as StellarSdk from "stellar-sdk";
+import { Horizon } from "stellar-sdk";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;
@@ -23,7 +23,7 @@ function getSql() {
 }
 
 // Stellar Configuration
-const server = new StellarSdk.Horizon.Server(
+const server = new Horizon.Server(
   process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org"
 );
 
@@ -37,20 +37,19 @@ const EXTERNAL_PI_MIN_VALUE = Number.parseFloat(
   process.env.EXTERNAL_PI_MIN_VALUE || "1.0"
 );
 
-enum PiSource {
-  INTERNAL_MINED = "internal_mined",
-  INTERNAL_CONTRIBUTED = "internal_contributed",
-  EXTERNAL_EXCHANGE = "external_exchange",
-}
+type PiSource =
+  | "internal_mined"
+  | "internal_contributed"
+  | "external_exchange";
 
-interface PiPaymentRequest {
+type PiPaymentRequest = {
   user_id: string;
   amount: number;
   source: PiSource;
   memo?: string;
   stellar_tx_id?: string;
   metadata?: Record<string, any>;
-}
+};
 
 /**
  * Calculate Pi value based on source (Internal vs External)
@@ -99,7 +98,7 @@ function calculatePiValue(
  */
 async function verifyStellarTransaction(
   stellar_tx_id: string,
-  expected_amount: number
+  _expected_amount: number
 ): Promise<boolean> {
   try {
     const transaction = await server
@@ -242,12 +241,12 @@ export async function POST(request: NextRequest) {
  * Get Pi Value Information
  * GET /api/pi/value?amount=10&source=internal_mined
  */
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const amount = Number.parseFloat(searchParams.get("amount") || "0");
     const source =
-      (searchParams.get("source") as PiSource) || PiSource.EXTERNAL_EXCHANGE;
+      (searchParams.get("source") as PiSource) || "external_exchange";
 
     if (amount <= 0) {
       return NextResponse.json(

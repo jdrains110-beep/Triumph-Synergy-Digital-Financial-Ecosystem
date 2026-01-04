@@ -2,14 +2,14 @@
 // Pi Network Blockchain Verification Service
 // Validates all transactions, addresses, and smart contracts on Pi blockchain
 
-export interface BlockchainVerification {
+export type BlockchainVerification = {
   valid: boolean;
   verified: boolean;
   timestamp: number;
   blockNumber: number;
   hash?: string;
   confirmations: number;
-}
+};
 
 export interface AddressVerification extends BlockchainVerification {
   address: string;
@@ -55,11 +55,13 @@ export interface SmartContractVerification extends BlockchainVerification {
  * ✅ Real-time blockchain queries
  */
 export class PiBlockchainVerification {
-  private blockchainEndpoint: string;
-  private apiKey: string;
-  private verificationCache: Map<string, { result: any; timestamp: number }> =
-    new Map();
-  private cacheExpiry = 60_000; // 1 minute
+  private readonly blockchainEndpoint: string;
+  private readonly apiKey: string;
+  private readonly verificationCache: Map<
+    string,
+    { result: any; timestamp: number }
+  > = new Map();
+  private readonly cacheExpiry = 60_000; // 1 minute
 
   constructor(blockchainEndpoint: string, apiKey: string) {
     this.blockchainEndpoint = blockchainEndpoint;
@@ -79,7 +81,9 @@ export class PiBlockchainVerification {
     try {
       // Check cache first
       const cached = this.getFromCache(`tx_${transactionHash}`);
-      if (cached) return cached;
+      if (cached) {
+        return cached;
+      }
 
       console.log(`[Blockchain] Verifying transaction: ${transactionHash}`);
 
@@ -158,7 +162,9 @@ export class PiBlockchainVerification {
     try {
       // Check cache first
       const cached = this.getFromCache(`addr_${address}`);
-      if (cached) return cached;
+      if (cached) {
+        return cached;
+      }
 
       console.log(`[Blockchain] Verifying address: ${address}`);
 
@@ -624,7 +630,7 @@ export class PiBlockchainVerification {
    */
   private async verifyContractBytecode(
     contractAddress: string,
-    bytecode: string
+    _bytecode: string
   ): Promise<boolean> {
     try {
       const result = await this.queryBlockchain(
@@ -645,8 +651,8 @@ export class PiBlockchainVerification {
    */
   private async executeSmartContract(
     contractAddress: string,
-    functionName: string,
-    parameters: Record<string, any>
+    _functionName: string,
+    _parameters: Record<string, any>
   ): Promise<{ result: any; gasUsed: number }> {
     try {
       const result = await this.queryBlockchain(

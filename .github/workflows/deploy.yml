@@ -13,7 +13,6 @@ permissions:
   pull-requests: read
 
 env:
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: us-central1
   GKE_CLUSTER: triumph-synergy-production
   REGISTRY: gcr.io

@@ -5,20 +5,20 @@
 import ApplePayProcessor from "./apple-pay-secondary";
 import PiNetworkPaymentProcessor from "./pi-network-primary";
 
-export interface PaymentMethod {
+export type PaymentMethod = {
   id: string;
   name: string;
   type: "crypto" | "wallet" | "card" | "bank";
   priority: number;
   enabled: boolean;
   targetAdoption: number;
-}
+};
 
-export interface PaymentRoute {
+export type PaymentRoute = {
   method: PaymentMethod;
   processor: string;
   fallback?: string[];
-}
+};
 
 /**
  * Unified Payment Routing System
@@ -26,10 +26,10 @@ export interface PaymentRoute {
  * Pri Priority: Pi Network (95%) → Apple Pay (5%) → Stripe/PayPal (fallback)
  */
 export class UnifiedPaymentRouter {
-  private piProcessor: PiNetworkPaymentProcessor;
-  private appleProcessor: ApplePayProcessor;
+  private readonly piProcessor: PiNetworkPaymentProcessor;
+  private readonly appleProcessor: ApplePayProcessor;
 
-  private paymentMethods: Map<string, PaymentMethod> = new Map();
+  private readonly paymentMethods: Map<string, PaymentMethod> = new Map();
   private routes: PaymentRoute[] = [];
 
   constructor() {
@@ -68,7 +68,7 @@ export class UnifiedPaymentRouter {
       name: "Credit Card (Stripe)",
       type: "card",
       priority: 3,
-      enabled: process.env.STRIPE_API_KEY ? true : false,
+      enabled: !!process.env.STRIPE_API_KEY,
       targetAdoption: 0.001,
     });
 
@@ -77,7 +77,7 @@ export class UnifiedPaymentRouter {
       name: "PayPal",
       type: "bank",
       priority: 4,
-      enabled: process.env.PAYPAL_API_KEY ? true : false,
+      enabled: !!process.env.PAYPAL_API_KEY,
       targetAdoption: 0.001,
     });
 
@@ -183,7 +183,7 @@ export class UnifiedPaymentRouter {
 
       // Try fallback method
       const route = this.routes.find((r) => r.method.id === method);
-      if (route && route.fallback && route.fallback.length > 0) {
+      if (route?.fallback && route.fallback.length > 0) {
         console.log(`Attempting fallback to ${route.fallback[0]}`);
         return await this.routePayment(route.fallback[0], paymentData);
       }
@@ -254,7 +254,7 @@ export class UnifiedPaymentRouter {
    */
   private async routeLegacyPayment(
     method: string,
-    paymentData: Record<string, unknown>
+    _paymentData: Record<string, unknown>
   ): Promise<{
     success: boolean;
     processor: string;
@@ -276,7 +276,7 @@ export class UnifiedPaymentRouter {
   /**
    * Get payment statistics for monitoring
    */
-  async getPaymentStats(periodDays = 30): Promise<{
+  async getPaymentStats(_periodDays = 30): Promise<{
     totalTransactions: number;
     totalVolume: number;
     methodBreakdown: {

@@ -19,8 +19,8 @@ type AMLComplianceService = any;
  * - Consumer protection
  */
 export class MICAComplianceService {
-  private blockchain: PiNetworkBlockchain;
-  private amlService: AMLComplianceService;
+  private readonly blockchain: PiNetworkBlockchain;
+  private readonly amlService: AMLComplianceService;
 
   constructor(
     blockchain: PiNetworkBlockchain,
@@ -123,7 +123,7 @@ export class MICAComplianceService {
     const noRedemptionLimit = true;
 
     // Step 4: Burn tokens from circulation
-    const burnTx = await this.blockchain.burnTokens(userAddress, amount);
+    const _burnTx = await this.blockchain.burnTokens(userAddress, amount);
 
     // Step 5: Transfer equivalent assets to user
     const reference = `RED-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -308,7 +308,7 @@ export class MICAComplianceService {
    * Detect circular trading patterns
    * @private
    */
-  private detectCircularTrading(transactions: any[]): boolean {
+  private detectCircularTrading(_transactions: any[]): boolean {
     // Implement graph analysis to find A→B→A patterns
     // Return true if suspicious pattern found
     return false;
@@ -318,7 +318,7 @@ export class MICAComplianceService {
    * Detect pump & dump patterns
    * @private
    */
-  private detectPumpAndDump(transactions: any[]): boolean {
+  private detectPumpAndDump(_transactions: any[]): boolean {
     // Check for volume spike followed by price drop
     return false;
   }
@@ -327,7 +327,7 @@ export class MICAComplianceService {
    * Detect wash trading
    * @private
    */
-  private detectWashTrading(transactions: any[]): boolean {
+  private detectWashTrading(_transactions: any[]): boolean {
     // Check for trades between same entity (different accounts)
     return false;
   }
@@ -336,7 +336,7 @@ export class MICAComplianceService {
    * Detect manipulative orders
    * @private
    */
-  private detectManipulativeOrders(transactions: any[]): boolean {
+  private detectManipulativeOrders(_transactions: any[]): boolean {
     // Check for orders that get cancelled before settlement
     return false;
   }

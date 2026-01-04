@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export function GET(_request: NextRequest) {
   try {
     // Basic health check
     const health = {

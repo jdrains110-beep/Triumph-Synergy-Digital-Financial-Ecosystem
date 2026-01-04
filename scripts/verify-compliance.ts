@@ -7,15 +7,15 @@
  * Run: node verify-compliance.js
  */
 
-interface ComplianceStatus {
+type ComplianceStatus = {
   requirement: string;
   status: "COMPLIANT" | "PENDING" | "FAILED";
   lastVerified: string;
   evidence: string[];
   nextReview: string;
-}
+};
 
-interface ComplianceReport {
+type ComplianceReport = {
   timestamp: string;
   totalRequirements: number;
   compliantCount: number;
@@ -28,7 +28,7 @@ interface ComplianceReport {
   certifications: string[];
   nextAuditDate: string;
   signedBy: string;
-}
+};
 
 // COMPLIANCE CHECKLIST
 const complianceChecklist: ComplianceStatus[] = [
@@ -457,7 +457,7 @@ if (require.main === module) {
   console.log("\n🔍 Verifying Triumph Synergy Compliance Status...\n");
 
   // Print full report
-  const report = printComplianceReport();
+  const _report = printComplianceReport();
 
   // Check deployment readiness
   const isReady = checkDeploymentReadiness();

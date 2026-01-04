@@ -1,4 +1,4 @@
-import { createHmac } from "crypto";
+import { createHmac } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "redis";
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Verify GitHub signature
     const secret = process.env.GITHUB_WEBHOOK_SECRET || "";
     const hmac = createHmac("sha256", secret);
-    const digest = "sha256=" + hmac.update(body).digest("hex");
+    const digest = `sha256=${hmac.update(body).digest("hex")}`;
 
     if (signature !== digest && process.env.NODE_ENV === "production") {
       console.error("Invalid webhook signature");
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Handle push events
     if (payload.commits && Array.isArray(payload.commits)) {
-      const contractFiles = [];
+      const contractFiles: string[] = [];
 
       for (const commit of payload.commits) {
         // Check for smart contract files

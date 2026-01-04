@@ -1,10 +1,9 @@
-import cluster from "cluster";
-import os from "os";
+import cluster from "node:cluster";
+import os from "node:os";
 import postgres from "postgres";
 import { createClient } from "redis";
-import { Worker } from "worker_threads";
 
-interface PiPayment {
+type PiPayment = {
   payment_id: string;
   user_id: string;
   amount: number;
@@ -12,14 +11,14 @@ interface PiPayment {
   pi_transaction_id?: string;
   metadata: Record<string, any>;
   created_at: Date;
-}
+};
 
 class PaymentProcessor {
-  private redis: ReturnType<typeof createClient>;
-  private db: ReturnType<typeof postgres>;
-  private workersCount: number;
-  private batchSize = 1000;
-  private processingInterval = 100; // ms
+  private readonly redis: ReturnType<typeof createClient>;
+  private readonly db: ReturnType<typeof postgres>;
+  private readonly workersCount: number;
+  private readonly batchSize = 1000;
+  private readonly processingInterval = 100; // ms
 
   constructor() {
     this.workersCount = Number(process.env.WORKER_THREADS) || os.cpus().length;
@@ -178,7 +177,7 @@ class PaymentProcessor {
   /**
    * Mock Pi Network API call - Replace with actual Pi SDK
    */
-  private async callPiNetworkAPI(payment: PiPayment) {
+  private async callPiNetworkAPI(_payment: PiPayment) {
     // TODO: Replace with actual Pi Network SDK integration
     // const piPayment = await piSDK.createPayment({
     //   amount: payment.amount,
@@ -286,7 +285,7 @@ if (cluster.isPrimary && process.env.NODE_ENV === "production") {
     cluster.fork();
   }
 
-  cluster.on("exit", (worker, code, signal) => {
+  cluster.on("exit", (worker, _code, _signal) => {
     console.log(`⚠️  Worker ${worker.process.pid} died. Starting new worker...`);
     cluster.fork();
   });

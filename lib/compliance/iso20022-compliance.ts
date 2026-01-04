@@ -1,12 +1,12 @@
 // lib/compliance/iso20022-compliance.ts
 // ISO 20022 Financial Messaging Standard Implementation
 
-export interface ISO20022Message {
+export type ISO20022Message = {
   messageId: string;
   creationDateTime: string;
   messageType: string;
   version: string;
-}
+};
 
 export interface PACS008Message extends ISO20022Message {
   messageType: "PACS.008";
@@ -64,22 +64,31 @@ export class ISO20022ComplianceService {
     const warnings: string[] = [];
 
     // Required fields
-    if (!message.messageId) errors.push("messageId is required");
-    if (!message.creationDateTime) errors.push("creationDateTime is required");
-    if (!message.paymentInformation)
+    if (!message.messageId) {
+      errors.push("messageId is required");
+    }
+    if (!message.creationDateTime) {
+      errors.push("creationDateTime is required");
+    }
+    if (!message.paymentInformation) {
       errors.push("paymentInformation is required");
-    if (!message.endToEndReference)
+    }
+    if (!message.endToEndReference) {
       errors.push("endToEndReference is required (traceability)");
+    }
 
     // Message structure
     const pi = message.paymentInformation;
     if (pi) {
-      if (!pi.debtorAccount)
+      if (!pi.debtorAccount) {
         errors.push("paymentInformation.debtorAccount is required");
-      if (!pi.creditorAccount)
+      }
+      if (!pi.creditorAccount) {
         errors.push("paymentInformation.creditorAccount is required");
-      if (!pi.transactionAmount)
+      }
+      if (!pi.transactionAmount) {
         errors.push("paymentInformation.transactionAmount is required");
+      }
 
       // Amount validation
       if (pi.transactionAmount && pi.transactionAmount.amount <= 0) {
@@ -106,10 +115,10 @@ export class ISO20022ComplianceService {
     // Date validation
     try {
       const date = new Date(message.creationDateTime);
-      if (isNaN(date.getTime())) {
+      if (Number.isNaN(date.getTime())) {
         errors.push("creationDateTime must be valid ISO 8601 format");
       }
-    } catch (e) {
+    } catch (_e) {
       errors.push("creationDateTime parsing failed");
     }
 
@@ -137,12 +146,18 @@ export class ISO20022ComplianceService {
     const errors: string[] = [];
 
     // Required fields
-    if (!message.messageId) errors.push("messageId is required");
-    if (!message.originalMessageId)
+    if (!message.messageId) {
+      errors.push("messageId is required");
+    }
+    if (!message.originalMessageId) {
       errors.push("originalMessageId is required");
-    if (!message.paymentStatus) errors.push("paymentStatus is required");
-    if (!message.transactionReference)
+    }
+    if (!message.paymentStatus) {
+      errors.push("paymentStatus is required");
+    }
+    if (!message.transactionReference) {
       errors.push("transactionReference is required");
+    }
 
     // Status validation
     const validStatuses = ["ACCC", "ACPT", "RJCT"];
@@ -288,7 +303,7 @@ export class ISO20022ComplianceService {
    * @private
    */
   private async createBlockchainTransaction(
-    tx: any
+    _tx: any
   ): Promise<{ hash: string }> {
     // In production: call blockchain service
     return {

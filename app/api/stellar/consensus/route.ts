@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import postgres from "postgres";
 import { createClient } from "redis";
-import * as StellarSdk from "stellar-sdk";
+import { Horizon } from "stellar-sdk";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;
 let sql: ReturnType<typeof postgres> | null = null;
 
-function getRedis() {
+function _getRedis() {
   if (!redis) {
     redis = createClient({ url: process.env.REDIS_URL });
     redis.connect().catch(console.error);
@@ -31,7 +31,7 @@ const server = new StellarSdk.Horizon.Server(
  * Get Stellar Consensus Protocol Status
  * GET /api/stellar/consensus
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get latest ledger from Stellar network
     const latestLedger = await server.ledgers().order("desc").limit(1).call();

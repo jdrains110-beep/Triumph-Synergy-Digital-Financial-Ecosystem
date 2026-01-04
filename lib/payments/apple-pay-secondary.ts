@@ -2,13 +2,13 @@
 // Apple Pay as SECONDARY Payment Method Configuration
 // 5% of transaction volume target with biometric security
 
-export interface ApplePayConfig {
+export type ApplePayConfig = {
   enabled: boolean;
   isSecondary: boolean;
   processorBackends: string[];
   conversionToPi: boolean;
   biometricRequired: boolean;
-}
+};
 
 // Secondary payment configuration
 export const applePayConfig: ApplePayConfig = {
@@ -24,10 +24,10 @@ export const applePayConfig: ApplePayConfig = {
  * Handles Apple Pay tokens and payment processing
  */
 export class ApplePayProcessor {
-  private merchantId: string;
-  private merchantDomain: string;
-  private stripeKey?: string;
-  private paypalKey?: string;
+  private readonly merchantId: string;
+  private readonly merchantDomain: string;
+  private readonly stripeKey?: string;
+  private readonly paypalKey?: string;
 
   constructor() {
     this.merchantId = process.env.APPLE_PAY_MERCHANT_ID || "";
@@ -91,7 +91,7 @@ export class ApplePayProcessor {
    */
   async processApplePayment(
     paymentToken: string,
-    orderId: string,
+    _orderId: string,
     amount: number,
     currency = "USD"
   ): Promise<{
@@ -312,7 +312,7 @@ export class ApplePayProcessor {
    */
   private async convertToPI(
     amountCents: number,
-    currency: string
+    _currency: string
   ): Promise<number> {
     try {
       const amountUsd = amountCents / 100;
@@ -370,7 +370,7 @@ export class ApplePayProcessor {
    * Refund an Apple Pay payment
    */
   async refundPayment(
-    paymentId: string,
+    _paymentId: string,
     transactionId: string,
     processor: string,
     amount?: number

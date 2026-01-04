@@ -5,7 +5,7 @@
 import type { PiNetworkBlockchain } from "@/lib/blockchain/pi-network-blockchain";
 import type { WalletManager } from "@/lib/wallet/wallet-manager";
 
-export interface P2PPayment {
+export type P2PPayment = {
   id: string;
   senderAddress: string;
   recipientAddress: string;
@@ -15,9 +15,9 @@ export interface P2PPayment {
   createdAt: Date;
   confirmedAt?: Date;
   settlementTime?: number;
-}
+};
 
-export interface P2PPeer {
+export type P2PPeer = {
   address: string;
   name?: string;
   reputation: number;
@@ -27,7 +27,7 @@ export interface P2PPeer {
   lastSeen: Date;
   verifiedOnBlockchain: boolean;
   kycVerified: boolean;
-}
+};
 
 /**
  * P2P Payment Service
@@ -42,9 +42,9 @@ export interface P2PPeer {
  * ✅ Reputation-based trust
  */
 export class P2PPaymentService {
-  private blockchain: PiNetworkBlockchain;
-  private walletManager: WalletManager;
-  private peerCache: Map<string, P2PPeer> = new Map();
+  private readonly blockchain: PiNetworkBlockchain;
+  private readonly walletManager: WalletManager;
+  private readonly peerCache: Map<string, P2PPeer> = new Map();
 
   constructor(blockchain: PiNetworkBlockchain, walletManager: WalletManager) {
     this.blockchain = blockchain;
@@ -391,11 +391,17 @@ export class P2PPaymentService {
       const reputation = await this.blockchain.getReputation(peerAddress);
 
       let trustLevel: "unverified" | "low" | "medium" | "high" | "excellent";
-      if (reputation.score < 20) trustLevel = "unverified";
-      else if (reputation.score < 40) trustLevel = "low";
-      else if (reputation.score < 60) trustLevel = "medium";
-      else if (reputation.score < 80) trustLevel = "high";
-      else trustLevel = "excellent";
+      if (reputation.score < 20) {
+        trustLevel = "unverified";
+      } else if (reputation.score < 40) {
+        trustLevel = "low";
+      } else if (reputation.score < 60) {
+        trustLevel = "medium";
+      } else if (reputation.score < 80) {
+        trustLevel = "high";
+      } else {
+        trustLevel = "excellent";
+      }
 
       return {
         score: reputation.score,

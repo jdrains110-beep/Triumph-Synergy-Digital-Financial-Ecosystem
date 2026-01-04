@@ -27,11 +27,11 @@ export {
  */
 
 export class ComplianceOrchestrator {
-  private mica: MICAComplianceService;
-  private iso20022: ISO20022ComplianceService;
-  private kycaml: KYCAMLComplianceService;
-  private gdpr: GDPRComplianceService;
-  private energy: EnergyEfficiencyComplianceService;
+  private readonly mica: MICAComplianceService;
+  private readonly iso20022: ISO20022ComplianceService;
+  private readonly kycaml: KYCAMLComplianceService;
+  private readonly gdpr: GDPRComplianceService;
+  private readonly energy: EnergyEfficiencyComplianceService;
 
   constructor() {
     try {
@@ -41,7 +41,7 @@ export class ComplianceOrchestrator {
       // by invoking as any — real args will be supplied at runtime.
       // @ts-expect-error
       this.mica = new (MICAComplianceService as any)();
-    } catch (e) {
+    } catch (_e) {
       // Provide lightweight noop fallback to avoid build-time errors
       // while preserving runtime behavior when real services are available.
       // @ts-expect-error
@@ -52,7 +52,7 @@ export class ComplianceOrchestrator {
 
     try {
       this.iso20022 = new ISO20022ComplianceService();
-    } catch (e) {
+    } catch (_e) {
       // Fallback stub
       // @ts-expect-error
       this.iso20022 = { validateFrameworkCompliance: () => ({}) } as any;
@@ -60,21 +60,21 @@ export class ComplianceOrchestrator {
 
     try {
       this.kycaml = new KYCAMLComplianceService();
-    } catch (e) {
+    } catch (_e) {
       // @ts-expect-error
       this.kycaml = { runAMLScreening: async () => ({}) } as any;
     }
 
     try {
       this.gdpr = new GDPRComplianceService();
-    } catch (e) {
+    } catch (_e) {
       // @ts-expect-error
       this.gdpr = { auditDataProtectionCompliance: () => ({}) } as any;
     }
 
     try {
       this.energy = new EnergyEfficiencyComplianceService();
-    } catch (e) {
+    } catch (_e) {
       // @ts-expect-error
       this.energy = {
         calculateAnnualCarbonFootprint: () => ({

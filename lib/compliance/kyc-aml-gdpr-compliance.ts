@@ -1,7 +1,7 @@
 // lib/compliance/kyc-aml-gdpr-compliance.ts
 // Complete KYC/AML and GDPR Compliance Service
 
-export interface KYCVerificationResult {
+export type KYCVerificationResult = {
   userId: string;
   tier: "TIER1" | "TIER2" | "TIER3";
   verified: boolean;
@@ -15,9 +15,9 @@ export interface KYCVerificationResult {
     pepScreening: boolean;
     sanctionsScreening: boolean;
   };
-}
+};
 
-export interface AMLTransaction {
+export type AMLTransaction = {
   transactionId: string;
   timestamp: string;
   from: string;
@@ -26,7 +26,7 @@ export interface AMLTransaction {
   riskScore: number; // 0-100
   flaggedForReview: boolean;
   reason?: string;
-}
+};
 
 /**
  * Comprehensive KYC/AML/GDPR Compliance Service
@@ -37,9 +37,9 @@ export interface AMLTransaction {
  * - General Data Protection Regulation (GDPR) compliance
  */
 export class KYCAMLGDPRComplianceService {
-  private ofacList: Set<string> = new Set();
-  private pepDatabase: Map<string, any> = new Map();
-  private dataSubjects: Map<string, any> = new Map();
+  private readonly ofacList: Set<string> = new Set();
+  private readonly pepDatabase: Map<string, any> = new Map();
+  private readonly dataSubjects: Map<string, any> = new Map();
 
   constructor() {
     // Initialize watchlists
@@ -260,7 +260,7 @@ export class KYCAMLGDPRComplianceService {
 
     // 3. Screen amount against threshold
     const isThresholdBreach = transaction.amount > 10_000; // EUR 10,000
-    const isRoundAmount = transaction.amount % 1000 === 0; // Structuring indicator
+    const _isRoundAmount = transaction.amount % 1000 === 0; // Structuring indicator
 
     // 4. Check transaction patterns
     const patterns = this.detectAMLPatterns(transaction);
@@ -347,8 +347,8 @@ export class KYCAMLGDPRComplianceService {
   }> {
     const requestId = `RTE-${userId}-${Date.now()}`;
 
-    const erasedData: string[] = [];
-    const retainedData: string[] = [];
+    const _erasedData: string[] = [];
+    const _retainedData: string[] = [];
 
     // What can be erased
     const canErase = [
@@ -454,23 +454,39 @@ export class KYCAMLGDPRComplianceService {
     let score = 0;
 
     // Base factors
-    if (transaction.amount > 100_000) score += 20;
-    if (transaction.amount > 10_000) score += 10;
-    if (transaction.amount % 1000 === 0) score += 5; // Round amount (structuring)
+    if (transaction.amount > 100_000) {
+      score += 20;
+    }
+    if (transaction.amount > 10_000) {
+      score += 10;
+    }
+    if (transaction.amount % 1000 === 0) {
+      score += 5; // Round amount (structuring)
+    }
 
     // Velocity indicators
-    if (context.senderHistoryAvailable && transaction.isUnusualSize)
+    if (context.senderHistoryAvailable && transaction.isUnusualSize) {
       score += 15;
-    if (context.senderHistoryAvailable && transaction.isUnusualFrequency)
+    }
+    if (context.senderHistoryAvailable && transaction.isUnusualFrequency) {
       score += 15;
+    }
 
     // Geography indicators
-    if (transaction.recipientCountry === "HIGH-RISK") score += 20;
-    if (transaction.senderCountry === "HIGH-RISK") score += 20;
+    if (transaction.recipientCountry === "HIGH-RISK") {
+      score += 20;
+    }
+    if (transaction.senderCountry === "HIGH-RISK") {
+      score += 20;
+    }
 
     // KYC age
-    if (context.senderKYCAge < 7) score += 10; // Recently verified
-    if (context.recipientKYCAge < 7) score += 10;
+    if (context.senderKYCAge < 7) {
+      score += 10; // Recently verified
+    }
+    if (context.recipientKYCAge < 7) {
+      score += 10;
+    }
 
     return Math.min(100, score);
   }
@@ -523,7 +539,7 @@ export class KYCAMLGDPRComplianceService {
     return age;
   }
 
-  private async verifyIDDocument(document: any): Promise<boolean> {
+  private async verifyIDDocument(_document: any): Promise<boolean> {
     // In production: call document verification service
     return true;
   }
@@ -538,14 +554,14 @@ export class KYCAMLGDPRComplianceService {
   }
 
   private async verifySourceOfFunds(
-    userId: string,
-    source: any
+    _userId: string,
+    _source: any
   ): Promise<boolean> {
     // Verify source matches transaction patterns
     return true;
   }
 
-  private async verifyEmployment(employment: any): Promise<boolean> {
+  private async verifyEmployment(_employment: any): Promise<boolean> {
     // Verify employment details
     return true;
   }
@@ -564,7 +580,7 @@ export class KYCAMLGDPRComplianceService {
     return { flagged, status: flagged ? "PEP" : "CLEAR" };
   }
 
-  private async screenEnhancedSanctions(name: string): Promise<{
+  private async screenEnhancedSanctions(_name: string): Promise<{
     flagged: boolean;
     status: string;
   }> {
@@ -577,7 +593,7 @@ export class KYCAMLGDPRComplianceService {
     return owners && owners.length > 0;
   }
 
-  private async verifyKYCStatus(userId: string): Promise<boolean> {
+  private async verifyKYCStatus(_userId: string): Promise<boolean> {
     // Check if user is KYC verified
     return true;
   }
@@ -612,7 +628,7 @@ export class KYCAMLGDPRComplianceService {
     }
   }
 
-  private async logConsentChange(userId: string, change: any): Promise<void> {
+  private async logConsentChange(_userId: string, change: any): Promise<void> {
     console.log("[GDPR] Consent change:", change);
   }
 

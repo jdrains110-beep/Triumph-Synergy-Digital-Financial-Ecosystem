@@ -3,25 +3,23 @@
 // TypeScript and allow serverless builds. Replace with real client in production.
 
 export class PiNetworkBlockchain {
-  constructor(endpoint?: string, apiKey?: string) {}
-
   async getTotalCirculation(): Promise<number> {
     return 1_000_000; // placeholder
   }
 
-  async getBalance(address: string): Promise<number> {
+  async getBalance(_address: string): Promise<number> {
     return 0;
   }
 
-  async burnTokens(address: string, amount: number): Promise<any> {
+  async burnTokens(_address: string, _amount: number): Promise<any> {
     return { success: true };
   }
 
-  async query(path: string): Promise<any> {
+  async query(_path: string): Promise<any> {
     return null;
   }
 
-  async someOtherMethod(...args: any[]): Promise<any> {
+  async someOtherMethod(..._args: any[]): Promise<any> {
     return null;
   }
 
@@ -30,19 +28,19 @@ export class PiNetworkBlockchain {
     return { address, kycVerified: false, reputation: 0 };
   }
 
-  async verifySignature(from: string, signature: string): Promise<boolean> {
+  async verifySignature(_from: string, _signature: string): Promise<boolean> {
     return true;
   }
 
-  async isTransactionInBlockchain(txHash: string): Promise<boolean> {
+  async isTransactionInBlockchain(_txHash: string): Promise<boolean> {
     return true;
   }
 
-  async getConfirmationCount(txHash: string): Promise<number> {
+  async getConfirmationCount(_txHash: string): Promise<number> {
     return 6;
   }
 
-  async queryTransaction(txHash: string): Promise<any> {
+  async queryTransaction(_txHash: string): Promise<any> {
     return null;
   }
 }
