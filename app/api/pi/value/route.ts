@@ -2,8 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import postgres from "postgres";
 import { createClient } from "redis";
 import { Horizon } from "stellar-sdk";
-import type { PiSourceConfig } from "@/types/pi";
-import { PiSource } from "@/types/pi";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;

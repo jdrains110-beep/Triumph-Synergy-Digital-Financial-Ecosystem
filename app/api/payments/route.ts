@@ -287,7 +287,7 @@ export async function verifyPayment(request: NextRequest) {
       );
     }
 
-    let verified = false;
+    let verified: any = false;
     if (method === "pi_network") {
       verified = await piProcessor.verifyPiPayment(transactionHash as string);
     } else {
@@ -301,10 +301,10 @@ export async function verifyPayment(request: NextRequest) {
     }
 
     return NextResponse.json({
-      success: verified.valid,
+      success: verified.valid || verified === true,
       paymentId,
-      verified: verified.confirmed,
-      confirmations: verified.confirmations,
+      verified: verified.confirmed || verified === true,
+      confirmations: verified.confirmations || 0,
     });
   } catch (error) {
     console.error("[PAYMENT_VERIFY] Error:", error);
@@ -366,25 +366,27 @@ function getPaymentRecord(paymentIdOrOrderId: string): Promise<{
   timestamp: string;
   status: string;
 } | null> {
-  try {
-    // Query payment_audit table
-    // SELECT * FROM payment_audit
-    // WHERE payment_id = $1 OR order_id = $1
+  return Promise.resolve().then(() => {
+    try {
+      // Query payment_audit table
+      // SELECT * FROM payment_audit
+      // WHERE payment_id = $1 OR order_id = $1
 
-    // Mock data - replace with actual database query
-    return {
-      paymentId: paymentIdOrOrderId,
-      method: "pi_network",
-      processor: "pi_network",
-      orderId: "order-123",
-      amount: 100,
-      timestamp: new Date().toISOString(),
-      status: "confirmed",
-    };
-  } catch (error) {
-    console.error("Failed to retrieve payment record:", error);
-    return null;
-  }
+      // Mock data - replace with actual database query
+      return {
+        paymentId: paymentIdOrOrderId,
+        method: "pi_network",
+        processor: "pi_network",
+        orderId: "order-123",
+        amount: 100,
+        timestamp: new Date().toISOString(),
+        status: "confirmed",
+      };
+    } catch (error) {
+      console.error("Failed to retrieve payment record:", error);
+      return null;
+    }
+  });
 }
 
 // Export the main payment route
