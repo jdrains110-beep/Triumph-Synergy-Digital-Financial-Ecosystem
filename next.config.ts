@@ -8,25 +8,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  
+
   // Platform-aware output configuration
   // - Vercel: undefined (uses Vercel's output optimization)
   // - Docker: "standalone" (self-contained binary for containerization)
   // - Local: undefined (development mode)
   output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
-  
+
   // Production optimizations
   compress: true,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
-  
+
   // Experimental features for better performance
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
     },
   },
-  
+
   // Ensure database connections aren't attempted during build
   env: {
     // These are build-time, not runtime
@@ -44,21 +44,13 @@ const nextConfig: NextConfig = {
           redis: "redis",
           postgres: "postgres",
           pg: "pg",
-          "@node-rs/bcrypt": "@node-rs/bcrypt",
         },
       ];
     }
     return config;
-  },
-
-  // TypeScript configuration for build
-  typescript: {
-    // Don't fail build on type errors - CI will catch them
-    ignoreBuildErrors: false,
   },
   // Provide an explicit (empty) turbopack config to avoid Turbopack detection
   turbopack: {},
 };
 
 export default nextConfig;
-
