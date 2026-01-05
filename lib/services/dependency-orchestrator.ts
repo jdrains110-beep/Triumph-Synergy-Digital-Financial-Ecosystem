@@ -4,8 +4,6 @@
  * Prevents cascade failures by verifying dependencies before use
  */
 
-import type { Logger } from "pino";
-
 export type ServicePriority = "critical" | "high" | "medium" | "low";
 
 export type ServiceDependency = {
@@ -26,9 +24,9 @@ export class DependencyOrchestrator {
   private readonly dependencies: Map<string, ServiceDependency> = new Map();
   private readonly healthStatus: Map<string, boolean> = new Map();
   private readonly startupLog: string[] = [];
-  private readonly logger?: Logger;
+  private readonly logger?: unknown;
 
-  constructor(logger?: Logger) {
+  constructor(logger?: unknown) {
     this.logger = logger;
   }
 
@@ -237,8 +235,8 @@ export class DependencyOrchestrator {
     const logEntry = `[${timestamp}] ${message}`;
     this.startupLog.push(logEntry);
 
-    if (this.logger) {
-      this.logger.info(message);
+    if (this.logger && typeof this.logger === 'object' && this.logger !== null && 'info' in this.logger) {
+      (this.logger as any).info(message);
     } else {
       console.log(logEntry);
     }
@@ -249,7 +247,7 @@ export class DependencyOrchestrator {
  * Create and configure the global dependency orchestrator
  */
 export function createDependencyOrchestrator(
-  logger?: Logger
+  logger?: unknown
 ): DependencyOrchestrator {
   const orchestrator = new DependencyOrchestrator(logger);
 
@@ -324,7 +322,7 @@ export function createDependencyOrchestrator(
 // HEALTH CHECK FUNCTIONS
 // ============================================================================
 
-function checkPostgres(): boolean {
+async function checkPostgres(): Promise<boolean> {
   try {
     // This will be implemented by the actual database module
     // For now, we'll check if environment variable is set
@@ -334,7 +332,7 @@ function checkPostgres(): boolean {
   }
 }
 
-function checkRedis(): boolean {
+async function checkRedis(): Promise<boolean> {
   try {
     // This will be implemented by the actual Redis module
     return !!process.env.REDIS_URL;
@@ -357,7 +355,7 @@ async function checkStellar(): Promise<boolean> {
   }
 }
 
-function checkPiNetwork(): boolean {
+async function checkPiNetwork(): Promise<boolean> {
   try {
     // Check Pi Network API availability
     const apiKey = process.env.PI_API_KEY;
@@ -373,7 +371,7 @@ function checkPiNetwork(): boolean {
   }
 }
 
-function checkCompliance(): boolean {
+async function checkCompliance(): Promise<boolean> {
   try {
     // Check if compliance modules can be loaded
     // This would be a more comprehensive check in production
@@ -383,7 +381,7 @@ function checkCompliance(): boolean {
   }
 }
 
-function checkAnalytics(): boolean {
+async function checkAnalytics(): Promise<boolean> {
   try {
     // Analytics can always be disabled gracefully
     return true;
@@ -396,26 +394,26 @@ function checkAnalytics(): boolean {
 // FALLBACK FUNCTIONS
 // ============================================================================
 
-function fallbackStellar(): void {
+async function fallbackStellar(): Promise<void> {
   // Use local ledger cache or delayed settlement
   console.log("⚠️  Using Stellar fallback: Delaying settlement verification");
 }
 
-function fallbackPiNetwork(): void {
+async function fallbackPiNetwork(): Promise<void> {
   // Switch to Apple Pay or other payment method
   console.log(
     "⚠️  Using Pi Network fallback: Routing to secondary payment processor"
   );
 }
 
-function fallbackCompliance(): void {
+async function fallbackCompliance(): Promise<void> {
   // Use cached compliance results or require manual review
   console.log(
     "⚠️  Using Compliance fallback: Transactions will require manual review"
   );
 }
 
-function fallbackAnalytics(): void {
+async function fallbackAnalytics(): Promise<void> {
   // Disable analytics, log locally
   console.log("⚠️  Using Analytics fallback: Logging locally instead of remote");
 }

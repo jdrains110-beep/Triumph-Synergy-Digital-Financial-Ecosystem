@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "pnpm exec tsx scripts/run-migrations-if-present.ts && next build --webpack",
+    "build": "next build",
     "start": "next start",
-    "start-server-for-tests": "pnpm exec next dev --webpack",
+    "start-server-for-tests": "next dev",
     "lint": "npx ultracite@5.3.9 check",
     "format": "npx ultracite@5.3.9 fix",
     "db:generate": "npx drizzle-kit@latest generate",

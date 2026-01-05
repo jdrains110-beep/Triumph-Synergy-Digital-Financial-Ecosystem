@@ -2,7 +2,7 @@
 // Pi Network as PRIMARY Payment Method Configuration
 // 95% of transaction volume target
 
-import { Horizon, Networks, TransactionBuilder } from "stellar-sdk";
+import { Horizon, Keypair, Memo, Networks, TransactionBuilder } from "stellar-sdk";
 
 export type PiPaymentConfig = {
   enabled: boolean;
@@ -34,6 +34,7 @@ export const piNetworkConfig: PiPaymentConfig = {
  */
 export class PiNetworkPaymentProcessor {
   private readonly apiKey: string;
+  private readonly internalApiKey: string;
   private readonly horizon: Horizon.Server;
   private readonly stellar: {
     account: string;
@@ -122,7 +123,7 @@ export class PiNetworkPaymentProcessor {
       const stellarSettlement = await this.settlePiOnStellar(
         orderId,
         appliedValue,
-        piTransaction.transactionHash
+        piTransaction.transactionHash || ""
       );
 
       const paymentId = `pi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -230,14 +231,12 @@ export class PiNetworkPaymentProcessor {
 
       // Create Stellar transaction
       const transaction = new TransactionBuilder(sourceAccount, {
-        fee: 100,
-        networkPassphrase: Networks.PUBLIC_NETWORK_PASSPHRASE,
+        fee: "100",
+        networkPassphrase: "Public Global Stellar Network ; September 2015",
       })
-        .addMemo({
-          type: "text",
-          value: `Pi:${orderId}:${piTxHash}`,
-        })
+        .addMemo(Memo.text(`Pi:${orderId}:${piTxHash}`))
         .addOperation({
+          source: sourceAccount.accountId(),
           type: "manageData",
           name: "pi_settlement",
           value: JSON.stringify({
@@ -246,7 +245,7 @@ export class PiNetworkPaymentProcessor {
             piTxHash,
             timestamp: new Date().toISOString(),
           }),
-        })
+        } as any)
         .setTimeout(30)
         .build();
 

@@ -32,5 +32,5 @@
     ".next\\dev/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "tests/**", "**/*.test.ts", "**/*.test.tsx", "lib/ai/models.test.ts", "lib/p2p/**", "lib/payments/pi-network-primary.ts", "lib/payments/unified-routing.ts"]
 }

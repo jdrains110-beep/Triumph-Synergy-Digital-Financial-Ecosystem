@@ -209,7 +209,7 @@ export class UnifiedPaymentRouter {
     const result = await this.piProcessor.processPiPayment(
       paymentData.orderId as string,
       paymentData.amount as number,
-      (paymentData.source as string) || "external",
+      ((paymentData.source as string) || "external") as "internal" | "external",
       paymentData.userAddress as string
     );
 

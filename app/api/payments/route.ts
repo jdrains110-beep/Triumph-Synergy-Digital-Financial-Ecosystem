@@ -182,11 +182,10 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * GET /api/payments/stats
- *
  * Get payment statistics and performance metrics
+ * @internal - Called by GET route with /stats parameter
  */
-export async function getStats(request: NextRequest) {
+async function getPaymentStats(request: NextRequest) {
   try {
     if (!request.nextUrl.pathname.endsWith("/stats")) {
       return null;
@@ -221,7 +220,7 @@ export async function getStats(request: NextRequest) {
  *
  * Get available payment methods and configuration
  */
-export async function getConfig(request: NextRequest) {
+async function getConfig(request: NextRequest) {
   try {
     if (!request.nextUrl.pathname.endsWith("/config")) {
       return null;
@@ -265,7 +264,7 @@ export async function getConfig(request: NextRequest) {
  *
  * Verify a payment on the blockchain
  */
-export async function verifyPayment(request: NextRequest) {
+async function verifyPayment(request: NextRequest) {
   try {
     if (
       request.method !== "POST" ||
@@ -331,7 +330,7 @@ function storePaymentRecord(payment: {
   amount: number;
   timestamp: string;
   status: string;
-}): Promise<void> {
+}): void {
   try {
     // Store in appropriate table based on method
     if (payment.method === "pi_network") {
@@ -388,12 +387,3 @@ function getPaymentRecord(paymentIdOrOrderId: string): Promise<{
     }
   });
 }
-
-// Export the main payment route
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "1mb",
-    },
-  },
-};
