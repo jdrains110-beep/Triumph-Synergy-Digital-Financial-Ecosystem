@@ -1,22 +1,7 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
+  "buildCommand": "next build",
   "installCommand": "pnpm install",
-  "env": {
-    "NEXTAUTH_URL": "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app",
-    "NEXTAUTH_SECRET": "@NEXTAUTH_SECRET",
-    "AUTH_SECRET": "@AUTH_SECRET",
-    "PI_API_KEY": "@PI_API_KEY",
-    "PI_INTERNAL_API_KEY": "@PI_INTERNAL_API_KEY",
-    "SUPABASE_URL": "https://triumph-synergy.supabase.co",
-    "SUPABASE_ANON_KEY": "@SUPABASE_ANON_KEY",
-    "STELLAR_HORIZON_URL": "https://horizon.stellar.org",
-    "POSTGRES_URL": "@POSTGRES_URL",
-    "REDIS_URL": "@REDIS_URL",
-    "INTERNAL_PI_MULTIPLIER": "1.5",
-    "INTERNAL_PI_MIN_VALUE": "10.0",
-    "EXTERNAL_PI_MIN_VALUE": "1.0"
-  },
   "headers": [
     {
       "source": "/(.*)",
