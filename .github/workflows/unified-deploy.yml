@@ -133,7 +133,7 @@ jobs:
           [ -f .next/BUILD_ID ] && echo "✅ Build ID exists" || true
       
       - name: Cache build artifacts
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .next
           key: ${{ runner.os }}-nextjs-${{ github.sha }}
@@ -204,7 +204,7 @@ jobs:
       
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: test-results/

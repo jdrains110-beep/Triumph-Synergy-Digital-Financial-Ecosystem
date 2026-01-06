@@ -2,17 +2,30 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 
+/**
+ * CRITICAL: DO NOT MODIFY THE REDIRECT LOGIC BELOW
+ * 
+ * All traffic from Vercel domains MUST redirect to https://triumphsynergy0576.pinet.com/
+ * This is a core routing requirement for Pi App Studio integration.
+ * Any add-ons, features, or modifications must respect this redirect - NO EXCEPTIONS.
+ * 
+ * If you need to add features, add them AFTER the redirect check.
+ */
 export default async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const host = request.headers.get("host") || "";
 
-  // Redirect all Vercel domain traffic to Pi Network domain
+  // ============================================================================
+  // LOCKED REDIRECT: All Vercel URLs → triumphsynergy0576.pinet.com
+  // DO NOT MODIFY - This is non-negotiable for Pi App Studio connectivity
+  // ============================================================================
   if (host.includes("triumph-synergy") && host.includes("vercel.app")) {
     return NextResponse.redirect(
       `https://triumphsynergy0576.pinet.com${pathname}${search}`,
       { status: 307 } // Temporary redirect
     );
   }
+  // ============================================================================
 
   // Allow validation endpoints and skip platform protections
   if (
