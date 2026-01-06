@@ -253,7 +253,7 @@ Response:
             <li>✅ Pi Network account with Pi balance</li>
             <li>✅ Internet connection for blockchain settlement</li>
             <li>✅ Server approval required (prevents unauthorized transactions)</li>
-            <li>✅ Timestamp validation (< 5 minutes old)</li>
+            <li>✅ Timestamp validation (&lt; 5 minutes old)</li>
           </ul>
         </div>
 
