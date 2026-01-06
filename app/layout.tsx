@@ -9,7 +9,7 @@ import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    "https://triumph-synergy-jeremiah-drains-projects.vercel.app"
+    "https://triumphsynergy0576.pinet.com"
   ),
   title: "Triumph Synergy - Pi App Studio",
   description:
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Triumph Synergy - Pi App Studio",
     description: "Advanced payment routing with compliance automation",
-    url: "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+    url: "https://triumphsynergy0576.pinet.com",
     siteName: "Triumph Synergy",
     type: "website",
   },

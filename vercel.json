@@ -2,6 +2,13 @@
   "framework": "nextjs",
   "buildCommand": "next build",
   "installCommand": "pnpm install",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://triumphsynergy0576.pinet.com/:path*",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

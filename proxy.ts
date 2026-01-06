@@ -3,7 +3,16 @@ import { NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 
 export default async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+  const host = request.headers.get("host") || "";
+
+  // Redirect all Vercel domain traffic to Pi Network domain
+  if (host.includes("triumph-synergy") && host.includes("vercel.app")) {
+    return NextResponse.redirect(
+      `https://triumphsynergy0576.pinet.com${pathname}${search}`,
+      { status: 307 } // Temporary redirect
+    );
+  }
 
   // Allow validation endpoints and skip platform protections
   if (
