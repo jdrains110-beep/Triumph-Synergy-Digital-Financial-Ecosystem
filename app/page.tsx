@@ -1,16 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function RootPage() {
   const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Redirect to chat after brief delay
+    // Attempt to redirect to chat, with fallback to loading the chat directly
     const timer = setTimeout(() => {
-      router.replace("/(chat)");
-    }, 500);
+      setIsReady(true);
+      router.replace("/(chat)/");
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [router]);
@@ -24,8 +26,8 @@ export default function RootPage() {
             Advanced Payment Routing & Compliance
           </p>
         </div>
-        <div className="animate-pulse">
-          <p className="text-gray-500 text-sm">Initializing application...</p>
+        <div className={isReady ? "opacity-50" : "animate-pulse"}>
+          <p className="text-gray-500 text-sm">Loading Pi App Studio...</p>
         </div>
       </div>
     </main>
