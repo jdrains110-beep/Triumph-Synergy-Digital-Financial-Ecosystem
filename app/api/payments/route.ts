@@ -387,3 +387,6 @@ function getPaymentRecord(paymentIdOrOrderId: string): Promise<{
     }
   });
 }
+
+// Route segment config for Next.js 13+
+export const maxDuration = 30;

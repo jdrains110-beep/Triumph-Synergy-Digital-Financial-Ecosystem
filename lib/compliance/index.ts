@@ -39,12 +39,10 @@ export class ComplianceOrchestrator {
       // but fall back to noop implementations if unavailable during static builds.
       // Bypass strict constructor signature check during build-time
       // by invoking as any — real args will be supplied at runtime.
-      // @ts-expect-error
       this.mica = new (MICAComplianceService as any)();
     } catch (_e) {
       // Provide lightweight noop fallback to avoid build-time errors
       // while preserving runtime behavior when real services are available.
-      // @ts-expect-error
       this.mica = {
         auditComplianceStatus: async () => ({}),
       } as any;
@@ -54,28 +52,24 @@ export class ComplianceOrchestrator {
       this.iso20022 = new ISO20022ComplianceService();
     } catch (_e) {
       // Fallback stub
-      // @ts-expect-error
       this.iso20022 = { validateFrameworkCompliance: () => ({}) } as any;
     }
 
     try {
       this.kycaml = new KYCAMLComplianceService();
     } catch (_e) {
-      // @ts-expect-error
       this.kycaml = { runAMLScreening: async () => ({}) } as any;
     }
 
     try {
       this.gdpr = new GDPRComplianceService();
     } catch (_e) {
-      // @ts-expect-error
       this.gdpr = { auditDataProtectionCompliance: () => ({}) } as any;
     }
 
     try {
       this.energy = new EnergyEfficiencyComplianceService();
     } catch (_e) {
-      // @ts-expect-error
       this.energy = {
         calculateAnnualCarbonFootprint: () => ({
           totalEmissions: 0,

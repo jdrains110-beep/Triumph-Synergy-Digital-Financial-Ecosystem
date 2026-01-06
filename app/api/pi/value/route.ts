@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import postgres from "postgres";
 import { createClient } from "redis";
 import { Horizon } from "stellar-sdk";
+import { PiSource } from "@/types/pi";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;
@@ -36,11 +37,6 @@ const INTERNAL_PI_MIN_VALUE = Number.parseFloat(
 const EXTERNAL_PI_MIN_VALUE = Number.parseFloat(
   process.env.EXTERNAL_PI_MIN_VALUE || "1.0"
 );
-
-type PiSource =
-  | "internal_mined"
-  | "internal_contributed"
-  | "external_exchange";
 
 type PiPaymentRequest = {
   user_id: string;
