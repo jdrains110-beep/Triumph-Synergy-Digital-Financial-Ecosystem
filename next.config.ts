@@ -7,6 +7,24 @@ const nextConfig: NextConfig = {
         hostname: "avatar.vercel.sh",
       },
     ],
+    unoptimized: process.env.VERCEL === "1", // Disable image optimization on Vercel
+  },
+
+  // Redirect all Vercel URLs to custom domain
+  redirects: async () => {
+    return [
+      {
+        source: "/:path*",
+        destination: "https://triumphsynergy0576.pinet.com/:path*",
+        permanent: false,
+        has: [
+          {
+            type: "host",
+            value: "triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app",
+          },
+        ],
+      },
+    ];
   },
 
   // Platform-aware output configuration
