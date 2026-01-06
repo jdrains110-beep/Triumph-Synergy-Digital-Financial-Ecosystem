@@ -6,6 +6,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import ApplePayProcessor from "@/lib/payments/apple-pay-secondary";
 import PiNetworkPaymentProcessor from "@/lib/payments/pi-network-primary";
 import UnifiedPaymentRouter from "@/lib/payments/unified-routing";
+import { piSdkVerifier } from "@/lib/pi-sdk/pi-sdk-verifier";
 
 // Initialize payment processors
 const router = new UnifiedPaymentRouter();
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as Record<string, unknown>;
 
     // Validate required fields
-    const { method, orderId, amount } = body;
+    const { method, orderId, amount, transactionId } = body;
 
     if (!method || !orderId || !amount) {
       return NextResponse.json(
@@ -62,6 +63,30 @@ export async function POST(request: NextRequest) {
       `[PAYMENT] Received ${method} payment for order ${orderId}: ${amount}`
     );
 
+    // If this is a Pi Network payment from SDK, verify transaction
+    if (method === "pi_network" && transactionId) {
+      console.log(`[PAYMENT] Verifying Pi SDK transaction: ${transactionId}`);
+      
+      const verification = await piSdkVerifier.verifyTransaction(
+        transactionId as string
+      );
+
+      if (!verification.valid) {
+        console.error(`[PAYMENT] ❌ Pi SDK verification failed: ${verification.error}`);
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Payment verification failed: ${verification.error}`,
+          },
+          { status: 402 }
+        );
+      }
+
+      console.log(
+        `[PAYMENT] ✅ Pi SDK transaction verified: ${transactionId}`
+      );
+    }
+
     // Route payment through unified system
     const result = await router.routePayment(method as string, body);
 
@@ -73,6 +98,7 @@ export async function POST(request: NextRequest) {
         processor: result.processor,
         orderId: orderId as string,
         amount: amount as number,
+        transactionId: transactionId as string | undefined,
         timestamp: new Date().toISOString(),
         status: "confirmed",
       });
@@ -88,6 +114,7 @@ export async function POST(request: NextRequest) {
           orderId,
           amount,
           method,
+          transactionId,
         },
       });
     }
@@ -328,15 +355,16 @@ function storePaymentRecord(payment: {
   processor: string;
   orderId: string;
   amount: number;
+  transactionId?: string;
   timestamp: string;
   status: string;
 }): void {
   try {
     // Store in appropriate table based on method
     if (payment.method === "pi_network") {
-      // INSERT INTO pi_payments (payment_id, order_id, amount, status, created_at)
-      // VALUES ($1, $2, $3, $4, $5)
-      console.log(`Stored Pi payment: ${payment.paymentId}`);
+      // INSERT INTO pi_payments (payment_id, order_id, amount, transaction_id, status, created_at)
+      // VALUES ($1, $2, $3, $4, $5, $6)
+      console.log(`Stored Pi payment: ${payment.paymentId} (tx: ${payment.transactionId})`);
     } else if (payment.method === "apple_pay") {
       // INSERT INTO apple_pay_payments (payment_id, order_id, amount, processor, status, created_at)
       // VALUES ($1, $2, $3, $4, $5, $6)
@@ -344,8 +372,8 @@ function storePaymentRecord(payment: {
     }
 
     // Also store in unified payments audit log
-    // INSERT INTO payment_audit (payment_id, method, processor, amount, status, created_at)
-    // VALUES ($1, $2, $3, $4, $5, $6)
+    // INSERT INTO payment_audit (payment_id, method, processor, amount, transaction_id, status, created_at)
+    // VALUES ($1, $2, $3, $4, $5, $6, $7)
   } catch (error) {
     console.error("Failed to store payment record:", error);
     throw error;

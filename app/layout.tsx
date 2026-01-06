@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
@@ -86,6 +87,8 @@ export default function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
+        {/* Pi Network SDK - Version 2.0 */}
+        <script src="https://sdk.minepi.com/pi-sdk.js" async />
       </head>
       <body className="antialiased">
         <ThemeProvider
@@ -95,7 +98,11 @@ export default function RootLayout({
           enableSystem
         >
           <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            <PiProvider>
+              {children}
+            </PiProvider>
+          </SessionProvider>
         </ThemeProvider>
         <Analytics />
       </body>
