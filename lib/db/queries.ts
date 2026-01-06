@@ -42,7 +42,16 @@ import { generateHashedPassword } from "./utils";
 let _db: any = null;
 function getDb() {
   if (!_db) {
-    const client = postgres(process.env.POSTGRES_URL || "");
+    const dbUrl = process.env.POSTGRES_URL;
+    if (!dbUrl) {
+      console.warn("POSTGRES_URL environment variable not configured. Database operations will fail.");
+      // Return a mock database object to prevent runtime crashes
+      return {
+        query: () => Promise.reject(new Error("Database not configured")),
+        select: () => ({ from: () => Promise.reject(new Error("Database not configured")) }),
+      };
+    }
+    const client = postgres(dbUrl);
     _db = drizzle(client);
   }
   return _db;
