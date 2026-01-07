@@ -12,14 +12,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, FileText, Shield } from 'lucide-react';
 
+interface Contract {
+  id: string;
+  type: string;
+  title: string;
+  version: string;
+  content: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ComplianceStatus {
+  esignActCompliant: boolean;
+  uetaCompliant: boolean;
+  hasAuditTrail: boolean;
+  hasActiveConsent: boolean;
+  [key: string]: any;
+}
+
 /**
  * Example: Contract Management Page
  */
 export function ContractManagementPage() {
-  const [contracts, setContracts] = useState([]);
-  const [selectedContract, setSelectedContract] = useState(null);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [selectedContract, setSelectedContract] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [compliance, setCompliance] = useState(null);
+  const [compliance, setCompliance] = useState<ComplianceStatus | null>(null);
 
   // Load user's contracts
   useEffect(() => {
@@ -44,7 +63,7 @@ export function ContractManagementPage() {
     }
   };
 
-  const handleSelectContract = async (contractId) => {
+  const handleSelectContract = async (contractId: string) => {
     setSelectedContract(contractId);
 
     // Load compliance status
@@ -59,7 +78,7 @@ export function ContractManagementPage() {
     }
   };
 
-  const handleExportEvidence = async (contractId) => {
+  const handleExportEvidence = async (contractId: string) => {
     try {
       const response = await fetch(
         `/api/contracts/${contractId}/export`,

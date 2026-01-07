@@ -16,6 +16,7 @@ import {
   contractNotifications,
   contractBulkOperations,
 } from '@/lib/contracts/schema';
+import { and, eq } from 'drizzle-orm';
 
 export async function migrateContractSystem() {
   console.log('Starting contract system migration...');
@@ -325,7 +326,10 @@ By executing this agreement, both parties acknowledge they have read, understand
         .select()
         .from(contractTemplates)
         .where(
-          (t) => t.name === template.name && t.type === template.type
+          and(
+            eq(contractTemplates.name, template.name),
+            eq(contractTemplates.type, template.type)
+          )
         );
 
       if (existing.length === 0) {

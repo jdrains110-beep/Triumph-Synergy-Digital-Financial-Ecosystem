@@ -4,6 +4,7 @@
  */
 
 import crypto from 'crypto';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { contractAuditLogs } from './schema';
 
@@ -181,31 +182,32 @@ export class AuditTrailService {
    * Generate audit report for contract
    */
   static async generateAuditReport(contractId: string): Promise<string> {
-    const logs = await db.query.contractAuditLogs.findMany({
-      where: (table) => table.contractId == contractId,
-    });
+    const logs = await db
+      .select()
+      .from(contractAuditLogs)
+      .where(eq(contractAuditLogs.contractId, contractId));
 
     const report = {
       contractId,
       generatedAt: new Date(),
       totalEvents: logs.length,
-      events: logs.map((log) => ({
+      events: logs.map((log: typeof contractAuditLogs.$inferSelect) => ({
         action: log.action,
         timestamp: log.timestamp,
         userId: log.userId,
         ipAddress: log.ipAddress,
-        location: log.details?.country
-          ? `${log.details.city}, ${log.details.country}`
+        location: (log.details as any)?.country
+          ? `${(log.details as any).city}, ${(log.details as any).country}`
           : 'Unknown',
-        deviceType: log.details?.deviceType,
-        browser: log.details?.browser,
+        deviceType: (log.details as any)?.deviceType,
+        browser: (log.details as any)?.browser,
         screenshotHash: log.screenshot?.hash,
       })),
       summary: {
-        totalSignatures: logs.filter((l) => l.action === 'signed').length,
-        totalAcceptances: logs.filter((l) => l.action === 'accepted').length,
-        totalRejections: logs.filter((l) => l.action === 'rejected').length,
-        totalWithdrawals: logs.filter((l) => l.action === 'withdrawn').length,
+        totalSignatures: logs.filter((l: typeof contractAuditLogs.$inferSelect) => l.action === 'signed').length,
+        totalAcceptances: logs.filter((l: typeof contractAuditLogs.$inferSelect) => l.action === 'accepted').length,
+        totalRejections: logs.filter((l: typeof contractAuditLogs.$inferSelect) => l.action === 'rejected').length,
+        totalWithdrawals: logs.filter((l: typeof contractAuditLogs.$inferSelect) => l.action === 'withdrawn').length,
       },
     };
 

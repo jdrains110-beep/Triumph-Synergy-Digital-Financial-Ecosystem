@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ContractService } from '@/lib/contracts/service';
+import { DocuSignService } from '@/lib/contracts/docusign-service';
 import { db } from '@/lib/db';
 import { contractTemplates } from '@/lib/contracts/schema';
 import { eq } from 'drizzle-orm';
