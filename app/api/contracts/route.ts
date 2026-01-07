@@ -88,6 +88,7 @@ export async function createContract(req: NextRequest) {
         expiryDate: expiryDate ? new Date(expiryDate) : undefined,
         status: ContractStatus.DRAFT,
         tags: tags || [],
+        createdBy: userId,
       },
       userId
     );

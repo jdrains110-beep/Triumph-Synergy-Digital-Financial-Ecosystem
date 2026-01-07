@@ -268,7 +268,7 @@ export class ContractService {
    * Log audit event with optional screenshot verification
    */
   static async logAuditEvent(
-    data: Omit<AuditLog, 'id' | 'timestamp'> & {
+    data: Omit<AuditLog, 'id' | 'timestamp' | 'ipAddress' | 'userAgent'> & {
       ipAddress?: string;
       userAgent?: string;
     }
@@ -369,8 +369,10 @@ export class ContractService {
         htmlContent: undefined,
         jurisdiction: tmpl.jurisdiction,
         effectiveDate: new Date(),
+        expiryDate: undefined,
         status: ContractStatus.DRAFT,
         tags: [tmpl.category, tmpl.industry || ''].filter(Boolean),
+        createdBy: createdByUserId,
       },
       createdByUserId
     );

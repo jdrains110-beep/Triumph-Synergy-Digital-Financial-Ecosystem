@@ -31,6 +31,28 @@ interface ComplianceStatus {
   [key: string]: any;
 }
 
+interface AuditLogEntry {
+  id: string;
+  action: string;
+  timestamp: string | Date;
+  userId: string;
+  ipAddress: string;
+  userAgent: string;
+  details?: {
+    deviceType?: string;
+    city?: string;
+    country?: string;
+    browser?: string;
+    platform?: string;
+    [key: string]: any;
+  };
+  screenshot?: {
+    hash: string;
+    timestamp: string | Date;
+    description: string;
+  };
+}
+
 /**
  * Example: Contract Management Page
  */
@@ -271,7 +293,7 @@ export function ContractManagementPage() {
  * Audit Trail Viewer Component
  */
 function ContractAuditTrailViewer({ contractId }: { contractId: string }) {
-  const [auditLogs, setAuditLogs] = useState([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
