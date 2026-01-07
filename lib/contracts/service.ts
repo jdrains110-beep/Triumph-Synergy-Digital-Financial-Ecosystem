@@ -366,6 +366,7 @@ export class ContractService {
         title: `${tmpl.name} - ${new Date().toISOString()}`,
         version: tmpl.version,
         content,
+        htmlContent: undefined,
         jurisdiction: tmpl.jurisdiction,
         effectiveDate: new Date(),
         status: ContractStatus.DRAFT,
