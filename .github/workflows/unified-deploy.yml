@@ -124,6 +124,7 @@ jobs:
           NEXT_PUBLIC_VERSION: ${{ steps.meta.outputs.version }}
           NEXT_PUBLIC_BUILD_TIME: ${{ steps.meta.outputs.timestamp }}
           # Database: Use dummy values for build (actual connections at runtime)
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
           POSTGRES_URL: postgresql://dummy:dummy@localhost:5432/dummy
           REDIS_URL: redis://localhost:6379
           # Auth: Build doesn't need real secrets
@@ -217,6 +218,7 @@ jobs:
 
       - name: Run integration tests
         env:
+          DATABASE_URL: postgresql://postgres:testpass@localhost:5432/test_triumph
           POSTGRES_URL: postgresql://postgres:testpass@localhost:5432/test_triumph
           REDIS_URL: redis://localhost:6379
           AUTH_SECRET: test-secret-min-32-chars-long-string

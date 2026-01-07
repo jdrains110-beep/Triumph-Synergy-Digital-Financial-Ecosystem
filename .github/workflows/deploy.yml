@@ -78,6 +78,7 @@ jobs:
     - name: Run tests
       continue-on-error: true
       env:
+        DATABASE_URL: postgresql://postgres:password@localhost:5432/test
         POSTGRES_URL: postgresql://postgres:password@localhost:5432/test
         REDIS_URL: redis://localhost:6379
         PLAYWRIGHT: true

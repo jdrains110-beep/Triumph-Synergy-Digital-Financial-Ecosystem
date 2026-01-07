@@ -20,6 +20,7 @@ jobs:
       - name: Build
         env:
           # Provide production-ready environment variables for build
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
           POSTGRES_URL: postgresql://dummy:dummy@localhost:5432/dummy
           AUTH_SECRET: production-auth-secret-32-chars-minimum-secure-key
           NEXTAUTH_SECRET: production-nextauth-secret-32-chars-minimum-secure
