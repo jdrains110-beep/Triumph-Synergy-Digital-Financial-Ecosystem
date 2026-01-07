@@ -21,17 +21,19 @@ export async function POST(request: NextRequest) {
     // In production, verify attestation using WebAuthn service
     // Store credential in database
     const registeredCredential = {
+      id: `cred_${Date.now()}`,
       credentialId: credential.id,
       userId,
       biometricType: biometricType || 'faceID',
       publicKey: credential.response?.getPublicKey?.(),
+      type: 'public-key' as const,
       createdAt: new Date(),
     };
 
     return NextResponse.json(
       {
         id: registeredCredential.id,
-        credentialId: Array.from(new Uint8Array(registeredCredential.credentialId)),
+        credentialId: registeredCredential.credentialId,
         biometricType: registeredCredential.biometricType,
         type: registeredCredential.type,
         deviceName: deviceName || "Unknown Device",

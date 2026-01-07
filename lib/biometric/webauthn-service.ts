@@ -7,10 +7,8 @@
 
 import { base64url } from '@/lib/utils/base64url';
 
-// WebAuthn Type Aliases
+// WebAuthn Type Aliases - only for types not in DOM
 type AttestationConveyanceFormat = 'direct' | 'indirect' | 'none' | 'enterprise';
-type AuthenticatorAttachment = 'platform' | 'cross-platform';
-type AuthenticatorTransport = 'usb' | 'nfc' | 'ble' | 'internal' | 'hybrid' | 'platform';
 
 // WebAuthn Types
 export interface WebAuthnOptions {
@@ -166,8 +164,11 @@ export class WebAuthnService {
     }
 
     const publicKey = base64url.fromBuffer(publicKeyBuffer);
-    const aaguidBuffer = new Uint8Array(attestationObject.authData.aaguid as any);
-    const aaguid = this.bufferToHex(aaguidBuffer);
+    const aaguidData = attestationObject.authData.aaguid;
+    const aaguidBuffer = aaguidData instanceof ArrayBuffer 
+      ? new Uint8Array(aaguidData) 
+      : new Uint8Array(aaguidData as unknown as ArrayBuffer);
+    const aaguid = this.bufferToHex(aaguidBuffer.buffer.slice(aaguidBuffer.byteOffset, aaguidBuffer.byteOffset + aaguidBuffer.byteLength));
 
     return {
       id: credentialId,
@@ -196,13 +197,10 @@ export class WebAuthnService {
       userVerification: 'preferred',
       rpId: this.rpId,
       allowCredentials: userCredentials.map((cred) => ({
-        type: 'public-key',
+        type: 'public-key' as const,
         id: base64url.toBuffer(cred.id),
-        transports: cred.transports,
+        transports: cred.transports as AuthenticatorTransport[],
       })),
-      extensions: {
-        hmacSecret: true,
-      },
     };
   }
 
@@ -270,11 +268,11 @@ export class WebAuthnService {
    */
   static isWebAuthnSupported(): boolean {
     if (typeof window === 'undefined') return false;
-    return !!(
+    return Boolean(
       window.PublicKeyCredential &&
       window.navigator.credentials &&
-      window.navigator.credentials.create &&
-      window.navigator.credentials.get
+      typeof window.navigator.credentials.create === 'function' &&
+      typeof window.navigator.credentials.get === 'function'
     );
   }
 
@@ -450,7 +448,7 @@ export async function registerBiometric(
     response: {
       clientDataJSON: arrayBufferToBase64url(response.clientDataJSON),
       attestationObject: arrayBufferToBase64url(response.attestationObject),
-      transports: response.getTransports(),
+      transports: (response.getTransports?.() || []) as AuthenticatorTransport[],
     },
     type: credential.type,
   };

@@ -17,7 +17,6 @@ if (!databaseUrl) {
 const client = postgres(databaseUrl, {
   prepare: false, // Disable prepared statements for serverless
   connect_timeout: 10, // 10 second connection timeout
-  idle_in_transaction_session_timeout: 30000, // 30 second idle timeout
 });
 
 // Create Drizzle ORM instance with schema
