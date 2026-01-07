@@ -3,7 +3,7 @@
  * Run with: npm run db:migrate
  */
 
-import { db } from './index';
+import { db } from '@/lib/db';
 import {
   contracts,
   contractSignatures,

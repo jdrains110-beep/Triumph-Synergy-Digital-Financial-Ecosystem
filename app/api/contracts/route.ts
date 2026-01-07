@@ -288,7 +288,7 @@ export async function recordConsent(
     const { contractId } = params;
     const userId = req.headers.get('x-user-id');
     const email = req.headers.get('x-user-email');
-    const ipAddress = req.headers.get('x-forwarded-for') || req.ip || '0.0.0.0';
+    const ipAddress = req.headers.get('x-forwarded-for') || '0.0.0.0';
     const userAgent = req.headers.get('user-agent') || 'Unknown';
 
     if (!userId || !email) {
@@ -425,7 +425,7 @@ export async function exportContract(
       contractId,
       userId,
       {
-        ipAddress: req.headers.get('x-forwarded-for') || req.ip || '0.0.0.0',
+        ipAddress: req.headers.get('x-forwarded-for') || '0.0.0.0',
         userAgent: req.headers.get('user-agent') || 'Unknown',
         platform: 'web',
         browser: 'unknown',
