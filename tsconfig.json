@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -14,24 +18,41 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "skipDefaultLibCheck": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     },
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "tsBuildInfoFile": ".next/.tsbuildinfo"
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "next.config.js",
-    ".next\\dev/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "tests/**", "**/*.test.ts", "**/*.test.tsx", "lib/ai/models.test.ts", "lib/p2p/**", "lib/payments/pi-network-primary.ts", "lib/payments/unified-routing.ts"]
+  "exclude": [
+    "node_modules",
+    "tests/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "lib/ai/models.test.ts",
+    "lib/p2p/**",
+    "lib/payments/pi-network-primary.ts",
+    "lib/payments/unified-routing.ts",
+    ".next",
+    "dist",
+    "out"
+  ]
 }

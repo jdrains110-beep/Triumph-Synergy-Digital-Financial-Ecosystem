@@ -22,7 +22,7 @@ Triumph Synergy is a multi-cloud financial ecosystem that integrates Pi Network 
 
 ### Setup
 
-\\\ash
+```bash
 git clone https://github.com/jdrains110-beep/triumph-synergy.git
 cd triumph-synergy
 pnpm install
@@ -30,9 +30,9 @@ cp .env.example .env.local
 pnpm db:start
 pnpm db:migrate
 pnpm dev
-\\\
+```
 
-App runs on http://localhost:3000
+App runs on <http://localhost:3000>
 
 ## Deployment
 
@@ -46,11 +46,11 @@ VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID, SUPABASE_ANON_KEY
 
 ## Database
 
-\\\ash
+```bash
 pnpm db:generate
 pnpm db:migrate
 pnpm db:studio
-\\\
+```
 
 ## License
 

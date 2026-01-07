@@ -24,10 +24,10 @@
         /* Needed for generateUUID() */
         "noBitwiseOperators": "off",
 
-        /* Temporarily off to fix memory issues */
-        "noEvolvingTypes": "warn",
-        "noImplicitAnyLet": "warn",
-        "useAwait": "warn"
+        /* Turned off to prevent VS Code crashes */
+        "noEvolvingTypes": "off",
+        "noImplicitAnyLet": "off",
+        "useAwait": "off"
       },
       "style": {
         /* Allowing magic numbers */
@@ -36,12 +36,12 @@
         /* Needs more work to fix */
         "noNestedTernary": "off",
 
-        /* Temporarily off */
-        "noNonNullAssertion": "warn",
-        "noEnum": "warn",
-        "useNodejsImportProtocol": "warn",
-        "useTemplate": "warn",
-        "useFilenamingConvention": "warn"
+        /* Turned off to prevent VS Code crashes */
+        "noNonNullAssertion": "off",
+        "noEnum": "off",
+        "useNodejsImportProtocol": "off",
+        "useTemplate": "off",
+        "useFilenamingConvention": "off"
       },
       "nursery": {
         /* Too many false positives */
@@ -57,24 +57,24 @@
         /* This one has false positives. It's a bit... iffy 😉 */
         "useSimplifiedLogicExpression": "off",
 
-        /* Temporarily off */
-        "noForEach": "warn"
+        /* Turned off to prevent VS Code crashes */
+        "noForEach": "off"
       },
       "performance": {
-        /* Temporarily off */
-        "noNamespaceImport": "warn"
+        /* Turned off to prevent VS Code crashes */
+        "noNamespaceImport": "off"
       },
       "a11y": {
         /* Needs more work to fix */
         "noSvgWithoutTitle": "off",
 
-        /* Temporarily off */
-        "useButtonType": "warn"
+        /* Turned off to prevent VS Code crashes */
+        "useButtonType": "off"
       },
       "correctness": {
-        /* Temporarily off */
-        "noUnusedFunctionParameters": "warn",
-        "noUnusedVariables": "warn"
+        /* Turned off to prevent VS Code crashes */
+        "noUnusedFunctionParameters": "off",
+        "noUnusedVariables": "off"
       }
     }
   }

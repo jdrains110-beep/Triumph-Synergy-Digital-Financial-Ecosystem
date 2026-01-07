@@ -1,7 +1,11 @@
 {
   "recommendations": [
     "biomejs.biome",
-    "ms-azuretools.vscode-azureterraform",
+    "ms-vscode.vscode-typescript-next",
+    "dbaeumer.vscode-eslint"
+  ],
+  "unwantedRecommendations": [
+    "GitHub.copilot-chat",
     "firefox-devtools.vscode-firefox-debug"
   ]
 }

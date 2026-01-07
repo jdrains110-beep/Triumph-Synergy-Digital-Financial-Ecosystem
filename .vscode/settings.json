@@ -1,5 +1,4 @@
 {
-  "editor.defaultFormatter": "GitHub.copilot-chat",
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -25,15 +24,36 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferGoToProjectRootOnDefinition": true,
   "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
   "emmet.showExpandedAbbreviation": "never",
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
+  "editor.codeActions.triggerOnFocusChange": false,
+  "files.autoSave": "off",
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true,
+    "**/out/**": true,
+    "**/.git/**": true
+  },
+  "editor.maxTokensPerLine": 10000,
+  "editor.wordBasedSuggestions": "off",
+  "editor.quickSuggestions": {
+    "other": false,
+    "comments": false,
+    "strings": false
+  },
   "DockerRun.DisableDockerrc": true,
-  "editor.codeActions.triggerOnFocusChange": true,
-  "files.autoSave": "afterDelay",
-  "DockerRun.DisableAutoGenerateConfig": true
+  "DockerRun.DisableAutoGenerateConfig": true,
+  "extensions.ignoreRecommendations": false,
+  "[markdown]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
 }

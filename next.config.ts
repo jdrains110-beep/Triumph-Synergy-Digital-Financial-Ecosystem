@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       },
     ],
     unoptimized: process.env.VERCEL === "1", // Disable image optimization on Vercel
+    minimumCacheTTL: 31536000,
   },
 
   // Platform-aware output configuration
@@ -26,6 +27,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
+    optimizePackageImports: ["@radix-ui/react-dialog", "sonner"],
   },
 
   // Ensure database connections aren't attempted during build
@@ -48,10 +50,44 @@ const nextConfig: NextConfig = {
         },
       ];
     }
+
+    // Ensure proper memory usage during build
+    config.optimization = config.optimization || {};
+    config.optimization.splitChunks = {
+      chunks: "all",
+      cacheGroups: {
+        default: false,
+        vendors: false,
+      },
+    };
+
     return config;
   },
-  // Provide an explicit (empty) turbopack config to avoid Turbopack detection
-  turbopack: {},
+
+  // Turbopack configuration
+  turbopack: {
+    resolveAlias: {
+      "@": "./*",
+    },
+  },
+
+  // Prevent potential issues with trailing slashes
+  trailingSlash: false,
+
+  // Ensure proper headers for caching
+  headers: async () => {
+    return [
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
