@@ -48,6 +48,20 @@ services:
     container_name: triumph-app
     ports:
       - "3000:3000"
+      # Pi Network Node Ports (Supernode Communication)
+      - "31400:31400"
+      - "31401:31401"
+      - "31402:31402"
+      - "31403:31403"
+      - "31404:31404"
+      - "31405:31405"
+      - "31406:31406"
+      - "31407:31407"
+      - "31408:31408"
+      - "31409:31409"
+      # Stellar Core Ports
+      - "11625:11625"
+      - "11626:11626"
     environment:
       - DOMAIN_VALIDATION_KEY=75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc833adeeecdce9240b4cbc10faaed93a3
       - FRONTEND_URL=https://triumphsynergy0576.pinet.com
@@ -64,6 +78,11 @@ services:
       - PI_API_KEY=production-pi-api-key-placeholder
       - PI_INTERNAL_API_KEY=production-pi-internal-api-key-placeholder
       - STELLAR_HORIZON_URL=https://horizon.stellar.org
+      # Pi Network Supernode Configuration
+      - PI_SUPERNODE_ADDRESS=GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      - STELLAR_NETWORK_PASSPHRASE=Public Global Stellar Network ; September 2015
+      - PI_NODE_PORTS=31400-31409
+      - PI_SUPERNODE_MODE=true
       - GITHUB_WEBHOOK_SECRET=production-github-webhook-secret-placeholder
       - NODE_ENV=production
       - INTERNAL_PI_MULTIPLIER=1.5
