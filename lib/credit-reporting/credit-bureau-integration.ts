@@ -17,7 +17,7 @@
 // TYPES & INTERFACES
 // ============================================================================
 
-export type CreditBureau = 
+export type CreditBureau =
   | "equifax"
   | "experian"
   | "transunion"
@@ -188,7 +188,12 @@ export interface CreditSummary {
 export interface CreditReportingPayload {
   consumerId: string;
   bureau: CreditBureau;
-  reportType: "account-update" | "new-account" | "inquiry" | "dispute" | "closure";
+  reportType:
+    | "account-update"
+    | "new-account"
+    | "inquiry"
+    | "dispute"
+    | "closure";
   data: Record<string, unknown>;
   timestamp: Date;
   submitterId: string;
@@ -264,7 +269,7 @@ export class CreditBureauIntegration {
     // For now, generate a realistic sample report
 
     const report = this.generateSampleReport(consumerId, bureau, scoreModel);
-    
+
     // Store report
     const existingReports = this.reports.get(consumerId) || [];
     existingReports.push(report);
@@ -277,7 +282,11 @@ export class CreditBureauIntegration {
     consumerId: string,
     ssn: string,
     scoreModel: ScoreModel = "FICO8"
-  ): Promise<{ equifax: CreditReport; experian: CreditReport; transunion: CreditReport }> {
+  ): Promise<{
+    equifax: CreditReport;
+    experian: CreditReport;
+    transunion: CreditReport;
+  }> {
     const [equifax, experian, transunion] = await Promise.all([
       this.pullCreditReport(consumerId, ssn, "equifax", scoreModel),
       this.pullCreditReport(consumerId, ssn, "experian", scoreModel),
@@ -291,11 +300,19 @@ export class CreditBureauIntegration {
   // CREDIT REPORTING (FURNISHING DATA)
   // ==========================================================================
 
-  async reportToAllBureaus(payload: Omit<CreditReportingPayload, "bureau" | "timestamp">): Promise<{
-    results: Record<CreditBureau, { success: boolean; confirmationId: string | null }>;
+  async reportToAllBureaus(
+    payload: Omit<CreditReportingPayload, "bureau" | "timestamp">
+  ): Promise<{
+    results: Record<
+      CreditBureau,
+      { success: boolean; confirmationId: string | null }
+    >;
   }> {
     const bureaus: CreditBureau[] = ["equifax", "experian", "transunion"];
-    const results: Record<CreditBureau, { success: boolean; confirmationId: string | null }> = {
+    const results: Record<
+      CreditBureau,
+      { success: boolean; confirmationId: string | null }
+    > = {
       equifax: { success: false, confirmationId: null },
       experian: { success: false, confirmationId: null },
       transunion: { success: false, confirmationId: null },
@@ -407,7 +424,10 @@ export class CreditBureauIntegration {
     consumerId: string,
     bureaus: CreditBureau[] = ["equifax", "experian", "transunion"]
   ): Promise<Record<CreditBureau, { success: boolean; pin: string | null }>> {
-    const results: Record<CreditBureau, { success: boolean; pin: string | null }> = {
+    const results: Record<
+      CreditBureau,
+      { success: boolean; pin: string | null }
+    > = {
       equifax: { success: false, pin: null },
       experian: { success: false, pin: null },
       transunion: { success: false, pin: null },
@@ -492,7 +512,7 @@ export class CreditBureauIntegration {
     // This creates a new category of crypto-financial creditworthiness
 
     const validActivities = activities.filter((a) => a.verified);
-    
+
     for (const activity of validActivities) {
       await this.reportToBureau({
         consumerId,
@@ -528,7 +548,7 @@ export class CreditBureauIntegration {
     scoreModel: ScoreModel
   ): CreditReport {
     const baseScore = 680 + Math.floor(Math.random() * 100);
-    
+
     return {
       id: `report-${bureau}-${Date.now()}`,
       bureau,
@@ -538,13 +558,13 @@ export class CreditBureauIntegration {
       scoreModel,
       tradelines: [
         {
-          id: `tl-1`,
+          id: "tl-1",
           creditorName: "Bank of America",
           accountNumber: "****1234",
           accountType: "revolving",
           status: "current",
           balance: 2500,
-          creditLimit: 10000,
+          creditLimit: 10_000,
           highBalance: 5000,
           monthlyPayment: 100,
           openDate: new Date("2020-01-15"),
@@ -554,14 +574,14 @@ export class CreditBureauIntegration {
           disputeStatus: null,
         },
         {
-          id: `tl-2`,
+          id: "tl-2",
           creditorName: "Chase Auto",
           accountNumber: "****5678",
           accountType: "installment",
           status: "current",
-          balance: 15000,
+          balance: 15_000,
           creditLimit: 0,
-          highBalance: 25000,
+          highBalance: 25_000,
           monthlyPayment: 450,
           openDate: new Date("2022-06-01"),
           lastActivityDate: new Date(),
@@ -609,8 +629,8 @@ export class CreditBureauIntegration {
         totalAccounts: 2,
         openAccounts: 2,
         closedAccounts: 0,
-        totalBalance: 17500,
-        totalCreditLimit: 10000,
+        totalBalance: 17_500,
+        totalCreditLimit: 10_000,
         utilizationRate: 0.25,
         oldestAccountAge: 48,
         averageAccountAge: 30,
@@ -640,7 +660,9 @@ export class CreditBureauIntegration {
   }
 
   private generateSecurityPin(): string {
-    return Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)).join("");
+    return Array.from({ length: 10 }, () =>
+      Math.floor(Math.random() * 10)
+    ).join("");
   }
 }
 
@@ -673,7 +695,11 @@ export const creditBureauEngine = CreditBureauIntegration.getInstance();
 export async function pullCreditReports(
   consumerId: string,
   ssn: string
-): Promise<{ equifax: CreditReport; experian: CreditReport; transunion: CreditReport }> {
+): Promise<{
+  equifax: CreditReport;
+  experian: CreditReport;
+  transunion: CreditReport;
+}> {
   return creditBureauEngine.pullTriMergeReport(consumerId, ssn);
 }
 
@@ -709,5 +735,9 @@ export async function reportPiPayments(
   piUserId: string,
   activities: PiNetworkCreditActivity[]
 ): Promise<{ success: boolean; score_impact: number }> {
-  return creditBureauEngine.reportPiNetworkActivity(consumerId, piUserId, activities);
+  return creditBureauEngine.reportPiNetworkActivity(
+    consumerId,
+    piUserId,
+    activities
+  );
 }

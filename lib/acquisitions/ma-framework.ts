@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Mergers & Acquisitions Framework
- * 
+ *
  * Enterprise-grade company buyout and framework integration system
  * Handles due diligence, valuation, acquisition workflow, and integration
- * 
+ *
  * @module lib/acquisitions/ma-framework
  * @version 1.0.0
  */
@@ -26,18 +26,18 @@ export interface Company {
   taxId: string;
   jurisdiction: string;
   entityType: EntityType;
-  
+
   // Details
   industry: string;
   sector: string;
   founded: Date;
   headquarters: CompanyAddress;
   employees: number;
-  
+
   // Leadership
   executives: Executive[];
   boardMembers: BoardMember[];
-  
+
   // Financial
   revenue: number;
   netIncome: number;
@@ -45,27 +45,27 @@ export interface Company {
   totalLiabilities: number;
   equity: number;
   fiscalYearEnd: string;
-  
+
   // Valuation
   marketCap: number;
   enterpriseValue: number;
   sharesOutstanding: number;
   sharePrice: number;
-  
+
   // Tech Stack
   techStack: TechAsset[];
   intellectualProperty: IntellectualProperty[];
-  
+
   // Operations
   products: Product[];
   customers: number;
   contracts: Contract[];
-  
+
   // Status
   publiclyTraded: boolean;
   ticker: string | null;
   exchange: string | null;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -195,41 +195,41 @@ export interface Acquisition {
   dealName: string;
   type: AcquisitionType;
   status: AcquisitionStatus;
-  
+
   // Parties
   acquirer: string; // Company ID
   target: string; // Company ID
-  
+
   // Deal Terms
   dealValue: number;
   dealValueInPi: number;
   paymentStructure: PaymentStructure;
   earnout: Earnout | null;
-  
+
   // Valuation
   valuation: Valuation;
-  
+
   // Due Diligence
   dueDiligence: DueDiligence;
-  
+
   // Timeline
   loi: { signed: boolean; date: Date | null };
   definitive: { signed: boolean; date: Date | null };
   regulatory: { approved: boolean; date: Date | null };
   closing: { completed: boolean; date: Date | null };
-  
+
   // Integration
   integrationPlan: IntegrationPlan | null;
-  
+
   // Team
   dealTeam: DealTeamMember[];
-  
+
   // Documents
   documents: DealDocument[];
-  
+
   // Notes
   notes: DealNote[];
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -340,7 +340,7 @@ export interface DueDiligence {
   status: "not-started" | "in-progress" | "completed";
   startDate: Date | null;
   endDate: Date | null;
-  
+
   // Areas
   financial: DDArea;
   legal: DDArea;
@@ -350,12 +350,12 @@ export interface DueDiligence {
   hr: DDArea;
   commercial: DDArea;
   environmental: DDArea;
-  
+
   // Findings
   redFlags: DDFinding[];
   yellowFlags: DDFinding[];
   greenFlags: DDFinding[];
-  
+
   // Data Room
   dataRoomUrl: string | null;
   dataRoomAccess: DataRoomAccess[];
@@ -394,28 +394,28 @@ export interface IntegrationPlan {
   id: string;
   name: string;
   status: "planning" | "in-progress" | "completed";
-  
+
   // Timeline
   day1Plan: IntegrationMilestone[];
   first30Days: IntegrationMilestone[];
   first90Days: IntegrationMilestone[];
   first180Days: IntegrationMilestone[];
-  
+
   // Workstreams
   workstreams: IntegrationWorkstream[];
-  
+
   // Synergies
   synergies: Synergy[];
   totalSynergies: number;
   synergiesRealized: number;
-  
+
   // Costs
   integrationBudget: number;
   integrationSpend: number;
-  
+
   // Risks
   risks: IntegrationRisk[];
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -530,7 +530,7 @@ export interface DealNote {
 
 export class MAFramework {
   private static instance: MAFramework;
-  
+
   private companies: Map<string, Company> = new Map();
   private acquisitions: Map<string, Acquisition> = new Map();
   private integrationPlans: Map<string, IntegrationPlan> = new Map();
@@ -568,15 +568,15 @@ export class MAFramework {
       employees: 50,
       executives: [],
       boardMembers: [],
-      revenue: 10000000,
-      netIncome: 2000000,
-      totalAssets: 50000000,
-      totalLiabilities: 10000000,
-      equity: 40000000,
+      revenue: 10_000_000,
+      netIncome: 2_000_000,
+      totalAssets: 50_000_000,
+      totalLiabilities: 10_000_000,
+      equity: 40_000_000,
       fiscalYearEnd: "December",
-      marketCap: 100000000,
-      enterpriseValue: 110000000,
-      sharesOutstanding: 10000000,
+      marketCap: 100_000_000,
+      enterpriseValue: 110_000_000,
+      sharesOutstanding: 10_000_000,
       sharePrice: 10,
       techStack: [
         {
@@ -592,7 +592,7 @@ export class MAFramework {
           documentation: "https://docs.triumphsynergy.com",
           status: "active",
           maintainers: 10,
-          linesOfCode: 250000,
+          linesOfCode: 250_000,
           lastUpdate: new Date(),
         },
       ],
@@ -603,14 +603,14 @@ export class MAFramework {
           name: "Universal Basic Income Engine",
           description: "Pi-powered UBI distribution system",
           category: "Financial Services",
-          revenue: 2000000,
-          users: 100000,
-          mrr: 166667,
+          revenue: 2_000_000,
+          users: 100_000,
+          mrr: 166_667,
           churnRate: 2,
           status: "active",
         },
       ],
-      customers: 100000,
+      customers: 100_000,
       contracts: [],
       publiclyTraded: false,
       ticker: null,
@@ -626,7 +626,9 @@ export class MAFramework {
   // COMPANY MANAGEMENT
   // ==========================================================================
 
-  async addCompany(companyData: Omit<Company, "id" | "createdAt" | "updatedAt">): Promise<Company> {
+  async addCompany(
+    companyData: Omit<Company, "id" | "createdAt" | "updatedAt">
+  ): Promise<Company> {
     const id = `company-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const company: Company = {
@@ -655,22 +657,26 @@ export class MAFramework {
     let companies = Array.from(this.companies.values());
 
     if (query.industry) {
-      companies = companies.filter(c => c.industry.toLowerCase().includes(query.industry!.toLowerCase()));
+      companies = companies.filter((c) =>
+        c.industry.toLowerCase().includes(query.industry!.toLowerCase())
+      );
     }
     if (query.sector) {
-      companies = companies.filter(c => c.sector.toLowerCase().includes(query.sector!.toLowerCase()));
+      companies = companies.filter((c) =>
+        c.sector.toLowerCase().includes(query.sector!.toLowerCase())
+      );
     }
     if (query.revenueMin !== undefined) {
-      companies = companies.filter(c => c.revenue >= query.revenueMin!);
+      companies = companies.filter((c) => c.revenue >= query.revenueMin!);
     }
     if (query.revenueMax !== undefined) {
-      companies = companies.filter(c => c.revenue <= query.revenueMax!);
+      companies = companies.filter((c) => c.revenue <= query.revenueMax!);
     }
     if (query.employeesMin !== undefined) {
-      companies = companies.filter(c => c.employees >= query.employeesMin!);
+      companies = companies.filter((c) => c.employees >= query.employeesMin!);
     }
     if (query.employeesMax !== undefined) {
-      companies = companies.filter(c => c.employees <= query.employeesMax!);
+      companies = companies.filter((c) => c.employees <= query.employeesMax!);
     }
 
     return companies;
@@ -680,7 +686,10 @@ export class MAFramework {
   // VALUATION
   // ==========================================================================
 
-  async performValuation(companyId: string, method: ValuationMethod): Promise<Valuation> {
+  async performValuation(
+    companyId: string,
+    method: ValuationMethod
+  ): Promise<Valuation> {
     const company = this.companies.get(companyId);
     if (!company) {
       throw new Error("Company not found");
@@ -698,25 +707,29 @@ export class MAFramework {
       case "ebitda-multiple":
         enterpriseValue = ebitda * 12; // 12x EBITDA
         break;
-      case "dcf":
+      case "dcf": {
         // Simplified DCF
         const growthRate = 0.15;
-        const discountRate = 0.10;
+        const discountRate = 0.1;
         const terminalGrowth = 0.03;
         let npv = 0;
         for (let i = 1; i <= 5; i++) {
-          const cf = ebitda * Math.pow(1 + growthRate, i);
-          npv += cf / Math.pow(1 + discountRate, i);
+          const cf = ebitda * (1 + growthRate) ** i;
+          npv += cf / (1 + discountRate) ** i;
         }
-        const terminalValue = (ebitda * Math.pow(1 + growthRate, 5) * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
-        npv += terminalValue / Math.pow(1 + discountRate, 5);
+        const terminalValue =
+          (ebitda * (1 + growthRate) ** 5 * (1 + terminalGrowth)) /
+          (discountRate - terminalGrowth);
+        npv += terminalValue / (1 + discountRate) ** 5;
         enterpriseValue = npv;
         break;
+      }
       default:
         enterpriseValue = company.enterpriseValue;
     }
 
-    equityValue = enterpriseValue - company.totalLiabilities + (company.totalAssets * 0.1); // Cash adjustment
+    equityValue =
+      enterpriseValue - company.totalLiabilities + company.totalAssets * 0.1; // Cash adjustment
 
     const valuation: Valuation = {
       method,
@@ -728,14 +741,19 @@ export class MAFramework {
         peRatio: equityValue / company.netIncome,
         pbRatio: equityValue / company.equity,
       },
-      dcf: method === "dcf" ? {
-        projectionYears: 5,
-        discountRate: 0.10,
-        terminalGrowthRate: 0.03,
-        projectedCashFlows: Array(5).fill(0).map((_, i) => ebitda * Math.pow(1.15, i + 1)),
-        terminalValue: enterpriseValue * 0.6,
-        presentValue: enterpriseValue,
-      } : null,
+      dcf:
+        method === "dcf"
+          ? {
+              projectionYears: 5,
+              discountRate: 0.1,
+              terminalGrowthRate: 0.03,
+              projectedCashFlows: Array(5)
+                .fill(0)
+                .map((_, i) => ebitda * 1.15 ** (i + 1)),
+              terminalValue: enterpriseValue * 0.6,
+              presentValue: enterpriseValue,
+            }
+          : null,
       comparables: [],
       premiumDiscount: 0,
       notes: `Valuation performed using ${method} method`,
@@ -763,7 +781,10 @@ export class MAFramework {
     const id = `acquisition-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     // Perform initial valuation
-    const valuation = await this.performValuation(data.targetId, "ebitda-multiple");
+    const valuation = await this.performValuation(
+      data.targetId,
+      "ebitda-multiple"
+    );
 
     const acquisition: Acquisition = {
       id,
@@ -781,14 +802,62 @@ export class MAFramework {
         status: "not-started",
         startDate: null,
         endDate: null,
-        financial: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
-        legal: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
-        tax: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
-        operational: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
-        technology: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
-        hr: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
-        commercial: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
-        environmental: { status: "not-started", lead: "", findings: [], documents: [], completionPercent: 0 },
+        financial: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
+        legal: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
+        tax: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
+        operational: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
+        technology: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
+        hr: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
+        commercial: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
+        environmental: {
+          status: "not-started",
+          lead: "",
+          findings: [],
+          documents: [],
+          completionPercent: 0,
+        },
         redFlags: [],
         yellowFlags: [],
         greenFlags: [],
@@ -815,7 +884,10 @@ export class MAFramework {
     return this.acquisitions.get(acquisitionId) || null;
   }
 
-  async updateAcquisitionStatus(acquisitionId: string, status: AcquisitionStatus): Promise<Acquisition> {
+  async updateAcquisitionStatus(
+    acquisitionId: string,
+    status: AcquisitionStatus
+  ): Promise<Acquisition> {
     const acquisition = this.acquisitions.get(acquisitionId);
     if (!acquisition) {
       throw new Error("Acquisition not found");
@@ -856,7 +928,10 @@ export class MAFramework {
     return acquisition.dueDiligence;
   }
 
-  async addDDFinding(acquisitionId: string, finding: Omit<DDFinding, "id" | "resolved">): Promise<DDFinding> {
+  async addDDFinding(
+    acquisitionId: string,
+    finding: Omit<DDFinding, "id" | "resolved">
+  ): Promise<DDFinding> {
     const acquisition = this.acquisitions.get(acquisitionId);
     if (!acquisition) {
       throw new Error("Acquisition not found");
@@ -889,12 +964,15 @@ export class MAFramework {
   // INTEGRATION
   // ==========================================================================
 
-  async createIntegrationPlan(acquisitionId: string, planData: {
-    name: string;
-    integrationBudget: number;
-    workstreams: Omit<IntegrationWorkstream, "id">[];
-    synergies: Omit<Synergy, "id" | "realizedAmount" | "status">[];
-  }): Promise<IntegrationPlan> {
+  async createIntegrationPlan(
+    acquisitionId: string,
+    planData: {
+      name: string;
+      integrationBudget: number;
+      workstreams: Omit<IntegrationWorkstream, "id">[];
+      synergies: Omit<Synergy, "id" | "realizedAmount" | "status">[];
+    }
+  ): Promise<IntegrationPlan> {
     const acquisition = this.acquisitions.get(acquisitionId);
     if (!acquisition) {
       throw new Error("Acquisition not found");
@@ -920,7 +998,10 @@ export class MAFramework {
         realizedAmount: 0,
         status: "identified",
       })),
-      totalSynergies: planData.synergies.reduce((sum, s) => sum + s.targetAmount, 0),
+      totalSynergies: planData.synergies.reduce(
+        (sum, s) => sum + s.targetAmount,
+        0
+      ),
       synergiesRealized: 0,
       integrationBudget: planData.integrationBudget,
       integrationSpend: 0,
@@ -954,7 +1035,7 @@ export class MAFramework {
     }
 
     const mergedAssets = [...acquirer.techStack, ...target.techStack];
-    
+
     const migrationPlan = [
       "1. Infrastructure Assessment: Audit both cloud environments",
       "2. Data Migration: Merge databases with schema alignment",
@@ -1041,18 +1122,26 @@ export class MAFramework {
   }> {
     const acquisitions = Array.from(this.acquisitions.values());
 
-    const activeDeals = acquisitions.filter(a => 
-      !["completed", "terminated"].includes(a.status)
+    const activeDeals = acquisitions.filter(
+      (a) => !["completed", "terminated"].includes(a.status)
     ).length;
 
-    const totalDealValue = acquisitions.reduce((sum, a) => sum + a.dealValue, 0);
+    const totalDealValue = acquisitions.reduce(
+      (sum, a) => sum + a.dealValue,
+      0
+    );
 
-    const completedAcquisitions = acquisitions.filter(a => a.status === "completed").length;
+    const completedAcquisitions = acquisitions.filter(
+      (a) => a.status === "completed"
+    ).length;
 
-    const pendingIntegrations = acquisitions.filter(a => a.status === "integration").length;
+    const pendingIntegrations = acquisitions.filter(
+      (a) => a.status === "integration"
+    ).length;
 
-    const totalSynergiesRealized = Array.from(this.integrationPlans.values())
-      .reduce((sum, p) => sum + p.synergiesRealized, 0);
+    const totalSynergiesRealized = Array.from(
+      this.integrationPlans.values()
+    ).reduce((sum, p) => sum + p.synergiesRealized, 0);
 
     return {
       activeDeals,
@@ -1070,22 +1159,34 @@ export class MAFramework {
 
 export const maFramework = MAFramework.getInstance();
 
-export async function initiateAcquisition(data: Parameters<typeof maFramework.initiateAcquisition>[0]): Promise<Acquisition> {
+export async function initiateAcquisition(
+  data: Parameters<typeof maFramework.initiateAcquisition>[0]
+): Promise<Acquisition> {
   return maFramework.initiateAcquisition(data);
 }
 
-export async function valuateCompany(companyId: string, method: ValuationMethod): Promise<Valuation> {
+export async function valuateCompany(
+  companyId: string,
+  method: ValuationMethod
+): Promise<Valuation> {
   return maFramework.performValuation(companyId, method);
 }
 
-export async function startDueDiligence(acquisitionId: string): Promise<DueDiligence> {
+export async function startDueDiligence(
+  acquisitionId: string
+): Promise<DueDiligence> {
   return maFramework.startDueDiligence(acquisitionId);
 }
 
-export async function createIntegrationPlan(acquisitionId: string, planData: Parameters<typeof maFramework.createIntegrationPlan>[1]): Promise<IntegrationPlan> {
+export async function createIntegrationPlan(
+  acquisitionId: string,
+  planData: Parameters<typeof maFramework.createIntegrationPlan>[1]
+): Promise<IntegrationPlan> {
   return maFramework.createIntegrationPlan(acquisitionId, planData);
 }
 
-export async function completeBuyout(acquisitionId: string): Promise<ReturnType<typeof maFramework.completeBuyout>> {
+export async function completeBuyout(
+  acquisitionId: string
+): Promise<ReturnType<typeof maFramework.completeBuyout>> {
   return maFramework.completeBuyout(acquisitionId);
 }

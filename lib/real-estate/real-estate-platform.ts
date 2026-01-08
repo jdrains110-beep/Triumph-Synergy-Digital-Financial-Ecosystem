@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Real Estate Platform
- * 
+ *
  * Comprehensive real estate marketplace and development platform
  * Supports property listings, transactions, development projects, and title management
- * 
+ *
  * @module lib/real-estate/real-estate-platform
  * @version 1.0.0
  */
@@ -18,37 +18,37 @@ export interface Property {
   listingType: ListingType;
   propertyType: PropertyType;
   status: PropertyStatus;
-  
+
   // Location
   address: PropertyAddress;
   coordinates: { lat: number; lng: number };
   neighborhood: string;
   schoolDistrict: string;
-  
+
   // Details
   details: PropertyDetails;
   features: PropertyFeatures;
   images: PropertyImage[];
   virtualTour: string | null;
   video: string | null;
-  
+
   // Pricing
   pricing: PropertyPricing;
-  
+
   // Parties
   ownerId: string;
   agentId: string | null;
   listingBrokerage: string | null;
-  
+
   // Dates
   listedAt: Date;
   updatedAt: Date;
   closingDate: Date | null;
-  
+
   // Development
   developmentProject: string | null;
   permitIds: string[];
-  
+
   // Metadata
   views: number;
   saves: number;
@@ -56,7 +56,7 @@ export interface Property {
 }
 
 export type ListingType = "sale" | "rent" | "lease" | "auction" | "development";
-export type PropertyType = 
+export type PropertyType =
   | "single-family"
   | "multi-family"
   | "condo"
@@ -68,7 +68,7 @@ export type PropertyType =
   | "farm"
   | "mixed-use";
 
-export type PropertyStatus = 
+export type PropertyStatus =
   | "active"
   | "pending"
   | "contingent"
@@ -170,13 +170,13 @@ export interface PropertyTransaction {
   propertyId: string;
   transactionType: "purchase" | "sale" | "lease" | "refinance";
   status: TransactionStatus;
-  
+
   // Parties
   buyerId: string;
   sellerId: string;
   buyerAgentId: string | null;
   sellerAgentId: string | null;
-  
+
   // Financial
   purchasePrice: number;
   piAmount: number | null;
@@ -184,7 +184,7 @@ export interface PropertyTransaction {
   downPayment: number;
   financingType: FinancingType;
   lenderId: string | null;
-  
+
   // Timeline
   offerDate: Date;
   acceptanceDate: Date | null;
@@ -192,21 +192,21 @@ export interface PropertyTransaction {
   appraisalDate: Date | null;
   closingDate: Date | null;
   possessionDate: Date | null;
-  
+
   // Documents
   documents: TransactionDocument[];
   contingencies: Contingency[];
-  
+
   // Escrow
   escrowCompany: string;
   escrowOfficer: string;
   titleCompany: string;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type TransactionStatus = 
+export type TransactionStatus =
   | "draft"
   | "offer-submitted"
   | "counter-offer"
@@ -220,7 +220,7 @@ export type TransactionStatus =
   | "cancelled"
   | "expired";
 
-export type FinancingType = 
+export type FinancingType =
   | "conventional"
   | "fha"
   | "va"
@@ -241,7 +241,7 @@ export interface TransactionDocument {
   signers: string[];
 }
 
-export type DocumentType = 
+export type DocumentType =
   | "purchase-agreement"
   | "disclosure"
   | "inspection-report"
@@ -266,44 +266,44 @@ export interface DevelopmentProject {
   description: string;
   type: DevelopmentType;
   status: DevelopmentStatus;
-  
+
   // Location
   address: PropertyAddress;
   acreage: number;
   parcelIds: string[];
-  
+
   // Details
   totalUnits: number;
   unitBreakdown: UnitBreakdown[];
   amenities: string[];
-  
+
   // Permits
   permits: string[]; // Permit IDs
   environmentalReview: EnvironmentalReviewStatus;
   zoningApproval: boolean;
-  
+
   // Financial
   totalInvestment: number;
   fundingRaised: number;
   projectedRevenue: number;
   projectedROI: number;
-  
+
   // Timeline
   startDate: Date;
   estimatedCompletion: Date;
   phases: DevelopmentPhase[];
-  
+
   // Team
   developerId: string;
   generalContractor: string;
   architect: string;
   investors: ProjectInvestor[];
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type DevelopmentType = 
+export type DevelopmentType =
   | "residential-subdivision"
   | "condo-development"
   | "mixed-use"
@@ -313,7 +313,7 @@ export type DevelopmentType =
   | "senior-living"
   | "affordable-housing";
 
-export type DevelopmentStatus = 
+export type DevelopmentStatus =
   | "planning"
   | "permitting"
   | "site-prep"
@@ -330,7 +330,7 @@ export interface UnitBreakdown {
   priceRange: { min: number; max: number };
 }
 
-export type EnvironmentalReviewStatus = 
+export type EnvironmentalReviewStatus =
   | "not-started"
   | "in-progress"
   | "approved"
@@ -371,20 +371,20 @@ export interface Title {
   titleType: "fee-simple" | "leasehold" | "life-estate" | "trust";
   legalDescription: string;
   parcelNumber: string;
-  
+
   // History
   chain: TitleChainEntry[];
   encumbrances: Encumbrance[];
-  
+
   // Insurance
   insurancePolicy: string | null;
   insuranceCompany: string | null;
   insuranceAmount: number | null;
-  
+
   // Status
   status: "clear" | "clouded" | "pending-search";
   issues: TitleIssue[];
-  
+
   lastSearched: Date;
   lastTransferred: Date;
 }
@@ -424,7 +424,7 @@ export interface TitleIssue {
 
 export class RealEstatePlatform {
   private static instance: RealEstatePlatform;
-  
+
   private properties: Map<string, Property> = new Map();
   private agents: Map<string, RealEstateAgent> = new Map();
   private transactions: Map<string, PropertyTransaction> = new Map();
@@ -446,7 +446,12 @@ export class RealEstatePlatform {
   // PROPERTY MANAGEMENT
   // ==========================================================================
 
-  async createListing(propertyData: Omit<Property, "id" | "listedAt" | "updatedAt" | "views" | "saves" | "inquiries">): Promise<Property> {
+  async createListing(
+    propertyData: Omit<
+      Property,
+      "id" | "listedAt" | "updatedAt" | "views" | "saves" | "inquiries"
+    >
+  ): Promise<Property> {
     const id = `prop-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const mlsNumber = `MLS${Date.now().toString(36).toUpperCase()}`;
 
@@ -462,7 +467,8 @@ export class RealEstatePlatform {
     };
 
     // Calculate price per sqft and Pi equivalent
-    property.pricing.pricePerSqFt = property.pricing.listPrice / property.details.squareFeet;
+    property.pricing.pricePerSqFt =
+      property.pricing.listPrice / property.details.squareFeet;
     property.pricing.piEquivalent = property.pricing.listPrice / this.PI_TO_USD;
 
     this.properties.set(id, property);
@@ -500,43 +506,45 @@ export class RealEstatePlatform {
     let results = Array.from(this.properties.values());
 
     if (query.listingType) {
-      results = results.filter(p => p.listingType === query.listingType);
+      results = results.filter((p) => p.listingType === query.listingType);
     }
     if (query.propertyType) {
-      results = results.filter(p => p.propertyType === query.propertyType);
+      results = results.filter((p) => p.propertyType === query.propertyType);
     }
     if (query.status) {
-      results = results.filter(p => p.status === query.status);
+      results = results.filter((p) => p.status === query.status);
     }
     if (query.city) {
-      results = results.filter(p => p.address.city.toLowerCase().includes(query.city!.toLowerCase()));
+      results = results.filter((p) =>
+        p.address.city.toLowerCase().includes(query.city!.toLowerCase())
+      );
     }
     if (query.state) {
-      results = results.filter(p => p.address.state === query.state);
+      results = results.filter((p) => p.address.state === query.state);
     }
     if (query.zip) {
-      results = results.filter(p => p.address.zip === query.zip);
+      results = results.filter((p) => p.address.zip === query.zip);
     }
     if (query.minPrice !== undefined) {
-      results = results.filter(p => p.pricing.listPrice >= query.minPrice!);
+      results = results.filter((p) => p.pricing.listPrice >= query.minPrice!);
     }
     if (query.maxPrice !== undefined) {
-      results = results.filter(p => p.pricing.listPrice <= query.maxPrice!);
+      results = results.filter((p) => p.pricing.listPrice <= query.maxPrice!);
     }
     if (query.minBeds !== undefined) {
-      results = results.filter(p => p.details.bedrooms >= query.minBeds!);
+      results = results.filter((p) => p.details.bedrooms >= query.minBeds!);
     }
     if (query.maxBeds !== undefined) {
-      results = results.filter(p => p.details.bedrooms <= query.maxBeds!);
+      results = results.filter((p) => p.details.bedrooms <= query.maxBeds!);
     }
     if (query.minBaths !== undefined) {
-      results = results.filter(p => p.details.bathrooms >= query.minBaths!);
+      results = results.filter((p) => p.details.bathrooms >= query.minBaths!);
     }
     if (query.minSqFt !== undefined) {
-      results = results.filter(p => p.details.squareFeet >= query.minSqFt!);
+      results = results.filter((p) => p.details.squareFeet >= query.minSqFt!);
     }
     if (query.maxSqFt !== undefined) {
-      results = results.filter(p => p.details.squareFeet <= query.maxSqFt!);
+      results = results.filter((p) => p.details.squareFeet <= query.maxSqFt!);
     }
 
     // Sort
@@ -567,7 +575,12 @@ export class RealEstatePlatform {
   // TRANSACTIONS
   // ==========================================================================
 
-  async initiateTransaction(transactionData: Omit<PropertyTransaction, "id" | "createdAt" | "updatedAt" | "documents" | "status">): Promise<PropertyTransaction> {
+  async initiateTransaction(
+    transactionData: Omit<
+      PropertyTransaction,
+      "id" | "createdAt" | "updatedAt" | "documents" | "status"
+    >
+  ): Promise<PropertyTransaction> {
     const id = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const transaction: PropertyTransaction = {
@@ -590,15 +603,22 @@ export class RealEstatePlatform {
     return transaction;
   }
 
-  async getTransaction(transactionId: string): Promise<PropertyTransaction | null> {
+  async getTransaction(
+    transactionId: string
+  ): Promise<PropertyTransaction | null> {
     return this.transactions.get(transactionId) || null;
   }
 
-  async getDevelopmentProject(projectId: string): Promise<DevelopmentProject | null> {
+  async getDevelopmentProject(
+    projectId: string
+  ): Promise<DevelopmentProject | null> {
     return this.projects.get(projectId) || null;
   }
 
-  async updateTransactionStatus(transactionId: string, status: TransactionStatus): Promise<PropertyTransaction> {
+  async updateTransactionStatus(
+    transactionId: string,
+    status: TransactionStatus
+  ): Promise<PropertyTransaction> {
     const transaction = this.transactions.get(transactionId);
     if (!transaction) {
       throw new Error("Transaction not found");
@@ -611,7 +631,8 @@ export class RealEstatePlatform {
     if (status === "closed") {
       const property = this.properties.get(transaction.propertyId);
       if (property) {
-        property.status = transaction.transactionType === "lease" ? "rented" : "sold";
+        property.status =
+          transaction.transactionType === "lease" ? "rented" : "sold";
         property.closingDate = new Date();
       }
     }
@@ -619,7 +640,10 @@ export class RealEstatePlatform {
     return transaction;
   }
 
-  async addTransactionDocument(transactionId: string, document: Omit<TransactionDocument, "id" | "uploadedAt">): Promise<TransactionDocument> {
+  async addTransactionDocument(
+    transactionId: string,
+    document: Omit<TransactionDocument, "id" | "uploadedAt">
+  ): Promise<TransactionDocument> {
     const transaction = this.transactions.get(transactionId);
     if (!transaction) {
       throw new Error("Transaction not found");
@@ -639,7 +663,9 @@ export class RealEstatePlatform {
   // DEVELOPMENT PROJECTS
   // ==========================================================================
 
-  async createDevelopmentProject(projectData: Omit<DevelopmentProject, "id" | "createdAt" | "updatedAt">): Promise<DevelopmentProject> {
+  async createDevelopmentProject(
+    projectData: Omit<DevelopmentProject, "id" | "createdAt" | "updatedAt">
+  ): Promise<DevelopmentProject> {
     const id = `dev-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const project: DevelopmentProject = {
@@ -657,7 +683,12 @@ export class RealEstatePlatform {
     return this.projects.get(projectId) || null;
   }
 
-  async investInProject(projectId: string, userId: string, amount: number, piTransactionId?: string): Promise<ProjectInvestor> {
+  async investInProject(
+    projectId: string,
+    userId: string,
+    amount: number,
+    piTransactionId?: string
+  ): Promise<ProjectInvestor> {
     const project = this.projects.get(projectId);
     if (!project) {
       throw new Error("Project not found");
@@ -681,13 +712,17 @@ export class RealEstatePlatform {
     return investor;
   }
 
-  async updateProjectPhase(projectId: string, phaseId: string, completionPercentage: number): Promise<DevelopmentPhase> {
+  async updateProjectPhase(
+    projectId: string,
+    phaseId: string,
+    completionPercentage: number
+  ): Promise<DevelopmentPhase> {
     const project = this.projects.get(projectId);
     if (!project) {
       throw new Error("Project not found");
     }
 
-    const phase = project.phases.find(p => p.id === phaseId);
+    const phase = project.phases.find((p) => p.id === phaseId);
     if (!phase) {
       throw new Error("Phase not found");
     }
@@ -707,7 +742,9 @@ export class RealEstatePlatform {
   // TITLE MANAGEMENT
   // ==========================================================================
 
-  async createTitle(titleData: Omit<Title, "id" | "lastSearched">): Promise<Title> {
+  async createTitle(
+    titleData: Omit<Title, "id" | "lastSearched">
+  ): Promise<Title> {
     const id = `title-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const title: Title = {
@@ -730,7 +767,12 @@ export class RealEstatePlatform {
     return null;
   }
 
-  async transferTitle(titleId: string, newOwner: string, consideration: number, documentType: TitleChainEntry["documentType"] = "deed"): Promise<Title> {
+  async transferTitle(
+    titleId: string,
+    newOwner: string,
+    consideration: number,
+    documentType: TitleChainEntry["documentType"] = "deed"
+  ): Promise<Title> {
     const title = this.titles.get(titleId);
     if (!title) {
       throw new Error("Title not found");
@@ -757,7 +799,12 @@ export class RealEstatePlatform {
   // AGENTS
   // ==========================================================================
 
-  async registerAgent(agentData: Omit<RealEstateAgent, "id" | "verified" | "rating" | "reviewCount" | "salesVolume">): Promise<RealEstateAgent> {
+  async registerAgent(
+    agentData: Omit<
+      RealEstateAgent,
+      "id" | "verified" | "rating" | "reviewCount" | "salesVolume"
+    >
+  ): Promise<RealEstateAgent> {
     const id = `agent-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const agent: RealEstateAgent = {
@@ -782,13 +829,15 @@ export class RealEstatePlatform {
     let agents = Array.from(this.agents.values());
 
     if (query.state) {
-      agents = agents.filter(a => a.licenseState === query.state);
+      agents = agents.filter((a) => a.licenseState === query.state);
     }
     if (query.specialization) {
-      agents = agents.filter(a => a.specializations.includes(query.specialization!));
+      agents = agents.filter((a) =>
+        a.specializations.includes(query.specialization!)
+      );
     }
     if (query.minRating) {
-      agents = agents.filter(a => a.rating >= query.minRating!);
+      agents = agents.filter((a) => a.rating >= query.minRating!);
     }
 
     agents.sort((a, b) => b.rating - a.rating);
@@ -807,18 +856,26 @@ export class RealEstatePlatform {
 
 export const realEstatePlatform = RealEstatePlatform.getInstance();
 
-export async function listProperty(propertyData: Parameters<typeof realEstatePlatform.createListing>[0]): Promise<Property> {
+export async function listProperty(
+  propertyData: Parameters<typeof realEstatePlatform.createListing>[0]
+): Promise<Property> {
   return realEstatePlatform.createListing(propertyData);
 }
 
-export async function searchProperties(query: Parameters<typeof realEstatePlatform.searchProperties>[0]): Promise<{ properties: Property[]; total: number }> {
+export async function searchProperties(
+  query: Parameters<typeof realEstatePlatform.searchProperties>[0]
+): Promise<{ properties: Property[]; total: number }> {
   return realEstatePlatform.searchProperties(query);
 }
 
-export async function makeOffer(transactionData: Parameters<typeof realEstatePlatform.initiateTransaction>[0]): Promise<PropertyTransaction> {
+export async function makeOffer(
+  transactionData: Parameters<typeof realEstatePlatform.initiateTransaction>[0]
+): Promise<PropertyTransaction> {
   return realEstatePlatform.initiateTransaction(transactionData);
 }
 
-export async function createDevelopment(projectData: Parameters<typeof realEstatePlatform.createDevelopmentProject>[0]): Promise<DevelopmentProject> {
+export async function createDevelopment(
+  projectData: Parameters<typeof realEstatePlatform.createDevelopmentProject>[0]
+): Promise<DevelopmentProject> {
   return realEstatePlatform.createDevelopmentProject(projectData);
 }

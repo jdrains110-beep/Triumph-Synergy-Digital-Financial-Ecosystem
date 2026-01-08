@@ -1,10 +1,10 @@
 /**
  * Triumph Synergy - Enterprise Hub API Routes
- * 
+ *
  * Unified enterprise platform dashboard and cross-system operations
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { enterpriseHub } from "@/lib/enterprise/enterprise-hub";
 
 export async function GET(request: NextRequest) {
@@ -32,7 +32,10 @@ export async function GET(request: NextRequest) {
       case "search": {
         const query = searchParams.get("q");
         if (!query) {
-          return NextResponse.json({ success: false, error: "Search query required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Search query required" },
+            { status: 400 }
+          );
         }
         const results = await enterpriseHub.globalSearch(query);
         return NextResponse.json({
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest) {
             "GET ?action=health": "System health check",
             "GET ?action=search&q=": "Global search across all platforms",
             "GET ?action=revenue": "Revenue breakdown by platform",
-            "POST": "Cross-platform operations",
+            POST: "Cross-platform operations",
           },
         });
     }
@@ -100,7 +103,9 @@ export async function POST(request: NextRequest) {
       }
 
       case "process-ecommerce-delivery": {
-        const result = await enterpriseHub.processEcommerceDelivery(data.orderId);
+        const result = await enterpriseHub.processEcommerceDelivery(
+          data.orderId
+        );
         return NextResponse.json({
           success: true,
           data: result,
@@ -109,7 +114,9 @@ export async function POST(request: NextRequest) {
       }
 
       case "integrate-acquired-tech": {
-        const result = await enterpriseHub.integrateAcquiredTech(data.acquisitionId);
+        const result = await enterpriseHub.integrateAcquiredTech(
+          data.acquisitionId
+        );
         return NextResponse.json({
           success: true,
           data: result,
@@ -126,7 +133,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Enterprise Hub API POST error:", error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to process request" },
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to process request",
+      },
       { status: 500 }
     );
   }

@@ -1,41 +1,39 @@
 /**
  * Triumph Synergy - Credit Reporting Module Index
- * 
+ *
  * Credit bureau integration and reporting system exports
  */
 
 export {
+  type AccountStatus,
+  type AccountType,
+  type Address,
+  type AlertType,
+  type CollectionAccount,
+  type ConsumerInfo,
+  type CreditAlert,
+  // Types
+  type CreditBureau,
   // Engine
   CreditBureauIntegration,
+  type CreditInquiry,
+  type CreditReport,
+  type CreditReportingPayload,
+  type CreditSummary,
   creditBureauEngine,
-  
+  type DisputeReason,
+  type DisputeRequest,
+  type DisputeStatus,
+  disputeCreditItem,
+  type Employer,
+  type PaymentHistoryEntry,
+  type PiNetworkCreditActivity,
+  type PositivePaymentData,
+  type PublicRecord,
   // Functions
   pullCreditReports,
   reportPaymentToBureaus,
-  disputeCreditItem,
   reportPiPayments,
-  
-  // Types
-  type CreditBureau,
-  type CreditReport,
   type ScoreModel,
   type Tradeline,
-  type AccountType,
-  type AccountStatus,
-  type PaymentHistoryEntry,
-  type DisputeStatus,
-  type CreditInquiry,
-  type PublicRecord,
-  type CollectionAccount,
-  type ConsumerInfo,
-  type Address,
-  type Employer,
-  type CreditAlert,
-  type AlertType,
-  type CreditSummary,
-  type CreditReportingPayload,
-  type DisputeRequest,
-  type DisputeReason,
-  type PositivePaymentData,
-  type PiNetworkCreditActivity,
 } from "./credit-bureau-integration";

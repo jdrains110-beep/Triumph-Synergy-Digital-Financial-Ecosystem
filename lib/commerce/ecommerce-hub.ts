@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Enterprise E-Commerce Hub
- * 
+ *
  * Multi-vendor marketplace with Pi Network payment integration
  * Supports physical goods, digital products, services, and subscriptions
- * 
+ *
  * @module lib/commerce/ecommerce-hub
  * @version 1.0.0
  */
@@ -31,7 +31,7 @@ export interface Vendor {
   contact: VendorContact;
 }
 
-export type VendorCategory = 
+export type VendorCategory =
   | "retail"
   | "electronics"
   | "fashion"
@@ -279,7 +279,7 @@ export interface Coupon {
 
 export class ECommerceHub {
   private static instance: ECommerceHub;
-  
+
   private vendors: Map<string, Vendor> = new Map();
   private products: Map<string, Product> = new Map();
   private carts: Map<string, ShoppingCart> = new Map();
@@ -351,9 +351,11 @@ export class ECommerceHub {
   // VENDOR MANAGEMENT
   // ==========================================================================
 
-  async registerVendor(vendorData: Omit<Vendor, "id" | "createdAt" | "stats" | "verified">): Promise<Vendor> {
+  async registerVendor(
+    vendorData: Omit<Vendor, "id" | "createdAt" | "stats" | "verified">
+  ): Promise<Vendor> {
     const id = `vendor-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    
+
     const vendor: Vendor = {
       ...vendorData,
       id,
@@ -376,22 +378,24 @@ export class ECommerceHub {
     return this.vendors.get(vendorId) || null;
   }
 
-  async listVendors(options: {
-    category?: VendorCategory;
-    verified?: boolean;
-    featured?: boolean;
-    limit?: number;
-  } = {}): Promise<Vendor[]> {
+  async listVendors(
+    options: {
+      category?: VendorCategory;
+      verified?: boolean;
+      featured?: boolean;
+      limit?: number;
+    } = {}
+  ): Promise<Vendor[]> {
     let vendors = Array.from(this.vendors.values());
 
     if (options.category) {
-      vendors = vendors.filter(v => v.category === options.category);
+      vendors = vendors.filter((v) => v.category === options.category);
     }
     if (options.verified !== undefined) {
-      vendors = vendors.filter(v => v.verified === options.verified);
+      vendors = vendors.filter((v) => v.verified === options.verified);
     }
     if (options.featured !== undefined) {
-      vendors = vendors.filter(v => v.featured === options.featured);
+      vendors = vendors.filter((v) => v.featured === options.featured);
     }
     if (options.limit) {
       vendors = vendors.slice(0, options.limit);
@@ -404,9 +408,11 @@ export class ECommerceHub {
   // PRODUCT MANAGEMENT
   // ==========================================================================
 
-  async createProduct(productData: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> {
+  async createProduct(
+    productData: Omit<Product, "id" | "createdAt" | "updatedAt">
+  ): Promise<Product> {
     const id = `prod-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    
+
     const product: Product = {
       ...productData,
       id,
@@ -441,33 +447,38 @@ export class ECommerceHub {
     limit?: number;
     offset?: number;
   }): Promise<{ products: Product[]; total: number }> {
-    let products = Array.from(this.products.values()).filter(p => p.status === "active");
+    let products = Array.from(this.products.values()).filter(
+      (p) => p.status === "active"
+    );
 
     if (query.search) {
       const searchLower = query.search.toLowerCase();
-      products = products.filter(p =>
-        p.name.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower) ||
-        p.tags.some(t => t.toLowerCase().includes(searchLower))
+      products = products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.description.toLowerCase().includes(searchLower) ||
+          p.tags.some((t) => t.toLowerCase().includes(searchLower))
       );
     }
     if (query.category) {
-      products = products.filter(p => p.category === query.category);
+      products = products.filter((p) => p.category === query.category);
     }
     if (query.vendorId) {
-      products = products.filter(p => p.vendorId === query.vendorId);
+      products = products.filter((p) => p.vendorId === query.vendorId);
     }
     if (query.minPrice !== undefined) {
-      products = products.filter(p => p.pricing.basePrice >= query.minPrice!);
+      products = products.filter((p) => p.pricing.basePrice >= query.minPrice!);
     }
     if (query.maxPrice !== undefined) {
-      products = products.filter(p => p.pricing.basePrice <= query.maxPrice!);
+      products = products.filter((p) => p.pricing.basePrice <= query.maxPrice!);
     }
     if (query.inStock) {
-      products = products.filter(p => !p.inventory.tracked || p.inventory.quantity > 0);
+      products = products.filter(
+        (p) => !p.inventory.tracked || p.inventory.quantity > 0
+      );
     }
     if (query.featured) {
-      products = products.filter(p => p.featured);
+      products = products.filter((p) => p.featured);
     }
 
     // Sort
@@ -500,7 +511,7 @@ export class ECommerceHub {
 
   async getOrCreateCart(userId: string): Promise<ShoppingCart> {
     let cart = this.carts.get(userId);
-    
+
     if (!cart) {
       cart = {
         id: `cart-${Date.now()}`,
@@ -523,7 +534,12 @@ export class ECommerceHub {
     return cart;
   }
 
-  async addToCart(userId: string, productId: string, quantity: number, variantId?: string): Promise<ShoppingCart> {
+  async addToCart(
+    userId: string,
+    productId: string,
+    quantity: number,
+    variantId?: string
+  ): Promise<ShoppingCart> {
     const cart = await this.getOrCreateCart(userId);
     const product = await this.getProduct(productId);
 
@@ -531,13 +547,20 @@ export class ECommerceHub {
       throw new Error("Product not found");
     }
 
-    const existingItem = cart.items.find(i => i.productId === productId && i.variantId === (variantId || null));
+    const existingItem = cart.items.find(
+      (i) => i.productId === productId && i.variantId === (variantId || null)
+    );
 
     if (existingItem) {
       existingItem.quantity += quantity;
     } else {
-      const variant = variantId ? product.variants.find(v => v.id === variantId) : null;
-      const price = variant?.price || product.pricing.salePrice || product.pricing.basePrice;
+      const variant = variantId
+        ? product.variants.find((v) => v.id === variantId)
+        : null;
+      const price =
+        variant?.price ||
+        product.pricing.salePrice ||
+        product.pricing.basePrice;
 
       cart.items.push({
         id: `item-${Date.now()}`,
@@ -556,16 +579,20 @@ export class ECommerceHub {
     return cart;
   }
 
-  async updateCartItem(userId: string, itemId: string, quantity: number): Promise<ShoppingCart> {
+  async updateCartItem(
+    userId: string,
+    itemId: string,
+    quantity: number
+  ): Promise<ShoppingCart> {
     const cart = await this.getOrCreateCart(userId);
-    const item = cart.items.find(i => i.id === itemId);
+    const item = cart.items.find((i) => i.id === itemId);
 
     if (!item) {
       throw new Error("Cart item not found");
     }
 
     if (quantity <= 0) {
-      cart.items = cart.items.filter(i => i.id !== itemId);
+      cart.items = cart.items.filter((i) => i.id !== itemId);
     } else {
       item.quantity = quantity;
     }
@@ -580,7 +607,9 @@ export class ECommerceHub {
 
   async applyCoupon(userId: string, couponCode: string): Promise<ShoppingCart> {
     const cart = await this.getOrCreateCart(userId);
-    const coupon = Array.from(this.coupons.values()).find(c => c.code === couponCode);
+    const coupon = Array.from(this.coupons.values()).find(
+      (c) => c.code === couponCode
+    );
 
     if (!coupon || !coupon.isActive) {
       throw new Error("Invalid coupon code");
@@ -600,7 +629,10 @@ export class ECommerceHub {
   }
 
   private recalculateCart(cart: ShoppingCart): void {
-    cart.subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    cart.subtotal = cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
     cart.piSubtotal = cart.subtotal / this.PI_TO_USD_RATE;
 
     // Calculate tax (average 8%)
@@ -612,7 +644,9 @@ export class ECommerceHub {
     // Apply coupon
     cart.discount = 0;
     if (cart.couponCode) {
-      const coupon = Array.from(this.coupons.values()).find(c => c.code === cart.couponCode);
+      const coupon = Array.from(this.coupons.values()).find(
+        (c) => c.code === cart.couponCode
+      );
       if (coupon) {
         if (coupon.type === "percentage") {
           cart.discount = cart.subtotal * (coupon.value / 100);
@@ -657,7 +691,10 @@ export class ECommerceHub {
 
     // Create order for each vendor
     for (const [vendorId, items] of itemsByVendor) {
-      const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const subtotal = items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
       const tax = subtotal * 0.08;
       const shipping = subtotal >= 50 ? 0 : 9.99;
       const total = subtotal + tax + shipping;
@@ -667,7 +704,7 @@ export class ECommerceHub {
         orderNumber: `TS-${Date.now().toString(36).toUpperCase()}`,
         userId,
         vendorId,
-        items: items.map(item => ({
+        items: items.map((item) => ({
           id: item.id,
           productId: item.productId,
           variantId: item.variantId,
@@ -713,7 +750,8 @@ export class ECommerceHub {
       if (vendor) {
         vendor.stats.totalOrders++;
         vendor.stats.totalSales += total;
-        vendor.stats.avgOrderValue = vendor.stats.totalSales / vendor.stats.totalOrders;
+        vendor.stats.avgOrderValue =
+          vendor.stats.totalSales / vendor.stats.totalOrders;
       }
     }
 
@@ -730,11 +768,14 @@ export class ECommerceHub {
 
   async getUserOrders(userId: string): Promise<Order[]> {
     return Array.from(this.orders.values())
-      .filter(o => o.userId === userId)
+      .filter((o) => o.userId === userId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatus
+  ): Promise<Order> {
     const order = this.orders.get(orderId);
     if (!order) {
       throw new Error("Order not found");
@@ -754,7 +795,10 @@ export class ECommerceHub {
     return order;
   }
 
-  async processPayment(orderId: string, piTransactionId?: string): Promise<Order> {
+  async processPayment(
+    orderId: string,
+    piTransactionId?: string
+  ): Promise<Order> {
     const order = this.orders.get(orderId);
     if (!order) {
       throw new Error("Order not found");
@@ -775,18 +819,30 @@ export class ECommerceHub {
 
 export const ecommerceHub = ECommerceHub.getInstance();
 
-export async function createVendor(vendorData: Omit<Vendor, "id" | "createdAt" | "stats" | "verified">): Promise<Vendor> {
+export async function createVendor(
+  vendorData: Omit<Vendor, "id" | "createdAt" | "stats" | "verified">
+): Promise<Vendor> {
   return ecommerceHub.registerVendor(vendorData);
 }
 
-export async function listProducts(query: Parameters<typeof ecommerceHub.searchProducts>[0]): Promise<{ products: Product[]; total: number }> {
+export async function listProducts(
+  query: Parameters<typeof ecommerceHub.searchProducts>[0]
+): Promise<{ products: Product[]; total: number }> {
   return ecommerceHub.searchProducts(query);
 }
 
-export async function addToCart(userId: string, productId: string, quantity: number): Promise<ShoppingCart> {
+export async function addToCart(
+  userId: string,
+  productId: string,
+  quantity: number
+): Promise<ShoppingCart> {
   return ecommerceHub.addToCart(userId, productId, quantity);
 }
 
-export async function checkout(userId: string, paymentMethod: Order["paymentMethod"], shippingAddress: Address): Promise<Order[]> {
+export async function checkout(
+  userId: string,
+  paymentMethod: Order["paymentMethod"],
+  shippingAddress: Address
+): Promise<Order[]> {
   return ecommerceHub.checkout(userId, paymentMethod, shippingAddress);
 }

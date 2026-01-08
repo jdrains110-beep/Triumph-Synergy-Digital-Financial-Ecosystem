@@ -1,19 +1,19 @@
 /**
  * Triumph Synergy - Credit Bureau API Routes
- * 
+ *
  * API endpoints for credit reporting to all major bureaus
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
+  type CreditBureau,
   creditBureauEngine,
+  type DisputeReason,
+  disputeCreditItem,
+  type PiNetworkCreditActivity,
   pullCreditReports,
   reportPaymentToBureaus,
   reportPiPayments,
-  disputeCreditItem,
-  type CreditBureau,
-  type DisputeReason,
-  type PiNetworkCreditActivity,
 } from "@/lib/credit-reporting/credit-bureau-integration";
 
 export async function POST(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "pull-report": {
         const { consumerId, ssn, bureau, scoreModel } = body;
-        
+
         if (!consumerId || !ssn) {
           return NextResponse.json(
             { error: "Missing required fields: consumerId, ssn" },
@@ -44,23 +44,25 @@ export async function POST(request: NextRequest) {
             success: true,
             report,
           });
-        } else {
-          // Pull tri-merge report
-          const reports = await pullCreditReports(consumerId, ssn);
-
-          return NextResponse.json({
-            success: true,
-            reports,
-            averageScore: Math.round(
-              (reports.equifax.score + reports.experian.score + reports.transunion.score) / 3
-            ),
-          });
         }
+        // Pull tri-merge report
+        const reports = await pullCreditReports(consumerId, ssn);
+
+        return NextResponse.json({
+          success: true,
+          reports,
+          averageScore: Math.round(
+            (reports.equifax.score +
+              reports.experian.score +
+              reports.transunion.score) /
+              3
+          ),
+        });
       }
 
       case "report-payment": {
         const { consumerId, paymentData } = body;
-        
+
         if (!consumerId || !paymentData) {
           return NextResponse.json(
             { error: "Missing required fields: consumerId, paymentData" },
@@ -84,10 +86,13 @@ export async function POST(request: NextRequest) {
 
       case "report-pi-activity": {
         const { consumerId, piUserId, activities } = body;
-        
+
         if (!consumerId || !piUserId || !activities) {
           return NextResponse.json(
-            { error: "Missing required fields: consumerId, piUserId, activities" },
+            {
+              error:
+                "Missing required fields: consumerId, piUserId, activities",
+            },
             { status: 400 }
           );
         }
@@ -106,11 +111,15 @@ export async function POST(request: NextRequest) {
       }
 
       case "dispute": {
-        const { consumerId, tradelineId, reason, explanation, documents } = body;
-        
+        const { consumerId, tradelineId, reason, explanation, documents } =
+          body;
+
         if (!consumerId || !tradelineId || !reason || !explanation) {
           return NextResponse.json(
-            { error: "Missing required fields: consumerId, tradelineId, reason, explanation" },
+            {
+              error:
+                "Missing required fields: consumerId, tradelineId, reason, explanation",
+            },
             { status: 400 }
           );
         }
@@ -125,13 +134,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           dispute,
-          message: "Dispute submitted to all bureaus. Investigation typically takes 30 days.",
+          message:
+            "Dispute submitted to all bureaus. Investigation typically takes 30 days.",
         });
       }
 
       case "freeze": {
         const { consumerId, bureaus } = body;
-        
+
         if (!consumerId) {
           return NextResponse.json(
             { error: "Missing required field: consumerId" },
@@ -147,13 +157,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           freezeResults: result,
-          message: "Credit freeze placed at all requested bureaus. Save your PINs securely.",
+          message:
+            "Credit freeze placed at all requested bureaus. Save your PINs securely.",
         });
       }
 
       case "fraud-alert": {
         const { consumerId, alertType, bureaus } = body;
-        
+
         if (!consumerId || !alertType) {
           return NextResponse.json(
             { error: "Missing required fields: consumerId, alertType" },
@@ -176,7 +187,7 @@ export async function POST(request: NextRequest) {
 
       case "report-positive-payments": {
         const { consumerId, payments } = body;
-        
+
         if (!consumerId || !payments) {
           return NextResponse.json(
             { error: "Missing required fields: consumerId, payments" },
@@ -184,7 +195,10 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const result = await creditBureauEngine.reportPositivePayments(consumerId, payments);
+        const result = await creditBureauEngine.reportPositivePayments(
+          consumerId,
+          payments
+        );
 
         return NextResponse.json({
           success: true,
@@ -202,7 +216,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Credit Bureau API error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
@@ -214,12 +230,9 @@ export async function GET(request: NextRequest) {
 
   if (disputeId) {
     const dispute = await creditBureauEngine.getDisputeStatus(disputeId);
-    
+
     if (!dispute) {
-      return NextResponse.json(
-        { error: "Dispute not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Dispute not found" }, { status: 404 });
     }
 
     return NextResponse.json({

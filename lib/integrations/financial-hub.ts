@@ -14,33 +14,32 @@
  */
 
 import {
-  UniversalBasicIncomeEngine,
-  enrollInUBI,
-  distributeUBI,
-  type UBIRecipient,
-  type UBIDistribution,
-} from "../ubi/universal-basic-income";
-
-import {
-  NESARAGESARAEngine,
-  registerNESARA,
-  submitDebtForgiveness,
-  processDebtForgiveness,
-  activateProsperity,
-  type NESARAProfile,
-  type DebtForgivenessRecord,
-} from "../nesara/nesara-gesara-system";
-
-import {
+  type CreditBureau,
   CreditBureauIntegration,
+  type CreditReport,
+  disputeCreditItem,
+  type PiNetworkCreditActivity,
   pullCreditReports,
   reportPaymentToBureaus,
   reportPiPayments,
-  disputeCreditItem,
-  type CreditReport,
-  type CreditBureau,
-  type PiNetworkCreditActivity,
 } from "../credit-reporting/credit-bureau-integration";
+
+import {
+  activateProsperity,
+  type DebtForgivenessRecord,
+  NESARAGESARAEngine,
+  type NESARAProfile,
+  processDebtForgiveness,
+  registerNESARA,
+  submitDebtForgiveness,
+} from "../nesara/nesara-gesara-system";
+import {
+  distributeUBI,
+  enrollInUBI,
+  type UBIDistribution,
+  type UBIRecipient,
+  UniversalBasicIncomeEngine,
+} from "../ubi/universal-basic-income";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -55,12 +54,12 @@ export interface TriumphUser {
   kycStatus: KYCStatus;
   createdAt: Date;
   lastActive: Date;
-  
+
   // Linked profiles
   ubiRecipientId: string | null;
   nesaraProfileId: string | null;
   creditProfileId: string | null;
-  
+
   // Feature access
   features: TriumphFeatures;
 }
@@ -77,7 +76,7 @@ export interface TriumphFeatures {
 
 export interface FinancialDashboard {
   user: TriumphUser;
-  
+
   // UBI Status
   ubi: {
     enrolled: boolean;
@@ -86,7 +85,7 @@ export interface FinancialDashboard {
     totalReceived: number;
     pendingAmount: number;
   };
-  
+
   // NESARA/GESARA Status
   nesara: {
     registered: boolean;
@@ -96,7 +95,7 @@ export interface FinancialDashboard {
     taxRefundDue: number;
     status: string;
   };
-  
+
   // Credit Status
   credit: {
     scores: {
@@ -109,7 +108,7 @@ export interface FinancialDashboard {
     activeDisputes: number;
     piPaymentsReported: number;
   };
-  
+
   // Pi Network Status
   pi: {
     balance: number;
@@ -154,10 +153,10 @@ export type TransactionSource =
 
 export class FinancialIntegrationHub {
   private static instance: FinancialIntegrationHub;
-  
+
   private users: Map<string, TriumphUser> = new Map();
   private transactions: Map<string, UnifiedTransaction[]> = new Map();
-  
+
   private ubiEngine: UniversalBasicIncomeEngine;
   private nesaraEngine: NESARAGESARAEngine;
   private creditEngine: CreditBureauIntegration;
@@ -249,14 +248,27 @@ export class FinancialIntegrationHub {
     user: TriumphUser;
     ubiEnrollment: UBIRecipient | null;
     nesaraProfile: NESARAProfile | null;
-    creditReports: { equifax: CreditReport; experian: CreditReport; transunion: CreditReport } | null;
+    creditReports: {
+      equifax: CreditReport;
+      experian: CreditReport;
+      transunion: CreditReport;
+    } | null;
   }> {
     // 1. Register user
-    const user = await this.registerUser(piUserId, piUsername, email, "verified");
+    const user = await this.registerUser(
+      piUserId,
+      piUsername,
+      email,
+      "verified"
+    );
 
     let ubiEnrollment: UBIRecipient | null = null;
     let nesaraProfile: NESARAProfile | null = null;
-    let creditReports: { equifax: CreditReport; experian: CreditReport; transunion: CreditReport } | null = null;
+    let creditReports: {
+      equifax: CreditReport;
+      experian: CreditReport;
+      transunion: CreditReport;
+    } | null = null;
 
     // 2. Enroll in UBI if requested
     if (options.enrollUBI !== false) {
@@ -310,7 +322,9 @@ export class FinancialIntegrationHub {
   // FINANCIAL DASHBOARD
   // ==========================================================================
 
-  async getFinancialDashboard(userId: string): Promise<FinancialDashboard | null> {
+  async getFinancialDashboard(
+    userId: string
+  ): Promise<FinancialDashboard | null> {
     const user = this.users.get(userId);
     if (!user) return null;
 
@@ -329,8 +343,10 @@ export class FinancialIntegrationHub {
         ubiStatus = {
           enrolled: true,
           programs: ["pi-global-ubi"], // Default program
-          nextPayment: recipient.lastDistribution 
-            ? new Date(recipient.lastDistribution.getTime() + 30 * 24 * 60 * 60 * 1000)
+          nextPayment: recipient.lastDistribution
+            ? new Date(
+                recipient.lastDistribution.getTime() + 30 * 24 * 60 * 60 * 1000
+              )
             : new Date(),
           totalReceived: recipient.totalReceived,
           pendingAmount: 0, // Calculate from pending distributions
@@ -513,7 +529,9 @@ export class FinancialIntegrationHub {
     for (const user of this.users.values()) {
       if (user.ubiRecipientId) {
         try {
-          const distributions = await distributeUBI("pi-global-ubi", [user.ubiRecipientId]);
+          const distributions = await distributeUBI("pi-global-ubi", [
+            user.ubiRecipientId,
+          ]);
           if (distributions && distributions.length > 0) {
             const distribution = distributions[0];
             ubiDistributions++;
@@ -537,9 +555,10 @@ export class FinancialIntegrationHub {
       // Process NESARA prosperity distributions
       if (user.nesaraProfileId) {
         try {
-          const { amount, transactionId } = await this.nesaraEngine.distributeProsperityPayment(
-            user.nesaraProfileId
-          );
+          const { amount, transactionId } =
+            await this.nesaraEngine.distributeProsperityPayment(
+              user.nesaraProfileId
+            );
           prosperityDistributions++;
           totalAmount += amount;
 
@@ -590,12 +609,17 @@ export async function onboardNewUser(
   ubiEnrollment: UBIRecipient | null;
   nesaraProfile: NESARAProfile | null;
 }> {
-  const result = await financialHub.completeFullOnboarding(piUserId, piUsername, email, {
-    enrollUBI: true,
-    registerNESARA: true,
-    enableCreditReporting: true,
-    debts,
-  });
+  const result = await financialHub.completeFullOnboarding(
+    piUserId,
+    piUsername,
+    email,
+    {
+      enrollUBI: true,
+      registerNESARA: true,
+      enableCreditReporting: true,
+      debts,
+    }
+  );
 
   return {
     user: result.user,
@@ -604,11 +628,15 @@ export async function onboardNewUser(
   };
 }
 
-export async function getDashboard(userId: string): Promise<FinancialDashboard | null> {
+export async function getDashboard(
+  userId: string
+): Promise<FinancialDashboard | null> {
   return financialHub.getFinancialDashboard(userId);
 }
 
 export async function processDistributions(): Promise<void> {
   const result = await financialHub.processAllPendingDistributions();
-  console.log(`Processed ${result.ubiDistributions} UBI and ${result.prosperityDistributions} prosperity distributions. Total: $${result.totalAmount.toLocaleString()}`);
+  console.log(
+    `Processed ${result.ubiDistributions} UBI and ${result.prosperityDistributions} prosperity distributions. Total: $${result.totalAmount.toLocaleString()}`
+  );
 }

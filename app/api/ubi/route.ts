@@ -1,14 +1,14 @@
 /**
  * Triumph Synergy - UBI API Routes
- * 
+ *
  * API endpoints for Universal Basic Income distribution
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
-  ubiEngine,
-  enrollInUBI,
   distributeUBI,
+  enrollInUBI,
+  ubiEngine,
 } from "@/lib/ubi/universal-basic-income";
 
 export async function POST(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "enroll": {
         const { piUsername, walletAddress, country } = body;
-        
+
         if (!piUsername || !walletAddress) {
           return NextResponse.json(
             { error: "Missing required fields: piUsername, walletAddress" },
@@ -42,10 +42,12 @@ export async function POST(request: NextRequest) {
 
       case "distribute": {
         const { programId, recipientIds } = body;
-        
+
         if (!programId || !recipientIds || !Array.isArray(recipientIds)) {
           return NextResponse.json(
-            { error: "Missing required fields: programId, recipientIds (array)" },
+            {
+              error: "Missing required fields: programId, recipientIds (array)",
+            },
             { status: 400 }
           );
         }
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
 
       case "get-status": {
         const { recipientId } = body;
-        
+
         if (!recipientId) {
           return NextResponse.json(
             { error: "Missing required field: recipientId" },
@@ -114,7 +116,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("UBI API error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
@@ -126,7 +130,7 @@ export async function GET(request: NextRequest) {
 
   if (recipientId) {
     const recipient = await ubiEngine.getRecipient(recipientId);
-    
+
     if (!recipient) {
       return NextResponse.json(
         { error: "Recipient not found" },

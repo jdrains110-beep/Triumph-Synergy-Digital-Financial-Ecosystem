@@ -27,36 +27,41 @@ export interface Product {
   subcategory: string;
   brand: string;
   vendorId: string;
-  
+
   // Pricing
   basePrice: number;
   salePrice: number | null;
   currency: "PI" | "USD" | "EUR" | "GBP";
   piEquivalent: number;
   taxCategory: TaxCategory;
-  
+
   // Inventory
   stockQuantity: number;
-  stockStatus: "in-stock" | "low-stock" | "out-of-stock" | "backorder" | "preorder";
+  stockStatus:
+    | "in-stock"
+    | "low-stock"
+    | "out-of-stock"
+    | "backorder"
+    | "preorder";
   trackInventory: boolean;
   lowStockThreshold: number;
-  
+
   // Attributes
   attributes: ProductAttribute[];
   variants: ProductVariant[];
   images: ProductImage[];
-  
+
   // Shipping
   weight: number;
   dimensions: { length: number; width: number; height: number };
   shippingClass: string;
   freeShipping: boolean;
-  
+
   // Status
   status: "draft" | "pending" | "published" | "archived";
   visibility: "public" | "private" | "hidden";
   featured: boolean;
-  
+
   // Metadata
   tags: string[];
   seoTitle: string;
@@ -139,10 +144,10 @@ export interface Order {
   orderNumber: string;
   customerId: string;
   vendorId: string;
-  
+
   // Items
   items: OrderItem[];
-  
+
   // Pricing
   subtotal: number;
   taxAmount: number;
@@ -151,27 +156,27 @@ export interface Order {
   total: number;
   currency: "PI" | "USD";
   piPaymentAmount: number | null;
-  
+
   // Payment
   paymentStatus: PaymentStatus;
   paymentMethod: PaymentMethod;
   paymentTransactionId: string | null;
   piTransactionHash: string | null;
-  
+
   // Shipping
   shippingAddress: ShippingAddress;
   billingAddress: ShippingAddress;
   shippingMethod: string;
   trackingNumber: string | null;
-  
+
   // Status
   status: OrderStatus;
   fulfillmentStatus: FulfillmentStatus;
-  
+
   // Notes
   customerNote: string | null;
   internalNote: string | null;
-  
+
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
@@ -192,10 +197,32 @@ export interface OrderItem {
   taxAmount: number;
 }
 
-export type PaymentStatus = "pending" | "authorized" | "paid" | "partially-refunded" | "refunded" | "failed";
-export type PaymentMethod = "pi-network" | "credit-card" | "bank-transfer" | "crypto" | "cash-on-delivery";
-export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
-export type FulfillmentStatus = "unfulfilled" | "partially-fulfilled" | "fulfilled" | "returned";
+export type PaymentStatus =
+  | "pending"
+  | "authorized"
+  | "paid"
+  | "partially-refunded"
+  | "refunded"
+  | "failed";
+export type PaymentMethod =
+  | "pi-network"
+  | "credit-card"
+  | "bank-transfer"
+  | "crypto"
+  | "cash-on-delivery";
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded";
+export type FulfillmentStatus =
+  | "unfulfilled"
+  | "partially-fulfilled"
+  | "fulfilled"
+  | "returned";
 
 export interface ShippingAddress {
   firstName: string;
@@ -268,7 +295,7 @@ export interface Review {
 
 export class EcommercePlatform {
   private static instance: EcommercePlatform;
-  
+
   private products: Map<string, Product> = new Map();
   private vendors: Map<string, Vendor> = new Map();
   private orders: Map<string, Order> = new Map();
@@ -321,7 +348,9 @@ export class EcommercePlatform {
   // PRODUCT MANAGEMENT
   // ==========================================================================
 
-  async createProduct(productData: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> {
+  async createProduct(
+    productData: Omit<Product, "id" | "createdAt" | "updatedAt">
+  ): Promise<Product> {
     const id = `prod-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const product: Product = {
       ...productData,
@@ -330,13 +359,13 @@ export class EcommercePlatform {
       updatedAt: new Date(),
     };
     this.products.set(id, product);
-    
+
     // Update vendor product count
     const vendor = this.vendors.get(product.vendorId);
     if (vendor) {
       vendor.totalProducts++;
     }
-    
+
     return product;
   }
 
@@ -355,49 +384,67 @@ export class EcommercePlatform {
     sortBy?: "price-asc" | "price-desc" | "newest" | "popular";
     page?: number;
     limit?: number;
-  }): Promise<{ products: Product[]; total: number; page: number; totalPages: number }> {
-    let results = Array.from(this.products.values()).filter(p => p.status === "published");
+  }): Promise<{
+    products: Product[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    let results = Array.from(this.products.values()).filter(
+      (p) => p.status === "published"
+    );
 
     if (query.search) {
       const searchLower = query.search.toLowerCase();
-      results = results.filter(p => 
-        p.name.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower) ||
-        p.tags.some(t => t.toLowerCase().includes(searchLower))
+      results = results.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.description.toLowerCase().includes(searchLower) ||
+          p.tags.some((t) => t.toLowerCase().includes(searchLower))
       );
     }
 
     if (query.category) {
-      results = results.filter(p => p.category === query.category);
+      results = results.filter((p) => p.category === query.category);
     }
 
     if (query.vendorId) {
-      results = results.filter(p => p.vendorId === query.vendorId);
+      results = results.filter((p) => p.vendorId === query.vendorId);
     }
 
     if (query.minPrice !== undefined) {
-      results = results.filter(p => (p.salePrice || p.basePrice) >= query.minPrice!);
+      results = results.filter(
+        (p) => (p.salePrice || p.basePrice) >= query.minPrice!
+      );
     }
 
     if (query.maxPrice !== undefined) {
-      results = results.filter(p => (p.salePrice || p.basePrice) <= query.maxPrice!);
+      results = results.filter(
+        (p) => (p.salePrice || p.basePrice) <= query.maxPrice!
+      );
     }
 
     if (query.inStock) {
-      results = results.filter(p => p.stockStatus === "in-stock" || p.stockStatus === "low-stock");
+      results = results.filter(
+        (p) => p.stockStatus === "in-stock" || p.stockStatus === "low-stock"
+      );
     }
 
     if (query.featured) {
-      results = results.filter(p => p.featured);
+      results = results.filter((p) => p.featured);
     }
 
     // Sort
     switch (query.sortBy) {
       case "price-asc":
-        results.sort((a, b) => (a.salePrice || a.basePrice) - (b.salePrice || b.basePrice));
+        results.sort(
+          (a, b) => (a.salePrice || a.basePrice) - (b.salePrice || b.basePrice)
+        );
         break;
       case "price-desc":
-        results.sort((a, b) => (b.salePrice || b.basePrice) - (a.salePrice || a.basePrice));
+        results.sort(
+          (a, b) => (b.salePrice || b.basePrice) - (a.salePrice || a.basePrice)
+        );
         break;
       case "newest":
         results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -420,12 +467,15 @@ export class EcommercePlatform {
     };
   }
 
-  async updateInventory(productId: string, quantityChange: number): Promise<Product | null> {
+  async updateInventory(
+    productId: string,
+    quantityChange: number
+  ): Promise<Product | null> {
     const product = this.products.get(productId);
     if (!product) return null;
 
     product.stockQuantity += quantityChange;
-    
+
     if (product.stockQuantity <= 0) {
       product.stockStatus = "out-of-stock";
     } else if (product.stockQuantity <= product.lowStockThreshold) {
@@ -442,7 +492,10 @@ export class EcommercePlatform {
   // CART MANAGEMENT
   // ==========================================================================
 
-  async createCart(customerId: string | null, sessionId: string): Promise<Cart> {
+  async createCart(
+    customerId: string | null,
+    sessionId: string
+  ): Promise<Cart> {
     const id = `cart-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const cart: Cart = {
       id,
@@ -463,14 +516,21 @@ export class EcommercePlatform {
     return cart;
   }
 
-  async addToCart(cartId: string, productId: string, quantity: number, variantId?: string): Promise<Cart | null> {
+  async addToCart(
+    cartId: string,
+    productId: string,
+    quantity: number,
+    variantId?: string
+  ): Promise<Cart | null> {
     const cart = this.carts.get(cartId);
     const product = this.products.get(productId);
-    
+
     if (!cart || !product) return null;
 
     const price = product.salePrice || product.basePrice;
-    const existingItem = cart.items.find(i => i.productId === productId && i.variantId === (variantId || null));
+    const existingItem = cart.items.find(
+      (i) => i.productId === productId && i.variantId === (variantId || null)
+    );
 
     if (existingItem) {
       existingItem.quantity += quantity;
@@ -489,12 +549,16 @@ export class EcommercePlatform {
     return cart;
   }
 
-  async removeFromCart(cartId: string, productId: string, variantId?: string): Promise<Cart | null> {
+  async removeFromCart(
+    cartId: string,
+    productId: string,
+    variantId?: string
+  ): Promise<Cart | null> {
     const cart = this.carts.get(cartId);
     if (!cart) return null;
 
-    cart.items = cart.items.filter(i => 
-      !(i.productId === productId && i.variantId === (variantId || null))
+    cart.items = cart.items.filter(
+      (i) => !(i.productId === productId && i.variantId === (variantId || null))
     );
 
     this.recalculateCart(cart);
@@ -512,7 +576,11 @@ export class EcommercePlatform {
   // ORDER MANAGEMENT
   // ==========================================================================
 
-  async createOrder(cartId: string, shippingAddress: ShippingAddress, paymentMethod: PaymentMethod): Promise<Order | null> {
+  async createOrder(
+    cartId: string,
+    shippingAddress: ShippingAddress,
+    paymentMethod: PaymentMethod
+  ): Promise<Order | null> {
     const cart = this.carts.get(cartId);
     if (!cart || cart.items.length === 0) return null;
 
@@ -583,7 +651,10 @@ export class EcommercePlatform {
     return this.orders.get(orderId) || null;
   }
 
-  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order | null> {
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatus
+  ): Promise<Order | null> {
     const order = this.orders.get(orderId);
     if (!order) return null;
 
@@ -600,7 +671,11 @@ export class EcommercePlatform {
     return order;
   }
 
-  async processPayment(orderId: string, transactionId: string, piHash?: string): Promise<Order | null> {
+  async processPayment(
+    orderId: string,
+    transactionId: string,
+    piHash?: string
+  ): Promise<Order | null> {
     const order = this.orders.get(orderId);
     if (!order) return null;
 
@@ -624,7 +699,12 @@ export class EcommercePlatform {
   // VENDOR MANAGEMENT
   // ==========================================================================
 
-  async registerVendor(vendorData: Omit<Vendor, "id" | "rating" | "totalSales" | "totalProducts" | "createdAt">): Promise<Vendor> {
+  async registerVendor(
+    vendorData: Omit<
+      Vendor,
+      "id" | "rating" | "totalSales" | "totalProducts" | "createdAt"
+    >
+  ): Promise<Vendor> {
     const id = `vendor-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const vendor: Vendor = {
       ...vendorData,
@@ -645,7 +725,7 @@ export class EcommercePlatform {
   async listVendors(status?: Vendor["status"]): Promise<Vendor[]> {
     const vendors = Array.from(this.vendors.values());
     if (status) {
-      return vendors.filter(v => v.status === status);
+      return vendors.filter((v) => v.status === status);
     }
     return vendors;
   }
@@ -654,7 +734,9 @@ export class EcommercePlatform {
   // COUPON MANAGEMENT
   // ==========================================================================
 
-  async createCoupon(couponData: Omit<Coupon, "id" | "usageCount">): Promise<Coupon> {
+  async createCoupon(
+    couponData: Omit<Coupon, "id" | "usageCount">
+  ): Promise<Coupon> {
     const id = `coupon-${Date.now()}`;
     const coupon: Coupon = {
       ...couponData,
@@ -665,7 +747,10 @@ export class EcommercePlatform {
     return coupon;
   }
 
-  async applyCoupon(cartId: string, code: string): Promise<{ success: boolean; message: string; discount?: number }> {
+  async applyCoupon(
+    cartId: string,
+    code: string
+  ): Promise<{ success: boolean; message: string; discount?: number }> {
     const cart = this.carts.get(cartId);
     const coupon = this.coupons.get(code.toUpperCase());
 
@@ -691,7 +776,10 @@ export class EcommercePlatform {
     }
 
     if (coupon.minOrderAmount && cart.subtotal < coupon.minOrderAmount) {
-      return { success: false, message: `Minimum order amount is $${coupon.minOrderAmount}` };
+      return {
+        success: false,
+        message: `Minimum order amount is $${coupon.minOrderAmount}`,
+      };
     }
 
     let discount = 0;
@@ -720,14 +808,22 @@ export class EcommercePlatform {
 
 export const ecommercePlatform = EcommercePlatform.getInstance();
 
-export async function createProduct(data: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> {
+export async function createProduct(
+  data: Omit<Product, "id" | "createdAt" | "updatedAt">
+): Promise<Product> {
   return ecommercePlatform.createProduct(data);
 }
 
-export async function searchProducts(query: Parameters<EcommercePlatform["searchProducts"]>[0]) {
+export async function searchProducts(
+  query: Parameters<EcommercePlatform["searchProducts"]>[0]
+) {
   return ecommercePlatform.searchProducts(query);
 }
 
-export async function createOrder(cartId: string, address: ShippingAddress, payment: PaymentMethod): Promise<Order | null> {
+export async function createOrder(
+  cartId: string,
+  address: ShippingAddress,
+  payment: PaymentMethod
+): Promise<Order | null> {
   return ecommercePlatform.createOrder(cartId, address, payment);
 }

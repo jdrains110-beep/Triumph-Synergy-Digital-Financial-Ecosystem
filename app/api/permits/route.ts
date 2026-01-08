@@ -1,10 +1,10 @@
 /**
  * Triumph Synergy - Permits API Routes
- * 
+ *
  * Building permits, inspections, and compliance management
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { permitSystem } from "@/lib/permits/permit-system";
 
 export async function GET(request: NextRequest) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get("status") || undefined;
         const applicantId = searchParams.get("applicantId") || undefined;
         const address = searchParams.get("address") || undefined;
-        
+
         const permits = await permitSystem.searchPermits({
           type: type as any,
           status: status as any,
@@ -35,7 +35,10 @@ export async function GET(request: NextRequest) {
       case "permit": {
         const permitId = searchParams.get("permitId");
         if (!permitId) {
-          return NextResponse.json({ success: false, error: "Permit ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Permit ID required" },
+            { status: 400 }
+          );
         }
         const permit = await permitSystem.getPermit(permitId);
         return NextResponse.json({
@@ -47,7 +50,10 @@ export async function GET(request: NextRequest) {
       case "inspections": {
         const permitId = searchParams.get("permitId");
         if (!permitId) {
-          return NextResponse.json({ success: false, error: "Permit ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Permit ID required" },
+            { status: 400 }
+          );
         }
         const inspections = await permitSystem.getNextInspections(permitId);
         return NextResponse.json({
@@ -60,7 +66,10 @@ export async function GET(request: NextRequest) {
       case "compliance": {
         const permitId = searchParams.get("permitId");
         if (!permitId) {
-          return NextResponse.json({ success: false, error: "Permit ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Permit ID required" },
+            { status: 400 }
+          );
         }
         const compliance = await permitSystem.checkAllCompliance(permitId);
         return NextResponse.json({
@@ -72,7 +81,10 @@ export async function GET(request: NextRequest) {
       case "zoning": {
         const zoneCode = searchParams.get("zoneCode");
         if (!zoneCode) {
-          return NextResponse.json({ success: false, error: "Zone code required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Zone code required" },
+            { status: 400 }
+          );
         }
         const zoning = await permitSystem.getZoningInfo(zoneCode);
         return NextResponse.json({
@@ -84,13 +96,18 @@ export async function GET(request: NextRequest) {
       case "check-zoning": {
         const zoneCode = searchParams.get("zoneCode");
         const proposedUse = searchParams.get("proposedUse");
-        const height = parseFloat(searchParams.get("height") || "0");
-        const lotCoverage = parseFloat(searchParams.get("lotCoverage") || "0");
-        
+        const height = Number.parseFloat(searchParams.get("height") || "0");
+        const lotCoverage = Number.parseFloat(
+          searchParams.get("lotCoverage") || "0"
+        );
+
         if (!zoneCode || !proposedUse) {
-          return NextResponse.json({ success: false, error: "Zone code and proposed use required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Zone code and proposed use required" },
+            { status: 400 }
+          );
         }
-        
+
         const result = await permitSystem.checkZoningCompliance({
           zoneCode,
           proposedUse,
@@ -115,7 +132,7 @@ export async function GET(request: NextRequest) {
             "GET ?action=compliance&permitId=": "Check compliance status",
             "GET ?action=zoning&zoneCode=": "Get zoning information",
             "GET ?action=check-zoning": "Check zoning compliance",
-            "POST": "Create permits, schedule inspections",
+            POST: "Create permits, schedule inspections",
           },
         });
     }
@@ -251,7 +268,9 @@ export async function POST(request: NextRequest) {
       }
 
       case "verify-contractor": {
-        const result = await permitSystem.verifyContractorLicense(data.contractorId);
+        const result = await permitSystem.verifyContractorLicense(
+          data.contractorId
+        );
         return NextResponse.json({
           success: true,
           data: result,
@@ -268,7 +287,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Permits API POST error:", error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to process request" },
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to process request",
+      },
       { status: 500 }
     );
   }

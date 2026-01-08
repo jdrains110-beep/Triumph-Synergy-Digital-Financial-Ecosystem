@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Enterprise Delivery Platform
- * 
+ *
  * Superior delivery service rivaling DoorDash, UberEats, Instacart, and Amazon Logistics
  * Features real-time tracking, intelligent routing, multi-modal delivery, and Pi payments
- * 
+ *
  * @module lib/delivery/delivery-platform
  * @version 1.0.0
  */
@@ -24,30 +24,30 @@ export interface DeliveryOrder {
   type: DeliveryType;
   status: DeliveryStatus;
   priority: "standard" | "express" | "scheduled" | "instant";
-  
+
   // Customer
   customerId: string;
   customerName: string;
   customerPhone: string;
   customerEmail: string;
-  
+
   // Merchant/Origin
   merchantId: string;
   merchantName: string;
   pickupAddress: DeliveryAddress;
   pickupInstructions: string;
-  
+
   // Destination
   dropoffAddress: DeliveryAddress;
   dropoffInstructions: string;
   deliveryWindow: { start: Date; end: Date } | null;
-  
+
   // Items
   items: DeliveryItem[];
   totalItems: number;
   totalWeight: number;
   specialHandling: SpecialHandling[];
-  
+
   // Pricing
   subtotal: number;
   deliveryFee: number;
@@ -57,38 +57,38 @@ export interface DeliveryOrder {
   total: number;
   piEquivalent: number;
   currency: string;
-  
+
   // Payment
   paymentMethod: "pi" | "card" | "cash";
   paymentStatus: "pending" | "authorized" | "captured" | "refunded";
   piTransactionId: string | null;
-  
+
   // Assignment
   driverId: string | null;
   vehicleId: string | null;
   routeId: string | null;
-  
+
   // Tracking
   tracking: TrackingUpdate[];
   currentLocation: GeoLocation | null;
   estimatedArrival: Date | null;
   actualArrival: Date | null;
-  
+
   // Proof of Delivery
   proofOfDelivery: ProofOfDelivery | null;
-  
+
   // Ratings
   customerRating: number | null;
   driverRating: number | null;
   merchantRating: number | null;
-  
+
   // Timestamps
   placedAt: Date;
   acceptedAt: Date | null;
   pickedUpAt: Date | null;
   deliveredAt: Date | null;
   cancelledAt: Date | null;
-  
+
   // Notes
   cancellationReason: string | null;
   notes: string;
@@ -200,39 +200,39 @@ export interface Driver {
   email: string;
   phone: string;
   profilePhoto: string;
-  
+
   // Status
   status: "available" | "busy" | "offline" | "suspended";
   currentOrderId: string | null;
   currentLocation: GeoLocation | null;
-  
+
   // Vehicle
   vehicleType: VehicleType;
   vehicleDetails: VehicleDetails;
-  
+
   // Ratings & Stats
   rating: number;
   totalDeliveries: number;
   completionRate: number;
   onTimeRate: number;
-  
+
   // Earnings
   walletAddress: string;
   lifetimeEarnings: number;
   weeklyEarnings: number;
   pendingPayout: number;
-  
+
   // Documents
   driversLicense: DriverDocument;
   insurance: DriverDocument;
   vehicleRegistration: DriverDocument;
   backgroundCheck: BackgroundCheck;
-  
+
   // Preferences
   maxDistance: number;
   preferredZones: string[];
   acceptedDeliveryTypes: DeliveryType[];
-  
+
   // Account
   createdAt: Date;
   lastActiveAt: Date;
@@ -279,33 +279,33 @@ export interface Merchant {
   businessName: string;
   category: string;
   subcategory: string;
-  
+
   // Contact
   email: string;
   phone: string;
   contactName: string;
-  
+
   // Location
   address: DeliveryAddress;
-  
+
   // Operations
   operatingHours: OperatingHours[];
   prepTime: number; // average in minutes
   acceptsScheduled: boolean;
-  
+
   // Ratings
   rating: number;
   totalOrders: number;
-  
+
   // Payment
   piWalletAddress: string;
   commissionRate: number;
-  
+
   // Settings
   autoAcceptOrders: boolean;
   minimumOrder: number;
   deliveryRadius: number;
-  
+
   // Account
   isActive: boolean;
   isVerified: boolean;
@@ -324,16 +324,16 @@ export interface Route {
   driverId: string;
   orderIds: string[];
   status: "planning" | "active" | "completed";
-  
+
   // Waypoints
   waypoints: RouteWaypoint[];
   totalDistance: number;
   totalDuration: number;
-  
+
   // Optimization
   optimizationScore: number;
   fuelEstimate: number;
-  
+
   // Tracking
   startedAt: Date | null;
   completedAt: Date | null;
@@ -364,7 +364,7 @@ export interface DeliveryZone {
 
 export class DeliveryPlatform {
   private static instance: DeliveryPlatform;
-  
+
   private orders: Map<string, DeliveryOrder> = new Map();
   private drivers: Map<string, Driver> = new Map();
   private merchants: Map<string, Merchant> = new Map();
@@ -388,7 +388,7 @@ export class DeliveryPlatform {
       name: "Default Zone",
       polygon: [],
       baseDeliveryFee: 4.99,
-      perMileFee: 1.50,
+      perMileFee: 1.5,
       peakMultiplier: 1.5,
       isActive: true,
     };
@@ -430,10 +430,16 @@ export class DeliveryPlatform {
     }));
 
     const subtotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
-    const totalWeight = items.reduce((sum, item) => sum + item.weight * item.quantity, 0);
-    
+    const totalWeight = items.reduce(
+      (sum, item) => sum + item.weight * item.quantity,
+      0
+    );
+
     // Calculate fees
-    const distance = this.calculateDistance(merchant.address, orderData.dropoffAddress);
+    const distance = this.calculateDistance(
+      merchant.address,
+      orderData.dropoffAddress
+    );
     const deliveryFee = this.calculateDeliveryFee(distance, orderData.priority);
     const serviceFee = subtotal * 0.05;
     const taxes = (subtotal + deliveryFee + serviceFee) * 0.08;
@@ -509,14 +515,18 @@ export class DeliveryPlatform {
     return this.orders.get(orderId) || null;
   }
 
-  async updateOrderStatus(orderId: string, status: DeliveryStatus, message?: string): Promise<DeliveryOrder> {
+  async updateOrderStatus(
+    orderId: string,
+    status: DeliveryStatus,
+    message?: string
+  ): Promise<DeliveryOrder> {
     const order = this.orders.get(orderId);
     if (!order) {
       throw new Error("Order not found");
     }
 
     order.status = status;
-    
+
     const trackingUpdate: TrackingUpdate = {
       id: `track-${Date.now()}`,
       status,
@@ -542,7 +552,10 @@ export class DeliveryPlatform {
     return order;
   }
 
-  async assignDriver(orderId: string, driverId: string): Promise<DeliveryOrder> {
+  async assignDriver(
+    orderId: string,
+    driverId: string
+  ): Promise<DeliveryOrder> {
     const order = this.orders.get(orderId);
     if (!order) {
       throw new Error("Order not found");
@@ -560,14 +573,21 @@ export class DeliveryPlatform {
     order.driverId = driverId;
     order.vehicleId = driver.id;
     order.status = "driver-assigned";
-    
+
     driver.status = "busy";
     driver.currentOrderId = orderId;
 
     // Calculate ETA - use driver's current location if available, otherwise use pickup address
-    const fromLat = driver.currentLocation?.latitude ?? order.pickupAddress.latitude;
-    const fromLon = driver.currentLocation?.longitude ?? order.pickupAddress.longitude;
-    const distance = this.calculateDistanceFromCoords(fromLat, fromLon, order.dropoffAddress.latitude, order.dropoffAddress.longitude);
+    const fromLat =
+      driver.currentLocation?.latitude ?? order.pickupAddress.latitude;
+    const fromLon =
+      driver.currentLocation?.longitude ?? order.pickupAddress.longitude;
+    const distance = this.calculateDistanceFromCoords(
+      fromLat,
+      fromLon,
+      order.dropoffAddress.latitude,
+      order.dropoffAddress.longitude
+    );
     const durationMinutes = (distance / 25) * 60 + 15; // Assume 25mph avg + 15min buffer
     order.estimatedArrival = new Date(Date.now() + durationMinutes * 60 * 1000);
 
@@ -583,7 +603,13 @@ export class DeliveryPlatform {
     return order;
   }
 
-  async trackOrder(orderId: string): Promise<{ order: DeliveryOrder; eta: Date | null; driverLocation: GeoLocation | null }> {
+  async trackOrder(
+    orderId: string
+  ): Promise<{
+    order: DeliveryOrder;
+    eta: Date | null;
+    driverLocation: GeoLocation | null;
+  }> {
     const order = this.orders.get(orderId);
     if (!order) {
       throw new Error("Order not found");
@@ -604,7 +630,10 @@ export class DeliveryPlatform {
     };
   }
 
-  async completeDelivery(orderId: string, proof: Omit<ProofOfDelivery, "timestamp">): Promise<DeliveryOrder> {
+  async completeDelivery(
+    orderId: string,
+    proof: Omit<ProofOfDelivery, "timestamp">
+  ): Promise<DeliveryOrder> {
     const order = this.orders.get(orderId);
     if (!order) {
       throw new Error("Order not found");
@@ -645,7 +674,25 @@ export class DeliveryPlatform {
   // DRIVER MANAGEMENT
   // ==========================================================================
 
-  async registerDriver(driverData: Omit<Driver, "id" | "status" | "currentOrderId" | "currentLocation" | "rating" | "totalDeliveries" | "completionRate" | "onTimeRate" | "lifetimeEarnings" | "weeklyEarnings" | "pendingPayout" | "createdAt" | "lastActiveAt" | "isVerified">): Promise<Driver> {
+  async registerDriver(
+    driverData: Omit<
+      Driver,
+      | "id"
+      | "status"
+      | "currentOrderId"
+      | "currentLocation"
+      | "rating"
+      | "totalDeliveries"
+      | "completionRate"
+      | "onTimeRate"
+      | "lifetimeEarnings"
+      | "weeklyEarnings"
+      | "pendingPayout"
+      | "createdAt"
+      | "lastActiveAt"
+      | "isVerified"
+    >
+  ): Promise<Driver> {
     const id = `driver-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const driver: Driver = {
@@ -670,7 +717,10 @@ export class DeliveryPlatform {
     return driver;
   }
 
-  async updateDriverStatus(driverId: string, status: Driver["status"]): Promise<Driver> {
+  async updateDriverStatus(
+    driverId: string,
+    status: Driver["status"]
+  ): Promise<Driver> {
     const driver = this.drivers.get(driverId);
     if (!driver) {
       throw new Error("Driver not found");
@@ -681,7 +731,10 @@ export class DeliveryPlatform {
     return driver;
   }
 
-  async updateDriverLocation(driverId: string, location: GeoLocation): Promise<Driver> {
+  async updateDriverLocation(
+    driverId: string,
+    location: GeoLocation
+  ): Promise<Driver> {
     const driver = this.drivers.get(driverId);
     if (!driver) {
       throw new Error("Driver not found");
@@ -701,27 +754,37 @@ export class DeliveryPlatform {
     return driver;
   }
 
-  async findNearbyDrivers(location: GeoLocation, maxDistance: number = 10): Promise<Driver[]> {
-    const availableDrivers = Array.from(this.drivers.values())
-      .filter(d => d.status === "available" && d.currentLocation);
+  async findNearbyDrivers(
+    location: GeoLocation,
+    maxDistance = 10
+  ): Promise<Driver[]> {
+    const availableDrivers = Array.from(this.drivers.values()).filter(
+      (d) => d.status === "available" && d.currentLocation
+    );
 
-    const nearbyDrivers = availableDrivers.filter(driver => {
+    const nearbyDrivers = availableDrivers.filter((driver) => {
       if (!driver.currentLocation) return false;
       const distance = this.calculateDistanceFromCoords(
-        location.latitude, location.longitude,
-        driver.currentLocation.latitude, driver.currentLocation.longitude
+        location.latitude,
+        location.longitude,
+        driver.currentLocation.latitude,
+        driver.currentLocation.longitude
       );
       return distance <= maxDistance;
     });
 
     return nearbyDrivers.sort((a, b) => {
       const distA = this.calculateDistanceFromCoords(
-        location.latitude, location.longitude,
-        a.currentLocation!.latitude, a.currentLocation!.longitude
+        location.latitude,
+        location.longitude,
+        a.currentLocation!.latitude,
+        a.currentLocation!.longitude
       );
       const distB = this.calculateDistanceFromCoords(
-        location.latitude, location.longitude,
-        b.currentLocation!.latitude, b.currentLocation!.longitude
+        location.latitude,
+        location.longitude,
+        b.currentLocation!.latitude,
+        b.currentLocation!.longitude
       );
       return distA - distB;
     });
@@ -731,7 +794,12 @@ export class DeliveryPlatform {
   // MERCHANT MANAGEMENT
   // ==========================================================================
 
-  async registerMerchant(merchantData: Omit<Merchant, "id" | "rating" | "totalOrders" | "isActive" | "isVerified" | "createdAt">): Promise<Merchant> {
+  async registerMerchant(
+    merchantData: Omit<
+      Merchant,
+      "id" | "rating" | "totalOrders" | "isActive" | "isVerified" | "createdAt"
+    >
+  ): Promise<Merchant> {
     const id = `merchant-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const merchant: Merchant = {
@@ -758,19 +826,23 @@ export class DeliveryPlatform {
     maxDistance?: number;
     isOpen?: boolean;
   }): Promise<Merchant[]> {
-    let merchants = Array.from(this.merchants.values()).filter(m => m.isActive);
+    let merchants = Array.from(this.merchants.values()).filter(
+      (m) => m.isActive
+    );
 
     if (query.category) {
-      merchants = merchants.filter(m => 
+      merchants = merchants.filter((m) =>
         m.category.toLowerCase().includes(query.category!.toLowerCase())
       );
     }
 
     if (query.location && query.maxDistance) {
-      merchants = merchants.filter(m => {
+      merchants = merchants.filter((m) => {
         const distance = this.calculateDistanceFromCoords(
-          query.location!.latitude, query.location!.longitude,
-          m.address.latitude, m.address.longitude
+          query.location!.latitude,
+          query.location!.longitude,
+          m.address.latitude,
+          m.address.longitude
         );
         return distance <= query.maxDistance!;
       });
@@ -780,11 +852,16 @@ export class DeliveryPlatform {
       const now = new Date();
       const dayOfWeek = now.getDay();
       const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-      
-      merchants = merchants.filter(m => {
-        const todayHours = m.operatingHours.find(h => h.dayOfWeek === dayOfWeek);
+
+      merchants = merchants.filter((m) => {
+        const todayHours = m.operatingHours.find(
+          (h) => h.dayOfWeek === dayOfWeek
+        );
         if (!todayHours || todayHours.isClosed) return false;
-        return currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
+        return (
+          currentTime >= todayHours.openTime &&
+          currentTime <= todayHours.closeTime
+        );
       });
     }
 
@@ -801,7 +878,9 @@ export class DeliveryPlatform {
       throw new Error("Driver not found");
     }
 
-    const orders = orderIds.map(id => this.orders.get(id)).filter(Boolean) as DeliveryOrder[];
+    const orders = orderIds
+      .map((id) => this.orders.get(id))
+      .filter(Boolean) as DeliveryOrder[];
     if (orders.length !== orderIds.length) {
       throw new Error("Some orders not found");
     }
@@ -812,14 +891,14 @@ export class DeliveryPlatform {
 
     // Add all pickups first (grouped by merchant)
     const merchantOrders = new Map<string, DeliveryOrder[]>();
-    orders.forEach(order => {
+    orders.forEach((order) => {
       const existing = merchantOrders.get(order.merchantId) || [];
       existing.push(order);
       merchantOrders.set(order.merchantId, existing);
     });
 
     merchantOrders.forEach((merchantOrderList) => {
-      merchantOrderList.forEach(order => {
+      merchantOrderList.forEach((order) => {
         waypoints.push({
           orderId: order.id,
           type: "pickup",
@@ -832,7 +911,7 @@ export class DeliveryPlatform {
     });
 
     // Add dropoffs (optimized by proximity)
-    const dropoffs = orders.map(order => ({
+    const dropoffs = orders.map((order) => ({
       orderId: order.id,
       address: order.dropoffAddress,
     }));
@@ -844,7 +923,7 @@ export class DeliveryPlatform {
 
     while (remaining.length > 0) {
       let nearestIdx = 0;
-      let nearestDist = Infinity;
+      let nearestDist = Number.POSITIVE_INFINITY;
 
       remaining.forEach((dropoff, idx) => {
         const dist = this.calculateDistance(currentPos, dropoff.address);
@@ -859,7 +938,7 @@ export class DeliveryPlatform {
       currentPos = nearest.address;
     }
 
-    orderedDropoffs.forEach(dropoff => {
+    orderedDropoffs.forEach((dropoff) => {
       waypoints.push({
         orderId: dropoff.orderId,
         type: "dropoff",
@@ -873,7 +952,10 @@ export class DeliveryPlatform {
     // Calculate totals
     let totalDistance = 0;
     for (let i = 1; i < waypoints.length; i++) {
-      totalDistance += this.calculateDistance(waypoints[i-1].address, waypoints[i].address);
+      totalDistance += this.calculateDistance(
+        waypoints[i - 1].address,
+        waypoints[i].address
+      );
     }
     const totalDuration = (totalDistance / 25) * 60 + waypoints.length * 5; // 25mph + 5min per stop
 
@@ -892,9 +974,9 @@ export class DeliveryPlatform {
     };
 
     this.routes.set(route.id, route);
-    
+
     // Link route to orders
-    orders.forEach(order => {
+    orders.forEach((order) => {
       order.routeId = route.id;
     });
 
@@ -913,26 +995,30 @@ export class DeliveryPlatform {
     avgDeliveryTime: number;
     avgRating: number;
   }> {
-    const orders = Array.from(this.orders.values()).filter(o =>
-      o.placedAt >= timeRange.start && o.placedAt <= timeRange.end
+    const orders = Array.from(this.orders.values()).filter(
+      (o) => o.placedAt >= timeRange.start && o.placedAt <= timeRange.end
     );
 
-    const completedOrders = orders.filter(o => o.status === "delivered");
-    const cancelledOrders = orders.filter(o => o.status === "cancelled");
+    const completedOrders = orders.filter((o) => o.status === "delivered");
+    const cancelledOrders = orders.filter((o) => o.status === "cancelled");
 
     const totalRevenue = completedOrders.reduce((sum, o) => sum + o.total, 0);
-    
-    const deliveryTimes = completedOrders
-      .filter(o => o.placedAt && o.deliveredAt)
-      .map(o => (o.deliveredAt!.getTime() - o.placedAt.getTime()) / 60000);
-    const avgDeliveryTime = deliveryTimes.length > 0
-      ? deliveryTimes.reduce((a, b) => a + b, 0) / deliveryTimes.length
-      : 0;
 
-    const ratings = completedOrders.filter(o => o.customerRating).map(o => o.customerRating!);
-    const avgRating = ratings.length > 0
-      ? ratings.reduce((a, b) => a + b, 0) / ratings.length
-      : 0;
+    const deliveryTimes = completedOrders
+      .filter((o) => o.placedAt && o.deliveredAt)
+      .map((o) => (o.deliveredAt!.getTime() - o.placedAt.getTime()) / 60_000);
+    const avgDeliveryTime =
+      deliveryTimes.length > 0
+        ? deliveryTimes.reduce((a, b) => a + b, 0) / deliveryTimes.length
+        : 0;
+
+    const ratings = completedOrders
+      .filter((o) => o.customerRating)
+      .map((o) => o.customerRating!);
+    const avgRating =
+      ratings.length > 0
+        ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+        : 0;
 
     return {
       totalOrders: orders.length,
@@ -948,20 +1034,33 @@ export class DeliveryPlatform {
   // HELPER METHODS
   // ==========================================================================
 
-  private calculateDistance(from: DeliveryAddress, to: DeliveryAddress): number {
+  private calculateDistance(
+    from: DeliveryAddress,
+    to: DeliveryAddress
+  ): number {
     return this.calculateDistanceFromCoords(
-      from.latitude, from.longitude,
-      to.latitude, to.longitude
+      from.latitude,
+      from.longitude,
+      to.latitude,
+      to.longitude
     );
   }
 
-  private calculateDistanceFromCoords(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistanceFromCoords(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
     const R = 3959; // Earth's radius in miles
     const dLat = this.toRad(lat2 - lat1);
     const dLon = this.toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRad(lat1)) *
+        Math.cos(this.toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -970,9 +1069,12 @@ export class DeliveryPlatform {
     return deg * (Math.PI / 180);
   }
 
-  private calculateDeliveryFee(distance: number, priority: DeliveryOrder["priority"]): number {
+  private calculateDeliveryFee(
+    distance: number,
+    priority: DeliveryOrder["priority"]
+  ): number {
     const baseFee = 4.99;
-    const perMile = 1.50;
+    const perMile = 1.5;
     let fee = baseFee + distance * perMile;
 
     switch (priority) {
@@ -992,9 +1094,9 @@ export class DeliveryPlatform {
 
   private getStatusMessage(status: DeliveryStatus): string {
     const messages: Record<DeliveryStatus, string> = {
-      "pending": "Order received and pending confirmation",
-      "confirmed": "Order confirmed by merchant",
-      "preparing": "Your order is being prepared",
+      pending: "Order received and pending confirmation",
+      confirmed: "Order confirmed by merchant",
+      preparing: "Your order is being prepared",
       "ready-for-pickup": "Order ready for pickup",
       "driver-assigned": "Driver assigned to your order",
       "driver-en-route-pickup": "Driver is heading to pickup location",
@@ -1002,9 +1104,9 @@ export class DeliveryPlatform {
       "picked-up": "Order picked up and on the way",
       "in-transit": "Order is on the way to you",
       "arrived-at-destination": "Driver has arrived at your location",
-      "delivered": "Order delivered successfully!",
-      "cancelled": "Order has been cancelled",
-      "failed": "Delivery attempt failed",
+      delivered: "Order delivered successfully!",
+      cancelled: "Order has been cancelled",
+      failed: "Delivery attempt failed",
     };
     return messages[status];
   }
@@ -1016,22 +1118,38 @@ export class DeliveryPlatform {
 
 export const deliveryPlatform = DeliveryPlatform.getInstance();
 
-export async function placeDeliveryOrder(orderData: Parameters<typeof deliveryPlatform.createOrder>[0]): Promise<DeliveryOrder> {
+export async function placeDeliveryOrder(
+  orderData: Parameters<typeof deliveryPlatform.createOrder>[0]
+): Promise<DeliveryOrder> {
   return deliveryPlatform.createOrder(orderData);
 }
 
-export async function trackDelivery(orderId: string): Promise<ReturnType<typeof deliveryPlatform.trackOrder>> {
+export async function trackDelivery(
+  orderId: string
+): Promise<ReturnType<typeof deliveryPlatform.trackOrder>> {
   return deliveryPlatform.trackOrder(orderId);
 }
 
-export async function registerDriver(driverData: Parameters<typeof deliveryPlatform.registerDriver>[0]): Promise<Driver> {
+export async function registerDriver(
+  driverData: Parameters<typeof deliveryPlatform.registerDriver>[0]
+): Promise<Driver> {
   return deliveryPlatform.registerDriver(driverData);
 }
 
-export async function registerMerchant(merchantData: Parameters<typeof deliveryPlatform.registerMerchant>[0]): Promise<Merchant> {
+export async function registerMerchant(
+  merchantData: Parameters<typeof deliveryPlatform.registerMerchant>[0]
+): Promise<Merchant> {
   return deliveryPlatform.registerMerchant(merchantData);
 }
 
-export async function findNearbyMerchants(location: GeoLocation, category?: string): Promise<Merchant[]> {
-  return deliveryPlatform.searchMerchants({ location, maxDistance: 10, category, isOpen: true });
+export async function findNearbyMerchants(
+  location: GeoLocation,
+  category?: string
+): Promise<Merchant[]> {
+  return deliveryPlatform.searchMerchants({
+    location,
+    maxDistance: 10,
+    category,
+    isOpen: true,
+  });
 }

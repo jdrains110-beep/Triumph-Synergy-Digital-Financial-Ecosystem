@@ -1,14 +1,14 @@
 /**
  * Triumph Synergy - Unified Financial API Routes
- * 
+ *
  * Master API for unified onboarding and financial dashboard
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   financialHub,
-  onboardNewUser,
   getDashboard,
+  onboardNewUser,
   processDistributions,
 } from "@/lib/integrations/financial-hub";
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "onboard": {
         const { piUserId, piUsername, email, debts } = body;
-        
+
         if (!piUserId || !piUsername || !email) {
           return NextResponse.json(
             { error: "Missing required fields: piUserId, piUsername, email" },
@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           ...result,
-          message: "Full onboarding complete! You are now enrolled in UBI, NESARA/GESARA, and Credit Reporting.",
+          message:
+            "Full onboarding complete! You are now enrolled in UBI, NESARA/GESARA, and Credit Reporting.",
         });
       }
 
@@ -48,9 +49,24 @@ export async function POST(request: NextRequest) {
       }
 
       case "record-transaction": {
-        const { userId, type, amount, currency, source, destination, metadata } = body;
-        
-        if (!userId || !type || amount === undefined || !currency || !source || !destination) {
+        const {
+          userId,
+          type,
+          amount,
+          currency,
+          source,
+          destination,
+          metadata,
+        } = body;
+
+        if (
+          !userId ||
+          !type ||
+          amount === undefined ||
+          !currency ||
+          !source ||
+          !destination
+        ) {
           return NextResponse.json(
             { error: "Missing required transaction fields" },
             { status: 400 }
@@ -75,7 +91,7 @@ export async function POST(request: NextRequest) {
 
       case "report-pi-to-credit": {
         const { userId, activities } = body;
-        
+
         if (!userId || !activities) {
           return NextResponse.json(
             { error: "Missing required fields: userId, activities" },
@@ -83,7 +99,10 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const result = await financialHub.reportPiActivityToCredit(userId, activities);
+        const result = await financialHub.reportPiActivityToCredit(
+          userId,
+          activities
+        );
 
         return NextResponse.json({
           success: result.success,
@@ -101,7 +120,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Financial Hub API error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
@@ -114,21 +135,20 @@ export async function GET(request: NextRequest) {
   const transactionHistory = searchParams.get("transactions") === "true";
 
   if (userId || piUserId) {
-    const user = userId 
+    const user = userId
       ? await financialHub.getUser(userId)
-      : piUserId 
+      : piUserId
         ? await financialHub.getUserByPiId(piUserId)
         : null;
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     if (transactionHistory) {
-      const transactions = await financialHub.getUserTransactions(user.id, { limit: 50 });
+      const transactions = await financialHub.getUserTransactions(user.id, {
+        limit: 50,
+      });
       return NextResponse.json({
         success: true,
         user,
@@ -155,7 +175,12 @@ export async function GET(request: NextRequest) {
       },
       nesara: {
         status: "active",
-        features: ["Debt Forgiveness", "Prosperity Funds", "Tax Reform", "Asset-Backed Accounts"],
+        features: [
+          "Debt Forgiveness",
+          "Prosperity Funds",
+          "Tax Reform",
+          "Asset-Backed Accounts",
+        ],
       },
       credit: {
         status: "active",
@@ -168,7 +193,8 @@ export async function GET(request: NextRequest) {
       },
     },
     endpoints: {
-      onboard: "POST /api/financial-hub { action: 'onboard', piUserId, piUsername, email, debts }",
+      onboard:
+        "POST /api/financial-hub { action: 'onboard', piUserId, piUsername, email, debts }",
       dashboard: "GET /api/financial-hub?userId={id}",
       transactions: "GET /api/financial-hub?userId={id}&transactions=true",
       distribute: "POST /api/financial-hub { action: 'process-distributions' }",

@@ -1,30 +1,28 @@
 /**
  * Triumph Synergy - NESARA Module Index
- * 
+ *
  * NESARA/GESARA compliance and benefit system exports
  */
 
 export {
+  type AssetBackedAccount,
+  activateProsperity,
+  type BirthCertificateBondRecord,
+  type ComplianceEvent,
+  checkGESARACompliance,
+  type DebtForgivenessRecord,
+  type DistributionScheduleEntry,
+  type GESARACountryStatus,
   // Engine
   NESARAGESARAEngine,
-  nesaraEngine,
-  
-  // Functions
-  registerNESARA,
-  submitDebtForgiveness,
-  processDebtForgiveness,
-  activateProsperity,
-  checkGESARACompliance,
-  
   // Types
   type NESARAProfile,
   type NESARAStatus,
-  type DebtForgivenessRecord,
+  nesaraEngine,
   type ProsperityFundsRecord,
-  type DistributionScheduleEntry,
-  type BirthCertificateBondRecord,
+  processDebtForgiveness,
+  // Functions
+  registerNESARA,
+  submitDebtForgiveness,
   type TaxReformRecord,
-  type AssetBackedAccount,
-  type ComplianceEvent,
-  type GESARACountryStatus,
 } from "./nesara-gesara-system";

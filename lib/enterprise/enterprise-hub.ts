@@ -1,6 +1,6 @@
 /**
  * Triumph Synergy - Enterprise Platform Hub
- * 
+ *
  * Unified integration layer for all enterprise systems:
  * - E-Commerce Marketplace
  * - Real Estate Platform
@@ -8,16 +8,16 @@
  * - Delivery Platform
  * - M&A Framework
  * - Financial Systems (UBI, NESARA, Credit)
- * 
+ *
  * @module lib/enterprise/enterprise-hub
  * @version 1.0.0
  */
 
-import { ecommerceHub } from "@/lib/commerce/ecommerce-hub";
-import { realEstatePlatform } from "@/lib/real-estate/real-estate-platform";
-import { permitSystem } from "@/lib/permits/permit-system";
-import { deliveryPlatform } from "@/lib/delivery/delivery-platform";
 import { maFramework } from "@/lib/acquisitions/ma-framework";
+import { ecommerceHub } from "@/lib/commerce/ecommerce-hub";
+import { deliveryPlatform } from "@/lib/delivery/delivery-platform";
+import { permitSystem } from "@/lib/permits/permit-system";
+import { realEstatePlatform } from "@/lib/real-estate/real-estate-platform";
 
 // ============================================================================
 // CONSTANTS
@@ -33,7 +33,7 @@ const PLATFORM_VERSION = "1.0.0";
 export interface EnterpriseDashboard {
   timestamp: Date;
   version: string;
-  
+
   // Financial Overview
   financial: {
     totalRevenue: number;
@@ -41,7 +41,7 @@ export interface EnterpriseDashboard {
     monthlyRecurring: number;
     transactionsToday: number;
   };
-  
+
   // E-Commerce Metrics
   ecommerce: {
     totalVendors: number;
@@ -49,7 +49,7 @@ export interface EnterpriseDashboard {
     activeOrders: number;
     dailySales: number;
   };
-  
+
   // Real Estate Metrics
   realEstate: {
     activeListings: number;
@@ -57,14 +57,14 @@ export interface EnterpriseDashboard {
     developmentProjects: number;
     totalPropertyValue: number;
   };
-  
+
   // Permits Metrics
   permits: {
     activePermits: number;
     pendingInspections: number;
     complianceRate: number;
   };
-  
+
   // Delivery Metrics
   delivery: {
     activeDrivers: number;
@@ -72,7 +72,7 @@ export interface EnterpriseDashboard {
     deliveriesToday: number;
     avgDeliveryTime: number;
   };
-  
+
   // M&A Metrics
   acquisitions: {
     activeDeals: number;
@@ -80,7 +80,7 @@ export interface EnterpriseDashboard {
     completedAcquisitions: number;
     synergiesRealized: number;
   };
-  
+
   // System Status
   systemStatus: {
     status: "operational" | "degraded" | "outage";
@@ -142,59 +142,94 @@ export class EnterpriseHub {
     const dashboard: EnterpriseDashboard = {
       timestamp: new Date(),
       version: PLATFORM_VERSION,
-      
+
       financial: {
-        totalRevenue: 15000000,
-        totalRevenueInPi: 15000000 / PI_TO_USD_RATE,
-        monthlyRecurring: 500000,
+        totalRevenue: 15_000_000,
+        totalRevenueInPi: 15_000_000 / PI_TO_USD_RATE,
+        monthlyRecurring: 500_000,
         transactionsToday: 1250,
       },
-      
+
       ecommerce: {
         totalVendors: 150,
         totalProducts: 5000,
         activeOrders: 320,
-        dailySales: 75000,
+        dailySales: 75_000,
       },
-      
+
       realEstate: {
         activeListings: 450,
         pendingTransactions: 35,
         developmentProjects: 12,
-        totalPropertyValue: 250000000,
+        totalPropertyValue: 250_000_000,
       },
-      
+
       permits: {
         activePermits: 180,
         pendingInspections: 45,
         complianceRate: 94.5,
       },
-      
+
       delivery: {
         activeDrivers: 75,
         activeMerchants: 200,
         deliveriesToday: deliveryStats.completedOrders,
         avgDeliveryTime: deliveryStats.avgDeliveryTime,
       },
-      
+
       acquisitions: {
         activeDeals: maDashboard.activeDeals,
         totalDealValue: maDashboard.totalDealValue,
         completedAcquisitions: maDashboard.completedAcquisitions,
         synergiesRealized: maDashboard.totalSynergiesRealized,
       },
-      
+
       systemStatus: {
         status: "operational",
         uptime: (Date.now() - this.startTime.getTime()) / 1000,
         services: [
-          { name: "E-Commerce", status: "online", latency: 45, lastCheck: new Date() },
-          { name: "Real Estate", status: "online", latency: 52, lastCheck: new Date() },
-          { name: "Permits", status: "online", latency: 38, lastCheck: new Date() },
-          { name: "Delivery", status: "online", latency: 41, lastCheck: new Date() },
-          { name: "M&A Framework", status: "online", latency: 55, lastCheck: new Date() },
-          { name: "Pi Network", status: "online", latency: 120, lastCheck: new Date() },
-          { name: "Database", status: "online", latency: 15, lastCheck: new Date() },
+          {
+            name: "E-Commerce",
+            status: "online",
+            latency: 45,
+            lastCheck: new Date(),
+          },
+          {
+            name: "Real Estate",
+            status: "online",
+            latency: 52,
+            lastCheck: new Date(),
+          },
+          {
+            name: "Permits",
+            status: "online",
+            latency: 38,
+            lastCheck: new Date(),
+          },
+          {
+            name: "Delivery",
+            status: "online",
+            latency: 41,
+            lastCheck: new Date(),
+          },
+          {
+            name: "M&A Framework",
+            status: "online",
+            latency: 55,
+            lastCheck: new Date(),
+          },
+          {
+            name: "Pi Network",
+            status: "online",
+            latency: 120,
+            lastCheck: new Date(),
+          },
+          {
+            name: "Database",
+            status: "online",
+            latency: 15,
+            lastCheck: new Date(),
+          },
         ],
       },
     };
@@ -216,7 +251,9 @@ export class EnterpriseHub {
     totalBudget: number;
     phases: { name: string; budget: number }[];
   }): Promise<{
-    development: Awaited<ReturnType<typeof realEstatePlatform.createDevelopmentProject>>;
+    development: Awaited<
+      ReturnType<typeof realEstatePlatform.createDevelopmentProject>
+    >;
     permits: Awaited<ReturnType<typeof permitSystem.createPermitApplication>>[];
   }> {
     // Create development project
@@ -266,12 +303,9 @@ export class EnterpriseHub {
     });
 
     // Create required permits
-    const permitTypes: Array<Parameters<typeof permitSystem.createPermitApplication>[0]["type"]> = [
-      "building",
-      "grading",
-      "electrical",
-      "plumbing",
-    ];
+    const permitTypes: Array<
+      Parameters<typeof permitSystem.createPermitApplication>[0]["type"]
+    > = ["building", "grading", "electrical", "plumbing"];
 
     const permits = await Promise.all(
       permitTypes.map((type) =>
@@ -293,7 +327,7 @@ export class EnterpriseHub {
           description: `${type} permit for ${projectData.developmentName}`,
           scopeOfWork: `${type} work for development project`,
           estimatedCost: projectData.totalBudget * 0.1,
-          squareFootage: 10000,
+          squareFootage: 10_000,
           requirements: [],
           inspections: [],
           violations: [],
@@ -324,7 +358,9 @@ export class EnterpriseHub {
    */
   async processEcommerceDelivery(orderId: string): Promise<{
     ecommerceOrder: Awaited<ReturnType<typeof ecommerceHub.getOrder>>;
-    deliveryOrder: Awaited<ReturnType<typeof deliveryPlatform.createOrder>> | null;
+    deliveryOrder: Awaited<
+      ReturnType<typeof deliveryPlatform.createOrder>
+    > | null;
   }> {
     const ecommerceOrder = await ecommerceHub.getOrder(orderId);
     if (!ecommerceOrder) {
@@ -332,7 +368,9 @@ export class EnterpriseHub {
     }
 
     // Create delivery order if shipping is required (has shipping address and is not fulfilled yet)
-    const needsDelivery = ecommerceOrder.shippingAddress && ecommerceOrder.fulfillment.status !== "fulfilled";
+    const needsDelivery =
+      ecommerceOrder.shippingAddress &&
+      ecommerceOrder.fulfillment.status !== "fulfilled";
     if (needsDelivery) {
       const deliveryOrder = await deliveryPlatform.createOrder({
         type: "package",
@@ -369,7 +407,8 @@ export class EnterpriseHub {
           substitutedItem: null,
         })),
         specialHandling: [],
-        paymentMethod: ecommerceOrder.paymentMethod === "pi-network" ? "pi" : "card",
+        paymentMethod:
+          ecommerceOrder.paymentMethod === "pi-network" ? "pi" : "card",
         tip: 0,
       });
 
@@ -410,13 +449,14 @@ export class EnterpriseHub {
     merchants: Awaited<ReturnType<typeof deliveryPlatform.searchMerchants>>;
     companies: Awaited<ReturnType<typeof maFramework.searchCompanies>>;
   }> {
-    const [vendors, products, properties, merchants, companies] = await Promise.all([
-      ecommerceHub.listVendors({}),
-      ecommerceHub.searchProducts({ search: query }),
-      realEstatePlatform.searchProperties({ city: query }),
-      deliveryPlatform.searchMerchants({ category: query }),
-      maFramework.searchCompanies({ industry: query }),
-    ]);
+    const [vendors, products, properties, merchants, companies] =
+      await Promise.all([
+        ecommerceHub.listVendors({}),
+        ecommerceHub.searchProducts({ search: query }),
+        realEstatePlatform.searchProperties({ city: query }),
+        deliveryPlatform.searchMerchants({ category: query }),
+        maFramework.searchCompanies({ industry: query }),
+      ]);
 
     return { vendors, products, properties, merchants, companies };
   }
@@ -434,11 +474,11 @@ export class EnterpriseHub {
     total: number;
     totalInPi: number;
   }> {
-    const ecommerce = 5000000;
-    const realEstate = 3000000;
-    const delivery = 2000000;
-    const permits = 500000;
-    const acquisitions = 4500000;
+    const ecommerce = 5_000_000;
+    const realEstate = 3_000_000;
+    const delivery = 2_000_000;
+    const permits = 500_000;
+    const acquisitions = 4_500_000;
     const total = ecommerce + realEstate + delivery + permits + acquisitions;
 
     return {
@@ -493,10 +533,14 @@ export async function getEnterpriseDashboard(): Promise<EnterpriseDashboard> {
   return enterpriseHub.getDashboard();
 }
 
-export async function globalSearch(query: string): ReturnType<typeof enterpriseHub.globalSearch> {
+export async function globalSearch(
+  query: string
+): ReturnType<typeof enterpriseHub.globalSearch> {
   return enterpriseHub.globalSearch(query);
 }
 
-export async function healthCheck(): ReturnType<typeof enterpriseHub.healthCheck> {
+export async function healthCheck(): ReturnType<
+  typeof enterpriseHub.healthCheck
+> {
   return enterpriseHub.healthCheck();
 }

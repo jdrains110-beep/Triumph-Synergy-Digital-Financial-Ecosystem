@@ -135,9 +135,9 @@ export class NESARAGESARAEngine {
 
   // NESARA Flat Tax Rate (14-17% consumption tax replacing income tax)
   private readonly NESARA_TAX_RATE = 0.14;
-  
+
   // Prosperity fund base amount per citizen
-  private readonly BASE_PROSPERITY_AMOUNT = 100000;
+  private readonly BASE_PROSPERITY_AMOUNT = 100_000;
 
   private constructor() {
     this.initializeGESARACountries();
@@ -153,9 +153,17 @@ export class NESARAGESARAEngine {
   private initializeGESARACountries(): void {
     // Initialize GESARA-compliant countries
     const compliantCountries: Partial<GESARACountryStatus>[] = [
-      { countryCode: "US", countryName: "United States", implementationPhase: 5 },
+      {
+        countryCode: "US",
+        countryName: "United States",
+        implementationPhase: 5,
+      },
       { countryCode: "CA", countryName: "Canada", implementationPhase: 4 },
-      { countryCode: "GB", countryName: "United Kingdom", implementationPhase: 4 },
+      {
+        countryCode: "GB",
+        countryName: "United Kingdom",
+        implementationPhase: 4,
+      },
       { countryCode: "AU", countryName: "Australia", implementationPhase: 4 },
       { countryCode: "NZ", countryName: "New Zealand", implementationPhase: 4 },
       { countryCode: "DE", countryName: "Germany", implementationPhase: 3 },
@@ -304,7 +312,9 @@ export class NESARAGESARAEngine {
     return profile.debtForgiveness;
   }
 
-  async processDebtForgiveness(profileId: string): Promise<DebtForgivenessRecord> {
+  async processDebtForgiveness(
+    profileId: string
+  ): Promise<DebtForgivenessRecord> {
     const profile = this.profiles.get(profileId);
     if (!profile) {
       throw new Error("Profile not found");
@@ -338,7 +348,9 @@ export class NESARAGESARAEngine {
   // PROSPERITY FUNDS
   // ==========================================================================
 
-  async activateProsperityFunds(profileId: string): Promise<ProsperityFundsRecord> {
+  async activateProsperityFunds(
+    profileId: string
+  ): Promise<ProsperityFundsRecord> {
     const profile = this.profiles.get(profileId);
     if (!profile) {
       throw new Error("Profile not found");
@@ -415,12 +427,12 @@ export class NESARAGESARAEngine {
     );
     profile.prosperityFunds.nextDistribution = upcoming?.date || null;
 
-    if (!upcoming) {
-      profile.prosperityFunds.status = "completed";
-      profile.status = "completed";
-    } else {
+    if (upcoming) {
       profile.prosperityFunds.status = "receiving";
       profile.status = "receiving-benefits";
+    } else {
+      profile.prosperityFunds.status = "completed";
+      profile.status = "completed";
     }
 
     return { amount: nextPayment.amount, transactionId };
@@ -508,12 +520,16 @@ export class NESARAGESARAEngine {
   // GESARA COUNTRY STATUS
   // ==========================================================================
 
-  async getCountryGESARAStatus(countryCode: string): Promise<GESARACountryStatus | null> {
+  async getCountryGESARAStatus(
+    countryCode: string
+  ): Promise<GESARACountryStatus | null> {
     return this.countryStatus.get(countryCode) || null;
   }
 
   async listGESARACompliantCountries(): Promise<GESARACountryStatus[]> {
-    return Array.from(this.countryStatus.values()).filter((c) => c.gesaraCompliant);
+    return Array.from(this.countryStatus.values()).filter(
+      (c) => c.gesaraCompliant
+    );
   }
 
   // ==========================================================================

@@ -145,7 +145,7 @@ export class UniversalBasicIncomeEngine {
         maxAge: null,
         kycRequired: true,
         residencyRequired: true,
-        incomeThreshold: 75000,
+        incomeThreshold: 75_000,
         citizenshipRequired: true,
         excludedCountries: [],
         additionalRequirements: ["nesara-registered", "debt-forgiveness-filed"],
@@ -181,7 +181,10 @@ export class UniversalBasicIncomeEngine {
   // ==========================================================================
 
   async enrollRecipient(
-    recipientData: Omit<UBIRecipient, "id" | "enrollmentDate" | "lastDistribution" | "totalReceived">
+    recipientData: Omit<
+      UBIRecipient,
+      "id" | "enrollmentDate" | "lastDistribution" | "totalReceived"
+    >
   ): Promise<UBIRecipient> {
     const id = `ubi-recipient-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -231,7 +234,9 @@ export class UniversalBasicIncomeEngine {
     }
 
     // Check excluded countries
-    if (program.eligibilityCriteria.excludedCountries.includes(recipient.country)) {
+    if (
+      program.eligibilityCriteria.excludedCountries.includes(recipient.country)
+    ) {
       reasons.push("Country excluded from program");
     }
 
@@ -399,7 +404,8 @@ export class UniversalBasicIncomeEngine {
     return {
       totalDistributed,
       recipientCount,
-      averagePerRecipient: recipientCount > 0 ? totalDistributed / recipientCount : 0,
+      averagePerRecipient:
+        recipientCount > 0 ? totalDistributed / recipientCount : 0,
       byMonth,
     };
   }

@@ -1,10 +1,10 @@
 /**
  * Triumph Synergy - M&A (Mergers & Acquisitions) API Routes
- * 
+ *
  * Company buyouts, valuations, and framework integration
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { maFramework } from "@/lib/acquisitions/ma-framework";
 
 export async function GET(request: NextRequest) {
@@ -16,9 +16,13 @@ export async function GET(request: NextRequest) {
       case "companies": {
         const industry = searchParams.get("industry") || undefined;
         const sector = searchParams.get("sector") || undefined;
-        const revenueMin = searchParams.get("revenueMin") ? parseFloat(searchParams.get("revenueMin")!) : undefined;
-        const revenueMax = searchParams.get("revenueMax") ? parseFloat(searchParams.get("revenueMax")!) : undefined;
-        
+        const revenueMin = searchParams.get("revenueMin")
+          ? Number.parseFloat(searchParams.get("revenueMin")!)
+          : undefined;
+        const revenueMax = searchParams.get("revenueMax")
+          ? Number.parseFloat(searchParams.get("revenueMax")!)
+          : undefined;
+
         const companies = await maFramework.searchCompanies({
           industry,
           sector,
@@ -35,7 +39,10 @@ export async function GET(request: NextRequest) {
       case "company": {
         const companyId = searchParams.get("companyId");
         if (!companyId) {
-          return NextResponse.json({ success: false, error: "Company ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Company ID required" },
+            { status: 400 }
+          );
         }
         const company = await maFramework.getCompany(companyId);
         return NextResponse.json({
@@ -47,7 +54,10 @@ export async function GET(request: NextRequest) {
       case "acquisition": {
         const acquisitionId = searchParams.get("acquisitionId");
         if (!acquisitionId) {
-          return NextResponse.json({ success: false, error: "Acquisition ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Acquisition ID required" },
+            { status: 400 }
+          );
         }
         const acquisition = await maFramework.getAcquisition(acquisitionId);
         return NextResponse.json({
@@ -60,9 +70,15 @@ export async function GET(request: NextRequest) {
         const companyId = searchParams.get("companyId");
         const method = searchParams.get("method") || "ebitda-multiple";
         if (!companyId) {
-          return NextResponse.json({ success: false, error: "Company ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Company ID required" },
+            { status: 400 }
+          );
         }
-        const valuation = await maFramework.performValuation(companyId, method as any);
+        const valuation = await maFramework.performValuation(
+          companyId,
+          method as any
+        );
         return NextResponse.json({
           success: true,
           data: valuation,
@@ -86,9 +102,10 @@ export async function GET(request: NextRequest) {
             "GET ?action=companies": "Search target companies",
             "GET ?action=company&companyId=": "Get company details",
             "GET ?action=acquisition&acquisitionId=": "Get acquisition details",
-            "GET ?action=valuation&companyId=&method=": "Perform company valuation",
+            "GET ?action=valuation&companyId=&method=":
+              "Perform company valuation",
             "GET ?action=dashboard": "Get M&A dashboard metrics",
-            "POST": "Create acquisitions, manage due diligence",
+            POST: "Create acquisitions, manage due diligence",
           },
         });
     }
@@ -138,7 +155,9 @@ export async function POST(request: NextRequest) {
       }
 
       case "start-due-diligence": {
-        const dueDiligence = await maFramework.startDueDiligence(data.acquisitionId);
+        const dueDiligence = await maFramework.startDueDiligence(
+          data.acquisitionId
+        );
         return NextResponse.json({
           success: true,
           data: dueDiligence,
@@ -147,7 +166,10 @@ export async function POST(request: NextRequest) {
       }
 
       case "add-finding": {
-        const finding = await maFramework.addDDFinding(data.acquisitionId, data.finding);
+        const finding = await maFramework.addDDFinding(
+          data.acquisitionId,
+          data.finding
+        );
         return NextResponse.json({
           success: true,
           data: finding,
@@ -156,7 +178,10 @@ export async function POST(request: NextRequest) {
       }
 
       case "create-integration-plan": {
-        const plan = await maFramework.createIntegrationPlan(data.acquisitionId, data.plan);
+        const plan = await maFramework.createIntegrationPlan(
+          data.acquisitionId,
+          data.plan
+        );
         return NextResponse.json({
           success: true,
           data: plan,
@@ -165,7 +190,9 @@ export async function POST(request: NextRequest) {
       }
 
       case "execute-tech-integration": {
-        const result = await maFramework.executeTechIntegration(data.acquisitionId);
+        const result = await maFramework.executeTechIntegration(
+          data.acquisitionId
+        );
         return NextResponse.json({
           success: true,
           data: result,
@@ -191,7 +218,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("M&A API POST error:", error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to process request" },
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to process request",
+      },
       { status: 500 }
     );
   }

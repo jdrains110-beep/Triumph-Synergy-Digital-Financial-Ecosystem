@@ -1,17 +1,17 @@
 /**
  * Triumph Synergy - NESARA/GESARA API Routes
- * 
+ *
  * API endpoints for NESARA/GESARA compliance and benefits
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
-  nesaraEngine,
-  registerNESARA,
-  submitDebtForgiveness,
-  processDebtForgiveness,
   activateProsperity,
   checkGESARACompliance,
+  nesaraEngine,
+  processDebtForgiveness,
+  registerNESARA,
+  submitDebtForgiveness,
 } from "@/lib/nesara/nesara-gesara-system";
 
 export async function POST(request: NextRequest) {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "register": {
         const { piUserId, piUsername } = body;
-        
+
         if (!piUserId || !piUsername) {
           return NextResponse.json(
             { error: "Missing required fields: piUserId, piUsername" },
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
       case "submit-debt": {
         const { profileId, debts } = body;
-        
+
         if (!profileId) {
           return NextResponse.json(
             { error: "Missing required field: profileId" },
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
       case "process-forgiveness": {
         const { profileId } = body;
-        
+
         if (!profileId) {
           return NextResponse.json(
             { error: "Missing required field: profileId" },
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
       case "activate-prosperity": {
         const { profileId } = body;
-        
+
         if (!profileId) {
           return NextResponse.json(
             { error: "Missing required field: profileId" },
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
 
       case "distribute-prosperity": {
         const { profileId } = body;
-        
+
         if (!profileId) {
           return NextResponse.json(
             { error: "Missing required field: profileId" },
@@ -113,7 +113,8 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const distribution = await nesaraEngine.distributeProsperityPayment(profileId);
+        const distribution =
+          await nesaraEngine.distributeProsperityPayment(profileId);
 
         return NextResponse.json({
           success: true,
@@ -124,10 +125,17 @@ export async function POST(request: NextRequest) {
 
       case "calculate-tax-reform": {
         const { profileId, previousIncome, previousTaxPaid } = body;
-        
-        if (!profileId || previousIncome === undefined || previousTaxPaid === undefined) {
+
+        if (
+          !profileId ||
+          previousIncome === undefined ||
+          previousTaxPaid === undefined
+        ) {
           return NextResponse.json(
-            { error: "Missing required fields: profileId, previousIncome, previousTaxPaid" },
+            {
+              error:
+                "Missing required fields: profileId, previousIncome, previousTaxPaid",
+            },
             { status: 400 }
           );
         }
@@ -147,10 +155,13 @@ export async function POST(request: NextRequest) {
 
       case "create-asset-account": {
         const { profileId, assetType, initialDeposit } = body;
-        
+
         if (!profileId || !assetType || initialDeposit === undefined) {
           return NextResponse.json(
-            { error: "Missing required fields: profileId, assetType, initialDeposit" },
+            {
+              error:
+                "Missing required fields: profileId, assetType, initialDeposit",
+            },
             { status: 400 }
           );
         }
@@ -170,7 +181,7 @@ export async function POST(request: NextRequest) {
 
       case "check-country-compliance": {
         const { countryCode } = body;
-        
+
         if (!countryCode) {
           return NextResponse.json(
             { error: "Missing required field: countryCode" },
@@ -198,7 +209,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("NESARA/GESARA API error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
@@ -212,12 +225,9 @@ export async function GET(request: NextRequest) {
 
   if (profileId) {
     const profile = await nesaraEngine.getProfile(profileId);
-    
+
     if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -228,7 +238,7 @@ export async function GET(request: NextRequest) {
 
   if (countryCode) {
     const status = await nesaraEngine.getCountryGESARAStatus(countryCode);
-    
+
     return NextResponse.json({
       success: true,
       countryCode,
@@ -239,7 +249,7 @@ export async function GET(request: NextRequest) {
 
   if (listCountries === "true") {
     const countries = await nesaraEngine.listGESARACompliantCountries();
-    
+
     return NextResponse.json({
       success: true,
       compliantCountries: countries,

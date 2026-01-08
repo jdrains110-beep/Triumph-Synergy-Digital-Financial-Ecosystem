@@ -1,25 +1,23 @@
 /**
  * Triumph Synergy - Integrations Module Index
- * 
+ *
  * Unified financial integration hub exports
  */
 
 export {
+  type FinancialDashboard,
   // Hub
   FinancialIntegrationHub,
   financialHub,
-  
+  getDashboard,
+  type KYCStatus,
   // Functions
   onboardNewUser,
-  getDashboard,
   processDistributions,
-  
+  type TransactionSource,
+  type TransactionType,
+  type TriumphFeatures,
   // Types
   type TriumphUser,
-  type KYCStatus,
-  type TriumphFeatures,
-  type FinancialDashboard,
   type UnifiedTransaction,
-  type TransactionType,
-  type TransactionSource,
 } from "./financial-hub";

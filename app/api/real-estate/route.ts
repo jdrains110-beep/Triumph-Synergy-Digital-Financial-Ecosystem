@@ -1,11 +1,15 @@
 /**
  * Triumph Synergy - Real Estate API Routes
- * 
+ *
  * Property listings, transactions, and development management
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { realEstatePlatform, type PropertyType, type PropertyStatus } from "@/lib/real-estate/real-estate-platform";
+import { type NextRequest, NextResponse } from "next/server";
+import {
+  type PropertyStatus,
+  type PropertyType,
+  realEstatePlatform,
+} from "@/lib/real-estate/real-estate-platform";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,14 +21,24 @@ export async function GET(request: NextRequest) {
         const propertyTypeParam = searchParams.get("propertyType");
         const statusParam = searchParams.get("status");
         const city = searchParams.get("city") || undefined;
-        const minPrice = searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined;
-        const maxPrice = searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined;
-        const minBeds = searchParams.get("minBeds") ? parseInt(searchParams.get("minBeds")!) : undefined;
-        const minBaths = searchParams.get("minBaths") ? parseInt(searchParams.get("minBaths")!) : undefined;
-        
+        const minPrice = searchParams.get("minPrice")
+          ? Number.parseFloat(searchParams.get("minPrice")!)
+          : undefined;
+        const maxPrice = searchParams.get("maxPrice")
+          ? Number.parseFloat(searchParams.get("maxPrice")!)
+          : undefined;
+        const minBeds = searchParams.get("minBeds")
+          ? Number.parseInt(searchParams.get("minBeds")!)
+          : undefined;
+        const minBaths = searchParams.get("minBaths")
+          ? Number.parseInt(searchParams.get("minBaths")!)
+          : undefined;
+
         const result = await realEstatePlatform.searchProperties({
-          propertyType: propertyTypeParam ? propertyTypeParam as PropertyType : undefined,
-          status: statusParam ? statusParam as PropertyStatus : undefined,
+          propertyType: propertyTypeParam
+            ? (propertyTypeParam as PropertyType)
+            : undefined,
+          status: statusParam ? (statusParam as PropertyStatus) : undefined,
           city,
           minPrice,
           maxPrice,
@@ -41,7 +55,10 @@ export async function GET(request: NextRequest) {
       case "property": {
         const propertyId = searchParams.get("propertyId");
         if (!propertyId) {
-          return NextResponse.json({ success: false, error: "Property ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Property ID required" },
+            { status: 400 }
+          );
         }
         const property = await realEstatePlatform.getProperty(propertyId);
         return NextResponse.json({
@@ -53,9 +70,13 @@ export async function GET(request: NextRequest) {
       case "transaction": {
         const transactionId = searchParams.get("transactionId");
         if (!transactionId) {
-          return NextResponse.json({ success: false, error: "Transaction ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Transaction ID required" },
+            { status: 400 }
+          );
         }
-        const transaction = await realEstatePlatform.getTransaction(transactionId);
+        const transaction =
+          await realEstatePlatform.getTransaction(transactionId);
         return NextResponse.json({
           success: true,
           data: transaction,
@@ -65,9 +86,13 @@ export async function GET(request: NextRequest) {
       case "development": {
         const developmentId = searchParams.get("developmentId");
         if (!developmentId) {
-          return NextResponse.json({ success: false, error: "Development ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Development ID required" },
+            { status: 400 }
+          );
         }
-        const development = await realEstatePlatform.getDevelopmentProject(developmentId);
+        const development =
+          await realEstatePlatform.getDevelopmentProject(developmentId);
         return NextResponse.json({
           success: true,
           data: development,
@@ -77,7 +102,10 @@ export async function GET(request: NextRequest) {
       case "agents": {
         const state = searchParams.get("state") || undefined;
         const specialization = searchParams.get("specialization") || undefined;
-        const agents = await realEstatePlatform.searchAgents({ state, specialization });
+        const agents = await realEstatePlatform.searchAgents({
+          state,
+          specialization,
+        });
         return NextResponse.json({
           success: true,
           data: agents,
@@ -96,7 +124,7 @@ export async function GET(request: NextRequest) {
             "GET ?action=transaction&transactionId=": "Get transaction details",
             "GET ?action=development&developmentId=": "Get development project",
             "GET ?action=agents": "Search real estate agents",
-            "POST": "Create listings, offers, developments",
+            POST: "Create listings, offers, developments",
           },
         });
     }
@@ -146,7 +174,8 @@ export async function POST(request: NextRequest) {
       }
 
       case "create-development": {
-        const development = await realEstatePlatform.createDevelopmentProject(data);
+        const development =
+          await realEstatePlatform.createDevelopmentProject(data);
         return NextResponse.json({
           success: true,
           data: development,
@@ -185,7 +214,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Real Estate API POST error:", error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to process request" },
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to process request",
+      },
       { status: 500 }
     );
   }

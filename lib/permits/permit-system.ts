@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Permit & Compliance System
- * 
+ *
  * Comprehensive permit management for housing development and construction
  * Integrates with government agencies for compliance tracking
- * 
+ *
  * @module lib/permits/permit-system
  * @version 1.0.0
  */
@@ -18,50 +18,50 @@ export interface Permit {
   type: PermitType;
   subType: string;
   status: PermitStatus;
-  
+
   // Property
   propertyId: string | null;
   projectId: string | null;
   address: PermitAddress;
   parcelNumber: string;
-  
+
   // Details
   description: string;
   scopeOfWork: string;
   estimatedCost: number;
   squareFootage: number;
-  
+
   // Compliance
   requirements: ComplianceRequirement[];
   inspections: Inspection[];
   violations: Violation[];
-  
+
   // Fees
   fees: PermitFee[];
   totalFees: number;
   paidAmount: number;
-  
+
   // Parties
   applicantId: string;
   contractorId: string | null;
   architectId: string | null;
   engineerId: string | null;
-  
+
   // Documents
   documents: PermitDocument[];
   plans: BuildingPlan[];
-  
+
   // Dates
   applicationDate: Date;
   issuedDate: Date | null;
   expirationDate: Date | null;
   finalizedDate: Date | null;
-  
+
   // Jurisdiction
   jurisdiction: string;
   department: string;
   reviewer: string | null;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -250,7 +250,14 @@ export interface BuildingPlan {
   id: string;
   sheetNumber: string;
   title: string;
-  discipline: "architectural" | "structural" | "electrical" | "plumbing" | "mechanical" | "civil" | "landscape";
+  discipline:
+    | "architectural"
+    | "structural"
+    | "electrical"
+    | "plumbing"
+    | "mechanical"
+    | "civil"
+    | "landscape";
   version: number;
   url: string;
   status: "submitted" | "under-review" | "approved" | "revise-resubmit";
@@ -310,7 +317,11 @@ export interface ZoningInfo {
 export interface EnvironmentalReview {
   id: string;
   projectId: string;
-  type: "categorical-exemption" | "negative-declaration" | "mitigated-neg-dec" | "eir";
+  type:
+    | "categorical-exemption"
+    | "negative-declaration"
+    | "mitigated-neg-dec"
+    | "eir";
   status: "pending" | "in-progress" | "approved" | "denied";
   leadAgency: string;
   publicCommentPeriod: { start: Date; end: Date } | null;
@@ -323,7 +334,11 @@ export interface EnvironmentalReview {
 
 export interface EnvironmentalFinding {
   category: string;
-  impact: "none" | "less-than-significant" | "potentially-significant" | "significant";
+  impact:
+    | "none"
+    | "less-than-significant"
+    | "potentially-significant"
+    | "significant";
   description: string;
   mitigation: string | null;
 }
@@ -343,7 +358,7 @@ export interface MitigationMeasure {
 
 export class PermitSystem {
   private static instance: PermitSystem;
-  
+
   private permits: Map<string, Permit> = new Map();
   private contractors: Map<string, Contractor> = new Map();
   private zoningData: Map<string, ZoningInfo> = new Map();
@@ -366,7 +381,11 @@ export class PermitSystem {
       parcelNumber: "SAMPLE",
       zoneCode: "R-1",
       zoneName: "Single-Family Residential",
-      allowedUses: ["single-family-dwelling", "home-office", "accessory-dwelling"],
+      allowedUses: [
+        "single-family-dwelling",
+        "home-office",
+        "accessory-dwelling",
+      ],
       conditionalUses: ["daycare", "home-business", "short-term-rental"],
       prohibitedUses: ["commercial", "industrial", "multi-family"],
       setbacks: { front: 20, rear: 15, side: 5 },
@@ -385,9 +404,24 @@ export class PermitSystem {
   // PERMIT MANAGEMENT
   // ==========================================================================
 
-  async createPermitApplication(permitData: Omit<Permit, "id" | "permitNumber" | "createdAt" | "updatedAt" | "status" | "issuedDate" | "finalizedDate">): Promise<Permit> {
+  async createPermitApplication(
+    permitData: Omit<
+      Permit,
+      | "id"
+      | "permitNumber"
+      | "createdAt"
+      | "updatedAt"
+      | "status"
+      | "issuedDate"
+      | "finalizedDate"
+    >
+  ): Promise<Permit> {
     const id = `permit-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    const permitNumber = `${permitData.type.toUpperCase().slice(0, 3)}-${new Date().getFullYear()}-${Math.floor(Math.random() * 100000).toString().padStart(5, "0")}`;
+    const permitNumber = `${permitData.type.toUpperCase().slice(0, 3)}-${new Date().getFullYear()}-${Math.floor(
+      Math.random() * 100_000
+    )
+      .toString()
+      .padStart(5, "0")}`;
 
     const permit: Permit = {
       ...permitData,
@@ -416,8 +450,8 @@ export class PermitSystem {
 
     // Validate required documents
     const requiredDocs: DocumentCategory[] = ["application-form", "site-plan"];
-    const uploadedTypes = permit.documents.map(d => d.type);
-    const missingDocs = requiredDocs.filter(r => !uploadedTypes.includes(r));
+    const uploadedTypes = permit.documents.map((d) => d.type);
+    const missingDocs = requiredDocs.filter((r) => !uploadedTypes.includes(r));
 
     if (missingDocs.length > 0) {
       throw new Error(`Missing required documents: ${missingDocs.join(", ")}`);
@@ -445,26 +479,27 @@ export class PermitSystem {
     let permits = Array.from(this.permits.values());
 
     if (query.type) {
-      permits = permits.filter(p => p.type === query.type);
+      permits = permits.filter((p) => p.type === query.type);
     }
     if (query.status) {
-      permits = permits.filter(p => p.status === query.status);
+      permits = permits.filter((p) => p.status === query.status);
     }
     if (query.applicantId) {
-      permits = permits.filter(p => p.applicantId === query.applicantId);
+      permits = permits.filter((p) => p.applicantId === query.applicantId);
     }
     if (query.contractorId) {
-      permits = permits.filter(p => p.contractorId === query.contractorId);
+      permits = permits.filter((p) => p.contractorId === query.contractorId);
     }
     if (query.address) {
-      permits = permits.filter(p => 
+      permits = permits.filter((p) =>
         p.address.street.toLowerCase().includes(query.address!.toLowerCase())
       );
     }
     if (query.dateRange) {
-      permits = permits.filter(p => 
-        p.applicationDate >= query.dateRange!.start && 
-        p.applicationDate <= query.dateRange!.end
+      permits = permits.filter(
+        (p) =>
+          p.applicationDate >= query.dateRange!.start &&
+          p.applicationDate <= query.dateRange!.end
       );
     }
 
@@ -477,7 +512,11 @@ export class PermitSystem {
     return permits;
   }
 
-  async updatePermitStatus(permitId: string, status: PermitStatus, notes?: string): Promise<Permit> {
+  async updatePermitStatus(
+    permitId: string,
+    status: PermitStatus,
+    notes?: string
+  ): Promise<Permit> {
     const permit = this.permits.get(permitId);
     if (!permit) {
       throw new Error("Permit not found");
@@ -502,7 +541,13 @@ export class PermitSystem {
   // INSPECTIONS
   // ==========================================================================
 
-  async scheduleInspection(permitId: string, inspectionData: Omit<Inspection, "id" | "status" | "completedDate" | "result" | "corrections" | "photos">): Promise<Inspection> {
+  async scheduleInspection(
+    permitId: string,
+    inspectionData: Omit<
+      Inspection,
+      "id" | "status" | "completedDate" | "result" | "corrections" | "photos"
+    >
+  ): Promise<Inspection> {
     const permit = this.permits.get(permitId);
     if (!permit) {
       throw new Error("Permit not found");
@@ -536,7 +581,7 @@ export class PermitSystem {
       throw new Error("Permit not found");
     }
 
-    const inspection = permit.inspections.find(i => i.id === inspectionId);
+    const inspection = permit.inspections.find((i) => i.id === inspectionId);
     if (!inspection) {
       throw new Error("Inspection not found");
     }
@@ -547,7 +592,7 @@ export class PermitSystem {
     inspection.status = "completed";
 
     if (corrections) {
-      inspection.corrections = corrections.map(c => ({
+      inspection.corrections = corrections.map((c) => ({
         ...c,
         id: `corr-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
         status: "open",
@@ -569,7 +614,8 @@ export class PermitSystem {
       throw new Error("Permit not found");
     }
 
-    return permit.inspections.filter(i => i.status === "scheduled")
+    return permit.inspections
+      .filter((i) => i.status === "scheduled")
       .sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
   }
 
@@ -577,7 +623,13 @@ export class PermitSystem {
   // COMPLIANCE
   // ==========================================================================
 
-  async addComplianceRequirement(permitId: string, requirement: Omit<ComplianceRequirement, "id" | "status" | "reviewedBy" | "reviewedAt">): Promise<ComplianceRequirement> {
+  async addComplianceRequirement(
+    permitId: string,
+    requirement: Omit<
+      ComplianceRequirement,
+      "id" | "status" | "reviewedBy" | "reviewedAt"
+    >
+  ): Promise<ComplianceRequirement> {
     const permit = this.permits.get(permitId);
     if (!permit) {
       throw new Error("Permit not found");
@@ -609,7 +661,7 @@ export class PermitSystem {
       throw new Error("Permit not found");
     }
 
-    const requirement = permit.requirements.find(r => r.id === requirementId);
+    const requirement = permit.requirements.find((r) => r.id === requirementId);
     if (!requirement) {
       throw new Error("Requirement not found");
     }
@@ -625,14 +677,20 @@ export class PermitSystem {
     return requirement;
   }
 
-  async checkAllCompliance(permitId: string): Promise<{ compliant: boolean; pending: number; failed: number }> {
+  async checkAllCompliance(
+    permitId: string
+  ): Promise<{ compliant: boolean; pending: number; failed: number }> {
     const permit = this.permits.get(permitId);
     if (!permit) {
       throw new Error("Permit not found");
     }
 
-    const pending = permit.requirements.filter(r => r.status === "pending" || r.status === "in-review").length;
-    const failed = permit.requirements.filter(r => r.status === "failed").length;
+    const pending = permit.requirements.filter(
+      (r) => r.status === "pending" || r.status === "in-review"
+    ).length;
+    const failed = permit.requirements.filter(
+      (r) => r.status === "failed"
+    ).length;
     const compliant = pending === 0 && failed === 0;
 
     return { compliant, pending, failed };
@@ -705,13 +763,17 @@ export class PermitSystem {
     return fees;
   }
 
-  async payFee(permitId: string, feeId: string, receiptNumber: string): Promise<PermitFee> {
+  async payFee(
+    permitId: string,
+    feeId: string,
+    receiptNumber: string
+  ): Promise<PermitFee> {
     const permit = this.permits.get(permitId);
     if (!permit) {
       throw new Error("Permit not found");
     }
 
-    const fee = permit.fees.find(f => f.id === feeId);
+    const fee = permit.fees.find((f) => f.id === feeId);
     if (!fee) {
       throw new Error("Fee not found");
     }
@@ -720,7 +782,9 @@ export class PermitSystem {
     fee.paidDate = new Date();
     fee.receiptNumber = receiptNumber;
 
-    permit.paidAmount = permit.fees.filter(f => f.status === "paid").reduce((sum, f) => sum + f.amount, 0);
+    permit.paidAmount = permit.fees
+      .filter((f) => f.status === "paid")
+      .reduce((sum, f) => sum + f.amount, 0);
     permit.updatedAt = new Date();
 
     return fee;
@@ -734,7 +798,12 @@ export class PermitSystem {
     return this.zoningData.get(zoneCode) || null;
   }
 
-  async checkZoningCompliance(permitData: { zoneCode: string; proposedUse: string; height: number; lotCoverage: number }): Promise<{ compliant: boolean; violations: string[] }> {
+  async checkZoningCompliance(permitData: {
+    zoneCode: string;
+    proposedUse: string;
+    height: number;
+    lotCoverage: number;
+  }): Promise<{ compliant: boolean; violations: string[] }> {
     const zoning = this.zoningData.get(permitData.zoneCode);
     if (!zoning) {
       return { compliant: false, violations: ["Zone code not found"] };
@@ -742,16 +811,25 @@ export class PermitSystem {
 
     const violations: string[] = [];
 
-    if (!zoning.allowedUses.includes(permitData.proposedUse) && !zoning.conditionalUses.includes(permitData.proposedUse)) {
-      violations.push(`Use "${permitData.proposedUse}" not allowed in zone ${permitData.zoneCode}`);
+    if (
+      !zoning.allowedUses.includes(permitData.proposedUse) &&
+      !zoning.conditionalUses.includes(permitData.proposedUse)
+    ) {
+      violations.push(
+        `Use "${permitData.proposedUse}" not allowed in zone ${permitData.zoneCode}`
+      );
     }
 
     if (permitData.height > zoning.maxHeight) {
-      violations.push(`Height ${permitData.height}ft exceeds maximum ${zoning.maxHeight}ft`);
+      violations.push(
+        `Height ${permitData.height}ft exceeds maximum ${zoning.maxHeight}ft`
+      );
     }
 
     if (permitData.lotCoverage > zoning.maxLotCoverage) {
-      violations.push(`Lot coverage ${(permitData.lotCoverage * 100).toFixed(1)}% exceeds maximum ${(zoning.maxLotCoverage * 100).toFixed(1)}%`);
+      violations.push(
+        `Lot coverage ${(permitData.lotCoverage * 100).toFixed(1)}% exceeds maximum ${(zoning.maxLotCoverage * 100).toFixed(1)}%`
+      );
     }
 
     return { compliant: violations.length === 0, violations };
@@ -761,7 +839,12 @@ export class PermitSystem {
   // CONTRACTORS
   // ==========================================================================
 
-  async registerContractor(contractorData: Omit<Contractor, "id" | "verified" | "rating" | "completedProjects">): Promise<Contractor> {
+  async registerContractor(
+    contractorData: Omit<
+      Contractor,
+      "id" | "verified" | "rating" | "completedProjects"
+    >
+  ): Promise<Contractor> {
     const id = `contractor-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const contractor: Contractor = {
@@ -776,15 +859,19 @@ export class PermitSystem {
     return contractor;
   }
 
-  async verifyContractorLicense(contractorId: string): Promise<{ valid: boolean; expirationDate: Date | null; status: string }> {
+  async verifyContractorLicense(
+    contractorId: string
+  ): Promise<{ valid: boolean; expirationDate: Date | null; status: string }> {
     const contractor = this.contractors.get(contractorId);
     if (!contractor) {
       throw new Error("Contractor not found");
     }
 
     // In production, this would call state licensing board API
-    const valid = contractor.insuranceExpiration > new Date() && contractor.workersCompExpiration > new Date();
-    
+    const valid =
+      contractor.insuranceExpiration > new Date() &&
+      contractor.workersCompExpiration > new Date();
+
     return {
       valid,
       expirationDate: contractor.insuranceExpiration,
@@ -799,18 +886,27 @@ export class PermitSystem {
 
 export const permitSystem = PermitSystem.getInstance();
 
-export async function applyForPermit(permitData: Parameters<typeof permitSystem.createPermitApplication>[0]): Promise<Permit> {
+export async function applyForPermit(
+  permitData: Parameters<typeof permitSystem.createPermitApplication>[0]
+): Promise<Permit> {
   return permitSystem.createPermitApplication(permitData);
 }
 
-export async function submitPermitApplication(permitId: string): Promise<Permit> {
+export async function submitPermitApplication(
+  permitId: string
+): Promise<Permit> {
   return permitSystem.submitPermit(permitId);
 }
 
-export async function scheduleInspection(permitId: string, inspectionData: Parameters<typeof permitSystem.scheduleInspection>[1]): Promise<Inspection> {
+export async function scheduleInspection(
+  permitId: string,
+  inspectionData: Parameters<typeof permitSystem.scheduleInspection>[1]
+): Promise<Inspection> {
   return permitSystem.scheduleInspection(permitId, inspectionData);
 }
 
-export async function checkZoning(data: Parameters<typeof permitSystem.checkZoningCompliance>[0]): Promise<{ compliant: boolean; violations: string[] }> {
+export async function checkZoning(
+  data: Parameters<typeof permitSystem.checkZoningCompliance>[0]
+): Promise<{ compliant: boolean; violations: string[] }> {
   return permitSystem.checkZoningCompliance(data);
 }
