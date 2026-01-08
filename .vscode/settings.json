@@ -55,5 +55,10 @@
   "extensions.ignoreRecommendations": false,
   "[markdown]": {
     "editor.defaultFormatter": "biomejs.biome"
+  },
+  "chat.mcp.serverSampling": {
+    "triumph-synergy/.vscode/mcp.json: io.github.github/github-mcp-server": {
+      "allowedModels": []
+    }
   }
 }
