@@ -2,11 +2,10 @@
   "framework": "nextjs",
   "buildCommand": "next build",
   "installCommand": "pnpm install",
-  "redirects": [
+  "rewrites": [
     {
-      "source": "/:path*",
-      "destination": "https://triumphsynergy0576.pinet.com/:path*",
-      "permanent": false
+      "source": "/validation-key.txt",
+      "destination": "/api/validation-key"
     }
   ],
   "headers": [
