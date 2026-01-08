@@ -4,7 +4,7 @@
  * Verifies and stores credential
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
       id: `cred_${Date.now()}`,
       credentialId: credential.id,
       userId,
-      biometricType: biometricType || 'faceID',
+      biometricType: biometricType || "faceID",
       publicKey: credential.response?.getPublicKey?.(),
-      type: 'public-key' as const,
+      type: "public-key" as const,
       createdAt: new Date(),
     };
 

@@ -4,7 +4,7 @@
  * Removes a biometric credential
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
   request: NextRequest,
@@ -12,7 +12,7 @@ export async function DELETE(
 ) {
   try {
     const { credentialId } = await params;
-    const userId = request.headers.get('X-User-ID');
+    const userId = request.headers.get("X-User-ID");
 
     if (!userId || !credentialId) {
       return NextResponse.json(

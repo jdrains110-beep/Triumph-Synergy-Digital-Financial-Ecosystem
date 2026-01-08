@@ -3,7 +3,7 @@
  * Execute token swap endpoint
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (tokenAId === tokenBId) {
-      return NextResponse.json({ error: "Cannot swap same token" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Cannot swap same token" },
+        { status: 400 }
+      );
     }
 
     const amountANum = BigInt(amountA);
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
         transactionHash,
         tokenAId,
         tokenBId,
-        amountA: amountA,
+        amountA,
         amountB: estimatedOutput.toString(),
         fee: Math.floor(fee).toString(),
         timestamp: new Date().toISOString(),

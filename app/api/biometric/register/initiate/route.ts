@@ -3,17 +3,18 @@
  * Generate WebAuthn registration options
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { WebAuthnService } from '@/lib/biometric/webauthn-service';
-import { base64url } from '@/lib/utils/base64url';
+import { type NextRequest, NextResponse } from "next/server";
+import { WebAuthnService } from "@/lib/biometric/webauthn-service";
+import { base64url } from "@/lib/utils/base64url";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, username, displayName, credentialName } = await request.json();
+    const { userId, username, displayName, credentialName } =
+      await request.json();
 
     if (!userId || !username || !displayName) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -28,7 +29,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Convert challenge to base64url for transmission
-    const challenge = base64url.fromBuffer(Buffer.from(options.challenge as ArrayBuffer));
+    const challenge = base64url.fromBuffer(
+      Buffer.from(options.challenge as ArrayBuffer)
+    );
 
     // TODO: Store challenge in session/cache for verification
     // await cache.set(`webauthn_challenge_${userId}`, challenge, 300); // 5 min TTL
@@ -48,9 +51,9 @@ export async function POST(request: NextRequest) {
       challenge,
     });
   } catch (error) {
-    console.error('Error generating registration options:', error);
+    console.error("Error generating registration options:", error);
     return NextResponse.json(
-      { error: 'Failed to generate registration options' },
+      { error: "Failed to generate registration options" },
       { status: 500 }
     );
   }

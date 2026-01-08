@@ -8,14 +8,14 @@ export enum PiSource {
   EXTERNAL_EXCHANGE = "external_exchange",
 }
 
-export interface PiSourceConfig {
+export type PiSourceConfig = {
   source: PiSource;
   amount: number;
-}
+};
 
-export interface PiValue {
+export type PiValue = {
   nominal_amount: number;
   internal_value: number;
   price_equivalent: number;
   source: PiSource;
-}
+};

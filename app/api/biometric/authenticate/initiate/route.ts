@@ -3,19 +3,19 @@
  * Generate WebAuthn authentication options
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { WebAuthnService, BiometricCredential } from '@/lib/biometric/webauthn-service';
-import { base64url } from '@/lib/utils/base64url';
+import { type NextRequest, NextResponse } from "next/server";
+import {
+  type BiometricCredential,
+  WebAuthnService,
+} from "@/lib/biometric/webauthn-service";
+import { base64url } from "@/lib/utils/base64url";
 
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await request.json();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
 
     // TODO: Fetch user's credentials from database
@@ -27,18 +27,18 @@ export async function POST(request: NextRequest) {
     // Mock credentials
     const mockCredentials: BiometricCredential[] = [
       {
-        id: base64url.fromBuffer(new TextEncoder().encode('cred_1')),
+        id: base64url.fromBuffer(new TextEncoder().encode("cred_1")),
         counter: 0,
-        publicKey: '',
-        aaguid: '',
+        publicKey: "",
+        aaguid: "",
         createdAt: new Date(),
-        transports: ['platform' as any],
+        transports: ["platform" as any],
       },
     ];
 
     if (mockCredentials.length === 0) {
       return NextResponse.json(
-        { error: 'No credentials registered for this user' },
+        { error: "No credentials registered for this user" },
         { status: 404 }
       );
     }
@@ -51,17 +51,21 @@ export async function POST(request: NextRequest) {
     );
 
     // Convert challenge
-    const challenge = base64url.fromBuffer(Buffer.from(options.challenge as ArrayBuffer));
+    const challenge = base64url.fromBuffer(
+      Buffer.from(options.challenge as ArrayBuffer)
+    );
 
     // TODO: Store challenge in cache
     // await cache.set(`webauthn_auth_challenge_${userId}`, challenge, 300);
 
     const authOptions = {
       ...options,
-      challenge: challenge,
+      challenge,
       allowCredentials: options.allowCredentials?.map((cred) => ({
         ...cred,
-        id: cred.id ? base64url.fromBuffer(Buffer.from(cred.id as ArrayBuffer)) : undefined,
+        id: cred.id
+          ? base64url.fromBuffer(Buffer.from(cred.id as ArrayBuffer))
+          : undefined,
       })),
     } as any;
 
@@ -70,9 +74,9 @@ export async function POST(request: NextRequest) {
       challenge,
     });
   } catch (error) {
-    console.error('Error generating authentication options:', error);
+    console.error("Error generating authentication options:", error);
     return NextResponse.json(
-      { error: 'Failed to generate authentication options' },
+      { error: "Failed to generate authentication options" },
       { status: 500 }
     );
   }

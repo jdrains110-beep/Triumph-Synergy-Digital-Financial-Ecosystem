@@ -3,22 +3,22 @@
  * Refresh biometric session token
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { SignJWT, jwtVerify } from 'jose';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { jwtVerify, SignJWT } from "jose";
+import { type NextRequest, NextResponse } from "next/server";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'dev-secret-key-change-in-production'
+  process.env.JWT_SECRET || "dev-secret-key-change-in-production"
 );
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('Authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.replace("Bearer ", "");
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Missing authentication token' },
+        { error: "Missing authentication token" },
         { status: 401 }
       );
     }
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       payload = verified.payload;
     } catch (error) {
       return NextResponse.json(
-        { error: 'Invalid or expired token' },
+        { error: "Invalid or expired token" },
         { status: 401 }
       );
     }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
     })
-      .setProtectedHeader({ alg: 'HS256' })
+      .setProtectedHeader({ alg: "HS256" })
       .sign(JWT_SECRET);
 
     const response = NextResponse.json({
@@ -56,19 +56,19 @@ export async function POST(request: NextRequest) {
     });
 
     response.cookies.set({
-      name: 'biometric_session',
+      name: "biometric_session",
       value: newToken,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 24 * 60 * 60,
     });
 
     return response;
   } catch (error) {
-    console.error('Error refreshing session:', error);
+    console.error("Error refreshing session:", error);
     return NextResponse.json(
-      { error: 'Failed to refresh session' },
+      { error: "Failed to refresh session" },
       { status: 500 }
     );
   }

@@ -3,7 +3,7 @@
  * Add liquidity endpoint
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (tokenAId === tokenBId) {
-      return NextResponse.json({ error: "Cannot add liquidity with same token" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Cannot add liquidity with same token" },
+        { status: 400 }
+      );
     }
 
     const amountANum = BigInt(amountA);
@@ -45,8 +48,8 @@ export async function POST(request: NextRequest) {
       userId: "current_user",
       tokenAId,
       tokenBId,
-      amountA: amountA,
-      amountB: amountB,
+      amountA,
+      amountB,
       lpTokens: (Number(amountANum) + Number(amountBNum)).toString(),
       sharePercentage: 100,
       rewardsEarned: "0",
@@ -56,6 +59,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(lpPosition, { status: 201 });
   } catch (error) {
     console.error("Add liquidity error:", error);
-    return NextResponse.json({ error: "Failed to add liquidity" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to add liquidity" },
+      { status: 500 }
+    );
   }
 }

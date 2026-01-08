@@ -3,29 +3,35 @@
  * Handles biometric authentication during login
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useBiometric } from '@/lib/biometric/use-biometric';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Loader2,
-  Fingerprint,
   AlertCircle,
   CheckCircle2,
-  Lock,
   Eye,
   EyeOff,
-} from 'lucide-react';
+  Fingerprint,
+  Loader2,
+  Lock,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useBiometric } from "@/lib/biometric/use-biometric";
 
-interface BiometricLoginProps {
+type BiometricLoginProps = {
   onSuccess?: (sessionToken: string) => void;
   onError?: (error: string) => void;
-}
+};
 
 export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
   const {
@@ -39,11 +45,11 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
     resetErrors,
   } = useBiometric();
 
-  const [pin, setPin] = useState('');
-  const [password, setPassword] = useState('');
+  const [pin, setPin] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<'biometric' | 'pin' | 'password'>(
-    registeredCredentials.length > 0 ? 'biometric' : 'pin'
+  const [activeTab, setActiveTab] = useState<"biometric" | "pin" | "password">(
+    registeredCredentials.length > 0 ? "biometric" : "pin"
   );
   const [isPinLoading, setIsPinLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
@@ -60,7 +66,7 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
     const success = await authenticateBiometric();
 
     if (!success && onError) {
-      onError(authenticateError || 'Biometric authentication failed');
+      onError(authenticateError || "Biometric authentication failed");
     }
   };
 
@@ -68,7 +74,7 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
     e.preventDefault();
 
     if (!pin || pin.length < 4) {
-      onError?.('PIN must be at least 4 digits');
+      onError?.("PIN must be at least 4 digits");
       return;
     }
 
@@ -78,11 +84,11 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
       const success = await authenticateWithFallback(pin);
 
       if (!success) {
-        onError?.(authenticateError || 'PIN authentication failed');
+        onError?.(authenticateError || "PIN authentication failed");
       }
     } finally {
       setIsPinLoading(false);
-      setPin('');
+      setPin("");
     }
   };
 
@@ -90,7 +96,7 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
     e.preventDefault();
 
     if (!password) {
-      onError?.('Password is required');
+      onError?.("Password is required");
       return;
     }
 
@@ -100,28 +106,28 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
       const success = await authenticateWithFallback(password);
 
       if (!success) {
-        onError?.(authenticateError || 'Password authentication failed');
+        onError?.(authenticateError || "Password authentication failed");
       }
     } finally {
       setIsPasswordLoading(false);
-      setPassword('');
+      setPassword("");
     }
   };
 
   if (!isSupported) {
     return (
-      <Card className="w-full max-w-md mx-auto">
+      <Card className="mx-auto w-full max-w-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-orange-500" />
+            <AlertCircle className="h-5 w-5 text-orange-500" />
             Biometric Not Available
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Alert>
             <AlertDescription>
-              Your device does not support biometric authentication. Please use PIN or
-              password to log in.
+              Your device does not support biometric authentication. Please use
+              PIN or password to log in.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -130,10 +136,10 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="mx-auto w-full max-w-md">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lock className="w-5 h-5" />
+          <Lock className="h-5 w-5" />
           Secure Login
         </CardTitle>
         <CardDescription>
@@ -142,27 +148,30 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
       </CardHeader>
 
       <CardContent>
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+        <Tabs
+          onValueChange={(value) => setActiveTab(value as any)}
+          value={activeTab}
+        >
           <TabsList className="grid w-full grid-cols-3">
             {registeredCredentials.length > 0 && (
-              <TabsTrigger value="biometric" className="text-xs">
-                <Fingerprint className="w-4 h-4 mr-1" />
+              <TabsTrigger className="text-xs" value="biometric">
+                <Fingerprint className="mr-1 h-4 w-4" />
                 Biometric
               </TabsTrigger>
             )}
-            <TabsTrigger value="pin" className="text-xs">
-              <Lock className="w-4 h-4 mr-1" />
+            <TabsTrigger className="text-xs" value="pin">
+              <Lock className="mr-1 h-4 w-4" />
               PIN
             </TabsTrigger>
-            <TabsTrigger value="password" className="text-xs">
-              <Lock className="w-4 h-4 mr-1" />
+            <TabsTrigger className="text-xs" value="password">
+              <Lock className="mr-1 h-4 w-4" />
               Password
             </TabsTrigger>
           </TabsList>
 
           {/* Biometric Login */}
           {registeredCredentials.length > 0 && (
-            <TabsContent value="biometric" className="space-y-4 mt-4">
+            <TabsContent className="mt-4 space-y-4" value="biometric">
               {authenticateError && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -170,32 +179,34 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
                 </Alert>
               )}
 
-              <div className="text-center space-y-4">
+              <div className="space-y-4 text-center">
                 <div className="flex justify-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Fingerprint className="w-8 h-8 text-blue-600" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                    <Fingerprint className="h-8 w-8 text-blue-600" />
                   </div>
                 </div>
 
                 <div>
                   <h3 className="font-semibold">Biometric Authentication</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="mt-1 text-muted-foreground text-sm">
                     {registeredCredentials.length} credential
-                    {registeredCredentials.length !== 1 ? 's' : ''} registered
+                    {registeredCredentials.length !== 1 ? "s" : ""} registered
                   </p>
                 </div>
 
                 <Button
-                  onClick={handleBiometricLogin}
-                  disabled={isAuthenticating}
-                  size="lg"
                   className="w-full"
+                  disabled={isAuthenticating}
+                  onClick={handleBiometricLogin}
+                  size="lg"
                 >
-                  {isAuthenticating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {isAuthenticating ? 'Scanning...' : 'Use Biometric'}
+                  {isAuthenticating && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {isAuthenticating ? "Scanning..." : "Use Biometric"}
                 </Button>
 
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Place your finger on the reader or look at your camera
                 </p>
               </div>
@@ -203,7 +214,7 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
           )}
 
           {/* PIN Login */}
-          <TabsContent value="pin" className="space-y-4 mt-4">
+          <TabsContent className="mt-4 space-y-4" value="pin">
             {authenticateError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -211,37 +222,39 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
               </Alert>
             )}
 
-            <form onSubmit={handlePinLogin} className="space-y-3">
+            <form className="space-y-3" onSubmit={handlePinLogin}>
               <div>
-                <label className="text-sm font-medium">PIN</label>
+                <label className="font-medium text-sm">PIN</label>
                 <Input
-                  type="password"
-                  placeholder="Enter your PIN"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                  maxLength={6}
-                  disabled={isPinLoading}
                   className="mt-1"
+                  disabled={isPinLoading}
+                  maxLength={6}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter your PIN"
+                  type="password"
+                  value={pin}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="mt-1 text-muted-foreground text-xs">
                   Numeric PIN (4-6 digits)
                 </p>
               </div>
 
               <Button
-                type="submit"
+                className="w-full"
                 disabled={isPinLoading || pin.length < 4}
                 size="lg"
-                className="w-full"
+                type="submit"
               >
-                {isPinLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {isPinLoading ? 'Verifying...' : 'Login with PIN'}
+                {isPinLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {isPinLoading ? "Verifying..." : "Login with PIN"}
               </Button>
             </form>
           </TabsContent>
 
           {/* Password Login */}
-          <TabsContent value="password" className="space-y-4 mt-4">
+          <TabsContent className="mt-4 space-y-4" value="password">
             {authenticateError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -249,39 +262,41 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
               </Alert>
             )}
 
-            <form onSubmit={handlePasswordLogin} className="space-y-3">
+            <form className="space-y-3" onSubmit={handlePasswordLogin}>
               <div>
-                <label className="text-sm font-medium">Password</label>
+                <label className="font-medium text-sm">Password</label>
                 <div className="relative mt-1">
                   <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     disabled={isPasswordLoading}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
                   />
                   <button
-                    type="button"
+                    className="-translate-y-1/2 absolute top-1/2 right-2 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    type="button"
                   >
                     {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="w-4 h-4" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
                 </div>
               </div>
 
               <Button
-                type="submit"
+                className="w-full"
                 disabled={isPasswordLoading || !password}
                 size="lg"
-                className="w-full"
+                type="submit"
               >
-                {isPasswordLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {isPasswordLoading ? 'Verifying...' : 'Login with Password'}
+                {isPasswordLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {isPasswordLoading ? "Verifying..." : "Login with Password"}
               </Button>
             </form>
           </TabsContent>
@@ -289,7 +304,7 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
 
         {/* Success State */}
         {sessionToken && (
-          <Alert className="mt-4 bg-green-50 border-green-200">
+          <Alert className="mt-4 border-green-200 bg-green-50">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-700">
               Authentication successful! Redirecting...

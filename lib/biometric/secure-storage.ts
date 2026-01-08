@@ -3,24 +3,23 @@
  * Handles encrypted storage of biometric credentials and session tokens
  */
 
-import crypto from 'crypto';
+import crypto from "crypto";
 
-export interface SecureStorageOptions {
+export type SecureStorageOptions = {
   algorithm?: string;
   encoding?: BufferEncoding;
-  keyDerivation?: 'pbkdf2' | 'scrypt';
-}
+  keyDerivation?: "pbkdf2" | "scrypt";
+};
 
 /**
  * Secure storage for sensitive tokens
  */
 export class SecureStorageService {
-  private algorithm = 'aes-256-gcm';
-  private keyDerivation = 'pbkdf2';
-  private iterations = 100000;
-  private saltLength = 16;
-  private ivLength = 12;
-  private tagLength = 16;
+  private readonly algorithm = "aes-256-gcm";
+  private readonly iterations = 100_000;
+  private readonly saltLength = 16;
+  private readonly ivLength = 12;
+  private readonly tagLength = 16;
 
   /**
    * Encrypt data with AES-256-GCM
@@ -36,7 +35,7 @@ export class SecureStorageService {
         salt,
         this.iterations,
         32, // 256 bits for AES-256
-        'sha256'
+        "sha256"
       );
 
       // Generate IV
@@ -46,19 +45,26 @@ export class SecureStorageService {
       const cipher = crypto.createCipheriv(this.algorithm, key, iv) as any;
 
       // Encrypt data
-      let encrypted = cipher.update(data, 'utf8', 'hex');
-      encrypted += cipher.final('hex');
+      let encrypted = cipher.update(data, "utf8", "hex");
+      encrypted += cipher.final("hex");
 
       // Get auth tag
       const authTag = cipher.getAuthTag();
 
       // Combine: salt + iv + tag + encrypted
-      const combined = Buffer.concat([salt, iv, authTag, Buffer.from(encrypted, 'hex')]);
+      const combined = Buffer.concat([
+        salt,
+        iv,
+        authTag,
+        Buffer.from(encrypted, "hex"),
+      ]);
 
       // Return as base64
-      return combined.toString('base64');
+      return combined.toString("base64");
     } catch (error) {
-      throw new Error(`Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Encryption failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
   }
 
@@ -68,16 +74,21 @@ export class SecureStorageService {
   decryptToken(encrypted: string, password: string): string {
     try {
       // Decode from base64
-      const combined = Buffer.from(encrypted, 'base64');
+      const combined = Buffer.from(encrypted, "base64");
 
       // Extract components
       const salt = combined.slice(0, this.saltLength);
-      const iv = combined.slice(this.saltLength, this.saltLength + this.ivLength);
+      const iv = combined.slice(
+        this.saltLength,
+        this.saltLength + this.ivLength
+      );
       const authTag = combined.slice(
         this.saltLength + this.ivLength,
         this.saltLength + this.ivLength + this.tagLength
       );
-      const encryptedData = combined.slice(this.saltLength + this.ivLength + this.tagLength);
+      const encryptedData = combined.slice(
+        this.saltLength + this.ivLength + this.tagLength
+      );
 
       // Derive key
       const key = crypto.pbkdf2Sync(
@@ -85,7 +96,7 @@ export class SecureStorageService {
         salt,
         this.iterations,
         32,
-        'sha256'
+        "sha256"
       );
 
       // Create decipher
@@ -93,12 +104,18 @@ export class SecureStorageService {
       decipher.setAuthTag(authTag);
 
       // Decrypt
-      let decrypted = decipher.update(encryptedData.toString('hex'), 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
+      let decrypted = decipher.update(
+        encryptedData.toString("hex"),
+        "hex",
+        "utf8"
+      );
+      decrypted += decipher.final("utf8");
 
       return decrypted;
     } catch (error) {
-      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Decryption failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
   }
 
@@ -106,9 +123,17 @@ export class SecureStorageService {
    * Hash password with bcrypt-style hashing
    */
   hashPassword(password: string, salt?: string): string {
-    const saltBytes = salt ? Buffer.from(salt, 'base64') : crypto.randomBytes(16);
-    const hash = crypto.pbkdf2Sync(password, saltBytes, this.iterations, 32, 'sha256');
-    return Buffer.concat([saltBytes, hash]).toString('base64');
+    const saltBytes = salt
+      ? Buffer.from(salt, "base64")
+      : crypto.randomBytes(16);
+    const hash = crypto.pbkdf2Sync(
+      password,
+      saltBytes,
+      this.iterations,
+      32,
+      "sha256"
+    );
+    return Buffer.concat([saltBytes, hash]).toString("base64");
   }
 
   /**
@@ -116,11 +141,17 @@ export class SecureStorageService {
    */
   verifyPassword(password: string, hash: string): boolean {
     try {
-      const combined = Buffer.from(hash, 'base64');
+      const combined = Buffer.from(hash, "base64");
       const salt = combined.slice(0, 16);
       const hashToVerify = combined.slice(16);
 
-      const newHash = crypto.pbkdf2Sync(password, salt, this.iterations, 32, 'sha256');
+      const newHash = crypto.pbkdf2Sync(
+        password,
+        salt,
+        this.iterations,
+        32,
+        "sha256"
+      );
       return crypto.timingSafeEqual(hashToVerify, newHash);
     } catch {
       return false;
@@ -132,8 +163,8 @@ export class SecureStorageService {
  * Session storage with encryption
  */
 export class SessionStorageService {
-  private storage: SecureStorageService;
-  private prefix = 'triumph_session_';
+  private readonly storage: SecureStorageService;
+  private readonly prefix = "triumph_session_";
 
   constructor(storage?: SecureStorageService) {
     this.storage = storage || new SecureStorageService();
@@ -143,8 +174,8 @@ export class SessionStorageService {
    * Store encrypted session token
    */
   storeSessionToken(sessionId: string, token: string, password: string): void {
-    if (typeof localStorage === 'undefined') {
-      console.warn('localStorage not available');
+    if (typeof localStorage === "undefined") {
+      console.warn("localStorage not available");
       return;
     }
 
@@ -156,7 +187,7 @@ export class SessionStorageService {
    * Retrieve and decrypt session token
    */
   getSessionToken(sessionId: string, password: string): string | null {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return null;
     }
 
@@ -168,7 +199,7 @@ export class SessionStorageService {
     try {
       return this.storage.decryptToken(encrypted, password);
     } catch {
-      console.error('Failed to decrypt session token');
+      console.error("Failed to decrypt session token");
       this.clearSessionToken(sessionId);
       return null;
     }
@@ -178,7 +209,7 @@ export class SessionStorageService {
    * Clear session token
    */
   clearSessionToken(sessionId: string): void {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return;
     }
 
@@ -189,7 +220,7 @@ export class SessionStorageService {
    * Clear all session tokens
    */
   clearAllSessionTokens(): void {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return;
     }
 
@@ -205,7 +236,7 @@ export class SessionStorageService {
    * Check if session exists
    */
   hasSession(sessionId: string): boolean {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return false;
     }
 
@@ -216,7 +247,7 @@ export class SessionStorageService {
    * Get all active sessions
    */
   getActiveSessions(): string[] {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return [];
     }
 
@@ -238,14 +269,17 @@ export class SessionStorageService {
  * Credential storage for local caching
  */
 export class CredentialStorageService {
-  private prefix = 'triumph_cred_';
-  private ttl = 24 * 60 * 60 * 1000; // 24 hours
+  private readonly prefix = "triumph_cred_";
+  private readonly ttl = 24 * 60 * 60 * 1000; // 24 hours
 
   /**
    * Store credential metadata (non-sensitive)
    */
-  storeCredentialMetadata(credentialId: string, metadata: Record<string, any>): void {
-    if (typeof localStorage === 'undefined') {
+  storeCredentialMetadata(
+    credentialId: string,
+    metadata: Record<string, any>
+  ): void {
+    if (typeof localStorage === "undefined") {
       return;
     }
 
@@ -261,7 +295,7 @@ export class CredentialStorageService {
    * Get credential metadata
    */
   getCredentialMetadata(credentialId: string): Record<string, any> | null {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return null;
     }
 
@@ -281,7 +315,7 @@ export class CredentialStorageService {
 
       return data;
     } catch {
-      console.error('Failed to parse credential metadata');
+      console.error("Failed to parse credential metadata");
       return null;
     }
   }
@@ -290,7 +324,7 @@ export class CredentialStorageService {
    * Clear credential metadata
    */
   clearCredentialMetadata(credentialId: string): void {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return;
     }
 
@@ -301,7 +335,7 @@ export class CredentialStorageService {
    * Clear all credential metadata
    */
   clearAllCredentialMetadata(): void {
-    if (typeof localStorage === 'undefined') {
+    if (typeof localStorage === "undefined") {
       return;
     }
 

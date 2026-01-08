@@ -3,8 +3,8 @@
  * POST /api/streaming/sessions/init
  */
 
+import { type NextRequest, NextResponse } from "next/server";
 import { streamingManager } from "@/lib/streaming-sdk/streaming";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,11 +20,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize session
-    const session = await streamingManager.initializeSession(userId, title, description, {
-      category,
-      tags,
-      isPublic,
-    });
+    const session = await streamingManager.initializeSession(
+      userId,
+      title,
+      description,
+      {
+        category,
+        tags,
+        isPublic,
+      }
+    );
 
     return NextResponse.json({
       success: true,

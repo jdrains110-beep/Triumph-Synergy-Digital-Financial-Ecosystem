@@ -8,19 +8,18 @@ export const base64url = {
    * Encode buffer to base64url string
    */
   fromBuffer(buffer: ArrayBuffer | Uint8Array): string {
-    const bytes = buffer instanceof ArrayBuffer 
-      ? new Uint8Array(buffer) 
-      : buffer;
-    
-    let binary = '';
+    const bytes =
+      buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;
+
+    let binary = "";
     for (let i = 0; i < bytes.byteLength; i++) {
       binary += String.fromCharCode(bytes[i]);
     }
-    
+
     return btoa(binary)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
   },
 
   /**
@@ -30,20 +29,16 @@ export const base64url = {
     // Add padding if needed
     let padded = str;
     while (padded.length % 4 !== 0) {
-      padded += '=';
+      padded += "=";
     }
 
-    const binary = atob(
-      padded
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/')
-    );
+    const binary = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
 
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
       bytes[i] = binary.charCodeAt(i);
     }
-    
+
     return bytes.buffer;
   },
 

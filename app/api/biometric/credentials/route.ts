@@ -4,17 +4,14 @@
  * Returns all biometric credentials for a user
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
     const userId = request.headers.get("X-User-ID");
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // TODO: Fetch from database
@@ -32,11 +29,11 @@ export async function GET(request: NextRequest) {
     // Mock response for development
     const credentials = [
       {
-        id: 'cred_1',
-        name: 'iPhone Face ID',
+        id: "cred_1",
+        name: "iPhone Face ID",
         createdAt: new Date(),
         lastUsedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        credentialDeviceType: 'single_device',
+        credentialDeviceType: "single_device",
       },
     ];
 

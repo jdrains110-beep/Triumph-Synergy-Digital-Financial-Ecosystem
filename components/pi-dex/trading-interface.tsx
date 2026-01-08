@@ -7,12 +7,19 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePiDex } from "@/lib/pi-sdk/use-pi-dex";
 
 export function TradingInterface() {
-  const { executeSwap, getSwapQuote, activeOrders, loading, error, swapQuote } = usePiDex();
+  const { executeSwap, getSwapQuote, activeOrders, loading, error, swapQuote } =
+    usePiDex();
   const [formData, setFormData] = useState({
     tokenA: "",
     tokenB: "",
@@ -20,17 +27,30 @@ export function TradingInterface() {
   });
 
   const handleGetQuote = async () => {
-    if (!formData.tokenA || !formData.tokenB || !formData.amountA) return;
-    await getSwapQuote(formData.tokenA, formData.tokenB, BigInt(formData.amountA));
+    if (!formData.tokenA || !formData.tokenB || !formData.amountA) {
+      return;
+    }
+    await getSwapQuote(
+      formData.tokenA,
+      formData.tokenB,
+      BigInt(formData.amountA)
+    );
   };
 
   const handleExecuteSwap = async () => {
-    if (!swapQuote) return;
-    await executeSwap(formData.tokenA, formData.tokenB, BigInt(formData.amountA), swapQuote.estimatedOutput);
+    if (!swapQuote) {
+      return;
+    }
+    await executeSwap(
+      formData.tokenA,
+      formData.tokenB,
+      BigInt(formData.amountA),
+      swapQuote.estimatedOutput
+    );
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Trading Form */}
       <Card className="lg:col-span-2">
         <CardHeader>
@@ -40,42 +60,50 @@ export function TradingInterface() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">From Token</label>
+              <label className="font-medium text-sm">From Token</label>
               <Input
+                onChange={(e) =>
+                  setFormData({ ...formData, tokenA: e.target.value })
+                }
                 placeholder="Token ID"
                 value={formData.tokenA}
-                onChange={(e) => setFormData({ ...formData, tokenA: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-sm font-medium">To Token</label>
+              <label className="font-medium text-sm">To Token</label>
               <Input
+                onChange={(e) =>
+                  setFormData({ ...formData, tokenB: e.target.value })
+                }
                 placeholder="Token ID"
                 value={formData.tokenB}
-                onChange={(e) => setFormData({ ...formData, tokenB: e.target.value })}
               />
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium">Amount</label>
+            <label className="font-medium text-sm">Amount</label>
             <Input
-              type="number"
+              onChange={(e) =>
+                setFormData({ ...formData, amountA: e.target.value })
+              }
               placeholder="Amount to swap"
+              type="number"
               value={formData.amountA}
-              onChange={(e) => setFormData({ ...formData, amountA: e.target.value })}
             />
           </div>
 
           {swapQuote && (
-            <div className="p-3 bg-blue-50 rounded space-y-2">
+            <div className="space-y-2 rounded bg-blue-50 p-3">
               <div className="flex justify-between">
                 <span>You send:</span>
                 <span className="font-semibold">{formData.amountA}</span>
               </div>
               <div className="flex justify-between">
                 <span>You receive:</span>
-                <span className="font-semibold">{swapQuote.estimatedOutput.toString()}</span>
+                <span className="font-semibold">
+                  {swapQuote.estimatedOutput.toString()}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Price Impact:</span>
@@ -88,13 +116,24 @@ export function TradingInterface() {
             </div>
           )}
 
-          {error && <div className="p-2 bg-red-100 text-red-700 rounded text-sm">{error.message}</div>}
+          {error && (
+            <div className="rounded bg-red-100 p-2 text-red-700 text-sm">
+              {error.message}
+            </div>
+          )}
 
           <div className="flex gap-2">
-            <Button onClick={handleGetQuote} variant="outline" disabled={loading}>
+            <Button
+              disabled={loading}
+              onClick={handleGetQuote}
+              variant="outline"
+            >
               {loading ? "Loading..." : "Get Quote"}
             </Button>
-            <Button onClick={handleExecuteSwap} disabled={!swapQuote || loading}>
+            <Button
+              disabled={!swapQuote || loading}
+              onClick={handleExecuteSwap}
+            >
               {loading ? "Swapping..." : "Execute Swap"}
             </Button>
           </div>
@@ -108,18 +147,24 @@ export function TradingInterface() {
         </CardHeader>
         <CardContent>
           {activeOrders.length === 0 ? (
-            <p className="text-sm text-gray-500">No active orders</p>
+            <p className="text-gray-500 text-sm">No active orders</p>
           ) : (
             <div className="space-y-2">
               {activeOrders.map((order) => (
-                <div key={order.id} className="p-2 border rounded text-sm">
+                <div className="rounded border p-2 text-sm" key={order.id}>
                   <div className="flex justify-between">
                     <span className="font-medium">{order.type}</span>
-                    <span className={order.status === "filled" ? "text-green-600" : "text-yellow-600"}>
+                    <span
+                      className={
+                        order.status === "filled"
+                          ? "text-green-600"
+                          : "text-yellow-600"
+                      }
+                    >
                       {order.status}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-600">
+                  <div className="text-gray-600 text-xs">
                     {order.amountA.toString()} → {order.amountB.toString()}
                   </div>
                 </div>

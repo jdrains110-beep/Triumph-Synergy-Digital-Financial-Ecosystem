@@ -3,16 +3,21 @@
  * Manages streams, viewers, recording, analytics
  */
 
-import { STREAMING_CONFIG, StreamSession, StreamViewer, StreamAnalytics } from "./streaming-config";
+import {
+  STREAMING_CONFIG,
+  type StreamAnalytics,
+  type StreamSession,
+  type StreamViewer,
+} from "./streaming-config";
 
 /**
  * Core Streaming Manager
  * Handles all streaming operations
  */
 export class StreamingManager {
-  private activeSessions: Map<string, StreamSession> = new Map();
-  private sessionViewers: Map<string, Set<StreamViewer>> = new Map();
-  private recordings: Map<string, string> = new Map();
+  private readonly activeSessions: Map<string, StreamSession> = new Map();
+  private readonly sessionViewers: Map<string, Set<StreamViewer>> = new Map();
+  private readonly recordings: Map<string, string> = new Map();
 
   /**
    * Initialize a new streaming session
@@ -57,7 +62,9 @@ export class StreamingManager {
   /**
    * Start a streaming session
    */
-  async startStream(sessionId: string): Promise<{ success: boolean; streamKey: string }> {
+  async startStream(
+    sessionId: string
+  ): Promise<{ success: boolean; streamKey: string }> {
     const session = this.activeSessions.get(sessionId);
     if (!session) {
       throw new Error(`Stream session ${sessionId} not found`);
@@ -89,7 +96,9 @@ export class StreamingManager {
     session.status = "ended";
     session.endedAt = new Date();
 
-    const duration = Math.floor((session.endedAt.getTime() - session.startedAt.getTime()) / 1000);
+    const duration = Math.floor(
+      (session.endedAt.getTime() - session.startedAt.getTime()) / 1000
+    );
     session.duration = duration;
 
     const viewers = this.sessionViewers.get(sessionId);
@@ -98,7 +107,10 @@ export class StreamingManager {
     // Generate recording
     const recordingId = `rec_${sessionId}`;
     if (STREAMING_CONFIG.recording.enabled) {
-      this.recordings.set(recordingId, `${STREAMING_CONFIG.recording.storage.bucket}/${sessionId}.mp4`);
+      this.recordings.set(
+        recordingId,
+        `${STREAMING_CONFIG.recording.storage.bucket}/${sessionId}.mp4`
+      );
     }
 
     return {
@@ -134,12 +146,16 @@ export class StreamingManager {
    */
   removeViewer(sessionId: string, viewerId: string): void {
     const viewers = this.sessionViewers.get(sessionId);
-    if (!viewers) return;
+    if (!viewers) {
+      return;
+    }
 
     const viewer = Array.from(viewers).find((v) => v.id === viewerId);
     if (viewer) {
       viewer.leftAt = new Date();
-      viewer.duration = Math.floor((viewer.leftAt.getTime() - viewer.joinedAt.getTime()) / 1000);
+      viewer.duration = Math.floor(
+        (viewer.leftAt.getTime() - viewer.joinedAt.getTime()) / 1000
+      );
       viewers.delete(viewer);
 
       const session = this.activeSessions.get(sessionId);
@@ -160,7 +176,9 @@ export class StreamingManager {
    * Get all active sessions
    */
   getActiveSessions(): StreamSession[] {
-    return Array.from(this.activeSessions.values()).filter((s) => s.status === "live");
+    return Array.from(this.activeSessions.values()).filter(
+      (s) => s.status === "live"
+    );
   }
 
   /**
@@ -174,7 +192,10 @@ export class StreamingManager {
   /**
    * Update stream quality
    */
-  async updateQuality(sessionId: string, quality: string): Promise<{ success: boolean; bitrate: number }> {
+  async updateQuality(
+    sessionId: string,
+    quality: string
+  ): Promise<{ success: boolean; bitrate: number }> {
     const session = this.activeSessions.get(sessionId);
     if (!session) {
       throw new Error(`Stream session ${sessionId} not found`);
@@ -199,14 +220,19 @@ export class StreamingManager {
   /**
    * Enable recording
    */
-  async startRecording(sessionId: string): Promise<{ success: boolean; recordingId: string }> {
+  async startRecording(
+    sessionId: string
+  ): Promise<{ success: boolean; recordingId: string }> {
     const session = this.activeSessions.get(sessionId);
     if (!session) {
       throw new Error(`Stream session ${sessionId} not found`);
     }
 
     const recordingId = `rec_${sessionId}_${Date.now()}`;
-    this.recordings.set(recordingId, `${STREAMING_CONFIG.recording.storage.bucket}/${sessionId}.mp4`);
+    this.recordings.set(
+      recordingId,
+      `${STREAMING_CONFIG.recording.storage.bucket}/${sessionId}.mp4`
+    );
 
     return {
       success: true,
@@ -217,7 +243,9 @@ export class StreamingManager {
   /**
    * Stop recording
    */
-  async stopRecording(recordingId: string): Promise<{ success: boolean; url: string }> {
+  async stopRecording(
+    recordingId: string
+  ): Promise<{ success: boolean; url: string }> {
     const url = this.recordings.get(recordingId);
     if (!url) {
       throw new Error(`Recording ${recordingId} not found`);
@@ -241,7 +269,9 @@ export class StreamingManager {
     }
 
     const allViewers = Array.from(viewers);
-    const avgViewDuration = allViewers.reduce((sum, v) => sum + v.duration, 0) / Math.max(allViewers.length, 1);
+    const avgViewDuration =
+      allViewers.reduce((sum, v) => sum + v.duration, 0) /
+      Math.max(allViewers.length, 1);
 
     return {
       sessionId,
@@ -269,7 +299,10 @@ export class StreamingManager {
   /**
    * Get viewer analytics for a specific viewer
    */
-  getViewerAnalytics(sessionId: string, viewerId: string): {
+  getViewerAnalytics(
+    sessionId: string,
+    viewerId: string
+  ): {
     viewedDuration: number;
     startTime: Date;
     endTime?: Date;
@@ -277,7 +310,9 @@ export class StreamingManager {
     bufferingEvents: number;
   } {
     const viewers = this.sessionViewers.get(sessionId);
-    const viewer = viewers ? Array.from(viewers).find((v) => v.id === viewerId) : undefined;
+    const viewer = viewers
+      ? Array.from(viewers).find((v) => v.id === viewerId)
+      : undefined;
 
     if (!viewer) {
       throw new Error(`Viewer ${viewerId} not found in session ${sessionId}`);
@@ -295,9 +330,14 @@ export class StreamingManager {
   /**
    * Validate stream key
    */
-  async validateStreamKey(sessionId: string, streamKey: string): Promise<boolean> {
+  async validateStreamKey(
+    sessionId: string,
+    streamKey: string
+  ): Promise<boolean> {
     const session = this.activeSessions.get(sessionId);
-    if (!session) return false;
+    if (!session) {
+      return false;
+    }
 
     const expectedKey = `rtmps://live.agora.io/${session.channelName}`;
     return streamKey === expectedKey;

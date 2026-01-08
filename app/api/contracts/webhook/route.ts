@@ -37,7 +37,11 @@ export async function POST(request: NextRequest) {
 
     // Handle push events
     if (payload.commits && Array.isArray(payload.commits)) {
-      const contractFiles: Array<{ file: string; commit_id: string; message: string }> = [];
+      const contractFiles: Array<{
+        file: string;
+        commit_id: string;
+        message: string;
+      }> = [];
 
       for (const commit of payload.commits) {
         // Check for smart contract files

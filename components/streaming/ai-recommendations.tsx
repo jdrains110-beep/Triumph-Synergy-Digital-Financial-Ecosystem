@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
-import { Card } from "@/components/ui/card";
+import { Play, Star, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Star, TrendingUp } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
-interface Recommendation {
+type Recommendation = {
   id: string;
   title: string;
   thumbnail: string;
@@ -14,12 +13,12 @@ interface Recommendation {
   relevanceScore: number;
   reason: string;
   isLive: boolean;
-}
+};
 
-interface AIRecommendationsProps {
+type AIRecommendationsProps = {
   recommendations?: Recommendation[];
   onSelect?: (recommendationId: string) => void;
-}
+};
 
 /**
  * AI-powered content recommendations
@@ -58,76 +57,78 @@ export function AIRecommendations({
 }: AIRecommendationsProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <TrendingUp size={20} className="text-blue-600" />
-        <h3 className="text-lg font-bold text-gray-900">Recommended For You</h3>
+      <div className="mb-4 flex items-center gap-2">
+        <TrendingUp className="text-blue-600" size={20} />
+        <h3 className="font-bold text-gray-900 text-lg">Recommended For You</h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {recommendations.map((rec) => (
           <Card
+            className="group cursor-pointer overflow-hidden transition-shadow hover:shadow-lg"
             key={rec.id}
-            className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
             onClick={() => onSelect?.(rec.id)}
           >
             {/* Thumbnail */}
-            <div className="relative overflow-hidden bg-gray-900 aspect-video">
+            <div className="relative aspect-video overflow-hidden bg-gray-900">
               <img
-                src={rec.thumbnail}
                 alt={rec.title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                src={rec.thumbnail}
               />
 
               {/* Live Badge */}
               {rec.isLive && (
-                <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                <div className="absolute top-2 left-2 flex items-center gap-1 rounded bg-red-600 px-2 py-1 font-bold text-white text-xs">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
                   LIVE
                 </div>
               )}
 
               {/* Play Button Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
                 <Play
-                  size={48}
-                  className="text-white opacity-0 group-hover:opacity-100 transition-opacity ml-2"
+                  className="ml-2 text-white opacity-0 transition-opacity group-hover:opacity-100"
                   fill="white"
+                  size={48}
                 />
               </div>
 
               {/* Relevance Score */}
-              <div className="absolute top-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                <Star size={12} className="text-yellow-400" fill="currentColor" />
+              <div className="absolute top-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 font-bold text-white text-xs">
+                <Star
+                  className="text-yellow-400"
+                  fill="currentColor"
+                  size={12}
+                />
                 {Math.round(rec.relevanceScore * 100)}%
               </div>
             </div>
 
             {/* Content */}
-            <div className="p-3 space-y-2">
-              <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
+            <div className="space-y-2 p-3">
+              <h4 className="line-clamp-2 font-semibold text-gray-900 text-sm">
                 {rec.title}
               </h4>
 
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-xs">
+                <Badge className="text-xs" variant="outline">
                   {rec.category}
                 </Badge>
               </div>
 
-              <p className="text-xs text-gray-600">
-                💡 {rec.reason}
-              </p>
+              <p className="text-gray-600 text-xs">💡 {rec.reason}</p>
 
               <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs h-7"
+                className="h-7 w-full text-xs"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelect?.(rec.id);
                 }}
+                size="sm"
+                variant="outline"
               >
-                <Play size={12} className="mr-1" />
+                <Play className="mr-1" size={12} />
                 Watch Now
               </Button>
             </div>
@@ -136,11 +137,11 @@ export function AIRecommendations({
       </div>
 
       {/* How This Works */}
-      <Card className="bg-blue-50 p-4 border-blue-200">
-        <p className="text-sm text-blue-900 font-semibold mb-2">
+      <Card className="border-blue-200 bg-blue-50 p-4">
+        <p className="mb-2 font-semibold text-blue-900 text-sm">
           ✨ How AI Recommendations Work
         </p>
-        <ul className="text-xs text-blue-800 space-y-1">
+        <ul className="space-y-1 text-blue-800 text-xs">
           <li>• Analyzes your viewing history and preferences</li>
           <li>• Uses collaborative filtering with similar users</li>
           <li>• Considers trending content in your interests</li>

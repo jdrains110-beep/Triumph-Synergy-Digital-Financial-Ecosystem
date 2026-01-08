@@ -3,11 +3,12 @@
  * List item on marketplace endpoint
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { tokenId, amount, price, category, description, imageUrl } = await request.json();
+    const { tokenId, amount, price, category, description, imageUrl } =
+      await request.json();
 
     // Validation
     if (!tokenId) {
@@ -28,7 +29,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!description || description.length === 0) {
-      return NextResponse.json({ error: "Invalid description" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid description" },
+        { status: 400 }
+      );
     }
 
     const expiresAt = new Date();

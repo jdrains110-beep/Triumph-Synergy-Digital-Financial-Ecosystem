@@ -3,8 +3,8 @@
  * GET /api/streaming/analytics/[sessionId]
  */
 
+import { type NextRequest, NextResponse } from "next/server";
 import { streamingManager } from "@/lib/streaming-sdk/streaming";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,

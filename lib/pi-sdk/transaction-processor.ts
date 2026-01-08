@@ -5,7 +5,7 @@
 
 import { piSdkVerifier } from "./pi-sdk-verifier";
 
-export interface UserTransaction {
+export type UserTransaction = {
   transactionId: string;
   userId: string;
   amount: number;
@@ -15,32 +15,32 @@ export interface UserTransaction {
   serverApprovalId?: string;
   blockchainHash?: string;
   metadata?: Record<string, unknown>;
-}
+};
 
-export interface ServerApprovalRequest {
+export type ServerApprovalRequest = {
   transactionId: string;
   userId: string;
   amount: number;
   memo: string;
   userSignature?: string;
   timestamp: number;
-}
+};
 
-export interface ServerApprovalResponse {
+export type ServerApprovalResponse = {
   approved: boolean;
   approvalId: string;
   reason?: string;
   timestamp: number;
   expiresAt: number;
-}
+};
 
-export interface BlockchainSettlement {
+export type BlockchainSettlement = {
   transactionId: string;
   blockchainHash: string;
   status: "pending" | "confirmed" | "failed";
   confirmations: number;
   settledAt: number;
-}
+};
 
 /**
  * Transaction Processor
@@ -250,9 +250,7 @@ export class TransactionProcessor {
   /**
    * Validate approval request
    */
-  private validateApprovalRequest(
-    request: ServerApprovalRequest
-  ): {
+  private validateApprovalRequest(request: ServerApprovalRequest): {
     valid: boolean;
     error?: string;
   } {

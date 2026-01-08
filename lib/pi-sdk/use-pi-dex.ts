@@ -5,11 +5,18 @@
 
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { piDex, Token, TradeOrder, LiquidityPosition, StakingPosition, MarketplaceListing, SwapQuote } from "./pi-dex";
+import { useCallback, useEffect, useState } from "react";
+import type {
+  LiquidityPosition,
+  MarketplaceListing,
+  StakingPosition,
+  SwapQuote,
+  Token,
+  TradeOrder,
+} from "./pi-dex";
 import { usePi } from "./pi-provider";
 
-export interface UsePiDexState {
+export type UsePiDexState = {
   // User tokens
   userTokens: Token[];
   userTokenBalances: Record<string, bigint>;
@@ -32,7 +39,7 @@ export interface UsePiDexState {
   // Loading and error states
   loading: boolean;
   error: Error | null;
-}
+};
 
 export function usePiDex() {
   const { user, isAuthenticated } = usePi();
@@ -76,7 +83,9 @@ export function usePiDex() {
           body: JSON.stringify({ name, symbol, totalSupply }),
         });
 
-        if (!response.ok) throw new Error("Failed to create token");
+        if (!response.ok) {
+          throw new Error("Failed to create token");
+        }
 
         const token = await response.json();
         setState((prev) => ({
@@ -103,7 +112,9 @@ export function usePiDex() {
 
     try {
       const response = await fetch("/api/pi-dex/tokens/list");
-      if (!response.ok) throw new Error("Failed to fetch tokens");
+      if (!response.ok) {
+        throw new Error("Failed to fetch tokens");
+      }
 
       const tokens = await response.json();
       setState((prev) => ({
@@ -132,10 +143,16 @@ export function usePiDex() {
         const response = await fetch("/api/pi-dex/trading/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tokenAId, tokenBId, amountA: amountA.toString() }),
+          body: JSON.stringify({
+            tokenAId,
+            tokenBId,
+            amountA: amountA.toString(),
+          }),
         });
 
-        if (!response.ok) throw new Error("Failed to get quote");
+        if (!response.ok) {
+          throw new Error("Failed to get quote");
+        }
 
         const quote = await response.json();
         setState((prev) => ({
@@ -155,10 +172,43 @@ export function usePiDex() {
   );
 
   /**
+   * List order history
+   */
+  const listOrderHistory = useCallback(async () => {
+    if (!user?.uid) {
+      return;
+    }
+
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await fetch("/api/pi-dex/trading/orders");
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+
+      const orders = await response.json();
+      setState((prev) => ({
+        ...prev,
+        orderHistory: orders,
+        loading: false,
+      }));
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Unknown error");
+      setState((prev) => ({ ...prev, error, loading: false }));
+    }
+  }, [user?.uid]);
+
+  /**
    * Execute swap
    */
   const executeSwap = useCallback(
-    async (tokenAId: string, tokenBId: string, amountA: bigint, minAmountOut: bigint) => {
+    async (
+      tokenAId: string,
+      tokenBId: string,
+      amountA: bigint,
+      minAmountOut: bigint
+    ) => {
       if (!isAuthenticated) {
         setState((prev) => ({
           ...prev,
@@ -181,7 +231,9 @@ export function usePiDex() {
           }),
         });
 
-        if (!response.ok) throw new Error("Swap failed");
+        if (!response.ok) {
+          throw new Error("Swap failed");
+        }
 
         const result = await response.json();
         await listOrderHistory(); // Refresh orders
@@ -194,14 +246,20 @@ export function usePiDex() {
         return null;
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, listOrderHistory]
   );
 
   /**
    * Place order
    */
   const placeOrder = useCallback(
-    async (tokenAId: string, tokenBId: string, amountA: bigint, amountB: bigint, type: "buy" | "sell" | "swap") => {
+    async (
+      tokenAId: string,
+      tokenBId: string,
+      amountA: bigint,
+      amountB: bigint,
+      type: "buy" | "sell" | "swap"
+    ) => {
       if (!isAuthenticated) {
         setState((prev) => ({
           ...prev,
@@ -225,7 +283,9 @@ export function usePiDex() {
           }),
         });
 
-        if (!response.ok) throw new Error("Failed to place order");
+        if (!response.ok) {
+          throw new Error("Failed to place order");
+        }
 
         const order = await response.json();
         setState((prev) => ({
@@ -244,30 +304,6 @@ export function usePiDex() {
     [isAuthenticated]
   );
 
-  /**
-   * List order history
-   */
-  const listOrderHistory = useCallback(async () => {
-    if (!user?.uid) return;
-
-    setState((prev) => ({ ...prev, loading: true, error: null }));
-
-    try {
-      const response = await fetch("/api/pi-dex/trading/orders");
-      if (!response.ok) throw new Error("Failed to fetch orders");
-
-      const orders = await response.json();
-      setState((prev) => ({
-        ...prev,
-        orderHistory: orders,
-        loading: false,
-      }));
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error");
-      setState((prev) => ({ ...prev, error, loading: false }));
-    }
-  }, [user?.uid]);
-
   // ============================================================
   // LIQUIDITY OPERATIONS
   // ============================================================
@@ -276,7 +312,12 @@ export function usePiDex() {
    * Add liquidity
    */
   const addLiquidity = useCallback(
-    async (tokenAId: string, tokenBId: string, amountA: bigint, amountB: bigint) => {
+    async (
+      tokenAId: string,
+      tokenBId: string,
+      amountA: bigint,
+      amountB: bigint
+    ) => {
       if (!isAuthenticated) {
         setState((prev) => ({
           ...prev,
@@ -299,7 +340,9 @@ export function usePiDex() {
           }),
         });
 
-        if (!response.ok) throw new Error("Failed to add liquidity");
+        if (!response.ok) {
+          throw new Error("Failed to add liquidity");
+        }
 
         const position = await response.json();
         setState((prev) => ({
@@ -343,12 +386,16 @@ export function usePiDex() {
           }),
         });
 
-        if (!response.ok) throw new Error("Failed to remove liquidity");
+        if (!response.ok) {
+          throw new Error("Failed to remove liquidity");
+        }
 
         const result = await response.json();
         setState((prev) => ({
           ...prev,
-          liquidityPositions: prev.liquidityPositions.filter((p) => p.id !== positionId),
+          liquidityPositions: prev.liquidityPositions.filter(
+            (p) => p.id !== positionId
+          ),
           loading: false,
         }));
 
@@ -370,7 +417,9 @@ export function usePiDex() {
 
     try {
       const response = await fetch("/api/pi-dex/liquidity/positions");
-      if (!response.ok) throw new Error("Failed to fetch positions");
+      if (!response.ok) {
+        throw new Error("Failed to fetch positions");
+      }
 
       const positions = await response.json();
       setState((prev) => ({
@@ -414,7 +463,9 @@ export function usePiDex() {
           }),
         });
 
-        if (!response.ok) throw new Error("Failed to stake");
+        if (!response.ok) {
+          throw new Error("Failed to stake");
+        }
 
         const position = await response.json();
         setState((prev) => ({
@@ -455,12 +506,16 @@ export function usePiDex() {
           body: JSON.stringify({ positionId }),
         });
 
-        if (!response.ok) throw new Error("Failed to unstake");
+        if (!response.ok) {
+          throw new Error("Failed to unstake");
+        }
 
         const result = await response.json();
         setState((prev) => ({
           ...prev,
-          stakingPositions: prev.stakingPositions.filter((p) => p.id !== positionId),
+          stakingPositions: prev.stakingPositions.filter(
+            (p) => p.id !== positionId
+          ),
           loading: false,
         }));
 
@@ -482,7 +537,9 @@ export function usePiDex() {
 
     try {
       const response = await fetch("/api/pi-dex/staking/positions");
-      if (!response.ok) throw new Error("Failed to fetch positions");
+      if (!response.ok) {
+        throw new Error("Failed to fetch positions");
+      }
 
       const positions = await response.json();
       setState((prev) => ({
@@ -504,7 +561,13 @@ export function usePiDex() {
    * List on marketplace
    */
   const listOnMarketplace = useCallback(
-    async (tokenId: string, amount: bigint, price: number, category: string, description: string) => {
+    async (
+      tokenId: string,
+      amount: bigint,
+      price: number,
+      category: string,
+      description: string
+    ) => {
       if (!isAuthenticated) {
         setState((prev) => ({
           ...prev,
@@ -528,7 +591,9 @@ export function usePiDex() {
           }),
         });
 
-        if (!response.ok) throw new Error("Failed to list");
+        if (!response.ok) {
+          throw new Error("Failed to list");
+        }
 
         const listing = await response.json();
         setState((prev) => ({
@@ -572,7 +637,9 @@ export function usePiDex() {
           }),
         });
 
-        if (!response.ok) throw new Error("Purchase failed");
+        if (!response.ok) {
+          throw new Error("Purchase failed");
+        }
 
         const result = await response.json();
         setState((prev) => ({ ...prev, loading: false }));
@@ -594,11 +661,18 @@ export function usePiDex() {
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const url = new URL("/api/pi-dex/marketplace/listings", window.location.origin);
-      if (category) url.searchParams.append("category", category);
+      const url = new URL(
+        "/api/pi-dex/marketplace/listings",
+        window.location.origin
+      );
+      if (category) {
+        url.searchParams.append("category", category);
+      }
 
       const response = await fetch(url.toString());
-      if (!response.ok) throw new Error("Failed to fetch listings");
+      if (!response.ok) {
+        throw new Error("Failed to fetch listings");
+      }
 
       const listings = await response.json();
       setState((prev) => ({
@@ -621,7 +695,14 @@ export function usePiDex() {
       getStakingPositions();
       getMarketplaceListings();
     }
-  }, [isAuthenticated]);
+  }, [
+    isAuthenticated,
+    getLiquidityPositions,
+    getMarketplaceListings,
+    getStakingPositions,
+    listOrderHistory,
+    listTokens,
+  ]);
 
   return {
     ...state,

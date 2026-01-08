@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
 import HLS from "hls.js";
-import { Play, Pause, Volume2, Settings, Maximize2 } from "lucide-react";
+import { Maximize2, Pause, Play, Settings, Volume2 } from "lucide-react";
+import React, { useEffect, useRef } from "react";
 
-interface VideoPlayerProps {
+type VideoPlayerProps = {
   streamUrl?: string;
   title?: string;
   isLive?: boolean;
   quality?: string;
   onQualityChange?: (quality: string) => void;
   controlsTimeout?: number;
-}
+};
 
 /**
  * Advanced video player with adaptive streaming
@@ -34,7 +34,9 @@ export function VideoPlayer({
 
   // Initialize HLS
   useEffect(() => {
-    if (!streamUrl || !videoRef.current) return;
+    if (!streamUrl || !videoRef.current) {
+      return;
+    }
 
     const video = videoRef.current;
 
@@ -56,7 +58,8 @@ export function VideoPlayer({
       return () => {
         hls.destroy();
       };
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    }
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = streamUrl;
       video.addEventListener("loadedmetadata", () => {
         video.play();
@@ -109,10 +112,10 @@ export function VideoPlayer({
 
   const toggleFullscreen = () => {
     if (containerRef.current) {
-      if (!isFullscreen) {
-        containerRef.current.requestFullscreen?.();
-      } else {
+      if (isFullscreen) {
         document.exitFullscreen?.();
+      } else {
+        containerRef.current.requestFullscreen?.();
       }
       setIsFullscreen(!isFullscreen);
     }
@@ -120,60 +123,56 @@ export function VideoPlayer({
 
   return (
     <div
+      className="group relative w-full overflow-hidden rounded-lg bg-black"
       ref={containerRef}
-      className="relative w-full bg-black rounded-lg overflow-hidden group"
       style={{ aspectRatio: "16 / 9" }}
     >
       {/* Video Element */}
       <video
-        ref={videoRef}
-        className="w-full h-full"
+        className="h-full w-full"
         controls={false}
         playsInline
+        ref={videoRef}
       />
 
       {/* Live Badge */}
       {isLive && (
-        <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2 z-10">
-          <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+        <div className="absolute top-4 left-4 z-10 flex items-center gap-2 rounded-full bg-red-600 px-3 py-1 font-semibold text-sm text-white">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
           LIVE
         </div>
       )}
 
       {/* Quality Badge */}
-      <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded text-sm z-10">
+      <div className="absolute top-4 right-4 z-10 rounded bg-black/50 px-3 py-1 text-sm text-white">
         {quality}
       </div>
 
       {/* Controls */}
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${
+        className={`absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${
           showControls ? "opacity-100" : "opacity-0"
         }`}
       >
         {/* Progress Bar */}
-        <div className="w-full mb-3 h-1 bg-white/20 rounded cursor-pointer hover:h-2 transition-all">
-          <div className="h-full bg-red-600 rounded" style={{ width: "45%" }} />
+        <div className="mb-3 h-1 w-full cursor-pointer rounded bg-white/20 transition-all hover:h-2">
+          <div className="h-full rounded bg-red-600" style={{ width: "45%" }} />
         </div>
 
         {/* Control Buttons */}
         <div className="flex items-center justify-between text-white">
           <div className="flex items-center gap-3">
             <button
+              className="transition-transform hover:scale-110"
               onClick={togglePlay}
-              className="hover:scale-110 transition-transform"
               title={isPlaying ? "Pause" : "Play"}
             >
-              {isPlaying ? (
-                <Pause size={24} />
-              ) : (
-                <Play size={24} />
-              )}
+              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
             </button>
 
             <button
+              className="transition-transform hover:scale-110"
               onClick={toggleMute}
-              className="hover:scale-110 transition-transform"
               title={isMuted ? "Unmute" : "Mute"}
             >
               <Volume2 size={24} />
@@ -182,16 +181,16 @@ export function VideoPlayer({
 
           <div className="flex items-center gap-3">
             <button
+              className="transition-transform hover:scale-110"
               onClick={() => onQualityChange?.(quality)}
-              className="hover:scale-110 transition-transform"
               title="Settings"
             >
               <Settings size={24} />
             </button>
 
             <button
+              className="transition-transform hover:scale-110"
               onClick={toggleFullscreen}
-              className="hover:scale-110 transition-transform"
               title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             >
               <Maximize2 size={24} />
@@ -203,10 +202,10 @@ export function VideoPlayer({
       {/* Play Button Overlay */}
       {!isPlaying && (
         <button
+          className="group absolute inset-0 flex items-center justify-center bg-black/30 transition-colors hover:bg-black/40"
           onClick={togglePlay}
-          className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors group"
         >
-          <Play size={64} className="text-white ml-4" fill="white" />
+          <Play className="ml-4 text-white" fill="white" size={64} />
         </button>
       )}
     </div>

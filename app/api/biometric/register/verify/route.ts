@@ -3,16 +3,17 @@
  * Verify and store biometric credential registration
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { WebAuthnService, RegistrationResponseJSON, BiometricCredential } from '@/lib/biometric/webauthn-service';
+import { type NextRequest, NextResponse } from "next/server";
+import { WebAuthnService } from "@/lib/biometric/webauthn-service";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, credential, challenge, credentialName } = await request.json();
+    const { userId, credential, challenge, credentialName } =
+      await request.json();
 
     if (!userId || !credential || !challenge) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -28,15 +29,21 @@ export async function POST(request: NextRequest) {
 
     // Verify registration response
     const service = new WebAuthnService();
-    
+
     // Convert credential for verification
     const credentialForVerification = {
       ...credential,
-      rawId: Buffer.from(credential.rawId, 'base64'),
+      rawId: Buffer.from(credential.rawId, "base64"),
       response: {
         ...credential.response,
-        clientDataJSON: Buffer.from(credential.response.clientDataJSON, 'base64'),
-        attestationObject: Buffer.from(credential.response.attestationObject, 'base64'),
+        clientDataJSON: Buffer.from(
+          credential.response.clientDataJSON,
+          "base64"
+        ),
+        attestationObject: Buffer.from(
+          credential.response.attestationObject,
+          "base64"
+        ),
       },
     };
 
@@ -76,8 +83,8 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error verifying registration:', error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error verifying registration:", error);
     return NextResponse.json(
       { error: `Registration verification failed: ${message}` },
       { status: 400 }

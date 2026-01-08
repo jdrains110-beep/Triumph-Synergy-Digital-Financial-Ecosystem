@@ -3,7 +3,6 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { transactionProcessor } from "@/lib/pi-sdk/transaction-processor";
-import { piSdkVerifier } from "@/lib/pi-sdk/pi-sdk-verifier";
 
 /**
  * POST /api/transactions/request-approval

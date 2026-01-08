@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { usePi } from "./pi-provider";
 
 type PaymentOptions = {

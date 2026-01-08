@@ -66,13 +66,15 @@ export async function POST(request: NextRequest) {
     // If this is a Pi Network payment from SDK, verify transaction
     if (method === "pi_network" && transactionId) {
       console.log(`[PAYMENT] Verifying Pi SDK transaction: ${transactionId}`);
-      
+
       const verification = await piSdkVerifier.verifyTransaction(
         transactionId as string
       );
 
       if (!verification.valid) {
-        console.error(`[PAYMENT] ❌ Pi SDK verification failed: ${verification.error}`);
+        console.error(
+          `[PAYMENT] ❌ Pi SDK verification failed: ${verification.error}`
+        );
         return NextResponse.json(
           {
             success: false,
@@ -82,9 +84,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log(
-        `[PAYMENT] ✅ Pi SDK transaction verified: ${transactionId}`
-      );
+      console.log(`[PAYMENT] ✅ Pi SDK transaction verified: ${transactionId}`);
     }
 
     // Route payment through unified system
@@ -364,7 +364,9 @@ function storePaymentRecord(payment: {
     if (payment.method === "pi_network") {
       // INSERT INTO pi_payments (payment_id, order_id, amount, transaction_id, status, created_at)
       // VALUES ($1, $2, $3, $4, $5, $6)
-      console.log(`Stored Pi payment: ${payment.paymentId} (tx: ${payment.transactionId})`);
+      console.log(
+        `Stored Pi payment: ${payment.paymentId} (tx: ${payment.transactionId})`
+      );
     } else if (payment.method === "apple_pay") {
       // INSERT INTO apple_pay_payments (payment_id, order_id, amount, processor, status, created_at)
       // VALUES ($1, $2, $3, $4, $5, $6)

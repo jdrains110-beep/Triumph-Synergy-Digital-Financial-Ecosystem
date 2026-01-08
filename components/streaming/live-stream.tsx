@@ -1,22 +1,26 @@
 "use client";
 
+import { Loader2, Mic, MicOff, Radio, Video, VideoOff } from "lucide-react";
 import React from "react";
-import { useStreaming } from "@/lib/streaming-sdk/use-streaming";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Loader2, Mic, MicOff, Video, VideoOff, Radio } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useStreaming } from "@/lib/streaming-sdk/use-streaming";
 
-interface LiveStreamProps {
+type LiveStreamProps = {
   userId: string;
   onStreamStart?: (sessionId: string) => void;
   onStreamEnd?: (sessionId: string) => void;
-}
+};
 
 /**
  * Main live streaming interface
  */
-export function LiveStream({ userId, onStreamStart, onStreamEnd }: LiveStreamProps) {
+export function LiveStream({
+  userId,
+  onStreamStart,
+  onStreamEnd,
+}: LiveStreamProps) {
   const {
     initializeSession,
     startStream,
@@ -77,51 +81,51 @@ export function LiveStream({ userId, onStreamStart, onStreamEnd }: LiveStreamPro
 
   if (!initialized) {
     return (
-      <Card className="p-6 max-w-md mx-auto">
-        <h3 className="text-2xl font-bold mb-4">Start a Stream</h3>
+      <Card className="mx-auto max-w-md p-6">
+        <h3 className="mb-4 font-bold text-2xl">Start a Stream</h3>
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Stream Title</label>
+            <label className="font-medium text-sm">Stream Title</label>
             <Input
-              value={streamTitle}
+              className="mt-1"
               onChange={(e) => setStreamTitle(e.target.value)}
               placeholder="Enter stream title"
-              className="mt-1"
+              value={streamTitle}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium">Description</label>
+            <label className="font-medium text-sm">Description</label>
             <textarea
-              value={streamDescription}
+              className="mt-1 w-full rounded-md border p-2 text-sm"
               onChange={(e) => setStreamDescription(e.target.value)}
               placeholder="Enter stream description"
-              className="w-full p-2 border rounded-md mt-1 text-sm"
               rows={3}
+              value={streamDescription}
             />
           </div>
 
           {error && (
-            <div className="bg-red-100 text-red-700 p-3 rounded text-sm">
+            <div className="rounded bg-red-100 p-3 text-red-700 text-sm">
               {error}
             </div>
           )}
 
           <Button
-            onClick={handleInitialize}
-            disabled={loading}
             className="w-full"
+            disabled={loading}
+            onClick={handleInitialize}
             size="lg"
           >
             {loading ? (
               <>
-                <Loader2 size={16} className="animate-spin mr-2" />
+                <Loader2 className="mr-2 animate-spin" size={16} />
                 Initializing...
               </>
             ) : (
               <>
-                <Radio size={16} className="mr-2" />
+                <Radio className="mr-2" size={16} />
                 Initialize Stream
               </>
             )}
@@ -135,16 +139,18 @@ export function LiveStream({ userId, onStreamStart, onStreamEnd }: LiveStreamPro
     <Card className="p-6">
       <div className="space-y-6">
         {/* Status Bar */}
-        <div className="flex items-center justify-between bg-slate-100 p-4 rounded-lg">
+        <div className="flex items-center justify-between rounded-lg bg-slate-100 p-4">
           <div>
-            <p className="text-sm text-gray-600">Stream Status</p>
-            <p className="text-2xl font-bold uppercase text-gray-900">{status}</p>
+            <p className="text-gray-600 text-sm">Stream Status</p>
+            <p className="font-bold text-2xl text-gray-900 uppercase">
+              {status}
+            </p>
           </div>
 
           {status === "live" && (
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-red-600 rounded-full animate-pulse" />
-              <span className="text-red-600 font-semibold">LIVE</span>
+              <span className="h-3 w-3 animate-pulse rounded-full bg-red-600" />
+              <span className="font-semibold text-red-600">LIVE</span>
             </div>
           )}
         </div>
@@ -152,17 +158,17 @@ export function LiveStream({ userId, onStreamStart, onStreamEnd }: LiveStreamPro
         {/* Stats */}
         {status === "live" && (
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="rounded-lg bg-blue-50 p-4">
               <p className="text-gray-600 text-sm">Duration</p>
-              <p className="text-2xl font-bold">{formatDuration(duration)}</p>
+              <p className="font-bold text-2xl">{formatDuration(duration)}</p>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg">
+            <div className="rounded-lg bg-green-50 p-4">
               <p className="text-gray-600 text-sm">Viewers</p>
-              <p className="text-2xl font-bold">{viewerCount}</p>
+              <p className="font-bold text-2xl">{viewerCount}</p>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
+            <div className="rounded-lg bg-purple-50 p-4">
               <p className="text-gray-600 text-sm">Bitrate</p>
-              <p className="text-2xl font-bold">2.5 Mb/s</p>
+              <p className="font-bold text-2xl">2.5 Mb/s</p>
             </div>
           </div>
         )}
@@ -171,41 +177,41 @@ export function LiveStream({ userId, onStreamStart, onStreamEnd }: LiveStreamPro
         <div className="flex flex-wrap gap-3">
           <Button
             onClick={() => setIsAudioEnabled(!isAudioEnabled)}
-            variant={isAudioEnabled ? "default" : "outline"}
             size="sm"
+            variant={isAudioEnabled ? "default" : "outline"}
           >
             {isAudioEnabled ? (
-              <Mic size={16} className="mr-2" />
+              <Mic className="mr-2" size={16} />
             ) : (
-              <MicOff size={16} className="mr-2" />
+              <MicOff className="mr-2" size={16} />
             )}
             {isAudioEnabled ? "Audio On" : "Audio Off"}
           </Button>
 
           <Button
             onClick={() => setIsVideoEnabled(!isVideoEnabled)}
-            variant={isVideoEnabled ? "default" : "outline"}
             size="sm"
+            variant={isVideoEnabled ? "default" : "outline"}
           >
             {isVideoEnabled ? (
-              <Video size={16} className="mr-2" />
+              <Video className="mr-2" size={16} />
             ) : (
-              <VideoOff size={16} className="mr-2" />
+              <VideoOff className="mr-2" size={16} />
             )}
             {isVideoEnabled ? "Video On" : "Video Off"}
           </Button>
 
           {status === "idle" && (
             <Button
-              onClick={handleStart}
-              disabled={loading}
               className="bg-green-600 hover:bg-green-700"
+              disabled={loading}
+              onClick={handleStart}
               size="sm"
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin mr-2" />
+                <Loader2 className="mr-2 animate-spin" size={16} />
               ) : (
-                <Radio size={16} className="mr-2" />
+                <Radio className="mr-2" size={16} />
               )}
               Start Stream
             </Button>
@@ -213,17 +219,13 @@ export function LiveStream({ userId, onStreamStart, onStreamEnd }: LiveStreamPro
 
           {status === "live" && (
             <>
-              <Button
-                onClick={pauseStream}
-                variant="outline"
-                size="sm"
-              >
+              <Button onClick={pauseStream} size="sm" variant="outline">
                 Pause
               </Button>
 
               <Button
-                onClick={handleEnd}
                 className="bg-red-600 hover:bg-red-700"
+                onClick={handleEnd}
                 size="sm"
               >
                 End Stream
@@ -232,20 +234,14 @@ export function LiveStream({ userId, onStreamStart, onStreamEnd }: LiveStreamPro
           )}
 
           {status === "paused" && (
-            <Button
-              onClick={resumeStream}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={resumeStream} size="sm" variant="outline">
               Resume
             </Button>
           )}
         </div>
 
         {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded">
-            {error}
-          </div>
+          <div className="rounded bg-red-100 p-3 text-red-700">{error}</div>
         )}
       </div>
     </Card>

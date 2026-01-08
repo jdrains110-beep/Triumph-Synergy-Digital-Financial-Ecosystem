@@ -1,25 +1,25 @@
 "use client";
 
+import { Pin, Send } from "lucide-react";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Smile, Send, Pin, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
-interface Message {
+type Message = {
   id: string;
   userId: string;
   username: string;
   message: string;
   timestamp: Date;
   isPinned?: boolean;
-}
+};
 
-interface InteractiveChatProps {
+type InteractiveChatProps = {
   messages?: Message[];
   onSendMessage?: (message: string) => void;
   enabled?: boolean;
-}
+};
 
 /**
  * Interactive live chat component
@@ -30,14 +30,16 @@ export function InteractiveChat({
   enabled = true,
 }: InteractiveChatProps) {
   const [message, setMessage] = React.useState("");
-  const [pinnedMessage, setPinnedMessage] = React.useState<Message | null>(null);
+  const [pinnedMessage, setPinnedMessage] = React.useState<Message | null>(
+    null
+  );
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, []);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -60,30 +62,36 @@ export function InteractiveChat({
   if (!enabled) {
     return (
       <Card className="p-4">
-        <p className="text-gray-500 text-center">Chat is disabled for this stream</p>
+        <p className="text-center text-gray-500">
+          Chat is disabled for this stream
+        </p>
       </Card>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden rounded-lg bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
         <h3 className="font-semibold">Live Chat</h3>
-        <p className="text-sm text-blue-100">{messages.length} messages</p>
+        <p className="text-blue-100 text-sm">{messages.length} messages</p>
       </div>
 
       {/* Pinned Message */}
       {pinnedMessage && (
-        <div className="bg-blue-50 border-l-4 border-blue-600 p-3 mx-3 mt-3 rounded">
+        <div className="mx-3 mt-3 rounded border-blue-600 border-l-4 bg-blue-50 p-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-xs font-semibold text-blue-600">📌 Pinned Message</p>
-              <p className="text-xs text-gray-700 mt-1">{pinnedMessage.message}</p>
+              <p className="font-semibold text-blue-600 text-xs">
+                📌 Pinned Message
+              </p>
+              <p className="mt-1 text-gray-700 text-xs">
+                {pinnedMessage.message}
+              </p>
             </div>
             <button
+              className="ml-2 text-blue-600 hover:text-blue-700"
               onClick={() => setPinnedMessage(null)}
-              className="text-blue-600 hover:text-blue-700 ml-2"
             >
               ✕
             </button>
@@ -93,42 +101,42 @@ export function InteractiveChat({
 
       {/* Messages */}
       <div
+        className="flex-1 space-y-3 overflow-y-auto bg-gray-50 p-4"
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"
       >
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-400 text-center">
+          <div className="flex h-full items-center justify-center">
+            <p className="text-center text-gray-400">
               No messages yet. Be the first to chat!
             </p>
           </div>
         ) : (
           messages.map((msg) => (
             <div
+              className="group rounded bg-white p-3 transition-colors hover:bg-gray-50"
               key={msg.id}
-              className="group bg-white rounded p-3 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-900 text-sm">
                     {msg.username}
                   </p>
-                  <p className="text-sm text-gray-700 break-words mt-1">
+                  <p className="mt-1 break-words text-gray-700 text-sm">
                     {msg.message}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="mt-1 text-gray-400 text-xs">
                     {msg.timestamp.toLocaleTimeString()}
                   </p>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="ml-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                   <button
+                    className="rounded p-1 hover:bg-gray-200"
                     onClick={() => handlePin(msg)}
-                    className="p-1 hover:bg-gray-200 rounded"
                     title={msg.isPinned ? "Unpin" : "Pin"}
                   >
-                    <Pin size={14} className="text-gray-600" />
+                    <Pin className="text-gray-600" size={14} />
                   </button>
                 </div>
               </div>
@@ -139,21 +147,21 @@ export function InteractiveChat({
       </div>
 
       {/* Input */}
-      <div className="border-t p-3 space-y-2">
+      <div className="space-y-2 border-t p-3">
         <div className="flex gap-2">
           <Input
-            value={message}
+            className="flex-1"
+            disabled={!enabled}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            className="flex-1"
-            disabled={!enabled}
+            value={message}
           />
           <Button
-            onClick={handleSend}
-            disabled={!message.trim() || !enabled}
-            size="sm"
             className="bg-blue-600 hover:bg-blue-700"
+            disabled={!message.trim() || !enabled}
+            onClick={handleSend}
+            size="sm"
           >
             <Send size={16} />
           </Button>
@@ -163,11 +171,11 @@ export function InteractiveChat({
         <div className="flex gap-2 text-lg">
           {["👍", "❤️", "😂", "😮", "🔥", "🎉"].map((emoji) => (
             <button
+              className="transition-transform hover:scale-125"
               key={emoji}
               onClick={() => {
                 setMessage((msg) => msg + emoji);
               }}
-              className="hover:scale-125 transition-transform"
               title={emoji}
             >
               {emoji}

@@ -4,8 +4,6 @@
  * Date: January 7, 2026
  */
 
-import type { IAgoraRTCRemoteUser } from "agora-rtc-sdk-ng";
-
 // ============================================================================
 // AGORA CONFIGURATION
 // ============================================================================
@@ -18,16 +16,16 @@ export const STREAMING_CONFIG = {
     rtcToken: process.env.NEXT_PUBLIC_AGORA_TOKEN,
     channelNamePrefix: "triumph-stream-",
     defaultUID: 0,
-    
+
     // Audio Configuration
     audio: {
       enabled: true,
-      sampleRate: 48000,
+      sampleRate: 48_000,
       channels: 2,
       bitrate: 128,
       codec: "opus",
     },
-    
+
     // Video Configuration
     video: {
       enabled: true,
@@ -54,7 +52,7 @@ export const STREAMING_CONFIG = {
       playlist: "live.m3u8",
       variant: "variable", // adaptive bitrate
     },
-    
+
     // Bitrate Options for Adaptive Streaming
     bitrates: [
       {
@@ -93,22 +91,28 @@ export const STREAMING_CONFIG = {
         fps: 24,
       },
     ],
-    
+
     // CDN Endpoints
     endpoints: [
       {
         name: "Primary",
-        url: process.env.NEXT_PUBLIC_CDN_PRIMARY || "https://cdn.triumph-synergy.com",
+        url:
+          process.env.NEXT_PUBLIC_CDN_PRIMARY ||
+          "https://cdn.triumph-synergy.com",
         region: "US-EAST",
       },
       {
         name: "Secondary",
-        url: process.env.NEXT_PUBLIC_CDN_SECONDARY || "https://cdn2.triumph-synergy.com",
+        url:
+          process.env.NEXT_PUBLIC_CDN_SECONDARY ||
+          "https://cdn2.triumph-synergy.com",
         region: "EU-WEST",
       },
       {
         name: "Asia-Pacific",
-        url: process.env.NEXT_PUBLIC_CDN_APAC || "https://cdn-apac.triumph-synergy.com",
+        url:
+          process.env.NEXT_PUBLIC_CDN_APAC ||
+          "https://cdn-apac.triumph-synergy.com",
         region: "APAC",
       },
     ],
@@ -125,7 +129,7 @@ export const STREAMING_CONFIG = {
       provider: "widevine", // widevine, fairplay, playready
       licenseUrl: process.env.NEXT_PUBLIC_DRM_LICENSE_URL,
     },
-    
+
     // Content Encryption
     encryption: {
       enabled: true,
@@ -133,7 +137,7 @@ export const STREAMING_CONFIG = {
       keyRotation: true,
       rotationInterval: 3600, // 1 hour
     },
-    
+
     // Access Control
     accessControl: {
       requireAuth: true,
@@ -141,7 +145,7 @@ export const STREAMING_CONFIG = {
       geoRestriction: true,
       allowedCountries: ["US", "CA", "GB", "AU", "NZ", "DE", "FR"],
     },
-    
+
     // Watermarking
     watermark: {
       enabled: true,
@@ -164,7 +168,7 @@ export const STREAMING_CONFIG = {
       maxResults: 10,
       updateInterval: 3600,
     },
-    
+
     // Smart Search
     search: {
       enabled: true,
@@ -181,7 +185,7 @@ export const STREAMING_CONFIG = {
         "uploadDate",
       ],
     },
-    
+
     // Content Analysis
     analysis: {
       enabled: true,
@@ -191,7 +195,7 @@ export const STREAMING_CONFIG = {
       detectSpeech: true,
       language: "en-US",
     },
-    
+
     // User Engagement AI
     engagement: {
       predictChurn: true,
@@ -215,7 +219,7 @@ export const STREAMING_CONFIG = {
       emojisEnabled: true,
       spoilerWarnings: true,
     },
-    
+
     // Live Polls
     polls: {
       enabled: true,
@@ -224,7 +228,7 @@ export const STREAMING_CONFIG = {
       resultsVisibility: "during-voting", // during-voting, after-close
       analytics: true,
     },
-    
+
     // Watch Parties
     watchParties: {
       enabled: true,
@@ -233,14 +237,14 @@ export const STREAMING_CONFIG = {
       hostControls: true,
       guestCanPause: false,
     },
-    
+
     // Live Reactions
     reactions: {
       enabled: true,
       types: ["👍", "❤️", "😂", "😮", "😢", "🔥", "🎉", "💯"],
       animationDuration: 2000,
     },
-    
+
     // Super Chat (Donations)
     superChat: {
       enabled: true,
@@ -286,7 +290,7 @@ export const STREAMING_CONFIG = {
       performanceMetrics: true,
       revenueMetrics: true,
     },
-    
+
     events: [
       "stream_started",
       "stream_ended",
@@ -299,7 +303,7 @@ export const STREAMING_CONFIG = {
       "quality_changed",
       "error_occurred",
     ],
-    
+
     retention: {
       rawData: 30, // days
       aggregated: 365, // days
@@ -318,21 +322,21 @@ export const STREAMING_CONFIG = {
       apiUrl: "https://api.zoom.us/v2",
       webhookSecret: process.env.ZOOM_WEBHOOK_SECRET,
     },
-    
+
     // YouTube Live (Archive)
     youtube: {
       enabled: !!process.env.YOUTUBE_API_KEY,
       apiKey: process.env.YOUTUBE_API_KEY,
       autoArchive: true,
     },
-    
+
     // Twitch Integration
     twitch: {
       enabled: !!process.env.TWITCH_CLIENT_ID,
       clientId: process.env.TWITCH_CLIENT_ID,
       simul: true, // simultaneous streaming
     },
-    
+
     // Social Sharing
     social: {
       facebook: true,
@@ -357,7 +361,9 @@ export const STREAMING_CONFIG = {
 
   // Get bitrate for quality
   getBitrateForQuality: (quality: string): number => {
-    const bitrate = STREAMING_CONFIG.cdn.bitrates.find((b) => b.label === quality);
+    const bitrate = STREAMING_CONFIG.cdn.bitrates.find(
+      (b) => b.label === quality
+    );
     return bitrate?.bitrate || 1500;
   },
 
@@ -369,7 +375,7 @@ export const STREAMING_CONFIG = {
         return bitrates[i].label;
       }
     }
-    return bitrates[bitrates.length - 1].label;
+    return bitrates.at(-1)?.label ?? bitrates[0].label;
   },
 
   // Calculate video statistics
@@ -400,7 +406,9 @@ export const STREAMING_CONFIG = {
   },
 
   // Get recommended bitrate (kb/s) based on network quality
-  recommendedBitrate: (quality: "poor" | "fair" | "good" | "excellent"): number => {
+  recommendedBitrate: (
+    quality: "poor" | "fair" | "good" | "excellent"
+  ): number => {
     const mapping = {
       poor: 500,
       fair: 1000,
@@ -415,7 +423,7 @@ export const STREAMING_CONFIG = {
 // TYPE DEFINITIONS
 // ============================================================================
 
-export interface StreamSession {
+export type StreamSession = {
   id: string;
   title: string;
   description: string;
@@ -434,9 +442,9 @@ export interface StreamSession {
   tags: string[];
   language: string;
   isPublic: boolean;
-}
+};
 
-export interface StreamViewer {
+export type StreamViewer = {
   id: string;
   sessionId: string;
   userId: string;
@@ -447,9 +455,9 @@ export interface StreamViewer {
   bandwidth: number;
   engagement: number;
   country: string;
-}
+};
 
-export interface StreamMessage {
+export type StreamMessage = {
   id: string;
   sessionId: string;
   userId: string;
@@ -459,9 +467,9 @@ export interface StreamMessage {
   reactions: string[];
   isModerated: boolean;
   isPinned: boolean;
-}
+};
 
-export interface StreamPoll {
+export type StreamPoll = {
   id: string;
   sessionId: string;
   question: string;
@@ -478,18 +486,18 @@ export interface StreamPoll {
     percentage: number;
     votes: number;
   }>;
-}
+};
 
-export interface StreamReaction {
+export type StreamReaction = {
   id: string;
   sessionId: string;
   userId: string;
   emoji: string;
   timestamp: Date;
   animated: boolean;
-}
+};
 
-export interface StreamAnalytics {
+export type StreamAnalytics = {
   sessionId: string;
   totalViewers: number;
   peakViewers: number;
@@ -505,9 +513,9 @@ export interface StreamAnalytics {
   devices: Record<string, number>;
   qualitySwitches: number;
   averageBufferTime: number;
-}
+};
 
-export interface StreamRecommendation {
+export type StreamRecommendation = {
   sessionId: string;
   title: string;
   thumbnail: string;
@@ -515,9 +523,9 @@ export interface StreamRecommendation {
   relevanceScore: number;
   reason: string;
   isLive: boolean;
-}
+};
 
-export interface StreamWatchParty {
+export type StreamWatchParty = {
   id: string;
   hostId: string;
   sessionId: string;
@@ -526,7 +534,7 @@ export interface StreamWatchParty {
   isSynced: boolean;
   maxParticipants: number;
   currentParticipants: number;
-}
+};
 
 export type StreamQuality = "360p" | "480p" | "720p" | "1080p" | "4K";
 export type StreamStatus = "scheduled" | "live" | "ended" | "paused";

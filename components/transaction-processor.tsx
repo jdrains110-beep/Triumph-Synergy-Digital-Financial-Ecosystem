@@ -1,18 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { usePi } from "@/lib/pi-sdk/pi-provider";
-import { detectPiBrowser, logPiBrowserInfo } from "@/lib/pi-sdk/pi-browser-detector";
-import { Card } from "@/components/ui/card";
+import { AlertCircle, CheckCircle2, Info, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
+import {
+  detectPiBrowser,
+  logPiBrowserInfo,
+} from "@/lib/pi-sdk/pi-browser-detector";
+import { usePi } from "@/lib/pi-sdk/pi-provider";
 
-interface TransactionRequest {
+type TransactionRequest = {
   amount: number;
   memo: string;
   userId: string;
-}
+};
 
 export function TransactionProcessor() {
   const { isReady, isAuthenticated, user } = usePi();
@@ -20,7 +23,9 @@ export function TransactionProcessor() {
   const [amount, setAmount] = useState<string>("10");
   const [memo, setMemo] = useState<string>("Triumph Synergy Payment");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [status, setStatus] = useState<"idle" | "approving" | "processing" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "approving" | "processing" | "success" | "error"
+  >("idle");
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [browserInfo, setBrowserInfo] = useState<any>(null);
@@ -60,7 +65,10 @@ export function TransactionProcessor() {
       }
 
       const data = await response.json();
-      console.log("[TransactionProcessor] ✅ Approval received:", data.approvalId);
+      console.log(
+        "[TransactionProcessor] ✅ Approval received:",
+        data.approvalId
+      );
 
       return data.approvalId;
     } catch (err) {
@@ -130,7 +138,7 @@ export function TransactionProcessor() {
       setError(null);
 
       const txReq: TransactionRequest = {
-        amount: parseFloat(amount),
+        amount: Number.parseFloat(amount),
         memo,
         userId: user.uid,
       };
@@ -153,24 +161,30 @@ export function TransactionProcessor() {
     <div className="space-y-4">
       {/* Pi Browser Info */}
       {browserInfo && (
-        <Card className="p-4 bg-blue-50 border-blue-200">
+        <Card className="border-blue-200 bg-blue-50 p-4">
           <div className="flex items-start gap-2">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+            <Info className="mt-0.5 h-5 w-5 text-blue-600" />
             <div>
               <h3 className="font-medium text-blue-900">Pi Browser Status</h3>
-              <div className="text-sm text-blue-800 space-y-1 mt-2">
+              <div className="mt-2 space-y-1 text-blue-800 text-sm">
                 <p>
                   ✅ Browser Available:{" "}
-                  <span className="font-semibold">{browserInfo.isAvailable ? "Yes" : "No"}</span>
+                  <span className="font-semibold">
+                    {browserInfo.isAvailable ? "Yes" : "No"}
+                  </span>
                 </p>
                 <p>
                   {browserInfo.isPiBrowser ? "✅" : "⚠️"} Pi Browser:{" "}
-                  <span className="font-semibold">{browserInfo.isPiBrowser ? "Detected" : "Not detected"}</span>
+                  <span className="font-semibold">
+                    {browserInfo.isPiBrowser ? "Detected" : "Not detected"}
+                  </span>
                 </p>
                 <p>
                   {browserInfo.isPiNetworkAvailable ? "✅" : "❌"} Pi Network:{" "}
                   <span className="font-semibold">
-                    {browserInfo.isPiNetworkAvailable ? "Available" : "Not available"}
+                    {browserInfo.isPiNetworkAvailable
+                      ? "Available"
+                      : "Not available"}
                   </span>
                 </p>
               </div>
@@ -182,8 +196,8 @@ export function TransactionProcessor() {
       {/* Authentication Status */}
       <Card className="p-4">
         <div className="space-y-2">
-          <h2 className="text-xl font-bold">Transaction Processor</h2>
-          <div className="text-sm text-gray-600">
+          <h2 className="font-bold text-xl">Transaction Processor</h2>
+          <div className="text-gray-600 text-sm">
             <p>
               Status: {isReady ? "✅ Ready" : "⏳ Loading"} | Auth:{" "}
               {isAuthenticated ? "✅ Authenticated" : "❌ Not authenticated"}
@@ -194,36 +208,36 @@ export function TransactionProcessor() {
       </Card>
 
       {/* Transaction Form */}
-      <Card className="p-6 space-y-4">
+      <Card className="space-y-4 p-6">
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Amount (π)</label>
+          <label className="block font-medium text-sm">Amount (π)</label>
           <Input
-            type="number"
-            value={amount}
+            disabled={isProcessing}
+            max="100000"
+            min="1"
             onChange={(e) => setAmount(e.target.value)}
             placeholder="10"
-            min="1"
-            max="100000"
             step="0.1"
-            disabled={isProcessing}
+            type="number"
+            value={amount}
           />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Memo</label>
+          <label className="block font-medium text-sm">Memo</label>
           <Input
-            type="text"
-            value={memo}
+            disabled={isProcessing}
             onChange={(e) => setMemo(e.target.value)}
             placeholder="Transaction description"
-            disabled={isProcessing}
+            type="text"
+            value={memo}
           />
         </div>
 
         <Button
-          onClick={handleTransaction}
-          disabled={isProcessing || !isReady || !isAuthenticated}
           className="w-full"
+          disabled={isProcessing || !isReady || !isAuthenticated}
+          onClick={handleTransaction}
         >
           {isProcessing ? (
             <>
@@ -239,25 +253,27 @@ export function TransactionProcessor() {
 
       {/* Status Messages */}
       {status === "success" && result && (
-        <Card className="p-4 bg-green-50 border-green-200">
+        <Card className="border-green-200 bg-green-50 p-4">
           <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+            <CheckCircle2 className="mt-0.5 h-5 w-5 text-green-600" />
             <div className="flex-1">
-              <h3 className="font-medium text-green-900">✅ Transaction Successful</h3>
-              <div className="text-sm text-green-800 space-y-2 mt-2">
+              <h3 className="font-medium text-green-900">
+                ✅ Transaction Successful
+              </h3>
+              <div className="mt-2 space-y-2 text-green-800 text-sm">
                 <p>
                   <strong>Transaction ID:</strong> {result.transactionId}
                 </p>
                 <p>
                   <strong>Blockchain Hash:</strong>{" "}
-                  <code className="bg-white px-2 py-1 rounded text-xs break-all">
+                  <code className="break-all rounded bg-white px-2 py-1 text-xs">
                     {result.blockchainHash}
                   </code>
                 </p>
                 <p>
                   <strong>Status:</strong> {result.status}
                 </p>
-                <p className="text-green-700 font-medium mt-3">
+                <p className="mt-3 font-medium text-green-700">
                   {result.message}
                 </p>
               </div>
@@ -267,21 +283,21 @@ export function TransactionProcessor() {
       )}
 
       {error && (
-        <Card className="p-4 bg-red-50 border-red-200">
+        <Card className="border-red-200 bg-red-50 p-4">
           <div className="flex items-start gap-2">
-            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+            <AlertCircle className="mt-0.5 h-5 w-5 text-red-600" />
             <div className="flex-1">
               <h3 className="font-medium text-red-900">❌ Error</h3>
-              <p className="text-sm text-red-800 mt-1">{error}</p>
+              <p className="mt-1 text-red-800 text-sm">{error}</p>
               <Button
+                className="mt-3"
                 onClick={() => {
                   setStatus("idle");
                   setError(null);
                   setResult(null);
                 }}
-                variant="outline"
                 size="sm"
-                className="mt-3"
+                variant="outline"
               >
                 Try Again
               </Button>
@@ -291,8 +307,8 @@ export function TransactionProcessor() {
       )}
 
       {/* Debug Info */}
-      <Card className="p-4 bg-gray-50">
-        <div className="text-xs text-gray-600 font-mono space-y-1">
+      <Card className="bg-gray-50 p-4">
+        <div className="space-y-1 font-mono text-gray-600 text-xs">
           <p>isReady: {isReady ? "true" : "false"}</p>
           <p>isAuthenticated: {isAuthenticated ? "true" : "false"}</p>
           <p>userId: {user?.uid || "N/A"}</p>

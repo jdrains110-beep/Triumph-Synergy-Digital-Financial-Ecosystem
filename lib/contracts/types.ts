@@ -4,42 +4,42 @@
  */
 
 export enum ContractType {
-  TERMS_OF_SERVICE = 'TERMS_OF_SERVICE',
-  PRIVACY_POLICY = 'PRIVACY_POLICY',
-  NON_DISCLOSURE_AGREEMENT = 'NON_DISCLOSURE_AGREEMENT',
-  SERVICE_AGREEMENT = 'SERVICE_AGREEMENT',
-  DATA_PROCESSING_AGREEMENT = 'DATA_PROCESSING_AGREEMENT',
-  PARTNERSHIP_AGREEMENT = 'PARTNERSHIP_AGREEMENT',
-  PAYMENT_TERMS = 'PAYMENT_TERMS',
-  ARBITRATION_CLAUSE = 'ARBITRATION_CLAUSE',
+  TERMS_OF_SERVICE = "TERMS_OF_SERVICE",
+  PRIVACY_POLICY = "PRIVACY_POLICY",
+  NON_DISCLOSURE_AGREEMENT = "NON_DISCLOSURE_AGREEMENT",
+  SERVICE_AGREEMENT = "SERVICE_AGREEMENT",
+  DATA_PROCESSING_AGREEMENT = "DATA_PROCESSING_AGREEMENT",
+  PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT",
+  PAYMENT_TERMS = "PAYMENT_TERMS",
+  ARBITRATION_CLAUSE = "ARBITRATION_CLAUSE",
 }
 
 export enum SignatureMethod {
-  DOCUSIGN = 'DOCUSIGN',
-  ADOBE_SIGN = 'ADOBE_SIGN',
-  HELLOSIGN = 'HELLOSIGN',
-  NATIVE_CLICK = 'NATIVE_CLICK',
-  BIOMETRIC_SIGNATURE = 'BIOMETRIC_SIGNATURE',
+  DOCUSIGN = "DOCUSIGN",
+  ADOBE_SIGN = "ADOBE_SIGN",
+  HELLOSIGN = "HELLOSIGN",
+  NATIVE_CLICK = "NATIVE_CLICK",
+  BIOMETRIC_SIGNATURE = "BIOMETRIC_SIGNATURE",
 }
 
 export enum ContractStatus {
-  DRAFT = 'DRAFT',
-  ACTIVE = 'ACTIVE',
-  PENDING_SIGNATURE = 'PENDING_SIGNATURE',
-  SIGNED = 'SIGNED',
-  EXPIRED = 'EXPIRED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  PENDING_SIGNATURE = "PENDING_SIGNATURE",
+  SIGNED = "SIGNED",
+  EXPIRED = "EXPIRED",
+  ARCHIVED = "ARCHIVED",
 }
 
 export enum ConsentStatus {
-  NOT_REQUESTED = 'NOT_REQUESTED',
-  PENDING = 'PENDING',
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED',
-  WITHDRAWN = 'WITHDRAWN',
+  NOT_REQUESTED = "NOT_REQUESTED",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+  WITHDRAWN = "WITHDRAWN",
 }
 
-export interface Contract {
+export type Contract = {
   id: string;
   type: ContractType;
   title: string;
@@ -54,9 +54,9 @@ export interface Contract {
   updatedAt: Date;
   createdBy: string;
   tags: string[];
-}
+};
 
-export interface ContractSignature {
+export type ContractSignature = {
   id: string;
   contractId: string;
   userId: string;
@@ -84,9 +84,9 @@ export interface ContractSignature {
   };
   screenshotHash?: string; // Hash of screenshot for verification
   blockchainTxHash?: string; // If stored on blockchain
-}
+};
 
-export interface UserConsent {
+export type UserConsent = {
   id: string;
   userId: string;
   email: string;
@@ -101,9 +101,9 @@ export interface UserConsent {
   consentVersion: string;
   expiresAt?: Date;
   notes?: string;
-}
+};
 
-export interface AuditLog {
+export type AuditLog = {
   id: string;
   contractId: string;
   signatureId?: string;
@@ -123,9 +123,9 @@ export interface AuditLog {
     before: Record<string, any>;
     after: Record<string, any>;
   };
-}
+};
 
-export interface DocuSignIntegration {
+export type DocuSignIntegration = {
   id: string;
   accountId: string;
   accountEmail: string;
@@ -133,22 +133,22 @@ export interface DocuSignIntegration {
   refreshToken: string;
   expiresAt: Date;
   baseUri: string;
-  integrationStatus: 'CONNECTED' | 'PENDING' | 'FAILED' | 'EXPIRED';
+  integrationStatus: "CONNECTED" | "PENDING" | "FAILED" | "EXPIRED";
   lastSyncAt: Date;
-}
+};
 
-export interface E2EEncryptedContract {
+export type E2EEncryptedContract = {
   id: string;
   contractId: string;
-  encryptionAlgorithm: 'AES-256-GCM' | 'AES-256-CBC';
+  encryptionAlgorithm: "AES-256-GCM" | "AES-256-CBC";
   encryptedContent: string;
   iv: string;
   salt: string;
   encryptedAt: Date;
   publicKeyHash: string; // For key management
-}
+};
 
-export interface ContractTemplate {
+export type ContractTemplate = {
   id: string;
   name: string;
   type: ContractType;
@@ -161,16 +161,16 @@ export interface ContractTemplate {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface ContractAnalysis {
+export type ContractAnalysis = {
   id: string;
   contractId: string;
   analyzedAt: Date;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   riskFactors: {
     factor: string;
-    severity: 'LOW' | 'MEDIUM' | 'HIGH';
+    severity: "LOW" | "MEDIUM" | "HIGH";
     description: string;
   }[];
   legalKeywords: string[];
@@ -182,25 +182,33 @@ export interface ContractAnalysis {
     otherRegulations: string[];
   };
   suggestedImprovements: string[];
-}
+};
 
-export interface ContractNotification {
+export type ContractNotification = {
   id: string;
   contractId: string;
   userId: string;
-  type: 'SIGNATURE_REQUIRED' | 'CONTRACT_UPDATED' | 'SIGNATURE_REMINDER' | 'CONTRACT_EXPIRING';
+  type:
+    | "SIGNATURE_REQUIRED"
+    | "CONTRACT_UPDATED"
+    | "SIGNATURE_REMINDER"
+    | "CONTRACT_EXPIRING";
   sentAt: Date;
   readAt?: Date;
   content: string;
   actionUrl: string;
-}
+};
 
-export interface ContractBulkOperation {
+export type ContractBulkOperation = {
   id: string;
-  operationType: 'SEND_FOR_SIGNATURE' | 'REQUEST_CONSENT' | 'EXPIRE_CONTRACTS' | 'ARCHIVE';
+  operationType:
+    | "SEND_FOR_SIGNATURE"
+    | "REQUEST_CONSENT"
+    | "EXPIRE_CONTRACTS"
+    | "ARCHIVE";
   contractIds: string[];
   recipientIds: string[];
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
   createdAt: Date;
   completedAt?: Date;
   successCount: number;
@@ -209,4 +217,4 @@ export interface ContractBulkOperation {
     contractId: string;
     error: string;
   }[];
-}
+};

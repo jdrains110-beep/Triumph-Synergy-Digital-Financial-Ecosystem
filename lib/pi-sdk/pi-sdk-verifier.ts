@@ -5,14 +5,14 @@
 
 import crypto from "crypto";
 
-export interface PiPaymentPayload {
+export type PiPaymentPayload = {
   txid: string;
   amount: number;
   memo: string;
   metadata?: Record<string, unknown>;
   timestamp: number;
   signature?: string;
-}
+};
 
 /**
  * Verify Pi SDK payment signature and integrity
@@ -36,9 +36,7 @@ export class PiSdkVerifier {
   /**
    * Verify payment transaction from Pi SDK
    */
-  async verifyTransaction(
-    transactionId: string
-  ): Promise<{
+  async verifyTransaction(transactionId: string): Promise<{
     valid: boolean;
     confirmed: boolean;
     amount?: number;
@@ -48,7 +46,7 @@ export class PiSdkVerifier {
     try {
       // In production, verify with Pi API
       // https://pi-docs.minepi.com/docs/pi-server-sdk/payment-verification
-      
+
       if (!transactionId) {
         return {
           valid: false,
@@ -98,9 +96,7 @@ export class PiSdkVerifier {
   /**
    * Check transaction status with Pi API
    */
-  private async checkTransactionWithPiApi(
-    transactionId: string
-  ): Promise<{
+  private async checkTransactionWithPiApi(transactionId: string): Promise<{
     valid: boolean;
     confirmed: boolean;
     amount?: number;
@@ -125,7 +121,7 @@ export class PiSdkVerifier {
           };
         }
 
-        const data = await response.json() as any;
+        const data = (await response.json()) as any;
         return {
           valid: data.state === "COMPLETED" || data.state === "CONFIRMED",
           confirmed: data.state === "COMPLETED",
@@ -135,7 +131,9 @@ export class PiSdkVerifier {
       }
 
       // Development/sandbox mode - accept transaction as valid
-      console.log("[PiSdkVerifier] Running in sandbox mode - accepting transaction");
+      console.log(
+        "[PiSdkVerifier] Running in sandbox mode - accepting transaction"
+      );
       return {
         valid: true,
         confirmed: true,
@@ -192,9 +190,15 @@ export class PiSdkVerifier {
     const errors: string[] = [];
 
     // Check required fields
-    if (!payload.txid) errors.push("Missing transaction ID");
-    if (payload.amount <= 0) errors.push("Invalid amount");
-    if (!payload.memo) errors.push("Missing memo");
+    if (!payload.txid) {
+      errors.push("Missing transaction ID");
+    }
+    if (payload.amount <= 0) {
+      errors.push("Invalid amount");
+    }
+    if (!payload.memo) {
+      errors.push("Missing memo");
+    }
 
     // Check timestamp is recent (within 5 minutes)
     const now = Date.now();

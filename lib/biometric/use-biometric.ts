@@ -3,31 +3,30 @@
  * Manages WebAuthn registration and authentication flows
  */
 
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import {
-  WebAuthnService,
-  BiometricCredential,
-  registerBiometric,
-  authenticateWithBiometric,
-} from '@/lib/biometric/webauthn-service';
-import {
-  getSecureStorage,
-  getSessionStorage,
   getCredentialStorage,
-} from '@/lib/biometric/secure-storage';
+  getSessionStorage,
+} from "@/lib/biometric/secure-storage";
+import {
+  authenticateWithBiometric,
+  type BiometricCredential,
+  registerBiometric,
+  WebAuthnService,
+} from "@/lib/biometric/webauthn-service";
 
 // Try to import usePi if available, otherwise use a stub
 let usePi: any;
 try {
-  ({ usePi } = require('@/lib/context/PiContext'));
+  ({ usePi } = require("@/lib/context/PiContext"));
 } catch {
   // Fallback if PiContext is not available
   usePi = () => ({ user: null });
 }
 
-export interface UseBiometricState {
+export type UseBiometricState = {
   // Feature detection
   isSupported: boolean;
   isConditionalUIAvailable: boolean;
@@ -49,9 +48,9 @@ export interface UseBiometricState {
 
   // Loading states
   isLoading: boolean;
-}
+};
 
-export interface UseBiometricCallbacks {
+export type UseBiometricCallbacks = {
   // Registration
   initiateRegistration: (credentialName?: string) => Promise<void>;
   completeRegistration: (
@@ -71,7 +70,7 @@ export interface UseBiometricCallbacks {
   // State management
   fetchCredentials: () => Promise<void>;
   resetErrors: () => void;
-}
+};
 
 export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
   const { user } = usePi();
@@ -92,8 +91,45 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
     isLoading: true,
   });
 
-  const [registrationChallenge, setRegistrationChallenge] = useState<string>('');
-  const [authenticationChallenge, setAuthenticationChallenge] = useState<string>('');
+  const [registrationChallenge, setRegistrationChallenge] =
+    useState<string>("");
+  const [authenticationChallenge, setAuthenticationChallenge] =
+    useState<string>("");
+
+  /**
+   * Fetch user's registered credentials from server
+   */
+  const fetchCredentials = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+
+    try {
+      setState((prev) => ({ ...prev, isLoading: true }));
+
+      const response = await fetch("/api/biometric/credentials", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch credentials");
+      }
+
+      const { credentials } = await response.json();
+
+      setState((prev) => ({
+        ...prev,
+        registeredCredentials: credentials || [],
+      }));
+    } catch (error) {
+      console.error("Failed to fetch credentials:", error);
+    } finally {
+      setState((prev) => ({ ...prev, isLoading: false }));
+    }
+  }, [user]);
 
   // Initialize WebAuthn support detection
   useEffect(() => {
@@ -117,111 +153,85 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
           await fetchCredentials();
         }
       } catch (error) {
-        console.error('WebAuthn support check failed:', error);
+        console.error("WebAuthn support check failed:", error);
         setState((prev) => ({ ...prev, isLoading: false }));
       }
     };
 
     checkSupport();
-  }, [user]);
-
-  /**
-   * Fetch user's registered credentials from server
-   */
-  const fetchCredentials = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      setState((prev) => ({ ...prev, isLoading: true }));
-
-      const response = await fetch('/api/biometric/credentials', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch credentials');
-      }
-
-      const { credentials } = await response.json();
-
-      setState((prev) => ({
-        ...prev,
-        registeredCredentials: credentials || [],
-      }));
-    } catch (error) {
-      console.error('Failed to fetch credentials:', error);
-    } finally {
-      setState((prev) => ({ ...prev, isLoading: false }));
-    }
-  }, [user]);
+  }, [user, fetchCredentials]);
 
   /**
    * Initiate biometric registration
    */
-  const initiateRegistration = useCallback(async (credentialName?: string) => {
-    if (!user) {
-      setState((prev) => ({
-        ...prev,
-        registerError: 'User not authenticated',
-      }));
-      return;
-    }
-
-    try {
-      setState((prev) => ({
-        ...prev,
-        isRegistering: true,
-        registerError: null,
-      }));
-
-      // Request registration options from server
-      const response = await fetch('/api/biometric/register/initiate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          username: user.email || user.id,
-          displayName: user.displayName || user.email || user.id,
-          credentialName,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get registration options');
+  const initiateRegistration = useCallback(
+    async (credentialName?: string) => {
+      if (!user) {
+        setState((prev) => ({
+          ...prev,
+          registerError: "User not authenticated",
+        }));
+        return;
       }
 
-      const { options, challenge } = await response.json();
+      try {
+        setState((prev) => ({
+          ...prev,
+          isRegistering: true,
+          registerError: null,
+        }));
 
-      // Store challenge for verification
-      setRegistrationChallenge(challenge);
+        // Request registration options from server
+        const response = await fetch("/api/biometric/register/initiate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            username: user.email || user.id,
+            displayName: user.displayName || user.email || user.id,
+            credentialName,
+          }),
+        });
 
-      // Convert challenge string to buffer
-      const challengeBuffer = Uint8Array.from(
-        atob(challenge.replace(/[-_]/g, (c: string) => (c === '-' ? '+' : '/'))),
-        (c: string) => c.charCodeAt(0)
-      );
+        if (!response.ok) {
+          throw new Error("Failed to get registration options");
+        }
 
-      options.challenge = challengeBuffer;
+        const { options, challenge } = await response.json();
 
-      setState((prev) => ({
-        ...prev,
-        isRegistering: true,
-      }));
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Registration initiation failed';
-      setState((prev) => ({
-        ...prev,
-        isRegistering: false,
-        registerError: message,
-      }));
-    }
-  }, [user]);
+        // Store challenge for verification
+        setRegistrationChallenge(challenge);
+
+        // Convert challenge string to buffer
+        const challengeBuffer = Uint8Array.from(
+          atob(
+            challenge.replace(/[-_]/g, (c: string) => (c === "-" ? "+" : "/"))
+          ),
+          (c: string) => c.charCodeAt(0)
+        );
+
+        options.challenge = challengeBuffer;
+
+        setState((prev) => ({
+          ...prev,
+          isRegistering: true,
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Registration initiation failed";
+        setState((prev) => ({
+          ...prev,
+          isRegistering: false,
+          registerError: message,
+        }));
+      }
+    },
+    [user]
+  );
 
   /**
    * Complete biometric registration
@@ -231,17 +241,17 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
       if (!user || !registrationChallenge) {
         setState((prev) => ({
           ...prev,
-          registerError: 'Registration not initiated',
+          registerError: "Registration not initiated",
         }));
         return null;
       }
 
       try {
         // Get registration options
-        const response = await fetch('/api/biometric/register/initiate', {
-          method: 'POST',
+        const response = await fetch("/api/biometric/register/initiate", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             userId: user.id,
@@ -255,7 +265,11 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
 
         // Convert challenge to buffer
         const challengeBuffer = Uint8Array.from(
-          atob(options.challenge.replace(/[-_]/g, (c: string) => (c === '-' ? '+' : '/'))),
+          atob(
+            options.challenge.replace(/[-_]/g, (c: string) =>
+              c === "-" ? "+" : "/"
+            )
+          ),
           (c: string) => c.charCodeAt(0)
         );
 
@@ -265,10 +279,10 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
         const credential = await registerBiometric(options, credentialName);
 
         // Verify with server
-        const verifyResponse = await fetch('/api/biometric/register/verify', {
-          method: 'POST',
+        const verifyResponse = await fetch("/api/biometric/register/verify", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             userId: user.id,
@@ -279,7 +293,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
         });
 
         if (!verifyResponse.ok) {
-          throw new Error('Server verification failed');
+          throw new Error("Server verification failed");
         }
 
         const { biometricCredential } = await verifyResponse.json();
@@ -287,7 +301,10 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
         // Update state
         setState((prev) => ({
           ...prev,
-          registeredCredentials: [...prev.registeredCredentials, biometricCredential],
+          registeredCredentials: [
+            ...prev.registeredCredentials,
+            biometricCredential,
+          ],
           registerError: null,
         }));
 
@@ -297,11 +314,11 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
           createdAt: biometricCredential.createdAt,
         });
 
-        setRegistrationChallenge('');
+        setRegistrationChallenge("");
         return biometricCredential;
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : 'Registration failed';
+          error instanceof Error ? error.message : "Registration failed";
         setState((prev) => ({
           ...prev,
           registerError: message,
@@ -317,31 +334,31 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
   /**
    * Remove credential
    */
-  const removeCredential = useCallback(
-    async (credentialId: string) => {
-      try {
-        const response = await fetch(`/api/biometric/credentials/${credentialId}`, {
-          method: 'DELETE',
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to remove credential');
+  const removeCredential = useCallback(async (credentialId: string) => {
+    try {
+      const response = await fetch(
+        `/api/biometric/credentials/${credentialId}`,
+        {
+          method: "DELETE",
         }
+      );
 
-        setState((prev) => ({
-          ...prev,
-          registeredCredentials: prev.registeredCredentials.filter(
-            (c) => c.id !== credentialId
-          ),
-        }));
-
-        getCredentialStorage().clearCredentialMetadata(credentialId);
-      } catch (error) {
-        console.error('Failed to remove credential:', error);
+      if (!response.ok) {
+        throw new Error("Failed to remove credential");
       }
-    },
-    []
-  );
+
+      setState((prev) => ({
+        ...prev,
+        registeredCredentials: prev.registeredCredentials.filter(
+          (c) => c.id !== credentialId
+        ),
+      }));
+
+      getCredentialStorage().clearCredentialMetadata(credentialId);
+    } catch (error) {
+      console.error("Failed to remove credential:", error);
+    }
+  }, []);
 
   /**
    * Authenticate with biometric
@@ -350,7 +367,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
     if (!user || state.registeredCredentials.length === 0) {
       setState((prev) => ({
         ...prev,
-        authenticateError: 'No biometric credentials registered',
+        authenticateError: "No biometric credentials registered",
       }));
       return false;
     }
@@ -363,10 +380,10 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
       }));
 
       // Request authentication options
-      const response = await fetch('/api/biometric/authenticate/initiate', {
-        method: 'POST',
+      const response = await fetch("/api/biometric/authenticate/initiate", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user.id,
@@ -374,7 +391,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get authentication options');
+        throw new Error("Failed to get authentication options");
       }
 
       const { options, challenge } = await response.json();
@@ -384,7 +401,9 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
 
       // Convert challenge to buffer
       const challengeBuffer = Uint8Array.from(
-        atob(challenge.replace(/[-_]/g, (c: string) => (c === '-' ? '+' : '/'))),
+        atob(
+          challenge.replace(/[-_]/g, (c: string) => (c === "-" ? "+" : "/"))
+        ),
         (c: string) => c.charCodeAt(0)
       );
 
@@ -394,10 +413,10 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
       const credential = await authenticateWithBiometric(options);
 
       // Verify with server
-      const verifyResponse = await fetch('/api/biometric/authenticate/verify', {
-        method: 'POST',
+      const verifyResponse = await fetch("/api/biometric/authenticate/verify", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user.id,
@@ -407,7 +426,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
       });
 
       if (!verifyResponse.ok) {
-        throw new Error('Authentication verification failed');
+        throw new Error("Authentication verification failed");
       }
 
       const { sessionToken, expiresAt } = await verifyResponse.json();
@@ -427,11 +446,11 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
         authenticateError: null,
       }));
 
-      setAuthenticationChallenge('');
+      setAuthenticationChallenge("");
       return true;
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Authentication failed';
+        error instanceof Error ? error.message : "Authentication failed";
       setState((prev) => ({
         ...prev,
         authenticateError: message,
@@ -451,7 +470,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
       if (!user) {
         setState((prev) => ({
           ...prev,
-          authenticateError: 'User not authenticated',
+          authenticateError: "User not authenticated",
         }));
         return false;
       }
@@ -463,10 +482,10 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
           authenticateError: null,
         }));
 
-        const response = await fetch('/api/biometric/authenticate/fallback', {
-          method: 'POST',
+        const response = await fetch("/api/biometric/authenticate/fallback", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             userId: user.id,
@@ -476,7 +495,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
 
         if (!response.ok) {
           const error = await response.json();
-          throw new Error(error.message || 'PIN authentication failed');
+          throw new Error(error.message || "PIN authentication failed");
         }
 
         const { sessionToken, expiresAt } = await response.json();
@@ -495,7 +514,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
         return true;
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : 'PIN authentication failed';
+          error instanceof Error ? error.message : "PIN authentication failed";
         setState((prev) => ({
           ...prev,
           authenticateError: message,
@@ -512,7 +531,9 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
    * Get current session token
    */
   const getSessionToken = useCallback((): string | null => {
-    if (!user) return null;
+    if (!user) {
+      return null;
+    }
 
     try {
       const sessionId = user.id;
@@ -527,7 +548,9 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
    * Clear session
    */
   const clearSession = useCallback(() => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     const sessionId = user.id;
     getSessionStorage().clearSessionToken(sessionId);
@@ -544,13 +567,15 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
    * Refresh session
    */
   const refreshSession = useCallback(async () => {
-    if (!user || !state.sessionToken) return;
+    if (!user || !state.sessionToken) {
+      return;
+    }
 
     try {
-      const response = await fetch('/api/biometric/authenticate/refresh', {
-        method: 'POST',
+      const response = await fetch("/api/biometric/authenticate/refresh", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${state.sessionToken}`,
         },
         body: JSON.stringify({
@@ -559,7 +584,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
       });
 
       if (!response.ok) {
-        throw new Error('Session refresh failed');
+        throw new Error("Session refresh failed");
       }
 
       const { sessionToken, expiresAt } = await response.json();
@@ -575,7 +600,7 @@ export function useBiometric(): UseBiometricState & UseBiometricCallbacks {
         sessionExpiry: new Date(expiresAt),
       }));
     } catch (error) {
-      console.error('Failed to refresh session:', error);
+      console.error("Failed to refresh session:", error);
       clearSession();
     }
   }, [user, state.sessionToken, clearSession]);

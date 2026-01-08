@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSecureStorage } from '@/lib/biometric/secure-storage';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { type NextRequest, NextResponse } from "next/server";
+import { getSecureStorage } from "@/lib/biometric/secure-storage";
 
 // Simple JWT token generation (in production, use proper JWT library)
-function generateToken(payload: any, secret: string = 'biometric-secret'): string {
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  
-  const hmac = crypto.createHmac('sha256', secret);
+function generateToken(payload: any, secret = "biometric-secret"): string {
+  const header = Buffer.from(
+    JSON.stringify({ alg: "HS256", typ: "JWT" })
+  ).toString("base64url");
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+
+  const hmac = crypto.createHmac("sha256", secret);
   hmac.update(`${header}.${body}`);
-  const signature = hmac.digest('base64url');
-  
+  const signature = hmac.digest("base64url");
+
   return `${header}.${body}.${signature}`;
 }
 
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !pin) {
       return NextResponse.json(
-        { error: 'User ID and PIN are required' },
+        { error: "User ID and PIN are required" },
         { status: 400 }
       );
     }
@@ -33,16 +35,13 @@ export async function POST(request: NextRequest) {
 
     // Mock user with PIN hash
     const storage = getSecureStorage();
-    const mockPinHash = storage.hashPassword('1234'); // Mock PIN: 1234
+    const mockPinHash = storage.hashPassword("1234"); // Mock PIN: 1234
 
     // In production, this should verify against stored hash
     const isValid = storage.verifyPassword(pin, mockPinHash);
 
     if (!isValid) {
-      return NextResponse.json(
-        { error: 'Invalid PIN' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid PIN" }, { status: 401 });
     }
 
     // Generate session token
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
       sid: sessionId,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
-      method: 'pin',
+      method: "pin",
     });
 
     // TODO: Log authentication attempt
@@ -75,19 +74,19 @@ export async function POST(request: NextRequest) {
     });
 
     response.cookies.set({
-      name: 'biometric_session',
+      name: "biometric_session",
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 24 * 60 * 60,
     });
 
     return response;
   } catch (error) {
-    console.error('Error in fallback authentication:', error);
+    console.error("Error in fallback authentication:", error);
     return NextResponse.json(
-      { error: 'Authentication failed' },
+      { error: "Authentication failed" },
       { status: 500 }
     );
   }

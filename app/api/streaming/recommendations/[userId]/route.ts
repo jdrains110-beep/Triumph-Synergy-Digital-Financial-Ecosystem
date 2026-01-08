@@ -3,7 +3,7 @@
  * GET /api/streaming/recommendations/[userId]
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,

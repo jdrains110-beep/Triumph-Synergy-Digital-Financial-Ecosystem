@@ -235,7 +235,12 @@ export class DependencyOrchestrator {
     const logEntry = `[${timestamp}] ${message}`;
     this.startupLog.push(logEntry);
 
-    if (this.logger && typeof this.logger === 'object' && this.logger !== null && 'info' in this.logger) {
+    if (
+      this.logger &&
+      typeof this.logger === "object" &&
+      this.logger !== null &&
+      "info" in this.logger
+    ) {
       (this.logger as any).info(message);
     } else {
       console.log(logEntry);

@@ -3,41 +3,47 @@
  * Endpoints for creating, managing, and signing contracts
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { ContractService } from '@/lib/contracts/service';
-import { AuditTrailService } from '@/lib/contracts/audit-trail-service';
-import { DocuSignService } from '@/lib/contracts/docusign-service';
+import { type NextRequest, NextResponse } from "next/server";
+import { AuditTrailService } from "@/lib/contracts/audit-trail-service";
+import { DocuSignService } from "@/lib/contracts/docusign-service";
+import { ContractService } from "@/lib/contracts/service";
 import {
-  Contract,
-  ContractType,
-  SignatureMethod,
+  type ConsentStatus,
   ContractStatus,
-  ConsentStatus,
-} from '@/lib/contracts/types';
+  type ContractType,
+  type SignatureMethod,
+} from "@/lib/contracts/types";
 
 /**
  * GET /api/contracts - List user's contracts
  */
 export async function getContracts(req: NextRequest) {
   try {
-    const userId = req.headers.get('x-user-id');
+    const userId = req.headers.get("x-user-id");
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "User ID required" }, { status: 401 });
     }
 
-    const limit = parseInt(req.nextUrl.searchParams.get('limit') || '50');
-    const offset = parseInt(req.nextUrl.searchParams.get('offset') || '0');
+    const limit = Number.parseInt(
+      req.nextUrl.searchParams.get("limit") || "50",
+      10
+    );
+    const offset = Number.parseInt(
+      req.nextUrl.searchParams.get("offset") || "0",
+      10
+    );
 
-    const result = await ContractService.getUserContracts(userId, limit, offset);
+    const result = await ContractService.getUserContracts(
+      userId,
+      limit,
+      offset
+    );
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error fetching contracts:', error);
+    console.error("Error fetching contracts:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch contracts' },
+      { error: "Failed to fetch contracts" },
       { status: 500 }
     );
   }
@@ -48,12 +54,9 @@ export async function getContracts(req: NextRequest) {
  */
 export async function createContract(req: NextRequest) {
   try {
-    const userId = req.headers.get('x-user-id');
+    const userId = req.headers.get("x-user-id");
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "User ID required" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -71,7 +74,7 @@ export async function createContract(req: NextRequest) {
 
     if (!type || !title || !content || !jurisdiction) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -80,7 +83,7 @@ export async function createContract(req: NextRequest) {
       {
         type: type as ContractType,
         title,
-        version: version || '1.0',
+        version: version || "1.0",
         content,
         htmlContent,
         jurisdiction,
@@ -95,9 +98,9 @@ export async function createContract(req: NextRequest) {
 
     return NextResponse.json(contract, { status: 201 });
   } catch (error) {
-    console.error('Error creating contract:', error);
+    console.error("Error creating contract:", error);
     return NextResponse.json(
-      { error: 'Failed to create contract' },
+      { error: "Failed to create contract" },
       { status: 500 }
     );
   }
@@ -116,16 +119,16 @@ export async function getContractDetails(
 
     if (!details) {
       return NextResponse.json(
-        { error: 'Contract not found' },
+        { error: "Contract not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json(details);
   } catch (error) {
-    console.error('Error fetching contract:', error);
+    console.error("Error fetching contract:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch contract' },
+      { error: "Failed to fetch contract" },
       { status: 500 }
     );
   }
@@ -140,13 +143,13 @@ export async function signContract(
 ) {
   try {
     const { contractId } = params;
-    const userId = req.headers.get('x-user-id');
-    const email = req.headers.get('x-user-email');
-    const displayName = req.headers.get('x-user-name') || 'Unknown';
+    const userId = req.headers.get("x-user-id");
+    const email = req.headers.get("x-user-email");
+    const displayName = req.headers.get("x-user-name") || "Unknown";
 
     if (!userId || !email) {
       return NextResponse.json(
-        { error: 'User authentication required' },
+        { error: "User authentication required" },
         { status: 401 }
       );
     }
@@ -167,7 +170,7 @@ export async function signContract(
 
     if (!signatureData || !method) {
       return NextResponse.json(
-        { error: 'Signature data and method required' },
+        { error: "Signature data and method required" },
         { status: 400 }
       );
     }
@@ -177,7 +180,7 @@ export async function signContract(
     if (screenshotBase64) {
       const screenshot = AuditTrailService.captureScreenshot(
         screenshotBase64,
-        'Contract signing acceptance'
+        "Contract signing acceptance"
       );
       screenshotHash = screenshot.hash;
     }
@@ -216,7 +219,7 @@ export async function signContract(
         city,
       },
       {
-        action: 'signed',
+        action: "signed",
         screenshotHash,
         signatureData,
         method,
@@ -270,9 +273,9 @@ export async function signContract(
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error signing contract:', error);
+    console.error("Error signing contract:", error);
     return NextResponse.json(
-      { error: 'Failed to sign contract' },
+      { error: "Failed to sign contract" },
       { status: 500 }
     );
   }
@@ -287,14 +290,14 @@ export async function recordConsent(
 ) {
   try {
     const { contractId } = params;
-    const userId = req.headers.get('x-user-id');
-    const email = req.headers.get('x-user-email');
-    const ipAddress = req.headers.get('x-forwarded-for') || '0.0.0.0';
-    const userAgent = req.headers.get('user-agent') || 'Unknown';
+    const userId = req.headers.get("x-user-id");
+    const email = req.headers.get("x-user-email");
+    const ipAddress = req.headers.get("x-forwarded-for") || "0.0.0.0";
+    const userAgent = req.headers.get("user-agent") || "Unknown";
 
     if (!userId || !email) {
       return NextResponse.json(
-        { error: 'User authentication required' },
+        { error: "User authentication required" },
         { status: 401 }
       );
     }
@@ -304,7 +307,7 @@ export async function recordConsent(
 
     if (!contractType || !status) {
       return NextResponse.json(
-        { error: 'Contract type and consent status required' },
+        { error: "Contract type and consent status required" },
         { status: 400 }
       );
     }
@@ -326,21 +329,21 @@ export async function recordConsent(
       {
         ipAddress,
         userAgent,
-        platform: 'web',
-        browser: 'unknown',
-        deviceType: 'desktop',
+        platform: "web",
+        browser: "unknown",
+        deviceType: "desktop",
         timestamp: new Date(),
       },
       {
-        action: status === 'ACCEPTED' ? 'accepted' : 'rejected',
+        action: status === "ACCEPTED" ? "accepted" : "rejected",
       }
     );
 
     return NextResponse.json(consent, { status: 201 });
   } catch (error) {
-    console.error('Error recording consent:', error);
+    console.error("Error recording consent:", error);
     return NextResponse.json(
-      { error: 'Failed to record consent' },
+      { error: "Failed to record consent" },
       { status: 500 }
     );
   }
@@ -363,9 +366,9 @@ export async function getAuditTrail(
       total: auditLogs.length,
     });
   } catch (error) {
-    console.error('Error fetching audit trail:', error);
+    console.error("Error fetching audit trail:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch audit trail' },
+      { error: "Failed to fetch audit trail" },
       { status: 500 }
     );
   }
@@ -388,14 +391,14 @@ export async function checkCompliance(
       summary: {
         isCompliant: compliance.isValid,
         message: compliance.isValid
-          ? 'Contract meets legal compliance standards (ESIGN, UETA)'
-          : 'Contract requires additional signatures or consent',
+          ? "Contract meets legal compliance standards (ESIGN, UETA)"
+          : "Contract requires additional signatures or consent",
       },
     });
   } catch (error) {
-    console.error('Error checking compliance:', error);
+    console.error("Error checking compliance:", error);
     return NextResponse.json(
-      { error: 'Failed to check compliance' },
+      { error: "Failed to check compliance" },
       { status: 500 }
     );
   }
@@ -410,30 +413,29 @@ export async function exportContract(
 ) {
   try {
     const { contractId } = params;
-    const userId = req.headers.get('x-user-id');
+    const userId = req.headers.get("x-user-id");
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "User ID required" }, { status: 401 });
     }
 
-    const contractData = await ContractService.exportContractWithAuditTrail(contractId);
-    const evidencePackage = await AuditTrailService.exportEvidencePackage(contractId);
+    const contractData =
+      await ContractService.exportContractWithAuditTrail(contractId);
+    const evidencePackage =
+      await AuditTrailService.exportEvidencePackage(contractId);
 
     await AuditTrailService.logSigningEvent(
       contractId,
       userId,
       {
-        ipAddress: req.headers.get('x-forwarded-for') || '0.0.0.0',
-        userAgent: req.headers.get('user-agent') || 'Unknown',
-        platform: 'web',
-        browser: 'unknown',
-        deviceType: 'desktop',
+        ipAddress: req.headers.get("x-forwarded-for") || "0.0.0.0",
+        userAgent: req.headers.get("user-agent") || "Unknown",
+        platform: "web",
+        browser: "unknown",
+        deviceType: "desktop",
         timestamp: new Date(),
       },
-      { action: 'exported' }
+      { action: "exported" }
     );
 
     return NextResponse.json({
@@ -442,9 +444,9 @@ export async function exportContract(
       exportedAt: new Date(),
     });
   } catch (error) {
-    console.error('Error exporting contract:', error);
+    console.error("Error exporting contract:", error);
     return NextResponse.json(
-      { error: 'Failed to export contract' },
+      { error: "Failed to export contract" },
       { status: 500 }
     );
   }
@@ -464,9 +466,9 @@ export async function handleDocuSignWebhook(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error processing DocuSign webhook:', error);
+    console.error("Error processing DocuSign webhook:", error);
     return NextResponse.json(
-      { error: 'Failed to process webhook' },
+      { error: "Failed to process webhook" },
       { status: 500 }
     );
   }

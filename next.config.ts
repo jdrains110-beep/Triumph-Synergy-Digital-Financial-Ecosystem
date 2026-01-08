@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
       },
     ],
     unoptimized: process.env.VERCEL === "1", // Disable image optimization on Vercel
-    minimumCacheTTL: 31536000,
+    minimumCacheTTL: 31_536_000,
   },
 
   // Platform-aware output configuration

@@ -3,14 +3,14 @@
  * Detects and validates Pi Browser environment
  */
 
-export interface PiBrowserInfo {
+export type PiBrowserInfo = {
   isAvailable: boolean;
   isPiBrowser: boolean;
   userAgent: string;
   version?: string;
   platform?: string;
   isPiNetworkAvailable: boolean;
-}
+};
 
 /**
  * Detect if running in Pi Browser
@@ -50,7 +50,9 @@ export function detectPiBrowser(): PiBrowserInfo {
  * Get Pi Browser version
  */
 function getPiBrowserVersion(): string | undefined {
-  if (typeof window === "undefined") return undefined;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   const userAgent = navigator.userAgent;
   const match = userAgent.match(/PiBrowser\/([^\s]+)/i);
@@ -94,7 +96,9 @@ export async function validatePiBrowserEnvironment(): Promise<{
       return { valid: false, errors, info };
     }
   } catch (err) {
-    errors.push(`Pi SDK validation error: ${err instanceof Error ? err.message : "Unknown error"}`);
+    errors.push(
+      `Pi SDK validation error: ${err instanceof Error ? err.message : "Unknown error"}`
+    );
     return { valid: false, errors, info };
   }
 
@@ -158,7 +162,9 @@ export async function initializePiBrowser(): Promise<{
  * Check if Pi Browser has payment support
  */
 export function hasPaymentSupport(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") {
+    return false;
+  }
 
   const Pi = (window as any).Pi;
   return (

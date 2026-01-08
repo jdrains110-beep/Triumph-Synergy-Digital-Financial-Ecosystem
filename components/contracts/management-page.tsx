@@ -3,16 +3,16 @@
  * Shows how to integrate contracts into your app
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { ContractSigningComponent } from '@/components/contracts/signing-component';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle2, FileText, Shield } from 'lucide-react';
+import { CheckCircle2, FileText, Shield } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ContractSigningComponent } from "@/components/contracts/signing-component";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface Contract {
+type Contract = {
   id: string;
   type: string;
   title: string;
@@ -21,17 +21,17 @@ interface Contract {
   status: string;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-interface ComplianceStatus {
+type ComplianceStatus = {
   esignActCompliant: boolean;
   uetaCompliant: boolean;
   hasAuditTrail: boolean;
   hasActiveConsent: boolean;
   [key: string]: any;
-}
+};
 
-interface AuditLogEntry {
+type AuditLogEntry = {
   id: string;
   action: string;
   timestamp: string | Date;
@@ -51,7 +51,7 @@ interface AuditLogEntry {
     timestamp: string | Date;
     description: string;
   };
-}
+};
 
 /**
  * Example: Contract Management Page
@@ -62,77 +62,74 @@ export function ContractManagementPage() {
   const [loading, setLoading] = useState(false);
   const [compliance, setCompliance] = useState<ComplianceStatus | null>(null);
 
-  // Load user's contracts
-  useEffect(() => {
-    loadContracts();
-  }, []);
-
-  const loadContracts = async () => {
+  const loadContracts = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/contracts', {
+      const response = await fetch("/api/contracts", {
         headers: {
-          'X-User-ID': 'current-user-id', // Get from session
-          'X-User-Email': 'user@example.com', // Get from session
+          "X-User-ID": "current-user-id", // Get from session
+          "X-User-Email": "user@example.com", // Get from session
         },
       });
       const data = await response.json();
       setContracts(data.contracts || []);
     } catch (error) {
-      console.error('Failed to load contracts:', error);
+      console.error("Failed to load contracts:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Load user's contracts
+  useEffect(() => {
+    loadContracts();
+  }, [loadContracts]);
 
   const handleSelectContract = async (contractId: string) => {
     setSelectedContract(contractId);
 
     // Load compliance status
     try {
-      const response = await fetch(
-        `/api/contracts/${contractId}/compliance`
-      );
+      const response = await fetch(`/api/contracts/${contractId}/compliance`);
       const data = await response.json();
       setCompliance(data.compliance);
     } catch (error) {
-      console.error('Failed to load compliance:', error);
+      console.error("Failed to load compliance:", error);
     }
   };
 
   const handleExportEvidence = async (contractId: string) => {
     try {
-      const response = await fetch(
-        `/api/contracts/${contractId}/export`,
-        { method: 'POST' }
-      );
+      const response = await fetch(`/api/contracts/${contractId}/export`, {
+        method: "POST",
+      });
       const data = await response.json();
 
       // Download evidence package
       const filename = `contract-evidence-${contractId}-${Date.now()}.json`;
       const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: 'application/json',
+        type: "application/json",
       });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = filename;
       a.click();
     } catch (error) {
-      console.error('Failed to export evidence:', error);
+      console.error("Failed to export evidence:", error);
     }
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <div className="container mx-auto space-y-8 py-8">
       <div>
-        <h1 className="text-3xl font-bold">Contract Management</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="font-bold text-3xl">Contract Management</h1>
+        <p className="mt-2 text-gray-600">
           Create, review, sign, and manage legally binding contracts
         </p>
       </div>
 
-      <Tabs defaultValue="contracts" className="w-full">
+      <Tabs className="w-full" defaultValue="contracts">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="contracts">Your Contracts</TabsTrigger>
           <TabsTrigger value="sign">Sign Contract</TabsTrigger>
@@ -140,7 +137,7 @@ export function ContractManagementPage() {
         </TabsList>
 
         {/* Your Contracts Tab */}
-        <TabsContent value="contracts" className="space-y-4">
+        <TabsContent className="space-y-4" value="contracts">
           {contracts.length === 0 ? (
             <Alert>
               <FileText className="h-4 w-4" />
@@ -152,73 +149,72 @@ export function ContractManagementPage() {
             <div className="space-y-3">
               {contracts.map((contract) => (
                 <div
+                  className="cursor-pointer rounded-lg border p-4 hover:bg-gray-50"
                   key={contract.id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
                   onClick={() => handleSelectContract(contract.id)}
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">{contract.title}</h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-gray-600 text-sm">
                         Version {contract.version} • {contract.type}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Status: <span className="font-medium">{contract.status}</span>
+                      <p className="mt-1 text-gray-500 text-xs">
+                        Status:{" "}
+                        <span className="font-medium">{contract.status}</span>
                       </p>
                     </div>
                     <Button
-                      variant="outline"
-                      size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleExportEvidence(contract.id);
                       }}
+                      size="sm"
+                      variant="outline"
                     >
                       Export Evidence
                     </Button>
                   </div>
 
                   {selectedContract === contract.id && compliance && (
-                    <div className="mt-4 pt-4 border-t space-y-2">
+                    <div className="mt-4 space-y-2 border-t pt-4">
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div
                           className={
                             compliance.esignActCompliant
-                              ? 'text-green-700'
-                              : 'text-red-700'
+                              ? "text-green-700"
+                              : "text-red-700"
                           }
                         >
-                          {compliance.esignActCompliant ? '✓' : '✗'} ESIGN
+                          {compliance.esignActCompliant ? "✓" : "✗"} ESIGN
                           Compliant
                         </div>
                         <div
                           className={
                             compliance.uetaCompliant
-                              ? 'text-green-700'
-                              : 'text-red-700'
+                              ? "text-green-700"
+                              : "text-red-700"
                           }
                         >
-                          {compliance.uetaCompliant ? '✓' : '✗'} UETA
-                          Compliant
+                          {compliance.uetaCompliant ? "✓" : "✗"} UETA Compliant
                         </div>
                         <div
                           className={
                             compliance.hasAuditTrail
-                              ? 'text-green-700'
-                              : 'text-red-700'
+                              ? "text-green-700"
+                              : "text-red-700"
                           }
                         >
-                          {compliance.hasAuditTrail ? '✓' : '✗'} Audit
-                          Trail
+                          {compliance.hasAuditTrail ? "✓" : "✗"} Audit Trail
                         </div>
                         <div
                           className={
                             compliance.hasActiveConsent
-                              ? 'text-green-700'
-                              : 'text-red-700'
+                              ? "text-green-700"
+                              : "text-red-700"
                           }
                         >
-                          {compliance.hasActiveConsent ? '✓' : '✗'} Active
+                          {compliance.hasActiveConsent ? "✓" : "✗"} Active
                           Consent
                         </div>
                       </div>
@@ -231,29 +227,30 @@ export function ContractManagementPage() {
         </TabsContent>
 
         {/* Sign Contract Tab */}
-        <TabsContent value="sign" className="space-y-4">
+        <TabsContent className="space-y-4" value="sign">
           {selectedContract ? (
             <div className="space-y-4">
               <Alert className="border-blue-500 bg-blue-50">
                 <Shield className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-blue-900">
-                  This contract is legally binding. Ensure you understand all terms before signing.
+                  This contract is legally binding. Ensure you understand all
+                  terms before signing.
                 </AlertDescription>
               </Alert>
 
               <ContractSigningComponent
+                contractContent={
+                  contracts.find((c) => c.id === selectedContract)?.content ||
+                  ""
+                }
                 contractId={selectedContract}
                 contractTitle={
                   contracts.find((c) => c.id === selectedContract)?.title ||
-                  'Contract'
-                }
-                contractContent={
-                  contracts.find((c) => c.id === selectedContract)?.content ||
-                  ''
+                  "Contract"
                 }
                 onSignatureComplete={(signature) => {
-                  alert('Contract signed successfully!');
-                  console.log('Signature evidence:', signature);
+                  alert("Contract signed successfully!");
+                  console.log("Signature evidence:", signature);
 
                   // Reload contracts to update status
                   loadContracts();
@@ -272,7 +269,7 @@ export function ContractManagementPage() {
         </TabsContent>
 
         {/* Audit Trail Tab */}
-        <TabsContent value="evidence" className="space-y-4">
+        <TabsContent className="space-y-4" value="evidence">
           {selectedContract ? (
             <ContractAuditTrailViewer contractId={selectedContract} />
           ) : (
@@ -296,32 +293,34 @@ function ContractAuditTrailViewer({ contractId }: { contractId: string }) {
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadAuditTrail();
-  }, [contractId]);
-
-  const loadAuditTrail = async () => {
+  const loadAuditTrail = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/contracts/${contractId}/audit-trail`);
       const data = await response.json();
       setAuditLogs(data.logs || []);
     } catch (error) {
-      console.error('Failed to load audit trail:', error);
+      console.error("Failed to load audit trail:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [contractId]);
+
+  useEffect(() => {
+    loadAuditTrail();
+  }, [loadAuditTrail]);
 
   if (loading) {
-    return <div className="text-center py-8">Loading audit trail...</div>;
+    return <div className="py-8 text-center">Loading audit trail...</div>;
   }
 
   if (auditLogs.length === 0) {
     return (
       <Alert>
         <FileText className="h-4 w-4" />
-        <AlertDescription>No audit events for this contract yet.</AlertDescription>
+        <AlertDescription>
+          No audit events for this contract yet.
+        </AlertDescription>
       </Alert>
     );
   }
@@ -331,26 +330,23 @@ function ContractAuditTrailViewer({ contractId }: { contractId: string }) {
       <Alert className="border-green-500 bg-green-50">
         <CheckCircle2 className="h-4 w-4 text-green-600" />
         <AlertDescription className="text-green-900">
-          Complete audit trail with {auditLogs.length} events recorded. All actions
-          timestamped and verified.
+          Complete audit trail with {auditLogs.length} events recorded. All
+          actions timestamped and verified.
         </AlertDescription>
       </Alert>
 
       <div className="space-y-3">
         {auditLogs.map((log, idx) => (
-          <div
-            key={idx}
-            className="border rounded-lg p-4 bg-gray-50 space-y-2"
-          >
+          <div className="space-y-2 rounded-lg border bg-gray-50 p-4" key={idx}>
             <div className="flex items-start justify-between">
               <div>
                 <h4 className="font-semibold capitalize">{log.action}</h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-gray-600 text-sm">
                   {new Date(log.timestamp).toLocaleString()}
                 </p>
               </div>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {log.details?.deviceType || 'Unknown'}
+              <span className="rounded bg-blue-100 px-2 py-1 text-blue-800 text-xs">
+                {log.details?.deviceType || "Unknown"}
               </span>
             </div>
 
@@ -376,9 +372,9 @@ function ContractAuditTrailViewer({ contractId }: { contractId: string }) {
             </div>
 
             {log.screenshot && (
-              <div className="pt-2 border-t">
-                <p className="text-xs font-semibold">Screenshot Evidence:</p>
-                <p className="font-mono text-xs text-gray-600 break-all">
+              <div className="border-t pt-2">
+                <p className="font-semibold text-xs">Screenshot Evidence:</p>
+                <p className="break-all font-mono text-gray-600 text-xs">
                   {log.screenshot.hash}
                 </p>
               </div>
@@ -387,9 +383,11 @@ function ContractAuditTrailViewer({ contractId }: { contractId: string }) {
         ))}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-        <p className="font-semibold text-blue-900 mb-2">Legal Evidence Summary</p>
-        <ul className="space-y-1 text-blue-800 text-xs list-disc ml-4">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
+        <p className="mb-2 font-semibold text-blue-900">
+          Legal Evidence Summary
+        </p>
+        <ul className="ml-4 list-disc space-y-1 text-blue-800 text-xs">
           <li>All signing events timestamped with timezone</li>
           <li>Device fingerprints prevent unauthorized access</li>
           <li>Geographic location recorded for fraud detection</li>

@@ -7,9 +7,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { streamingManager } from "./streaming";
-import { STREAMING_CONFIG, StreamSession, StreamAnalytics, StreamRecommendation } from "./streaming-config";
+import {
+  STREAMING_CONFIG,
+  type StreamAnalytics,
+  type StreamSession,
+} from "./streaming-config";
 
-export interface UseStreamingState {
+export type UseStreamingState = {
   // Session Management
   activeSession: StreamSession | null;
   sessionId: string | null;
@@ -45,7 +49,7 @@ export interface UseStreamingState {
   // State Management
   loading: boolean;
   error: string | null;
-}
+};
 
 /**
  * Main streaming hook
@@ -92,7 +96,12 @@ export function useStreaming(userId: string) {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
-        const session = await streamingManager.initializeSession(userId, title, description, options);
+        const session = await streamingManager.initializeSession(
+          userId,
+          title,
+          description,
+          options
+        );
 
         setState((prev) => ({
           ...prev,
@@ -114,6 +123,21 @@ export function useStreaming(userId: string) {
     },
     [userId]
   );
+
+  /**
+   * Check bandwidth and recommend quality
+   */
+  const checkBandwidth = useCallback(() => {
+    // Simulate bandwidth check
+    const bandwidth = 2000 + Math.random() * 3000;
+    const result = streamingManager.checkBandwidthAndRecommend(bandwidth);
+
+    setState((prev) => ({
+      ...prev,
+      bandwidth: Math.round(bandwidth),
+      recommendedQuality: result.quality,
+    }));
+  }, []);
 
   /**
    * Start streaming
@@ -157,13 +181,15 @@ export function useStreaming(userId: string) {
         error: error.message,
       }));
     }
-  }, [state.sessionId]);
+  }, [state.sessionId, checkBandwidth]);
 
   /**
    * End streaming
    */
   const endStream = useCallback(async () => {
-    if (!state.sessionId) return;
+    if (!state.sessionId) {
+      return;
+    }
 
     setState((prev) => ({ ...prev, loading: true }));
 
@@ -177,8 +203,12 @@ export function useStreaming(userId: string) {
         viewerCount: result.viewerCount,
       }));
 
-      if (sessionTimerRef.current) clearInterval(sessionTimerRef.current);
-      if (bandwidthCheckRef.current) clearInterval(bandwidthCheckRef.current);
+      if (sessionTimerRef.current) {
+        clearInterval(sessionTimerRef.current);
+      }
+      if (bandwidthCheckRef.current) {
+        clearInterval(bandwidthCheckRef.current);
+      }
     } catch (error: any) {
       setState((prev) => ({
         ...prev,
@@ -192,12 +222,16 @@ export function useStreaming(userId: string) {
    * Pause stream
    */
   const pauseStream = useCallback(async () => {
-    if (!state.sessionId) return;
+    if (!state.sessionId) {
+      return;
+    }
 
     try {
       await streamingManager.pauseStream(state.sessionId);
       setState((prev) => ({ ...prev, status: "paused" }));
-      if (sessionTimerRef.current) clearInterval(sessionTimerRef.current);
+      if (sessionTimerRef.current) {
+        clearInterval(sessionTimerRef.current);
+      }
     } catch (error: any) {
       setState((prev) => ({ ...prev, error: error.message }));
     }
@@ -207,7 +241,9 @@ export function useStreaming(userId: string) {
    * Resume stream
    */
   const resumeStream = useCallback(async () => {
-    if (!state.sessionId) return;
+    if (!state.sessionId) {
+      return;
+    }
 
     try {
       await streamingManager.resumeStream(state.sessionId);
@@ -236,10 +272,15 @@ export function useStreaming(userId: string) {
    */
   const updateQuality = useCallback(
     async (quality: string) => {
-      if (!state.sessionId) return;
+      if (!state.sessionId) {
+        return;
+      }
 
       try {
-        const result = await streamingManager.updateQuality(state.sessionId, quality);
+        const result = await streamingManager.updateQuality(
+          state.sessionId,
+          quality
+        );
         setState((prev) => ({
           ...prev,
           currentQuality: quality,
@@ -252,21 +293,6 @@ export function useStreaming(userId: string) {
     [state.sessionId]
   );
 
-  /**
-   * Check bandwidth and recommend quality
-   */
-  const checkBandwidth = useCallback(() => {
-    // Simulate bandwidth check
-    const bandwidth = 2000 + Math.random() * 3000;
-    const result = streamingManager.checkBandwidthAndRecommend(bandwidth);
-
-    setState((prev) => ({
-      ...prev,
-      bandwidth: Math.round(bandwidth),
-      recommendedQuality: result.quality,
-    }));
-  }, []);
-
   // ============================================================================
   // INTERACTIVITY
   // ============================================================================
@@ -276,7 +302,9 @@ export function useStreaming(userId: string) {
    */
   const sendMessage = useCallback(
     (message: string) => {
-      if (!state.sessionId) return;
+      if (!state.sessionId) {
+        return;
+      }
 
       const newMessage = {
         id: `msg_${Date.now()}`,
@@ -299,7 +327,9 @@ export function useStreaming(userId: string) {
    */
   const createPoll = useCallback(
     (question: string, options: string[]) => {
-      if (!state.sessionId) return;
+      if (!state.sessionId) {
+        return;
+      }
 
       const poll = {
         id: `poll_${Date.now()}`,
@@ -347,7 +377,9 @@ export function useStreaming(userId: string) {
    * Send reaction
    */
   const sendReaction = useCallback((emoji: string) => {
-    if (!STREAMING_CONFIG.interactivity.reactions.enabled) return;
+    if (!STREAMING_CONFIG.interactivity.reactions.enabled) {
+      return;
+    }
 
     const reaction = {
       id: `reaction_${Date.now()}`,
@@ -366,8 +398,12 @@ export function useStreaming(userId: string) {
    */
   const sendSuperChat = useCallback(
     (message: string, amount: number) => {
-      if (!STREAMING_CONFIG.interactivity.superChat.enabled) return;
-      if (amount < STREAMING_CONFIG.interactivity.superChat.minAmount) return;
+      if (!STREAMING_CONFIG.interactivity.superChat.enabled) {
+        return;
+      }
+      if (amount < STREAMING_CONFIG.interactivity.superChat.minAmount) {
+        return;
+      }
 
       const superChat = {
         id: `sc_${Date.now()}`,
@@ -393,7 +429,9 @@ export function useStreaming(userId: string) {
    * Start recording
    */
   const startRecording = useCallback(async () => {
-    if (!state.sessionId) return;
+    if (!state.sessionId) {
+      return;
+    }
 
     try {
       const result = await streamingManager.startRecording(state.sessionId);
@@ -411,7 +449,9 @@ export function useStreaming(userId: string) {
    * Stop recording
    */
   const stopRecording = useCallback(async () => {
-    if (!state.recordingId) return;
+    if (!state.recordingId) {
+      return;
+    }
 
     try {
       const result = await streamingManager.stopRecording(state.recordingId);
@@ -434,7 +474,9 @@ export function useStreaming(userId: string) {
    * Get session analytics
    */
   const getAnalytics = useCallback(() => {
-    if (!state.sessionId) return null;
+    if (!state.sessionId) {
+      return null;
+    }
 
     try {
       return streamingManager.getSessionAnalytics(state.sessionId);
@@ -467,8 +509,12 @@ export function useStreaming(userId: string) {
   // Cleanup
   useEffect(() => {
     return () => {
-      if (sessionTimerRef.current) clearInterval(sessionTimerRef.current);
-      if (bandwidthCheckRef.current) clearInterval(bandwidthCheckRef.current);
+      if (sessionTimerRef.current) {
+        clearInterval(sessionTimerRef.current);
+      }
+      if (bandwidthCheckRef.current) {
+        clearInterval(bandwidthCheckRef.current);
+      }
     };
   }, []);
 

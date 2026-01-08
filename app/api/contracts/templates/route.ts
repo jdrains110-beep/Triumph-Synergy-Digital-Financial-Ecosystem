@@ -2,23 +2,25 @@
  * Contract Templates & Management
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { ContractService } from '@/lib/contracts/service';
-import { DocuSignService } from '@/lib/contracts/docusign-service';
-import { db } from '@/lib/db';
-import { contractTemplates } from '@/lib/contracts/schema';
-import { eq } from 'drizzle-orm';
-import { v4 as uuidv4 } from 'uuid';
+import { eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
+import { DocuSignService } from "@/lib/contracts/docusign-service";
+import { contractTemplates } from "@/lib/contracts/schema";
+import { ContractService } from "@/lib/contracts/service";
+import { db } from "@/lib/db";
 
 /**
  * GET /api/contracts/templates - List contract templates
  */
 export async function getTemplates(req: NextRequest) {
   try {
-    const type = req.nextUrl.searchParams.get('type');
-    const category = req.nextUrl.searchParams.get('category');
+    const type = req.nextUrl.searchParams.get("type");
+    const category = req.nextUrl.searchParams.get("category");
 
-    let query = db.select().from(contractTemplates).where(eq(contractTemplates.isActive, true));
+    const query = db
+      .select()
+      .from(contractTemplates)
+      .where(eq(contractTemplates.isActive, true));
 
     if (type) {
       // Need to add additional filtering logic
@@ -28,9 +30,9 @@ export async function getTemplates(req: NextRequest) {
 
     return NextResponse.json(templates);
   } catch (error) {
-    console.error('Error fetching templates:', error);
+    console.error("Error fetching templates:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch templates' },
+      { error: "Failed to fetch templates" },
       { status: 500 }
     );
   }
@@ -41,12 +43,9 @@ export async function getTemplates(req: NextRequest) {
  */
 export async function createFromTemplate(req: NextRequest) {
   try {
-    const userId = req.headers.get('x-user-id');
+    const userId = req.headers.get("x-user-id");
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "User ID required" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -54,7 +53,7 @@ export async function createFromTemplate(req: NextRequest) {
 
     if (!templateId || !variables) {
       return NextResponse.json(
-        { error: 'Template ID and variables required' },
+        { error: "Template ID and variables required" },
         { status: 400 }
       );
     }
@@ -67,9 +66,9 @@ export async function createFromTemplate(req: NextRequest) {
 
     return NextResponse.json(contract, { status: 201 });
   } catch (error) {
-    console.error('Error creating contract from template:', error);
+    console.error("Error creating contract from template:", error);
     return NextResponse.json(
-      { error: 'Failed to create contract' },
+      { error: "Failed to create contract" },
       { status: 500 }
     );
   }
@@ -80,12 +79,9 @@ export async function createFromTemplate(req: NextRequest) {
  */
 export async function sendForSignature(req: NextRequest) {
   try {
-    const userId = req.headers.get('x-user-id');
+    const userId = req.headers.get("x-user-id");
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "User ID required" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -93,7 +89,7 @@ export async function sendForSignature(req: NextRequest) {
 
     if (!contractId || !recipients || !Array.isArray(recipients)) {
       return NextResponse.json(
-        { error: 'Contract ID and recipients required' },
+        { error: "Contract ID and recipients required" },
         { status: 400 }
       );
     }
@@ -102,7 +98,7 @@ export async function sendForSignature(req: NextRequest) {
     const contract = await ContractService.getContractById(contractId);
     if (!contract) {
       return NextResponse.json(
-        { error: 'Contract not found' },
+        { error: "Contract not found" },
         { status: 404 }
       );
     }
@@ -119,7 +115,8 @@ export async function sendForSignature(req: NextRequest) {
           recipientId: (idx + 1).toString(),
         })),
         subject: subject || `Please sign: ${contract.title}`,
-        message: message || `You have been asked to review and sign this contract.`,
+        message:
+          message || "You have been asked to review and sign this contract.",
       },
       contract.content
     );
@@ -133,9 +130,9 @@ export async function sendForSignature(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error sending for signature:', error);
+    console.error("Error sending for signature:", error);
     return NextResponse.json(
-      { error: 'Failed to send for signature' },
+      { error: "Failed to send for signature" },
       { status: 500 }
     );
   }

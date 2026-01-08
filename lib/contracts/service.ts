@@ -3,37 +3,34 @@
  * Handles contract lifecycle, signatures, consent tracking, and audit trails
  */
 
-import { eq, and, inArray } from 'drizzle-orm';
-import { db } from '@/lib/db';
+import { and, eq } from "drizzle-orm";
+import { v4 as uuidv4 } from "uuid";
+import { db } from "@/lib/db";
 import {
-  contracts,
-  contractSignatures,
-  userConsents,
   contractAuditLogs,
+  contractSignatures,
+  contracts,
   contractTemplates,
-  encryptedContracts,
-  contractAnalyses,
-  contractNotifications,
-} from './schema';
+  userConsents,
+} from "./schema";
 import {
-  Contract,
-  ContractSignature,
-  UserConsent,
-  AuditLog,
-  ContractTemplate,
-  ContractType,
-  SignatureMethod,
-  ContractStatus,
+  type AuditLog,
   ConsentStatus,
-} from './types';
-import { v4 as uuidv4 } from 'uuid';
+  type Contract,
+  type ContractSignature,
+  ContractStatus,
+  type ContractTemplate,
+  type ContractType,
+  type SignatureMethod,
+  type UserConsent,
+} from "./types";
 
 export class ContractService {
   /**
    * Create a new contract
    */
   static async createContract(
-    data: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>,
+    data: Omit<Contract, "id" | "createdAt" | "updatedAt">,
     createdByUserId: string
   ): Promise<Contract> {
     const id = uuidv4();
@@ -60,10 +57,10 @@ export class ContractService {
       .returning();
 
     // Log creation
-    await this.logAuditEvent({
+    await ContractService.logAuditEvent({
       contractId: id,
       userId: createdByUserId,
-      action: 'created',
+      action: "created",
       details: { title: data.title, type: data.type },
     });
 
@@ -153,7 +150,7 @@ export class ContractService {
         location: context.country
           ? {
               country: context.country,
-              city: context.city || '',
+              city: context.city || "",
             }
           : undefined,
       })
@@ -162,14 +159,17 @@ export class ContractService {
     const signature = result[0] as ContractSignature;
 
     // Update contract status if all required signatures obtained
-    await this.updateContractStatus(contractId, ContractStatus.SIGNED);
+    await ContractService.updateContractStatus(
+      contractId,
+      ContractStatus.SIGNED
+    );
 
     // Log signature event
-    await this.logAuditEvent({
+    await ContractService.logAuditEvent({
       contractId,
       signatureId: id,
       userId,
-      action: 'signed',
+      action: "signed",
       details: {
         signatureMethod: method,
         deviceType: context.deviceType,
@@ -183,7 +183,9 @@ export class ContractService {
   /**
    * Get all signatures for a contract
    */
-  static async getContractSignatures(contractId: string): Promise<ContractSignature[]> {
+  static async getContractSignatures(
+    contractId: string
+  ): Promise<ContractSignature[]> {
     const results = await db
       .select()
       .from(contractSignatures)
@@ -209,7 +211,9 @@ export class ContractService {
   ): Promise<UserConsent> {
     const id = uuidv4();
     const now = new Date();
-    const expiresAt = expiresInDays ? new Date(now.getTime() + expiresInDays * 24 * 60 * 60 * 1000) : undefined;
+    const expiresAt = expiresInDays
+      ? new Date(now.getTime() + expiresInDays * 24 * 60 * 60 * 1000)
+      : undefined;
 
     const result = await db
       .insert(userConsents)
@@ -224,7 +228,7 @@ export class ContractService {
         rejectedAt: status === ConsentStatus.REJECTED ? now : undefined,
         ipAddress: context.ipAddress,
         userAgent: context.userAgent,
-        consentVersion: '1.0',
+        consentVersion: "1.0",
         expiresAt,
         createdAt: now,
         updatedAt: now,
@@ -234,11 +238,11 @@ export class ContractService {
     const consent = result[0] as UserConsent;
 
     // Log consent event
-    await this.logAuditEvent({
+    await ContractService.logAuditEvent({
       contractId,
       consentId: id,
       userId,
-      action: status === ConsentStatus.ACCEPTED ? 'accepted' : 'rejected',
+      action: status === ConsentStatus.ACCEPTED ? "accepted" : "rejected",
       details: {
         consentStatus: status,
         expiresAt: expiresAt?.toISOString(),
@@ -258,7 +262,12 @@ export class ContractService {
     const result = await db
       .select()
       .from(userConsents)
-      .where(and(eq(userConsents.userId, userId), eq(userConsents.contractId, contractId)))
+      .where(
+        and(
+          eq(userConsents.userId, userId),
+          eq(userConsents.contractId, contractId)
+        )
+      )
       .limit(1);
 
     return (result[0] as UserConsent) || null;
@@ -268,7 +277,7 @@ export class ContractService {
    * Log audit event with optional screenshot verification
    */
   static async logAuditEvent(
-    data: Omit<AuditLog, 'id' | 'timestamp' | 'ipAddress' | 'userAgent'> & {
+    data: Omit<AuditLog, "id" | "timestamp" | "ipAddress" | "userAgent"> & {
       ipAddress?: string;
       userAgent?: string;
     }
@@ -286,8 +295,8 @@ export class ContractService {
         userId: data.userId,
         action: data.action,
         timestamp: now,
-        ipAddress: data.ipAddress || '0.0.0.0',
-        userAgent: data.userAgent || 'Unknown',
+        ipAddress: data.ipAddress || "0.0.0.0",
+        userAgent: data.userAgent || "Unknown",
         details: data.details || {},
         screenshot: data.screenshot,
         changeLog: data.changeLog,
@@ -324,7 +333,10 @@ export class ContractService {
   /**
    * Update contract status
    */
-  static async updateContractStatus(contractId: string, status: ContractStatus): Promise<void> {
+  static async updateContractStatus(
+    contractId: string,
+    status: ContractStatus
+  ): Promise<void> {
     await db
       .update(contracts)
       .set({
@@ -360,7 +372,7 @@ export class ContractService {
       content = content.replace(`{{${key}}}`, value);
     });
 
-    return this.createContract(
+    return ContractService.createContract(
       {
         type: tmpl.type,
         title: `${tmpl.name} - ${new Date().toISOString()}`,
@@ -371,7 +383,7 @@ export class ContractService {
         effectiveDate: new Date(),
         expiryDate: undefined,
         status: ContractStatus.DRAFT,
-        tags: [tmpl.category, tmpl.industry || ''].filter(Boolean),
+        tags: [tmpl.category, tmpl.industry || ""].filter(Boolean),
         createdBy: createdByUserId,
       },
       createdByUserId
@@ -382,13 +394,18 @@ export class ContractService {
    * Get contract with all related data
    */
   static async getContractWithDetails(contractId: string) {
-    const contract = await this.getContractById(contractId);
-    if (!contract) return null;
+    const contract = await ContractService.getContractById(contractId);
+    if (!contract) {
+      return null;
+    }
 
     const [signatures, consents, auditLogs] = await Promise.all([
-      this.getContractSignatures(contractId),
-      db.select().from(userConsents).where(eq(userConsents.contractId, contractId)),
-      this.getContractAuditTrail(contractId),
+      ContractService.getContractSignatures(contractId),
+      db
+        .select()
+        .from(userConsents)
+        .where(eq(userConsents.contractId, contractId)),
+      ContractService.getContractAuditTrail(contractId),
     ]);
 
     return {
@@ -411,21 +428,23 @@ export class ContractService {
     hasAuditTrail: boolean;
     isValid: boolean;
   }> {
-    const contract = await this.getContractById(contractId);
-    if (!contract) throw new Error('Contract not found');
+    const contract = await ContractService.getContractById(contractId);
+    if (!contract) {
+      throw new Error("Contract not found");
+    }
 
-    const signatures = await this.getContractSignatures(contractId);
+    const signatures = await ContractService.getContractSignatures(contractId);
     const consents = await db
       .select()
       .from(userConsents)
       .where(
         and(
           eq(userConsents.contractId, contractId),
-          eq(userConsents.consentStatus, 'ACCEPTED')
+          eq(userConsents.consentStatus, "ACCEPTED")
         )
       );
 
-    const auditLogs = await this.getContractAuditTrail(contractId);
+    const auditLogs = await ContractService.getContractAuditTrail(contractId);
 
     // Check compliance criteria
     const esignActCompliant = signatures.length > 0 && auditLogs.length > 0; // E-signature + audit trail
@@ -458,10 +477,13 @@ export class ContractService {
     auditLogs: AuditLog[];
     complianceStatus: object;
   }> {
-    const details = await this.getContractWithDetails(contractId);
-    if (!details) throw new Error('Contract not found');
+    const details = await ContractService.getContractWithDetails(contractId);
+    if (!details) {
+      throw new Error("Contract not found");
+    }
 
-    const complianceStatus = await this.verifyLegalCompliance(contractId);
+    const complianceStatus =
+      await ContractService.verifyLegalCompliance(contractId);
 
     return {
       contract: details.contract,
@@ -476,12 +498,16 @@ export class ContractService {
    * Check if contract is valid and not expired
    */
   static async isContractValid(contractId: string): Promise<boolean> {
-    const contract = await this.getContractById(contractId);
-    if (!contract) return false;
+    const contract = await ContractService.getContractById(contractId);
+    if (!contract) {
+      return false;
+    }
 
     const now = new Date();
     const isExpired = contract.expiryDate && contract.expiryDate < now;
-    const isActive = contract.status === ContractStatus.ACTIVE || contract.status === ContractStatus.SIGNED;
+    const isActive =
+      contract.status === ContractStatus.ACTIVE ||
+      contract.status === ContractStatus.SIGNED;
 
     return isActive && !isExpired;
   }

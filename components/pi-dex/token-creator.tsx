@@ -7,8 +7,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePiDex } from "@/lib/pi-sdk/use-pi-dex";
 
 export function TokenCreator() {
@@ -24,7 +30,11 @@ export function TokenCreator() {
     e.preventDefault();
     setSuccess(false);
 
-    const result = await createToken(formData.name, formData.symbol, parseInt(formData.totalSupply));
+    const result = await createToken(
+      formData.name,
+      formData.symbol,
+      Number.parseInt(formData.totalSupply, 10)
+    );
 
     if (result) {
       setSuccess(true);
@@ -39,44 +49,58 @@ export function TokenCreator() {
         <CardDescription>Launch your own token on Pi Network</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="text-sm font-medium">Token Name</label>
+            <label className="font-medium text-sm">Token Name</label>
             <Input
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="e.g., Triumph Token"
+              required
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium">Symbol</label>
+            <label className="font-medium text-sm">Symbol</label>
             <Input
-              placeholder="e.g., TMP"
               maxLength={10}
-              value={formData.symbol}
-              onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, symbol: e.target.value })
+              }
+              placeholder="e.g., TMP"
               required
+              value={formData.symbol}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium">Total Supply</label>
+            <label className="font-medium text-sm">Total Supply</label>
             <Input
-              type="number"
+              onChange={(e) =>
+                setFormData({ ...formData, totalSupply: e.target.value })
+              }
               placeholder="e.g., 1000000"
-              value={formData.totalSupply}
-              onChange={(e) => setFormData({ ...formData, totalSupply: e.target.value })}
               required
+              type="number"
+              value={formData.totalSupply}
             />
           </div>
 
-          {error && <div className="p-2 bg-red-100 text-red-700 rounded text-sm">{error.message}</div>}
+          {error && (
+            <div className="rounded bg-red-100 p-2 text-red-700 text-sm">
+              {error.message}
+            </div>
+          )}
 
-          {success && <div className="p-2 bg-green-100 text-green-700 rounded text-sm">Token created successfully!</div>}
+          {success && (
+            <div className="rounded bg-green-100 p-2 text-green-700 text-sm">
+              Token created successfully!
+            </div>
+          )}
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button className="w-full" disabled={loading} type="submit">
             {loading ? "Creating..." : "Create Token"}
           </Button>
         </form>

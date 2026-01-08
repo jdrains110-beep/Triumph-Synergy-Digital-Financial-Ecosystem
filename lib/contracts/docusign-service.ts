@@ -3,12 +3,12 @@
  * Handles DocuSign envelope creation, signing, and webhook processing
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { db } from '@/lib/db';
-import { docuSignIntegrations, contracts } from './schema';
-import { eq } from 'drizzle-orm';
+import axios, { type AxiosInstance } from "axios";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { contracts, docuSignIntegrations } from "./schema";
 
-interface DocuSignEnvelopeRequest {
+type DocuSignEnvelopeRequest = {
   contractId: string;
   recipients: Array<{
     email: string;
@@ -17,18 +17,18 @@ interface DocuSignEnvelopeRequest {
   }>;
   subject: string;
   message: string;
-}
+};
 
-interface DocuSignEnvelopeResponse {
+type DocuSignEnvelopeResponse = {
   envelopeId: string;
   uri: string;
   statusDateTime: string;
   status: string;
-}
+};
 
 export class DocuSignService {
-  private accountId: string;
-  private client: AxiosInstance;
+  private readonly accountId: string;
+  private readonly client: AxiosInstance;
 
   constructor(accountId: string, baseUri: string, accessToken: string) {
     this.accountId = accountId;
@@ -36,7 +36,7 @@ export class DocuSignService {
       baseURL: `${baseUri}/restapi/v2.1/accounts/${accountId}`,
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
   }
@@ -50,7 +50,7 @@ export class DocuSignService {
     accessToken: string,
     refreshToken: string,
     baseUri: string,
-    expiresInSeconds: number = 3600
+    expiresInSeconds = 3600
   ) {
     const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
 
@@ -63,7 +63,7 @@ export class DocuSignService {
         refreshToken,
         baseUri,
         expiresAt,
-        integrationStatus: 'CONNECTED',
+        integrationStatus: "CONNECTED",
         lastSyncAt: new Date(),
       })
       .returning();
@@ -82,14 +82,14 @@ export class DocuSignService {
       .limit(1);
 
     if (!config[0]) {
-      throw new Error('DocuSign integration not configured');
+      throw new Error("DocuSign integration not configured");
     }
 
     const cfg = config[0];
 
     // Check if token needs refresh
     if (cfg.expiresAt < new Date()) {
-      await this.refreshToken(accountId);
+      await DocuSignService.refreshToken(accountId);
     }
 
     return new DocuSignService(accountId, cfg.baseUri, cfg.accessToken);
@@ -106,18 +106,21 @@ export class DocuSignService {
       .limit(1);
 
     if (!config[0]) {
-      throw new Error('DocuSign integration not found');
+      throw new Error("DocuSign integration not found");
     }
 
     const cfg = config[0];
 
     try {
-      const response = await axios.post('https://account.docusign.com/oauth/token', {
-        grant_type: 'refresh_token',
-        client_id: process.env.DOCUSIGN_CLIENT_ID,
-        client_secret: process.env.DOCUSIGN_CLIENT_SECRET,
-        refresh_token: cfg.refreshToken,
-      });
+      const response = await axios.post(
+        "https://account.docusign.com/oauth/token",
+        {
+          grant_type: "refresh_token",
+          client_id: process.env.DOCUSIGN_CLIENT_ID,
+          client_secret: process.env.DOCUSIGN_CLIENT_SECRET,
+          refresh_token: cfg.refreshToken,
+        }
+      );
 
       const expiresAt = new Date(Date.now() + response.data.expires_in * 1000);
 
@@ -126,14 +129,14 @@ export class DocuSignService {
         .set({
           accessToken: response.data.access_token,
           expiresAt,
-          integrationStatus: 'CONNECTED',
+          integrationStatus: "CONNECTED",
         })
         .where(eq(docuSignIntegrations.accountId, accountId));
     } catch (error) {
       await db
         .update(docuSignIntegrations)
         .set({
-          integrationStatus: 'FAILED',
+          integrationStatus: "FAILED",
         })
         .where(eq(docuSignIntegrations.accountId, accountId));
       throw error;
@@ -159,20 +162,20 @@ export class DocuSignService {
       emailBlurb: request.message,
       documents: [
         {
-          documentBase64: Buffer.from(documentContent).toString('base64'),
+          documentBase64: Buffer.from(documentContent).toString("base64"),
           name: `Contract_${request.contractId}.pdf`,
-          fileExtension: 'pdf',
-          documentId: '1',
+          fileExtension: "pdf",
+          documentId: "1",
         },
       ],
       recipients: {
         signers,
       },
-      status: 'sent',
+      status: "sent",
     };
 
     try {
-      const response = await this.client.post('/envelopes', envelope);
+      const response = await this.client.post("/envelopes", envelope);
 
       // Store envelope ID in contract
       await db
@@ -182,7 +185,7 @@ export class DocuSignService {
 
       return response.data as DocuSignEnvelopeResponse;
     } catch (error) {
-      console.error('DocuSign envelope creation failed:', error);
+      console.error("DocuSign envelope creation failed:", error);
       throw error;
     }
   }
@@ -199,18 +202,23 @@ export class DocuSignService {
    * Get envelope recipients and their signing status
    */
   async getEnvelopeRecipients(envelopeId: string): Promise<object> {
-    const response = await this.client.get(`/envelopes/${envelopeId}/recipients`);
+    const response = await this.client.get(
+      `/envelopes/${envelopeId}/recipients`
+    );
     return response.data;
   }
 
   /**
    * Download signed document
    */
-  async downloadSignedDocument(envelopeId: string, documentId: string = '1'): Promise<Buffer> {
+  async downloadSignedDocument(
+    envelopeId: string,
+    documentId = "1"
+  ): Promise<Buffer> {
     const response = await this.client.get(
       `/envelopes/${envelopeId}/documents/${documentId}`,
       {
-        responseType: 'arraybuffer',
+        responseType: "arraybuffer",
       }
     );
 
@@ -224,7 +232,7 @@ export class DocuSignService {
     const response = await this.client.get(
       `/envelopes/${envelopeId}/documents/combined`,
       {
-        responseType: 'arraybuffer',
+        responseType: "arraybuffer",
         params: {
           certificate: true,
         },
@@ -247,7 +255,7 @@ export class DocuSignService {
       `/envelopes/${envelopeId}/views/recipient`,
       {
         returnUrl,
-        authenticationMethod: 'none',
+        authenticationMethod: "none",
         email: recipientEmail,
         userName: recipientName,
         clientUserId: recipientEmail,
@@ -262,30 +270,28 @@ export class DocuSignService {
   /**
    * Process webhook event from DocuSign
    */
-  static async processWebhookEvent(
-    event: {
-      data: {
-        envelopeSummary: {
-          envelopeId: string;
-          status: string;
-          documentsUri: string;
-          recipientsUri: string;
-        };
+  static async processWebhookEvent(event: {
+    data: {
+      envelopeSummary: {
+        envelopeId: string;
+        status: string;
+        documentsUri: string;
+        recipientsUri: string;
       };
-    }
-  ): Promise<void> {
+    };
+  }): Promise<void> {
     const { envelopeId, status } = event.data.envelopeSummary;
 
     // Map DocuSign status to contract status
     const statusMap: Record<string, string> = {
-      sent: 'PENDING_SIGNATURE',
-      delivered: 'PENDING_SIGNATURE',
-      completed: 'SIGNED',
-      declined: 'REJECTED',
-      voided: 'ARCHIVED',
+      sent: "PENDING_SIGNATURE",
+      delivered: "PENDING_SIGNATURE",
+      completed: "SIGNED",
+      declined: "REJECTED",
+      voided: "ARCHIVED",
     };
 
-    const contractStatus = statusMap[status] || 'DRAFT';
+    const contractStatus = statusMap[status] || "DRAFT";
 
     // Update contract status
     // Note: You'll need to store envelopeId in contracts table to map back
@@ -298,10 +304,10 @@ export class DocuSignService {
  */
 export function getDocuSignOAuthUrl(state: string): string {
   const params = new URLSearchParams({
-    response_type: 'code',
-    scope: 'signature impersonation',
-    client_id: process.env.DOCUSIGN_CLIENT_ID || '',
-    redirect_uri: process.env.DOCUSIGN_REDIRECT_URI || '',
+    response_type: "code",
+    scope: "signature impersonation",
+    client_id: process.env.DOCUSIGN_CLIENT_ID || "",
+    redirect_uri: process.env.DOCUSIGN_REDIRECT_URI || "",
     state,
   });
 
@@ -319,9 +325,9 @@ export async function exchangeDocuSignCode(code: string): Promise<{
   baseUri: string;
 }> {
   const response = await axios.post(
-    'https://account.docusign.com/oauth/token',
+    "https://account.docusign.com/oauth/token",
     {
-      grant_type: 'authorization_code',
+      grant_type: "authorization_code",
       code,
       client_id: process.env.DOCUSIGN_CLIENT_ID,
       client_secret: process.env.DOCUSIGN_CLIENT_SECRET,
@@ -330,7 +336,7 @@ export async function exchangeDocuSignCode(code: string): Promise<{
   );
 
   // Get account info
-  const userInfo = await axios.get('https://api.docusign.com/oauth/userinfo', {
+  const userInfo = await axios.get("https://api.docusign.com/oauth/userinfo", {
     headers: {
       Authorization: `Bearer ${response.data.access_token}`,
     },

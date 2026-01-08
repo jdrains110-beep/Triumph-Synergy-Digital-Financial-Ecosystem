@@ -3,26 +3,29 @@
  * Prevents brute force attacks and DoS attempts
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
 
-export interface RateLimitConfig {
+export type RateLimitConfig = {
   windowMs: number; // Time window in milliseconds
   maxAttempts: number; // Maximum attempts per window
   delayMs: number; // Delay between attempts
   keyGenerator?: (request: NextRequest) => string;
   skip?: (request: NextRequest) => boolean;
   onLimitReached?: (key: string) => Promise<void>;
-}
+};
 
 /**
  * In-memory store for rate limiting
  * In production, use Redis or similar for distributed rate limiting
  */
 export class RateLimitStore {
-  private store = new Map<string, { attempts: number; resetTime: number }>();
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private readonly store = new Map<
+    string,
+    { attempts: number; resetTime: number }
+  >();
+  private readonly cleanupInterval: NodeJS.Timeout | null = null;
 
-  constructor(cleanupIntervalMs = 60000) {
+  constructor(cleanupIntervalMs = 60_000) {
     // Cleanup old entries every minute
     this.cleanupInterval = setInterval(() => this.cleanup(), cleanupIntervalMs);
   }
@@ -135,12 +138,12 @@ const credentialStore = new RateLimitStore();
  * Get client IP from request
  */
 function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
+  const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    return forwarded.split(",")[0].trim();
   }
 
-  return request.headers.get('x-real-ip') || 'unknown';
+  return request.headers.get("x-real-ip") || "unknown";
 }
 
 /**
@@ -148,9 +151,9 @@ function getClientIP(request: NextRequest): string {
  */
 function defaultKeyGenerator(request: NextRequest, prefix: string): string {
   const ip = getClientIP(request);
-  const userIdHeader = request.headers.get('x-user-id');
-  
-  return `${prefix}:${ip}${userIdHeader ? ':' + userIdHeader : ''}`;
+  const userIdHeader = request.headers.get("x-user-id");
+
+  return `${prefix}:${ip}${userIdHeader ? ":" + userIdHeader : ""}`;
 }
 
 /**
@@ -164,39 +167,41 @@ export async function biometricAuthRateLimit(
     windowMs: 15 * 60 * 1000, // 15 minutes
     maxAttempts: 5, // 5 attempts
     delayMs: 1000,
-    keyGenerator: (req) => defaultKeyGenerator(req, 'biometric:auth'),
+    keyGenerator: (req) => defaultKeyGenerator(req, "biometric:auth"),
     ...config,
   };
 
   if (finalConfig.skip?.(request)) {
-    return undefined;
+    return;
   }
 
   const key = finalConfig.keyGenerator!(request);
 
   if (authAttemptStore.isLimited(key, finalConfig)) {
     const resetTime = authAttemptStore.getResetTime(key);
-    const retryAfter = resetTime ? Math.ceil((resetTime - Date.now()) / 1000) : 900;
+    const retryAfter = resetTime
+      ? Math.ceil((resetTime - Date.now()) / 1000)
+      : 900;
 
     await finalConfig.onLimitReached?.(key);
 
     return NextResponse.json(
       {
-        error: 'Too many authentication attempts. Please try again later.',
-        code: 'RATE_LIMITED',
+        error: "Too many authentication attempts. Please try again later.",
+        code: "RATE_LIMITED",
         retryAfter,
       },
       {
         status: 429,
         headers: {
-          'Retry-After': retryAfter.toString(),
+          "Retry-After": retryAfter.toString(),
         },
       }
     );
   }
 
   authAttemptStore.recordAttempt(key, finalConfig);
-  return undefined;
+  return;
 }
 
 /**
@@ -210,39 +215,41 @@ export async function biometricRegistrationRateLimit(
     windowMs: 60 * 60 * 1000, // 1 hour
     maxAttempts: 10, // 10 registrations per hour
     delayMs: 0,
-    keyGenerator: (req) => defaultKeyGenerator(req, 'biometric:register'),
+    keyGenerator: (req) => defaultKeyGenerator(req, "biometric:register"),
     ...config,
   };
 
   if (finalConfig.skip?.(request)) {
-    return undefined;
+    return;
   }
 
   const key = finalConfig.keyGenerator!(request);
 
   if (registrationStore.isLimited(key, finalConfig)) {
     const resetTime = registrationStore.getResetTime(key);
-    const retryAfter = resetTime ? Math.ceil((resetTime - Date.now()) / 1000) : 3600;
+    const retryAfter = resetTime
+      ? Math.ceil((resetTime - Date.now()) / 1000)
+      : 3600;
 
     await finalConfig.onLimitReached?.(key);
 
     return NextResponse.json(
       {
-        error: 'Too many registration attempts. Please try again later.',
-        code: 'RATE_LIMITED',
+        error: "Too many registration attempts. Please try again later.",
+        code: "RATE_LIMITED",
         retryAfter,
       },
       {
         status: 429,
         headers: {
-          'Retry-After': retryAfter.toString(),
+          "Retry-After": retryAfter.toString(),
         },
       }
     );
   }
 
   registrationStore.recordAttempt(key, finalConfig);
-  return undefined;
+  return;
 }
 
 /**
@@ -256,39 +263,41 @@ export async function biometricCredentialRateLimit(
     windowMs: 60 * 1000, // 1 minute
     maxAttempts: 20, // 20 operations per minute
     delayMs: 0,
-    keyGenerator: (req) => defaultKeyGenerator(req, 'biometric:credential'),
+    keyGenerator: (req) => defaultKeyGenerator(req, "biometric:credential"),
     ...config,
   };
 
   if (finalConfig.skip?.(request)) {
-    return undefined;
+    return;
   }
 
   const key = finalConfig.keyGenerator!(request);
 
   if (credentialStore.isLimited(key, finalConfig)) {
     const resetTime = credentialStore.getResetTime(key);
-    const retryAfter = resetTime ? Math.ceil((resetTime - Date.now()) / 1000) : 60;
+    const retryAfter = resetTime
+      ? Math.ceil((resetTime - Date.now()) / 1000)
+      : 60;
 
     await finalConfig.onLimitReached?.(key);
 
     return NextResponse.json(
       {
-        error: 'Too many requests. Please wait before trying again.',
-        code: 'RATE_LIMITED',
+        error: "Too many requests. Please wait before trying again.",
+        code: "RATE_LIMITED",
         retryAfter,
       },
       {
         status: 429,
         headers: {
-          'Retry-After': retryAfter.toString(),
+          "Retry-After": retryAfter.toString(),
         },
       }
     );
   }
 
   credentialStore.recordAttempt(key, finalConfig);
-  return undefined;
+  return;
 }
 
 /**
@@ -298,19 +307,19 @@ export async function biometricCredentialRateLimit(
 export function resetRateLimit(
   ip: string,
   userId?: string,
-  limitType: 'auth' | 'register' | 'credential' = 'auth'
+  limitType: "auth" | "register" | "credential" = "auth"
 ): void {
   const prefix = `biometric:${limitType}`;
-  const key = `${prefix}:${ip}${userId ? ':' + userId : ''}`;
+  const key = `${prefix}:${ip}${userId ? ":" + userId : ""}`;
 
   switch (limitType) {
-    case 'auth':
+    case "auth":
       authAttemptStore.clear(key);
       break;
-    case 'register':
+    case "register":
       registrationStore.clear(key);
       break;
-    case 'credential':
+    case "credential":
       credentialStore.clear(key);
       break;
   }
@@ -322,22 +331,34 @@ export function resetRateLimit(
 export function getRateLimitStatus(
   ip: string,
   userId?: string,
-  limitType: 'auth' | 'register' | 'credential' = 'auth'
+  limitType: "auth" | "register" | "credential" = "auth"
 ): { isLimited: boolean; remainingAttempts: number; resetTime: number | null } {
   const prefix = `biometric:${limitType}`;
-  const key = `${prefix}:${ip}${userId ? ':' + userId : ''}`;
+  const key = `${prefix}:${ip}${userId ? ":" + userId : ""}`;
 
   const stores = {
-    auth: { store: authAttemptStore, config: { windowMs: 15 * 60 * 1000, maxAttempts: 5 } },
-    register: { store: registrationStore, config: { windowMs: 60 * 60 * 1000, maxAttempts: 10 } },
-    credential: { store: credentialStore, config: { windowMs: 60 * 1000, maxAttempts: 20 } },
+    auth: {
+      store: authAttemptStore,
+      config: { windowMs: 15 * 60 * 1000, maxAttempts: 5 },
+    },
+    register: {
+      store: registrationStore,
+      config: { windowMs: 60 * 60 * 1000, maxAttempts: 10 },
+    },
+    credential: {
+      store: credentialStore,
+      config: { windowMs: 60 * 1000, maxAttempts: 20 },
+    },
   };
 
   const { store, config } = stores[limitType];
 
   return {
     isLimited: store.isLimited(key, config as RateLimitConfig),
-    remainingAttempts: store.getRemainingAttempts(key, config as RateLimitConfig),
+    remainingAttempts: store.getRemainingAttempts(
+      key,
+      config as RateLimitConfig
+    ),
     resetTime: store.getResetTime(key),
   };
 }
@@ -352,8 +373,8 @@ export function destroyRateLimiters(): void {
 }
 
 // Clean up on process exit
-if (typeof process !== 'undefined' && process.on) {
-  process.on('exit', destroyRateLimiters);
-  process.on('SIGTERM', destroyRateLimiters);
-  process.on('SIGINT', destroyRateLimiters);
+if (typeof process !== "undefined" && process.on) {
+  process.on("exit", destroyRateLimiters);
+  process.on("SIGTERM", destroyRateLimiters);
+  process.on("SIGINT", destroyRateLimiters);
 }

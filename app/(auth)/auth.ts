@@ -80,7 +80,11 @@ export const {
         } catch (error) {
           console.error("Guest auth error:", error);
           // Return a minimal guest user even if database is unavailable
-          return { id: "guest-" + Date.now(), email: "guest@local", type: "guest" };
+          return {
+            id: "guest-" + Date.now(),
+            email: "guest@local",
+            type: "guest",
+          };
         }
       },
     }),

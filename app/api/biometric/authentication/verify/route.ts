@@ -4,7 +4,7 @@
  * Verifies assertion and returns session token
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,12 +24,12 @@ export async function POST(request: NextRequest) {
       session: {
         sessionId: `session_${Date.now()}`,
         userId,
-        biometricType: 'faceID',
+        biometricType: "faceID",
         expiresAt: new Date(Date.now() + 30 * 60 * 1000),
       },
       token: {
         accessToken: `token_${Date.now()}`,
-        tokenType: 'Bearer',
+        tokenType: "Bearer",
         expiresIn: 3600,
       },
     };

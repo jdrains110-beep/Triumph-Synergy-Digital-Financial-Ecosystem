@@ -3,35 +3,24 @@
  * Run with: npm run db:migrate
  */
 
-import { db } from '@/lib/db';
-import {
-  contracts,
-  contractSignatures,
-  userConsents,
-  contractAuditLogs,
-  contractTemplates,
-  docuSignIntegrations,
-  encryptedContracts,
-  contractAnalyses,
-  contractNotifications,
-  contractBulkOperations,
-} from '@/lib/contracts/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq } from "drizzle-orm";
+import { contractTemplates } from "@/lib/contracts/schema";
+import { db } from "@/lib/db";
 
 export async function migrateContractSystem() {
-  console.log('Starting contract system migration...');
+  console.log("Starting contract system migration...");
 
   try {
     // Create all tables
-    console.log('Creating contracts table...');
+    console.log("Creating contracts table...");
     // Tables created via Drizzle schema
 
-    console.log('Seeding default contract templates...');
+    console.log("Seeding default contract templates...");
     await seedTemplates();
 
-    console.log('✅ Contract system migration completed successfully');
+    console.log("✅ Contract system migration completed successfully");
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error("❌ Migration failed:", error);
     throw error;
   }
 }
@@ -39,9 +28,9 @@ export async function migrateContractSystem() {
 async function seedTemplates() {
   const defaultTemplates = [
     {
-      name: 'Terms of Service',
-      type: 'TERMS_OF_SERVICE',
-      category: 'Legal',
+      name: "Terms of Service",
+      type: "TERMS_OF_SERVICE",
+      category: "Legal",
       templateContent: `TERMS OF SERVICE
 Agreement Version {{version}}
 Effective Date: {{effectiveDate}}
@@ -82,22 +71,22 @@ Any disputes shall be resolved through binding arbitration in {{jurisdiction}}.
 
 Acknowledgment: I have read and agree to these Terms of Service.`,
       variables: [
-        'appName',
-        'companyName',
-        'version',
-        'effectiveDate',
-        'paymentTerms',
-        'refundPolicy',
-        'jurisdiction',
+        "appName",
+        "companyName",
+        "version",
+        "effectiveDate",
+        "paymentTerms",
+        "refundPolicy",
+        "jurisdiction",
       ],
-      jurisdiction: 'US',
-      version: '1.0',
+      jurisdiction: "US",
+      version: "1.0",
       isActive: true,
     },
     {
-      name: 'Privacy Policy',
-      type: 'PRIVACY_POLICY',
-      category: 'Legal',
+      name: "Privacy Policy",
+      type: "PRIVACY_POLICY",
+      category: "Legal",
       templateContent: `PRIVACY POLICY
 {{companyName}} Privacy Policy
 Last Updated: {{lastUpdated}}
@@ -179,20 +168,20 @@ Address: {{companyAddress}}
 
 By using {{appName}}, you consent to this Privacy Policy.`,
       variables: [
-        'companyName',
-        'lastUpdated',
-        'appName',
-        'privacyEmail',
-        'companyAddress',
+        "companyName",
+        "lastUpdated",
+        "appName",
+        "privacyEmail",
+        "companyAddress",
       ],
-      jurisdiction: 'US',
-      version: '1.0',
+      jurisdiction: "US",
+      version: "1.0",
       isActive: true,
     },
     {
-      name: 'Non-Disclosure Agreement',
-      type: 'NON_DISCLOSURE_AGREEMENT',
-      category: 'Legal',
+      name: "Non-Disclosure Agreement",
+      type: "NON_DISCLOSURE_AGREEMENT",
+      category: "Legal",
       templateContent: `NON-DISCLOSURE AGREEMENT
 Confidential Information Protection Agreement
 
@@ -240,20 +229,20 @@ This NDA is governed by the laws of {{jurisdiction}}.
 
 I acknowledge that I have read and understand this NDA and agree to be bound by its terms.`,
       variables: [
-        'date',
-        'disclosingParty',
-        'receivingParty',
-        'duration',
-        'jurisdiction',
+        "date",
+        "disclosingParty",
+        "receivingParty",
+        "duration",
+        "jurisdiction",
       ],
-      jurisdiction: 'US',
-      version: '1.0',
+      jurisdiction: "US",
+      version: "1.0",
       isActive: true,
     },
     {
-      name: 'Service Agreement',
-      type: 'SERVICE_AGREEMENT',
-      category: 'Legal',
+      name: "Service Agreement",
+      type: "SERVICE_AGREEMENT",
+      category: "Legal",
       templateContent: `SERVICE AGREEMENT
 {{serviceName}} Service Agreement
 Effective Date: {{effectiveDate}}
@@ -297,24 +286,24 @@ This agreement constitutes the entire understanding between parties.
 
 By executing this agreement, both parties acknowledge they have read, understand, and agree to be bound by all terms and conditions.`,
       variables: [
-        'serviceName',
-        'effectiveDate',
-        'companyName',
-        'serviceDescription',
-        'uptime',
-        'supportHours',
-        'responseTime',
-        'serviceFee',
-        'billingPeriod',
-        'paymentDue',
-        'latePenalty',
-        'initialTerm',
-        'renewalTerms',
-        'terminationNotice',
-        'terminationEffect',
+        "serviceName",
+        "effectiveDate",
+        "companyName",
+        "serviceDescription",
+        "uptime",
+        "supportHours",
+        "responseTime",
+        "serviceFee",
+        "billingPeriod",
+        "paymentDue",
+        "latePenalty",
+        "initialTerm",
+        "renewalTerms",
+        "terminationNotice",
+        "terminationEffect",
       ],
-      jurisdiction: 'US',
-      version: '1.0',
+      jurisdiction: "US",
+      version: "1.0",
       isActive: true,
     },
   ];

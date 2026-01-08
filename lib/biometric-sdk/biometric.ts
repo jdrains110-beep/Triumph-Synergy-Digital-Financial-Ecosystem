@@ -1,28 +1,28 @@
 /**
  * Biometric Authentication Manager
  * Handles WebAuthn registration, authentication, and credential management
- * 
+ *
  * NOTE: This is a reference implementation. Production deployment requires
  * proper database integration and cryptographic verification.
  */
 
 import {
   BIOMETRIC_CONFIG,
+  type BiometricCredential,
+  type BiometricError,
+  type BiometricRegistrationOptions,
+  type BiometricSession,
+  type FallbackAuthOptions,
   generateChallenge,
-  BiometricCredential,
-  BiometricRegistrationOptions,
-  BiometricSession,
-  SecureToken,
-  BiometricError,
-  FallbackAuthOptions,
+  type SecureToken,
 } from "./biometric-config";
 
 export class BiometricManager {
   private static instance: BiometricManager;
-  private sessions: Map<string, BiometricSession> = new Map();
-  private credentials: Map<string, BiometricCredential> = new Map();
-  private failedAttempts: Map<string, number> = new Map();
-  private lockedUsers: Map<string, Date> = new Map();
+  private readonly sessions: Map<string, BiometricSession> = new Map();
+  private readonly credentials: Map<string, BiometricCredential> = new Map();
+  private readonly failedAttempts: Map<string, number> = new Map();
+  private readonly lockedUsers: Map<string, Date> = new Map();
 
   private constructor() {
     this.initializeSessionCleanup();
@@ -36,7 +36,9 @@ export class BiometricManager {
   }
 
   private initializeSessionCleanup(): void {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     setInterval(() => {
       const now = new Date();
@@ -45,12 +47,10 @@ export class BiometricManager {
           this.sessions.delete(sessionId);
         }
       }
-    }, 60000);
+    }, 60_000);
   }
 
-  async registerCredential(
-    options: BiometricRegistrationOptions
-  ): Promise<{
+  async registerCredential(options: BiometricRegistrationOptions): Promise<{
     challengeId: string;
     publicKey: any;
   }> {
@@ -67,7 +67,7 @@ export class BiometricManager {
       const challengeId = `challenge_${Date.now()}_${Math.random().toString(36)}`;
 
       const registrationOptions: any = {
-        challenge: challenge,
+        challenge,
         rp: {
           name: BIOMETRIC_CONFIG.webAuthn.rp.name,
           id: BIOMETRIC_CONFIG.webAuthn.rp.id,
@@ -96,11 +96,7 @@ export class BiometricManager {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw this.createError(
-        "REGISTRATION_FAILED",
-        message,
-        true
-      );
+      throw this.createError("REGISTRATION_FAILED", message, true);
     }
   }
 
@@ -139,9 +135,7 @@ export class BiometricManager {
     }
   }
 
-  async getAuthenticationChallenge(
-    userId?: string
-  ): Promise<{
+  async getAuthenticationChallenge(userId?: string): Promise<{
     challengeId: string;
     publicKey: any;
   }> {
@@ -158,7 +152,7 @@ export class BiometricManager {
       const challengeId = `challenge_${Date.now()}_${Math.random().toString(36)}`;
 
       const authenticationOptions: any = {
-        challenge: challenge,
+        challenge,
         timeout: BIOMETRIC_CONFIG.authentication.timeout,
         rpId: BIOMETRIC_CONFIG.webAuthn.rp.id,
         userVerification: "preferred",
@@ -171,11 +165,7 @@ export class BiometricManager {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw this.createError(
-        "INVALID_CHALLENGE",
-        message,
-        true
-      );
+      throw this.createError("INVALID_CHALLENGE", message, true);
     }
   }
 
@@ -218,11 +208,7 @@ export class BiometricManager {
     } catch (error) {
       this.incrementFailedAttempts(userId);
       const message = error instanceof Error ? error.message : String(error);
-      throw this.createError(
-        "AUTHENTICATION_FAILED",
-        message,
-        true
-      );
+      throw this.createError("AUTHENTICATION_FAILED", message, true);
     }
   }
 
@@ -273,11 +259,7 @@ export class BiometricManager {
     } catch (error) {
       this.incrementFailedAttempts(userId);
       const message = error instanceof Error ? error.message : String(error);
-      throw this.createError(
-        "AUTHENTICATION_FAILED",
-        message,
-        true
-      );
+      throw this.createError("AUTHENTICATION_FAILED", message, true);
     }
   }
 
@@ -294,7 +276,8 @@ export class BiometricManager {
     }
 
     if (
-      session.operationCount >= BIOMETRIC_CONFIG.securityPolicy.forceRepromptAfter
+      session.operationCount >=
+      BIOMETRIC_CONFIG.securityPolicy.forceRepromptAfter
     ) {
       session.requiresReverification = true;
     }
@@ -331,7 +314,9 @@ export class BiometricManager {
 
   private isUserLockedOut(userId: string): boolean {
     const lockoutTime = this.lockedUsers.get(userId);
-    if (!lockoutTime) return false;
+    if (!lockoutTime) {
+      return false;
+    }
 
     if (new Date() > lockoutTime) {
       this.lockedUsers.delete(userId);
@@ -375,9 +360,7 @@ export class BiometricManager {
       })
     );
 
-    const signature = btoa(
-      `${header}.${payload}.signature`
-    );
+    const signature = btoa(`${header}.${payload}.signature`);
 
     return `${header}.${payload}.${signature}`;
   }
@@ -396,7 +379,7 @@ export class BiometricManager {
   private createError(
     code: keyof typeof BIOMETRIC_CONFIG.errors,
     details?: string,
-    recoverable: boolean = true
+    recoverable = true
   ): BiometricError {
     return {
       code,

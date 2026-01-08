@@ -4,7 +4,7 @@
  * Returns WebAuthn registration challenge
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { BIOMETRIC_CONFIG } from "@/lib/biometric-sdk/biometric-config";
 
 export async function POST(request: NextRequest) {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
           { alg: -7, type: "public-key" },
           { alg: -257, type: "public-key" },
         ],
-        timeout: 60000,
+        timeout: 60_000,
         attestation: "direct",
         userVerification: "preferred",
       },

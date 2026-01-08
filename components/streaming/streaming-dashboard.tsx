@@ -1,22 +1,21 @@
 "use client";
 
+import { BarChart3, MessageSquare, Sparkles, Users, Video } from "lucide-react";
 import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { VideoPlayer } from "./video-player";
-import { LiveStream } from "./live-stream";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InteractiveChat } from "./interactive-chat";
 import { LivePolls } from "./live-polls";
-import { WatchParty } from "./watch-party";
-import { AIRecommendations } from "./ai-recommendations";
+import { LiveStream } from "./live-stream";
 import { StreamControls } from "./stream-controls";
-import { Video, MessageSquare, BarChart3, Users, Sparkles, Settings } from "lucide-react";
+import { VideoPlayer } from "./video-player";
+import { WatchParty } from "./watch-party";
 
-interface StreamingDashboardProps {
+type StreamingDashboardProps = {
   userId: string;
   streamUrl?: string;
   sessionId?: string;
-}
+};
 
 /**
  * Main streaming dashboard combining all features
@@ -79,72 +78,72 @@ export function StreamingDashboard({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
       {/* Main Video Player and Stream */}
-      <div className="lg:col-span-3 space-y-6">
+      <div className="space-y-6 lg:col-span-3">
         {/* Video Player */}
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">Live Stream</h2>
+          <h2 className="font-bold text-2xl text-gray-900">Live Stream</h2>
           <VideoPlayer
-            streamUrl={streamUrl}
-            title="Triumph Synergy Live Stream"
             isLive={true}
             quality="1080p"
+            streamUrl={streamUrl}
+            title="Triumph Synergy Live Stream"
           />
         </div>
 
         {/* Stream Controls */}
-        <StreamControls quality="1080p" bandwidth={5000} bitrate={2500} />
+        <StreamControls bandwidth={5000} bitrate={2500} quality="1080p" />
 
         {/* Interactive Features */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs className="w-full" onValueChange={setActiveTab} value={activeTab}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="stream" className="flex items-center gap-2">
+            <TabsTrigger className="flex items-center gap-2" value="stream">
               <Video size={16} />
               <span className="hidden sm:inline">Stream</span>
             </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
+            <TabsTrigger className="flex items-center gap-2" value="chat">
               <MessageSquare size={16} />
               <span className="hidden sm:inline">Chat</span>
             </TabsTrigger>
-            <TabsTrigger value="polls" className="flex items-center gap-2">
+            <TabsTrigger className="flex items-center gap-2" value="polls">
               <BarChart3 size={16} />
               <span className="hidden sm:inline">Polls</span>
             </TabsTrigger>
-            <TabsTrigger value="party" className="flex items-center gap-2">
+            <TabsTrigger className="flex items-center gap-2" value="party">
               <Users size={16} />
               <span className="hidden sm:inline">Party</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Stream Tab */}
-          <TabsContent value="stream" className="space-y-4 mt-4">
+          <TabsContent className="mt-4 space-y-4" value="stream">
             <LiveStream userId={userId} />
           </TabsContent>
 
           {/* Chat Tab */}
-          <TabsContent value="chat" className="mt-4">
+          <TabsContent className="mt-4" value="chat">
             <Card className="h-[400px] overflow-hidden">
               <InteractiveChat
+                enabled={true}
                 messages={messages}
                 onSendMessage={handleSendMessage}
-                enabled={true}
               />
             </Card>
           </TabsContent>
 
           {/* Polls Tab */}
-          <TabsContent value="polls" className="mt-4 space-y-4">
+          <TabsContent className="mt-4 space-y-4" value="polls">
             <LivePolls
-              polls={polls}
+              enabled={true}
               onCreatePoll={handleCreatePoll}
               onVote={handleVotePoll}
-              enabled={true}
+              polls={polls}
             />
           </TabsContent>
 
           {/* Watch Party Tab */}
-          <TabsContent value="party" className="mt-4">
+          <TabsContent className="mt-4" value="party">
             <WatchParty sessionId={sessionId} />
           </TabsContent>
         </Tabs>
@@ -153,8 +152,8 @@ export function StreamingDashboard({
       {/* Sidebar */}
       <div className="space-y-6">
         {/* Stream Info */}
-        <Card className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
-          <h3 className="font-bold text-lg mb-2">Stream Info</h3>
+        <Card className="bg-gradient-to-br from-blue-600 to-blue-700 p-4 text-white">
+          <h3 className="mb-2 font-bold text-lg">Stream Info</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Viewers</span>
@@ -173,21 +172,24 @@ export function StreamingDashboard({
 
         {/* AI Recommendations */}
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles size={18} className="text-purple-600" />
+          <div className="mb-3 flex items-center gap-2">
+            <Sparkles className="text-purple-600" size={18} />
             <h3 className="font-bold text-gray-900">AI Recommends</h3>
           </div>
-          <div className="space-y-3 max-h-[600px] overflow-y-auto">
+          <div className="max-h-[600px] space-y-3 overflow-y-auto">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="bg-gray-300 aspect-video flex items-center justify-center">
+              <Card
+                className="cursor-pointer overflow-hidden transition-shadow hover:shadow-lg"
+                key={i}
+              >
+                <div className="flex aspect-video items-center justify-center bg-gray-300">
                   <span className="text-gray-600">Stream {i}</span>
                 </div>
                 <div className="p-2">
-                  <p className="text-xs font-semibold text-gray-900 line-clamp-2">
+                  <p className="line-clamp-2 font-semibold text-gray-900 text-xs">
                     Recommended Stream Title {i}
                   </p>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="mt-1 text-gray-600 text-xs">
                     {95 - i * 5}% match
                   </p>
                 </div>
@@ -197,8 +199,8 @@ export function StreamingDashboard({
         </div>
 
         {/* Quick Stats */}
-        <Card className="p-4 bg-purple-50 border-purple-200">
-          <h3 className="font-semibold text-gray-900 text-sm mb-3">
+        <Card className="border-purple-200 bg-purple-50 p-4">
+          <h3 className="mb-3 font-semibold text-gray-900 text-sm">
             ⚡ Quick Stats
           </h3>
           <div className="space-y-2 text-xs">
@@ -206,13 +208,13 @@ export function StreamingDashboard({
               <span className="text-gray-600">Engagement</span>
               <span className="font-bold text-purple-600">42.5%</span>
             </div>
-            <div className="w-full bg-purple-200 rounded-full h-1">
+            <div className="h-1 w-full rounded-full bg-purple-200">
               <div
-                className="bg-purple-600 h-1 rounded-full"
+                className="h-1 rounded-full bg-purple-600"
                 style={{ width: "42.5%" }}
               />
             </div>
-            <div className="flex justify-between mt-2">
+            <div className="mt-2 flex justify-between">
               <span className="text-gray-600">Chat Activity</span>
               <span className="font-bold text-purple-600">234 msgs</span>
             </div>

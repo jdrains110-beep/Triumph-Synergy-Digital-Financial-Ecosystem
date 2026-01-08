@@ -3,10 +3,10 @@
  * Core Pi Dex Integration - Token trading, creation, liquidity management
  */
 
-import { PI_DEX_CONFIG, getDexConfig, parseTokenAmount, calculateTradingFee } from "./pi-dex-config";
+import { getDexConfig, type PI_DEX_CONFIG } from "./pi-dex-config";
 
 // Token Types
-export interface Token {
+export type Token = {
   id: string;
   name: string;
   symbol: string;
@@ -19,17 +19,17 @@ export interface Token {
   logoUrl?: string;
   website?: string;
   standard: "PT20" | "PT721" | "PT1155";
-}
+};
 
-export interface TokenBalance {
+export type TokenBalance = {
   tokenId: string;
   userId: string;
   balance: bigint;
   lastUpdated: Date;
-}
+};
 
 // Trading Types
-export interface TradeOrder {
+export type TradeOrder = {
   id: string;
   userId: string;
   tokenAId: string;
@@ -42,9 +42,9 @@ export interface TradeOrder {
   expiresAt: Date;
   executedAt?: Date;
   fee: bigint;
-}
+};
 
-export interface SwapQuote {
+export type SwapQuote = {
   tokenAId: string;
   tokenBId: string;
   amountA: bigint;
@@ -52,10 +52,10 @@ export interface SwapQuote {
   priceImpact: number; // percentage
   fee: bigint;
   estimatedOutput: bigint;
-}
+};
 
 // Liquidity Types
-export interface LiquidityPool {
+export type LiquidityPool = {
   id: string;
   tokenAId: string;
   tokenBId: string;
@@ -65,9 +65,9 @@ export interface LiquidityPool {
   fee: number; // percentage
   volume24h: bigint;
   createdAt: Date;
-}
+};
 
-export interface LiquidityPosition {
+export type LiquidityPosition = {
   id: string;
   userId: string;
   poolId: string;
@@ -75,10 +75,10 @@ export interface LiquidityPosition {
   sharePercentage: number;
   rewardsEarned: bigint;
   createdAt: Date;
-}
+};
 
 // Staking Types
-export interface StakingPosition {
+export type StakingPosition = {
   id: string;
   userId: string;
   tokenId: string;
@@ -88,10 +88,10 @@ export interface StakingPosition {
   rewardsEarned: bigint;
   stakedAt: Date;
   unlocksAt: Date;
-}
+};
 
 // Marketplace Types
-export interface MarketplaceListing {
+export type MarketplaceListing = {
   id: string;
   userId: string;
   tokenId: string;
@@ -103,10 +103,10 @@ export interface MarketplaceListing {
   status: "active" | "sold" | "cancelled";
   createdAt: Date;
   expiresAt: Date;
-}
+};
 
 export class PiDex {
-  private config: typeof PI_DEX_CONFIG;
+  private readonly config: typeof PI_DEX_CONFIG;
 
   constructor(sandbox?: boolean) {
     this.config = getDexConfig(sandbox);
@@ -131,7 +131,9 @@ export class PiDex {
     }
 
     if (totalSupply > this.config.tokens.maxSupply) {
-      throw new Error(`Total supply exceeds maximum of ${this.config.tokens.maxSupply}`);
+      throw new Error(
+        `Total supply exceeds maximum of ${this.config.tokens.maxSupply}`
+      );
     }
 
     return {
@@ -158,7 +160,10 @@ export class PiDex {
   /**
    * List all tokens
    */
-  async listTokens(filter?: { standard?: string; owner?: string }): Promise<Token[]> {
+  async listTokens(filter?: {
+    standard?: string;
+    owner?: string;
+  }): Promise<Token[]> {
     // Would fetch from database
     return [];
   }
@@ -166,7 +171,10 @@ export class PiDex {
   /**
    * Get token balance for user
    */
-  async getTokenBalance(userId: string, tokenId: string): Promise<TokenBalance | null> {
+  async getTokenBalance(
+    userId: string,
+    tokenId: string
+  ): Promise<TokenBalance | null> {
     // Would fetch from database
     return null;
   }
@@ -178,12 +186,18 @@ export class PiDex {
   /**
    * Get swap quote for token trade
    */
-  async getSwapQuote(tokenAId: string, tokenBId: string, amountA: bigint): Promise<SwapQuote> {
+  async getSwapQuote(
+    tokenAId: string,
+    tokenBId: string,
+    amountA: bigint
+  ): Promise<SwapQuote> {
     if (!this.config.operations.trade) {
       throw new Error("Trading is disabled");
     }
 
-    const fee = BigInt(Math.floor(Number(amountA) * this.config.trading.feePercentage / 100));
+    const fee = BigInt(
+      Math.floor((Number(amountA) * this.config.trading.feePercentage) / 100)
+    );
     const amountAfterFee = amountA - fee;
 
     // Simple 1:1 swap for demonstration (would use actual DEX math)
@@ -203,7 +217,12 @@ export class PiDex {
   /**
    * Execute token swap
    */
-  async executeSwap(tokenAId: string, tokenBId: string, amountA: bigint, minAmountOut: bigint): Promise<string> {
+  async executeSwap(
+    tokenAId: string,
+    tokenBId: string,
+    amountA: bigint,
+    minAmountOut: bigint
+  ): Promise<string> {
     if (!this.config.operations.trade) {
       throw new Error("Trading is disabled");
     }
@@ -232,7 +251,9 @@ export class PiDex {
       throw new Error("Trading is disabled");
     }
 
-    const fee = BigInt(Math.floor(Number(amountA) * this.config.trading.feePercentage / 100));
+    const fee = BigInt(
+      Math.floor((Number(amountA) * this.config.trading.feePercentage) / 100)
+    );
 
     return {
       id: `order_${Date.now()}_${Math.random().toString(36).substring(7)}`,
@@ -282,9 +303,13 @@ export class PiDex {
       throw new Error("Liquidity provision is disabled");
     }
 
-    if (amountA < BigInt(this.config.liquidity.minLiquidityAmount) ||
-        amountB < BigInt(this.config.liquidity.minLiquidityAmount)) {
-      throw new Error(`Minimum liquidity amount is ${this.config.liquidity.minLiquidityAmount}`);
+    if (
+      amountA < BigInt(this.config.liquidity.minLiquidityAmount) ||
+      amountB < BigInt(this.config.liquidity.minLiquidityAmount)
+    ) {
+      throw new Error(
+        `Minimum liquidity amount is ${this.config.liquidity.minLiquidityAmount}`
+      );
     }
 
     return {
@@ -301,7 +326,10 @@ export class PiDex {
   /**
    * Remove liquidity from pool
    */
-  async removeLiquidity(positionId: string, lpTokensToRemove: bigint): Promise<{ tokenA: bigint; tokenB: bigint }> {
+  async removeLiquidity(
+    positionId: string,
+    lpTokensToRemove: bigint
+  ): Promise<{ tokenA: bigint; tokenB: bigint }> {
     if (!this.config.operations.liquidity) {
       throw new Error("Liquidity provision is disabled");
     }
@@ -316,7 +344,10 @@ export class PiDex {
   /**
    * Get liquidity pools
    */
-  async getLiquidityPools(tokenAId?: string, tokenBId?: string): Promise<LiquidityPool[]> {
+  async getLiquidityPools(
+    tokenAId?: string,
+    tokenBId?: string
+  ): Promise<LiquidityPool[]> {
     // Would fetch from database
     return [];
   }
@@ -324,7 +355,9 @@ export class PiDex {
   /**
    * Get user's liquidity positions
    */
-  async getUserLiquidityPositions(userId: string): Promise<LiquidityPosition[]> {
+  async getUserLiquidityPositions(
+    userId: string
+  ): Promise<LiquidityPosition[]> {
     // Would fetch from database
     return [];
   }
@@ -336,13 +369,19 @@ export class PiDex {
   /**
    * Stake tokens
    */
-  async stakeTokens(tokenId: string, amount: bigint, lockupPeriod: number): Promise<StakingPosition> {
+  async stakeTokens(
+    tokenId: string,
+    amount: bigint,
+    lockupPeriod: number
+  ): Promise<StakingPosition> {
     if (!this.config.operations.staking) {
       throw new Error("Staking is disabled");
     }
 
     if (!this.config.staking.lockupPeriods.includes(lockupPeriod)) {
-      throw new Error(`Invalid lockup period. Must be one of: ${this.config.staking.lockupPeriods.join(", ")}`);
+      throw new Error(
+        `Invalid lockup period. Must be one of: ${this.config.staking.lockupPeriods.join(", ")}`
+      );
     }
 
     const lockupIndex = this.config.staking.lockupPeriods.indexOf(lockupPeriod);
@@ -367,7 +406,9 @@ export class PiDex {
   /**
    * Unstake tokens
    */
-  async unstakeTokens(positionId: string): Promise<{ principal: bigint; rewards: bigint }> {
+  async unstakeTokens(
+    positionId: string
+  ): Promise<{ principal: bigint; rewards: bigint }> {
     if (!this.config.operations.staking) {
       throw new Error("Staking is disabled");
     }
@@ -424,7 +465,10 @@ export class PiDex {
   /**
    * Buy from marketplace
    */
-  async buyFromMarketplace(listingId: string, quantity: bigint): Promise<string> {
+  async buyFromMarketplace(
+    listingId: string,
+    quantity: bigint
+  ): Promise<string> {
     // Would execute purchase and return transaction hash
     return `0x${Math.random().toString(16).substring(2).padStart(64, "0")}`;
   }
@@ -432,7 +476,9 @@ export class PiDex {
   /**
    * Get marketplace listings
    */
-  async getMarketplaceListings(category?: string): Promise<MarketplaceListing[]> {
+  async getMarketplaceListings(
+    category?: string
+  ): Promise<MarketplaceListing[]> {
     // Would fetch from database
     return [];
   }
@@ -463,7 +509,11 @@ export class PiDex {
   /**
    * Calculate price impact
    */
-  calculatePriceImpact(inputAmount: bigint, outputAmount: bigint, spotPrice: bigint): number {
+  calculatePriceImpact(
+    inputAmount: bigint,
+    outputAmount: bigint,
+    spotPrice: bigint
+  ): number {
     const executionPrice = Number(outputAmount) / Number(inputAmount);
     const spotPriceNum = Number(spotPrice);
     return ((spotPriceNum - executionPrice) / spotPriceNum) * 100;
@@ -472,10 +522,20 @@ export class PiDex {
   /**
    * Validate token creation parameters
    */
-  validateTokenParams(name: string, symbol: string, totalSupply: number): boolean {
-    if (!name || name.length < 1 || name.length > 50) return false;
-    if (!symbol || symbol.length < 1 || symbol.length > 10) return false;
-    if (totalSupply <= 0 || totalSupply > this.config.tokens.maxSupply) return false;
+  validateTokenParams(
+    name: string,
+    symbol: string,
+    totalSupply: number
+  ): boolean {
+    if (!name || name.length < 1 || name.length > 50) {
+      return false;
+    }
+    if (!symbol || symbol.length < 1 || symbol.length > 10) {
+      return false;
+    }
+    if (totalSupply <= 0 || totalSupply > this.config.tokens.maxSupply) {
+      return false;
+    }
     return true;
   }
 

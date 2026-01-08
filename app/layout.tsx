@@ -9,9 +9,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    "https://triumphsynergy0576.pinet.com"
-  ),
+  metadataBase: new URL("https://triumphsynergy0576.pinet.com"),
   title: "Triumph Synergy - Pi App Studio",
   description:
     "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
@@ -88,7 +86,7 @@ export default function RootLayout({
           }}
         />
         {/* Pi Network SDK - Version 2.0 */}
-        <script src="https://sdk.minepi.com/pi-sdk.js" async />
+        <script async src="https://sdk.minepi.com/pi-sdk.js" />
       </head>
       <body className="antialiased">
         <ThemeProvider
@@ -99,9 +97,7 @@ export default function RootLayout({
         >
           <Toaster position="top-center" />
           <SessionProvider>
-            <PiProvider>
-              {children}
-            </PiProvider>
+            <PiProvider>{children}</PiProvider>
           </SessionProvider>
         </ThemeProvider>
         <Analytics />

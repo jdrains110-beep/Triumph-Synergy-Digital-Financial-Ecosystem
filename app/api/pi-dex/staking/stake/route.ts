@@ -3,7 +3,7 @@
  * Stake tokens endpoint
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,9 @@ export async function POST(request: NextRequest) {
     const validLockupPeriods = [7, 30, 90, 180, 365];
     if (!validLockupPeriods.includes(lockupPeriod)) {
       return NextResponse.json(
-        { error: `Invalid lockup period. Must be one of: ${validLockupPeriods.join(", ")}` },
+        {
+          error: `Invalid lockup period. Must be one of: ${validLockupPeriods.join(", ")}`,
+        },
         { status: 400 }
       );
     }
@@ -69,6 +71,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(stakingPosition, { status: 201 });
   } catch (error) {
     console.error("Staking error:", error);
-    return NextResponse.json({ error: "Failed to stake tokens" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to stake tokens" },
+      { status: 500 }
+    );
   }
 }

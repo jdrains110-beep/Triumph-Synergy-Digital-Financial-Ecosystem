@@ -1,11 +1,11 @@
 "use client";
 
-import React, {
+import {
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useState,
-  ReactNode,
 } from "react";
 
 /**
@@ -93,7 +93,9 @@ export function PiProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       } catch (err) {
         console.error("[Pi SDK] Initialization error:", err);
-        setError(err instanceof Error ? err.message : "Failed to initialize Pi SDK");
+        setError(
+          err instanceof Error ? err.message : "Failed to initialize Pi SDK"
+        );
         setIsLoading(false);
 
         // Retry initialization

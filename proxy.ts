@@ -4,11 +4,11 @@ import { auth } from "@/app/(auth)/auth";
 
 /**
  * CRITICAL: DO NOT MODIFY THE REDIRECT LOGIC BELOW
- * 
+ *
  * All traffic from Vercel domains MUST redirect to https://triumphsynergy0576.pinet.com/
  * This is a core routing requirement for Pi App Studio integration.
  * Any add-ons, features, or modifications must respect this redirect - NO EXCEPTIONS.
- * 
+ *
  * If you need to add features, add them AFTER the redirect check.
  */
 export default async function proxy(request: NextRequest) {

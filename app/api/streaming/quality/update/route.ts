@@ -3,8 +3,8 @@
  * POST /api/streaming/quality/update
  */
 
+import { type NextRequest, NextResponse } from "next/server";
 import { streamingManager } from "@/lib/streaming-sdk/streaming";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {

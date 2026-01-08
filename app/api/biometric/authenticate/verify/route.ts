@@ -3,13 +3,13 @@
  * Verify biometric authentication and issue session token
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { WebAuthnService } from '@/lib/biometric/webauthn-service';
-import { SignJWT } from 'jose';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { SignJWT } from "jose";
+import { type NextRequest, NextResponse } from "next/server";
+import { WebAuthnService } from "@/lib/biometric/webauthn-service";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'dev-secret-key-change-in-production'
+  process.env.JWT_SECRET || "dev-secret-key-change-in-production"
 );
 
 export async function POST(request: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !credential || !challenge) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -40,33 +40,39 @@ export async function POST(request: NextRequest) {
     // Mock stored credential
     const storedCredential = {
       id: credential.id,
-      publicKey: '',
+      publicKey: "",
       counter: 0,
-      aaguid: '',
+      aaguid: "",
       createdAt: new Date(),
     };
 
     if (!storedCredential) {
       return NextResponse.json(
-        { error: 'Credential not found' },
+        { error: "Credential not found" },
         { status: 404 }
       );
     }
 
     // Verify authentication response
     const service = new WebAuthnService();
-    
+
     // Convert credential for verification
     const credentialForVerification = {
       ...credential,
-      rawId: Buffer.from(credential.rawId, 'base64'),
+      rawId: Buffer.from(credential.rawId, "base64"),
       response: {
         ...credential.response,
-        clientDataJSON: Buffer.from(credential.response.clientDataJSON, 'base64'),
-        authenticatorData: Buffer.from(credential.response.authenticatorData, 'base64'),
-        signature: Buffer.from(credential.response.signature, 'base64'),
+        clientDataJSON: Buffer.from(
+          credential.response.clientDataJSON,
+          "base64"
+        ),
+        authenticatorData: Buffer.from(
+          credential.response.authenticatorData,
+          "base64"
+        ),
+        signature: Buffer.from(credential.response.signature, "base64"),
         userHandle: credential.response.userHandle
-          ? Buffer.from(credential.response.userHandle, 'base64')
+          ? Buffer.from(credential.response.userHandle, "base64")
           : null,
       },
     };
@@ -79,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     if (!valid) {
       return NextResponse.json(
-        { error: 'Authentication verification failed' },
+        { error: "Authentication verification failed" },
         { status: 401 }
       );
     }
@@ -101,7 +107,7 @@ export async function POST(request: NextRequest) {
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
     })
-      .setProtectedHeader({ alg: 'HS256' })
+      .setProtectedHeader({ alg: "HS256" })
       .sign(JWT_SECRET);
 
     // TODO: Store session in database
@@ -124,18 +130,18 @@ export async function POST(request: NextRequest) {
     });
 
     response.cookies.set({
-      name: 'biometric_session',
+      name: "biometric_session",
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 24 * 60 * 60,
     });
 
     return response;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error verifying authentication:', error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error verifying authentication:", error);
     return NextResponse.json(
       { error: `Authentication verification failed: ${message}` },
       { status: 400 }
