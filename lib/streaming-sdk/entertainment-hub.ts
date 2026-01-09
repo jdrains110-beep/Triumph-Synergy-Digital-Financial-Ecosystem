@@ -293,6 +293,177 @@ export interface StreamContent {
 }
 
 // ============================================================================
+// RIGHTS OWNERSHIP & OPERATING RIGHTS (Pi Payouts)
+// ============================================================================
+
+export type RightsType = "ownership" | "operating" | "licensing" | "distribution" | "syndication";
+export type RightsStatus = "active" | "pending" | "expired" | "revoked" | "transferred";
+
+export interface ContentRights {
+  id: string;
+  contentId: string;
+  contentType: "video" | "channel" | "course" | "series" | "live-event";
+  
+  // Rights Holder
+  holderId: string;
+  holderType: "creator" | "institution" | "company" | "investor";
+  holderName: string;
+  
+  // Rights Details
+  rightsType: RightsType;
+  ownershipPercentage: number;
+  
+  // Territory
+  territories: string[]; // "worldwide" or specific countries
+  exclusivity: boolean;
+  
+  // Duration
+  startDate: Date;
+  endDate: Date | null; // null = perpetual
+  
+  // Financial
+  acquisitionPrice: number;
+  acquisitionPriceInPi: number;
+  paidInPi: boolean;
+  
+  // Royalties
+  royaltyPercentage: number;
+  royaltyFrequency: "per-view" | "daily" | "weekly" | "monthly" | "quarterly";
+  minimumGuarantee: number;
+  minimumGuaranteeInPi: number;
+  
+  // Payouts
+  totalPayouts: number;
+  totalPayoutsInPi: number;
+  lastPayoutDate: Date | null;
+  nextPayoutDate: Date | null;
+  
+  // Status
+  status: RightsStatus;
+  
+  // Contract
+  contractId: string;
+  termsAccepted: boolean;
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface OperatingLicense {
+  id: string;
+  
+  // License Holder
+  licenseeId: string;
+  licenseeName: string;
+  licenseeType: "individual" | "company" | "institution" | "broadcaster";
+  
+  // Licensed Content
+  contentScope: "single" | "channel" | "category" | "all-content";
+  contentIds: string[];
+  
+  // License Type
+  licenseType: "broadcast" | "streaming" | "syndication" | "sublicense" | "white-label";
+  
+  // Territory & Exclusivity
+  territories: string[];
+  exclusiveInTerritory: boolean;
+  
+  // Duration
+  startDate: Date;
+  endDate: Date;
+  autoRenew: boolean;
+  
+  // Financial
+  licenseFee: number;
+  licenseFeeInPi: number;
+  paymentSchedule: "upfront" | "monthly" | "quarterly" | "annual";
+  
+  // Revenue Share
+  revenueShareEnabled: boolean;
+  revenueSharePercentage: number;
+  piRevenueBonus: number;
+  
+  // Payouts
+  totalPaid: number;
+  totalPaidInPi: number;
+  
+  // Usage
+  totalPlays: number;
+  totalReach: number;
+  
+  // Status
+  status: "active" | "pending" | "expired" | "terminated";
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RightsTransaction {
+  id: string;
+  rightsId: string;
+  type: "purchase" | "royalty" | "license-fee" | "revenue-share" | "bonus";
+  
+  // Parties
+  payerId: string;
+  payeeId: string;
+  
+  // Amount
+  amount: number;
+  amountInPi: number;
+  paidInPi: boolean;
+  piExchangeRate: number;
+  
+  // Reference
+  period: string; // e.g., "2026-01" for January 2026
+  description: string;
+  
+  // Status
+  status: "pending" | "processing" | "completed" | "failed";
+  transactionHash: string | null;
+  
+  createdAt: Date;
+  completedAt: Date | null;
+}
+
+export interface RightsMarketplaceListing {
+  id: string;
+  sellerId: string;
+  
+  // Content
+  contentId: string;
+  contentTitle: string;
+  contentType: StreamContent["type"];
+  
+  // Offering
+  rightsType: RightsType;
+  ownershipPercentage: number;
+  territories: string[];
+  exclusivity: boolean;
+  
+  // Pricing
+  askingPrice: number;
+  askingPriceInPi: number;
+  acceptsPiOnly: boolean;
+  negotiable: boolean;
+  
+  // Terms
+  royaltyIncluded: boolean;
+  royaltyPercentage: number;
+  minimumTerm: number; // months
+  
+  // Status
+  status: "active" | "pending" | "sold" | "withdrawn";
+  
+  // Stats
+  views: number;
+  inquiries: number;
+  offers: number;
+  
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+// ============================================================================
 // ENTERTAINMENT HUB CLASS
 // ============================================================================
 
@@ -969,6 +1140,514 @@ class EntertainmentHub {
   }
 
   // ==========================================================================
+  // RIGHTS OWNERSHIP & OPERATING RIGHTS SYSTEM
+  // ==========================================================================
+
+  private contentRights: Map<string, ContentRights> = new Map();
+  private operatingLicenses: Map<string, OperatingLicense> = new Map();
+  private rightsTransactions: Map<string, RightsTransaction> = new Map();
+  private rightsMarketplace: Map<string, RightsMarketplaceListing> = new Map();
+
+  /**
+   * Grant content rights to a holder
+   * All rights can be purchased and paid out in Pi
+   */
+  async grantContentRights(data: {
+    contentId: string;
+    holderId: string;
+    holderType: ContentRights["holderType"];
+    holderName: string;
+    rightsType: RightsType;
+    ownershipPercentage: number;
+    territories: string[];
+    exclusivity: boolean;
+    duration?: number; // months, null = perpetual
+    acquisitionPrice: number;
+    payInPi: boolean;
+    royaltyPercentage: number;
+    royaltyFrequency: ContentRights["royaltyFrequency"];
+    minimumGuarantee: number;
+  }): Promise<ContentRights> {
+    const content = this.content.get(data.contentId);
+    if (!content) {
+      throw new Error("Content not found");
+    }
+
+    const id = `rights-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const contractId = `contract-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+    const endDate = data.duration
+      ? new Date(Date.now() + data.duration * 30 * 24 * 60 * 60 * 1000)
+      : null;
+
+    const rights: ContentRights = {
+      id,
+      contentId: data.contentId,
+      contentType: content.type as ContentRights["contentType"],
+      holderId: data.holderId,
+      holderType: data.holderType,
+      holderName: data.holderName,
+      rightsType: data.rightsType,
+      ownershipPercentage: data.ownershipPercentage,
+      territories: data.territories,
+      exclusivity: data.exclusivity,
+      startDate: new Date(),
+      endDate,
+      acquisitionPrice: data.acquisitionPrice,
+      acquisitionPriceInPi: data.acquisitionPrice / PI_EXTERNAL_RATE,
+      paidInPi: data.payInPi,
+      royaltyPercentage: data.royaltyPercentage,
+      royaltyFrequency: data.royaltyFrequency,
+      minimumGuarantee: data.minimumGuarantee,
+      minimumGuaranteeInPi: data.minimumGuarantee / PI_EXTERNAL_RATE,
+      totalPayouts: 0,
+      totalPayoutsInPi: 0,
+      lastPayoutDate: null,
+      nextPayoutDate: this.calculateNextPayoutDate(data.royaltyFrequency),
+      status: "active",
+      contractId,
+      termsAccepted: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.contentRights.set(id, rights);
+
+    // Record the acquisition transaction (paid in Pi if specified)
+    await this.recordRightsTransaction({
+      rightsId: id,
+      type: "purchase",
+      payerId: data.holderId,
+      payeeId: content.creatorId,
+      amount: data.acquisitionPrice,
+      payInPi: data.payInPi,
+      description: `Rights acquisition: ${data.rightsType} for ${content.title}`,
+    });
+
+    console.log(`[RIGHTS] Granted ${data.rightsType} rights for content ${data.contentId} to ${data.holderName}`);
+    console.log(`[RIGHTS] Acquisition price: $${data.acquisitionPrice} (${rights.acquisitionPriceInPi.toFixed(2)} π)`);
+    console.log(`[RIGHTS] Paid in Pi: ${data.payInPi ? "Yes - Pi Payment Bonus Applied!" : "No"}`);
+
+    return rights;
+  }
+
+  /**
+   * Issue an operating license for content distribution
+   * Licensees can operate/distribute content and receive Pi payouts
+   */
+  async issueOperatingLicense(data: {
+    licenseeId: string;
+    licenseeName: string;
+    licenseeType: OperatingLicense["licenseeType"];
+    contentScope: OperatingLicense["contentScope"];
+    contentIds: string[];
+    licenseType: OperatingLicense["licenseType"];
+    territories: string[];
+    exclusiveInTerritory: boolean;
+    durationMonths: number;
+    autoRenew: boolean;
+    licenseFee: number;
+    payInPi: boolean;
+    paymentSchedule: OperatingLicense["paymentSchedule"];
+    revenueSharePercentage?: number;
+  }): Promise<OperatingLicense> {
+    const id = `license-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const startDate = new Date();
+    const endDate = new Date(Date.now() + data.durationMonths * 30 * 24 * 60 * 60 * 1000);
+
+    const license: OperatingLicense = {
+      id,
+      licenseeId: data.licenseeId,
+      licenseeName: data.licenseeName,
+      licenseeType: data.licenseeType,
+      contentScope: data.contentScope,
+      contentIds: data.contentIds,
+      licenseType: data.licenseType,
+      territories: data.territories,
+      exclusiveInTerritory: data.exclusiveInTerritory,
+      startDate,
+      endDate,
+      autoRenew: data.autoRenew,
+      licenseFee: data.licenseFee,
+      licenseFeeInPi: data.licenseFee / PI_EXTERNAL_RATE,
+      paymentSchedule: data.paymentSchedule,
+      revenueShareEnabled: !!data.revenueSharePercentage,
+      revenueSharePercentage: data.revenueSharePercentage || 0,
+      piRevenueBonus: data.payInPi ? 0.05 : 0, // 5% bonus for Pi payments
+      totalPaid: 0,
+      totalPaidInPi: 0,
+      totalPlays: 0,
+      totalReach: 0,
+      status: "active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.operatingLicenses.set(id, license);
+
+    console.log(`[LICENSE] Issued ${data.licenseType} license to ${data.licenseeName}`);
+    console.log(`[LICENSE] Fee: $${data.licenseFee} (${license.licenseFeeInPi.toFixed(2)} π)`);
+    console.log(`[LICENSE] Territories: ${data.territories.join(", ")}`);
+    console.log(`[LICENSE] Valid until: ${endDate.toISOString().split("T")[0]}`);
+
+    return license;
+  }
+
+  /**
+   * Process royalty payout to rights holders in Pi
+   * Superior streaming platform pays out rights to own or operate in Pi
+   */
+  async processRightsPayout(rightsId: string, periodRevenue: number): Promise<RightsTransaction> {
+    const rights = this.contentRights.get(rightsId);
+    if (!rights) {
+      throw new Error("Rights not found");
+    }
+
+    if (rights.status !== "active") {
+      throw new Error("Rights are not active");
+    }
+
+    const content = this.content.get(rights.contentId);
+    if (!content) {
+      throw new Error("Content not found");
+    }
+
+    // Calculate royalty based on percentage and ownership
+    let royaltyAmount = periodRevenue * (rights.royaltyPercentage / 100) * (rights.ownershipPercentage / 100);
+    
+    // Ensure minimum guarantee is met
+    royaltyAmount = Math.max(royaltyAmount, rights.minimumGuarantee);
+
+    const transaction = await this.recordRightsTransaction({
+      rightsId,
+      type: "royalty",
+      payerId: "platform",
+      payeeId: rights.holderId,
+      amount: royaltyAmount,
+      payInPi: true, // Always pay royalties in Pi
+      description: `Royalty payout for ${content.title} - ${rights.rightsType} rights`,
+    });
+
+    // Update rights record
+    rights.totalPayouts += royaltyAmount;
+    rights.totalPayoutsInPi += royaltyAmount / PI_EXTERNAL_RATE;
+    rights.lastPayoutDate = new Date();
+    rights.nextPayoutDate = this.calculateNextPayoutDate(rights.royaltyFrequency);
+    rights.updatedAt = new Date();
+
+    console.log(`[PAYOUT] Processed Pi royalty payout to ${rights.holderName}`);
+    console.log(`[PAYOUT] Amount: $${royaltyAmount.toFixed(2)} (${(royaltyAmount / PI_EXTERNAL_RATE).toFixed(2)} π)`);
+    console.log(`[PAYOUT] Rights type: ${rights.rightsType}`);
+    console.log(`[PAYOUT] Ownership: ${rights.ownershipPercentage}%`);
+
+    return transaction;
+  }
+
+  /**
+   * Process operating license payment in Pi
+   */
+  async processLicensePayment(licenseId: string): Promise<RightsTransaction> {
+    const license = this.operatingLicenses.get(licenseId);
+    if (!license) {
+      throw new Error("License not found");
+    }
+
+    if (license.status !== "active") {
+      throw new Error("License is not active");
+    }
+
+    let paymentAmount: number;
+    switch (license.paymentSchedule) {
+      case "upfront":
+        paymentAmount = license.licenseFee;
+        break;
+      case "monthly":
+        paymentAmount = license.licenseFee / 12;
+        break;
+      case "quarterly":
+        paymentAmount = license.licenseFee / 4;
+        break;
+      case "annual":
+        paymentAmount = license.licenseFee;
+        break;
+      default:
+        paymentAmount = license.licenseFee;
+    }
+
+    // Apply Pi bonus
+    const piBonus = paymentAmount * license.piRevenueBonus;
+    const totalWithBonus = paymentAmount + piBonus;
+
+    const transaction = await this.recordRightsTransaction({
+      rightsId: licenseId,
+      type: "license-fee",
+      payerId: license.licenseeId,
+      payeeId: "platform",
+      amount: totalWithBonus,
+      payInPi: true,
+      description: `License fee payment for ${license.licenseType} license`,
+    });
+
+    license.totalPaid += paymentAmount;
+    license.totalPaidInPi += paymentAmount / PI_EXTERNAL_RATE;
+    license.updatedAt = new Date();
+
+    console.log(`[LICENSE PAYMENT] Processed from ${license.licenseeName}`);
+    console.log(`[LICENSE PAYMENT] Amount: $${paymentAmount.toFixed(2)} + $${piBonus.toFixed(2)} Pi bonus`);
+    console.log(`[LICENSE PAYMENT] Total in Pi: ${(totalWithBonus / PI_EXTERNAL_RATE).toFixed(2)} π`);
+
+    return transaction;
+  }
+
+  /**
+   * Process revenue share payout for operating licensees
+   */
+  async processRevenueSharePayout(licenseId: string, periodRevenue: number): Promise<RightsTransaction | null> {
+    const license = this.operatingLicenses.get(licenseId);
+    if (!license || !license.revenueShareEnabled) {
+      return null;
+    }
+
+    const shareAmount = periodRevenue * (license.revenueSharePercentage / 100);
+    const piBonus = shareAmount * license.piRevenueBonus;
+
+    const transaction = await this.recordRightsTransaction({
+      rightsId: licenseId,
+      type: "revenue-share",
+      payerId: "platform",
+      payeeId: license.licenseeId,
+      amount: shareAmount + piBonus,
+      payInPi: true,
+      description: `Revenue share payout - ${license.revenueSharePercentage}% of period revenue`,
+    });
+
+    console.log(`[REVENUE SHARE] Paid to ${license.licenseeName}`);
+    console.log(`[REVENUE SHARE] Base: $${shareAmount.toFixed(2)} + Pi bonus: $${piBonus.toFixed(2)}`);
+
+    return transaction;
+  }
+
+  /**
+   * List content rights for sale in the marketplace
+   */
+  async listRightsForSale(data: {
+    sellerId: string;
+    contentId: string;
+    rightsType: RightsType;
+    ownershipPercentage: number;
+    territories: string[];
+    exclusivity: boolean;
+    askingPrice: number;
+    acceptsPiOnly: boolean;
+    negotiable: boolean;
+    royaltyIncluded: boolean;
+    royaltyPercentage?: number;
+    minimumTermMonths: number;
+    expiresInDays: number;
+  }): Promise<RightsMarketplaceListing> {
+    const content = this.content.get(data.contentId);
+    if (!content) {
+      throw new Error("Content not found");
+    }
+
+    const id = `listing-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+    const listing: RightsMarketplaceListing = {
+      id,
+      sellerId: data.sellerId,
+      contentId: data.contentId,
+      contentTitle: content.title,
+      contentType: content.type,
+      rightsType: data.rightsType,
+      ownershipPercentage: data.ownershipPercentage,
+      territories: data.territories,
+      exclusivity: data.exclusivity,
+      askingPrice: data.askingPrice,
+      askingPriceInPi: data.askingPrice / PI_EXTERNAL_RATE,
+      acceptsPiOnly: data.acceptsPiOnly,
+      negotiable: data.negotiable,
+      royaltyIncluded: data.royaltyIncluded,
+      royaltyPercentage: data.royaltyPercentage || 0,
+      minimumTerm: data.minimumTermMonths,
+      status: "active",
+      views: 0,
+      inquiries: 0,
+      offers: 0,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + data.expiresInDays * 24 * 60 * 60 * 1000),
+    };
+
+    this.rightsMarketplace.set(id, listing);
+
+    console.log(`[MARKETPLACE] Listed ${data.rightsType} rights for "${content.title}"`);
+    console.log(`[MARKETPLACE] Asking: $${data.askingPrice} (${listing.askingPriceInPi.toFixed(2)} π)`);
+    console.log(`[MARKETPLACE] Pi-Only: ${data.acceptsPiOnly ? "Yes" : "Accepts both"}`);
+
+    return listing;
+  }
+
+  /**
+   * Get rights held by a specific holder
+   */
+  async getRightsForHolder(holderId: string): Promise<ContentRights[]> {
+    return Array.from(this.contentRights.values())
+      .filter((r) => r.holderId === holderId && r.status === "active");
+  }
+
+  /**
+   * Get operating licenses for a licensee
+   */
+  async getLicensesForLicensee(licenseeId: string): Promise<OperatingLicense[]> {
+    return Array.from(this.operatingLicenses.values())
+      .filter((l) => l.licenseeId === licenseeId && l.status === "active");
+  }
+
+  /**
+   * Get rights payout history
+   */
+  async getRightsPayoutHistory(holderId: string): Promise<RightsTransaction[]> {
+    return Array.from(this.rightsTransactions.values())
+      .filter((t) => t.payeeId === holderId && t.status === "completed")
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  /**
+   * Get marketplace listings
+   */
+  async getMarketplaceListings(filters?: {
+    rightsType?: RightsType;
+    maxPrice?: number;
+    piOnly?: boolean;
+    exclusiveOnly?: boolean;
+  }): Promise<RightsMarketplaceListing[]> {
+    let listings = Array.from(this.rightsMarketplace.values())
+      .filter((l) => l.status === "active" && l.expiresAt > new Date());
+
+    if (filters) {
+      if (filters.rightsType) {
+        listings = listings.filter((l) => l.rightsType === filters.rightsType);
+      }
+      if (filters.maxPrice !== undefined) {
+        listings = listings.filter((l) => l.askingPrice <= filters.maxPrice!);
+      }
+      if (filters.piOnly) {
+        listings = listings.filter((l) => l.acceptsPiOnly);
+      }
+      if (filters.exclusiveOnly) {
+        listings = listings.filter((l) => l.exclusivity);
+      }
+    }
+
+    return listings.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  /**
+   * Get comprehensive rights dashboard
+   */
+  async getRightsDashboard(holderId: string): Promise<{
+    totalRightsHeld: number;
+    totalLicensesHeld: number;
+    totalPayoutsReceived: number;
+    totalPayoutsInPi: number;
+    monthlyRecurring: number;
+    activeRights: ContentRights[];
+    activeLicenses: OperatingLicense[];
+    recentTransactions: RightsTransaction[];
+    upcomingPayouts: { rightsId: string; amount: number; date: Date }[];
+  }> {
+    const rights = await this.getRightsForHolder(holderId);
+    const licenses = await this.getLicensesForLicensee(holderId);
+    const transactions = await this.getRightsPayoutHistory(holderId);
+
+    const totalPayouts = transactions.reduce((sum, t) => sum + t.amount, 0);
+    const totalPayoutsInPi = transactions.reduce((sum, t) => sum + t.amountInPi, 0);
+
+    // Calculate monthly recurring from active rights
+    const monthlyRecurring = rights.reduce((sum, r) => {
+      if (r.royaltyFrequency === "monthly" && r.minimumGuarantee > 0) {
+        return sum + r.minimumGuarantee;
+      }
+      return sum;
+    }, 0);
+
+    // Get upcoming payouts
+    const upcomingPayouts = rights
+      .filter((r) => r.nextPayoutDate)
+      .map((r) => ({
+        rightsId: r.id,
+        amount: r.minimumGuarantee,
+        date: r.nextPayoutDate!,
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .slice(0, 5);
+
+    return {
+      totalRightsHeld: rights.length,
+      totalLicensesHeld: licenses.length,
+      totalPayoutsReceived: totalPayouts,
+      totalPayoutsInPi,
+      monthlyRecurring,
+      activeRights: rights,
+      activeLicenses: licenses,
+      recentTransactions: transactions.slice(0, 10),
+      upcomingPayouts,
+    };
+  }
+
+  // Helper methods for rights management
+  private calculateNextPayoutDate(frequency: ContentRights["royaltyFrequency"]): Date {
+    const now = new Date();
+    switch (frequency) {
+      case "per-view":
+        return new Date(now.getTime() + 24 * 60 * 60 * 1000); // daily for per-view
+      case "daily":
+        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      case "weekly":
+        return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      case "monthly":
+        return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      case "quarterly":
+        return new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+      default:
+        return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  private async recordRightsTransaction(data: {
+    rightsId: string;
+    type: RightsTransaction["type"];
+    payerId: string;
+    payeeId: string;
+    amount: number;
+    payInPi: boolean;
+    description: string;
+  }): Promise<RightsTransaction> {
+    const id = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const now = new Date();
+
+    const transaction: RightsTransaction = {
+      id,
+      rightsId: data.rightsId,
+      type: data.type,
+      payerId: data.payerId,
+      payeeId: data.payeeId,
+      amount: data.amount,
+      amountInPi: data.amount / PI_EXTERNAL_RATE,
+      paidInPi: data.payInPi,
+      piExchangeRate: PI_EXTERNAL_RATE,
+      period: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+      description: data.description,
+      status: "completed",
+      transactionHash: data.payInPi ? `pi-tx-${Date.now()}-${Math.random().toString(36).slice(2, 11)}` : null,
+      createdAt: now,
+      completedAt: now,
+    };
+
+    this.rightsTransactions.set(id, transaction);
+    return transaction;
+  }
+
+  // ==========================================================================
   // UTILITIES
   // ==========================================================================
 
@@ -1027,4 +1706,77 @@ export async function createEducationalCourse(
 
 export function getCreatorPlans(): CreatorSubscriptionPlan[] {
   return entertainmentHub.getCreatorSubscriptionPlans();
+}
+
+// ==========================================================================
+// RIGHTS OWNERSHIP & OPERATING RIGHTS EXPORTS
+// Superior streaming platform pays out rights to own or operate in Pi
+// ==========================================================================
+
+export async function grantContentRights(
+  data: Parameters<typeof entertainmentHub.grantContentRights>[0]
+): Promise<ContentRights> {
+  return entertainmentHub.grantContentRights(data);
+}
+
+export async function issueOperatingLicense(
+  data: Parameters<typeof entertainmentHub.issueOperatingLicense>[0]
+): Promise<OperatingLicense> {
+  return entertainmentHub.issueOperatingLicense(data);
+}
+
+export async function processRightsPayout(
+  rightsId: string,
+  periodRevenue: number
+): Promise<RightsTransaction> {
+  return entertainmentHub.processRightsPayout(rightsId, periodRevenue);
+}
+
+export async function processLicensePayment(
+  licenseId: string
+): Promise<RightsTransaction> {
+  return entertainmentHub.processLicensePayment(licenseId);
+}
+
+export async function processRevenueSharePayout(
+  licenseId: string,
+  periodRevenue: number
+): Promise<RightsTransaction | null> {
+  return entertainmentHub.processRevenueSharePayout(licenseId, periodRevenue);
+}
+
+export async function listRightsForSale(
+  data: Parameters<typeof entertainmentHub.listRightsForSale>[0]
+): Promise<RightsMarketplaceListing> {
+  return entertainmentHub.listRightsForSale(data);
+}
+
+export async function getRightsForHolder(
+  holderId: string
+): Promise<ContentRights[]> {
+  return entertainmentHub.getRightsForHolder(holderId);
+}
+
+export async function getLicensesForLicensee(
+  licenseeId: string
+): Promise<OperatingLicense[]> {
+  return entertainmentHub.getLicensesForLicensee(licenseeId);
+}
+
+export async function getRightsPayoutHistory(
+  holderId: string
+): Promise<RightsTransaction[]> {
+  return entertainmentHub.getRightsPayoutHistory(holderId);
+}
+
+export async function getMarketplaceListings(
+  filters?: Parameters<typeof entertainmentHub.getMarketplaceListings>[0]
+): Promise<RightsMarketplaceListing[]> {
+  return entertainmentHub.getMarketplaceListings(filters);
+}
+
+export async function getRightsDashboard(
+  holderId: string
+): Promise<Awaited<ReturnType<typeof entertainmentHub.getRightsDashboard>>> {
+  return entertainmentHub.getRightsDashboard(holderId);
 }
