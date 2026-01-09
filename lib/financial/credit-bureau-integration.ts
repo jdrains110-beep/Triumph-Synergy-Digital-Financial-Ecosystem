@@ -171,8 +171,10 @@ export class CreditBureauIntegration {
 
   // Triumph-Synergy credentials for bureau access
   private readonly COMPANY_INFO = {
-    name: "Triumph-Synergy Digital Financial Ecosystem",
-    ein: "XX-XXXXXXX", // To be configured with real EIN
+    name: "TRIUMPH-SYNERGY",
+    ein: "41-6777102", // REAL EIN - Trust
+    nameControl: "TRIU",
+    entityType: "Trust",
     address: "135 Lake Como Dr, Pomona Park, FL 32181",
     phone: "",
     website: "https://triumph-synergy.com",
@@ -246,8 +248,8 @@ export class CreditBureauIntegration {
 
   private initializeDataFurnisherRegistration(): void {
     this.dataFurnisherRegistration = {
-      businessName: this.COMPANY_INFO.name,
-      ein: this.COMPANY_INFO.ein,
+      businessName: "TRIUMPH-SYNERGY",
+      ein: "41-6777102",
       status: "application-submitted",
       registeredBureaus: [],
       metro2Compliant: true, // Our format is ready
@@ -364,9 +366,8 @@ export class CreditBureauIntegration {
       }
     }
 
-    if (this.dataFurnisherRegistration.ein === "XX-XXXXXXX") {
-      actionRequired.unshift("Register business EIN with IRS for credit reporting");
-    }
+    // EIN is now registered: 41-6777102
+    // actionRequired.unshift("Register business EIN with IRS for credit reporting");
 
     return {
       bureaus: bureauStatuses,
