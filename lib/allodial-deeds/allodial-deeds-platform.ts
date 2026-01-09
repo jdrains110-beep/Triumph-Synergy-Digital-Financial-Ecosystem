@@ -69,6 +69,12 @@ export interface AllodialDeed {
   marketValue: number;
   piValue: number;
   
+  // Acquisition (for properties being purchased)
+  acquisitionPrice?: number;
+  acquisitionStatus?: "pending-purchase" | "under-contract" | "acquired" | "allodial-converted";
+  listingAgent?: string;
+  listingDate?: Date;
+  
   // Documents
   documents: DeedDocument[];
   
@@ -547,10 +553,14 @@ class AllodialDeedsPlatform {
       liens: [],
       easements: [],
 
-      // Valuation
+      // Valuation - Based on Watson Realty Listing Price
       assessedValue: 0, // Allodial - no assessment
-      marketValue: 1000000, // $1M baseline
-      piValue: 1000000 / PI_EXTERNAL_RATE, // Value in Pi
+      marketValue: 675000, // $675,000 - Watson Realty asking price
+      piValue: 675000 / PI_EXTERNAL_RATE, // 2,147.85 π at external rate
+      acquisitionPrice: 675000, // Listed asking price
+      acquisitionStatus: "pending-purchase", // Ready to acquire
+      listingAgent: "Watson Realty",
+      listingDate: new Date("2026-01-09"),
 
       documents: [
         {
@@ -632,6 +642,88 @@ class AllodialDeedsPlatform {
       deedNumber: deed.deedNumber,
       verified: true,
       verifiedAt: new Date(),
+    };
+  }
+
+  /**
+   * Get Headquarters Acquisition Status
+   * Property is listed with Watson Realty for $675,000
+   */
+  getHeadquartersAcquisition(): {
+    property: string;
+    askingPrice: number;
+    askingPriceFormatted: string;
+    piEquivalent: number;
+    piEquivalentFormatted: string;
+    listingAgent: string;
+    acquisitionStatus: string;
+    ecosystemReady: boolean;
+    allodialDeedPrepared: boolean;
+    nextSteps: string[];
+    estimatedClosingDays: { cash: number; financed: number };
+  } {
+    const askingPrice = 675000;
+    const piEquivalent = askingPrice / PI_EXTERNAL_RATE;
+    
+    return {
+      property: "135 Lake Como Dr, Pomona Park, FL 32181",
+      askingPrice: askingPrice,
+      askingPriceFormatted: "$675,000",
+      piEquivalent: piEquivalent,
+      piEquivalentFormatted: `${piEquivalent.toFixed(2)} π`,
+      listingAgent: "Watson Realty",
+      acquisitionStatus: "READY TO PURCHASE",
+      ecosystemReady: true,
+      allodialDeedPrepared: true,
+      nextSteps: [
+        "1. Contact Watson Realty - Express interest in 135 Lake Como Dr",
+        "2. Submit offer - $675,000 or negotiate",
+        "3. Title search and escrow",
+        "4. Close transaction - Sign deed transfer",
+        "5. Allodial conversion - File sovereign declaration",
+        "6. Move in - Establish Triumph-Synergy Headquarters"
+      ],
+      estimatedClosingDays: {
+        cash: 7,
+        financed: 30
+      }
+    };
+  }
+
+  /**
+   * Complete Headquarters Acquisition - Call when purchase is finalized
+   */
+  completeHeadquartersAcquisition(closingDetails: {
+    closingDate: Date;
+    finalPrice: number;
+    paymentMethod: "cash" | "financed" | "pi-payment";
+    titleCompany?: string;
+  }): {
+    success: true;
+    property: string;
+    acquisitionComplete: true;
+    allodialStatusActive: true;
+    ownershipEffectiveDate: Date;
+    message: string;
+  } {
+    console.log("═══════════════════════════════════════════════════════════════");
+    console.log("   🎉 HEADQUARTERS ACQUISITION COMPLETE!");
+    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(`   Property: 135 Lake Como Dr, Pomona Park, FL 32181`);
+    console.log(`   Final Price: $${closingDetails.finalPrice.toLocaleString()}`);
+    console.log(`   Payment Method: ${closingDetails.paymentMethod.toUpperCase()}`);
+    console.log(`   Closing Date: ${closingDetails.closingDate.toISOString().split('T')[0]}`);
+    console.log("   Status: ALLODIAL TITLE NOW ACTIVE");
+    console.log("   Triumph-Synergy Headquarters: ESTABLISHED");
+    console.log("═══════════════════════════════════════════════════════════════");
+    
+    return {
+      success: true,
+      property: "135 Lake Como Dr, Pomona Park, FL 32181",
+      acquisitionComplete: true,
+      allodialStatusActive: true,
+      ownershipEffectiveDate: closingDetails.closingDate,
+      message: "Congratulations! 135 Lake Como Dr is now your headquarters with perfected allodial title."
     };
   }
 
