@@ -10,6 +10,7 @@ import {
   logPiBrowserInfo,
 } from "@/lib/pi-sdk/pi-browser-detector";
 import { usePi } from "@/lib/pi-sdk/pi-provider";
+import { PiEnvironmentBanner } from "@/components/pi-environment-banner";
 
 type TransactionRequest = {
   amount: number;
@@ -128,8 +129,9 @@ export function TransactionProcessor() {
   // Handle complete transaction flow
   const handleTransaction = async () => {
     try {
-      if (!isReady || !user) {
-        setError("Pi Network not ready or user not authenticated");
+      // Allow transaction even if Pi SDK is not ready (for web/fallback mode)
+      if (!user) {
+        setError("User not authenticated");
         setStatus("error");
         return;
       }
@@ -159,6 +161,9 @@ export function TransactionProcessor() {
 
   return (
     <div className="space-y-4">
+      {/* Pi Environment Status Banner */}
+      <PiEnvironmentBanner />
+
       {/* Pi Browser Info */}
       {browserInfo && (
         <Card className="border-blue-200 bg-blue-50 p-4">
@@ -236,7 +241,7 @@ export function TransactionProcessor() {
 
         <Button
           className="w-full"
-          disabled={isProcessing || !isReady || !isAuthenticated}
+          disabled={isProcessing || !user}
           onClick={handleTransaction}
         >
           {isProcessing ? (

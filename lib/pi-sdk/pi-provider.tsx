@@ -51,10 +51,17 @@ export function PiProvider({ children }: { children: ReactNode }) {
       try {
         // Check if Pi SDK is loaded
         if (typeof window === "undefined" || !(window as any).Pi) {
-          console.warn(
-            "[Pi SDK] Pi SDK not loaded yet, will retry in 1 second"
+          console.log(
+            "[Pi SDK] Pi SDK not available yet - continuing in fallback mode"
           );
-          setTimeout(initializePi, 1000);
+          // Still set as ready even without Pi SDK for development/web fallback
+          setTimeout(() => {
+            if (!isReady) {
+              setIsReady(true);
+              setIsLoading(false);
+              console.log("[Pi SDK] ✓ Fallback mode enabled - app continues");
+            }
+          }, 2000);
           return;
         }
 
@@ -96,6 +103,8 @@ export function PiProvider({ children }: { children: ReactNode }) {
         setError(
           err instanceof Error ? err.message : "Failed to initialize Pi SDK"
         );
+        // Still allow app to continue
+        setIsReady(true);
         setIsLoading(false);
 
         // Retry initialization
