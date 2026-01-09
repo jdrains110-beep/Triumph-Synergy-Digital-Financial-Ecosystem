@@ -12,7 +12,26 @@
 // CONSTANTS
 // ============================================================================
 
-const PI_TO_USD_RATE = 314.159;
+// Dual Pi Value System
+// Internally mined/contributed Pi = 1000x multiplier
+// External/non-contributed Pi = base rate
+const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
+const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_INTERNAL_MULTIPLIER = 1000;
+
+export type PiValueType = "internal" | "external";
+
+export function getPiRate(type: PiValueType = "external"): number {
+  return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
+}
+
+export function convertToPi(usdAmount: number, type: PiValueType = "external"): number {
+  return usdAmount / getPiRate(type);
+}
+
+export function convertToUsd(piAmount: number, type: PiValueType = "external"): number {
+  return piAmount * getPiRate(type);
+}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -730,7 +749,7 @@ class PhygitalGrocerantPlatform {
         category: "Produce",
         subcategory: "Organic",
         price: 2.99,
-        priceInPi: 2.99 / PI_TO_USD_RATE,
+        priceInPi: 2.99 / PI_EXTERNAL_RATE,
         salePrice: null,
         salePriceInPi: null,
         unit: "each",
@@ -779,7 +798,7 @@ class PhygitalGrocerantPlatform {
         category: "Prepared Foods",
         subcategory: "Bowls",
         price: 16.99,
-        priceInPi: 16.99 / PI_TO_USD_RATE,
+        priceInPi: 16.99 / PI_EXTERNAL_RATE,
         salePrice: null,
         salePriceInPi: null,
         unit: "bowl",
@@ -835,7 +854,7 @@ class PhygitalGrocerantPlatform {
         category: "Beverages",
         subcategory: "Coffee",
         price: 5.50,
-        priceInPi: 5.50 / PI_TO_USD_RATE,
+        priceInPi: 5.50 / PI_EXTERNAL_RATE,
         salePrice: null,
         salePriceInPi: null,
         unit: "16oz",
@@ -933,7 +952,7 @@ class PhygitalGrocerantPlatform {
         isDairyFree: true,
         linkedProducts: ["prod-1"],
         totalCost: 8.50,
-        totalCostInPi: 8.50 / PI_TO_USD_RATE,
+        totalCostInPi: 8.50 / PI_EXTERNAL_RATE,
         rating: 4.8,
         reviews: 342,
         saves: 1250,
@@ -1079,7 +1098,7 @@ class PhygitalGrocerantPlatform {
         name: product.name,
         quantity: item.quantity,
         price: itemPrice,
-        priceInPi: itemPrice / PI_TO_USD_RATE,
+        priceInPi: itemPrice / PI_EXTERNAL_RATE,
         total: itemTotal,
         modifications: item.modifications || [],
         specialInstructions: item.specialInstructions || null,
@@ -1095,7 +1114,7 @@ class PhygitalGrocerantPlatform {
     const piDiscount = orderData.paymentMethod === "pi" ? location.piDiscountRate : 0;
     const discount = subtotal * piDiscount;
     const total = subtotal + tax + deliveryFee + serviceFee - discount;
-    const totalInPi = total / PI_TO_USD_RATE;
+    const totalInPi = total / PI_EXTERNAL_RATE;
 
     const order: GrocerantOrder = {
       id,
@@ -1328,19 +1347,35 @@ class PhygitalGrocerantPlatform {
   }
 
   // ==========================================================================
-  // UTILITIES
+  // UTILITIES - DUAL PI VALUE SYSTEM
   // ==========================================================================
 
-  getPiToUsdRate(): number {
-    return PI_TO_USD_RATE;
+  getPiToUsdRate(type: PiValueType = "external"): number {
+    return getPiRate(type);
   }
 
-  convertPiToUsd(piAmount: number): number {
-    return piAmount * PI_TO_USD_RATE;
+  getInternalPiRate(): number {
+    return PI_INTERNAL_RATE;
   }
 
-  convertUsdToPi(usdAmount: number): number {
-    return usdAmount / PI_TO_USD_RATE;
+  getExternalPiRate(): number {
+    return PI_EXTERNAL_RATE;
+  }
+
+  convertPiToUsd(piAmount: number, type: PiValueType = "external"): number {
+    return piAmount * getPiRate(type);
+  }
+
+  convertUsdToPi(usdAmount: number, type: PiValueType = "external"): number {
+    return usdAmount / getPiRate(type);
+  }
+
+  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+    return {
+      internal: PI_INTERNAL_RATE,
+      external: PI_EXTERNAL_RATE,
+      multiplier: PI_INTERNAL_MULTIPLIER,
+    };
   }
 }
 

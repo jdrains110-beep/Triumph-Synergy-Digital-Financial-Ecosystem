@@ -12,7 +12,12 @@
 // CONSTANTS
 // ============================================================================
 
-const PI_TO_USD_RATE = 314.159;
+// Dual Pi Value System
+// Internally mined/contributed Pi = 1000x multiplier
+// External/non-contributed Pi = base rate
+const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
+const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_INTERNAL_MULTIPLIER = 1000;
 const GITHUB_API_BASE = "https://api.github.com";
 const SUPPORTED_LANGUAGES = ["rust", "solidity", "move", "cairo", "vyper"] as const;
 

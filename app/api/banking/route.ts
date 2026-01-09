@@ -49,12 +49,21 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, accounts });
 
       case "rates":
-        const rate = bankingPartnersPlatform.getPiToUsdRate();
+        const dualRates = bankingPartnersPlatform.getDualRateInfo();
         return NextResponse.json({
           success: true,
           rates: {
-            piToUsd: rate,
-            usdToPi: 1 / rate,
+            internal: {
+              piToUsd: dualRates.internal,
+              usdToPi: 1 / dualRates.internal,
+              description: "Internally mined/contributed Pi (1000x multiplier)",
+            },
+            external: {
+              piToUsd: dualRates.external,
+              usdToPi: 1 / dualRates.external,
+              description: "External/non-contributed Pi",
+            },
+            multiplier: dualRates.multiplier,
           },
         });
 

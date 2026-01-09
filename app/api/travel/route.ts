@@ -75,9 +75,20 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, operators });
 
       case "rates":
+        const dualRates = enterpriseTravelPlatform.getDualRateInfo();
         return NextResponse.json({
           success: true,
-          piToUsd: enterpriseTravelPlatform.getPiToUsdRate(),
+          rates: {
+            internal: {
+              piToUsd: dualRates.internal,
+              description: "Internally mined/contributed Pi (1000x multiplier)",
+            },
+            external: {
+              piToUsd: dualRates.external,
+              description: "External/non-contributed Pi",
+            },
+            multiplier: dualRates.multiplier,
+          },
           timestamp: new Date().toISOString(),
         });
 

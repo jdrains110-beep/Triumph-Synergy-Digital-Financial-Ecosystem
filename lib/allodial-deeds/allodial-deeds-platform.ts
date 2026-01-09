@@ -12,7 +12,26 @@
 // CONSTANTS
 // ============================================================================
 
-const PI_TO_USD_RATE = 314.159;
+// Dual Pi Value System
+// Internally mined/contributed Pi = 1000x multiplier
+// External/non-contributed Pi = base rate
+const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
+const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_INTERNAL_MULTIPLIER = 1000;
+
+export type PiValueType = "internal" | "external";
+
+export function getPiRate(type: PiValueType = "external"): number {
+  return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
+}
+
+export function convertToPi(usdAmount: number, type: PiValueType = "external"): number {
+  return usdAmount / getPiRate(type);
+}
+
+export function convertToUsd(piAmount: number, type: PiValueType = "external"): number {
+  return piAmount * getPiRate(type);
+}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -772,7 +791,7 @@ class AllodialDeedsPlatform {
     deed.updatedAt = new Date();
 
     // Calculate Pi value
-    deed.piValue = transferData.consideration / PI_TO_USD_RATE;
+    deed.piValue = transferData.consideration / PI_EXTERNAL_RATE;
 
     this.owners.set(newOwner.id, newOwner);
 
@@ -809,7 +828,7 @@ class AllodialDeedsPlatform {
         Property: ${deed.property.address.street}, ${deed.property.address.city}, ${deed.property.address.state}
         Parcel: ${deed.property.parcelNumber}
         
-        Total Amount Due: $${totalTax.toFixed(2)} (${(totalTax / PI_TO_USD_RATE).toFixed(4)} Pi)
+        Total Amount Due: $${totalTax.toFixed(2)} (${(totalTax / PI_EXTERNAL_RATE).toFixed(4)} Pi)
         
         Payment Options:
         1. Pi Network - Send to Triumph Synergy Treasury

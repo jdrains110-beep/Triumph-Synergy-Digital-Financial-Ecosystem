@@ -12,7 +12,18 @@
 // CONSTANTS
 // ============================================================================
 
-const PI_TO_USD_RATE = 314.159;
+// Dual Pi Value System
+// Internally mined/contributed Pi = 1000x multiplier
+// External/non-contributed Pi = base rate
+const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
+const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_INTERNAL_MULTIPLIER = 1000;
+
+export type PiValueType = "internal" | "external";
+
+export function getPiRate(type: PiValueType = "external"): number {
+  return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
+}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -681,8 +692,8 @@ class BankingPartnersPlatform {
     let piConversionRate: number | null = null;
 
     if (transferData.convertToPi) {
-      piConversionRate = PI_TO_USD_RATE;
-      piAmount = transferData.amount / PI_TO_USD_RATE;
+      piConversionRate = PI_EXTERNAL_RATE;
+      piAmount = transferData.amount / PI_EXTERNAL_RATE;
     }
 
     const transaction: Transaction = {
@@ -800,8 +811,8 @@ class BankingPartnersPlatform {
     return {
       transactionId: transaction.id,
       usdAmount: amount,
-      piAmount: amount / PI_TO_USD_RATE,
-      rate: PI_TO_USD_RATE,
+      piAmount: amount / PI_EXTERNAL_RATE,
+      rate: PI_EXTERNAL_RATE,
       piTxHash: `pending-${transaction.id}`,
     };
   }
@@ -822,7 +833,7 @@ class BankingPartnersPlatform {
       throw new Error("Account not found");
     }
 
-    const usdAmount = piAmount * PI_TO_USD_RATE;
+    const usdAmount = piAmount * PI_EXTERNAL_RATE;
     const id = `txn-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const transaction: Transaction = {
@@ -839,7 +850,7 @@ class BankingPartnersPlatform {
       toAccount: account.accountNumber,
       fromRoutingNumber: null,
       toRoutingNumber: account.routingNumber,
-      piConversionRate: PI_TO_USD_RATE,
+      piConversionRate: PI_EXTERNAL_RATE,
       piAmount,
       piTransactionHash: piTxHash,
       initiatedAt: new Date(),
@@ -859,7 +870,7 @@ class BankingPartnersPlatform {
       transactionId: id,
       piAmount,
       usdAmount,
-      rate: PI_TO_USD_RATE,
+      rate: PI_EXTERNAL_RATE,
     };
   }
 
@@ -954,19 +965,35 @@ class BankingPartnersPlatform {
   }
 
   // ==========================================================================
-  // UTILITIES
+  // UTILITIES - DUAL PI VALUE SYSTEM
   // ==========================================================================
 
-  getPiToUsdRate(): number {
-    return PI_TO_USD_RATE;
+  getPiToUsdRate(type: PiValueType = "external"): number {
+    return getPiRate(type);
   }
 
-  convertPiToUsd(piAmount: number): number {
-    return piAmount * PI_TO_USD_RATE;
+  getInternalPiRate(): number {
+    return PI_INTERNAL_RATE;
   }
 
-  convertUsdToPi(usdAmount: number): number {
-    return usdAmount / PI_TO_USD_RATE;
+  getExternalPiRate(): number {
+    return PI_EXTERNAL_RATE;
+  }
+
+  convertPiToUsd(piAmount: number, type: PiValueType = "external"): number {
+    return piAmount * getPiRate(type);
+  }
+
+  convertUsdToPi(usdAmount: number, type: PiValueType = "external"): number {
+    return usdAmount / getPiRate(type);
+  }
+
+  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+    return {
+      internal: PI_INTERNAL_RATE,
+      external: PI_EXTERNAL_RATE,
+      multiplier: PI_INTERNAL_MULTIPLIER,
+    };
   }
 }
 

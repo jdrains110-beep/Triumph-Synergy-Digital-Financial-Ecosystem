@@ -12,7 +12,26 @@
 // CONSTANTS
 // ============================================================================
 
-const PI_TO_USD_RATE = 314.159;
+// Dual Pi Value System
+// Internally mined/contributed Pi = 1000x multiplier (Pioneer reward)
+// External/non-contributed Pi = base rate
+const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
+const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_INTERNAL_MULTIPLIER = 1000;
+
+export type PiValueType = "internal" | "external";
+
+export function getPiRate(type: PiValueType = "external"): number {
+  return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
+}
+
+export function convertPiToUsdByType(piAmount: number, type: PiValueType = "external"): number {
+  return piAmount * getPiRate(type);
+}
+
+export function convertUsdToPiByType(usdAmount: number, type: PiValueType = "external"): number {
+  return usdAmount / getPiRate(type);
+}
 const PI_NETWORK_VERSION = "1.0.0";
 const PIOS_SDK_VERSION = "2.0.0";
 
@@ -735,7 +754,7 @@ class PiOSIntegration {
   }
 
   // ==========================================================================
-  // UTILITIES
+  // UTILITIES - DUAL PI VALUE SYSTEM
   // ==========================================================================
 
   async checkFeature(feature: keyof PiOSFeatures): Promise<boolean> {
@@ -746,16 +765,32 @@ class PiOSIntegration {
     return this.config.permissions[permission];
   }
 
-  getPiToUsdRate(): number {
-    return PI_TO_USD_RATE;
+  getPiToUsdRate(type: PiValueType = "external"): number {
+    return getPiRate(type);
   }
 
-  convertPiToUsd(piAmount: number): number {
-    return piAmount * PI_TO_USD_RATE;
+  getInternalPiRate(): number {
+    return PI_INTERNAL_RATE;
   }
 
-  convertUsdToPi(usdAmount: number): number {
-    return usdAmount / PI_TO_USD_RATE;
+  getExternalPiRate(): number {
+    return PI_EXTERNAL_RATE;
+  }
+
+  convertPiToUsd(piAmount: number, type: PiValueType = "external"): number {
+    return piAmount * getPiRate(type);
+  }
+
+  convertUsdToPi(usdAmount: number, type: PiValueType = "external"): number {
+    return usdAmount / getPiRate(type);
+  }
+
+  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+    return {
+      internal: PI_INTERNAL_RATE,
+      external: PI_EXTERNAL_RATE,
+      multiplier: PI_INTERNAL_MULTIPLIER,
+    };
   }
 
   // ==========================================================================
@@ -829,8 +864,12 @@ class PiOSIntegration {
       }).then(r => r.json());
     },
     
-    getPiRate: function() {
-      return ${PI_TO_USD_RATE};
+    getPiRate: function(type = 'external') {
+      return type === 'internal' ? ${PI_INTERNAL_RATE} : ${PI_EXTERNAL_RATE};
+    },
+    
+    getDualRates: function() {
+      return { internal: ${PI_INTERNAL_RATE}, external: ${PI_EXTERNAL_RATE}, multiplier: ${PI_INTERNAL_MULTIPLIER} };
     }
   };
   

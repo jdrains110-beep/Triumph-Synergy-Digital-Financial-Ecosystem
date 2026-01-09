@@ -12,7 +12,26 @@
 // CONSTANTS
 // ============================================================================
 
-const PI_TO_USD_RATE = 314.159;
+// Dual Pi Value System
+// Internally mined/contributed Pi = 1000x multiplier
+// External/non-contributed Pi = base rate
+const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
+const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_INTERNAL_MULTIPLIER = 1000;
+
+export type PiValueType = "internal" | "external";
+
+export function getPiRate(type: PiValueType = "external"): number {
+  return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
+}
+
+export function convertToPi(usdAmount: number, type: PiValueType = "external"): number {
+  return usdAmount / getPiRate(type);
+}
+
+export function convertToUsd(piAmount: number, type: PiValueType = "external"): number {
+  return piAmount * getPiRate(type);
+}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -644,7 +663,7 @@ class EnterpriseTravelPlatform {
 
     const piDiscount = bookingData.paymentMethod === "pi" ? 0.05 : 0;
     const totalAfterDiscount = total * (1 - piDiscount);
-    const totalInPi = totalAfterDiscount / PI_TO_USD_RATE;
+    const totalInPi = totalAfterDiscount / PI_EXTERNAL_RATE;
 
     const pricing: TravelPricing = {
       currency: "USD",
@@ -852,7 +871,7 @@ class EnterpriseTravelPlatform {
             new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
           ],
           startingPrice: 799,
-          startingPriceInPi: 799 / PI_TO_USD_RATE,
+          startingPriceInPi: 799 / PI_EXTERNAL_RATE,
         };
         itineraries.push(itinerary);
       }
@@ -887,7 +906,7 @@ class EnterpriseTravelPlatform {
         const estimatedDuration = 30; // Simplified
         const estimatedPrice = 495;
         const discount = operator.acceptsPi ? operator.piDiscount : 0;
-        const estimatedPriceInPi = (estimatedPrice * (1 - discount)) / PI_TO_USD_RATE;
+        const estimatedPriceInPi = (estimatedPrice * (1 - discount)) / PI_EXTERNAL_RATE;
 
         results.push({
           operator,
@@ -957,19 +976,35 @@ class EnterpriseTravelPlatform {
   }
 
   // ==========================================================================
-  // UTILITIES
+  // UTILITIES - DUAL PI VALUE SYSTEM
   // ==========================================================================
 
-  getPiToUsdRate(): number {
-    return PI_TO_USD_RATE;
+  getPiToUsdRate(type: PiValueType = "external"): number {
+    return getPiRate(type);
   }
 
-  convertPiToUsd(piAmount: number): number {
-    return piAmount * PI_TO_USD_RATE;
+  getInternalPiRate(): number {
+    return PI_INTERNAL_RATE;
   }
 
-  convertUsdToPi(usdAmount: number): number {
-    return usdAmount / PI_TO_USD_RATE;
+  getExternalPiRate(): number {
+    return PI_EXTERNAL_RATE;
+  }
+
+  convertPiToUsd(piAmount: number, type: PiValueType = "external"): number {
+    return piAmount * getPiRate(type);
+  }
+
+  convertUsdToPi(usdAmount: number, type: PiValueType = "external"): number {
+    return usdAmount / getPiRate(type);
+  }
+
+  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+    return {
+      internal: PI_INTERNAL_RATE,
+      external: PI_EXTERNAL_RATE,
+      multiplier: PI_INTERNAL_MULTIPLIER,
+    };
   }
 }
 
