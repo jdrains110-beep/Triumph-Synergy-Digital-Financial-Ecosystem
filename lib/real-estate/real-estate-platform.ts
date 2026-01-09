@@ -163,6 +163,100 @@ export interface RealEstateAgent {
   reviewCount: number;
   piWalletAddress: string;
   verified: boolean;
+  
+  // Subscription Hub Fields
+  subscriptionTier?: AgentSubscriptionTier;
+  subscriptionStatus?: AgentSubscriptionStatus;
+  subscriptionStartDate?: Date;
+  subscriptionEndDate?: Date;
+  monthlyFee?: number;
+  monthlyFeeInPi?: number;
+  commissionRate?: number;
+  piCommissionBonus?: number;
+  
+  // Performance Metrics
+  totalListings?: number;
+  activeListings?: number;
+  closedTransactions?: number;
+  totalCommissionEarned?: number;
+  totalPiEarned?: number;
+  averageListingPrice?: number;
+  averageDaysOnMarket?: number;
+  clientSatisfactionScore?: number;
+  
+  // Lead Management
+  leads?: AgentLead[];
+  totalLeads?: number;
+  convertedLeads?: number;
+  
+  // Tools Access
+  accessLevel?: string[];
+  crmAccess?: boolean;
+  mlsIntegration?: boolean;
+  virtualTourTools?: boolean;
+  marketingAutomation?: boolean;
+  
+  createdAt?: Date;
+  lastActiveAt?: Date;
+}
+
+// ============================================================================
+// REAL ESTATE AGENT HUB - SUBSCRIPTION SYSTEM
+// ============================================================================
+
+export type AgentSubscriptionTier = "basic" | "professional" | "broker" | "enterprise";
+export type AgentSubscriptionStatus = "trial" | "active" | "past_due" | "suspended" | "cancelled";
+
+export interface AgentLead {
+  id: string;
+  agentId: string;
+  type: "buyer" | "seller" | "investor" | "renter";
+  status: "new" | "contacted" | "qualified" | "showing" | "offer" | "closed" | "lost";
+  
+  // Contact Info
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  
+  // Requirements
+  propertyType: PropertyType[];
+  minBudget: number;
+  maxBudget: number;
+  desiredLocation: string[];
+  timeline: string;
+  preApproved: boolean;
+  
+  // Tracking
+  source: "website" | "referral" | "pi-network" | "advertising" | "open-house" | "other";
+  notes: string[];
+  nextFollowUp: Date | null;
+  
+  // Financial
+  estimatedCommission: number;
+  estimatedPiBonus: number;
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AgentSubscriptionPlan {
+  tier: AgentSubscriptionTier;
+  name: string;
+  monthlyPrice: number;
+  monthlyPriceInPi: number;
+  annualPrice: number;
+  annualPriceInPi: number;
+  commissionSplit: number;
+  piBonus: number;
+  features: string[];
+  maxListings: number | "unlimited";
+  maxLeads: number | "unlimited";
+  crmAccess: boolean;
+  mlsIntegration: boolean;
+  virtualTourTools: boolean;
+  marketingAutomation: boolean;
+  supportLevel: "community" | "email" | "priority" | "dedicated";
 }
 
 export interface PropertyTransaction {
@@ -844,6 +938,300 @@ export class RealEstatePlatform {
 
     if (query.limit) {
       agents = agents.slice(0, query.limit);
+    }
+
+    return agents;
+  }
+
+  // ==========================================================================
+  // REAL ESTATE AGENT HUB - SUBSCRIPTION & PARTNERSHIP
+  // ==========================================================================
+
+  getAgentSubscriptionPlans(): AgentSubscriptionPlan[] {
+    return [
+      {
+        tier: "basic",
+        name: "Basic Agent",
+        monthlyPrice: 79,
+        monthlyPriceInPi: 79 / this.PI_TO_USD,
+        annualPrice: 758,
+        annualPriceInPi: 758 / this.PI_TO_USD,
+        commissionSplit: 0.70,
+        piBonus: 0.02,
+        features: [
+          "Up to 10 active listings",
+          "Basic CRM access",
+          "Lead management (50 leads)",
+          "Standard MLS integration",
+          "Email support",
+          "Pi payment acceptance",
+          "Basic analytics",
+        ],
+        maxListings: 10,
+        maxLeads: 50,
+        crmAccess: true,
+        mlsIntegration: true,
+        virtualTourTools: false,
+        marketingAutomation: false,
+        supportLevel: "email",
+      },
+      {
+        tier: "professional",
+        name: "Professional Agent",
+        monthlyPrice: 199,
+        monthlyPriceInPi: 199 / this.PI_TO_USD,
+        annualPrice: 1910,
+        annualPriceInPi: 1910 / this.PI_TO_USD,
+        commissionSplit: 0.80,
+        piBonus: 0.03,
+        features: [
+          "Up to 50 active listings",
+          "Full CRM access",
+          "Unlimited lead management",
+          "Enhanced MLS integration",
+          "Virtual tour tools",
+          "Priority support",
+          "Advanced analytics",
+          "Marketing templates",
+          "Client portal",
+          "Transaction management",
+        ],
+        maxListings: 50,
+        maxLeads: "unlimited",
+        crmAccess: true,
+        mlsIntegration: true,
+        virtualTourTools: true,
+        marketingAutomation: false,
+        supportLevel: "priority",
+      },
+      {
+        tier: "broker",
+        name: "Broker Team",
+        monthlyPrice: 499,
+        monthlyPriceInPi: 499 / this.PI_TO_USD,
+        annualPrice: 4790,
+        annualPriceInPi: 4790 / this.PI_TO_USD,
+        commissionSplit: 0.85,
+        piBonus: 0.04,
+        features: [
+          "Unlimited listings",
+          "Team management (up to 25 agents)",
+          "Full CRM with automation",
+          "Premium MLS integration",
+          "3D virtual tours",
+          "Marketing automation",
+          "Dedicated support",
+          "White-label client portal",
+          "Commission tracking",
+          "Recruitment tools",
+          "Training resources",
+        ],
+        maxListings: "unlimited",
+        maxLeads: "unlimited",
+        crmAccess: true,
+        mlsIntegration: true,
+        virtualTourTools: true,
+        marketingAutomation: true,
+        supportLevel: "dedicated",
+      },
+      {
+        tier: "enterprise",
+        name: "Enterprise Brokerage",
+        monthlyPrice: 1499,
+        monthlyPriceInPi: 1499 / this.PI_TO_USD,
+        annualPrice: 14390,
+        annualPriceInPi: 14390 / this.PI_TO_USD,
+        commissionSplit: 0.90,
+        piBonus: 0.05,
+        features: [
+          "All Broker features",
+          "Unlimited agents",
+          "Custom branding",
+          "API access",
+          "Data export/import",
+          "24/7 dedicated support",
+          "Custom integrations",
+          "Franchise management",
+          "Revenue sharing",
+          "Pi escrow services",
+          "Blockchain title integration",
+          "Allodial deed processing",
+        ],
+        maxListings: "unlimited",
+        maxLeads: "unlimited",
+        crmAccess: true,
+        mlsIntegration: true,
+        virtualTourTools: true,
+        marketingAutomation: true,
+        supportLevel: "dedicated",
+      },
+    ];
+  }
+
+  async subscribeAgent(agentId: string, tier: AgentSubscriptionTier, payWithPi = false): Promise<RealEstateAgent> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const plans = this.getAgentSubscriptionPlans();
+    const plan = plans.find((p) => p.tier === tier)!;
+
+    agent.subscriptionTier = tier;
+    agent.subscriptionStatus = "active";
+    agent.subscriptionStartDate = new Date();
+    agent.subscriptionEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    agent.monthlyFee = plan.monthlyPrice;
+    agent.monthlyFeeInPi = plan.monthlyPriceInPi;
+    agent.commissionRate = plan.commissionSplit;
+    agent.piCommissionBonus = plan.piBonus;
+    agent.crmAccess = plan.crmAccess;
+    agent.mlsIntegration = plan.mlsIntegration;
+    agent.virtualTourTools = plan.virtualTourTools;
+    agent.marketingAutomation = plan.marketingAutomation;
+    agent.accessLevel = plan.features;
+    agent.leads = [];
+    agent.totalLeads = 0;
+    agent.convertedLeads = 0;
+    agent.totalListings = 0;
+    agent.activeListings = 0;
+    agent.closedTransactions = 0;
+    agent.totalCommissionEarned = 0;
+    agent.totalPiEarned = 0;
+    agent.lastActiveAt = new Date();
+
+    return agent;
+  }
+
+  async addAgentLead(agentId: string, leadData: Omit<AgentLead, "id" | "agentId" | "createdAt" | "updatedAt">): Promise<AgentLead> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const id = `lead-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const lead: AgentLead = {
+      ...leadData,
+      id,
+      agentId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    agent.leads = agent.leads || [];
+    agent.leads.push(lead);
+    agent.totalLeads = (agent.totalLeads || 0) + 1;
+
+    return lead;
+  }
+
+  async updateLeadStatus(agentId: string, leadId: string, status: AgentLead["status"]): Promise<AgentLead> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const lead = agent.leads?.find((l) => l.id === leadId);
+    if (!lead) {
+      throw new Error("Lead not found");
+    }
+
+    const previousStatus = lead.status;
+    lead.status = status;
+    lead.updatedAt = new Date();
+
+    if (status === "closed" && previousStatus !== "closed") {
+      agent.convertedLeads = (agent.convertedLeads || 0) + 1;
+      agent.totalCommissionEarned = (agent.totalCommissionEarned || 0) + lead.estimatedCommission;
+      agent.totalPiEarned = (agent.totalPiEarned || 0) + lead.estimatedPiBonus;
+    }
+
+    return lead;
+  }
+
+  async getAgentDashboard(agentId: string): Promise<{
+    agent: RealEstateAgent;
+    activeListings: Property[];
+    recentLeads: AgentLead[];
+    monthlyStats: {
+      listings: number;
+      leads: number;
+      closings: number;
+      revenue: number;
+      piEarned: number;
+    };
+    subscriptionInfo: AgentSubscriptionPlan | null;
+  }> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const activeListings = Array.from(this.properties.values())
+      .filter((p) => p.agentId === agentId && p.status === "active");
+
+    const plans = this.getAgentSubscriptionPlans();
+    const currentPlan = agent.subscriptionTier
+      ? plans.find((p) => p.tier === agent.subscriptionTier) || null
+      : null;
+
+    return {
+      agent,
+      activeListings,
+      recentLeads: (agent.leads || []).slice(-10),
+      monthlyStats: {
+        listings: agent.activeListings || 0,
+        leads: agent.totalLeads || 0,
+        closings: agent.closedTransactions || 0,
+        revenue: agent.totalCommissionEarned || 0,
+        piEarned: agent.totalPiEarned || 0,
+      },
+      subscriptionInfo: currentPlan,
+    };
+  }
+
+  async recordAgentClosing(agentId: string, transactionId: string, paidWithPi = false): Promise<{
+    commission: number;
+    piBonus: number;
+  }> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const transaction = this.transactions.get(transactionId);
+    if (!transaction) {
+      throw new Error("Transaction not found");
+    }
+
+    const commission = transaction.purchasePrice * (agent.commissionRate || 0.03);
+    const piBonus = paidWithPi ? transaction.purchasePrice * (agent.piCommissionBonus || 0) : 0;
+
+    agent.closedTransactions = (agent.closedTransactions || 0) + 1;
+    agent.salesVolume += transaction.purchasePrice;
+    agent.totalCommissionEarned = (agent.totalCommissionEarned || 0) + commission;
+    agent.totalPiEarned = (agent.totalPiEarned || 0) + piBonus;
+    agent.lastActiveAt = new Date();
+
+    return { commission, piBonus };
+  }
+
+  async getSubscribedAgents(filters?: {
+    tier?: AgentSubscriptionTier;
+    status?: AgentSubscriptionStatus;
+    state?: string;
+  }): Promise<RealEstateAgent[]> {
+    let agents = Array.from(this.agents.values())
+      .filter((a) => a.subscriptionTier !== undefined);
+
+    if (filters?.tier) {
+      agents = agents.filter((a) => a.subscriptionTier === filters.tier);
+    }
+    if (filters?.status) {
+      agents = agents.filter((a) => a.subscriptionStatus === filters.status);
+    }
+    if (filters?.state) {
+      agents = agents.filter((a) => a.licenseState === filters.state);
     }
 
     return agents;

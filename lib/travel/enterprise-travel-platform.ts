@@ -443,11 +443,157 @@ export interface LoyaltyProgram {
 }
 
 // ============================================================================
+// TRAVEL AGENT HUB - SUBSCRIPTION & PARTNERSHIP SYSTEM
+// ============================================================================
+
+export type AgentSubscriptionTier = "starter" | "professional" | "enterprise" | "elite";
+export type AgentStatus = "pending" | "active" | "suspended" | "expired";
+export type AgentSpecialty = 
+  | "leisure"
+  | "corporate"
+  | "luxury"
+  | "adventure"
+  | "cruise"
+  | "honeymoon"
+  | "family"
+  | "group"
+  | "sports"
+  | "wellness"
+  | "eco-tourism"
+  | "cultural";
+
+export interface TravelAgent {
+  id: string;
+  userId: string;
+  
+  // Profile
+  agencyName: string;
+  agentName: string;
+  email: string;
+  phone: string;
+  website: string | null;
+  
+  // Credentials
+  iataNumber: string | null;
+  arcNumber: string | null;
+  cliaNumber: string | null;
+  hostAgencyId: string | null;
+  
+  // Location
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+  };
+  
+  // Subscription
+  subscriptionTier: AgentSubscriptionTier;
+  subscriptionStatus: AgentStatus;
+  subscriptionStartDate: Date;
+  subscriptionEndDate: Date;
+  monthlyFee: number;
+  monthlyFeeInPi: number;
+  
+  // Commission Structure
+  commissionRate: number;
+  piCommissionBonus: number;
+  overrideCommission: number;
+  
+  // Performance
+  totalBookings: number;
+  totalRevenue: number;
+  totalCommissionEarned: number;
+  totalPiEarned: number;
+  averageBookingValue: number;
+  clientSatisfactionScore: number;
+  
+  // Clients
+  clients: AgentClient[];
+  totalClients: number;
+  activeClients: number;
+  
+  // Specialties
+  specialties: AgentSpecialty[];
+  certifications: AgentCertification[];
+  preferredSuppliers: string[];
+  
+  // Tools Access
+  accessLevel: string[];
+  apiAccess: boolean;
+  whitelabelEnabled: boolean;
+  
+  // Timestamps
+  createdAt: Date;
+  lastActiveAt: Date;
+  verifiedAt: Date | null;
+}
+
+export interface AgentClient {
+  id: string;
+  agentId: string;
+  
+  // Client Info
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  
+  // Preferences
+  preferredAirlines: string[];
+  preferredHotels: string[];
+  seatPreference: string;
+  mealPreference: string;
+  
+  // Loyalty
+  loyaltyNumbers: Record<string, string>;
+  
+  // History
+  totalBookings: number;
+  totalSpend: number;
+  lastBookingDate: Date | null;
+  
+  // Documents
+  passportExpiry: Date | null;
+  tsaPreCheckNumber: string | null;
+  globalEntryNumber: string | null;
+  
+  createdAt: Date;
+}
+
+export interface AgentCertification {
+  name: string;
+  issuer: string;
+  issuedAt: Date;
+  expiresAt: Date | null;
+  certificateNumber: string;
+}
+
+export interface AgentSubscriptionPlan {
+  tier: AgentSubscriptionTier;
+  name: string;
+  monthlyPrice: number;
+  monthlyPriceInPi: number;
+  annualPrice: number;
+  annualPriceInPi: number;
+  commissionRate: number;
+  piBonus: number;
+  features: string[];
+  maxClients: number | "unlimited";
+  apiAccess: boolean;
+  whitelabelAccess: boolean;
+  supportLevel: "email" | "priority" | "dedicated" | "24/7";
+}
+
+// ============================================================================
 // ENTERPRISE TRAVEL PLATFORM CLASS
 // ============================================================================
 
 class EnterpriseTravelPlatform {
   private bookings: Map<string, TravelBooking> = new Map();
+  private agents: Map<string, TravelAgent> = new Map();
+  private agentClients: Map<string, AgentClient> = new Map();
   private airports: Map<string, Airport> = new Map();
   private cruiseLines: Map<string, CruiseLine> = new Map();
   private airTaxiOperators: Map<string, AirTaxiOperator> = new Map();
@@ -973,6 +1119,354 @@ class EnterpriseTravelPlatform {
     }
 
     return program;
+  }
+
+  // ==========================================================================
+  // TRAVEL AGENT HUB - SUBSCRIPTION & MANAGEMENT
+  // ==========================================================================
+
+  getAgentSubscriptionPlans(): AgentSubscriptionPlan[] {
+    return [
+      {
+        tier: "starter",
+        name: "Starter Agent",
+        monthlyPrice: 49,
+        monthlyPriceInPi: 49 / PI_EXTERNAL_RATE,
+        annualPrice: 470,
+        annualPriceInPi: 470 / PI_EXTERNAL_RATE,
+        commissionRate: 0.08,
+        piBonus: 0.02,
+        features: [
+          "Access to booking platform",
+          "Up to 50 client profiles",
+          "Basic reporting dashboard",
+          "Email support",
+          "Standard commission rates",
+          "Pi payment acceptance",
+        ],
+        maxClients: 50,
+        apiAccess: false,
+        whitelabelAccess: false,
+        supportLevel: "email",
+      },
+      {
+        tier: "professional",
+        name: "Professional Agent",
+        monthlyPrice: 149,
+        monthlyPriceInPi: 149 / PI_EXTERNAL_RATE,
+        annualPrice: 1430,
+        annualPriceInPi: 1430 / PI_EXTERNAL_RATE,
+        commissionRate: 0.10,
+        piBonus: 0.03,
+        features: [
+          "All Starter features",
+          "Up to 500 client profiles",
+          "Advanced analytics",
+          "Priority support",
+          "Enhanced commission rates",
+          "Cruise booking access",
+          "Air taxi booking access",
+          "Custom branding on invoices",
+          "Marketing materials",
+        ],
+        maxClients: 500,
+        apiAccess: false,
+        whitelabelAccess: false,
+        supportLevel: "priority",
+      },
+      {
+        tier: "enterprise",
+        name: "Enterprise Agency",
+        monthlyPrice: 499,
+        monthlyPriceInPi: 499 / PI_EXTERNAL_RATE,
+        annualPrice: 4790,
+        annualPriceInPi: 4790 / PI_EXTERNAL_RATE,
+        commissionRate: 0.12,
+        piBonus: 0.04,
+        features: [
+          "All Professional features",
+          "Unlimited client profiles",
+          "Full API access",
+          "White-label booking portal",
+          "Dedicated account manager",
+          "Premium commission rates",
+          "Override commissions",
+          "Multi-agent management",
+          "Custom integrations",
+          "Advanced CRM tools",
+        ],
+        maxClients: "unlimited",
+        apiAccess: true,
+        whitelabelAccess: true,
+        supportLevel: "dedicated",
+      },
+      {
+        tier: "elite",
+        name: "Elite Partner",
+        monthlyPrice: 999,
+        monthlyPriceInPi: 999 / PI_EXTERNAL_RATE,
+        annualPrice: 9590,
+        annualPriceInPi: 9590 / PI_EXTERNAL_RATE,
+        commissionRate: 0.15,
+        piBonus: 0.05,
+        features: [
+          "All Enterprise features",
+          "Exclusive supplier rates",
+          "First access to new features",
+          "24/7 VIP support",
+          "Revenue sharing on referrals",
+          "Joint marketing opportunities",
+          "Custom Pi payment solutions",
+          "Blockchain-verified bookings",
+          "Premium placement in directory",
+          "Annual strategy sessions",
+        ],
+        maxClients: "unlimited",
+        apiAccess: true,
+        whitelabelAccess: true,
+        supportLevel: "24/7",
+      },
+    ];
+  }
+
+  async registerTravelAgent(data: {
+    userId: string;
+    agencyName: string;
+    agentName: string;
+    email: string;
+    phone: string;
+    website?: string;
+    iataNumber?: string;
+    arcNumber?: string;
+    cliaNumber?: string;
+    address: TravelAgent["address"];
+    subscriptionTier: AgentSubscriptionTier;
+    specialties: AgentSpecialty[];
+    payWithPi?: boolean;
+  }): Promise<TravelAgent> {
+    const id = `agent-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const plans = this.getAgentSubscriptionPlans();
+    const plan = plans.find((p) => p.tier === data.subscriptionTier)!;
+
+    const agent: TravelAgent = {
+      id,
+      userId: data.userId,
+      agencyName: data.agencyName,
+      agentName: data.agentName,
+      email: data.email,
+      phone: data.phone,
+      website: data.website || null,
+      iataNumber: data.iataNumber || null,
+      arcNumber: data.arcNumber || null,
+      cliaNumber: data.cliaNumber || null,
+      hostAgencyId: null,
+      address: data.address,
+      subscriptionTier: data.subscriptionTier,
+      subscriptionStatus: "active",
+      subscriptionStartDate: new Date(),
+      subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      monthlyFee: plan.monthlyPrice,
+      monthlyFeeInPi: plan.monthlyPriceInPi,
+      commissionRate: plan.commissionRate,
+      piCommissionBonus: plan.piBonus,
+      overrideCommission: 0,
+      totalBookings: 0,
+      totalRevenue: 0,
+      totalCommissionEarned: 0,
+      totalPiEarned: 0,
+      averageBookingValue: 0,
+      clientSatisfactionScore: 0,
+      clients: [],
+      totalClients: 0,
+      activeClients: 0,
+      specialties: data.specialties,
+      certifications: [],
+      preferredSuppliers: [],
+      accessLevel: plan.features,
+      apiAccess: plan.apiAccess,
+      whitelabelEnabled: plan.whitelabelAccess,
+      createdAt: new Date(),
+      lastActiveAt: new Date(),
+      verifiedAt: null,
+    };
+
+    this.agents.set(id, agent);
+    return agent;
+  }
+
+  async getAgent(agentId: string): Promise<TravelAgent | null> {
+    return this.agents.get(agentId) || null;
+  }
+
+  async getAgentByUserId(userId: string): Promise<TravelAgent | null> {
+    return Array.from(this.agents.values()).find((a) => a.userId === userId) || null;
+  }
+
+  async listAgents(filters?: {
+    status?: AgentStatus;
+    tier?: AgentSubscriptionTier;
+    specialty?: AgentSpecialty;
+  }): Promise<TravelAgent[]> {
+    let agents = Array.from(this.agents.values());
+
+    if (filters?.status) {
+      agents = agents.filter((a) => a.subscriptionStatus === filters.status);
+    }
+    if (filters?.tier) {
+      agents = agents.filter((a) => a.subscriptionTier === filters.tier);
+    }
+    if (filters?.specialty) {
+      agents = agents.filter((a) => a.specialties.includes(filters.specialty!));
+    }
+
+    return agents;
+  }
+
+  async addAgentClient(agentId: string, clientData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    preferredAirlines?: string[];
+    preferredHotels?: string[];
+    seatPreference?: string;
+    mealPreference?: string;
+    passportExpiry?: Date;
+    tsaPreCheckNumber?: string;
+    globalEntryNumber?: string;
+  }): Promise<AgentClient> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const id = `client-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+    const client: AgentClient = {
+      id,
+      agentId,
+      firstName: clientData.firstName,
+      lastName: clientData.lastName,
+      email: clientData.email,
+      phone: clientData.phone,
+      preferredAirlines: clientData.preferredAirlines || [],
+      preferredHotels: clientData.preferredHotels || [],
+      seatPreference: clientData.seatPreference || "no preference",
+      mealPreference: clientData.mealPreference || "no preference",
+      loyaltyNumbers: {},
+      totalBookings: 0,
+      totalSpend: 0,
+      lastBookingDate: null,
+      passportExpiry: clientData.passportExpiry || null,
+      tsaPreCheckNumber: clientData.tsaPreCheckNumber || null,
+      globalEntryNumber: clientData.globalEntryNumber || null,
+      createdAt: new Date(),
+    };
+
+    agent.clients.push(client);
+    agent.totalClients += 1;
+    agent.activeClients += 1;
+    this.agentClients.set(id, client);
+
+    return client;
+  }
+
+  async getAgentClients(agentId: string): Promise<AgentClient[]> {
+    const agent = this.agents.get(agentId);
+    return agent?.clients || [];
+  }
+
+  async recordAgentBooking(agentId: string, bookingData: {
+    bookingId: string;
+    bookingValue: number;
+    paidWithPi: boolean;
+    piAmount?: number;
+    clientId?: string;
+  }): Promise<{ commission: number; piBonus: number }> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const commission = bookingData.bookingValue * agent.commissionRate;
+    const piBonus = bookingData.paidWithPi 
+      ? bookingData.bookingValue * agent.piCommissionBonus 
+      : 0;
+
+    agent.totalBookings += 1;
+    agent.totalRevenue += bookingData.bookingValue;
+    agent.totalCommissionEarned += commission;
+    agent.totalPiEarned += piBonus;
+    agent.averageBookingValue = agent.totalRevenue / agent.totalBookings;
+    agent.lastActiveAt = new Date();
+
+    if (bookingData.clientId) {
+      const client = this.agentClients.get(bookingData.clientId);
+      if (client) {
+        client.totalBookings += 1;
+        client.totalSpend += bookingData.bookingValue;
+        client.lastBookingDate = new Date();
+      }
+    }
+
+    return { commission, piBonus };
+  }
+
+  async upgradeAgentSubscription(agentId: string, newTier: AgentSubscriptionTier): Promise<TravelAgent> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const plans = this.getAgentSubscriptionPlans();
+    const plan = plans.find((p) => p.tier === newTier)!;
+
+    agent.subscriptionTier = newTier;
+    agent.monthlyFee = plan.monthlyPrice;
+    agent.monthlyFeeInPi = plan.monthlyPriceInPi;
+    agent.commissionRate = plan.commissionRate;
+    agent.piCommissionBonus = plan.piBonus;
+    agent.apiAccess = plan.apiAccess;
+    agent.whitelabelEnabled = plan.whitelabelAccess;
+    agent.accessLevel = plan.features;
+    agent.subscriptionEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    return agent;
+  }
+
+  async getAgentDashboard(agentId: string): Promise<{
+    agent: TravelAgent;
+    recentBookings: TravelBooking[];
+    monthlyStats: {
+      bookings: number;
+      revenue: number;
+      commission: number;
+      piEarned: number;
+    };
+    clientGrowth: number;
+    upcomingRenewals: AgentClient[];
+  }> {
+    const agent = this.agents.get(agentId);
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    return {
+      agent,
+      recentBookings: Array.from(this.bookings.values())
+        .filter((b) => b.metadata?.agentId === agentId)
+        .slice(0, 10),
+      monthlyStats: {
+        bookings: agent.totalBookings,
+        revenue: agent.totalRevenue,
+        commission: agent.totalCommissionEarned,
+        piEarned: agent.totalPiEarned,
+      },
+      clientGrowth: agent.totalClients,
+      upcomingRenewals: agent.clients.filter(
+        (c) => c.passportExpiry && c.passportExpiry < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+      ),
+    };
   }
 
   // ==========================================================================
