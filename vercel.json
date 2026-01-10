@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "pnpm run build",
+  "buildCommand": "next build --webpack",
   "installCommand": "pnpm install",
   "outputDirectory": ".next",
   "rewrites": [
