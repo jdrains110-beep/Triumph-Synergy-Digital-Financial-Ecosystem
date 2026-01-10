@@ -202,7 +202,7 @@ export class EnterprisePartnerIntegrationEngine {
    * Initialize 18+ enterprise partners
    */
   private initializeDefaultPartners(): void {
-    const partners = [
+    const partners: EnterprisePartner[] = [
       // FOOD & BEVERAGE
       {
         partnerId: 'usfoods_001',

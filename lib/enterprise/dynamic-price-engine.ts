@@ -323,7 +323,7 @@ export class DynamicPriceAdjustmentEngine {
 
     // Keep only last 1440 snapshots (daily data)
     if (this.priceSnapshots.size > 1440) {
-      const firstKey = this.priceSnapshots.keys().next().value;
+      const firstKey = this.priceSnapshots.keys().next().value as string;
       this.priceSnapshots.delete(firstKey);
     }
   }

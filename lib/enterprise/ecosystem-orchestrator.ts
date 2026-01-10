@@ -41,11 +41,11 @@ export interface EcosystemDashboard {
  */
 export class TriumphSynergyEcosystemOrchestrator {
   private static instance: TriumphSynergyEcosystemOrchestrator;
-  private trustEngine = TriumphSynergyTrust;
-  private hubManager = EnterpriseHubManager;
-  private blockchainManager = BlockchainInfrastructureManager;
-  private priceEngine = DynamicPriceAdjustmentEngine;
-  private stabilityManager = EcosystemStabilityManager;
+  private trustEngine: any = TriumphSynergyTrust;
+  private hubManager: any = EnterpriseHubManager;
+  private blockchainManager: any = BlockchainInfrastructureManager;
+  private priceEngine: any = DynamicPriceAdjustmentEngine;
+  private stabilityManager: any = EcosystemStabilityManager;
   private integrationLog: Array<{
     timestamp: Date;
     component: string;
@@ -201,10 +201,10 @@ export class TriumphSynergyEcosystemOrchestrator {
     // Calculate metrics
     const trustHealth = Math.min(100, 95 + Math.random() * 5);
     const hubHealth =
-      (hubs.filter(h => h.status === 'active').length / hubs.length) * 100;
-    const priceStabilityScore = 100 - Math.abs(priceStability.volatilityIndex * 5);
+      hubs.length > 0 ? (hubs.filter((h: any) => h.status === 'active').length / hubs.length) * 100 : 100;
+    const priceStabilityScore = 100 - Math.abs((priceStability as any)?.volatilityIndex * 5 || 0);
     const overallHealth =
-      (trustHealth + hubHealth + blockchainHealth.overallHealth + priceStabilityScore + systemStability.overallHealth) / 5;
+      (trustHealth + hubHealth + (blockchainHealth as any)?.overallHealth + priceStabilityScore + (systemStability as any)?.overallHealth) / 5;
 
     // Get active transactions (simulated)
     const activeTransactions = Math.floor(Math.random() * 10000) + 1000;
@@ -240,7 +240,7 @@ export class TriumphSynergyEcosystemOrchestrator {
       transactionVolume,
       partnerships: trustMembers.length,
       blockchainNetworks: 3 + Math.floor(piNodes.length / 5),
-      bankingPartners: trustMembers.filter(m => m.memberType === 'banking_partner').length,
+      bankingPartners: trustMembers.filter((m: any) => m.memberType === 'banking_partner').length,
       recommendations
     };
   }

@@ -142,7 +142,7 @@ export class DynamicPriceAdjustmentEngine {
    * Initialize stability adjustment rules
    */
   private initializeDefaultRules(): void {
-    const rules = [
+    const rules: DynamicAdjustmentRule[] = [
       {
         ruleId: 'high_demand_rule',
         ruleName: 'High Demand Adjustment',
@@ -384,7 +384,7 @@ export class DynamicPriceAdjustmentEngine {
 
       // Check activation criteria
       for (const criteria of rule.activationCriteria) {
-        const metricValue = (currentMetrics as Record<string, number>)[criteria.metric] || 0;
+        const metricValue = (currentMetrics as any)[criteria.metric] || 0;
 
         if (criteria.operator === 'greater_than' && metricValue <= criteria.value) {
           shouldApply = false;

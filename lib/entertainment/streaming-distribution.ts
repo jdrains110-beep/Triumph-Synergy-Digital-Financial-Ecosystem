@@ -358,7 +358,7 @@ export class StreamingDistributionEngine {
         autoPay: true
       },
       {
-        recipientType: 'infrastructure',
+        recipientType: 'network',
         recipient: 'Infrastructure Providers',
         percentage: this.metrics.revenueSplit.infrastructure,
         amount: infrastructureAmount,

@@ -49,9 +49,9 @@ export interface SelfHealingReport {
  */
 export class EntertainmentHubOrchestrator {
   private static instance: EntertainmentHubOrchestrator;
-  private hubSystem = EntertainmentHubSystem;
-  private contractEngine = ContractManagementEngine;
-  private streamingEngine = StreamingDistributionEngine;
+  private hubSystem: any = EntertainmentHubSystem;
+  private contractEngine: any = ContractManagementEngine;
+  private streamingEngine: any = StreamingDistributionEngine;
   private selfHealingEnabled: boolean = true;
   private orchestrationLog: Array<{
     timestamp: Date;
@@ -151,9 +151,9 @@ export class EntertainmentHubOrchestrator {
     cycleReport.systemOptimizations += 3; // Hub, Contracts, Streaming
 
     // Calculate automation level
-    const entities = this.hubSystem.getAllEntities();
-    const activeEntities = entities.filter(e => e.platformStatus === 'active').length;
-    cycleReport.automationLevel = (activeEntities / entities.length) * 100;
+    const entities = this.hubSystem.getAllEntities() || [];
+    const activeEntities = entities.filter((e: any) => e.platformStatus === 'active').length;
+    cycleReport.automationLevel = entities.length > 0 ? (activeEntities / entities.length) * 100 : 100;
 
     this.healingCycles.push(cycleReport);
 
@@ -173,12 +173,12 @@ export class EntertainmentHubOrchestrator {
    * Heal hub system issues
    */
   private healHubSystemIssues(): void {
-    const entities = this.hubSystem.getAllEntities();
+    const entities = (this.hubSystem.getAllEntities?.() || []) as any[];
 
     // Reactivate inactive entities
     entities
-      .filter(e => e.platformStatus !== 'active')
-      .forEach(e => {
+      .filter((e: any) => e.platformStatus !== 'active')
+      .forEach((e: any) => {
         e.platformStatus = 'active';
       });
 
@@ -197,23 +197,27 @@ export class EntertainmentHubOrchestrator {
    * Heal contract issues
    */
   private healContractIssues(health: any): void {
-    const contracts = this.contractEngine.getAllContracts();
+    try {
+      const contracts = (this.contractEngine?.getAllContracts?.() || []) as any[];
 
-    contracts.forEach(contract => {
-      if (contract.status === 'broken') {
-        this.contractEngine.initiateContractRenegotiation(contract.contractId);
-      }
-    });
+      contracts.forEach((contract: any) => {
+        if (contract.status === 'broken') {
+          this.contractEngine?.initiateContractRenegotiation?.(contract.contractId);
+        }
+      });
 
-    this.orchestrationLog.push({
-      timestamp: new Date(),
-      component: 'Contract System',
-      action: 'Issues detected and healing initiated',
-      status: 'healing',
-      impact: `${health.totalBreakdowns} contracts being renegotiated`
-    });
+      this.orchestrationLog.push({
+        timestamp: new Date(),
+        component: 'Contract System',
+        action: 'Issues detected and healing initiated',
+        status: 'healing',
+        impact: `${health.totalBreakdowns} contracts being renegotiated`
+      });
 
-    console.log('[SELF-HEAL] Contract system issues addressed and renegotiations initiated');
+      console.log('[SELF-HEAL] Contract system issues addressed and renegotiations initiated');
+    } catch (error) {
+      console.error('Failed to heal contract issues:', error);
+    }
   }
 
   /**
@@ -368,17 +372,17 @@ export class EntertainmentHubOrchestrator {
     const contractHealth = this.contractEngine.getContractHealthReport();
     const streamingMetrics = this.streamingEngine.getCurrentMetrics();
     const streamingStatus = this.streamingEngine.getSystemStatus();
-    const distributions = this.streamingEngine.getAllDistributions();
+    const distributions = (this.streamingEngine.getAllDistributions?.() || []) as any[];
 
-    const totalRevenueGenerated = distributions.reduce((sum, d) => sum + d.totalRevenue, 0);
-    const totalViews = distributions.reduce((sum, d) => sum + d.totalViews, 0);
-    const totalEngagement = distributions.reduce((sum, d) => sum + d.totalEngagement, 0);
+    const totalRevenueGenerated = distributions.reduce((sum: number, d: any) => sum + d.totalRevenue, 0);
+    const totalViews = distributions.reduce((sum: number, d: any) => sum + d.totalViews, 0);
+    const totalEngagement = distributions.reduce((sum: number, d: any) => sum + d.totalEngagement, 0);
 
     // Calculate system health
-    const hubHealth = this.hubSystem.getSystemHealth();
+    const hubHealth = (this.hubSystem?.getSystemHealth?.() || { status: 'unknown', healthScore: 50 }) as any;
     const systemHealthScore =
       (hubHealth.status === 'healthy' ? 100 : hubHealth.status === 'warning' ? 70 : 30) * 0.4 +
-      streamingStatus.healthScore * 0.4 +
+      (streamingStatus?.healthScore || 50) * 0.4 +
       (contractHealth.successRate > 95 ? 100 : 70) * 0.2;
 
     // Generate recommendations
