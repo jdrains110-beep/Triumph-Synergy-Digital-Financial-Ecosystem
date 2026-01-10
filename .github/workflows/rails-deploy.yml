@@ -7,61 +7,12 @@ on:
             - ".github/workflows/rails-deploy.yml"
         branches:
             - main
-    pull_request:
-        paths:
-            - "tmpt/**"
-        branches:
-            - main
     workflow_dispatch:
 
 jobs:
-    build-rails:
-        name: Build Rails Application
-        runs-on: ubuntu-latest
-
-        services:
-            sqlite:
-                image: keinos/sqlite3
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Setup Ruby
-              uses: ruby/setup-ruby@v1
-              with:
-                  ruby-version: "3.4"
-                  bundler-cache: true
-                  working-directory: tmpt
-
-            - name: Install dependencies
-              working-directory: tmpt
-              run: bundle install
-
-            - name: Setup database
-              working-directory: tmpt
-              run: |
-                  bundle exec rails db:create
-                  bundle exec rails db:migrate
-
-            - name: Lint code
-              working-directory: tmpt
-              run: bundle exec rubocop || true
-
-            - name: Generate build report
-              working-directory: tmpt
-              run: |
-                  echo "## Rails Build Report" >> $GITHUB_STEP_SUMMARY
-                  echo "✅ Build Status: Success" >> $GITHUB_STEP_SUMMARY
-                  echo "📦 Framework: Rails 8.0" >> $GITHUB_STEP_SUMMARY
-                  echo "💎 Ruby Version: 3.4.8" >> $GITHUB_STEP_SUMMARY
-                  echo "🗄️ Database: SQLite" >> $GITHUB_STEP_SUMMARY
-
     deploy-heroku:
-        name: Deploy to Heroku
-        needs: build-rails
+        name: Deploy Rails to Heroku
         runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
         steps:
             - name: Checkout code
@@ -71,10 +22,13 @@ jobs:
 
             - name: Deploy to Heroku
               uses: akhileshns/heroku-deploy@v3.13.15
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+                  HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+                  HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
               with:
                   heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
                   heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
                   heroku_email: ${{ secrets.HEROKU_EMAIL }}
                   appdir: tmpt
                   branch: main
-              continue-on-error: true

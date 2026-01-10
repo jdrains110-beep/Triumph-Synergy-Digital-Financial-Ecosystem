@@ -5,8 +5,17 @@ ruby "3.4.8"
 
 # Rails
 gem "rails", "~> 8.0.0"
-gem "sqlite3", "~> 1.7"
 gem "puma", "~> 6.0"
+
+# Database
+group :development, :test do
+  gem "sqlite3", "~> 1.7"
+end
+
+group :production do
+  gem "pg", "~> 1.5"
+  gem "rails_12factor"
+end
 
 # JavaScript/CSS
 gem "importmap-rails"
@@ -30,9 +39,4 @@ end
 
 group :development do
   gem "web-console"
-end
-
-# Production
-group :production do
-  gem "rails_12factor"
 end
