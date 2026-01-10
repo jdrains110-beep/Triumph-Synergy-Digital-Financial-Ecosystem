@@ -26,11 +26,19 @@ jobs:
                   # Install Heroku CLI
                   curl https://cli-assets.heroku.com/install.sh | sh
                   
+                  # Configure git to use netrc for authentication
+                  cat > ~/.netrc << EOF
+                  machine api.heroku.com
+                    login ${{ secrets.HEROKU_EMAIL }}
+                    password ${HEROKU_API_KEY}
+                  machine git.heroku.com
+                    login ${{ secrets.HEROKU_EMAIL }}
+                    password ${HEROKU_API_KEY}
+                  EOF
+                  chmod 600 ~/.netrc
+                  
                   # Get the commit SHA for the tmpt subdirectory
                   SPLIT_COMMIT=$(git subtree split --prefix tmpt HEAD)
                   
-                  # Build the Heroku git URL
-                  HEROKU_GIT_URL="https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git"
-                  
-                  # Push to Heroku
-                  git push --force "$HEROKU_GIT_URL" "${SPLIT_COMMIT}:refs/heads/main"
+                  # Push to Heroku using netrc authentication
+                  git push --force "https://git.heroku.com/${HEROKU_APP_NAME}.git" "${SPLIT_COMMIT}:refs/heads/main"
