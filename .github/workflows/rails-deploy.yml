@@ -46,7 +46,7 @@ jobs:
 
             - name: Lint code
               working-directory: tmpt
-              run: bundle exec rails_lint || true
+              run: bundle exec rubocop || true
 
             - name: Generate build report
               working-directory: tmpt
