@@ -20,6 +20,19 @@
  */
 
 import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
+import { 
+  enforceHealthPayment, 
+  piOriginEnforcer,
+  TransactionCategory 
+} from '@/lib/core/pi-origin-enforcement';
+import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
+
+/**
+ * CRITICAL: All health institution payments enforce Pi origin verification
+ * - INTERNAL Pi only (earned through healthcare work)
+ * - NO external Pi accepted for payroll
+ * - Immutable enforcement on blockchain
+ */
 
 /**
  * Policy alternatives (non-mandatory options)
@@ -403,16 +416,39 @@ export class HealthPlatformRegistry {
 
     const payments = await institution.processPayroll(date);
     
-    // Record all payments
+    // Record all payments with origin enforcement
     for (const payment of payments) {
       this.payments.push(payment);
       
-      // Execute Pi payment
+      // ✅ CRITICAL: Enforce Pi origin verification for payroll
+      // All health institution payroll MUST be from internally earned Pi
+      // NO external Pi accepted - this is immutable
+      const enforceResult = await enforceHealthPayment(
+        payment.toPersonId,
+        payment.amount,
+        payment.type === 'salary' || payment.type === 'contractor_payment' ? 'payroll' : 'bonus',
+        `${payment.type} payment - ${payment.description}`
+      );
+
+      if (!enforceResult.success) {
+        payment.status = 'failed';
+        console.error(
+          `[Health Payroll] REJECTED: ${enforceResult.message} - Only internally earned Pi accepted`
+        );
+        continue; // Skip payment if origin check fails
+      }
+      
+      // Execute Pi payment (origin already verified)
       try {
         const piPayment = await this.piPayments.createPayment({
           amount: payment.amount,
-          memo: `${payment.type} - ${payment.description}`,
-          metadata: { personId: payment.toPersonId, type: payment.type },
+          memo: `${payment.type} - ${payment.description} [INTERNAL PI VERIFIED]`,
+          metadata: { 
+            personId: payment.toPersonId, 
+            type: payment.type,
+            originEnforced: true, // Mark as origin-verified
+            piSource: 'internal', // Record source
+          },
         });
         
         payment.blockchainHash = piPayment.txid;

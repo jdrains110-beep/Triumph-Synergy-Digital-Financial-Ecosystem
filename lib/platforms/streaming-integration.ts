@@ -9,6 +9,19 @@
  */
 
 import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
+import { 
+  enforceStreamingPayment, 
+  piOriginEnforcer,
+  TransactionCategory 
+} from '@/lib/core/pi-origin-enforcement';
+import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
+
+/**
+ * CRITICAL: All streaming earnings enforce Pi origin verification
+ * - INTERNAL Pi only (earned from viewer engagement)
+ * - NO external Pi accepted for streaming payouts
+ * - Immutable enforcement on blockchain
+ */
 
 /**
  * Streaming session data
@@ -250,14 +263,36 @@ export class StreamingAggregator {
     session.status = 'ended';
     session.endTime = new Date();
 
-    // Distribute earnings
+    // ✅ CRITICAL: Enforce Pi origin verification for streaming earnings
+    // All streaming earnings MUST be from viewer engagement (internal)
+    // NO external Pi accepted - this is immutable
+    const enforceResult = await enforceStreamingPayment(
+      session.streamerId,
+      session.totalEarned,
+      'earnings',
+      `Streaming earnings from ${session.platform} (${session.gamingPlatform})`
+    );
+
+    if (!enforceResult.success) {
+      throw new Error(
+        `[Streaming Earnings] REJECTED: ${enforceResult.message} - Only internally earned Pi accepted`
+      );
+    }
+
+    // Distribute earnings (origin already verified)
     const payment = await this.piPayments.createPayment({
       amount: session.totalEarned,
-      memo: `Streaming earnings from ${session.platform} (${session.gamingPlatform})`,
-      metadata: { streamerId: session.streamerId, sessionId, platform: session.platform },
+      memo: `Streaming earnings from ${session.platform} (${session.gamingPlatform}) [INTERNAL PI VERIFIED]`,
+      metadata: { 
+        streamerId: session.streamerId, 
+        sessionId, 
+        platform: session.platform,
+        originEnforced: true, // Mark as origin-verified
+        piSource: 'internal', // Record source
+      },
     });
 
-    console.log(`✅ Session ended. Earnings: ${session.totalEarned} Pi`);
+    console.log(`✅ Session ended. Earnings: ${session.totalEarned} Pi [Origin Verified]`);
 
     return {
       earnings: session.totalEarned,

@@ -17,6 +17,19 @@
  */
 
 import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
+import { 
+  enforceGamingPayment, 
+  piOriginEnforcer,
+  TransactionCategory 
+} from '@/lib/core/pi-origin-enforcement';
+import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
+
+/**
+ * CRITICAL: All gaming payments enforce Pi origin verification
+ * - INTERNAL Pi only (mined within ecosystem)
+ * - NO external Pi accepted
+ * - Immutable enforcement on blockchain
+ */
 
 /**
  * User engagement events tracked across platforms
@@ -311,12 +324,34 @@ export class GamingPlatformRegistry {
       throw new Error(`Platform ${platformId} not found`);
     }
 
+    // ✅ CRITICAL: Enforce Pi origin verification
+    // All gaming rewards MUST be from internally mined Pi
+    // NO external Pi accepted - this is immutable
+    const enforceResult = await enforceGamingPayment(
+      userId, // User wallet
+      amount,
+      'engagement', // Gaming category
+      memo
+    );
+
+    if (!enforceResult.success) {
+      throw new Error(
+        `[Gaming Rewards] REJECTED: ${enforceResult.message} - Only internally mined Pi accepted`
+      );
+    }
+
     try {
       // Create Pi payment via Official Pi Payments
+      // ✓ Origin already verified above
       const payment = await this.piPayments.createPayment({
         amount,
-        memo: `${memo} - ${platform.name}`,
-        metadata: { userId, platformId },
+        memo: `${memo} - ${platform.name} [INTERNAL PI VERIFIED]`,
+        metadata: { 
+          userId, 
+          platformId,
+          originEnforced: true, // Mark as origin-verified
+          piSource: 'internal', // Record source
+        },
       });
 
       return {
