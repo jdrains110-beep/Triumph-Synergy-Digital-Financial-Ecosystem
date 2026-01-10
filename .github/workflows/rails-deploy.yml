@@ -18,17 +18,15 @@ jobs:
               with:
                   fetch-depth: 0
             
-            - name: Install Heroku CLI
-              run: curl https://cli-assets.heroku.com/install.sh | sh
-            
             - name: Deploy to Heroku
-              uses: akhileshns/heroku-deploy@v3.13.15
-              with:
-                  heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-                  heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-                  heroku_email: ${{ secrets.HEROKU_EMAIL }}
-                  appdir: tmpt
-                  buildpack: heroku/ruby
-                  healthcheck: "https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com/health"
-                  checkstring: "ok"
-                  delay: 5
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+              run: |
+                  # Install Heroku CLI
+                  curl https://cli-assets.heroku.com/install.sh | sh
+                  
+                  # Add Heroku git remote
+                  git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git || true
+                  
+                  # Deploy subdirectory using git subtree
+                  git push https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git `git subtree split --prefix tmpt HEAD`:refs/heads/main --force
