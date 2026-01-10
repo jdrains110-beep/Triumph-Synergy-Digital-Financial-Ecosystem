@@ -26,11 +26,13 @@ jobs:
                   # Install Heroku CLI
                   curl https://cli-assets.heroku.com/install.sh | sh
                   
-                  # Configure Heroku API key
-                  echo $HEROKU_API_KEY | heroku auth:token
+                  # Configure git credentials
+                  git config --global credential.helper store
+                  echo "https://heroku:${HEROKU_API_KEY}@git.heroku.com" > ~/.git-credentials
                   
-                  # Add git remote
-                  heroku git:remote -a $HEROKU_APP_NAME
+                  # Get subdirectory commit
+                  SPLIT_COMMIT=$(git subtree split --prefix tmpt HEAD)
+                  echo "Split commit: $SPLIT_COMMIT"
                   
-                  # Deploy subdirectory
-                  git subtree push --prefix tmpt heroku main
+                  # Push to Heroku
+                  git push --force https://git.heroku.com/${HEROKU_APP_NAME}.git ${SPLIT_COMMIT}:refs/heads/main
