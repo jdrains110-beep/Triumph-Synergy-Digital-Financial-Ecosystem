@@ -1,43 +1,8 @@
 source "https://rubygems.org"
-git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby "3.4.8"
 
-# Rails
-gem "rails", "~> 8.1.1"
+# Minimal Rack app
+gem "rack"
+gem "rackup"
 gem "puma", "~> 6.0"
-gem "bootsnap", require: false
-
-# Database
-group :development, :test do
-  gem "sqlite3", "~> 1.7"
-end
-
-group :production do
-  gem "pg", "~> 1.5"
-  gem "rails_12factor"
-end
-
-# JavaScript/CSS
-gem "importmap-rails"
-gem "turbo-rails"
-gem "stimulus-rails"
-gem "jbuilder"
-
-# Pi Network SDK
-gem "pi-sdk-rails", git: "https://github.com/pi-apps/pi-sdk-rails.git"
-
-# API
-gem "rack-cors"
-gem "jsonapi-serializer"
-
-# Development/Testing
-group :development, :test do
-  gem "debug", platforms: %i[ mri mingw x64_mingw ]
-  gem "rspec-rails"
-  gem "factory_bot_rails"
-end
-
-group :development do
-  gem "web-console"
-end
