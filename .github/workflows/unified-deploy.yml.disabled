@@ -1,11 +1,16 @@
-name: Unified Deploy - Triumph Synergy
+name: Unified Deploy - Triumph Synergy (DISABLED)
+
+# DISABLED: This workflow is replaced by:
+# - .github/workflows/nextjs-deploy.yml (for tmtt_nextjs/)
+# - .github/workflows/rails-deploy.yml (for tmpt/)
+# 
+# This workflow was causing failures by trying to build the root monorepo
+# instead of the individual app subdirectories.
 
 on:
-  push:
-    branches: [main, staging, development]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+  workflow_dispatch:  # Only manual trigger, not automatic
+
+# Disabled - no longer triggers on push/PR
 
 concurrency:
   group: deployment-${{ github.ref }}
