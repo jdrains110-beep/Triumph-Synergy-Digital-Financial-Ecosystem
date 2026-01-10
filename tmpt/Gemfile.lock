@@ -146,14 +146,10 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nio4r (2.7.5)
-    nokogiri (1.19.0)
-      mini_portile2 (~> 2.8.2)
-      racc (~> 1.4)
     nokogiri (1.19.0-x64-mingw-ucrt)
       racc (~> 1.4)
     nokogiri (1.19.0-x86_64-linux-gnu)
       racc (~> 1.4)
-    pg (1.6.3)
     pg (1.6.3-x64-mingw-ucrt)
     pg (1.6.3-x86_64-linux)
     pp (0.6.3)
@@ -264,7 +260,6 @@ GEM
     zeitwerk (2.7.4)
 
 PLATFORMS
-  ruby
   x64-mingw-ucrt
   x86_64-linux
 
