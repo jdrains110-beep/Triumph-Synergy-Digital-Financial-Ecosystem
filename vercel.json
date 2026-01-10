@@ -1,9 +1,9 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "cd tmtt_nextjs && npm run build",
-  "installCommand": "cd tmtt_nextjs && npm install",
-  "outputDirectory": "tmtt_nextjs/.next",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
   "rewrites": [
     {
       "source": "/validation-key.txt",
@@ -50,7 +50,6 @@
       "source": "/validation-key.txt"
     }
   ],
-  "outputDirectory": ".next",
   "devCommand": "pnpm dev",
   "regions": ["iad1"],
   "functions": {
