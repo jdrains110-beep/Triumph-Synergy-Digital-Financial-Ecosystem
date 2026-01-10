@@ -9,7 +9,10 @@
     "start": "next start",
     "lint": "next lint"
   },
-  "keywords": ["pi-network", "triumph-synergy"],
+  "keywords": [
+    "pi-network",
+    "triumph-synergy"
+  ],
   "author": "Triumph-Synergy",
   "license": "ISC",
   "type": "module",
@@ -19,9 +22,9 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "typescript": "^5.0.0"
+    "@types/node": "^20.19.28",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "typescript": "^5.9.3"
   }
 }
