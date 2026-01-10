@@ -29,5 +29,8 @@ jobs:
                   # Get the commit SHA for the tmpt subdirectory
                   SPLIT_COMMIT=$(git subtree split --prefix tmpt HEAD)
                   
-                  # Push to Heroku using the API key for authentication
-                  git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git $SPLIT_COMMIT:refs/heads/main
+                  # Build the Heroku git URL
+                  HEROKU_GIT_URL="https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git"
+                  
+                  # Push to Heroku
+                  git push --force "$HEROKU_GIT_URL" "${SPLIT_COMMIT}:refs/heads/main"
