@@ -132,11 +132,29 @@ export function PiProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       const Pi = (window as any).Pi;
 
-      const paymentResult = await Pi.payments.request({
+      // Add timeout protection
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                "Payment request timeout - Pi SDK did not respond within 30 seconds"
+              )
+            ),
+          30000
+        )
+      );
+
+      const paymentPromise = Pi.payments.request({
         amount: payments[0]?.amount || 0,
         memo: memo || payments[0]?.memo || "Triumph Synergy Payment",
         metadata: payments[0]?.metadata || {},
       });
+
+      const paymentResult = await Promise.race([
+        paymentPromise,
+        timeoutPromise,
+      ]);
 
       console.log("[Pi SDK] Payment requested:", paymentResult);
       setIsLoading(false);

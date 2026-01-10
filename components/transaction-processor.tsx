@@ -48,6 +48,9 @@ export function TransactionProcessor() {
 
       console.log("[TransactionProcessor] Requesting approval...", txReq);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const response = await fetch("/api/transactions/request-approval", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +61,10 @@ export function TransactionProcessor() {
           memo: txReq.memo,
           timestamp: Date.now(),
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const err = await response.json();
@@ -73,6 +79,12 @@ export function TransactionProcessor() {
 
       return data.approvalId;
     } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        const errorMsg = "Request timeout - server took too long to respond";
+        setError(errorMsg);
+        setStatus("error");
+        throw new Error(errorMsg);
+      }
       const errorMsg = err instanceof Error ? err.message : "Approval failed";
       setError(errorMsg);
       setStatus("error");
@@ -94,6 +106,9 @@ export function TransactionProcessor() {
         approvalId,
       });
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const response = await fetch("/api/transactions/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,7 +120,10 @@ export function TransactionProcessor() {
           approvalId,
           timestamp: Date.now(),
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const err = await response.json();
@@ -119,6 +137,12 @@ export function TransactionProcessor() {
       setTransactionId(data.transactionId);
       setStatus("success");
     } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        const errorMsg = "Request timeout - server took too long to respond";
+        setError(errorMsg);
+        setStatus("error");
+        throw new Error(errorMsg);
+      }
       const errorMsg = err instanceof Error ? err.message : "Processing failed";
       setError(errorMsg);
       setStatus("error");
@@ -292,10 +316,42 @@ export function TransactionProcessor() {
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-5 w-5 text-red-600" />
             <div className="flex-1">
-              <h3 className="font-medium text-red-900">❌ Error</h3>
-              <p className="mt-1 text-red-800 text-sm">{error}</p>
+              <h3 className="font-medium text-red-900">❌ Payment Error</h3>
+              <p className="mt-2 text-red-800 text-sm font-semibold">{error}</p>
+              <div className="mt-3 space-y-2 text-red-700 text-xs">
+                <p className="font-medium">Troubleshooting tips:</p>
+                <ul className="list-inside list-disc space-y-1">
+                  {error.includes("timeout") && (
+                    <>
+                      <li>Network connection may be slow</li>
+                      <li>Try again in a few moments</li>
+                      <li>Check your internet connection</li>
+                    </>
+                  )}
+                  {error.includes("aborted") && (
+                    <>
+                      <li>Request was interrupted</li>
+                      <li>Try the payment again</li>
+                    </>
+                  )}
+                  {error.includes("not authenticated") && (
+                    <>
+                      <li>You need to be logged in</li>
+                      <li>Sign in with Pi Network first</li>
+                    </>
+                  )}
+                  {!error.includes("timeout") &&
+                    !error.includes("aborted") &&
+                    !error.includes("authenticated") && (
+                      <>
+                        <li>Check the error message above</li>
+                        <li>Try again or contact support</li>
+                      </>
+                    )}
+                </ul>
+              </div>
               <Button
-                className="mt-3"
+                className="mt-4"
                 onClick={() => {
                   setStatus("idle");
                   setError(null);
