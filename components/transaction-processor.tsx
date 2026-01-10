@@ -19,7 +19,8 @@ type TransactionRequest = {
 };
 
 export function TransactionProcessor() {
-  const { isReady, isAuthenticated, user } = usePi();
+  const { isReady, isAuthenticated, user: piUser } = usePi();
+  const [user, setUser] = useState<{ uid: string; username: string } | null>(piUser);
   const [transactionId, setTransactionId] = useState<string>("");
   const [amount, setAmount] = useState<string>("10");
   const [memo, setMemo] = useState<string>("Triumph Synergy Payment");
@@ -30,6 +31,13 @@ export function TransactionProcessor() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [browserInfo, setBrowserInfo] = useState<any>(null);
+
+  // Update user when Pi user changes
+  useEffect(() => {
+    if (piUser) {
+      setUser(piUser);
+    }
+  }, [piUser]);
 
   // Check Pi Browser on mount
   useEffect(() => {
@@ -155,8 +163,13 @@ export function TransactionProcessor() {
     try {
       // Allow transaction even if Pi SDK is not ready (for web/fallback mode)
       if (!user) {
-        setError("User not authenticated");
-        setStatus("error");
+        setError("User not authenticated. Creating guest session...");
+        setUser({
+          uid: `guest-${Date.now()}`,
+          username: "Guest User",
+        });
+        // Retry after setting guest user
+        setTimeout(() => handleTransaction(), 500);
         return;
       }
 
@@ -169,6 +182,8 @@ export function TransactionProcessor() {
         userId: user.uid,
       };
 
+      console.log("[TransactionProcessor] Starting payment flow...", txReq);
+
       // Step 1: Request server approval
       const approvalId = await requestApproval(txReq);
 
@@ -180,6 +195,11 @@ export function TransactionProcessor() {
     } catch (err) {
       console.error("[TransactionProcessor] Error:", err);
       setIsProcessing(false);
+      if (!error) {
+        setError(
+          err instanceof Error ? err.message : "Transaction failed"
+        );
+      }
     }
   };
 

@@ -50,18 +50,31 @@ export function PiProvider({ children }: { children: ReactNode }) {
     const initializePi = async () => {
       try {
         // Check if Pi SDK is loaded
-        if (typeof window === "undefined" || !(window as any).Pi) {
+        if (typeof window === "undefined") {
+          console.log("[Pi SDK] Server-side rendering - skipping initialization");
+          return;
+        }
+
+        // Wait for Pi SDK script to load
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max wait (50 * 100ms)
+
+        while (!((window as any).Pi) && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          attempts++;
+        }
+
+        if (!(window as any).Pi) {
           console.log(
-            "[Pi SDK] Pi SDK not available yet - continuing in fallback mode"
+            "[Pi SDK] Pi SDK not available - continuing in fallback mode"
           );
-          // Still set as ready even without Pi SDK for development/web fallback
           setTimeout(() => {
             if (!isReady) {
               setIsReady(true);
               setIsLoading(false);
               console.log("[Pi SDK] ✓ Fallback mode enabled - app continues");
             }
-          }, 2000);
+          }, 500);
           return;
         }
 
@@ -94,6 +107,11 @@ export function PiProvider({ children }: { children: ReactNode }) {
             authError
           );
           setIsAuthenticated(false);
+          // Still allow guest payments
+          setUser({
+            uid: `guest-${Date.now()}`,
+            username: "Guest User",
+          });
         }
 
         setIsReady(true);
@@ -106,9 +124,6 @@ export function PiProvider({ children }: { children: ReactNode }) {
         // Still allow app to continue
         setIsReady(true);
         setIsLoading(false);
-
-        // Retry initialization
-        setTimeout(initializePi, 2000);
       }
     };
 
