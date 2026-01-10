@@ -1,0 +1,27 @@
+{
+  "name": "tmtt_nextjs",
+  "version": "1.0.0",
+  "description": "Triumph-Synergy Pi Network Integration with Next.js",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": ["pi-network", "triumph-synergy"],
+  "author": "Triumph-Synergy",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "next": "^16.1.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}
