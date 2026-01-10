@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon, VercelIcon } from "./icons";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
+import { PaymentButton } from "./payment-button";
 
 function PureChatHeader({
   chatId,
@@ -48,6 +49,10 @@ function PureChatHeader({
           className="order-1 md:order-2"
           selectedVisibilityType={selectedVisibilityType}
         />
+      )}
+
+      {!isReadonly && (
+        <PaymentButton />
       )}
 
       <Button
