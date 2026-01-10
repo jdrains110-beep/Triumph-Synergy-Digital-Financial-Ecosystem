@@ -1,17 +1,26 @@
-name: Deploy Rails to Heroku
+name: Deploy Rails to Heroku [DISABLED]
+
+# DISABLED: This workflow was for deploying the tmpt/ subdirectory (legacy Rails app)
+# which has been removed from the project as it was causing Turbopack UTF-8 parsing errors.
+# 
+# The tmpt directory contained Ruby files that were incompatible with the Next.js build toolchain.
+# This workflow is kept for reference but is no longer triggered.
 
 on:
+  # Disabled - no longer needed
   push:
     paths:
-      - "tmpt/**"
-      - ".github/workflows/rails-deploy.yml"
+      - "none/**"
     branches:
-      - main
+      - "never"
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
+    # This job is disabled - tmpt directory was deleted
+    if: false
 
     steps:
       - uses: actions/checkout@v4
