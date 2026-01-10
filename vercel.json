@@ -1,7 +1,9 @@
 {
+  "version": 2,
   "framework": "nextjs",
-  "buildCommand": "next build",
-  "installCommand": "pnpm install",
+  "buildCommand": "cd tmtt_nextjs && npm run build",
+  "installCommand": "cd tmtt_nextjs && npm install",
+  "outputDirectory": "tmtt_nextjs/.next",
   "rewrites": [
     {
       "source": "/validation-key.txt",
