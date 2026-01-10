@@ -1,38 +1,38 @@
 name: Deploy Rails to Heroku
 
 on:
-    push:
-        paths:
-            - "tmpt/**"
-            - ".github/workflows/rails-deploy.yml"
-        branches:
-            - main
-    workflow_dispatch:
+  push:
+    paths:
+      - "tmpt/**"
+      - ".github/workflows/rails-deploy.yml"
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            
-            - name: Deploy to Heroku
-              env:
-                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-                  HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-              run: |
-                  # Install Heroku CLI
-                  curl https://cli-assets.heroku.com/install.sh | sh
-                  
-                  # Configure git credentials
-                  git config --global credential.helper store
-                  echo "https://heroku:${HEROKU_API_KEY}@git.heroku.com" > ~/.git-credentials
-                  
-                  # Get subdirectory commit
-                  SPLIT_COMMIT=$(git subtree split --prefix tmpt HEAD)
-                  echo "Split commit: $SPLIT_COMMIT"
-                  
-                  # Push to Heroku
-                  git push --force https://git.heroku.com/${HEROKU_APP_NAME}.git ${SPLIT_COMMIT}:refs/heads/main
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+        run: |
+          # Install Heroku CLI
+          curl https://cli-assets.heroku.com/install.sh | sh
+
+          # Configure git credentials
+          git config --global credential.helper store
+          echo "https://heroku:${HEROKU_API_KEY}@git.heroku.com" > ~/.git-credentials
+
+          # Get subdirectory commit
+          SPLIT_COMMIT=$(git subtree split --prefix tmpt HEAD)
+          echo "Split commit: $SPLIT_COMMIT"
+
+          # Push to Heroku
+          git push --force https://git.heroku.com/${HEROKU_APP_NAME}.git ${SPLIT_COMMIT}:refs/heads/main

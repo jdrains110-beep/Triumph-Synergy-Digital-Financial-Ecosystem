@@ -1,5 +1,4 @@
-# DISABLED: Migrations now run in unified-deploy.yml
-name: Build and (Optional) Migrate (Disabled)
+name: Build and Optional Migration
 
 on:
   workflow_dispatch:
@@ -37,7 +36,3 @@ jobs:
           INTERNAL_PI_MIN_VALUE: 10.0
           EXTERNAL_PI_MIN_VALUE: 1.0
         run: pnpm run build
-
-  # Note: To run migrations in GitHub Actions, set repository secret `RUN_MIGRATIONS` to `true`
-  # and add `POSTGRES_URL` as a secret. For Vercel, prefer running migrations from CI or
-  # a dedicated deployment hook rather than during Vercel build.
