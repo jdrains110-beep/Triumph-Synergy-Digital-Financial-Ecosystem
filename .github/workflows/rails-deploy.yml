@@ -21,12 +21,13 @@ jobs:
             - name: Deploy to Heroku
               env:
                   HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+                  HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
               run: |
                   # Install Heroku CLI
                   curl https://cli-assets.heroku.com/install.sh | sh
                   
-                  # Add Heroku git remote
-                  git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git || true
+                  # Get the commit SHA for the tmpt subdirectory
+                  SPLIT_COMMIT=$(git subtree split --prefix tmpt HEAD)
                   
-                  # Deploy subdirectory using git subtree
-                  git push https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git `git subtree split --prefix tmpt HEAD`:refs/heads/main --force
+                  # Push to Heroku using the API key for authentication
+                  git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git $SPLIT_COMMIT:refs/heads/main
