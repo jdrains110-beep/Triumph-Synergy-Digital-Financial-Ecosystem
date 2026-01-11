@@ -88,10 +88,10 @@
 **Test Coverage**: 85%+
 
 **Key Features**:
-- Real-time price feeds from 1,000+ nodes
-- VRF randomness for gaming/fairness
+- Real-time price feeds from decentralized operator network
+- VRF randomness (v2.5) for gaming/fairness
 - Keepers for automation
-- CCIP cross-chain messaging
+- CCIP cross-chain messaging (defense-in-depth)
 - Complete TypeScript types
 - Comprehensive test suite
 

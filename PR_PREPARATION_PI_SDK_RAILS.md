@@ -417,7 +417,7 @@ The gem includes built-in monitoring:
 Chainlink::HealthCheck.perform
 
 # Get metrics
-Chainlink::Metrics.oracle_uptime    # => 99.99%
+Chainlink::Metrics.network_status    # => "healthy"
 Chainlink::Metrics.avg_response_time # => 245ms
 Chainlink::Metrics.stale_prices     # => 0
 
@@ -500,11 +500,11 @@ Documentation:
 - Security best practices
 
 This enables Rails developers to:
-- Access 1,000+ Chainlink oracle nodes
+- Access Chainlink's decentralized oracle network
 - Build enterprise financial applications
 - Implement real-time price feeds
-- Automate contract execution via Keepers
-- Enable cross-chain messaging via CCIP
+- Automate contract execution (Keepers v2.1+)
+- Enable cross-chain messaging (CCIP)
 
 Tested with Rails 6.1+, Ruby 2.7+
 Compatible with Triumph Synergy ecosystem

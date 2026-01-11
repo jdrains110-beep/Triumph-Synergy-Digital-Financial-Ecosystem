@@ -44,15 +44,15 @@ This PR integrates Chainlink Oracle Network services directly into the Pi SDK, e
 ### Benefits for Pi SDK Users
 
 1. **Enterprise-Grade Data**
-   - 1,000+ independent Chainlink nodes
-   - 99.99% uptime SLA
-   - Multiple data sources for price feeds
-   - Real-time market data
+   - Decentralized network of independent operators
+   - High-frequency real-time data updates
+   - Multiple verified data sources
+   - Byzantine fault-tolerant consensus
 
 2. **Automated Execution**
-   - Chainlink Keepers for automation
+   - Chainlink Keepers for automation (v2.1+)
    - Custom condition checking
-   - Reliable execution with failovers
+   - Redundant execution guarantees
    - Cost-efficient batching
 
 3. **Cross-Chain Capability**
@@ -166,10 +166,10 @@ feat: Add Chainlink Oracle integration to Pi SDK
 
 Add comprehensive Chainlink oracle integration enabling:
 
-- Real-time price feeds (1,000+ nodes, 99.99% uptime)
-- Verifiable Randomness Function (VRF) for fairness
-- Keepers automation for reliable contract execution
-- CCIP cross-chain messaging and settlement
+- Real-time price feeds from decentralized oracle networks
+- Verifiable Randomness Function (VRF v2.5) for fairness
+- Automation (v2.1+) for reliable contract execution
+- CCIP cross-chain messaging with defense-in-depth security
 - Complete TypeScript interfaces and documentation
 
 Includes:
@@ -203,7 +203,7 @@ Closes #[issue-number]
 ```typescript
 /**
  * Chainlink Price Feed Integration
- * Access real-time market data from 1,000+ independent oracle nodes
+ * Access real-time market data from decentralized oracle network
  */
 
 import { EventEmitter } from 'events';

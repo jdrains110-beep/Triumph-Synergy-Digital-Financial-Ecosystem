@@ -29,7 +29,7 @@ This PR introduces comprehensive integration documentation for Triumph Synergy d
 
 ### Benefits
 - Developers can integrate enterprise financial systems into PIOS
-- Direct access to Chainlink's 1,000+ oracle nodes
+- Access to Chainlink's decentralized oracle network
 - Ready-to-use patterns for payments, staking, and UBI
 - Production-tested integration from Triumph Synergy
 
@@ -180,11 +180,11 @@ CCIP integration enables:
 
 ## Security Considerations
 
-1. **Oracle Trust**: Chainlink maintains 1,000+ independent nodes
-2. **Data Freshness**: Prices updated within configurable intervals
+1. **Oracle Trust**: Chainlink operates decentralized network of independent operators
+2. **Data Freshness**: Prices updated via heartbeat and deviation-triggered mechanisms
 3. **Backup Oracles**: Secondary feeds for critical prices
-4. **Rate Limiting**: Built-in protections against flash attacks
-5. **Audit Trail**: Full transaction history for compliance
+4. **Defense-in-Depth**: Built-in protections against manipulation attacks
+5. **Audit Trail**: Full on-chain transaction history for compliance
 
 ## Production Deployment Checklist
 
@@ -226,23 +226,23 @@ For PIOS issues: [pios-support]
 
 ## What is Chainlink?
 
-Chainlink is a decentralized oracle network connecting smart contracts to real-world data:
-- **1,000+ independent nodes** providing price feeds
-- **99.99% uptime SLA** with 24/7 monitoring
-- **Audited infrastructure** trusted by DeFi ecosystem
-- **Multi-chain support** via CCIP for cross-chain messaging
+Chainlink is the industry-standard decentralized oracle network:
+- **Decentralized data aggregation** from multiple independent data sources
+- **$14 trillion+** in onchain transaction value secured
+- **Audited infrastructure** trusted by leading DeFi protocols
+- **Multi-chain support** (Ethereum, Polygon, Arbitrum, Optimism, Base, Linea, and more)
+- **Defense-in-depth security** with Decentralized Oracle Networks (DONs)
 
 ## Available Chainlink Services
 
 ### 1. Price Feeds (Data Layer)
-Real-time commodity, cryptocurrency, and traditional asset prices.
+Decentralized price data from multiple independent node operators.
 
-**Supported Pairs**:
-- `PI/USD`: Pi Network token price
-- `XLM/USD`: Stellar Lumens price
-- `BTC/USD`: Bitcoin price
-- `ETH/USD`: Ethereum price
-- `USDC/USD`: USD Coin price
+**Data Sources**:
+- Decentralized data aggregation from multiple independent sources
+- Independent node operators validate and sign data
+- On-chain verification ensures data integrity
+- Supported on: Ethereum, Polygon, Arbitrum, Optimism, Avalanche, Base, Linea, and more
 
 **Accuracy**: 0.1% deviation tolerance  
 **Update Frequency**: Every 1 hour or 0.5% price movement  
@@ -430,7 +430,7 @@ Error: Keeper execution failed (reason: insufficient balance)
 - Oracle response latency: < 2 seconds
 - Data freshness: < 5 minutes old
 - Keeper success rate: > 99.9%
-- Network availability: 99.99%
+- Network reliability: High-frequency updates via heartbeat + deviation triggers
 
 ### Alert Thresholds
 - Price deviation > 5% from expected
@@ -715,10 +715,10 @@ Triumph Synergy provides enterprise-grade financial infrastructure for PIOS appl
 
 ### Chainlink Oracle Services
 Access decentralized oracle data through Chainlink:
-- Real-time price feeds (1,000+ nodes)
-- Verifiable randomness for fairness
-- Automated contract execution via Keepers
-- Cross-chain messaging via CCIP
+- Real-time price feeds from decentralized operator network
+- Verifiable randomness (VRF v2.5) for fairness
+- Automated contract execution (Keepers v2.1+)
+- Cross-chain messaging (CCIP with defense-in-depth)
 
 **[View Chainlink Guide →](docs/chainlink-oracle-guide.md)**
 

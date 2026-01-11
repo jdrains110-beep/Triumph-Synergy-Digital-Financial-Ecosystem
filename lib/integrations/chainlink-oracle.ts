@@ -75,12 +75,12 @@ export async function getChainlinkPrice(
   // In production, this would call Chainlink data aggregator
   return {
     assetPair,
-    price: 0.314159, // Example: Pi Network at $0.314159 USD
+    price: 0.314159, // Example: Pi Network price data
     timestamp: Date.now(),
     source: 'chainlink',
-    confidence: 0.9999, // 99.99% confidence from Chainlink network
-    updateFrequency: '1 hour',
-    nodeCount: 20, // 20 independent Chainlink nodes
+    confidence: 0.99, // High confidence from Chainlink decentralized network
+    updateFrequency: 'Real-time (heartbeat + deviation triggered)',
+    nodeCount: 10, // Multiple independent Chainlink node operators
   };
 }
 
