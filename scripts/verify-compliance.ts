@@ -441,10 +441,11 @@ function checkDeploymentReadiness(): boolean {
   } else {
     console.log("❌ DEPLOYMENT NOT READY");
     console.log("\nThe following compliance requirements need attention:");
-    for (const r of report.requirements.filter(
-      (r) => r.status !== "COMPLIANT"
-    )) {
-      console.log(`  ❌ ${r.requirement} (${r.status})`);
+    const nonCompliantRequirements = report.requirements.filter(
+      (requirement) => requirement.status !== "COMPLIANT"
+    );
+    for (const requirement of nonCompliantRequirements) {
+      console.log(`  ❌ ${requirement.requirement} (${requirement.status})`);
     }
   }
 

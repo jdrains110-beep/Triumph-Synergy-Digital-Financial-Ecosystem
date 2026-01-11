@@ -112,7 +112,7 @@ export function PaymentButton() {
 
           <p className="text-center text-gray-500 text-xs">
             By proceeding, you agree to our{" "}
-            <a className="text-blue-600 hover:underline" href="#">
+            <a className="text-blue-600 hover:underline" href="/payment-terms">
               Payment Terms
             </a>
           </p>
