@@ -259,9 +259,12 @@ export function TransactionProcessor() {
       {/* Transaction Form */}
       <Card className="space-y-4 p-6">
         <div className="space-y-2">
-          <label className="block font-medium text-sm">Amount (π)</label>
+          <label className="block font-medium text-sm" htmlFor="tx-amount">
+            Amount (π)
+          </label>
           <Input
             disabled={isProcessing}
+            id="tx-amount"
             max="100000"
             min="1"
             onChange={(e) => setAmount(e.target.value)}
@@ -273,9 +276,12 @@ export function TransactionProcessor() {
         </div>
 
         <div className="space-y-2">
-          <label className="block font-medium text-sm">Memo</label>
+          <label className="block font-medium text-sm" htmlFor="tx-memo">
+            Memo
+          </label>
           <Input
             disabled={isProcessing}
+            id="tx-memo"
             onChange={(e) => setMemo(e.target.value)}
             placeholder="Transaction description"
             type="text"

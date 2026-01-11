@@ -494,20 +494,27 @@ export class PlayStation5Integration implements GamingIntegration {
   async updateTournamentStandings(
     tournamentId: string,
     standings: GamingTournament["standings"]
-  ): Promise<void> {}
-  async completeTournament(tournamentId: string): Promise<void> {}
-  async distributeTournamentPrizes(tournamentId: string): Promise<void> {}
+  ): Promise<void> {
+    // TODO: Implement tournament standings update
+  }
+  async completeTournament(tournamentId: string): Promise<void> {
+    // TODO: Implement tournament completion
+  }
+  async distributeTournamentPrizes(tournamentId: string): Promise<void> {
+    // TODO: Implement prize distribution
+  }
   async trackReferral(
     referrerId: string,
     referredUserId: string
-  ): Promise<void> {}
+  ): Promise<void> {
+    // TODO: Implement referral tracking
+  }
   async getReferralEarnings(userId: string): Promise<number> {
     return 0;
   }
-  async trackAchievement(
-    userId: string,
-    achievementId: string
-  ): Promise<void> {}
+  async trackAchievement(userId: string, achievementId: string): Promise<void> {
+    // TODO: Implement achievement tracking
+  }
   async getAchievements(userId: string): Promise<string[]> {
     return [];
   }
@@ -670,13 +677,17 @@ export class Battlefield6Integration implements GamingIntegration {
     };
   }
 
-  async connectStreamingPlatform(streaming: StreamingPlatform): Promise<void> {}
+  async connectStreamingPlatform(streaming: StreamingPlatform): Promise<void> {
+    // TODO: Implement streaming platform connection
+  }
   async trackStreamingSession(
     userId: string,
     platform: "twitch" | "youtube" | "kick",
     durationHours: number,
     viewers: number
-  ): Promise<void> {}
+  ): Promise<void> {
+    // TODO: Implement streaming session tracking
+  }
   async createTournament(
     tournament: Omit<GamingTournament, "id" | "standings" | "status">
   ): Promise<GamingTournament> {
@@ -692,20 +703,27 @@ export class Battlefield6Integration implements GamingIntegration {
   async updateTournamentStandings(
     tournamentId: string,
     standings: GamingTournament["standings"]
-  ): Promise<void> {}
-  async completeTournament(tournamentId: string): Promise<void> {}
-  async distributeTournamentPrizes(tournamentId: string): Promise<void> {}
+  ): Promise<void> {
+    // TODO: Implement tournament standings update
+  }
+  async completeTournament(tournamentId: string): Promise<void> {
+    // TODO: Implement tournament completion
+  }
+  async distributeTournamentPrizes(tournamentId: string): Promise<void> {
+    // TODO: Implement prize distribution
+  }
   async trackReferral(
     referrerId: string,
     referredUserId: string
-  ): Promise<void> {}
+  ): Promise<void> {
+    // TODO: Implement referral tracking
+  }
   async getReferralEarnings(userId: string): Promise<number> {
     return 0;
   }
-  async trackAchievement(
-    userId: string,
-    achievementId: string
-  ): Promise<void> {}
+  async trackAchievement(userId: string, achievementId: string): Promise<void> {
+    // TODO: Implement achievement tracking
+  }
   async getAchievements(userId: string): Promise<string[]> {
     return [];
   }

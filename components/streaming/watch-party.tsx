@@ -105,8 +105,8 @@ export function WatchParty({
             {/* Invite Section */}
             <div className="space-y-2">
               <label
-                htmlFor="invite-email"
                 className="font-semibold text-gray-700 text-sm"
+                htmlFor="invite-email"
               >
                 Invite Friends
               </label>
@@ -133,7 +133,7 @@ export function WatchParty({
                 {participants.map((participant, idx) => (
                   <div
                     className="flex items-center gap-2 rounded bg-gray-50 p-2"
-                    key={idx}
+                    key={`participant-${participant}-${idx}`}
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 font-bold text-white text-xs">
                       {participant.charAt(0).toUpperCase()}
