@@ -20,7 +20,7 @@
 
 | Metric | Count | Status |
 |--------|-------|--------|
-| **Total Files Checked** | 380 | ✓ |
+| **Total Files Checked** | 380 | 📊 |
 | **Total Errors** | 1,420 | ❌ |
 | **Total Warnings** | 531 | ⚠️ |
 | **Total Issues** | 1,951 | ❌ |
@@ -169,9 +169,9 @@ Mostly style and formatting issues:
    - Inconsistent developer formatting practices
 
 2. **Configuration** - Multiple linter rules disabled in biome.jsonc:
-   - `noExplicitAny: "off"` - Should gradually enable
-   - `noConsole: "off"` - Should use proper logging
-   - `noUnusedVariables: "off"` - Can hide dead code
+   - `suspicious/noExplicitAny: "off"` - Should gradually enable
+   - `suspicious/noConsole: "off"` - Should use proper logging
+   - `correctness/noUnusedVariables: "off"` - Can hide dead code
 
 3. **File proliferation** - 100+ status/summary markdown files suggest:
    - Possible over-documentation
@@ -277,7 +277,7 @@ Based on the sample output, these files have multiple issues:
 **Running the auto-formatter will immediately raise the grade to B+ (85/100)**
 
 ```bash
-cd /home/runner/work/triumph-synergy/triumph-synergy
+# From the repository root directory:
 pnpm run format
 ```
 
