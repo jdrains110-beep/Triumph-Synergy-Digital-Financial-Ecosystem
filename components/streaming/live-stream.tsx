@@ -49,8 +49,8 @@ export function LiveStream({
         isPublic: true,
       });
       setInitialized(true);
-    } catch (error) {
-      console.error("Failed to initialize session:", error);
+    } catch (initError) {
+      console.error("Failed to initialize session:", initError);
     }
   };
 
@@ -58,8 +58,8 @@ export function LiveStream({
     try {
       await startStream();
       onStreamStart?.(sessionId!);
-    } catch (error) {
-      console.error("Failed to start stream:", error);
+    } catch (startError) {
+      console.error("Failed to start stream:", startError);
     }
   };
 
@@ -67,8 +67,8 @@ export function LiveStream({
     try {
       await endStream();
       onStreamEnd?.(sessionId!);
-    } catch (error) {
-      console.error("Failed to end stream:", error);
+    } catch (endError) {
+      console.error("Failed to end stream:", endError);
     }
   };
 
@@ -86,9 +86,12 @@ export function LiveStream({
 
         <div className="space-y-4">
           <div>
-            <label className="font-medium text-sm">Stream Title</label>
+            <label className="font-medium text-sm" htmlFor="stream-title">
+              Stream Title
+            </label>
             <Input
               className="mt-1"
+              id="stream-title"
               onChange={(e) => setStreamTitle(e.target.value)}
               placeholder="Enter stream title"
               value={streamTitle}
@@ -96,9 +99,12 @@ export function LiveStream({
           </div>
 
           <div>
-            <label className="font-medium text-sm">Description</label>
+            <label className="font-medium text-sm" htmlFor="stream-description">
+              Description
+            </label>
             <textarea
               className="mt-1 w-full rounded-md border p-2 text-sm"
+              id="stream-description"
               onChange={(e) => setStreamDescription(e.target.value)}
               placeholder="Enter stream description"
               rows={3}

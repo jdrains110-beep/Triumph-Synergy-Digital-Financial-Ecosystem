@@ -54,11 +54,11 @@ export function StreamControls({
       <Card className="p-4">
         <div className="space-y-4">
           {/* Quality Selection */}
-          <div>
+          <fieldset>
             <div className="mb-3 flex items-center justify-between">
-              <label className="font-semibold text-gray-900 text-sm">
+              <legend className="font-semibold text-gray-900 text-sm">
                 Stream Quality
-              </label>
+              </legend>
               <Button
                 className="text-xs"
                 onClick={() => setAutoQuality(!autoQuality)}
@@ -85,13 +85,16 @@ export function StreamControls({
                 </Button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Volume Control */}
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Volume2 className="text-gray-600" size={18} />
-              <label className="font-semibold text-gray-900 text-sm">
+              <label
+                className="font-semibold text-gray-900 text-sm"
+                htmlFor="volume-slider"
+              >
                 Volume
               </label>
               <span className="ml-auto text-gray-600 text-xs">{volume}%</span>
@@ -99,6 +102,7 @@ export function StreamControls({
             <Slider
               className="w-full"
               defaultValue={[volume]}
+              id="volume-slider"
               max={100}
               onValueChange={(val) => setVolume(val[0])}
               step={1}

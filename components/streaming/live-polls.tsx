@@ -91,25 +91,30 @@ export function LivePolls({
         <Card className="bg-purple-50 p-4">
           <div className="space-y-3">
             <div>
-              <label className="font-semibold text-gray-700 text-sm">
+              <label
+                className="font-semibold text-gray-700 text-sm"
+                htmlFor="poll-question"
+              >
                 Poll Question
               </label>
               <Input
                 className="mt-1"
+                id="poll-question"
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="What's your question?"
                 value={question}
               />
             </div>
 
-            <div>
-              <label className="mb-2 block font-semibold text-gray-700 text-sm">
+            <fieldset>
+              <legend className="mb-2 block font-semibold text-gray-700 text-sm">
                 Options (2-5)
-              </label>
+              </legend>
               <div className="space-y-2">
                 {options.map((opt, idx) => (
                   <Input
-                    key={idx}
+                    id={`poll-option-${idx}`}
+                    key={`poll-option-${idx}`}
                     onChange={(e) => handleUpdateOption(idx, e.target.value)}
                     placeholder={`Option ${idx + 1}`}
                     value={opt}
@@ -127,7 +132,7 @@ export function LivePolls({
                   <Plus className="mr-1" size={14} /> Add Option
                 </Button>
               )}
-            </div>
+            </fieldset>
 
             <div className="flex gap-2">
               <Button

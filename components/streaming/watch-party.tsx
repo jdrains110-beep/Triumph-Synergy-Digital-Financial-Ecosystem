@@ -104,11 +104,15 @@ export function WatchParty({
 
             {/* Invite Section */}
             <div className="space-y-2">
-              <label className="font-semibold text-gray-700 text-sm">
+              <label
+                htmlFor="invite-email"
+                className="font-semibold text-gray-700 text-sm"
+              >
                 Invite Friends
               </label>
               <div className="flex gap-2">
                 <Input
+                  id="invite-email"
                   onChange={(e) => setInviteEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleInvite()}
                   placeholder="friend@example.com"

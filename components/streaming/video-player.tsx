@@ -133,7 +133,9 @@ export function VideoPlayer({
         controls={false}
         playsInline
         ref={videoRef}
-      />
+      >
+        <track kind="captions" label="English" srcLang="en" />
+      </video>
 
       {/* Live Badge */}
       {isLive && (

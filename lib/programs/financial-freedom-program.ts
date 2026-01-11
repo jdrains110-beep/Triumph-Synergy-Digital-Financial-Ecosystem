@@ -609,6 +609,8 @@ class FinancialFreedomProgramManager {
       case "income":
         beneficiary.incomeVerified = true;
         break;
+      default:
+        throw new Error(`Unknown verification type: ${verificationType}`);
     }
 
     return true;
@@ -778,6 +780,9 @@ class FinancialFreedomProgramManager {
       case "monthly":
         nextPayment.setMonth(nextPayment.getMonth() + 1);
         break;
+      default:
+        nextPayment.setDate(nextPayment.getDate() + 1);
+        break;
     }
 
     const enrollment: UBIEnrollment = {
@@ -861,6 +866,9 @@ class FinancialFreedomProgramManager {
         break;
       case "monthly":
         nextPayment.setMonth(nextPayment.getMonth() + 1);
+        break;
+      default:
+        nextPayment.setDate(nextPayment.getDate() + 1);
         break;
     }
     enrollment.nextPaymentDate = nextPayment;
