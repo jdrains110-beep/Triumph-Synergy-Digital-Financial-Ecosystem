@@ -2,10 +2,10 @@
  * CHAINLINK ORACLE API ENDPOINT
  * 
  * Provides access to Chainlink-powered features:
- * - Real-time price feeds
- * - Verifiable randomness
- * - Automation status
- * - Health checks
+ * - Real-time price feeds with error handling
+ * - Verifiable randomness (VRF v2.5)
+ * - Automation status (Keepers v2.1+)
+ * - Health checks and monitoring
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -98,10 +98,10 @@ export async function GET(request: NextRequest) {
           vrf: 'POST /api/chainlink/vrf',
         },
         features: [
-          'Decentralized price feeds (1,000+ nodes)',
-          'Verifiable randomness (VRF)',
-          'Keepers automation',
-          'Cross-chain messaging (CCIP)',
+          'Decentralized price feeds from independent operators',
+          'Verifiable randomness (VRF v2.5)',
+          'Keepers automation (v2.1+)',
+          'Cross-chain messaging (CCIP with defense-in-depth)',
         ],
       },
     });
@@ -124,36 +124,69 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { action } = body;
+    // Validate request body can be parsed
+    let body: any;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
+    const { action, requestId } = body;
+
+    // Validate action parameter
+    if (!action || typeof action !== 'string') {
+      return NextResponse.json(
+        { error: 'action parameter required and must be a string' },
+        { status: 400 }
+      );
+    }
 
     if (action === 'request_vrf') {
-      const vrfRequestId = await requestChainlinkVRF();
-      return NextResponse.json({
-        success: true,
-        data: {
-          requestId: vrfRequestId,
-          status: 'pending',
-          message: 'VRF request submitted. Results will be available after Chainlink fulfills the request.',
-          estimatedTime: '5-10 minutes',
-        },
-      });
+      try {
+        const vrfRequestId = await requestChainlinkVRF();
+        return NextResponse.json({
+          success: true,
+          data: {
+            requestId: vrfRequestId,
+            status: 'pending',
+            message: 'VRF request submitted. Results will be available after Chainlink fulfills the request.',
+            estimatedTime: '5-10 minutes',
+          },
+        });
+      } catch (vrfError) {
+        console.error('VRF request failed:', vrfError);
+        return NextResponse.json(
+          { error: 'Failed to request VRF. Please try again.' },
+          { status: 500 }
+        );
+      }
     }
 
     if (action === 'get_vrf_result') {
-      const { requestId } = body;
-      if (!requestId) {
+      if (!requestId || typeof requestId !== 'string') {
         return NextResponse.json(
-          { error: 'requestId required' },
+          { error: 'requestId required and must be a string' },
           { status: 400 }
         );
       }
 
-      const randomness = await getVRFRandomness(requestId);
-      return NextResponse.json({
-        success: true,
-        data: randomness,
-      });
+      try {
+        const randomness = await getVRFRandomness(requestId);
+        return NextResponse.json({
+          success: true,
+          data: randomness,
+        });
+      } catch (vrfError) {
+        console.error('VRF result retrieval failed:', vrfError);
+        return NextResponse.json(
+          { error: 'Failed to retrieve VRF result. Request may still be pending.' },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json(
@@ -161,7 +194,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Chainlink VRF error:', error);
+    console.error('Chainlink VRF endpoint error:', error);
     return NextResponse.json(
       { error: 'Failed to process Chainlink VRF request' },
       { status: 500 }
