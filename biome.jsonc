@@ -41,14 +41,26 @@
         "noEnum": "off",
         "useNodejsImportProtocol": "off",
         "useTemplate": "off",
-        "useFilenamingConvention": "off"
+        "useFilenamingConvention": "off",
+        
+        /* Re-exporting for convenience is acceptable */
+        "noExportedImports": "off",
+        
+        /* Readonly properties - constructor assignment pattern */
+        "useReadonlyClassProperties": "off"
       },
       "nursery": {
         /* Too many false positives */
         "noUnnecessaryConditions": "off",
 
         /* Temporarily off */
-        "useConsistentTypeDefinitions": "warn"
+        "useConsistentTypeDefinitions": "warn",
+        
+        /* Functions with many parameters - would require significant API refactoring */
+        "useMaxParams": "off",
+        
+        /* Image optimization suggestions */
+        "useImageSize": "off"
       },
       "complexity": {
         /* Needs more work to fix */
@@ -58,14 +70,23 @@
         "useSimplifiedLogicExpression": "off",
 
         /* Turned off to prevent VS Code crashes */
-        "noForEach": "off"
+        "noForEach": "off",
+        
+        /* Static-only class pattern used for singletons */
+        "noStaticOnlyClass": "off"
       },
       "performance": {
         /* Turned off to prevent VS Code crashes */
         "noNamespaceImport": "off",
 
         /* Index files for clean module exports are acceptable */
-        "noBarrelFile": "off"
+        "noBarrelFile": "off",
+        
+        /* Top-level regex - minor performance impact, acceptable for readability */
+        "useTopLevelRegex": "off",
+        
+        /* Next.js Image component suggestions */
+        "noImgElement": "off"
       },
       "a11y": {
         /* Needs more work to fix */
