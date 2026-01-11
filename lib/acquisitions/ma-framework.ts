@@ -695,10 +695,9 @@ export class MAFramework {
       throw new Error("Company not found");
     }
 
-    let enterpriseValue: number;
-    let equityValue: number;
-
     const ebitda = company.netIncome * 1.3; // Simplified EBITDA estimate
+
+    let enterpriseValue: number;
 
     switch (method) {
       case "revenue-multiple":
@@ -728,7 +727,7 @@ export class MAFramework {
         enterpriseValue = company.enterpriseValue;
     }
 
-    equityValue =
+    const equityValue =
       enterpriseValue - company.totalLiabilities + company.totalAssets * 0.1; // Cash adjustment
 
     const valuation: Valuation = {
@@ -952,6 +951,10 @@ export class MAFramework {
         acquisition.dueDiligence.yellowFlags.push(ddFinding);
         break;
       case "low":
+        acquisition.dueDiligence.greenFlags.push(ddFinding);
+        break;
+      default:
+        // Treat unknown severity as low risk
         acquisition.dueDiligence.greenFlags.push(ddFinding);
         break;
     }

@@ -55,15 +55,24 @@ export enum BiometricErrorCode {
  * Biometric error with context
  */
 export class BiometricError extends Error {
+  readonly code: BiometricErrorCode;
+  readonly originalError?: Error;
+  readonly context?: Record<string, any>;
+  readonly userMessage?: string;
+
   constructor(
-    public code: BiometricErrorCode,
-    public message: string,
-    public originalError?: Error,
-    public context?: Record<string, any>,
-    public userMessage?: string // User-friendly message
+    code: BiometricErrorCode,
+    message: string,
+    originalError?: Error,
+    context?: Record<string, any>,
+    userMessage?: string
   ) {
     super(message);
     this.name = "BiometricError";
+    this.code = code;
+    this.originalError = originalError;
+    this.context = context;
+    this.userMessage = userMessage;
   }
 
   /**

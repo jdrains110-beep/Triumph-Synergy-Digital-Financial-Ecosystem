@@ -446,7 +446,7 @@ class AllodialDeedsPlatform {
   private readonly owners: Map<string, DeedOwner> = new Map();
 
   // Owner's Headquarters - First Property
-  public readonly HEADQUARTERS_DEED_ID = "deed-hq-triumph-synergy-001";
+  readonly HEADQUARTERS_DEED_ID = "deed-hq-triumph-synergy-001";
 
   constructor() {
     this.initializePlatform();

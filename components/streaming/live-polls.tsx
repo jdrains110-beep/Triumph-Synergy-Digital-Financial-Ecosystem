@@ -114,7 +114,7 @@ export function LivePolls({
                 {options.map((opt, idx) => (
                   <Input
                     id={`poll-option-${idx}`}
-                    key={`poll-option-${idx}`}
+                    key={opt || `poll-option-${idx}`}
                     onChange={(e) => handleUpdateOption(idx, e.target.value)}
                     placeholder={`Option ${idx + 1}`}
                     value={opt}

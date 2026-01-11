@@ -115,7 +115,9 @@ export class RateLimitStore {
       }
     }
 
-    keysToDelete.forEach((key) => this.store.delete(key));
+    for (const key of keysToDelete) {
+      this.store.delete(key);
+    }
   }
 
   /**
@@ -321,6 +323,9 @@ export function resetRateLimit(
       break;
     case "credential":
       credentialStore.clear(key);
+      break;
+    default:
+      authAttemptStore.clear(key);
       break;
   }
 }

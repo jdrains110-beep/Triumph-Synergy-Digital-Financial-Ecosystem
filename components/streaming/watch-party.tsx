@@ -133,7 +133,7 @@ export function WatchParty({
                 {participants.map((participant, idx) => (
                   <div
                     className="flex items-center gap-2 rounded bg-gray-50 p-2"
-                    key={`participant-${participant}-${idx}`}
+                    key={participant}
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 font-bold text-white text-xs">
                       {participant.charAt(0).toUpperCase()}
