@@ -1,12 +1,12 @@
 /**
  * Triumph Synergy - Banking Partners Hub
- * 
+ *
  * Superior banking partnership platform for:
  * - Financial institutions to join the Pi transition
  * - Banks and credit unions integration
  * - Pi Network financial services
  * - Fintech partnership programs
- * 
+ *
  * @module lib/banking/banking-partners-hub
  * @version 1.0.0
  */
@@ -16,7 +16,7 @@
 // ============================================================================
 
 const PI_EXTERNAL_RATE = 314.159;
-const PI_INTERNAL_RATE = 314159;
+const PI_INTERNAL_RATE = 314_159;
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -29,39 +29,54 @@ export function getPiRate(type: PiValueType = "external"): number {
 // TYPES & INTERFACES
 // ============================================================================
 
-export type InstitutionType = 
-  | "bank" 
-  | "credit-union" 
-  | "fintech" 
-  | "investment-firm" 
-  | "insurance" 
-  | "payment-processor" 
+export type InstitutionType =
+  | "bank"
+  | "credit-union"
+  | "fintech"
+  | "investment-firm"
+  | "insurance"
+  | "payment-processor"
   | "crypto-exchange"
   | "wealth-management"
   | "lending"
   | "other";
 
-export type PartnershipTier = "explorer" | "partner" | "premier" | "strategic" | "founding";
-export type PartnerStatus = "prospect" | "onboarding" | "active" | "suspended" | "churned";
-export type IntegrationLevel = "basic" | "standard" | "advanced" | "enterprise" | "custom";
+export type PartnershipTier =
+  | "explorer"
+  | "partner"
+  | "premier"
+  | "strategic"
+  | "founding";
+export type PartnerStatus =
+  | "prospect"
+  | "onboarding"
+  | "active"
+  | "suspended"
+  | "churned";
+export type IntegrationLevel =
+  | "basic"
+  | "standard"
+  | "advanced"
+  | "enterprise"
+  | "custom";
 
-export interface BankingPartner {
+export type BankingPartner = {
   id: string;
   userId: string;
-  
+
   // Institution Info
   institutionName: string;
   legalName: string;
   institutionType: InstitutionType;
   registrationNumber: string;
   taxId: string;
-  
+
   // Contact
   primaryContactName: string;
   primaryContactTitle: string;
   primaryContactEmail: string;
   primaryContactPhone: string;
-  
+
   // Location
   headquarters: {
     country: string;
@@ -71,26 +86,26 @@ export interface BankingPartner {
     postalCode: string;
   };
   operatingCountries: string[];
-  
+
   // Partnership
   partnershipTier: PartnershipTier;
   partnerStatus: PartnerStatus;
   partnerSince: Date;
   renewalDate: Date;
-  
+
   // Subscription
   monthlyFee: number;
   monthlyFeeInPi: number;
   annualContract: boolean;
   contractValue: number;
-  
+
   // Integration
   integrationLevel: IntegrationLevel;
   integrationStatus: "pending" | "in-progress" | "completed" | "maintenance";
   apiEnabled: boolean;
   sandboxEnabled: boolean;
   liveEnabled: boolean;
-  
+
   // Capabilities
   piWalletServices: boolean;
   piExchangeEnabled: boolean;
@@ -98,14 +113,14 @@ export interface BankingPartner {
   piSavingsEnabled: boolean;
   piPaymentsEnabled: boolean;
   crossBorderEnabled: boolean;
-  
+
   // Compliance
   regulatoryStatus: "pending" | "approved" | "conditional" | "review";
   kycVerified: boolean;
   amlCompliant: boolean;
   gdprCompliant: boolean;
   pciCompliant: boolean;
-  
+
   // Performance
   totalPiVolume: number;
   totalTransactions: number;
@@ -113,55 +128,55 @@ export interface BankingPartner {
   averageTransactionValue: number;
   revenueGenerated: number;
   revenueGeneratedInPi: number;
-  
+
   // Revenue Share
   revenueSharePercentage: number;
   piTransactionBonus: number;
   referralBonus: number;
-  
+
   // Support
   accountManagerId: string | null;
   supportTier: "standard" | "priority" | "dedicated" | "enterprise";
-  
+
   // Metrics
   customerSatisfaction: number;
   integrationHealth: number;
   uptime: number;
-  
+
   createdAt: Date;
   lastActiveAt: Date;
-}
+};
 
-export interface BankerProfile {
+export type BankerProfile = {
   id: string;
   userId: string;
   partnerId: string;
-  
+
   // Personal Info
   name: string;
   title: string;
   email: string;
   phone: string;
-  
+
   // Role
   role: "admin" | "manager" | "analyst" | "integration-specialist" | "support";
   department: string;
   permissions: BankerPermission[];
-  
+
   // Access
   apiAccess: boolean;
   dashboardAccess: boolean;
   reportingAccess: boolean;
-  
+
   // Activity
   lastLogin: Date;
   loginCount: number;
   actionsPerformed: number;
-  
-  createdAt: Date;
-}
 
-export type BankerPermission = 
+  createdAt: Date;
+};
+
+export type BankerPermission =
   | "view-transactions"
   | "manage-transactions"
   | "view-customers"
@@ -173,7 +188,7 @@ export type BankerPermission =
   | "live-access"
   | "admin";
 
-export interface PartnershipPlan {
+export type PartnershipPlan = {
   tier: PartnershipTier;
   name: string;
   monthlyFee: number;
@@ -182,150 +197,161 @@ export interface PartnershipPlan {
   annualFeeInPi: number;
   setupFee: number;
   features: string[];
-  
+
   // Limits
   maxTransactionsPerMonth: number | "unlimited";
   maxApiCalls: number | "unlimited";
   maxBankers: number | "unlimited";
   maxBranches: number | "unlimited";
-  
+
   // Revenue Share
   revenueShare: number;
   piTransactionBonus: number;
   referralBonus: number;
-  
+
   // Integration
   integrationLevel: IntegrationLevel;
   customIntegration: boolean;
   whiteLabel: boolean;
-  
+
   // Support
   supportTier: "standard" | "priority" | "dedicated" | "enterprise";
   accountManager: boolean;
-  
+
   // Compliance
   complianceSupport: boolean;
   regulatoryGuidance: boolean;
-}
+};
 
-export interface IntegrationRequest {
+export type IntegrationRequest = {
   id: string;
   partnerId: string;
-  
+
   // Request Details
   type: "wallet" | "exchange" | "payments" | "lending" | "savings" | "custom";
   description: string;
   requirements: string[];
-  
+
   // Status
-  status: "submitted" | "in-review" | "approved" | "in-development" | "testing" | "deployed" | "rejected";
+  status:
+    | "submitted"
+    | "in-review"
+    | "approved"
+    | "in-development"
+    | "testing"
+    | "deployed"
+    | "rejected";
   priority: "low" | "medium" | "high" | "critical";
-  
+
   // Timeline
   requestedDate: Date;
   estimatedCompletion: Date | null;
   actualCompletion: Date | null;
-  
+
   // Assignees
   assignedTeam: string | null;
   projectManagerId: string | null;
-  
+
   // Notes
   notes: string[];
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface PiTransaction {
+export type PiTransaction = {
   id: string;
   partnerId: string;
-  
+
   // Transaction Details
-  type: "exchange" | "transfer" | "payment" | "deposit" | "withdrawal" | "lending" | "reward";
+  type:
+    | "exchange"
+    | "transfer"
+    | "payment"
+    | "deposit"
+    | "withdrawal"
+    | "lending"
+    | "reward";
   direction: "inbound" | "outbound";
-  
+
   // Amounts
   amount: number;
   currency: "PI" | "USD" | "EUR" | "GBP" | "other";
   piAmount: number;
   fiatEquivalent: number;
   exchangeRate: number;
-  
+
   // Parties
   senderId: string;
   senderType: "customer" | "partner" | "platform";
   receiverId: string;
   receiverType: "customer" | "partner" | "platform";
-  
+
   // Status
   status: "pending" | "processing" | "completed" | "failed" | "reversed";
-  
+
   // Fees
   platformFee: number;
   partnerFee: number;
   networkFee: number;
-  
+
   // Compliance
   kycVerified: boolean;
   amlScreened: boolean;
   riskScore: number;
-  
+
   // Metadata
   reference: string;
   description: string;
   metadata: Record<string, unknown>;
-  
+
   createdAt: Date;
   completedAt: Date | null;
-}
+};
 
-export interface PartnerAnalytics {
+export type PartnerAnalytics = {
   partnerId: string;
   period: "day" | "week" | "month" | "quarter" | "year";
-  
+
   // Volume
   totalTransactions: number;
   totalPiVolume: number;
   totalFiatVolume: number;
   averageTransactionSize: number;
-  
+
   // Revenue
   grossRevenue: number;
   revenueShare: number;
   piBonuses: number;
   netRevenue: number;
-  
+
   // Customers
   totalCustomers: number;
   newCustomers: number;
   activeCustomers: number;
   customerGrowthRate: number;
-  
+
   // Performance
   successRate: number;
   averageProcessingTime: number;
   uptime: number;
-  
+
   // Trends
   transactionTrend: number;
   revenueTrend: number;
   customerTrend: number;
-}
+};
 
 // ============================================================================
 // BANKING PARTNERS HUB CLASS
 // ============================================================================
 
 class BankingPartnersHub {
-  private partners: Map<string, BankingPartner> = new Map();
-  private bankers: Map<string, BankerProfile> = new Map();
-  private integrationRequests: Map<string, IntegrationRequest> = new Map();
-  private transactions: Map<string, PiTransaction> = new Map();
-
-  constructor() {
-    // Initialize banking hub
-  }
+  private readonly partners: Map<string, BankingPartner> = new Map();
+  private readonly bankers: Map<string, BankerProfile> = new Map();
+  private readonly integrationRequests: Map<string, IntegrationRequest> =
+    new Map();
+  private readonly transactions: Map<string, PiTransaction> = new Map();
 
   // ==========================================================================
   // PARTNERSHIP PLANS
@@ -369,8 +395,8 @@ class BankingPartnersHub {
         name: "Partner",
         monthlyFee: 2499,
         monthlyFeeInPi: 2499 / PI_EXTERNAL_RATE,
-        annualFee: 23988,
-        annualFeeInPi: 23988 / PI_EXTERNAL_RATE,
+        annualFee: 23_988,
+        annualFeeInPi: 23_988 / PI_EXTERNAL_RATE,
         setupFee: 5000,
         features: [
           "Live API access",
@@ -383,8 +409,8 @@ class BankingPartnersHub {
           "Basic analytics dashboard",
           "10% revenue share",
         ],
-        maxTransactionsPerMonth: 10000,
-        maxApiCalls: 100000,
+        maxTransactionsPerMonth: 10_000,
+        maxApiCalls: 100_000,
         maxBankers: 5,
         maxBranches: 5,
         revenueShare: 10,
@@ -403,9 +429,9 @@ class BankingPartnersHub {
         name: "Premier Partner",
         monthlyFee: 9999,
         monthlyFeeInPi: 9999 / PI_EXTERNAL_RATE,
-        annualFee: 95988,
-        annualFeeInPi: 95988 / PI_EXTERNAL_RATE,
-        setupFee: 15000,
+        annualFee: 95_988,
+        annualFeeInPi: 95_988 / PI_EXTERNAL_RATE,
+        setupFee: 15_000,
         features: [
           "Full API suite",
           "Pi exchange integration",
@@ -420,8 +446,8 @@ class BankingPartnersHub {
           "15% revenue share",
           "2% Pi transaction bonus",
         ],
-        maxTransactionsPerMonth: 100000,
-        maxApiCalls: 1000000,
+        maxTransactionsPerMonth: 100_000,
+        maxApiCalls: 1_000_000,
         maxBankers: 25,
         maxBranches: 25,
         revenueShare: 15,
@@ -438,11 +464,11 @@ class BankingPartnersHub {
       {
         tier: "strategic",
         name: "Strategic Partner",
-        monthlyFee: 49999,
-        monthlyFeeInPi: 49999 / PI_EXTERNAL_RATE,
-        annualFee: 479988,
-        annualFeeInPi: 479988 / PI_EXTERNAL_RATE,
-        setupFee: 50000,
+        monthlyFee: 49_999,
+        monthlyFeeInPi: 49_999 / PI_EXTERNAL_RATE,
+        annualFee: 479_988,
+        annualFeeInPi: 479_988 / PI_EXTERNAL_RATE,
+        setupFee: 50_000,
         features: [
           "Everything in Premier",
           "Custom integration support",
@@ -475,10 +501,10 @@ class BankingPartnersHub {
       {
         tier: "founding",
         name: "Founding Partner",
-        monthlyFee: 149999,
-        monthlyFeeInPi: 149999 / PI_EXTERNAL_RATE,
-        annualFee: 1439988,
-        annualFeeInPi: 1439988 / PI_EXTERNAL_RATE,
+        monthlyFee: 149_999,
+        monthlyFeeInPi: 149_999 / PI_EXTERNAL_RATE,
+        annualFee: 1_439_988,
+        annualFeeInPi: 1_439_988 / PI_EXTERNAL_RATE,
         setupFee: 0,
         features: [
           "Everything in Strategic",
@@ -617,7 +643,10 @@ class BankingPartnersHub {
     return partner;
   }
 
-  async upgradePartnership(partnerId: string, newTier: PartnershipTier): Promise<BankingPartner> {
+  async upgradePartnership(
+    partnerId: string,
+    newTier: PartnershipTier
+  ): Promise<BankingPartner> {
     const partner = this.partners.get(partnerId);
     if (!partner) {
       throw new Error("Partner not found");
@@ -637,7 +666,11 @@ class BankingPartnersHub {
     partner.supportTier = newPlan.supportTier;
 
     // Enable features based on tier
-    if (newTier === "premier" || newTier === "strategic" || newTier === "founding") {
+    if (
+      newTier === "premier" ||
+      newTier === "strategic" ||
+      newTier === "founding"
+    ) {
       partner.piExchangeEnabled = true;
       partner.piLendingEnabled = true;
       partner.piSavingsEnabled = true;
@@ -653,15 +686,18 @@ class BankingPartnersHub {
   // BANKER MANAGEMENT
   // ==========================================================================
 
-  async registerBanker(partnerId: string, data: {
-    userId: string;
-    name: string;
-    title: string;
-    email: string;
-    phone: string;
-    role: BankerProfile["role"];
-    department: string;
-  }): Promise<BankerProfile> {
+  async registerBanker(
+    partnerId: string,
+    data: {
+      userId: string;
+      name: string;
+      title: string;
+      email: string;
+      phone: string;
+      role: BankerProfile["role"];
+      department: string;
+    }
+  ): Promise<BankerProfile> {
     const partner = this.partners.get(partnerId);
     if (!partner) {
       throw new Error("Partner not found");
@@ -670,13 +706,44 @@ class BankingPartnersHub {
     const id = `banker-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     // Assign permissions based on role
-    const permissionsByRole: Record<BankerProfile["role"], BankerPermission[]> = {
-      admin: ["view-transactions", "manage-transactions", "view-customers", "manage-customers", "view-reports", "generate-reports", "api-access", "sandbox-access", "live-access", "admin"],
-      manager: ["view-transactions", "manage-transactions", "view-customers", "manage-customers", "view-reports", "generate-reports", "api-access", "sandbox-access", "live-access"],
-      analyst: ["view-transactions", "view-customers", "view-reports", "generate-reports"],
-      "integration-specialist": ["api-access", "sandbox-access", "view-reports"],
-      support: ["view-transactions", "view-customers"],
-    };
+    const permissionsByRole: Record<BankerProfile["role"], BankerPermission[]> =
+      {
+        admin: [
+          "view-transactions",
+          "manage-transactions",
+          "view-customers",
+          "manage-customers",
+          "view-reports",
+          "generate-reports",
+          "api-access",
+          "sandbox-access",
+          "live-access",
+          "admin",
+        ],
+        manager: [
+          "view-transactions",
+          "manage-transactions",
+          "view-customers",
+          "manage-customers",
+          "view-reports",
+          "generate-reports",
+          "api-access",
+          "sandbox-access",
+          "live-access",
+        ],
+        analyst: [
+          "view-transactions",
+          "view-customers",
+          "view-reports",
+          "generate-reports",
+        ],
+        "integration-specialist": [
+          "api-access",
+          "sandbox-access",
+          "view-reports",
+        ],
+        support: ["view-transactions", "view-customers"],
+      };
 
     const banker: BankerProfile = {
       id,
@@ -703,19 +770,24 @@ class BankingPartnersHub {
   }
 
   async getBankersByPartner(partnerId: string): Promise<BankerProfile[]> {
-    return Array.from(this.bankers.values()).filter((b) => b.partnerId === partnerId);
+    return Array.from(this.bankers.values()).filter(
+      (b) => b.partnerId === partnerId
+    );
   }
 
   // ==========================================================================
   // INTEGRATION REQUESTS
   // ==========================================================================
 
-  async submitIntegrationRequest(partnerId: string, data: {
-    type: IntegrationRequest["type"];
-    description: string;
-    requirements: string[];
-    priority?: IntegrationRequest["priority"];
-  }): Promise<IntegrationRequest> {
+  async submitIntegrationRequest(
+    partnerId: string,
+    data: {
+      type: IntegrationRequest["type"];
+      description: string;
+      requirements: string[];
+      priority?: IntegrationRequest["priority"];
+    }
+  ): Promise<IntegrationRequest> {
     const partner = this.partners.get(partnerId);
     if (!partner) {
       throw new Error("Partner not found");
@@ -745,26 +817,33 @@ class BankingPartnersHub {
     return request;
   }
 
-  async getIntegrationRequests(partnerId: string): Promise<IntegrationRequest[]> {
-    return Array.from(this.integrationRequests.values()).filter((r) => r.partnerId === partnerId);
+  async getIntegrationRequests(
+    partnerId: string
+  ): Promise<IntegrationRequest[]> {
+    return Array.from(this.integrationRequests.values()).filter(
+      (r) => r.partnerId === partnerId
+    );
   }
 
   // ==========================================================================
   // TRANSACTIONS
   // ==========================================================================
 
-  async recordTransaction(partnerId: string, data: {
-    type: PiTransaction["type"];
-    direction: PiTransaction["direction"];
-    piAmount: number;
-    currency?: PiTransaction["currency"];
-    senderId: string;
-    senderType: PiTransaction["senderType"];
-    receiverId: string;
-    receiverType: PiTransaction["receiverType"];
-    description?: string;
-    metadata?: Record<string, unknown>;
-  }): Promise<PiTransaction> {
+  async recordTransaction(
+    partnerId: string,
+    data: {
+      type: PiTransaction["type"];
+      direction: PiTransaction["direction"];
+      piAmount: number;
+      currency?: PiTransaction["currency"];
+      senderId: string;
+      senderType: PiTransaction["senderType"];
+      receiverId: string;
+      receiverType: PiTransaction["receiverType"];
+      description?: string;
+      metadata?: Record<string, unknown>;
+    }
+  ): Promise<PiTransaction> {
     const partner = this.partners.get(partnerId);
     if (!partner) {
       throw new Error("Partner not found");
@@ -851,16 +930,28 @@ class BankingPartnersHub {
     }
 
     const bankers = await this.getBankersByPartner(partnerId);
-    const transactions = Array.from(this.transactions.values())
-      .filter((t) => t.partnerId === partnerId);
+    const transactions = Array.from(this.transactions.values()).filter(
+      (t) => t.partnerId === partnerId
+    );
     const requests = await this.getIntegrationRequests(partnerId);
     const plans = this.getPartnershipPlans();
 
     // Calculate analytics
-    const completedTransactions = transactions.filter((t) => t.status === "completed");
-    const totalPiVolume = completedTransactions.reduce((sum, t) => sum + t.piAmount, 0);
-    const totalFiatVolume = completedTransactions.reduce((sum, t) => sum + t.fiatEquivalent, 0);
-    const revenueShare = completedTransactions.reduce((sum, t) => sum + t.partnerFee, 0);
+    const completedTransactions = transactions.filter(
+      (t) => t.status === "completed"
+    );
+    const totalPiVolume = completedTransactions.reduce(
+      (sum, t) => sum + t.piAmount,
+      0
+    );
+    const totalFiatVolume = completedTransactions.reduce(
+      (sum, t) => sum + t.fiatEquivalent,
+      0
+    );
+    const revenueShare = completedTransactions.reduce(
+      (sum, t) => sum + t.partnerFee,
+      0
+    );
 
     return {
       partner,
@@ -873,9 +964,10 @@ class BankingPartnersHub {
         totalTransactions: completedTransactions.length,
         totalPiVolume,
         totalFiatVolume,
-        averageTransactionSize: completedTransactions.length > 0 
-          ? totalPiVolume / completedTransactions.length 
-          : 0,
+        averageTransactionSize:
+          completedTransactions.length > 0
+            ? totalPiVolume / completedTransactions.length
+            : 0,
         grossRevenue: totalFiatVolume,
         revenueShare,
         piBonuses: revenueShare * (partner.piTransactionBonus / 100),
@@ -884,14 +976,17 @@ class BankingPartnersHub {
         newCustomers: 0,
         activeCustomers: 0,
         customerGrowthRate: 0,
-        successRate: completedTransactions.length / Math.max(transactions.length, 1) * 100,
+        successRate:
+          (completedTransactions.length / Math.max(transactions.length, 1)) *
+          100,
         averageProcessingTime: 0,
         uptime: partner.uptime,
         transactionTrend: 0,
         revenueTrend: 0,
         customerTrend: 0,
       },
-      partnershipPlan: plans.find((p) => p.tier === partner.partnershipTier) || null,
+      partnershipPlan:
+        plans.find((p) => p.tier === partner.partnershipTier) || null,
     };
   }
 
@@ -900,18 +995,26 @@ class BankingPartnersHub {
   // ==========================================================================
 
   async getAllActivePartners(): Promise<BankingPartner[]> {
-    return Array.from(this.partners.values()).filter((p) => p.partnerStatus === "active");
+    return Array.from(this.partners.values()).filter(
+      (p) => p.partnerStatus === "active"
+    );
   }
 
   async getPartnersByTier(tier: PartnershipTier): Promise<BankingPartner[]> {
-    return Array.from(this.partners.values()).filter((p) => p.partnershipTier === tier);
+    return Array.from(this.partners.values()).filter(
+      (p) => p.partnershipTier === tier
+    );
   }
 
   getPiToUsdRate(type: PiValueType = "external"): number {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,

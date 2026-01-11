@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
           ? Number.parseFloat(searchParams.get("maxPrice")!)
           : undefined;
         const minBeds = searchParams.get("minBeds")
-          ? Number.parseInt(searchParams.get("minBeds")!)
+          ? Number.parseInt(searchParams.get("minBeds")!, 10)
           : undefined;
         const minBaths = searchParams.get("minBaths")
-          ? Number.parseInt(searchParams.get("minBaths")!)
+          ? Number.parseInt(searchParams.get("minBaths")!, 10)
           : undefined;
 
         const result = await realEstatePlatform.searchProperties({

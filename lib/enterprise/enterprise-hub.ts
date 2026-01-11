@@ -30,7 +30,7 @@ const PLATFORM_VERSION = "1.0.0";
 // TYPES
 // ============================================================================
 
-export interface EnterpriseDashboard {
+export type EnterpriseDashboard = {
   timestamp: Date;
   version: string;
 
@@ -87,16 +87,16 @@ export interface EnterpriseDashboard {
     uptime: number;
     services: ServiceStatus[];
   };
-}
+};
 
-export interface ServiceStatus {
+export type ServiceStatus = {
   name: string;
   status: "online" | "degraded" | "offline";
   latency: number;
   lastCheck: Date;
-}
+};
 
-export interface CrossPlatformTransaction {
+export type CrossPlatformTransaction = {
   id: string;
   type: "ecommerce" | "real-estate" | "delivery" | "acquisition" | "permit";
   sourceId: string;
@@ -105,7 +105,7 @@ export interface CrossPlatformTransaction {
   status: "pending" | "completed" | "failed";
   createdAt: Date;
   metadata: Record<string, unknown>;
-}
+};
 
 // ============================================================================
 // ENTERPRISE HUB ENGINE
@@ -113,8 +113,7 @@ export interface CrossPlatformTransaction {
 
 export class EnterpriseHub {
   private static instance: EnterpriseHub;
-  private transactions: Map<string, CrossPlatformTransaction> = new Map();
-  private startTime: Date = new Date();
+  private readonly startTime: Date = new Date();
 
   private constructor() {}
 
@@ -303,9 +302,9 @@ export class EnterpriseHub {
     });
 
     // Create required permits
-    const permitTypes: Array<
-      Parameters<typeof permitSystem.createPermitApplication>[0]["type"]
-    > = ["building", "grading", "electrical", "plumbing"];
+    const permitTypes: Parameters<
+      typeof permitSystem.createPermitApplication
+    >[0]["type"][] = ["building", "grading", "electrical", "plumbing"];
 
     const permits = await Promise.all(
       permitTypes.map((type) =>

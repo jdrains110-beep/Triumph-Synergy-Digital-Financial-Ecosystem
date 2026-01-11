@@ -5,18 +5,18 @@
 
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  initializePiSDKOnStartup,
-  getPiSDK,
   getPiBrowserInfo,
-  isRunningInPiBrowser,
+  getPiSDK,
+  initializePiSDKOnStartup,
   isPiNetworkAvailable,
-  type PiSDK,
+  isRunningInPiBrowser,
   type PiBrowserInfo,
+  type PiSDK,
 } from "@/lib/pi-sdk/pi-sdk-initialization";
 
-export interface PiSDKStatus {
+export type PiSDKStatus = {
   initialized: boolean;
   loading: boolean;
   error: string | null;
@@ -24,7 +24,7 @@ export interface PiSDKStatus {
   browserInfo: PiBrowserInfo | null;
   isPiBrowser: boolean;
   isPiNetworkAvailable: boolean;
-}
+};
 
 export function usePiSDK(): PiSDKStatus {
   const [status, setStatus] = useState<PiSDKStatus>({
@@ -44,7 +44,9 @@ export function usePiSDK(): PiSDKStatus {
       try {
         await initializePiSDKOnStartup();
 
-        if (!isMounted) return;
+        if (!isMounted) {
+          return;
+        }
 
         const sdk = await getPiSDK();
         const browserInfo = getPiBrowserInfo();
@@ -59,7 +61,9 @@ export function usePiSDK(): PiSDKStatus {
           isPiNetworkAvailable: isPiNetworkAvailable(),
         });
       } catch (error) {
-        if (!isMounted) return;
+        if (!isMounted) {
+          return;
+        }
 
         setStatus((prev) => ({
           ...prev,

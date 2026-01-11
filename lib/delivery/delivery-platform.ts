@@ -18,7 +18,7 @@ const PI_TO_USD_RATE = 314.159;
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface DeliveryOrder {
+export type DeliveryOrder = {
   id: string;
   orderNumber: string;
   type: DeliveryType;
@@ -92,7 +92,7 @@ export interface DeliveryOrder {
   // Notes
   cancellationReason: string | null;
   notes: string;
-}
+};
 
 export type DeliveryType =
   | "food"
@@ -123,7 +123,7 @@ export type DeliveryStatus =
   | "cancelled"
   | "failed";
 
-export interface DeliveryAddress {
+export type DeliveryAddress = {
   street: string;
   unit: string | null;
   city: string;
@@ -134,9 +134,9 @@ export interface DeliveryAddress {
   longitude: number;
   type: "residential" | "business" | "other";
   accessCode: string | null;
-}
+};
 
-export interface DeliveryItem {
+export type DeliveryItem = {
   id: string;
   name: string;
   description: string;
@@ -149,7 +149,7 @@ export interface DeliveryItem {
   specialInstructions: string;
   substitutionPreference: "allow" | "refund" | "contact";
   substitutedItem: string | null;
-}
+};
 
 export type SpecialHandling =
   | "fragile"
@@ -164,25 +164,25 @@ export type SpecialHandling =
   | "heavy"
   | "oversized";
 
-export interface GeoLocation {
+export type GeoLocation = {
   latitude: number;
   longitude: number;
   accuracy: number;
   heading: number | null;
   speed: number | null;
   timestamp: Date;
-}
+};
 
-export interface TrackingUpdate {
+export type TrackingUpdate = {
   id: string;
   status: DeliveryStatus;
   location: GeoLocation | null;
   message: string;
   timestamp: Date;
   isPublic: boolean;
-}
+};
 
-export interface ProofOfDelivery {
+export type ProofOfDelivery = {
   type: "photo" | "signature" | "pin" | "none";
   photoUrl: string | null;
   signatureUrl: string | null;
@@ -190,9 +190,9 @@ export interface ProofOfDelivery {
   recipientName: string | null;
   timestamp: Date;
   location: GeoLocation;
-}
+};
 
-export interface Driver {
+export type Driver = {
   id: string;
   userId: string;
   firstName: string;
@@ -237,7 +237,7 @@ export interface Driver {
   createdAt: Date;
   lastActiveAt: Date;
   isVerified: boolean;
-}
+};
 
 export type VehicleType =
   | "bicycle"
@@ -250,31 +250,31 @@ export type VehicleType =
   | "scooter"
   | "walker";
 
-export interface VehicleDetails {
+export type VehicleDetails = {
   make: string;
   model: string;
   year: number;
   color: string;
   licensePlate: string;
   capacity: { weight: number; volume: number };
-}
+};
 
-export interface DriverDocument {
+export type DriverDocument = {
   type: string;
   number: string;
   expirationDate: Date;
   verified: boolean;
   documentUrl: string;
-}
+};
 
-export interface BackgroundCheck {
+export type BackgroundCheck = {
   status: "pending" | "passed" | "failed";
   provider: string;
   completedAt: Date | null;
   validUntil: Date | null;
-}
+};
 
-export interface Merchant {
+export type Merchant = {
   id: string;
   businessName: string;
   category: string;
@@ -310,16 +310,16 @@ export interface Merchant {
   isActive: boolean;
   isVerified: boolean;
   createdAt: Date;
-}
+};
 
-export interface OperatingHours {
+export type OperatingHours = {
   dayOfWeek: number;
   openTime: string;
   closeTime: string;
   isClosed: boolean;
-}
+};
 
-export interface Route {
+export type Route = {
   id: string;
   driverId: string;
   orderIds: string[];
@@ -337,18 +337,18 @@ export interface Route {
   // Tracking
   startedAt: Date | null;
   completedAt: Date | null;
-}
+};
 
-export interface RouteWaypoint {
+export type RouteWaypoint = {
   orderId: string;
   type: "pickup" | "dropoff";
   address: DeliveryAddress;
   estimatedArrival: Date;
   actualArrival: Date | null;
   sequence: number;
-}
+};
 
-export interface DeliveryZone {
+export type DeliveryZone = {
   id: string;
   name: string;
   polygon: GeoLocation[];
@@ -356,7 +356,7 @@ export interface DeliveryZone {
   perMileFee: number;
   peakMultiplier: number;
   isActive: boolean;
-}
+};
 
 // ============================================================================
 // DELIVERY PLATFORM ENGINE
@@ -365,11 +365,11 @@ export interface DeliveryZone {
 export class DeliveryPlatform {
   private static instance: DeliveryPlatform;
 
-  private orders: Map<string, DeliveryOrder> = new Map();
-  private drivers: Map<string, Driver> = new Map();
-  private merchants: Map<string, Merchant> = new Map();
-  private routes: Map<string, Route> = new Map();
-  private zones: Map<string, DeliveryZone> = new Map();
+  private readonly orders: Map<string, DeliveryOrder> = new Map();
+  private readonly drivers: Map<string, Driver> = new Map();
+  private readonly merchants: Map<string, Merchant> = new Map();
+  private readonly routes: Map<string, Route> = new Map();
+  private readonly zones: Map<string, DeliveryZone> = new Map();
 
   private constructor() {
     this.initializeDefaultZones();
@@ -603,9 +603,7 @@ export class DeliveryPlatform {
     return order;
   }
 
-  async trackOrder(
-    orderId: string
-  ): Promise<{
+  async trackOrder(orderId: string): Promise<{
     order: DeliveryOrder;
     eta: Date | null;
     driverLocation: GeoLocation | null;
@@ -763,7 +761,9 @@ export class DeliveryPlatform {
     );
 
     const nearbyDrivers = availableDrivers.filter((driver) => {
-      if (!driver.currentLocation) return false;
+      if (!driver.currentLocation) {
+        return false;
+      }
       const distance = this.calculateDistanceFromCoords(
         location.latitude,
         location.longitude,
@@ -857,7 +857,9 @@ export class DeliveryPlatform {
         const todayHours = m.operatingHours.find(
           (h) => h.dayOfWeek === dayOfWeek
         );
-        if (!todayHours || todayHours.isClosed) return false;
+        if (!todayHours || todayHours.isClosed) {
+          return false;
+        }
         return (
           currentTime >= todayHours.openTime &&
           currentTime <= todayHours.closeTime

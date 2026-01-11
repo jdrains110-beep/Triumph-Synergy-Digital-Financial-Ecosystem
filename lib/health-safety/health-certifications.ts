@@ -1,22 +1,22 @@
 /**
  * HEALTH CERTIFICATION & COMPLIANCE SYSTEM
- * 
+ *
  * Track all organic certifications, health compliance status, and quality assurance
  * Verify against natural/organic standards - NO EXCEPTIONS
  */
 
-export interface OrganicCertification {
+export type OrganicCertification = {
   certificationId: string;
   certifyingBody: string;
   certificationType:
-    | 'USDA_Organic'
-    | 'EU_Organic'
-    | 'JAS_Organic'
-    | 'Demeter_Biodynamic'
-    | 'Fair_Trade'
-    | 'Non_GMO_Verified'
-    | 'Pesticide_Free'
-    | 'Natural_Product';
+    | "USDA_Organic"
+    | "EU_Organic"
+    | "JAS_Organic"
+    | "Demeter_Biodynamic"
+    | "Fair_Trade"
+    | "Non_GMO_Verified"
+    | "Pesticide_Free"
+    | "Natural_Product";
   issuedDate: Date;
   expiryDate: Date;
   scope: Array<{
@@ -27,7 +27,7 @@ export interface OrganicCertification {
   auditDetails: {
     auditDate: Date;
     auditingOfficer: string;
-    auditResult: 'compliant' | 'minor_issues' | 'major_issues';
+    auditResult: "compliant" | "minor_issues" | "major_issues";
     findings: string[];
     correctiveActions?: Array<{
       action: string;
@@ -37,10 +37,10 @@ export interface OrganicCertification {
     }>;
   };
   documentUrl: string;
-  status: 'valid' | 'pending_renewal' | 'expired' | 'suspended' | 'revoked';
-}
+  status: "valid" | "pending_renewal" | "expired" | "suspended" | "revoked";
+};
 
-export interface FacilityHealthCertification {
+export type FacilityHealthCertification = {
   certificationId: string;
   facilityId: string;
   facilityName: string;
@@ -54,12 +54,12 @@ export interface FacilityHealthCertification {
     animalWelfare?: boolean;
   };
   lastInspectionDate: Date;
-  lastInspectionResult: 'compliant' | 'minor_issues' | 'major_issues';
+  lastInspectionResult: "compliant" | "minor_issues" | "major_issues";
   nextInspectionDate: Date;
   compliancePercentage: number;
-}
+};
 
-export interface ProductHealthCertification {
+export type ProductHealthCertification = {
   productId: string;
   productName: string;
   certifications: OrganicCertification[];
@@ -77,7 +77,13 @@ export interface ProductHealthCertification {
     certified: boolean;
   }>;
   packaging: {
-    material: 'glass' | 'ceramic' | 'natural_fiber' | 'aluminum_free_container' | 'paper' | 'cardboard';
+    material:
+      | "glass"
+      | "ceramic"
+      | "natural_fiber"
+      | "aluminum_free_container"
+      | "paper"
+      | "cardboard";
     recyclable: boolean;
     compostable: boolean;
     organic: boolean;
@@ -90,15 +96,15 @@ export interface ProductHealthCertification {
     sustainability: number;
     overallScore: number;
   };
-  complianceStatus: 'certified' | 'pending_certification' | 'non_compliant';
-}
+  complianceStatus: "certified" | "pending_certification" | "non_compliant";
+};
 
-export interface HealthAudit {
+export type HealthAudit = {
   auditId: string;
   auditDate: Date;
   auditingOfficer: string;
   auditingAuthority: string;
-  auditTarget: 'facility' | 'farm' | 'product_batch' | 'supplier';
+  auditTarget: "facility" | "farm" | "product_batch" | "supplier";
   targetId: string;
   targetName: string;
   scope: string;
@@ -106,24 +112,24 @@ export interface HealthAudit {
     itemId: string;
     category: string;
     requirement: string;
-    status: 'pass' | 'fail' | 'partial';
+    status: "pass" | "fail" | "partial";
     comments?: string;
     evidence?: string;
   }>;
-  overallResult: 'compliant' | 'minor_issues' | 'major_issues';
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  overallResult: "compliant" | "minor_issues" | "major_issues";
+  riskLevel: "low" | "medium" | "high" | "critical";
   correctionDeadline: Date;
   correctiveActionsRequired: Array<{
     actionId: string;
     action: string;
-    priority: 'immediate' | 'urgent' | 'standard';
+    priority: "immediate" | "urgent" | "standard";
     deadline: Date;
-    status: 'pending' | 'in_progress' | 'completed' | 'overdue';
+    status: "pending" | "in_progress" | "completed" | "overdue";
     completionDate?: Date;
   }>;
-}
+};
 
-export interface QualityAssuranceRecord {
+export type QualityAssuranceRecord = {
   recordId: string;
   productBatchId: string;
   productName: string;
@@ -135,24 +141,31 @@ export interface QualityAssuranceRecord {
     parameter: string;
     value: number;
     acceptableRange: { min: number; max: number };
-    result: 'pass' | 'fail' | 'flag_for_review';
+    result: "pass" | "fail" | "flag_for_review";
   }>;
-  overallResult: 'pass' | 'fail' | 'conditional_pass';
+  overallResult: "pass" | "fail" | "conditional_pass";
   certificateUrl: string;
   validUntil: Date;
-}
+};
 
 /**
  * HEALTH CERTIFICATION ENGINE
  */
 export class HealthCertificationEngine {
   private static instance: HealthCertificationEngine;
-  private organicCertifications: Map<string, OrganicCertification> = new Map();
-  private facilityCertifications: Map<string, FacilityHealthCertification> = new Map();
-  private productCertifications: Map<string, ProductHealthCertification> = new Map();
-  private healthAudits: Map<string, HealthAudit> = new Map();
-  private qualityAssuranceRecords: HealthAuditDetails[] = [];
-  private complianceHistory: Array<{
+  private readonly organicCertifications: Map<string, OrganicCertification> =
+    new Map();
+  private readonly facilityCertifications: Map<
+    string,
+    FacilityHealthCertification
+  > = new Map();
+  private readonly productCertifications: Map<
+    string,
+    ProductHealthCertification
+  > = new Map();
+  private readonly healthAudits: Map<string, HealthAudit> = new Map();
+  private readonly qualityAssuranceRecords: HealthAuditDetails[] = [];
+  private readonly complianceHistory: Array<{
     timestamp: Date;
     action: string;
     entityId: string;
@@ -171,14 +184,18 @@ export class HealthCertificationEngine {
   /**
    * Register organic certification
    */
-  async registerOrganicCertification(cert: OrganicCertification): Promise<string> {
+  async registerOrganicCertification(
+    cert: OrganicCertification
+  ): Promise<string> {
     // Verify certification is current
-    if (cert.status === 'expired') {
-      throw new Error(`CERTIFICATION ERROR: ${cert.certifyingBody} certification expired`);
+    if (cert.status === "expired") {
+      throw new Error(
+        `CERTIFICATION ERROR: ${cert.certifyingBody} certification expired`
+      );
     }
 
     // Verify audit passed
-    if (cert.auditDetails.auditResult !== 'compliant') {
+    if (cert.auditDetails.auditResult !== "compliant") {
       throw new Error(
         `CERTIFICATION ERROR: Audit result not compliant for ${cert.certifyingBody}: ${cert.auditDetails.auditResult}`
       );
@@ -188,9 +205,9 @@ export class HealthCertificationEngine {
 
     this.complianceHistory.push({
       timestamp: new Date(),
-      action: 'Registered organic certification',
+      action: "Registered organic certification",
       entityId: cert.certificationId,
-      details: `${cert.certifyingBody} - ${cert.certificationType}`
+      details: `${cert.certifyingBody} - ${cert.certificationType}`,
     });
 
     return cert.certificationId;
@@ -202,26 +219,26 @@ export class HealthCertificationEngine {
   async certifyFacility(cert: FacilityHealthCertification): Promise<string> {
     // Verify all required compliance areas pass
     const requiredCompliance = [
-      'foodSafety',
-      'waterQuality',
-      'airQuality',
-      'wasteManagement',
-      'workerHealth'
+      "foodSafety",
+      "waterQuality",
+      "airQuality",
+      "wasteManagement",
+      "workerHealth",
     ];
 
     const failedCompliance = requiredCompliance.filter(
-      area => !(cert.healthCompliance as Record<string, boolean>)[area]
+      (area) => !(cert.healthCompliance as Record<string, boolean>)[area]
     );
 
     if (failedCompliance.length > 0) {
       throw new Error(
-        `FACILITY COMPLIANCE ERROR: Failed compliance areas: ${failedCompliance.join(', ')}`
+        `FACILITY COMPLIANCE ERROR: Failed compliance areas: ${failedCompliance.join(", ")}`
       );
     }
 
     // Verify all certifications are valid
     for (const certification of cert.certifications) {
-      if (certification.status !== 'valid') {
+      if (certification.status !== "valid") {
         throw new Error(
           `FACILITY COMPLIANCE ERROR: Certification not valid: ${certification.certifyingBody}`
         );
@@ -229,7 +246,7 @@ export class HealthCertificationEngine {
     }
 
     // Verify last inspection passed
-    if (cert.lastInspectionResult !== 'compliant') {
+    if (cert.lastInspectionResult !== "compliant") {
       throw new Error(
         `FACILITY COMPLIANCE ERROR: Last inspection did not pass: ${cert.lastInspectionResult}`
       );
@@ -239,9 +256,9 @@ export class HealthCertificationEngine {
 
     this.complianceHistory.push({
       timestamp: new Date(),
-      action: 'Certified facility for health compliance',
+      action: "Certified facility for health compliance",
       entityId: cert.facilityId,
-      details: `${cert.facilityName} - Compliance: ${cert.compliancePercentage}%`
+      details: `${cert.facilityName} - Compliance: ${cert.compliancePercentage}%`,
     });
 
     return cert.certificationId;
@@ -263,14 +280,23 @@ export class HealthCertificationEngine {
     // Verify processing methods are natural/organic
     for (const method of cert.processingMethods) {
       if (!method.natural || !method.organic) {
-        throw new Error(`PRODUCT CERTIFICATION ERROR: Processing method not certified: ${method.method}`);
+        throw new Error(
+          `PRODUCT CERTIFICATION ERROR: Processing method not certified: ${method.method}`
+        );
       }
     }
 
     // Verify packaging is approved
-    const approvedPackaging = ['glass', 'ceramic', 'natural_fiber', 'aluminum_free_container'];
+    const approvedPackaging = [
+      "glass",
+      "ceramic",
+      "natural_fiber",
+      "aluminum_free_container",
+    ];
     if (!approvedPackaging.includes(cert.packaging.material)) {
-      throw new Error(`PRODUCT CERTIFICATION ERROR: Unapproved packaging material: ${cert.packaging.material}`);
+      throw new Error(
+        `PRODUCT CERTIFICATION ERROR: Unapproved packaging material: ${cert.packaging.material}`
+      );
     }
 
     // Verify health rating is acceptable
@@ -284,9 +310,9 @@ export class HealthCertificationEngine {
 
     this.complianceHistory.push({
       timestamp: new Date(),
-      action: 'Certified product for health standards',
+      action: "Certified product for health standards",
       entityId: cert.productId,
-      details: `${cert.productName} - Health Score: ${cert.healthRating.overallScore}`
+      details: `${cert.productName} - Health Score: ${cert.healthRating.overallScore}`,
     });
 
     return cert.productId;
@@ -297,7 +323,7 @@ export class HealthCertificationEngine {
    */
   async conductHealthAudit(audit: HealthAudit): Promise<string> {
     // Verify all inspection items have results
-    const itemsWithoutResult = audit.inspectionItems.filter(i => !i.status);
+    const itemsWithoutResult = audit.inspectionItems.filter((i) => !i.status);
     if (itemsWithoutResult.length > 0) {
       throw new Error(
         `AUDIT ERROR: ${itemsWithoutResult.length} inspection items without results`
@@ -305,26 +331,34 @@ export class HealthCertificationEngine {
     }
 
     // Check for failed items
-    const failedItems = audit.inspectionItems.filter(i => i.status === 'fail');
-    if (failedItems.length > 0 && audit.overallResult === 'compliant') {
+    const failedItems = audit.inspectionItems.filter(
+      (i) => i.status === "fail"
+    );
+    if (failedItems.length > 0 && audit.overallResult === "compliant") {
       throw new Error(
-        `AUDIT ERROR: Failed items detected but overall result marked compliant`
+        "AUDIT ERROR: Failed items detected but overall result marked compliant"
       );
     }
 
     // If major issues, set high risk
-    if (audit.overallResult === 'major_issues' && audit.riskLevel !== 'high' && audit.riskLevel !== 'critical') {
-      throw new Error(`AUDIT ERROR: Major issues require high or critical risk level`);
+    if (
+      audit.overallResult === "major_issues" &&
+      audit.riskLevel !== "high" &&
+      audit.riskLevel !== "critical"
+    ) {
+      throw new Error(
+        "AUDIT ERROR: Major issues require high or critical risk level"
+      );
     }
 
     this.healthAudits.set(audit.auditId, audit);
 
-    if (audit.overallResult !== 'compliant') {
+    if (audit.overallResult !== "compliant") {
       this.complianceHistory.push({
         timestamp: new Date(),
-        action: 'Health audit conducted - Issues found',
+        action: "Health audit conducted - Issues found",
         entityId: audit.targetId,
-        details: `Result: ${audit.overallResult}, Risk: ${audit.riskLevel}`
+        details: `Result: ${audit.overallResult}, Risk: ${audit.riskLevel}`,
       });
     }
 
@@ -334,14 +368,18 @@ export class HealthCertificationEngine {
   /**
    * Record quality assurance test
    */
-  async recordQualityAssurance(record: QualityAssuranceRecord): Promise<string> {
+  async recordQualityAssurance(
+    record: QualityAssuranceRecord
+  ): Promise<string> {
     // Verify all tests passed acceptable ranges
-    const failedTests = record.testsPerformed.filter(t => t.result === 'fail');
+    const failedTests = record.testsPerformed.filter(
+      (t) => t.result === "fail"
+    );
     if (failedTests.length > 0) {
       throw new Error(
         `QUALITY ASSURANCE ERROR: ${failedTests.length} tests failed: ${failedTests
-          .map(t => t.testType)
-          .join(', ')}`
+          .map((t) => t.testType)
+          .join(", ")}`
       );
     }
 
@@ -349,7 +387,7 @@ export class HealthCertificationEngine {
       recordId: record.recordId,
       productBatchId: record.productBatchId,
       testDate: record.testDate,
-      overallResult: record.overallResult
+      overallResult: record.overallResult,
     } as any);
 
     return record.recordId;
@@ -364,27 +402,41 @@ export class HealthCertificationEngine {
     areasCompliant: string[];
     aresFailing: string[];
     certifications: number;
-    status: 'compliant' | 'warning' | 'non_compliant';
+    status: "compliant" | "warning" | "non_compliant";
     nextAuditDate: Date;
   } {
-    const cert = Array.from(this.facilityCertifications.values()).find(c => c.facilityId === facilityId);
+    const cert = Array.from(this.facilityCertifications.values()).find(
+      (c) => c.facilityId === facilityId
+    );
 
     if (!cert) {
       throw new Error(`Facility not found: ${facilityId}`);
     }
 
-    const requiredAreas = ['foodSafety', 'waterQuality', 'airQuality', 'wasteManagement', 'workerHealth'];
-    const compliant = requiredAreas.filter(area => (cert.healthCompliance as Record<string, boolean>)[area]);
-    const failing = requiredAreas.filter(area => !(cert.healthCompliance as Record<string, boolean>)[area]);
+    const requiredAreas = [
+      "foodSafety",
+      "waterQuality",
+      "airQuality",
+      "wasteManagement",
+      "workerHealth",
+    ];
+    const compliant = requiredAreas.filter(
+      (area) => (cert.healthCompliance as Record<string, boolean>)[area]
+    );
+    const failing = requiredAreas.filter(
+      (area) => !(cert.healthCompliance as Record<string, boolean>)[area]
+    );
 
     return {
-      certificationType: cert.certifications.map(c => c.certificationType).join(', '),
+      certificationType: cert.certifications
+        .map((c) => c.certificationType)
+        .join(", "),
       compliancePercentage: cert.compliancePercentage,
       areasCompliant: compliant,
       aresFailing: failing,
       certifications: cert.certifications.length,
-      status: cert.compliancePercentage >= 95 ? 'compliant' : 'warning',
-      nextAuditDate: cert.nextInspectionDate
+      status: cert.compliancePercentage >= 95 ? "compliant" : "warning",
+      nextAuditDate: cert.nextInspectionDate,
     };
   }
 
@@ -406,20 +458,23 @@ export class HealthCertificationEngine {
       throw new Error(`Product not found: ${productId}`);
     }
 
-    const allNatural = cert.ingredients.every(i => i.naturallySourced);
-    const allOrganic = cert.ingredients.every(i => i.organicCertified);
-    const safePackaging = ['glass', 'ceramic', 'natural_fiber', 'aluminum_free_container'].includes(
-      cert.packaging.material
-    );
+    const allNatural = cert.ingredients.every((i) => i.naturallySourced);
+    const allOrganic = cert.ingredients.every((i) => i.organicCertified);
+    const safePackaging = [
+      "glass",
+      "ceramic",
+      "natural_fiber",
+      "aluminum_free_container",
+    ].includes(cert.packaging.material);
 
     return {
       productName: cert.productName,
       certifiedOrganic: allOrganic,
       allNaturalIngredients: allNatural,
       healthRating: cert.healthRating.overallScore,
-      certifications: cert.certifications.map(c => c.certifyingBody),
+      certifications: cert.certifications.map((c) => c.certifyingBody),
       safePackaging,
-      complianceStatus: cert.complianceStatus
+      complianceStatus: cert.complianceStatus,
     };
   }
 
@@ -443,10 +498,14 @@ export class HealthCertificationEngine {
       throw new Error(`Audit not found: ${auditId}`);
     }
 
-    const passed = audit.inspectionItems.filter(i => i.status === 'pass').length;
-    const failed = audit.inspectionItems.filter(i => i.status === 'fail').length;
+    const passed = audit.inspectionItems.filter(
+      (i) => i.status === "pass"
+    ).length;
+    const failed = audit.inspectionItems.filter(
+      (i) => i.status === "fail"
+    ).length;
     const actionsCompleted = audit.correctiveActionsRequired.filter(
-      a => a.status === 'completed'
+      (a) => a.status === "completed"
     ).length;
 
     return {
@@ -458,14 +517,19 @@ export class HealthCertificationEngine {
       itemsFailed: failed,
       correctiveActionsRequired: audit.correctiveActionsRequired.length,
       correctiveActionsCompleted: actionsCompleted,
-      nextAuditDate: new Date(audit.correctionDeadline.getTime() + 30 * 24 * 60 * 60 * 1000)
+      nextAuditDate: new Date(
+        audit.correctionDeadline.getTime() + 30 * 24 * 60 * 60 * 1000
+      ),
     };
   }
 
   /**
    * Generate compliance certificate
    */
-  generateComplianceCertificate(entityId: string, entityType: 'facility' | 'product'): {
+  generateComplianceCertificate(
+    entityId: string,
+    entityType: "facility" | "product"
+  ): {
     certificateId: string;
     entityName: string;
     certifications: string[];
@@ -474,39 +538,46 @@ export class HealthCertificationEngine {
     issuedDate: Date;
     issuer: string;
   } {
-    if (entityType === 'facility') {
-      const cert = Array.from(this.facilityCertifications.values()).find(c => c.facilityId === entityId);
-      if (!cert) throw new Error(`Facility not found: ${entityId}`);
+    if (entityType === "facility") {
+      const cert = Array.from(this.facilityCertifications.values()).find(
+        (c) => c.facilityId === entityId
+      );
+      if (!cert) {
+        throw new Error(`Facility not found: ${entityId}`);
+      }
 
       return {
         certificateId: `cert_facility_${Date.now()}`,
         entityName: cert.facilityName,
-        certifications: cert.certifications.map(c => c.certifyingBody),
-        complianceStatus: cert.compliancePercentage >= 95 ? 'COMPLIANT' : 'CONDITIONAL',
+        certifications: cert.certifications.map((c) => c.certifyingBody),
+        complianceStatus:
+          cert.compliancePercentage >= 95 ? "COMPLIANT" : "CONDITIONAL",
         validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         issuedDate: new Date(),
-        issuer: 'Health Certification Authority'
-      };
-    } else {
-      const cert = this.productCertifications.get(entityId);
-      if (!cert) throw new Error(`Product not found: ${entityId}`);
-
-      return {
-        certificateId: `cert_product_${Date.now()}`,
-        entityName: cert.productName,
-        certifications: cert.certifications.map(c => c.certifyingBody),
-        complianceStatus: cert.complianceStatus === 'certified' ? 'COMPLIANT' : 'PENDING',
-        validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        issuedDate: new Date(),
-        issuer: 'Health Certification Authority'
+        issuer: "Health Certification Authority",
       };
     }
+    const cert = this.productCertifications.get(entityId);
+    if (!cert) {
+      throw new Error(`Product not found: ${entityId}`);
+    }
+
+    return {
+      certificateId: `cert_product_${Date.now()}`,
+      entityName: cert.productName,
+      certifications: cert.certifications.map((c) => c.certifyingBody),
+      complianceStatus:
+        cert.complianceStatus === "certified" ? "COMPLIANT" : "PENDING",
+      validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      issuedDate: new Date(),
+      issuer: "Health Certification Authority",
+    };
   }
 
   /**
    * Get compliance history
    */
-  getComplianceHistory(limit: number = 100): Array<{
+  getComplianceHistory(limit = 100): Array<{
     timestamp: Date;
     action: string;
     entityId: string;
@@ -516,11 +587,11 @@ export class HealthCertificationEngine {
   }
 }
 
-export interface HealthAuditDetails {
+export type HealthAuditDetails = {
   recordId: string;
   productBatchId: string;
   testDate: Date;
   overallResult: string;
-}
+};
 
 export default HealthCertificationEngine.getInstance();

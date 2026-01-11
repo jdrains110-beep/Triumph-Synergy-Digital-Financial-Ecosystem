@@ -1,9 +1,9 @@
 /**
  * TRIUMPH-SYNERGY GOVERNANCE EXCLUSIONS
- * 
+ *
  * Sovereign ecosystem access control
  * The Owner defines who may and may not participate
- * 
+ *
  * This is a PRIVATE ecosystem - participation is by invitation only
  */
 
@@ -15,7 +15,8 @@ export const EXCLUDED_ENTITY_CATEGORIES = {
   // Banking Cartels & Central Banking
   CENTRAL_BANKS: {
     excluded: true,
-    reason: "Central banking institutions and their subsidiaries are not permitted",
+    reason:
+      "Central banking institutions and their subsidiaries are not permitted",
     entities: [
       "Federal Reserve System",
       "Bank for International Settlements (BIS)",
@@ -47,7 +48,8 @@ export const EXCLUDED_ENTITY_CATEGORIES = {
   // Specific Individuals & Foundations
   EXCLUDED_INDIVIDUALS: {
     excluded: true,
-    reason: "Specific individuals and their controlled entities are not permitted",
+    reason:
+      "Specific individuals and their controlled entities are not permitted",
     entities: [
       "Bill & Melinda Gates Foundation",
       "Gates Foundation",
@@ -60,7 +62,8 @@ export const EXCLUDED_ENTITY_CATEGORIES = {
   // Government Revenue/Enforcement Agencies
   GOVERNMENT_REVENUE: {
     excluded: true,
-    reason: "Tax and revenue enforcement agencies cannot access ecosystem financial data",
+    reason:
+      "Tax and revenue enforcement agencies cannot access ecosystem financial data",
     entities: [
       "Internal Revenue Service (IRS)",
       "State Department of Revenue",
@@ -74,26 +77,28 @@ export const EXCLUDED_ENTITY_CATEGORIES = {
 // EXCLUSION VERIFICATION
 // =============================================================================
 
-export interface EntityVerification {
+export type EntityVerification = {
   entityName: string;
   entityType: string;
   ein?: string;
   representatives?: string[];
-}
+};
 
-export interface VerificationResult {
+export type VerificationResult = {
   allowed: boolean;
   reason: string;
   category?: string;
   timestamp: Date;
-}
+};
 
 /**
  * Check if an entity is allowed to participate in the ecosystem
  */
-export function verifyEntityAccess(entity: EntityVerification): VerificationResult {
+export function verifyEntityAccess(
+  entity: EntityVerification
+): VerificationResult {
   const normalizedName = entity.entityName.toLowerCase();
-  
+
   // Check against all exclusion categories
   for (const [category, config] of Object.entries(EXCLUDED_ENTITY_CATEGORIES)) {
     for (const excludedEntity of config.entities) {
@@ -169,21 +174,30 @@ export const PARTICIPATION_REQUIREMENTS = {
 // =============================================================================
 
 export class EcosystemAccessControl {
-  private verifiedEntities: Map<string, VerificationResult> = new Map();
-  private blockedAttempts: Array<{
+  private readonly verifiedEntities: Map<string, VerificationResult> =
+    new Map();
+  private readonly blockedAttempts: Array<{
     entity: EntityVerification;
     result: VerificationResult;
     timestamp: Date;
   }> = [];
 
   constructor() {
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
     console.log("   TRIUMPH-SYNERGY ACCESS CONTROL INITIALIZED");
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
     console.log("   Status: SOVEREIGN ECOSYSTEM - PRIVATE ACCESS");
-    console.log("   Excluded: Banking Cartels, Wall Street, Specified Entities");
+    console.log(
+      "   Excluded: Banking Cartels, Wall Street, Specified Entities"
+    );
     console.log("   Access: By Owner Approval Only");
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
   }
 
   /**
@@ -191,20 +205,22 @@ export class EcosystemAccessControl {
    */
   requestAccess(entity: EntityVerification): VerificationResult {
     const result = verifyEntityAccess(entity);
-    
-    if (!result.allowed) {
+
+    if (result.allowed) {
+      // Cache verified entity
+      this.verifiedEntities.set(entity.entityName, result);
+      console.log(
+        `[ACCESS PENDING] ${entity.entityName} - Awaiting Owner approval`
+      );
+    } else {
       // Log blocked attempt
       this.blockedAttempts.push({
         entity,
         result,
         timestamp: new Date(),
       });
-      
+
       console.log(`[ACCESS DENIED] ${entity.entityName} - ${result.reason}`);
-    } else {
-      // Cache verified entity
-      this.verifiedEntities.set(entity.entityName, result);
-      console.log(`[ACCESS PENDING] ${entity.entityName} - Awaiting Owner approval`);
     }
 
     return result;
@@ -215,20 +231,23 @@ export class EcosystemAccessControl {
    */
   ownerApproval(entityName: string, approved: boolean): boolean {
     const verification = this.verifiedEntities.get(entityName);
-    
+
     if (!verification || !verification.allowed) {
-      console.log(`[OWNER DECISION] ${entityName} - Cannot approve excluded entity`);
+      console.log(
+        `[OWNER DECISION] ${entityName} - Cannot approve excluded entity`
+      );
       return false;
     }
 
     if (approved) {
-      console.log(`[OWNER APPROVED] ${entityName} - Full ecosystem access granted`);
+      console.log(
+        `[OWNER APPROVED] ${entityName} - Full ecosystem access granted`
+      );
       return true;
-    } else {
-      this.verifiedEntities.delete(entityName);
-      console.log(`[OWNER DENIED] ${entityName} - Access revoked`);
-      return false;
     }
+    this.verifiedEntities.delete(entityName);
+    console.log(`[OWNER DENIED] ${entityName} - Access revoked`);
+    return false;
   }
 
   /**

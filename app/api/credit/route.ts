@@ -12,7 +12,6 @@ import {
   disputeCreditItem,
   type PiNetworkCreditActivity,
   pullCreditReports,
-  reportPaymentToBureaus,
   reportPiPayments,
 } from "@/lib/credit-reporting/credit-bureau-integration";
 

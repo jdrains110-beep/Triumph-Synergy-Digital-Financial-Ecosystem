@@ -3,7 +3,7 @@
  * Handle payments through integrated applications
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   applicationRegistry,
   executeApplicationPayment,
@@ -13,7 +13,7 @@ import {
 /**
  * POST /api/ecosystem/payments
  * Execute a payment through an integrated application
- * 
+ *
  * Request body:
  * {
  *   appId: string;          // Application ID

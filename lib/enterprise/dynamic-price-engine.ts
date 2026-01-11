@@ -1,6 +1,6 @@
 /**
  * DYNAMIC PRICE ADJUSTMENT ENGINE
- * 
+ *
  * Automatically adjusts prices across entire ecosystem based on:
  * - Pi Network price announcements
  * - Market conditions
@@ -9,29 +9,29 @@
  * - Ecosystem stability requirements
  */
 
-export interface PriceAdjustmentRule {
+export type PriceAdjustmentRule = {
   ruleId: string;
   ruleName: string;
-  triggerMetric: 'pi_price' | 'volume' | 'capacity' | 'volatility' | 'demand';
+  triggerMetric: "pi_price" | "volume" | "capacity" | "volatility" | "demand";
   triggerThreshold: number;
-  triggerDirection: 'above' | 'below' | 'both';
-  adjustmentType: 'percentage' | 'fixed' | 'dynamic';
+  triggerDirection: "above" | "below" | "both";
+  adjustmentType: "percentage" | "fixed" | "dynamic";
   adjustmentValue: number;
   maxAdjustmentPerDay: number;
-  affectedEntities: ('all' | string)[];
+  affectedEntities: ("all" | string)[];
   priority: number;
   enabled: boolean;
   createdDate: Date;
   lastModified: Date;
-}
+};
 
-export interface PriceSnapshot {
+export type PriceSnapshot = {
   snapshotId: string;
   timestamp: Date;
   piPrice: number;
   piPriceUSD: number;
   piDEXPrice: number;
-  marketCondition: 'bullish' | 'neutral' | 'bearish' | 'volatile';
+  marketCondition: "bullish" | "neutral" | "bearish" | "volatile";
   adjustmentsMade: Array<{
     entityId: string;
     oldPrice: number;
@@ -40,9 +40,9 @@ export interface PriceSnapshot {
   }>;
   systemStability: number;
   bankingUtilization: number;
-}
+};
 
-export interface EcosystemPricing {
+export type EcosystemPricing = {
   entityId: string;
   entityName: string;
   basePriceUSD: number;
@@ -57,24 +57,24 @@ export interface EcosystemPricing {
   adjustmentReason?: string;
   priceChange24h: number;
   priceChange7d: number;
-}
+};
 
 /**
  * DYNAMIC PRICE ADJUSTMENT ENGINE
  */
 export class DynamicPriceAdjustmentEngine {
   private static instance: DynamicPriceAdjustmentEngine;
-  private priceRules: Map<string, PriceAdjustmentRule> = new Map();
-  private priceSnapshots: Map<string, PriceSnapshot> = new Map();
-  private ecosystemPricing: Map<string, EcosystemPricing> = new Map();
-  private currentPiPrice: number = 314.0; // Starting price
-  private priceAdjustmentLog: Array<{
+  private readonly priceRules: Map<string, PriceAdjustmentRule> = new Map();
+  private readonly priceSnapshots: Map<string, PriceSnapshot> = new Map();
+  private readonly ecosystemPricing: Map<string, EcosystemPricing> = new Map();
+  private currentPiPrice = 314.0; // Starting price
+  private readonly priceAdjustmentLog: Array<{
     timestamp: Date;
     action: string;
     details: string;
     impact: number;
   }> = [];
-  private stabilityMonitor: {
+  private readonly stabilityMonitor: {
     currentStability: number;
     targetStability: number;
     volatilityIndex: number;
@@ -83,7 +83,7 @@ export class DynamicPriceAdjustmentEngine {
     currentStability: 97,
     targetStability: 95,
     volatilityIndex: 2.5,
-    riskLevel: 'LOW'
+    riskLevel: "LOW",
   };
 
   private constructor() {
@@ -93,7 +93,8 @@ export class DynamicPriceAdjustmentEngine {
 
   static getInstance(): DynamicPriceAdjustmentEngine {
     if (!DynamicPriceAdjustmentEngine.instance) {
-      DynamicPriceAdjustmentEngine.instance = new DynamicPriceAdjustmentEngine();
+      DynamicPriceAdjustmentEngine.instance =
+        new DynamicPriceAdjustmentEngine();
     }
     return DynamicPriceAdjustmentEngine.instance;
   }
@@ -104,61 +105,61 @@ export class DynamicPriceAdjustmentEngine {
   private initializePricingRules(): void {
     const rulesConfig = [
       {
-        name: 'Pi Price Up 5%+',
-        metric: 'pi_price',
+        name: "Pi Price Up 5%+",
+        metric: "pi_price",
         threshold: 5,
-        direction: 'above',
+        direction: "above",
         adjustment: 2.5,
-        maxDaily: 50000
+        maxDaily: 50_000,
       },
       {
-        name: 'Pi Price Down 5%+',
-        metric: 'pi_price',
+        name: "Pi Price Down 5%+",
+        metric: "pi_price",
         threshold: 5,
-        direction: 'below',
+        direction: "below",
         adjustment: -2.5,
-        maxDaily: 50000
+        maxDaily: 50_000,
       },
       {
-        name: 'High Banking Utilization',
-        metric: 'capacity',
+        name: "High Banking Utilization",
+        metric: "capacity",
         threshold: 85,
-        direction: 'above',
+        direction: "above",
         adjustment: 1.5,
-        maxDaily: 30000
+        maxDaily: 30_000,
       },
       {
-        name: 'High Volume Detection',
-        metric: 'volume',
+        name: "High Volume Detection",
+        metric: "volume",
         threshold: 120,
-        direction: 'above',
+        direction: "above",
         adjustment: 1.0,
-        maxDaily: 25000
+        maxDaily: 25_000,
       },
       {
-        name: 'Volatility High',
-        metric: 'volatility',
+        name: "Volatility High",
+        metric: "volatility",
         threshold: 10,
-        direction: 'above',
+        direction: "above",
         adjustment: 2.0,
-        maxDaily: 40000
+        maxDaily: 40_000,
       },
       {
-        name: 'Demand Surge',
-        metric: 'demand',
+        name: "Demand Surge",
+        metric: "demand",
         threshold: 150,
-        direction: 'above',
+        direction: "above",
         adjustment: 1.0,
-        maxDaily: 20000
+        maxDaily: 20_000,
       },
       {
-        name: 'Ecosystem Stabilization',
-        metric: 'volatility',
+        name: "Ecosystem Stabilization",
+        metric: "volatility",
         threshold: 5,
-        direction: 'below',
+        direction: "below",
         adjustment: -0.5,
-        maxDaily: 15000
-      }
+        maxDaily: 15_000,
+      },
     ];
 
     rulesConfig.forEach((config, index) => {
@@ -170,20 +171,22 @@ export class DynamicPriceAdjustmentEngine {
         triggerMetric: config.metric as any,
         triggerThreshold: config.threshold,
         triggerDirection: config.direction as any,
-        adjustmentType: 'percentage',
+        adjustmentType: "percentage",
         adjustmentValue: config.adjustment,
         maxAdjustmentPerDay: config.maxDaily,
-        affectedEntities: ['all'],
+        affectedEntities: ["all"],
         priority: 10 - index,
         enabled: true,
         createdDate: new Date(),
-        lastModified: new Date()
+        lastModified: new Date(),
       };
 
       this.priceRules.set(ruleId, rule);
     });
 
-    console.log(`[PRICING] Initialized ${this.priceRules.size} price adjustment rules`);
+    console.log(
+      `[PRICING] Initialized ${this.priceRules.size} price adjustment rules`
+    );
   }
 
   /**
@@ -195,9 +198,9 @@ export class DynamicPriceAdjustmentEngine {
       this.updatePiPrice();
       this.checkPricingRules();
       this.createPriceSnapshot();
-    }, 60000); // Check every minute
+    }, 60_000); // Check every minute
 
-    console.log(`[PRICING] Price monitoring started`);
+    console.log("[PRICING] Price monitoring started");
   }
 
   /**
@@ -208,17 +211,21 @@ export class DynamicPriceAdjustmentEngine {
     const trendFactor = Math.random() > 0.5 ? 0.1 : -0.1; // Slight trend
     const priceChange = volatility + trendFactor;
 
-    this.currentPiPrice = this.currentPiPrice * (1 + priceChange / 100);
+    this.currentPiPrice *= 1 + priceChange / 100;
 
     // Keep price realistic
-    if (this.currentPiPrice < 100) this.currentPiPrice = 100;
-    if (this.currentPiPrice > 1000) this.currentPiPrice = 1000;
+    if (this.currentPiPrice < 100) {
+      this.currentPiPrice = 100;
+    }
+    if (this.currentPiPrice > 1000) {
+      this.currentPiPrice = 1000;
+    }
 
     this.priceAdjustmentLog.push({
       timestamp: new Date(),
-      action: 'Pi price updated',
+      action: "Pi price updated",
       details: `New price: $${this.currentPiPrice.toFixed(2)}`,
-      impact: priceChange
+      impact: priceChange,
     });
   }
 
@@ -227,19 +234,27 @@ export class DynamicPriceAdjustmentEngine {
    */
   private checkPricingRules(): void {
     for (const rule of this.priceRules.values()) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {
+        continue;
+      }
 
       let shouldApply = false;
 
       // Simulate metric checks
       const randomMetric = Math.random() * 100;
 
-      if (rule.triggerMetric === 'pi_price') {
+      if (rule.triggerMetric === "pi_price") {
         const priceChange = Math.random() * 10; // 0-10% change
-        if (rule.triggerDirection === 'above' && priceChange > rule.triggerThreshold) {
+        if (
+          rule.triggerDirection === "above" &&
+          priceChange > rule.triggerThreshold
+        ) {
           shouldApply = true;
         }
-        if (rule.triggerDirection === 'below' && priceChange < -rule.triggerThreshold) {
+        if (
+          rule.triggerDirection === "below" &&
+          priceChange < -rule.triggerThreshold
+        ) {
           shouldApply = true;
         }
       } else if (randomMetric > 70 && rule.triggerThreshold < 80) {
@@ -259,14 +274,17 @@ export class DynamicPriceAdjustmentEngine {
     let adjustmentCount = 0;
 
     for (const pricing of this.ecosystemPricing.values()) {
-      if (rule.affectedEntities.includes('all') || rule.affectedEntities.includes(pricing.entityId)) {
+      if (
+        rule.affectedEntities.includes("all") ||
+        rule.affectedEntities.includes(pricing.entityId)
+      ) {
         const oldPrice = pricing.piPrice;
 
-        if (rule.adjustmentType === 'percentage') {
+        if (rule.adjustmentType === "percentage") {
           const adjustment = (oldPrice * rule.adjustmentValue) / 100;
           pricing.piPrice = oldPrice + adjustment;
           pricing.piDEXPrice = pricing.piPrice * 0.98; // Slight discount for DEX
-        } else if (rule.adjustmentType === 'fixed') {
+        } else if (rule.adjustmentType === "fixed") {
           pricing.piPrice = oldPrice + rule.adjustmentValue;
         }
 
@@ -277,7 +295,7 @@ export class DynamicPriceAdjustmentEngine {
         pricing.priceHistory.push({
           date: new Date(),
           price: pricing.piPrice,
-          adjustment: rule.adjustmentValue
+          adjustment: rule.adjustmentValue,
         });
 
         adjustmentCount++;
@@ -288,17 +306,22 @@ export class DynamicPriceAdjustmentEngine {
     if (Math.abs(rule.adjustmentValue) > 2) {
       this.stabilityMonitor.volatilityIndex += 0.5;
     } else {
-      this.stabilityMonitor.volatilityIndex = Math.max(0, this.stabilityMonitor.volatilityIndex - 0.1);
+      this.stabilityMonitor.volatilityIndex = Math.max(
+        0,
+        this.stabilityMonitor.volatilityIndex - 0.1
+      );
     }
 
     this.priceAdjustmentLog.push({
       timestamp: new Date(),
       action: `Applied rule: ${rule.ruleName}`,
       details: `Adjusted ${adjustmentCount} entities`,
-      impact: rule.adjustmentValue
+      impact: rule.adjustmentValue,
     });
 
-    console.log(`[PRICING ADJUSTMENT] ${rule.ruleName}: ${adjustmentCount} entities updated`);
+    console.log(
+      `[PRICING ADJUSTMENT] ${rule.ruleName}: ${adjustmentCount} entities updated`
+    );
   }
 
   /**
@@ -316,7 +339,7 @@ export class DynamicPriceAdjustmentEngine {
       marketCondition: this.getMarketCondition(),
       adjustmentsMade: [],
       systemStability: this.stabilityMonitor.currentStability,
-      bankingUtilization: Math.random() * 100
+      bankingUtilization: Math.random() * 100,
     };
 
     this.priceSnapshots.set(snapshotId, snapshot);
@@ -331,17 +354,27 @@ export class DynamicPriceAdjustmentEngine {
   /**
    * Determine market condition
    */
-  private getMarketCondition(): 'bullish' | 'neutral' | 'bearish' | 'volatile' {
-    if (this.stabilityMonitor.volatilityIndex > 8) return 'volatile';
-    if (this.currentPiPrice > 350) return 'bullish';
-    if (this.currentPiPrice < 280) return 'bearish';
-    return 'neutral';
+  private getMarketCondition(): "bullish" | "neutral" | "bearish" | "volatile" {
+    if (this.stabilityMonitor.volatilityIndex > 8) {
+      return "volatile";
+    }
+    if (this.currentPiPrice > 350) {
+      return "bullish";
+    }
+    if (this.currentPiPrice < 280) {
+      return "bearish";
+    }
+    return "neutral";
   }
 
   /**
    * Register ecosystem pricing
    */
-  registerEcosystemPricing(entityId: string, entityName: string, basePrice: number): void {
+  registerEcosystemPricing(
+    entityId: string,
+    entityName: string,
+    basePrice: number
+  ): void {
     if (!this.ecosystemPricing.has(entityId)) {
       this.ecosystemPricing.set(entityId, {
         entityId,
@@ -352,7 +385,7 @@ export class DynamicPriceAdjustmentEngine {
         priceHistory: [],
         lastAdjustment: new Date(),
         priceChange24h: 0,
-        priceChange7d: 0
+        priceChange7d: 0,
       });
     }
   }
@@ -386,13 +419,13 @@ export class DynamicPriceAdjustmentEngine {
   } {
     // Update risk level
     if (this.stabilityMonitor.volatilityIndex > 10) {
-      this.stabilityMonitor.riskLevel = 'CRITICAL';
+      this.stabilityMonitor.riskLevel = "CRITICAL";
     } else if (this.stabilityMonitor.volatilityIndex > 7) {
-      this.stabilityMonitor.riskLevel = 'HIGH';
+      this.stabilityMonitor.riskLevel = "HIGH";
     } else if (this.stabilityMonitor.volatilityIndex > 4) {
-      this.stabilityMonitor.riskLevel = 'MEDIUM';
+      this.stabilityMonitor.riskLevel = "MEDIUM";
     } else {
-      this.stabilityMonitor.riskLevel = 'LOW';
+      this.stabilityMonitor.riskLevel = "LOW";
     }
 
     return this.stabilityMonitor;
@@ -408,7 +441,7 @@ export class DynamicPriceAdjustmentEngine {
   /**
    * Get price adjustment log
    */
-  getPriceAdjustmentLog(limit: number = 100): Array<{
+  getPriceAdjustmentLog(limit = 100): Array<{
     timestamp: Date;
     action: string;
     details: string;
@@ -420,7 +453,7 @@ export class DynamicPriceAdjustmentEngine {
   /**
    * Get price history
    */
-  getPriceHistory(hours: number = 24): Array<{
+  getPriceHistory(hours = 24): Array<{
     timestamp: Date;
     price: number;
     condition: string;
@@ -429,11 +462,11 @@ export class DynamicPriceAdjustmentEngine {
     const cutoff = now - hours * 60 * 60 * 1000;
 
     return Array.from(this.priceSnapshots.values())
-      .filter(s => s.timestamp.getTime() > cutoff)
-      .map(s => ({
+      .filter((s) => s.timestamp.getTime() > cutoff)
+      .map((s) => ({
         timestamp: s.timestamp,
         price: s.piPrice,
-        condition: s.marketCondition
+        condition: s.marketCondition,
       }));
   }
 }

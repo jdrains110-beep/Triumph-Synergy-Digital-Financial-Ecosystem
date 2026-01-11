@@ -17,7 +17,7 @@
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface NESARAProfile {
+export type NESARAProfile = {
   id: string;
   piUserId: string;
   piUsername: string;
@@ -29,7 +29,7 @@ export interface NESARAProfile {
   taxReform: TaxReformRecord;
   assetBackedAccounts: AssetBackedAccount[];
   complianceHistory: ComplianceEvent[];
-}
+};
 
 export type NESARAStatus =
   | "pending-registration"
@@ -40,7 +40,7 @@ export type NESARAStatus =
   | "suspended"
   | "completed";
 
-export interface DebtForgivenessRecord {
+export type DebtForgivenessRecord = {
   id: string;
   creditCardDebt: number;
   mortgageDebt: number;
@@ -53,9 +53,9 @@ export interface DebtForgivenessRecord {
   forgivenessDate: Date | null;
   status: "pending" | "processing" | "forgiven" | "partial" | "denied";
   verificationDocuments: string[];
-}
+};
 
-export interface ProsperityFundsRecord {
+export type ProsperityFundsRecord = {
   id: string;
   eligibleAmount: number;
   distributedAmount: number;
@@ -65,17 +65,17 @@ export interface ProsperityFundsRecord {
   nextDistribution: Date | null;
   accountNumber: string;
   status: "pending" | "active" | "receiving" | "completed" | "suspended";
-}
+};
 
-export interface DistributionScheduleEntry {
+export type DistributionScheduleEntry = {
   date: Date;
   amount: number;
   type: "initial" | "monthly" | "quarterly" | "supplemental";
   status: "scheduled" | "processing" | "completed" | "failed";
   transactionId: string | null;
-}
+};
 
-export interface BirthCertificateBondRecord {
+export type BirthCertificateBondRecord = {
   id: string;
   certificateNumber: string;
   bondValue: number;
@@ -83,17 +83,17 @@ export interface BirthCertificateBondRecord {
   claimDate: Date | null;
   releaseDate: Date | null;
   fundingAccount: string | null;
-}
+};
 
-export interface TaxReformRecord {
+export type TaxReformRecord = {
   previousTaxBurden: number;
   newTaxRate: number; // Flat 14-17% consumption tax under NESARA
   refundDue: number;
   illegalTaxesRefunded: number;
   status: "pending" | "calculated" | "refunded" | "completed";
-}
+};
 
-export interface AssetBackedAccount {
+export type AssetBackedAccount = {
   id: string;
   type: "gold" | "silver" | "platinum" | "pi-backed" | "quantum";
   balance: number;
@@ -102,17 +102,17 @@ export interface AssetBackedAccount {
   createdAt: Date;
   lastUpdated: Date;
   isActive: boolean;
-}
+};
 
-export interface ComplianceEvent {
+export type ComplianceEvent = {
   timestamp: Date;
   eventType: string;
   description: string;
   status: "success" | "failure" | "pending";
   metadata: Record<string, unknown>;
-}
+};
 
-export interface GESARACountryStatus {
+export type GESARACountryStatus = {
   countryCode: string;
   countryName: string;
   gesaraCompliant: boolean;
@@ -122,7 +122,7 @@ export interface GESARACountryStatus {
   debtForgivenessActive: boolean;
   newCurrencyIssued: boolean;
   quantumFinancialSystem: boolean;
-}
+};
 
 // ============================================================================
 // NESARA/GESARA IMPLEMENTATION ENGINE
@@ -130,8 +130,8 @@ export interface GESARACountryStatus {
 
 export class NESARAGESARAEngine {
   private static instance: NESARAGESARAEngine;
-  private profiles: Map<string, NESARAProfile> = new Map();
-  private countryStatus: Map<string, GESARACountryStatus> = new Map();
+  private readonly profiles: Map<string, NESARAProfile> = new Map();
+  private readonly countryStatus: Map<string, GESARACountryStatus> = new Map();
 
   // NESARA Flat Tax Rate (14-17% consumption tax replacing income tax)
   private readonly NESARA_TAX_RATE = 0.14;

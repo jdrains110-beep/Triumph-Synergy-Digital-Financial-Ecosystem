@@ -1,10 +1,10 @@
 /**
  * TRIUMPH SYNERGY - Health Platform Integration Framework
- * 
+ *
  * Enables major health institutions (Shands Hospital, UF Health, etc.)
  * to integrate Pi Network for employee/employer/contractor payments
  * and policy management with sovereign control
- * 
+ *
  * Features:
  * - Employee/employer direct Pi payments
  * - Contractor payment routing
@@ -12,20 +12,15 @@
  * - Department-level management
  * - Medical equipment integration
  * - Regulatory compliance tracking
- * 
+ *
  * Vision: Digital healthcare with physical sovereignty
  * - No government mandates
  * - Alternative care pathways
  * - Transparent payment systems
  */
 
-import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
-import { 
-  enforceHealthPayment, 
-  piOriginEnforcer,
-  TransactionCategory 
-} from '@/lib/core/pi-origin-enforcement';
-import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
+import { enforceHealthPayment } from "@/lib/core/pi-origin-enforcement";
+import { OfficialPiPayments } from "@/lib/payments/pi-payments-official";
 
 /**
  * CRITICAL: All health institution payments enforce Pi origin verification
@@ -37,10 +32,10 @@ import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
 /**
  * Policy alternatives (non-mandatory options)
  */
-export interface HealthPolicy {
+export type HealthPolicy = {
   id: string;
   name: string;
-  category: 'vaccination' | 'birthing' | 'treatment' | 'testing' | 'prevention';
+  category: "vaccination" | "birthing" | "treatment" | "testing" | "prevention";
   description: string;
   isOptional: boolean; // All policies made optional under Triumph Synergy
   alternatives: {
@@ -52,14 +47,14 @@ export interface HealthPolicy {
     isAlternative: boolean;
   }[];
   employeeChoice: Map<string, string>; // employeeId -> selectedAlternativeId
-}
+};
 
 /**
  * Employee/Contractor profile
  */
-export interface HealthcarePersonProfile {
+export type HealthcarePersonProfile = {
   id: string;
-  type: 'employee' | 'contractor' | 'administrator';
+  type: "employee" | "contractor" | "administrator";
   firstName: string;
   lastName: string;
   email: string;
@@ -69,30 +64,30 @@ export interface HealthcarePersonProfile {
   hourlyRate?: number; // For contractors
   employerName: string;
   startDate: Date;
-  
+
   // Pi Payment details
   piWalletAddress: string;
-  paymentFrequency: 'weekly' | 'biweekly' | 'monthly';
+  paymentFrequency: "weekly" | "biweekly" | "monthly";
   totalEarned: number; // Pi total earned
   nextPaymentDate: Date;
-  
+
   // Policy preferences (user choice, not mandated)
   policyPreferences: Record<string, string>; // policyId -> selectedAlternativeId
-  
+
   // Relationships
   relatedContractors?: string[]; // For employers
   relatedEmployer?: string; // For employees
-  
+
   // Medical history (encrypted)
   medicalNotes?: string;
   activeConditions?: string[];
-  preferredTreatmentPath?: 'traditional' | 'alternative' | 'integrated';
-}
+  preferredTreatmentPath?: "traditional" | "alternative" | "integrated";
+};
 
 /**
  * Department configuration
  */
-export interface HealthcareDepconfig {
+export type HealthcareDepconfig = {
   id: string;
   name: string;
   specialization: string;
@@ -100,64 +95,64 @@ export interface HealthcareDepconfig {
   contractorCount: number;
   piPaymentPool: number; // Total Pi allocated for payroll
   equipmentIntegrated: string[]; // Equipment with Triumph Synergy
-}
+};
 
 /**
  * Health institution configuration
  */
-export interface HealthInstitutionConfig {
+export type HealthInstitutionConfig = {
   id: string; // 'shands-hospital', 'uf-health'
   name: string;
-  type: 'hospital' | 'clinic' | 'research' | 'wellness';
+  type: "hospital" | "clinic" | "research" | "wellness";
   locations: string[];
   departments: HealthcareDepconfig[];
-  
+
   // Pi Payment integration
   piPaymentEnabled: boolean;
   piPaymentEndpoint: string;
   apiKey: string;
   apiSecret: string;
-  
+
   // Policy management
   policiesManaged: HealthPolicy[];
-  
+
   // Partnership with Triumph Synergy
   triumphSynergyPartner: boolean;
-  partnershipLevel: 'associate' | 'partner' | 'owner';
-  policyInfluenceLevel: 'observer' | 'advisor' | 'co-creator' | 'owner';
-  
+  partnershipLevel: "associate" | "partner" | "owner";
+  policyInfluenceLevel: "observer" | "advisor" | "co-creator" | "owner";
+
   // Medical equipment integration
   equipmentIntegrated: Array<{
     name: string;
     deviceId: string;
     triumphSynergyEnabled: boolean;
   }>;
-}
+};
 
 /**
  * Payment transaction in healthcare
  */
-export interface HealthcarePayment {
+export type HealthcarePayment = {
   id: string;
   fromEntityId: string; // Employer or institution
   toPersonId: string; // Employee or contractor
   amount: number; // Pi
-  type: 'salary' | 'bonus' | 'reimbursement' | 'contractor_payment';
-  frequency?: 'weekly' | 'biweekly' | 'monthly';
+  type: "salary" | "bonus" | "reimbursement" | "contractor_payment";
+  frequency?: "weekly" | "biweekly" | "monthly";
   description: string;
   paymentDate: Date;
   blockchainHash?: string;
-  status: 'pending' | 'completed' | 'failed';
-}
+  status: "pending" | "completed" | "failed";
+};
 
 /**
  * Health Platform Integration Interface
  * All health institutions must implement this
  */
-export interface HealthIntegration {
+export type HealthIntegration = {
   readonly institutionId: string;
   readonly name: string;
-  readonly type: 'hospital' | 'clinic' | 'research' | 'wellness';
+  readonly type: "hospital" | "clinic" | "research" | "wellness";
 
   // Core lifecycle
   connect(): Promise<void>;
@@ -166,20 +161,39 @@ export interface HealthIntegration {
   // Employee/Contractor management
   registerPerson(profile: HealthcarePersonProfile): Promise<void>;
   getPerson(personId: string): Promise<HealthcarePersonProfile>;
-  updatePerson(personId: string, updates: Partial<HealthcarePersonProfile>): Promise<void>;
+  updatePerson(
+    personId: string,
+    updates: Partial<HealthcarePersonProfile>
+  ): Promise<void>;
   listEmployees(departmentId?: string): Promise<HealthcarePersonProfile[]>;
   listContractors(): Promise<HealthcarePersonProfile[]>;
 
   // Payment distribution
   processPayroll(date: Date): Promise<HealthcarePayment[]>;
-  processContractorPayment(contractorId: string, amount: number, memo: string): Promise<HealthcarePayment>;
-  processBonus(personId: string, amount: number, reason: string): Promise<HealthcarePayment>;
-  processReimbursement(personId: string, amount: number, description: string): Promise<HealthcarePayment>;
+  processContractorPayment(
+    contractorId: string,
+    amount: number,
+    memo: string
+  ): Promise<HealthcarePayment>;
+  processBonus(
+    personId: string,
+    amount: number,
+    reason: string
+  ): Promise<HealthcarePayment>;
+  processReimbursement(
+    personId: string,
+    amount: number,
+    description: string
+  ): Promise<HealthcarePayment>;
 
   // Policy management (all optional under Triumph Synergy)
   createPolicy(policy: HealthPolicy): Promise<void>;
   getPolicy(policyId: string): Promise<HealthPolicy>;
-  updatePersonPolicyPreference(personId: string, policyId: string, alternativeId: string): Promise<void>;
+  updatePersonPolicyPreference(
+    personId: string,
+    policyId: string,
+    alternativeId: string
+  ): Promise<void>;
   getPolicyStatistics(policyId: string): Promise<{
     totalAffected: number;
     selectionBreakdown: Record<string, number>;
@@ -193,10 +207,15 @@ export interface HealthIntegration {
 
   // Medical device integration
   integrateDevice(deviceName: string, deviceId: string): Promise<void>;
-  getIntegratedDevices(): Promise<Array<{ name: string; deviceId: string; status: string }>>;
+  getIntegratedDevices(): Promise<
+    Array<{ name: string; deviceId: string; status: string }>
+  >;
 
   // Reporting & compliance
-  getPayrollReport(startDate: Date, endDate: Date): Promise<{
+  getPayrollReport(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     totalPaid: number;
     employeeCount: number;
     contractorPayments: number;
@@ -212,32 +231,32 @@ export interface HealthIntegration {
 
   // Health check
   healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'offline';
+    status: "healthy" | "degraded" | "offline";
     uptime: number;
     activePersons: number;
-    paymentSystemStatus: 'operational' | 'degraded';
+    paymentSystemStatus: "operational" | "degraded";
     lastSync: Date;
   }>;
-}
+};
 
 /**
  * Health Platform Registry - Manages all integrated health institutions
  */
 export class HealthPlatformRegistry {
   private static instance: HealthPlatformRegistry;
-  private institutions = new Map<string, HealthIntegration>();
-  private configs = new Map<string, HealthInstitutionConfig>();
-  private persons = new Map<string, HealthcarePersonProfile>();
-  private payments: HealthcarePayment[] = [];
-  private policies: HealthPolicy[] = [];
-  private piPayments: OfficialPiPayments;
+  private readonly institutions = new Map<string, HealthIntegration>();
+  private readonly configs = new Map<string, HealthInstitutionConfig>();
+  private readonly persons = new Map<string, HealthcarePersonProfile>();
+  private readonly payments: HealthcarePayment[] = [];
+  private readonly policies: HealthPolicy[] = [];
+  private readonly piPayments: OfficialPiPayments;
 
   private constructor() {
     this.piPayments = new OfficialPiPayments({
-      appId: 'triumph-health-hub',
+      appId: "triumph-health-hub",
       apiKey: process.env.NEXT_PUBLIC_PI_API_KEY!,
       apiSecret: process.env.PI_API_SECRET!,
-      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== 'false',
+      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== "false",
     });
 
     // Initialize standard health policies (all optional)
@@ -245,10 +264,10 @@ export class HealthPlatformRegistry {
   }
 
   static getInstance(): HealthPlatformRegistry {
-    if (!this.instance) {
-      this.instance = new HealthPlatformRegistry();
+    if (!HealthPlatformRegistry.instance) {
+      HealthPlatformRegistry.instance = new HealthPlatformRegistry();
     }
-    return this.instance;
+    return HealthPlatformRegistry.instance;
   }
 
   /**
@@ -257,37 +276,37 @@ export class HealthPlatformRegistry {
   private initializeDefaultPolicies(): void {
     // Vaccination policy - make optional
     this.policies.push({
-      id: 'vaccination-optional',
-      name: 'Vaccination Policy',
-      category: 'vaccination',
-      description: 'Optional vaccination program - employee choice',
+      id: "vaccination-optional",
+      name: "Vaccination Policy",
+      category: "vaccination",
+      description: "Optional vaccination program - employee choice",
       isOptional: true,
       alternatives: [
         {
-          id: 'vaccine-mrna',
-          name: 'mRNA Vaccination',
-          description: 'Modern mRNA vaccine approach',
+          id: "vaccine-mrna",
+          name: "mRNA Vaccination",
+          description: "Modern mRNA vaccine approach",
           isTraditional: false,
           isAlternative: false,
         },
         {
-          id: 'vaccine-traditional',
-          name: 'Traditional Vaccination',
-          description: 'Inactivated pathogen vaccine',
+          id: "vaccine-traditional",
+          name: "Traditional Vaccination",
+          description: "Inactivated pathogen vaccine",
           isTraditional: true,
           isAlternative: false,
         },
         {
-          id: 'vaccine-none',
-          name: 'No Vaccination',
-          description: 'Choose not to vaccinate',
+          id: "vaccine-none",
+          name: "No Vaccination",
+          description: "Choose not to vaccinate",
           isTraditional: false,
           isAlternative: true,
         },
         {
-          id: 'vaccine-natural-immunity',
-          name: 'Natural Immunity Building',
-          description: 'Build immunity through natural exposure',
+          id: "vaccine-natural-immunity",
+          name: "Natural Immunity Building",
+          description: "Build immunity through natural exposure",
           isTraditional: true,
           isAlternative: true,
         },
@@ -297,40 +316,40 @@ export class HealthPlatformRegistry {
 
     // Birthing options - midwives program
     this.policies.push({
-      id: 'birthing-options',
-      name: 'Birthing Path Options',
-      category: 'birthing',
-      description: 'Choose your preferred birthing pathway',
+      id: "birthing-options",
+      name: "Birthing Path Options",
+      category: "birthing",
+      description: "Choose your preferred birthing pathway",
       isOptional: true,
       alternatives: [
         {
-          id: 'birth-hospital',
-          name: 'Hospital Birth',
-          description: 'Traditional hospital delivery',
-          provider: 'Shands Hospital',
+          id: "birth-hospital",
+          name: "Hospital Birth",
+          description: "Traditional hospital delivery",
+          provider: "Shands Hospital",
           isTraditional: true,
           isAlternative: false,
         },
         {
-          id: 'birth-midwife',
-          name: 'Midwife Assisted Birth',
-          description: 'Certified midwife home or birthing center birth',
-          provider: 'Triumph Synergy Midwives',
+          id: "birth-midwife",
+          name: "Midwife Assisted Birth",
+          description: "Certified midwife home or birthing center birth",
+          provider: "Triumph Synergy Midwives",
           isTraditional: true,
           isAlternative: true,
         },
         {
-          id: 'birth-home-unassisted',
-          name: 'Home Birth (Unassisted)',
-          description: 'Natural home birth without medical intervention',
+          id: "birth-home-unassisted",
+          name: "Home Birth (Unassisted)",
+          description: "Natural home birth without medical intervention",
           isTraditional: true,
           isAlternative: true,
         },
         {
-          id: 'birth-doula',
-          name: 'Doula Supported Birth',
-          description: 'Birth with professional doula support',
-          provider: 'Triumph Synergy Doula Network',
+          id: "birth-doula",
+          name: "Doula Supported Birth",
+          description: "Birth with professional doula support",
+          provider: "Triumph Synergy Doula Network",
           isTraditional: true,
           isAlternative: true,
         },
@@ -372,8 +391,14 @@ export class HealthPlatformRegistry {
   /**
    * List all registered institutions
    */
-  listInstitutions(): Array<{ config: HealthInstitutionConfig; isHealthy: boolean }> {
-    const result: Array<{ config: HealthInstitutionConfig; isHealthy: boolean }> = [];
+  listInstitutions(): Array<{
+    config: HealthInstitutionConfig;
+    isHealthy: boolean;
+  }> {
+    const result: Array<{
+      config: HealthInstitutionConfig;
+      isHealthy: boolean;
+    }> = [];
 
     for (const [institutionId, config] of this.configs.entries()) {
       result.push({
@@ -390,7 +415,7 @@ export class HealthPlatformRegistry {
    */
   async registerPerson(profile: HealthcarePersonProfile): Promise<void> {
     this.persons.set(profile.id, profile);
-    
+
     // Notify institution
     const institution = this.institutions.get(profile.employerName);
     if (institution) {
@@ -408,53 +433,58 @@ export class HealthPlatformRegistry {
   /**
    * Process payroll for institution
    */
-  async processPayroll(institutionId: string, date: Date): Promise<HealthcarePayment[]> {
+  async processPayroll(
+    institutionId: string,
+    date: Date
+  ): Promise<HealthcarePayment[]> {
     const institution = this.institutions.get(institutionId);
     if (!institution) {
       throw new Error(`Institution ${institutionId} not found`);
     }
 
     const payments = await institution.processPayroll(date);
-    
+
     // Record all payments with origin enforcement
     for (const payment of payments) {
       this.payments.push(payment);
-      
+
       // ✅ CRITICAL: Enforce Pi origin verification for payroll
       // All health institution payroll MUST be from internally earned Pi
       // NO external Pi accepted - this is immutable
       const enforceResult = await enforceHealthPayment(
         payment.toPersonId,
         payment.amount,
-        payment.type === 'salary' || payment.type === 'contractor_payment' ? 'payroll' : 'bonus',
+        payment.type === "salary" || payment.type === "contractor_payment"
+          ? "payroll"
+          : "bonus",
         `${payment.type} payment - ${payment.description}`
       );
 
       if (!enforceResult.success) {
-        payment.status = 'failed';
+        payment.status = "failed";
         console.error(
           `[Health Payroll] REJECTED: ${enforceResult.message} - Only internally earned Pi accepted`
         );
         continue; // Skip payment if origin check fails
       }
-      
+
       // Execute Pi payment (origin already verified)
       try {
         const piPayment = await this.piPayments.createPayment({
           amount: payment.amount,
           memo: `${payment.type} - ${payment.description} [INTERNAL PI VERIFIED]`,
-          metadata: { 
-            personId: payment.toPersonId, 
+          metadata: {
+            personId: payment.toPersonId,
             type: payment.type,
             originEnforced: true, // Mark as origin-verified
-            piSource: 'internal', // Record source
+            piSource: "internal", // Record source
           },
         });
-        
+
         payment.blockchainHash = piPayment.txid;
-        payment.status = 'completed';
+        payment.status = "completed";
       } catch (error) {
-        payment.status = 'failed';
+        payment.status = "failed";
         console.error(`Payment failed for ${payment.toPersonId}:`, error);
       }
     }
@@ -473,7 +503,7 @@ export class HealthPlatformRegistry {
    * Get policy by ID
    */
   getPolicy(policyId: string): HealthPolicy | undefined {
-    return this.policies.find(p => p.id === policyId);
+    return this.policies.find((p) => p.id === policyId);
   }
 
   /**
@@ -490,11 +520,15 @@ export class HealthPlatformRegistry {
     }
 
     person.policyPreferences[policyId] = alternativeId;
-    
+
     // Update with institution
     const institution = this.institutions.get(person.employerName);
     if (institution) {
-      await institution.updatePersonPolicyPreference(personId, policyId, alternativeId);
+      await institution.updatePersonPolicyPreference(
+        personId,
+        policyId,
+        alternativeId
+      );
     }
   }
 
@@ -512,7 +546,7 @@ export class HealthPlatformRegistry {
     }
 
     const breakdown: Record<string, number> = {};
-    policy.alternatives.forEach(alt => {
+    policy.alternatives.forEach((alt) => {
       breakdown[alt.name] = 0;
     });
 
@@ -520,7 +554,7 @@ export class HealthPlatformRegistry {
     for (const person of this.persons.values()) {
       const selectedAltId = person.policyPreferences[policyId];
       if (selectedAltId) {
-        const alt = policy.alternatives.find(a => a.id === selectedAltId);
+        const alt = policy.alternatives.find((a) => a.id === selectedAltId);
         if (alt) {
           breakdown[alt.name]++;
         }
@@ -548,19 +582,23 @@ export class HealthPlatformRegistry {
       throw new Error(`Institution ${institutionId} not found`);
     }
 
-    const payment = await institution.processContractorPayment(contractorId, amount, memo);
-    
+    const payment = await institution.processContractorPayment(
+      contractorId,
+      amount,
+      memo
+    );
+
     try {
       const piPayment = await this.piPayments.createPayment({
         amount,
         memo: `Contractor: ${memo}`,
         metadata: { contractorId, institutionId },
       });
-      
+
       payment.blockchainHash = piPayment.txid;
-      payment.status = 'completed';
+      payment.status = "completed";
     } catch (error) {
-      payment.status = 'failed';
+      payment.status = "failed";
     }
 
     this.payments.push(payment);
@@ -571,7 +609,7 @@ export class HealthPlatformRegistry {
    * Health check all institutions
    */
   async healthCheckAll(): Promise<
-    Record<string, { status: 'healthy' | 'degraded' | 'offline' }>
+    Record<string, { status: "healthy" | "degraded" | "offline" }>
   > {
     const results: Record<string, any> = {};
 
@@ -585,7 +623,7 @@ export class HealthPlatformRegistry {
         };
       } catch (error) {
         results[institutionId] = {
-          status: 'offline',
+          status: "offline",
           error: String(error),
         };
       }
@@ -604,7 +642,7 @@ export class HealthPlatformRegistry {
     totalPolicies: number;
   } {
     const totalPaid = this.payments
-      .filter(p => p.status === 'completed')
+      .filter((p) => p.status === "completed")
       .reduce((sum, p) => sum + p.amount, 0);
 
     return {
@@ -618,10 +656,17 @@ export class HealthPlatformRegistry {
   /**
    * Get payment history
    */
-  getPaymentHistory(personId?: string, institutionId?: string): HealthcarePayment[] {
-    return this.payments.filter(p => {
-      if (personId && p.toPersonId !== personId) return false;
-      if (institutionId && p.fromEntityId !== institutionId) return false;
+  getPaymentHistory(
+    personId?: string,
+    institutionId?: string
+  ): HealthcarePayment[] {
+    return this.payments.filter((p) => {
+      if (personId && p.toPersonId !== personId) {
+        return false;
+      }
+      if (institutionId && p.fromEntityId !== institutionId) {
+        return false;
+      }
       return true;
     });
   }

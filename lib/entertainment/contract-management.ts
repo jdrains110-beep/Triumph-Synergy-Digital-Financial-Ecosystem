@@ -1,6 +1,6 @@
 /**
  * ADVANCED CONTRACT MANAGEMENT SYSTEM
- * 
+ *
  * Handles contract lifecycle:
  * - Breaking existing contracts
  * - Renegotiating terms
@@ -10,7 +10,7 @@
  * - Ownership stake distribution
  */
 
-export interface ContractBreakdown {
+export type ContractBreakdown = {
   breakdownId: string;
   contractId: string;
   artist: string;
@@ -23,10 +23,10 @@ export interface ContractBreakdown {
     revertedDate: Date;
     nowControlledBy: string;
   };
-  status: 'processed' | 'pending_approval' | 'disputed';
-}
+  status: "processed" | "pending_approval" | "disputed";
+};
 
-export interface FairCompensationModel {
+export type FairCompensationModel = {
   modelId: string;
   artistName: string;
   baseCompensation: number;
@@ -41,9 +41,9 @@ export interface FairCompensationModel {
   }[];
   minimumGuarantee: number;
   totalValue: number;
-}
+};
 
-export interface ArtistLiberationTerms {
+export type ArtistLiberationTerms = {
   liberationId: string;
   artist: string;
   previousContract: {
@@ -75,17 +75,19 @@ export interface ArtistLiberationTerms {
     milestone: string;
     completed: boolean;
   }>;
-}
+};
 
 /**
  * CONTRACT MANAGEMENT ENGINE
  */
 export class ContractManagementEngine {
   private static instance: ContractManagementEngine;
-  private breakdowns: Map<string, ContractBreakdown> = new Map();
-  private compensationModels: Map<string, FairCompensationModel> = new Map();
-  private liberationTerms: Map<string, ArtistLiberationTerms> = new Map();
-  private contractAuditLog: Array<{
+  private readonly breakdowns: Map<string, ContractBreakdown> = new Map();
+  private readonly compensationModels: Map<string, FairCompensationModel> =
+    new Map();
+  private readonly liberationTerms: Map<string, ArtistLiberationTerms> =
+    new Map();
+  private readonly contractAuditLog: Array<{
     timestamp: Date;
     action: string;
     artist: string;
@@ -110,40 +112,40 @@ export class ContractManagementEngine {
   private initializeCompensationModels(): void {
     const models = [
       {
-        name: 'Film Star Model',
-        base: 5000000,
+        name: "Film Star Model",
+        base: 5_000_000,
         backend: 5,
         ownership: 2,
-        equity: 50000
+        equity: 50_000,
       },
       {
-        name: 'Music Artist Model',
-        base: 1000000,
+        name: "Music Artist Model",
+        base: 1_000_000,
         backend: 15,
         ownership: 5,
-        equity: 100000
+        equity: 100_000,
       },
       {
-        name: 'Athlete Model',
-        base: 3000000,
+        name: "Athlete Model",
+        base: 3_000_000,
         backend: 10,
         ownership: 3,
-        equity: 75000
+        equity: 75_000,
       },
       {
-        name: 'Creator Model',
-        base: 500000,
+        name: "Creator Model",
+        base: 500_000,
         backend: 25,
         ownership: 10,
-        equity: 150000
+        equity: 150_000,
       },
       {
-        name: 'Emerging Talent Model',
-        base: 100000,
+        name: "Emerging Talent Model",
+        base: 100_000,
         backend: 20,
         ownership: 8,
-        equity: 200000
-      }
+        equity: 200_000,
+      },
     ];
 
     models.forEach((model, index) => {
@@ -151,17 +153,24 @@ export class ContractManagementEngine {
       // Models are templates for fair compensation
     });
 
-    console.log(`[CONTRACT ENGINE] Initialized ${models.length} fair compensation models`);
+    console.log(
+      `[CONTRACT ENGINE] Initialized ${models.length} fair compensation models`
+    );
   }
 
   /**
    * Break existing contract with fair severance
    */
-  breakContract(contractId: string, artist: string, studio: string, reason: string): ContractBreakdown {
+  breakContract(
+    contractId: string,
+    artist: string,
+    studio: string,
+    reason: string
+  ): ContractBreakdown {
     const breakdownId = `breakdown_${Date.now()}`;
 
     // Calculate fair severance (minimum 1 year guaranteed compensation)
-    const severanceAmount = 2500000; // Starting point, adjusts based on circumstances
+    const severanceAmount = 2_500_000; // Starting point, adjusts based on circumstances
 
     const breakdown: ContractBreakdown = {
       breakdownId,
@@ -173,28 +182,30 @@ export class ContractManagementEngine {
       severanceAmount,
       rightReversion: {
         content: [
-          'All master recordings',
-          'Creative work products',
-          'Intellectual property',
-          'Character/image rights'
+          "All master recordings",
+          "Creative work products",
+          "Intellectual property",
+          "Character/image rights",
         ],
         revertedDate: new Date(),
-        nowControlledBy: artist
+        nowControlledBy: artist,
       },
-      status: 'processed'
+      status: "processed",
     };
 
     this.breakdowns.set(breakdownId, breakdown);
 
     this.contractAuditLog.push({
       timestamp: new Date(),
-      action: 'Contract broken',
+      action: "Contract broken",
       artist,
       amount: severanceAmount,
-      details: `${studio}: ${reason}`
+      details: `${studio}: ${reason}`,
     });
 
-    console.log(`[CONTRACT BREAK] ${artist} - ${studio}: Severance $${severanceAmount.toLocaleString()}`);
+    console.log(
+      `[CONTRACT BREAK] ${artist} - ${studio}: Severance $${severanceAmount.toLocaleString()}`
+    );
 
     return breakdown;
   }
@@ -215,23 +226,23 @@ export class ContractManagementEngine {
       performanceMultiplier,
       backendParticipation: 20, // Default 20% of profits
       ownershipStake: 10, // Default 10% ownership
-      equityOptions: 250000, // Equity options for growth
+      equityOptions: 250_000, // Equity options for growth
       bonusStructure: [
-        { metric: 'viewership', threshold: 1000000, amount: 500000 },
-        { metric: 'awards', threshold: 1, amount: 1000000 },
-        { metric: 'chart_position', threshold: 1, amount: 750000 },
-        { metric: 'social_reach', threshold: 5000000, amount: 250000 },
-        { metric: 'international_success', threshold: 50, amount: 2000000 }
+        { metric: "viewership", threshold: 1_000_000, amount: 500_000 },
+        { metric: "awards", threshold: 1, amount: 1_000_000 },
+        { metric: "chart_position", threshold: 1, amount: 750_000 },
+        { metric: "social_reach", threshold: 5_000_000, amount: 250_000 },
+        { metric: "international_success", threshold: 50, amount: 2_000_000 },
       ],
       minimumGuarantee: baseCompensation * 1.5, // 150% of base as minimum
-      totalValue: 0
+      totalValue: 0,
     };
 
     // Calculate total value
     model.totalValue =
       model.baseCompensation * model.performanceMultiplier +
-      model.backendParticipation * 100000 + // Estimated backend value
-      model.ownershipStake * 1000000 + // Estimated equity value
+      model.backendParticipation * 100_000 + // Estimated backend value
+      model.ownershipStake * 1_000_000 + // Estimated equity value
       model.minimumGuarantee;
 
     this.compensationModels.set(modelId, model);
@@ -246,7 +257,10 @@ export class ContractManagementEngine {
   /**
    * Create artist liberation terms
    */
-  createLiberationTerms(artist: string, previousStudio: string): ArtistLiberationTerms {
+  createLiberationTerms(
+    artist: string,
+    previousStudio: string
+  ): ArtistLiberationTerms {
     const liberationId = `liberation_${Date.now()}`;
 
     const terms: ArtistLiberationTerms = {
@@ -254,8 +268,8 @@ export class ContractManagementEngine {
       artist,
       previousContract: {
         studio: previousStudio,
-        terms: 'Standard contract terms',
-        status: 'terminated'
+        terms: "Standard contract terms",
+        status: "terminated",
       },
       liberationBenefits: {
         fullCreativeControl: true,
@@ -263,45 +277,67 @@ export class ContractManagementEngine {
         retainAllBackend: true,
         ownershipPreservation: true,
         futureOpportunities: [
-          'Featured roles in major productions',
-          'Music distribution deals',
-          'Brand collaborations',
-          'Equity investments',
-          'Mentorship opportunities'
-        ]
+          "Featured roles in major productions",
+          "Music distribution deals",
+          "Brand collaborations",
+          "Equity investments",
+          "Mentorship opportunities",
+        ],
       },
       supportProvided: {
-        marketingBudget: 5000000,
+        marketingBudget: 5_000_000,
         platformAccess: true,
         networkingOpportunities: true,
         financialAdvisory: true,
-        legalSupport: true
+        legalSupport: true,
       },
       successMetrics: {
-        targetAudience: 50000000,
-        revenueTarget: 10000000,
-        growthTarget: 150 // 150% year-over-year
+        targetAudience: 50_000_000,
+        revenueTarget: 10_000_000,
+        growthTarget: 150, // 150% year-over-year
       },
       implementations: [
-        { date: new Date(), milestone: 'Rights reversion completed', completed: true },
-        { date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), milestone: 'Marketing campaign launch', completed: false },
-        { date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), milestone: 'First independent release', completed: false },
-        { date: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), milestone: 'Audience milestone', completed: false },
-        { date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), milestone: 'Revenue target achievement', completed: false }
-      ]
+        {
+          date: new Date(),
+          milestone: "Rights reversion completed",
+          completed: true,
+        },
+        {
+          date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          milestone: "Marketing campaign launch",
+          completed: false,
+        },
+        {
+          date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          milestone: "First independent release",
+          completed: false,
+        },
+        {
+          date: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+          milestone: "Audience milestone",
+          completed: false,
+        },
+        {
+          date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          milestone: "Revenue target achievement",
+          completed: false,
+        },
+      ],
     };
 
     this.liberationTerms.set(liberationId, terms);
 
     this.contractAuditLog.push({
       timestamp: new Date(),
-      action: 'Artist liberation initiated',
+      action: "Artist liberation initiated",
       artist,
       amount: terms.supportProvided.marketingBudget,
-      details: `Full independence achieved with ${terms.supportProvided.marketingBudget.toLocaleString()} support`
+      details: `Full independence achieved with ${terms.supportProvided.marketingBudget.toLocaleString()} support`,
     });
 
-    console.log(`[ARTIST LIBERATION] ${artist}: Full independence with $${terms.supportProvided.marketingBudget.toLocaleString()} support`);
+    console.log(
+      `[ARTIST LIBERATION] ${artist}: Full independence with $${terms.supportProvided.marketingBudget.toLocaleString()} support`
+    );
 
     return terms;
   }
@@ -322,9 +358,9 @@ export class ContractManagementEngine {
     // Base value on metrics
     const followerValue = metrics.followers * 10; // $10 per follower
     const earningMultiplier = metrics.annualEarnings * 2; // 2x annual earnings
-    const awardBonus = metrics.awards * 500000;
-    const internationalMultiplier = metrics.internationalReach * 2000000;
-    const experienceBonus = metrics.yearsActive * 250000;
+    const awardBonus = metrics.awards * 500_000;
+    const internationalMultiplier = metrics.internationalReach * 2_000_000;
+    const experienceBonus = metrics.yearsActive * 250_000;
 
     const totalValue =
       followerValue +
@@ -350,16 +386,16 @@ export class ContractManagementEngine {
     improvement: number;
     improvementAmount: number;
   } {
-    const currentValue = 5000000; // Estimated current value
+    const currentValue = 5_000_000; // Estimated current value
     const improvementAmount = currentValue * (improvementPercentage - 1);
     const newValue = currentValue * improvementPercentage;
 
     this.contractAuditLog.push({
       timestamp: new Date(),
-      action: 'Contract renegotiated',
+      action: "Contract renegotiated",
       artist,
       amount: improvementAmount,
-      details: `${improvementPercentage}x improvement: $${currentValue.toLocaleString()} → $${newValue.toLocaleString()}`
+      details: `${improvementPercentage}x improvement: $${currentValue.toLocaleString()} → $${newValue.toLocaleString()}`,
     });
 
     console.log(
@@ -370,7 +406,7 @@ export class ContractManagementEngine {
       currentValue,
       newValue,
       improvement: improvementPercentage,
-      improvementAmount
+      improvementAmount,
     };
   }
 
@@ -398,7 +434,7 @@ export class ContractManagementEngine {
   /**
    * Get audit log
    */
-  getAuditLog(limit: number = 100): typeof this.contractAuditLog {
+  getAuditLog(limit = 100): typeof this.contractAuditLog {
     return this.contractAuditLog.slice(-limit);
   }
 
@@ -416,11 +452,20 @@ export class ContractManagementEngine {
     const breakdowns = Array.from(this.breakdowns.values());
     const liberations = Array.from(this.liberationTerms.values());
 
-    const totalSeverance = breakdowns.reduce((sum, b) => sum + b.severanceAmount, 0);
-    const averageSeverance = breakdowns.length > 0 ? totalSeverance / breakdowns.length : 0;
+    const totalSeverance = breakdowns.reduce(
+      (sum, b) => sum + b.severanceAmount,
+      0
+    );
+    const averageSeverance =
+      breakdowns.length > 0 ? totalSeverance / breakdowns.length : 0;
 
-    const processedBreakdowns = breakdowns.filter(b => b.status === 'processed').length;
-    const successRate = breakdowns.length > 0 ? (processedBreakdowns / breakdowns.length) * 100 : 0;
+    const processedBreakdowns = breakdowns.filter(
+      (b) => b.status === "processed"
+    ).length;
+    const successRate =
+      breakdowns.length > 0
+        ? (processedBreakdowns / breakdowns.length) * 100
+        : 0;
 
     return {
       totalBreakdowns: breakdowns.length,
@@ -428,7 +473,7 @@ export class ContractManagementEngine {
       totalSeveranceProcessed: totalSeverance,
       averageSeverance,
       artistsLiberated: liberations.length,
-      successRate
+      successRate,
     };
   }
 }

@@ -1,11 +1,11 @@
 /**
  * lib/hubs/physical-hub-framework.ts
- * 
+ *
  * TRIUMPH SYNERGY - PHYSICAL HUB INTEGRATION FRAMEWORK
- * 
+ *
  * Transforms major retailers and distributors into Triumph Synergy hubs
  * enabling real-world Pi payments and physical infrastructure integration
- * 
+ *
  * Hubs:
  * - Publix (Grocery retail - USA)
  * - DH Gate (Electronics wholesale - China/Global)
@@ -20,56 +20,56 @@
  * - Rulonco (Distribution - Americas)
  */
 
-import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
-import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
+import { piOriginVerificationEngine } from "@/lib/core/pi-origin-verification";
+import { OfficialPiPayments } from "@/lib/payments/pi-payments-official";
 
 // ============================================================================
 // HUB TYPES & INTERFACES
 // ============================================================================
 
-export type HubCategory = 
-  | 'grocery' 
-  | 'electronics' 
-  | 'retail_apparel' 
-  | 'equipment' 
-  | 'ecommerce' 
-  | 'tech_retail' 
-  | 'financial_services' 
-  | 'distribution' 
-  | 'beverages';
+export type HubCategory =
+  | "grocery"
+  | "electronics"
+  | "retail_apparel"
+  | "equipment"
+  | "ecommerce"
+  | "tech_retail"
+  | "financial_services"
+  | "distribution"
+  | "beverages";
 
-export interface PhysicalHubConfig {
+export type PhysicalHubConfig = {
   id: string; // 'publix', 'dhgate', 'nike', etc.
   name: string;
   category: HubCategory;
-  
+
   // Geographic reach
   headquarters: string;
   operatingCountries: string[];
   locations: number; // Number of physical locations
-  
+
   // Pi Integration
   piAcceptanceEnabled: boolean;
   piPaymentProcessor: string; // Official Pi Payments integration
   piWalletAddress: string;
-  
+
   // Hub capacity
   dailyTransactionCapacity: number; // Pi per day
   monthlyTransactionVolume: number; // Pi per month average
   acceptedProductCategories: string[];
-  
+
   // Token backing
   tokenBackingPool: number; // Pi reserved for token backing
   infrastructureAllocation: number; // Pi for infrastructure
   ecosystemAllocation: number; // Pi for ecosystem growth
-  
+
   // Status
-  status: 'pending' | 'active' | 'expanded' | 'mature';
+  status: "pending" | "active" | "expanded" | "mature";
   launchDate?: Date;
   integrationLevel: number; // 0-100% integration
-}
+};
 
-export interface HubTransaction {
+export type HubTransaction = {
   transactionId: string;
   hubId: string;
   customerId: string;
@@ -80,23 +80,23 @@ export interface HubTransaction {
     price: number;
     quantity: number;
   }[];
-  paymentMethod: 'pi_direct' | 'pi_backed_token' | 'hybrid';
+  paymentMethod: "pi_direct" | "pi_backed_token" | "hybrid";
   timestamp: Date;
   location: string; // Physical location ID
-  status: 'completed' | 'pending' | 'cancelled';
-}
+  status: "completed" | "pending" | "cancelled";
+};
 
-export interface HubInfrastructurePayment {
+export type HubInfrastructurePayment = {
   paymentId: string;
   hubId: string;
   amount: number; // Pi
-  purpose: 'equipment' | 'training' | 'technology' | 'operations' | 'expansion';
+  purpose: "equipment" | "training" | "technology" | "operations" | "expansion";
   description: string;
   timestamp: Date;
-  status: 'approved' | 'completed' | 'pending';
-}
+  status: "approved" | "completed" | "pending";
+};
 
-export interface HubMetrics {
+export type HubMetrics = {
   hubId: string;
   dailyTransactions: number;
   dailyVolume: number; // Pi volume
@@ -106,9 +106,9 @@ export interface HubMetrics {
   activeCustomers: number;
   averageTransactionValue: number;
   integrationProgress: number; // 0-100
-}
+};
 
-export interface TokenBackingPool {
+export type TokenBackingPool = {
   hubId: string;
   piReserved: number; // Pi backing tokens
   tokensIssued: number; // Tokens created
@@ -116,7 +116,7 @@ export interface TokenBackingPool {
   dexListings: string[]; // DEX trading pairs
   infrastructureUsage: number; // Pi allocated to infrastructure
   lastUpdated: Date;
-}
+};
 
 // ============================================================================
 // PHYSICAL HUB REGISTRY
@@ -124,28 +124,28 @@ export interface TokenBackingPool {
 
 export class PhysicalHubRegistry {
   private static instance: PhysicalHubRegistry;
-  private hubs = new Map<string, PhysicalHubConfig>();
-  private transactions: HubTransaction[] = [];
-  private infrastructurePayments: HubInfrastructurePayment[] = [];
-  private tokenBackingPools = new Map<string, TokenBackingPool>();
-  private piPayments: OfficialPiPayments;
+  private readonly hubs = new Map<string, PhysicalHubConfig>();
+  private readonly transactions: HubTransaction[] = [];
+  private readonly infrastructurePayments: HubInfrastructurePayment[] = [];
+  private readonly tokenBackingPools = new Map<string, TokenBackingPool>();
+  private readonly piPayments: OfficialPiPayments;
 
   private constructor() {
     this.piPayments = new OfficialPiPayments({
-      appId: 'triumph-physical-hubs',
+      appId: "triumph-physical-hubs",
       apiKey: process.env.NEXT_PUBLIC_PI_API_KEY!,
       apiSecret: process.env.PI_API_SECRET!,
-      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== 'false',
+      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== "false",
     });
 
-    console.log('[Physical Hub Registry] Initialized');
+    console.log("[Physical Hub Registry] Initialized");
   }
 
   static getInstance(): PhysicalHubRegistry {
-    if (!this.instance) {
-      this.instance = new PhysicalHubRegistry();
+    if (!PhysicalHubRegistry.instance) {
+      PhysicalHubRegistry.instance = new PhysicalHubRegistry();
     }
-    return this.instance;
+    return PhysicalHubRegistry.instance;
   }
 
   /**
@@ -185,7 +185,9 @@ export class PhysicalHubRegistry {
    * Get all hubs by category
    */
   getHubsByCategory(category: HubCategory): PhysicalHubConfig[] {
-    return Array.from(this.hubs.values()).filter((h) => h.category === category);
+    return Array.from(this.hubs.values()).filter(
+      (h) => h.category === category
+    );
   }
 
   /**
@@ -197,7 +199,7 @@ export class PhysicalHubRegistry {
     amount: number,
     products: { name: string; price: number; quantity: number }[],
     location: string,
-    paymentMethod: 'pi_direct' | 'pi_backed_token' | 'hybrid' = 'pi_direct'
+    paymentMethod: "pi_direct" | "pi_backed_token" | "hybrid" = "pi_direct"
   ): Promise<HubTransaction> {
     const hub = this.hubs.get(hubId);
     if (!hub) {
@@ -209,11 +211,12 @@ export class PhysicalHubRegistry {
     }
 
     // Verify internal Pi origin
-    const originState = piOriginVerificationEngine.getWalletOriginState(
-      customerId
-    );
+    const originState =
+      piOriginVerificationEngine.getWalletOriginState(customerId);
     if (!originState || originState.internalPiTotal < amount) {
-      throw new Error(`Insufficient internal Pi for purchase (required: ${amount})`);
+      throw new Error(
+        `Insufficient internal Pi for purchase (required: ${amount})`
+      );
     }
 
     const transaction: HubTransaction = {
@@ -221,19 +224,19 @@ export class PhysicalHubRegistry {
       hubId,
       customerId,
       amount,
-      productCategory: products[0]?.name.split(' ')[0] || 'general',
+      productCategory: products[0]?.name.split(" ")[0] || "general",
       productDetails: products,
       paymentMethod,
       timestamp: new Date(),
       location,
-      status: 'pending',
+      status: "pending",
     };
 
     // Execute Pi payment
     try {
       const piPayment = await this.piPayments.createPayment({
         amount,
-        memo: `Hub purchase at ${hub.name} - ${products.map((p) => p.name).join(', ')}`,
+        memo: `Hub purchase at ${hub.name} - ${products.map((p) => p.name).join(", ")}`,
         metadata: {
           hubId,
           customerId,
@@ -244,7 +247,7 @@ export class PhysicalHubRegistry {
         },
       });
 
-      transaction.status = 'completed';
+      transaction.status = "completed";
       this.transactions.push(transaction);
 
       console.log(
@@ -253,7 +256,7 @@ export class PhysicalHubRegistry {
 
       return transaction;
     } catch (error) {
-      transaction.status = 'cancelled';
+      transaction.status = "cancelled";
       throw error;
     }
   }
@@ -265,7 +268,12 @@ export class PhysicalHubRegistry {
   async processInfrastructurePayment(
     hubId: string,
     amount: number,
-    purpose: 'equipment' | 'training' | 'technology' | 'operations' | 'expansion',
+    purpose:
+      | "equipment"
+      | "training"
+      | "technology"
+      | "operations"
+      | "expansion",
     description: string
   ): Promise<HubInfrastructurePayment> {
     const hub = this.hubs.get(hubId);
@@ -286,7 +294,7 @@ export class PhysicalHubRegistry {
       purpose,
       description,
       timestamp: new Date(),
-      status: 'pending',
+      status: "pending",
     };
 
     try {
@@ -302,7 +310,7 @@ export class PhysicalHubRegistry {
         },
       });
 
-      payment.status = 'completed';
+      payment.status = "completed";
       this.infrastructurePayments.push(payment);
 
       // Deduct from hub infrastructure allocation
@@ -314,7 +322,7 @@ export class PhysicalHubRegistry {
 
       return payment;
     } catch (error) {
-      payment.status = 'pending';
+      payment.status = "pending";
       throw error;
     }
   }
@@ -329,24 +337,29 @@ export class PhysicalHubRegistry {
     }
 
     const hubTransactions = this.transactions.filter(
-      (t) => t.hubId === hubId && t.status === 'completed'
+      (t) => t.hubId === hubId && t.status === "completed"
     );
 
     const totalVolume = hubTransactions.reduce((sum, t) => sum + t.amount, 0);
-    const avgValue = hubTransactions.length > 0 ? totalVolume / hubTransactions.length : 0;
+    const avgValue =
+      hubTransactions.length > 0 ? totalVolume / hubTransactions.length : 0;
 
     // Calculate growth (simplified)
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const weekTransactions = hubTransactions.filter((t) => t.timestamp > weekAgo);
-    const monthTransactions = hubTransactions.filter((t) => t.timestamp > monthAgo);
+    const weekTransactions = hubTransactions.filter(
+      (t) => t.timestamp > weekAgo
+    );
+    const monthTransactions = hubTransactions.filter(
+      (t) => t.timestamp > monthAgo
+    );
 
     const weekVolume = weekTransactions.reduce((sum, t) => sum + t.amount, 0);
     const monthVolume = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
 
-    const previousWeekVolume = 
+    const previousWeekVolume =
       monthTransactions
         .filter((t) => t.timestamp < weekAgo)
         .slice(0, 7)
@@ -358,8 +371,10 @@ export class PhysicalHubRegistry {
       hubId,
       dailyTransactions: hubTransactions.length / 30, // Average
       dailyVolume: totalVolume / 30,
-      weeklyGrowth: ((weekVolume - previousWeekVolume) / previousWeekVolume) * 100,
-      monthlyGrowth: ((monthVolume - previousMonthVolume) / previousMonthVolume) * 100,
+      weeklyGrowth:
+        ((weekVolume - previousWeekVolume) / previousWeekVolume) * 100,
+      monthlyGrowth:
+        ((monthVolume - previousMonthVolume) / previousMonthVolume) * 100,
       totalTransactionVolume: totalVolume,
       activeCustomers: new Set(hubTransactions.map((t) => t.customerId)).size,
       averageTransactionValue: avgValue,
@@ -418,15 +433,21 @@ export class PhysicalHubRegistry {
     totalPhysicalLocations: number;
     totalInfrastructureInvested: number;
   } {
-    const completedTransactions = this.transactions.filter((t) => t.status === 'completed');
-    const totalVolume = completedTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const completedTransactions = this.transactions.filter(
+      (t) => t.status === "completed"
+    );
+    const totalVolume = completedTransactions.reduce(
+      (sum, t) => sum + t.amount,
+      0
+    );
     const totalInfra = this.infrastructurePayments
-      .filter((p) => p.status === 'completed')
+      .filter((p) => p.status === "completed")
       .reduce((sum, p) => sum + p.amount, 0);
 
     const hubs = Array.from(this.hubs.values());
-    const activeHubs = hubs.filter((h) => h.status === 'active' || h.status === 'mature')
-      .length;
+    const activeHubs = hubs.filter(
+      (h) => h.status === "active" || h.status === "mature"
+    ).length;
     const avgIntegration =
       hubs.reduce((sum, h) => sum + h.integrationLevel, 0) / hubs.length;
     const totalLocations = hubs.reduce((sum, h) => sum + h.locations, 0);

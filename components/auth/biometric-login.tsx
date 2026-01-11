@@ -224,10 +224,13 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
 
             <form className="space-y-3" onSubmit={handlePinLogin}>
               <div>
-                <label className="font-medium text-sm">PIN</label>
+                <label className="font-medium text-sm" htmlFor="pin-login">
+                  PIN
+                </label>
                 <Input
                   className="mt-1"
                   disabled={isPinLoading}
+                  id="pin-login"
                   maxLength={6}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                   placeholder="Enter your PIN"
@@ -264,10 +267,13 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
 
             <form className="space-y-3" onSubmit={handlePasswordLogin}>
               <div>
-                <label className="font-medium text-sm">Password</label>
+                <label className="font-medium text-sm" htmlFor="password-login">
+                  Password
+                </label>
                 <div className="relative mt-1">
                   <Input
                     disabled={isPasswordLoading}
+                    id="password-login"
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     type={showPassword ? "text" : "password"}

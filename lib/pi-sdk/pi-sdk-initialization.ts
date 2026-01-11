@@ -11,7 +11,7 @@ import { detectPiBrowser, type PiBrowserInfo } from "./pi-browser-detector";
 
 export type { PiBrowserInfo };
 
-export interface PiSDK {
+export type PiSDK = {
   // Authentication
   auth: {
     init: (config: AuthConfig) => Promise<AuthResult>;
@@ -40,35 +40,35 @@ export interface PiSDK {
     getUsername: () => string | null;
     getUID: () => string | null;
   };
-}
+};
 
-export interface AuthConfig {
+export type AuthConfig = {
   scope: string[];
   onIncompletePaymentFound?: (payment: any) => void;
-}
+};
 
-export interface AuthResult {
+export type AuthResult = {
   user: UserInfo;
   accessToken: string;
-}
+};
 
-export interface UserInfo {
+export type UserInfo = {
   username: string;
   uid: string;
   displayName: string;
-}
+};
 
-export interface PaymentConfig {
+export type PaymentConfig = {
   amount: number;
   memo: string;
   metadata?: Record<string, unknown>;
-}
+};
 
-export interface PaymentResult {
+export type PaymentResult = {
   paymentId: string;
   txid?: string;
   status: PaymentStatus;
-}
+};
 
 export enum PaymentStatus {
   PENDING = "pending",
@@ -85,8 +85,8 @@ export enum PaymentStatus {
 export class PiSDKInitializer {
   private static instance: PiSDKInitializer | null = null;
   private sdk: PiSDK | null = null;
-  private browserInfo: PiBrowserInfo | null = null;
-  private initialized = false;
+  private readonly browserInfo: PiBrowserInfo | null = null;
+  private readonly initialized = false;
   private initPromise: Promise<void> | null = null;
 
   private constructor() {}
@@ -95,10 +95,10 @@ export class PiSDKInitializer {
    * Get singleton instance
    */
   static getInstance(): PiSDKInitializer {
-    if (!this.instance) {
-      this.instance = new PiSDKInitializer();
+    if (!PiSDKInitializer.instance) {
+      PiSDKInitializer.instance = new PiSDKInitializer();
     }
-    return this.instance;
+    return PiSDKInitializer.instance;
   }
 
   /**
@@ -154,14 +154,11 @@ export class PiSDKInitializer {
       await this._loadPiSDK();
 
       if (this.sdk) {
-        console.log(
-          "[Pi SDK] ✓ Initialization successful",
-          {
-            isPiBrowser: this.browserInfo.isPiBrowser,
-            piNetworkAvailable: this.browserInfo.isPiNetworkAvailable,
-            version: this.browserInfo.version,
-          }
-        );
+        console.log("[Pi SDK] ✓ Initialization successful", {
+          isPiBrowser: this.browserInfo.isPiBrowser,
+          piNetworkAvailable: this.browserInfo.isPiNetworkAvailable,
+          version: this.browserInfo.version,
+        });
       }
 
       this.initialized = true;

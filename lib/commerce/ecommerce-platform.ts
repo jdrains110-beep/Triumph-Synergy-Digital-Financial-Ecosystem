@@ -17,7 +17,7 @@
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface Product {
+export type Product = {
   id: string;
   sku: string;
   name: string;
@@ -68,7 +68,7 @@ export interface Product {
   seoDescription: string;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type ProductCategory =
   | "electronics"
@@ -87,31 +87,31 @@ export type ProductCategory =
 
 export type TaxCategory = "standard" | "reduced" | "zero" | "exempt";
 
-export interface ProductAttribute {
+export type ProductAttribute = {
   name: string;
   value: string;
   visible: boolean;
   variation: boolean;
-}
+};
 
-export interface ProductVariant {
+export type ProductVariant = {
   id: string;
   sku: string;
   attributes: Record<string, string>;
   price: number;
   stockQuantity: number;
   image: string | null;
-}
+};
 
-export interface ProductImage {
+export type ProductImage = {
   id: string;
   url: string;
   alt: string;
   position: number;
   isMain: boolean;
-}
+};
 
-export interface Vendor {
+export type Vendor = {
   id: string;
   name: string;
   slug: string;
@@ -129,17 +129,17 @@ export interface Vendor {
   verificationStatus: "unverified" | "pending" | "verified";
   piWalletAddress: string;
   createdAt: Date;
-}
+};
 
-export interface VendorAddress {
+export type VendorAddress = {
   street: string;
   city: string;
   state: string;
   zip: string;
   country: string;
-}
+};
 
-export interface Order {
+export type Order = {
   id: string;
   orderNumber: string;
   customerId: string;
@@ -183,9 +183,9 @@ export interface Order {
   paidAt: Date | null;
   shippedAt: Date | null;
   deliveredAt: Date | null;
-}
+};
 
-export interface OrderItem {
+export type OrderItem = {
   id: string;
   productId: string;
   variantId: string | null;
@@ -195,7 +195,7 @@ export interface OrderItem {
   unitPrice: number;
   totalPrice: number;
   taxAmount: number;
-}
+};
 
 export type PaymentStatus =
   | "pending"
@@ -224,7 +224,7 @@ export type FulfillmentStatus =
   | "fulfilled"
   | "returned";
 
-export interface ShippingAddress {
+export type ShippingAddress = {
   firstName: string;
   lastName: string;
   company: string | null;
@@ -236,9 +236,9 @@ export interface ShippingAddress {
   country: string;
   phone: string;
   email: string;
-}
+};
 
-export interface Cart {
+export type Cart = {
   id: string;
   customerId: string | null;
   sessionId: string;
@@ -252,17 +252,17 @@ export interface Cart {
   createdAt: Date;
   updatedAt: Date;
   expiresAt: Date;
-}
+};
 
-export interface CartItem {
+export type CartItem = {
   productId: string;
   variantId: string | null;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-}
+};
 
-export interface Coupon {
+export type Coupon = {
   id: string;
   code: string;
   type: "percentage" | "fixed" | "free-shipping";
@@ -274,9 +274,9 @@ export interface Coupon {
   validFrom: Date;
   validTo: Date;
   isActive: boolean;
-}
+};
 
-export interface Review {
+export type Review = {
   id: string;
   productId: string;
   customerId: string;
@@ -287,7 +287,7 @@ export interface Review {
   helpful: number;
   status: "pending" | "approved" | "rejected";
   createdAt: Date;
-}
+};
 
 // ============================================================================
 // E-COMMERCE ENGINE
@@ -296,12 +296,11 @@ export interface Review {
 export class EcommercePlatform {
   private static instance: EcommercePlatform;
 
-  private products: Map<string, Product> = new Map();
-  private vendors: Map<string, Vendor> = new Map();
-  private orders: Map<string, Order> = new Map();
-  private carts: Map<string, Cart> = new Map();
-  private coupons: Map<string, Coupon> = new Map();
-  private reviews: Map<string, Review[]> = new Map();
+  private readonly products: Map<string, Product> = new Map();
+  private readonly vendors: Map<string, Vendor> = new Map();
+  private readonly orders: Map<string, Order> = new Map();
+  private readonly carts: Map<string, Cart> = new Map();
+  private readonly coupons: Map<string, Coupon> = new Map();
 
   private constructor() {
     this.initializeSampleData();
@@ -472,7 +471,9 @@ export class EcommercePlatform {
     quantityChange: number
   ): Promise<Product | null> {
     const product = this.products.get(productId);
-    if (!product) return null;
+    if (!product) {
+      return null;
+    }
 
     product.stockQuantity += quantityChange;
 
@@ -525,7 +526,9 @@ export class EcommercePlatform {
     const cart = this.carts.get(cartId);
     const product = this.products.get(productId);
 
-    if (!cart || !product) return null;
+    if (!cart || !product) {
+      return null;
+    }
 
     const price = product.salePrice || product.basePrice;
     const existingItem = cart.items.find(
@@ -555,7 +558,9 @@ export class EcommercePlatform {
     variantId?: string
   ): Promise<Cart | null> {
     const cart = this.carts.get(cartId);
-    if (!cart) return null;
+    if (!cart) {
+      return null;
+    }
 
     cart.items = cart.items.filter(
       (i) => !(i.productId === productId && i.variantId === (variantId || null))
@@ -582,7 +587,9 @@ export class EcommercePlatform {
     paymentMethod: PaymentMethod
   ): Promise<Order | null> {
     const cart = this.carts.get(cartId);
-    if (!cart || cart.items.length === 0) return null;
+    if (!cart || cart.items.length === 0) {
+      return null;
+    }
 
     const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
     const id = `order-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -656,7 +663,9 @@ export class EcommercePlatform {
     status: OrderStatus
   ): Promise<Order | null> {
     const order = this.orders.get(orderId);
-    if (!order) return null;
+    if (!order) {
+      return null;
+    }
 
     order.status = status;
     order.updatedAt = new Date();
@@ -677,7 +686,9 @@ export class EcommercePlatform {
     piHash?: string
   ): Promise<Order | null> {
     const order = this.orders.get(orderId);
-    if (!order) return null;
+    if (!order) {
+      return null;
+    }
 
     order.paymentStatus = "paid";
     order.paymentTransactionId = transactionId;

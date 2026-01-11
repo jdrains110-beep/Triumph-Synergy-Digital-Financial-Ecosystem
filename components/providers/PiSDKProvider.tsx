@@ -5,18 +5,18 @@
 
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import {
-  initializePiSDKOnStartup,
   getPiBrowserInfo,
-  isRunningInPiBrowser,
+  initializePiSDKOnStartup,
   isPiNetworkAvailable,
+  isRunningInPiBrowser,
 } from "@/lib/pi-sdk/pi-sdk-initialization";
 import { loadPiSDKScript } from "@/lib/pi-sdk/pi-sdk-script-loader";
 
-export interface PiSDKProviderProps {
+export type PiSDKProviderProps = {
   children: ReactNode;
-}
+};
 
 /**
  * Provider component that initializes Pi SDK globally
@@ -33,7 +33,7 @@ export function PiSDKProvider({ children }: PiSDKProviderProps) {
     // Initialize Pi SDK on mount
     const init = async () => {
       await initializePiSDKOnStartup();
-      
+
       // Log environment info
       const browserInfo = getPiBrowserInfo();
       const piAvailable = isPiNetworkAvailable();
@@ -43,16 +43,26 @@ export function PiSDKProvider({ children }: PiSDKProviderProps) {
       setInitialized(true);
 
       // Console output
-      console.log("═══════════════════════════════════════════════════════════════");
+      console.log(
+        "═══════════════════════════════════════════════════════════════"
+      );
       console.log("              PI SDK & PI BROWSER INITIALIZATION");
-      console.log("═══════════════════════════════════════════════════════════════");
-      console.log(`✓ Environment: ${inPiBrowser ? "Pi Browser" : "Web Browser"}`);
-      console.log(`✓ Pi Network: ${piAvailable ? "Available" : "Not Available"}`);
+      console.log(
+        "═══════════════════════════════════════════════════════════════"
+      );
+      console.log(
+        `✓ Environment: ${inPiBrowser ? "Pi Browser" : "Web Browser"}`
+      );
+      console.log(
+        `✓ Pi Network: ${piAvailable ? "Available" : "Not Available"}`
+      );
       console.log(`✓ User Agent: ${browserInfo?.userAgent}`);
       if (browserInfo?.version) {
         console.log(`✓ Version: ${browserInfo.version}`);
       }
-      console.log("═══════════════════════════════════════════════════════════════");
+      console.log(
+        "═══════════════════════════════════════════════════════════════"
+      );
     };
 
     init();
@@ -91,12 +101,14 @@ export function PiSDKStatus() {
   }, []);
 
   return (
-    <div className="text-xs text-gray-500 space-y-1">
+    <div className="space-y-1 text-gray-500 text-xs">
       <div>
-        <span className="font-semibold">Pi Browser:</span> {status.isPiBrowser ? "✓ Yes" : "✗ No"}
+        <span className="font-semibold">Pi Browser:</span>{" "}
+        {status.isPiBrowser ? "✓ Yes" : "✗ No"}
       </div>
       <div>
-        <span className="font-semibold">Pi Network:</span> {status.isPiNetworkAvailable ? "✓ Available" : "✗ Not Available"}
+        <span className="font-semibold">Pi Network:</span>{" "}
+        {status.isPiNetworkAvailable ? "✓ Available" : "✗ Not Available"}
       </div>
     </div>
   );

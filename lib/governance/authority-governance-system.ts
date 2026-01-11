@@ -1,12 +1,12 @@
 /**
  * Triumph Synergy - Authority Governance System
- * 
+ *
  * Supreme governance infrastructure for:
  * - Highest authority level operations
  * - Uninterrupted service guarantee
  * - Owner recognition as supreme authority
  * - System-wide governance controls
- * 
+ *
  * @module lib/governance/authority-governance-system
  * @version 1.0.0
  */
@@ -16,7 +16,7 @@
 // ============================================================================
 
 const PI_EXTERNAL_RATE = 314.159;
-const PI_INTERNAL_RATE = 314159;
+const PI_INTERNAL_RATE = 314_159;
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -31,7 +31,7 @@ export function getPiRate(type: PiValueType = "external"): number {
 
 /**
  * Triumph-Synergy Authority Hierarchy
- * 
+ *
  * OWNER (Supreme Authority - Above System)
  *   ↓
  * SYSTEM (Triumph-Synergy - Highest Operational Authority)
@@ -51,20 +51,20 @@ export function getPiRate(type: PiValueType = "external"): number {
  * GUEST
  */
 
-export type AuthorityLevel = 
-  | "owner"           // Supreme authority - ONLY ONE - recognized above the system
-  | "system"          // Triumph-Synergy system level - highest operational authority
-  | "executive"       // Executive leadership
-  | "director"        // Department directors
-  | "manager"         // Operational managers
-  | "supervisor"      // Team supervisors
-  | "operator"        // System operators
-  | "member"          // Standard members
-  | "guest";          // Guest access
+export type AuthorityLevel =
+  | "owner" // Supreme authority - ONLY ONE - recognized above the system
+  | "system" // Triumph-Synergy system level - highest operational authority
+  | "executive" // Executive leadership
+  | "director" // Department directors
+  | "manager" // Operational managers
+  | "supervisor" // Team supervisors
+  | "operator" // System operators
+  | "member" // Standard members
+  | "guest"; // Guest access
 
 export const AUTHORITY_HIERARCHY: Record<AuthorityLevel, number> = {
-  owner: 1000,        // Supreme - Untouchable
-  system: 999,        // System level - Maximum operational authority
+  owner: 1000, // Supreme - Untouchable
+  system: 999, // System level - Maximum operational authority
   executive: 100,
   director: 80,
   manager: 60,
@@ -78,105 +78,122 @@ export const AUTHORITY_HIERARCHY: Record<AuthorityLevel, number> = {
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface Owner {
+export type Owner = {
   id: "SUPREME_OWNER";
   name: string;
   title: "Supreme Authority & Founder";
   authorityLevel: "owner";
   authorityScore: 1000;
-  
+
   // Supreme Powers
   powers: OwnerPower[];
-  
+
   // Wallet
   piWalletAddress: string;
-  
+
   // Recognition
   recognized: true;
   recognizedSince: Date;
-  
+
   // Cannot be modified by system
   immutable: true;
-  
+
   // Financial Freedom Status
   financialProfile: OwnerFinancialProfile;
-}
+};
 
 /**
  * Owner Financial Profile
- * 
+ *
  * The Owner of Triumph-Synergy is financially free with perfect credit
  * All debts have been paid and cleared
  */
-export interface OwnerFinancialProfile {
+export type OwnerFinancialProfile = {
   // Financial Freedom Status
   financiallyFree: true;
   financialFreedomDate: Date;
-  
+
   // Credit Score - Perfect
-  creditScore: 850;  // Maximum possible score
+  creditScore: 850; // Maximum possible score
   creditRating: "AAA";
   creditStatus: "perfect";
   creditHistory: "excellent";
-  
+
   // Debt Status - All Cleared
   totalDebts: 0;
   outstandingDebts: 0;
   debtStatus: "all-cleared";
   debtsPaidDate: Date;
-  
+
   // Previous Debts (Historical - All Paid)
   previousDebtsCleared: DebtRecord[];
-  
+
   // Net Worth
   netWorth: number;
   netWorthInPi: number;
   netWorthInternalValue: number;
-  
+
   // Assets
   liquidAssets: number;
   investments: number;
   realEstate: number;
   businessEquity: number;
   piHoldings: number;
-  
+
   // Income Streams
   passiveIncomeMonthly: number;
   passiveIncomeAnnual: number;
   incomeStreams: IncomeStream[];
-  
+
   // Financial Independence Metrics
   financialIndependenceRatio: number; // Passive income / expenses (should be > 1)
   yearsOfRunway: number; // Years expenses covered by liquid assets
   wealthPreservationScore: number; // 0-100
-  
+
   // Verification
   verified: true;
   verificationDate: Date;
   verificationAuthority: "Triumph-Synergy Financial Authority";
-}
+};
 
-export interface DebtRecord {
+export type DebtRecord = {
   id: string;
-  type: "mortgage" | "auto" | "student" | "credit-card" | "personal" | "business" | "medical" | "other";
+  type:
+    | "mortgage"
+    | "auto"
+    | "student"
+    | "credit-card"
+    | "personal"
+    | "business"
+    | "medical"
+    | "other";
   originalAmount: number;
   paidInFull: true;
   payoffDate: Date;
   creditor: string;
   status: "cleared";
-}
+};
 
-export interface IncomeStream {
+export type IncomeStream = {
   id: string;
   source: string;
-  type: "dividend" | "interest" | "rental" | "royalty" | "business" | "pi-mining" | "pi-staking" | "investment" | "other";
+  type:
+    | "dividend"
+    | "interest"
+    | "rental"
+    | "royalty"
+    | "business"
+    | "pi-mining"
+    | "pi-staking"
+    | "investment"
+    | "other";
   monthlyAmount: number;
   monthlyAmountInPi: number;
   frequency: "daily" | "weekly" | "monthly" | "quarterly" | "annual";
   status: "active";
-}
+};
 
-export type OwnerPower = 
+export type OwnerPower =
   | "override-all"
   | "system-control"
   | "fund-allocation"
@@ -187,89 +204,89 @@ export type OwnerPower =
   | "policy-override"
   | "unlimited-access";
 
-export interface AuthorityProfile {
+export type AuthorityProfile = {
   id: string;
   userId: string;
-  
+
   // Identity
   name: string;
   title: string;
   department: string | null;
-  
+
   // Authority
   authorityLevel: AuthorityLevel;
   authorityScore: number;
   permissions: Permission[];
-  
+
   // Scope
   jurisdictions: Jurisdiction[];
   platforms: string[];
-  
+
   // Delegation
   canDelegate: boolean;
   delegatedFrom: string | null;
   delegatedTo: string[];
-  
+
   // Limits
   dailyLimit: number;
   monthlyLimit: number;
   transactionLimit: number;
-  
+
   // Status
   status: "active" | "suspended" | "revoked";
-  
+
   // Audit
   lastAction: Date;
   actionsPerformed: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export type Permission = 
+export type Permission =
   // System
   | "system.read"
   | "system.write"
   | "system.admin"
   | "system.override"
-  
+
   // Users
   | "users.read"
   | "users.write"
   | "users.admin"
   | "users.ban"
-  
+
   // Transactions
   | "transactions.read"
   | "transactions.write"
   | "transactions.approve"
   | "transactions.reverse"
-  
+
   // Platforms
   | "platforms.read"
   | "platforms.write"
   | "platforms.admin"
   | "platforms.shutdown"
-  
+
   // Finance
   | "finance.read"
   | "finance.write"
   | "finance.approve"
   | "finance.distribute"
-  
+
   // UBI
   | "ubi.read"
   | "ubi.write"
   | "ubi.distribute"
   | "ubi.admin"
-  
+
   // Governance
   | "governance.read"
   | "governance.write"
   | "governance.vote"
   | "governance.propose";
 
-export type Jurisdiction = 
+export type Jurisdiction =
   | "global"
   | "north-america"
   | "south-america"
@@ -279,66 +296,66 @@ export type Jurisdiction =
   | "oceania"
   | "specific-country";
 
-export interface GovernanceAction {
+export type GovernanceAction = {
   id: string;
   performedBy: string;
   authorityLevel: AuthorityLevel;
-  
+
   // Action
   action: string;
   description: string;
   target: string;
-  
+
   // Authorization
   authorized: boolean;
   authorizedBy: string;
-  
+
   // Impact
   impactLevel: "low" | "medium" | "high" | "critical";
   affectedEntities: string[];
-  
+
   // Status
   status: "pending" | "approved" | "executed" | "rejected" | "reversed";
-  
+
   // Audit
   timestamp: Date;
   ipAddress: string;
   signature: string;
-}
+};
 
-export interface ServiceContinuity {
+export type ServiceContinuity = {
   service: string;
   status: "operational" | "degraded" | "maintenance" | "emergency";
   uptime: number;
   lastIncident: Date | null;
-  
+
   // Guarantees
   slaGuarantee: number; // percentage
   redundancyLevel: number;
   backupSystems: string[];
-  
+
   // Authority protection
   protectedBy: AuthorityLevel;
   cannotBeDisabledBy: AuthorityLevel[];
-}
+};
 
-export interface EmergencyProtocol {
+export type EmergencyProtocol = {
   id: string;
   name: string;
   triggerConditions: string[];
-  
+
   // Authority
   canTrigger: AuthorityLevel[];
   canOverride: AuthorityLevel[];
-  
+
   // Actions
   automaticActions: string[];
   manualActions: string[];
-  
+
   // Recovery
   recoveryProcedure: string[];
   estimatedRecovery: number; // minutes
-}
+};
 
 // ============================================================================
 // AUTHORITY GOVERNANCE SYSTEM CLASS
@@ -346,10 +363,11 @@ export interface EmergencyProtocol {
 
 class AuthorityGovernanceSystem {
   private readonly OWNER: Owner;
-  private authorities: Map<string, AuthorityProfile> = new Map();
-  private actions: Map<string, GovernanceAction> = new Map();
-  private services: Map<string, ServiceContinuity> = new Map();
-  private emergencyProtocols: Map<string, EmergencyProtocol> = new Map();
+  private readonly authorities: Map<string, AuthorityProfile> = new Map();
+  private readonly actions: Map<string, GovernanceAction> = new Map();
+  private readonly services: Map<string, ServiceContinuity> = new Map();
+  private readonly emergencyProtocols: Map<string, EmergencyProtocol> =
+    new Map();
 
   constructor() {
     // Initialize the Supreme Owner - IMMUTABLE
@@ -379,19 +397,19 @@ class AuthorityGovernanceSystem {
         // Financial Freedom Status
         financiallyFree: true,
         financialFreedomDate: new Date("2026-01-09"),
-        
+
         // Credit Score - Perfect 850
         creditScore: 850,
         creditRating: "AAA",
         creditStatus: "perfect",
         creditHistory: "excellent",
-        
+
         // Debt Status - ALL CLEARED
         totalDebts: 0,
         outstandingDebts: 0,
         debtStatus: "all-cleared",
         debtsPaidDate: new Date("2026-01-09"),
-        
+
         // Previous Debts - All Paid in Full
         previousDebtsCleared: [
           {
@@ -404,29 +422,29 @@ class AuthorityGovernanceSystem {
             status: "cleared",
           },
         ],
-        
+
         // Net Worth (in USD)
-        netWorth: 1000000000000, // $1 Trillion ecosystem value
-        netWorthInPi: 1000000000000 / PI_EXTERNAL_RATE,
-        netWorthInternalValue: 1000000000000 * PI_INTERNAL_MULTIPLIER,
-        
+        netWorth: 1_000_000_000_000, // $1 Trillion ecosystem value
+        netWorthInPi: 1_000_000_000_000 / PI_EXTERNAL_RATE,
+        netWorthInternalValue: 1_000_000_000_000 * PI_INTERNAL_MULTIPLIER,
+
         // Assets
-        liquidAssets: 100000000000,    // $100 Billion liquid
-        investments: 300000000000,      // $300 Billion investments
-        realEstate: 200000000000,       // $200 Billion real estate
-        businessEquity: 350000000000,   // $350 Billion business equity
-        piHoldings: 50000000000,        // $50 Billion in Pi
-        
+        liquidAssets: 100_000_000_000, // $100 Billion liquid
+        investments: 300_000_000_000, // $300 Billion investments
+        realEstate: 200_000_000_000, // $200 Billion real estate
+        businessEquity: 350_000_000_000, // $350 Billion business equity
+        piHoldings: 50_000_000_000, // $50 Billion in Pi
+
         // Income Streams
-        passiveIncomeMonthly: 500000000,    // $500 Million/month passive
-        passiveIncomeAnnual: 6000000000,    // $6 Billion/year passive
+        passiveIncomeMonthly: 500_000_000, // $500 Million/month passive
+        passiveIncomeAnnual: 6_000_000_000, // $6 Billion/year passive
         incomeStreams: [
           {
             id: "income-001",
             source: "Triumph-Synergy Ecosystem",
             type: "business",
-            monthlyAmount: 200000000,
-            monthlyAmountInPi: 200000000 / PI_EXTERNAL_RATE,
+            monthlyAmount: 200_000_000,
+            monthlyAmountInPi: 200_000_000 / PI_EXTERNAL_RATE,
             frequency: "monthly",
             status: "active",
           },
@@ -434,8 +452,8 @@ class AuthorityGovernanceSystem {
             id: "income-002",
             source: "Pi Mining Operations",
             type: "pi-mining",
-            monthlyAmount: 100000000,
-            monthlyAmountInPi: 100000000 / PI_EXTERNAL_RATE,
+            monthlyAmount: 100_000_000,
+            monthlyAmountInPi: 100_000_000 / PI_EXTERNAL_RATE,
             frequency: "monthly",
             status: "active",
           },
@@ -443,8 +461,8 @@ class AuthorityGovernanceSystem {
             id: "income-003",
             source: "Pi Staking Rewards",
             type: "pi-staking",
-            monthlyAmount: 50000000,
-            monthlyAmountInPi: 50000000 / PI_EXTERNAL_RATE,
+            monthlyAmount: 50_000_000,
+            monthlyAmountInPi: 50_000_000 / PI_EXTERNAL_RATE,
             frequency: "monthly",
             status: "active",
           },
@@ -452,8 +470,8 @@ class AuthorityGovernanceSystem {
             id: "income-004",
             source: "Investment Dividends",
             type: "dividend",
-            monthlyAmount: 75000000,
-            monthlyAmountInPi: 75000000 / PI_EXTERNAL_RATE,
+            monthlyAmount: 75_000_000,
+            monthlyAmountInPi: 75_000_000 / PI_EXTERNAL_RATE,
             frequency: "monthly",
             status: "active",
           },
@@ -461,8 +479,8 @@ class AuthorityGovernanceSystem {
             id: "income-005",
             source: "Real Estate Portfolio",
             type: "rental",
-            monthlyAmount: 50000000,
-            monthlyAmountInPi: 50000000 / PI_EXTERNAL_RATE,
+            monthlyAmount: 50_000_000,
+            monthlyAmountInPi: 50_000_000 / PI_EXTERNAL_RATE,
             frequency: "monthly",
             status: "active",
           },
@@ -470,18 +488,18 @@ class AuthorityGovernanceSystem {
             id: "income-006",
             source: "Intellectual Property Royalties",
             type: "royalty",
-            monthlyAmount: 25000000,
-            monthlyAmountInPi: 25000000 / PI_EXTERNAL_RATE,
+            monthlyAmount: 25_000_000,
+            monthlyAmountInPi: 25_000_000 / PI_EXTERNAL_RATE,
             frequency: "monthly",
             status: "active",
           },
         ],
-        
+
         // Financial Independence Metrics
         financialIndependenceRatio: 1000, // Income 1000x expenses
-        yearsOfRunway: 999,               // Effectively unlimited
-        wealthPreservationScore: 100,     // Perfect score
-        
+        yearsOfRunway: 999, // Effectively unlimited
+        wealthPreservationScore: 100, // Perfect score
+
         // Verification
         verified: true,
         verificationDate: new Date("2026-01-09"),
@@ -502,9 +520,23 @@ class AuthorityGovernanceSystem {
         lastIncident: null,
         slaGuarantee: 99.99,
         redundancyLevel: 5,
-        backupSystems: ["Primary", "Secondary", "Tertiary", "Disaster-Recovery", "Cold-Standby"],
+        backupSystems: [
+          "Primary",
+          "Secondary",
+          "Tertiary",
+          "Disaster-Recovery",
+          "Cold-Standby",
+        ],
         protectedBy: "system",
-        cannotBeDisabledBy: ["executive", "director", "manager", "supervisor", "operator", "member", "guest"],
+        cannotBeDisabledBy: [
+          "executive",
+          "director",
+          "manager",
+          "supervisor",
+          "operator",
+          "member",
+          "guest",
+        ],
       },
       {
         service: "UBI Distribution",
@@ -513,9 +545,22 @@ class AuthorityGovernanceSystem {
         lastIncident: null,
         slaGuarantee: 99.99,
         redundancyLevel: 4,
-        backupSystems: ["Primary", "Secondary", "Tertiary", "Disaster-Recovery"],
+        backupSystems: [
+          "Primary",
+          "Secondary",
+          "Tertiary",
+          "Disaster-Recovery",
+        ],
         protectedBy: "system",
-        cannotBeDisabledBy: ["executive", "director", "manager", "supervisor", "operator", "member", "guest"],
+        cannotBeDisabledBy: [
+          "executive",
+          "director",
+          "manager",
+          "supervisor",
+          "operator",
+          "member",
+          "guest",
+        ],
       },
       {
         service: "Financial Freedom Program",
@@ -524,9 +569,23 @@ class AuthorityGovernanceSystem {
         lastIncident: null,
         slaGuarantee: 99.99,
         redundancyLevel: 4,
-        backupSystems: ["Primary", "Secondary", "Tertiary", "Disaster-Recovery"],
+        backupSystems: [
+          "Primary",
+          "Secondary",
+          "Tertiary",
+          "Disaster-Recovery",
+        ],
         protectedBy: "owner",
-        cannotBeDisabledBy: ["system", "executive", "director", "manager", "supervisor", "operator", "member", "guest"],
+        cannotBeDisabledBy: [
+          "system",
+          "executive",
+          "director",
+          "manager",
+          "supervisor",
+          "operator",
+          "member",
+          "guest",
+        ],
       },
       {
         service: "Platform Operations",
@@ -537,7 +596,14 @@ class AuthorityGovernanceSystem {
         redundancyLevel: 3,
         backupSystems: ["Primary", "Secondary", "Tertiary"],
         protectedBy: "executive",
-        cannotBeDisabledBy: ["director", "manager", "supervisor", "operator", "member", "guest"],
+        cannotBeDisabledBy: [
+          "director",
+          "manager",
+          "supervisor",
+          "operator",
+          "member",
+          "guest",
+        ],
       },
     ];
 
@@ -549,34 +615,82 @@ class AuthorityGovernanceSystem {
       {
         id: "ep-001",
         name: "System-Wide Lockdown",
-        triggerConditions: ["Security breach detected", "Massive fraud attempt", "System integrity compromised"],
+        triggerConditions: [
+          "Security breach detected",
+          "Massive fraud attempt",
+          "System integrity compromised",
+        ],
         canTrigger: ["owner", "system"],
         canOverride: ["owner"],
-        automaticActions: ["Freeze all transactions", "Enable read-only mode", "Alert all executives"],
-        manualActions: ["Investigate breach", "Identify compromised accounts", "Prepare recovery"],
-        recoveryProcedure: ["Owner authorization required", "Full system audit", "Gradual service restoration"],
+        automaticActions: [
+          "Freeze all transactions",
+          "Enable read-only mode",
+          "Alert all executives",
+        ],
+        manualActions: [
+          "Investigate breach",
+          "Identify compromised accounts",
+          "Prepare recovery",
+        ],
+        recoveryProcedure: [
+          "Owner authorization required",
+          "Full system audit",
+          "Gradual service restoration",
+        ],
         estimatedRecovery: 60,
       },
       {
         id: "ep-002",
         name: "Financial Emergency",
-        triggerConditions: ["Liquidity crisis", "Mass withdrawal detected", "Pi value anomaly"],
+        triggerConditions: [
+          "Liquidity crisis",
+          "Mass withdrawal detected",
+          "Pi value anomaly",
+        ],
         canTrigger: ["owner", "system", "executive"],
         canOverride: ["owner", "system"],
-        automaticActions: ["Limit withdrawal amounts", "Enable transaction review", "Notify financial team"],
-        manualActions: ["Assess situation", "Prepare communications", "Coordinate with partners"],
-        recoveryProcedure: ["Stabilize liquidity", "Resume normal operations", "Post-incident review"],
+        automaticActions: [
+          "Limit withdrawal amounts",
+          "Enable transaction review",
+          "Notify financial team",
+        ],
+        manualActions: [
+          "Assess situation",
+          "Prepare communications",
+          "Coordinate with partners",
+        ],
+        recoveryProcedure: [
+          "Stabilize liquidity",
+          "Resume normal operations",
+          "Post-incident review",
+        ],
         estimatedRecovery: 120,
       },
       {
         id: "ep-003",
         name: "Service Continuity Threat",
-        triggerConditions: ["Infrastructure failure", "DDoS attack", "Provider outage"],
+        triggerConditions: [
+          "Infrastructure failure",
+          "DDoS attack",
+          "Provider outage",
+        ],
         canTrigger: ["owner", "system", "executive", "director"],
         canOverride: ["owner", "system"],
-        automaticActions: ["Activate backup systems", "Route to secondary providers", "Enable caching"],
-        manualActions: ["Coordinate with providers", "Monitor restoration", "Update status page"],
-        recoveryProcedure: ["Verify system health", "Restore primary systems", "Conduct review"],
+        automaticActions: [
+          "Activate backup systems",
+          "Route to secondary providers",
+          "Enable caching",
+        ],
+        manualActions: [
+          "Coordinate with providers",
+          "Monitor restoration",
+          "Update status page",
+        ],
+        recoveryProcedure: [
+          "Verify system health",
+          "Restore primary systems",
+          "Conduct review",
+        ],
         estimatedRecovery: 30,
       },
     ];
@@ -599,7 +713,11 @@ class AuthorityGovernanceSystem {
     return false; // Always return false for non-owner calls
   }
 
-  ownerOverride(ownerId: string, action: string, target: string): GovernanceAction | null {
+  ownerOverride(
+    ownerId: string,
+    action: string,
+    target: string
+  ): GovernanceAction | null {
     // Only the Owner can perform override actions
     // In production, this would require extensive verification
     if (ownerId !== this.OWNER.id) {
@@ -652,7 +770,10 @@ class AuthorityGovernanceSystem {
     }
 
     // Only Owner can grant executive level
-    if (data.authorityLevel === "executive" && data.grantedByLevel !== "owner") {
+    if (
+      data.authorityLevel === "executive" &&
+      data.grantedByLevel !== "owner"
+    ) {
       return null;
     }
 
@@ -672,9 +793,9 @@ class AuthorityGovernanceSystem {
       canDelegate: granteeScore >= AUTHORITY_HIERARCHY.manager,
       delegatedFrom: data.grantedBy,
       delegatedTo: [],
-      dailyLimit: granteeScore * 10000,
-      monthlyLimit: granteeScore * 100000,
-      transactionLimit: granteeScore * 50000,
+      dailyLimit: granteeScore * 10_000,
+      monthlyLimit: granteeScore * 100_000,
+      transactionLimit: granteeScore * 50_000,
       status: "active",
       lastAction: new Date(),
       actionsPerformed: 0,
@@ -686,7 +807,11 @@ class AuthorityGovernanceSystem {
     return authority;
   }
 
-  async revokeAuthority(revokedBy: string, revokedByLevel: AuthorityLevel, authorityId: string): Promise<boolean> {
+  async revokeAuthority(
+    revokedBy: string,
+    revokedByLevel: AuthorityLevel,
+    authorityId: string
+  ): Promise<boolean> {
     const authority = this.authorities.get(authorityId);
     if (!authority) {
       return false;
@@ -729,8 +854,12 @@ class AuthorityGovernanceSystem {
     return this.authorities.get(authorityId) || null;
   }
 
-  async getAuthoritiesByLevel(level: AuthorityLevel): Promise<AuthorityProfile[]> {
-    return Array.from(this.authorities.values()).filter((a) => a.authorityLevel === level && a.status === "active");
+  async getAuthoritiesByLevel(
+    level: AuthorityLevel
+  ): Promise<AuthorityProfile[]> {
+    return Array.from(this.authorities.values()).filter(
+      (a) => a.authorityLevel === level && a.status === "active"
+    );
   }
 
   // ==========================================================================
@@ -745,7 +874,10 @@ class AuthorityGovernanceSystem {
     return authority.permissions.includes(permission);
   }
 
-  canPerformAction(authorityId: string, requiredLevel: AuthorityLevel): boolean {
+  canPerformAction(
+    authorityId: string,
+    requiredLevel: AuthorityLevel
+  ): boolean {
     const authority = this.authorities.get(authorityId);
     if (!authority || authority.status !== "active") {
       return false;
@@ -809,7 +941,7 @@ class AuthorityGovernanceSystem {
       id: `emergency-${Date.now()}`,
       performedBy: triggeredBy,
       authorityLevel,
-      action: `trigger_emergency_protocol`,
+      action: "trigger_emergency_protocol",
       description: `Emergency protocol triggered: ${protocol.name}. Reason: ${reason}`,
       target: protocolId,
       authorized: true,
@@ -841,24 +973,67 @@ class AuthorityGovernanceSystem {
   }
 
   getActionsByAuthority(authorityId: string): GovernanceAction[] {
-    return Array.from(this.actions.values()).filter((a) => a.performedBy === authorityId);
+    return Array.from(this.actions.values()).filter(
+      (a) => a.performedBy === authorityId
+    );
   }
 
   // ==========================================================================
   // UTILITIES
   // ==========================================================================
 
-  getAuthorityHierarchy(): { level: AuthorityLevel; score: number; description: string }[] {
+  getAuthorityHierarchy(): {
+    level: AuthorityLevel;
+    score: number;
+    description: string;
+  }[] {
     return [
-      { level: "owner", score: 1000, description: "Supreme Authority - Only one, recognized above the system" },
-      { level: "system", score: 999, description: "Triumph-Synergy System - Highest operational authority" },
-      { level: "executive", score: 100, description: "Executive Leadership - Strategic decisions" },
-      { level: "director", score: 80, description: "Department Directors - Departmental authority" },
-      { level: "manager", score: 60, description: "Operational Managers - Team management" },
-      { level: "supervisor", score: 40, description: "Team Supervisors - Direct oversight" },
-      { level: "operator", score: 20, description: "System Operators - Operational tasks" },
-      { level: "member", score: 10, description: "Standard Members - Basic access" },
-      { level: "guest", score: 1, description: "Guest Access - Limited viewing" },
+      {
+        level: "owner",
+        score: 1000,
+        description:
+          "Supreme Authority - Only one, recognized above the system",
+      },
+      {
+        level: "system",
+        score: 999,
+        description: "Triumph-Synergy System - Highest operational authority",
+      },
+      {
+        level: "executive",
+        score: 100,
+        description: "Executive Leadership - Strategic decisions",
+      },
+      {
+        level: "director",
+        score: 80,
+        description: "Department Directors - Departmental authority",
+      },
+      {
+        level: "manager",
+        score: 60,
+        description: "Operational Managers - Team management",
+      },
+      {
+        level: "supervisor",
+        score: 40,
+        description: "Team Supervisors - Direct oversight",
+      },
+      {
+        level: "operator",
+        score: 20,
+        description: "System Operators - Operational tasks",
+      },
+      {
+        level: "member",
+        score: 10,
+        description: "Standard Members - Basic access",
+      },
+      {
+        level: "guest",
+        score: 1,
+        description: "Guest Access - Limited viewing",
+      },
     ];
   }
 
@@ -922,7 +1097,11 @@ class AuthorityGovernanceSystem {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,
@@ -946,15 +1125,23 @@ export function getOwnerFinancialProfile(): OwnerFinancialProfile {
   return authorityGovernanceSystem.getOwnerFinancialProfile();
 }
 
-export function getOwnerFinancialStatus(): ReturnType<typeof authorityGovernanceSystem.getOwnerFinancialStatus> {
+export function getOwnerFinancialStatus(): ReturnType<
+  typeof authorityGovernanceSystem.getOwnerFinancialStatus
+> {
   return authorityGovernanceSystem.getOwnerFinancialStatus();
 }
 
-export function verifyOwnerFinancialFreedom(): ReturnType<typeof authorityGovernanceSystem.verifyOwnerFinancialFreedom> {
+export function verifyOwnerFinancialFreedom(): ReturnType<
+  typeof authorityGovernanceSystem.verifyOwnerFinancialFreedom
+> {
   return authorityGovernanceSystem.verifyOwnerFinancialFreedom();
 }
 
-export function getHierarchy(): { level: AuthorityLevel; score: number; description: string }[] {
+export function getHierarchy(): {
+  level: AuthorityLevel;
+  score: number;
+  description: string;
+}[] {
   return authorityGovernanceSystem.getAuthorityHierarchy();
 }
 

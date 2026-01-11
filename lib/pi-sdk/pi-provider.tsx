@@ -51,7 +51,9 @@ export function PiProvider({ children }: { children: ReactNode }) {
       try {
         // Check if Pi SDK is loaded
         if (typeof window === "undefined") {
-          console.log("[Pi SDK] Server-side rendering - skipping initialization");
+          console.log(
+            "[Pi SDK] Server-side rendering - skipping initialization"
+          );
           return;
         }
 
@@ -59,7 +61,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         let attempts = 0;
         const maxAttempts = 50; // 5 seconds max wait (50 * 100ms)
 
-        while (!((window as any).Pi) && attempts < maxAttempts) {
+        while (!(window as any).Pi && attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, 100));
           attempts++;
         }
@@ -128,7 +130,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
     };
 
     initializePi();
-  }, []);
+  }, [isReady]);
 
   // Request payment through Pi SDK
   const requestPayment = async (
@@ -156,7 +158,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
                 "Payment request timeout - Pi SDK did not respond within 30 seconds"
               )
             ),
-          30000
+          30_000
         )
       );
 

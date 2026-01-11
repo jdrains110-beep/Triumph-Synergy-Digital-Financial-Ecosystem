@@ -100,9 +100,7 @@ export async function initializePiNetworkSDK(config: {
     const ready = await waitForPiSDK();
 
     if (!ready) {
-      console.error(
-        "[Pi SDK] Failed to initialize - Pi SDK not available"
-      );
+      console.error("[Pi SDK] Failed to initialize - Pi SDK not available");
       return false;
     }
 

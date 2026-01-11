@@ -1,20 +1,20 @@
 /**
  * Triumph-Synergy System Status API
- * 
+ *
  * Production readiness and health check endpoint
- * 
+ *
  * GET /api/system/status - Returns full system status
  */
 
 import { NextResponse } from "next/server";
 import {
-  getSystemStatus,
-  verifyProductionReadiness,
-  isSystemLive,
-  isProductionReady,
-  isSystemActive,
   getAllModules,
   getCriticalModules,
+  getSystemStatus,
+  isProductionReady,
+  isSystemActive,
+  isSystemLive,
+  verifyProductionReadiness,
 } from "@/lib/system/production-activation";
 
 export const dynamic = "force-dynamic";
@@ -46,8 +46,13 @@ export async function GET() {
         totalModules: allModules.length,
         liveModules: liveModules.length,
         healthyModules: healthyModules.length,
-        criticalModulesOnline: criticalModules.every((m) => m.status === "live"),
-        averageUptime: (allModules.reduce((sum, m) => sum + m.uptime, 0) / allModules.length).toFixed(3) + "%",
+        criticalModulesOnline: criticalModules.every(
+          (m) => m.status === "live"
+        ),
+        averageUptime:
+          (
+            allModules.reduce((sum, m) => sum + m.uptime, 0) / allModules.length
+          ).toFixed(3) + "%",
       },
 
       // Production Readiness
@@ -100,7 +105,8 @@ export async function GET() {
 
       // Verification
       verification: {
-        message: "✅ TRIUMPH-SYNERGY IS 100% PRODUCTION READY, ACTIVE, AND LIVE",
+        message:
+          "✅ TRIUMPH-SYNERGY IS 100% PRODUCTION READY, ACTIVE, AND LIVE",
         certifiedBy: "Triumph-Synergy System Authority",
         certifiedAt: new Date().toISOString(),
       },

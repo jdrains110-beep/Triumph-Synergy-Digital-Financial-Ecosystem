@@ -1,23 +1,23 @@
 /**
  * lib/ecosystem/example-applications.ts
  * Example applications that can integrate with Triumph Synergy ecosystem
- * 
+ *
  * These demonstrate how third-party apps can connect to the ecosystem
  * while maintaining consistent Pi Payment handling
  */
 
 import {
+  createPiPayments,
+  type OfficialPiPayments,
+  type PiPaymentRequest,
+} from "@/lib/payments/pi-payments-official";
+import type {
   ApplicationIntegration,
-  RegisteredApplication,
+  ApplicationStatus,
   PaymentExecutionConfig,
   PaymentResult,
-  ApplicationStatus,
+  RegisteredApplication,
 } from "./application-registry";
-import {
-  OfficialPiPayments,
-  createPiPayments,
-  PiPaymentRequest,
-} from "@/lib/payments/pi-payments-official";
 
 // =============================================================================
 // EXAMPLE: E-COMMERCE APPLICATION
@@ -26,7 +26,7 @@ import {
 export class ECommerceAppIntegration implements ApplicationIntegration {
   readonly appId = "ecommerce-app";
   readonly name = "Pi E-Commerce Store";
-  private piPayments: OfficialPiPayments;
+  private readonly piPayments: OfficialPiPayments;
 
   constructor() {
     this.piPayments = createPiPayments({
@@ -131,7 +131,7 @@ export const eCommerceApp: RegisteredApplication = {
 export class MarketplaceAppIntegration implements ApplicationIntegration {
   readonly appId = "marketplace-app";
   readonly name = "Pi Marketplace";
-  private piPayments: OfficialPiPayments;
+  private readonly piPayments: OfficialPiPayments;
 
   constructor() {
     this.piPayments = createPiPayments({
@@ -226,7 +226,7 @@ export const marketplaceApp: RegisteredApplication = {
 export class GamingAppIntegration implements ApplicationIntegration {
   readonly appId = "gaming-app";
   readonly name = "Pi Gaming Hub";
-  private piPayments: OfficialPiPayments;
+  private readonly piPayments: OfficialPiPayments;
 
   constructor() {
     this.piPayments = createPiPayments({

@@ -148,10 +148,12 @@ export function ContractManagementPage() {
           ) : (
             <div className="space-y-3">
               {contracts.map((contract) => (
-                <div
-                  className="cursor-pointer rounded-lg border p-4 hover:bg-gray-50"
+                <button
+                  aria-selected={selectedContractId === contract.id}
+                  className="w-full rounded-lg border p-4 text-left transition-colors hover:bg-gray-50"
                   key={contract.id}
                   onClick={() => handleSelectContract(contract.id)}
+                  type="button"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -220,7 +222,7 @@ export function ContractManagementPage() {
                       </div>
                     </div>
                   )}
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -336,8 +338,11 @@ function ContractAuditTrailViewer({ contractId }: { contractId: string }) {
       </Alert>
 
       <div className="space-y-3">
-        {auditLogs.map((log, idx) => (
-          <div className="space-y-2 rounded-lg border bg-gray-50 p-4" key={idx}>
+        {auditLogs.map((log) => (
+          <div
+            className="space-y-2 rounded-lg border bg-gray-50 p-4"
+            key={`${log.timestamp}-${log.action}`}
+          >
             <div className="flex items-start justify-between">
               <div>
                 <h4 className="font-semibold capitalize">{log.action}</h4>

@@ -1,13 +1,13 @@
 /**
  * Triumph Synergy - Global Entertainment & Education Streaming Hub
- * 
+ *
  * Superior streaming platform hub for:
  * - Colleges & Universities
  * - Professional content creators
  * - Sports & Athletics
  * - STEM Instructors teaching kids
  * - Entertainment industry
- * 
+ *
  * @module lib/streaming-sdk/entertainment-hub
  * @version 1.0.0
  */
@@ -17,7 +17,7 @@
 // ============================================================================
 
 const PI_EXTERNAL_RATE = 314.159;
-const PI_INTERNAL_RATE = 314159;
+const PI_INTERNAL_RATE = 314_159;
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -30,7 +30,7 @@ export function getPiRate(type: PiValueType = "external"): number {
 // TYPES & INTERFACES
 // ============================================================================
 
-export type CreatorCategory = 
+export type CreatorCategory =
   | "college"
   | "university"
   | "professional"
@@ -46,16 +46,36 @@ export type CreatorCategory =
   | "tech"
   | "lifestyle";
 
-export type CreatorTier = "starter" | "creator" | "professional" | "enterprise" | "institution";
-export type CreatorStatus = "pending" | "active" | "suspended" | "verified" | "premium";
+export type CreatorTier =
+  | "starter"
+  | "creator"
+  | "professional"
+  | "enterprise"
+  | "institution";
+export type CreatorStatus =
+  | "pending"
+  | "active"
+  | "suspended"
+  | "verified"
+  | "premium";
 
-export type ContentRating = "all-ages" | "kids" | "teens" | "mature" | "educational";
-export type AudienceType = "public" | "subscribers" | "members" | "students" | "private";
+export type ContentRating =
+  | "all-ages"
+  | "kids"
+  | "teens"
+  | "mature"
+  | "educational";
+export type AudienceType =
+  | "public"
+  | "subscribers"
+  | "members"
+  | "students"
+  | "private";
 
-export interface StreamCreator {
+export type StreamCreator = {
   id: string;
   userId: string;
-  
+
   // Profile
   displayName: string;
   username: string;
@@ -64,13 +84,18 @@ export interface StreamCreator {
   bannerUrl: string;
   website: string | null;
   socialLinks: SocialLink[];
-  
+
   // Category & Verification
   category: CreatorCategory;
   subcategories: string[];
   verified: boolean;
-  verifiedType: "individual" | "organization" | "institution" | "celebrity" | null;
-  
+  verifiedType:
+    | "individual"
+    | "organization"
+    | "institution"
+    | "celebrity"
+    | null;
+
   // Subscription
   subscriptionTier: CreatorTier;
   subscriptionStatus: CreatorStatus;
@@ -78,36 +103,36 @@ export interface StreamCreator {
   subscriptionEndDate: Date;
   monthlyFee: number;
   monthlyFeeInPi: number;
-  
+
   // Revenue
   revenueShare: number;
   piRevenueBonus: number;
   totalEarnings: number;
   totalPiEarnings: number;
   monthlyEarnings: number;
-  
+
   // Audience
   subscribers: number;
   followers: number;
   totalViews: number;
   avgViewDuration: number;
-  
+
   // Content
   totalVideos: number;
   totalLiveStreams: number;
   totalCourses: number;
-  
+
   // For Educational Creators
   isEducator: boolean;
   educatorCredentials: EducatorCredentials | null;
   courses: Course[];
   students: number;
-  
+
   // For Sports/Colleges
   institutionId: string | null;
   teamId: string | null;
   athleteProfile: AthleteProfile | null;
-  
+
   // Monetization
   monetizationEnabled: boolean;
   adsEnabled: boolean;
@@ -115,22 +140,22 @@ export interface StreamCreator {
   subscriptionTiersEnabled: boolean;
   merchandiseEnabled: boolean;
   piPaymentsEnabled: boolean;
-  
+
   // Analytics Access
   analyticsLevel: "basic" | "advanced" | "enterprise";
   apiAccess: boolean;
-  
+
   createdAt: Date;
   lastStreamAt: Date | null;
-}
+};
 
-export interface SocialLink {
+export type SocialLink = {
   platform: string;
   url: string;
   verified: boolean;
-}
+};
 
-export interface EducatorCredentials {
+export type EducatorCredentials = {
   type: "teacher" | "professor" | "instructor" | "coach" | "tutor";
   institution: string | null;
   degrees: string[];
@@ -140,9 +165,9 @@ export interface EducatorCredentials {
   ageGroupsFocus: ("kids" | "teens" | "adults" | "seniors")[];
   backgroundCheckVerified: boolean;
   teachingLicense: string | null;
-}
+};
 
-export interface Course {
+export type Course = {
   id: string;
   creatorId: string;
   title: string;
@@ -150,38 +175,38 @@ export interface Course {
   category: string;
   level: "beginner" | "intermediate" | "advanced" | "all-levels";
   ageGroup: "kids" | "teens" | "adults" | "all-ages";
-  
+
   // Content
   modules: CourseModule[];
   totalDuration: number;
   totalLessons: number;
-  
+
   // Pricing
   price: number;
   priceInPi: number;
   isFree: boolean;
-  
+
   // Stats
   enrollments: number;
   completionRate: number;
   rating: number;
   reviews: number;
-  
+
   // Status
   published: boolean;
   publishedAt: Date | null;
-  
+
   // STEM Specific
   isSTEM: boolean;
   stemSubject: string | null;
   learningObjectives: string[];
   prerequisites: string[];
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface CourseModule {
+export type CourseModule = {
   id: string;
   title: string;
   description: string;
@@ -189,25 +214,25 @@ export interface CourseModule {
   quizzes: Quiz[];
   duration: number;
   order: number;
-}
+};
 
-export interface Lesson {
+export type Lesson = {
   id: string;
   title: string;
   type: "video" | "live" | "article" | "interactive" | "project";
   duration: number;
   contentUrl: string | null;
   isPreview: boolean;
-}
+};
 
-export interface Quiz {
+export type Quiz = {
   id: string;
   title: string;
   questions: number;
   passingScore: number;
-}
+};
 
-export interface AthleteProfile {
+export type AthleteProfile = {
   sport: string;
   position: string;
   team: string;
@@ -215,9 +240,9 @@ export interface AthleteProfile {
   stats: Record<string, number>;
   achievements: string[];
   endorsements: string[];
-}
+};
 
-export interface CreatorSubscriptionPlan {
+export type CreatorSubscriptionPlan = {
   tier: CreatorTier;
   name: string;
   monthlyPrice: number;
@@ -235,9 +260,9 @@ export interface CreatorSubscriptionPlan {
   apiAccess: boolean;
   prioritySupport: boolean;
   customBranding: boolean;
-}
+};
 
-export interface ViewerSubscription {
+export type ViewerSubscription = {
   id: string;
   viewerId: string;
   creatorId: string;
@@ -248,9 +273,9 @@ export interface ViewerSubscription {
   renewDate: Date;
   status: "active" | "cancelled" | "expired";
   benefits: string[];
-}
+};
 
-export interface StreamContent {
+export type StreamContent = {
   id: string;
   creatorId: string;
   type: "video" | "live" | "short" | "podcast" | "course-lesson";
@@ -259,220 +284,236 @@ export interface StreamContent {
   thumbnailUrl: string;
   contentUrl: string | null;
   duration: number;
-  
+
   // Categorization
   category: CreatorCategory;
   tags: string[];
   contentRating: ContentRating;
   audienceType: AudienceType;
-  
+
   // Stats
   views: number;
   likes: number;
   comments: number;
   shares: number;
   watchTime: number;
-  
+
   // Monetization
   monetized: boolean;
   adRevenue: number;
   tipRevenue: number;
   piRevenue: number;
-  
+
   // Status
   status: "processing" | "published" | "scheduled" | "private" | "deleted";
   publishedAt: Date | null;
   scheduledAt: Date | null;
-  
+
   // Educational
   courseId: string | null;
   lessonNumber: number | null;
   isEducational: boolean;
-  
+
   createdAt: Date;
-}
+};
 
 // ============================================================================
 // RIGHTS OWNERSHIP & OPERATING RIGHTS (Pi Payouts)
 // ============================================================================
 
-export type RightsType = "ownership" | "operating" | "licensing" | "distribution" | "syndication";
-export type RightsStatus = "active" | "pending" | "expired" | "revoked" | "transferred";
+export type RightsType =
+  | "ownership"
+  | "operating"
+  | "licensing"
+  | "distribution"
+  | "syndication";
+export type RightsStatus =
+  | "active"
+  | "pending"
+  | "expired"
+  | "revoked"
+  | "transferred";
 
-export interface ContentRights {
+export type ContentRights = {
   id: string;
   contentId: string;
   contentType: "video" | "channel" | "course" | "series" | "live-event";
-  
+
   // Rights Holder
   holderId: string;
   holderType: "creator" | "institution" | "company" | "investor";
   holderName: string;
-  
+
   // Rights Details
   rightsType: RightsType;
   ownershipPercentage: number;
-  
+
   // Territory
   territories: string[]; // "worldwide" or specific countries
   exclusivity: boolean;
-  
+
   // Duration
   startDate: Date;
   endDate: Date | null; // null = perpetual
-  
+
   // Financial
   acquisitionPrice: number;
   acquisitionPriceInPi: number;
   paidInPi: boolean;
-  
+
   // Royalties
   royaltyPercentage: number;
   royaltyFrequency: "per-view" | "daily" | "weekly" | "monthly" | "quarterly";
   minimumGuarantee: number;
   minimumGuaranteeInPi: number;
-  
+
   // Payouts
   totalPayouts: number;
   totalPayoutsInPi: number;
   lastPayoutDate: Date | null;
   nextPayoutDate: Date | null;
-  
+
   // Status
   status: RightsStatus;
-  
+
   // Contract
   contractId: string;
   termsAccepted: boolean;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface OperatingLicense {
+export type OperatingLicense = {
   id: string;
-  
+
   // License Holder
   licenseeId: string;
   licenseeName: string;
   licenseeType: "individual" | "company" | "institution" | "broadcaster";
-  
+
   // Licensed Content
   contentScope: "single" | "channel" | "category" | "all-content";
   contentIds: string[];
-  
+
   // License Type
-  licenseType: "broadcast" | "streaming" | "syndication" | "sublicense" | "white-label";
-  
+  licenseType:
+    | "broadcast"
+    | "streaming"
+    | "syndication"
+    | "sublicense"
+    | "white-label";
+
   // Territory & Exclusivity
   territories: string[];
   exclusiveInTerritory: boolean;
-  
+
   // Duration
   startDate: Date;
   endDate: Date;
   autoRenew: boolean;
-  
+
   // Financial
   licenseFee: number;
   licenseFeeInPi: number;
   paymentSchedule: "upfront" | "monthly" | "quarterly" | "annual";
-  
+
   // Revenue Share
   revenueShareEnabled: boolean;
   revenueSharePercentage: number;
   piRevenueBonus: number;
-  
+
   // Payouts
   totalPaid: number;
   totalPaidInPi: number;
-  
+
   // Usage
   totalPlays: number;
   totalReach: number;
-  
+
   // Status
   status: "active" | "pending" | "expired" | "terminated";
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface RightsTransaction {
+export type RightsTransaction = {
   id: string;
   rightsId: string;
   type: "purchase" | "royalty" | "license-fee" | "revenue-share" | "bonus";
-  
+
   // Parties
   payerId: string;
   payeeId: string;
-  
+
   // Amount
   amount: number;
   amountInPi: number;
   paidInPi: boolean;
   piExchangeRate: number;
-  
+
   // Reference
   period: string; // e.g., "2026-01" for January 2026
   description: string;
-  
+
   // Status
   status: "pending" | "processing" | "completed" | "failed";
   transactionHash: string | null;
-  
+
   createdAt: Date;
   completedAt: Date | null;
-}
+};
 
-export interface RightsMarketplaceListing {
+export type RightsMarketplaceListing = {
   id: string;
   sellerId: string;
-  
+
   // Content
   contentId: string;
   contentTitle: string;
   contentType: StreamContent["type"];
-  
+
   // Offering
   rightsType: RightsType;
   ownershipPercentage: number;
   territories: string[];
   exclusivity: boolean;
-  
+
   // Pricing
   askingPrice: number;
   askingPriceInPi: number;
   acceptsPiOnly: boolean;
   negotiable: boolean;
-  
+
   // Terms
   royaltyIncluded: boolean;
   royaltyPercentage: number;
   minimumTerm: number; // months
-  
+
   // Status
   status: "active" | "pending" | "sold" | "withdrawn";
-  
+
   // Stats
   views: number;
   inquiries: number;
   offers: number;
-  
+
   createdAt: Date;
   expiresAt: Date;
-}
+};
 
 // ============================================================================
 // ENTERTAINMENT HUB CLASS
 // ============================================================================
 
 class EntertainmentHub {
-  private creators: Map<string, StreamCreator> = new Map();
-  private content: Map<string, StreamContent> = new Map();
-  private courses: Map<string, Course> = new Map();
-  private viewerSubscriptions: Map<string, ViewerSubscription> = new Map();
-  private institutions: Map<string, Institution> = new Map();
+  private readonly creators: Map<string, StreamCreator> = new Map();
+  private readonly content: Map<string, StreamContent> = new Map();
+  private readonly courses: Map<string, Course> = new Map();
+  private readonly viewerSubscriptions: Map<string, ViewerSubscription> =
+    new Map();
+  private readonly institutions: Map<string, Institution> = new Map();
 
   constructor() {
     this.initializeSampleData();
@@ -486,7 +527,7 @@ class EntertainmentHub {
       type: "university",
       verified: true,
       channels: [],
-      students: 25000,
+      students: 25_000,
       streamingEnabled: true,
     });
   }
@@ -589,7 +630,7 @@ class EntertainmentHub {
         monthlyPriceInPi: 499 / PI_EXTERNAL_RATE,
         annualPrice: 4790,
         annualPriceInPi: 4790 / PI_EXTERNAL_RATE,
-        revenueShare: 0.80,
+        revenueShare: 0.8,
         piBonus: 0.05,
         features: [
           "All Professional features",
@@ -618,8 +659,8 @@ class EntertainmentHub {
         name: "Institution / University",
         monthlyPrice: 1999,
         monthlyPriceInPi: 1999 / PI_EXTERNAL_RATE,
-        annualPrice: 19190,
-        annualPriceInPi: 19190 / PI_EXTERNAL_RATE,
+        annualPrice: 19_190,
+        annualPriceInPi: 19_190 / PI_EXTERNAL_RATE,
         revenueShare: 0.85,
         piBonus: 0.06,
         features: [
@@ -729,7 +770,10 @@ class EntertainmentHub {
   }
 
   async getCreatorByUsername(username: string): Promise<StreamCreator | null> {
-    return Array.from(this.creators.values()).find((c) => c.username === username) || null;
+    return (
+      Array.from(this.creators.values()).find((c) => c.username === username) ||
+      null
+    );
   }
 
   async listCreators(filters?: {
@@ -760,7 +804,10 @@ class EntertainmentHub {
     return creators;
   }
 
-  async upgradeCreator(creatorId: string, newTier: CreatorTier): Promise<StreamCreator> {
+  async upgradeCreator(
+    creatorId: string,
+    newTier: CreatorTier
+  ): Promise<StreamCreator> {
     const creator = this.creators.get(creatorId);
     if (!creator) {
       throw new Error("Creator not found");
@@ -777,7 +824,9 @@ class EntertainmentHub {
     creator.analyticsLevel = plan.analyticsLevel;
     creator.apiAccess = plan.apiAccess;
     creator.monetizationEnabled = plan.tier !== "starter";
-    creator.subscriptionEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    creator.subscriptionEndDate = new Date(
+      Date.now() + 30 * 24 * 60 * 60 * 1000
+    );
 
     return creator;
   }
@@ -802,19 +851,22 @@ class EntertainmentHub {
     });
   }
 
-  async createCourse(creatorId: string, courseData: {
-    title: string;
-    description: string;
-    category: string;
-    level: Course["level"];
-    ageGroup: Course["ageGroup"];
-    price: number;
-    isFree?: boolean;
-    isSTEM?: boolean;
-    stemSubject?: string;
-    learningObjectives: string[];
-    prerequisites?: string[];
-  }): Promise<Course> {
+  async createCourse(
+    creatorId: string,
+    courseData: {
+      title: string;
+      description: string;
+      category: string;
+      level: Course["level"];
+      ageGroup: Course["ageGroup"];
+      price: number;
+      isFree?: boolean;
+      isSTEM?: boolean;
+      stemSubject?: string;
+      learningObjectives: string[];
+      prerequisites?: string[];
+    }
+  ): Promise<Course> {
     const creator = this.creators.get(creatorId);
     if (!creator) {
       throw new Error("Creator not found");
@@ -902,7 +954,11 @@ class EntertainmentHub {
     return courses;
   }
 
-  async enrollInCourse(courseId: string, studentId: string, payWithPi = false): Promise<{
+  async enrollInCourse(
+    courseId: string,
+    studentId: string,
+    payWithPi = false
+  ): Promise<{
     success: boolean;
     enrollmentId: string;
     accessUntil: Date;
@@ -972,21 +1028,24 @@ class EntertainmentHub {
   // CONTENT MANAGEMENT
   // ==========================================================================
 
-  async uploadContent(creatorId: string, contentData: {
-    type: StreamContent["type"];
-    title: string;
-    description: string;
-    thumbnailUrl?: string;
-    duration: number;
-    category?: CreatorCategory;
-    tags?: string[];
-    contentRating?: ContentRating;
-    audienceType?: AudienceType;
-    isEducational?: boolean;
-    courseId?: string;
-    lessonNumber?: number;
-    scheduledAt?: Date;
-  }): Promise<StreamContent> {
+  async uploadContent(
+    creatorId: string,
+    contentData: {
+      type: StreamContent["type"];
+      title: string;
+      description: string;
+      thumbnailUrl?: string;
+      duration: number;
+      category?: CreatorCategory;
+      tags?: string[];
+      contentRating?: ContentRating;
+      audienceType?: AudienceType;
+      isEducational?: boolean;
+      courseId?: string;
+      lessonNumber?: number;
+      scheduledAt?: Date;
+    }
+  ): Promise<StreamContent> {
     const creator = this.creators.get(creatorId);
     if (!creator) {
       throw new Error("Creator not found");
@@ -1036,14 +1095,21 @@ class EntertainmentHub {
   }
 
   async getCreatorContent(creatorId: string): Promise<StreamContent[]> {
-    return Array.from(this.content.values()).filter((c) => c.creatorId === creatorId);
+    return Array.from(this.content.values()).filter(
+      (c) => c.creatorId === creatorId
+    );
   }
 
   // ==========================================================================
   // VIEWER SUBSCRIPTIONS
   // ==========================================================================
 
-  async subscribeToCreator(viewerId: string, creatorId: string, tier: ViewerSubscription["tier"], payWithPi = false): Promise<ViewerSubscription> {
+  async subscribeToCreator(
+    viewerId: string,
+    creatorId: string,
+    tier: ViewerSubscription["tier"],
+    payWithPi = false
+  ): Promise<ViewerSubscription> {
     const creator = this.creators.get(creatorId);
     if (!creator) {
       throw new Error("Creator not found");
@@ -1088,9 +1154,25 @@ class EntertainmentHub {
   private getSubscriptionBenefits(tier: ViewerSubscription["tier"]): string[] {
     const benefits: Record<ViewerSubscription["tier"], string[]> = {
       free: ["Access to free content", "Community access"],
-      supporter: ["Ad-free viewing", "Supporter badge", "Early access", "Exclusive posts"],
-      member: ["All Supporter benefits", "Member-only content", "Live chat privileges", "Monthly Q&A"],
-      vip: ["All Member benefits", "1-on-1 sessions", "Behind the scenes", "Merchandise discounts", "Priority support"],
+      supporter: [
+        "Ad-free viewing",
+        "Supporter badge",
+        "Early access",
+        "Exclusive posts",
+      ],
+      member: [
+        "All Supporter benefits",
+        "Member-only content",
+        "Live chat privileges",
+        "Monthly Q&A",
+      ],
+      vip: [
+        "All Member benefits",
+        "1-on-1 sessions",
+        "Behind the scenes",
+        "Merchandise discounts",
+        "Priority support",
+      ],
     };
     return benefits[tier];
   }
@@ -1119,7 +1201,9 @@ class EntertainmentHub {
       throw new Error("Creator not found");
     }
 
-    const content = Array.from(this.content.values()).filter((c) => c.creatorId === creatorId);
+    const content = Array.from(this.content.values()).filter(
+      (c) => c.creatorId === creatorId
+    );
     const plans = this.getCreatorSubscriptionPlans();
 
     return {
@@ -1135,7 +1219,8 @@ class EntertainmentHub {
         newSubscribers: creator.subscribers,
       },
       courses: creator.isEducator ? creator.courses : undefined,
-      subscriptionInfo: plans.find((p) => p.tier === creator.subscriptionTier) || null,
+      subscriptionInfo:
+        plans.find((p) => p.tier === creator.subscriptionTier) || null,
     };
   }
 
@@ -1143,10 +1228,12 @@ class EntertainmentHub {
   // RIGHTS OWNERSHIP & OPERATING RIGHTS SYSTEM
   // ==========================================================================
 
-  private contentRights: Map<string, ContentRights> = new Map();
-  private operatingLicenses: Map<string, OperatingLicense> = new Map();
-  private rightsTransactions: Map<string, RightsTransaction> = new Map();
-  private rightsMarketplace: Map<string, RightsMarketplaceListing> = new Map();
+  private readonly contentRights: Map<string, ContentRights> = new Map();
+  private readonly operatingLicenses: Map<string, OperatingLicense> = new Map();
+  private readonly rightsTransactions: Map<string, RightsTransaction> =
+    new Map();
+  private readonly rightsMarketplace: Map<string, RightsMarketplaceListing> =
+    new Map();
 
   /**
    * Grant content rights to a holder
@@ -1224,9 +1311,15 @@ class EntertainmentHub {
       description: `Rights acquisition: ${data.rightsType} for ${content.title}`,
     });
 
-    console.log(`[RIGHTS] Granted ${data.rightsType} rights for content ${data.contentId} to ${data.holderName}`);
-    console.log(`[RIGHTS] Acquisition price: $${data.acquisitionPrice} (${rights.acquisitionPriceInPi.toFixed(2)} π)`);
-    console.log(`[RIGHTS] Paid in Pi: ${data.payInPi ? "Yes - Pi Payment Bonus Applied!" : "No"}`);
+    console.log(
+      `[RIGHTS] Granted ${data.rightsType} rights for content ${data.contentId} to ${data.holderName}`
+    );
+    console.log(
+      `[RIGHTS] Acquisition price: $${data.acquisitionPrice} (${rights.acquisitionPriceInPi.toFixed(2)} π)`
+    );
+    console.log(
+      `[RIGHTS] Paid in Pi: ${data.payInPi ? "Yes - Pi Payment Bonus Applied!" : "No"}`
+    );
 
     return rights;
   }
@@ -1253,7 +1346,9 @@ class EntertainmentHub {
   }): Promise<OperatingLicense> {
     const id = `license-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const startDate = new Date();
-    const endDate = new Date(Date.now() + data.durationMonths * 30 * 24 * 60 * 60 * 1000);
+    const endDate = new Date(
+      Date.now() + data.durationMonths * 30 * 24 * 60 * 60 * 1000
+    );
 
     const license: OperatingLicense = {
       id,
@@ -1285,10 +1380,16 @@ class EntertainmentHub {
 
     this.operatingLicenses.set(id, license);
 
-    console.log(`[LICENSE] Issued ${data.licenseType} license to ${data.licenseeName}`);
-    console.log(`[LICENSE] Fee: $${data.licenseFee} (${license.licenseFeeInPi.toFixed(2)} π)`);
+    console.log(
+      `[LICENSE] Issued ${data.licenseType} license to ${data.licenseeName}`
+    );
+    console.log(
+      `[LICENSE] Fee: $${data.licenseFee} (${license.licenseFeeInPi.toFixed(2)} π)`
+    );
     console.log(`[LICENSE] Territories: ${data.territories.join(", ")}`);
-    console.log(`[LICENSE] Valid until: ${endDate.toISOString().split("T")[0]}`);
+    console.log(
+      `[LICENSE] Valid until: ${endDate.toISOString().split("T")[0]}`
+    );
 
     return license;
   }
@@ -1297,7 +1398,10 @@ class EntertainmentHub {
    * Process royalty payout to rights holders in Pi
    * Superior streaming platform pays out rights to own or operate in Pi
    */
-  async processRightsPayout(rightsId: string, periodRevenue: number): Promise<RightsTransaction> {
+  async processRightsPayout(
+    rightsId: string,
+    periodRevenue: number
+  ): Promise<RightsTransaction> {
     const rights = this.contentRights.get(rightsId);
     if (!rights) {
       throw new Error("Rights not found");
@@ -1313,8 +1417,11 @@ class EntertainmentHub {
     }
 
     // Calculate royalty based on percentage and ownership
-    let royaltyAmount = periodRevenue * (rights.royaltyPercentage / 100) * (rights.ownershipPercentage / 100);
-    
+    let royaltyAmount =
+      periodRevenue *
+      (rights.royaltyPercentage / 100) *
+      (rights.ownershipPercentage / 100);
+
     // Ensure minimum guarantee is met
     royaltyAmount = Math.max(royaltyAmount, rights.minimumGuarantee);
 
@@ -1332,11 +1439,15 @@ class EntertainmentHub {
     rights.totalPayouts += royaltyAmount;
     rights.totalPayoutsInPi += royaltyAmount / PI_EXTERNAL_RATE;
     rights.lastPayoutDate = new Date();
-    rights.nextPayoutDate = this.calculateNextPayoutDate(rights.royaltyFrequency);
+    rights.nextPayoutDate = this.calculateNextPayoutDate(
+      rights.royaltyFrequency
+    );
     rights.updatedAt = new Date();
 
     console.log(`[PAYOUT] Processed Pi royalty payout to ${rights.holderName}`);
-    console.log(`[PAYOUT] Amount: $${royaltyAmount.toFixed(2)} (${(royaltyAmount / PI_EXTERNAL_RATE).toFixed(2)} π)`);
+    console.log(
+      `[PAYOUT] Amount: $${royaltyAmount.toFixed(2)} (${(royaltyAmount / PI_EXTERNAL_RATE).toFixed(2)} π)`
+    );
     console.log(`[PAYOUT] Rights type: ${rights.rightsType}`);
     console.log(`[PAYOUT] Ownership: ${rights.ownershipPercentage}%`);
 
@@ -1393,8 +1504,12 @@ class EntertainmentHub {
     license.updatedAt = new Date();
 
     console.log(`[LICENSE PAYMENT] Processed from ${license.licenseeName}`);
-    console.log(`[LICENSE PAYMENT] Amount: $${paymentAmount.toFixed(2)} + $${piBonus.toFixed(2)} Pi bonus`);
-    console.log(`[LICENSE PAYMENT] Total in Pi: ${(totalWithBonus / PI_EXTERNAL_RATE).toFixed(2)} π`);
+    console.log(
+      `[LICENSE PAYMENT] Amount: $${paymentAmount.toFixed(2)} + $${piBonus.toFixed(2)} Pi bonus`
+    );
+    console.log(
+      `[LICENSE PAYMENT] Total in Pi: ${(totalWithBonus / PI_EXTERNAL_RATE).toFixed(2)} π`
+    );
 
     return transaction;
   }
@@ -1402,7 +1517,10 @@ class EntertainmentHub {
   /**
    * Process revenue share payout for operating licensees
    */
-  async processRevenueSharePayout(licenseId: string, periodRevenue: number): Promise<RightsTransaction | null> {
+  async processRevenueSharePayout(
+    licenseId: string,
+    periodRevenue: number
+  ): Promise<RightsTransaction | null> {
     const license = this.operatingLicenses.get(licenseId);
     if (!license || !license.revenueShareEnabled) {
       return null;
@@ -1422,7 +1540,9 @@ class EntertainmentHub {
     });
 
     console.log(`[REVENUE SHARE] Paid to ${license.licenseeName}`);
-    console.log(`[REVENUE SHARE] Base: $${shareAmount.toFixed(2)} + Pi bonus: $${piBonus.toFixed(2)}`);
+    console.log(
+      `[REVENUE SHARE] Base: $${shareAmount.toFixed(2)} + Pi bonus: $${piBonus.toFixed(2)}`
+    );
 
     return transaction;
   }
@@ -1474,14 +1594,22 @@ class EntertainmentHub {
       inquiries: 0,
       offers: 0,
       createdAt: new Date(),
-      expiresAt: new Date(Date.now() + data.expiresInDays * 24 * 60 * 60 * 1000),
+      expiresAt: new Date(
+        Date.now() + data.expiresInDays * 24 * 60 * 60 * 1000
+      ),
     };
 
     this.rightsMarketplace.set(id, listing);
 
-    console.log(`[MARKETPLACE] Listed ${data.rightsType} rights for "${content.title}"`);
-    console.log(`[MARKETPLACE] Asking: $${data.askingPrice} (${listing.askingPriceInPi.toFixed(2)} π)`);
-    console.log(`[MARKETPLACE] Pi-Only: ${data.acceptsPiOnly ? "Yes" : "Accepts both"}`);
+    console.log(
+      `[MARKETPLACE] Listed ${data.rightsType} rights for "${content.title}"`
+    );
+    console.log(
+      `[MARKETPLACE] Asking: $${data.askingPrice} (${listing.askingPriceInPi.toFixed(2)} π)`
+    );
+    console.log(
+      `[MARKETPLACE] Pi-Only: ${data.acceptsPiOnly ? "Yes" : "Accepts both"}`
+    );
 
     return listing;
   }
@@ -1490,16 +1618,20 @@ class EntertainmentHub {
    * Get rights held by a specific holder
    */
   async getRightsForHolder(holderId: string): Promise<ContentRights[]> {
-    return Array.from(this.contentRights.values())
-      .filter((r) => r.holderId === holderId && r.status === "active");
+    return Array.from(this.contentRights.values()).filter(
+      (r) => r.holderId === holderId && r.status === "active"
+    );
   }
 
   /**
    * Get operating licenses for a licensee
    */
-  async getLicensesForLicensee(licenseeId: string): Promise<OperatingLicense[]> {
-    return Array.from(this.operatingLicenses.values())
-      .filter((l) => l.licenseeId === licenseeId && l.status === "active");
+  async getLicensesForLicensee(
+    licenseeId: string
+  ): Promise<OperatingLicense[]> {
+    return Array.from(this.operatingLicenses.values()).filter(
+      (l) => l.licenseeId === licenseeId && l.status === "active"
+    );
   }
 
   /**
@@ -1520,8 +1652,9 @@ class EntertainmentHub {
     piOnly?: boolean;
     exclusiveOnly?: boolean;
   }): Promise<RightsMarketplaceListing[]> {
-    let listings = Array.from(this.rightsMarketplace.values())
-      .filter((l) => l.status === "active" && l.expiresAt > new Date());
+    let listings = Array.from(this.rightsMarketplace.values()).filter(
+      (l) => l.status === "active" && l.expiresAt > new Date()
+    );
 
     if (filters) {
       if (filters.rightsType) {
@@ -1538,7 +1671,9 @@ class EntertainmentHub {
       }
     }
 
-    return listings.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return listings.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
   }
 
   /**
@@ -1560,7 +1695,10 @@ class EntertainmentHub {
     const transactions = await this.getRightsPayoutHistory(holderId);
 
     const totalPayouts = transactions.reduce((sum, t) => sum + t.amount, 0);
-    const totalPayoutsInPi = transactions.reduce((sum, t) => sum + t.amountInPi, 0);
+    const totalPayoutsInPi = transactions.reduce(
+      (sum, t) => sum + t.amountInPi,
+      0
+    );
 
     // Calculate monthly recurring from active rights
     const monthlyRecurring = rights.reduce((sum, r) => {
@@ -1595,7 +1733,9 @@ class EntertainmentHub {
   }
 
   // Helper methods for rights management
-  private calculateNextPayoutDate(frequency: ContentRights["royaltyFrequency"]): Date {
+  private calculateNextPayoutDate(
+    frequency: ContentRights["royaltyFrequency"]
+  ): Date {
     const now = new Date();
     switch (frequency) {
       case "per-view":
@@ -1638,7 +1778,9 @@ class EntertainmentHub {
       period: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
       description: data.description,
       status: "completed",
-      transactionHash: data.payInPi ? `pi-tx-${Date.now()}-${Math.random().toString(36).slice(2, 11)}` : null,
+      transactionHash: data.payInPi
+        ? `pi-tx-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+        : null,
       createdAt: now,
       completedAt: now,
     };
@@ -1655,7 +1797,11 @@ class EntertainmentHub {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,
@@ -1668,7 +1814,7 @@ class EntertainmentHub {
 // SUPPORTING TYPES
 // ============================================================================
 
-interface Institution {
+type Institution = {
   id: string;
   name: string;
   type: "college" | "university" | "k12" | "organization";
@@ -1676,7 +1822,7 @@ interface Institution {
   channels: string[];
   students: number;
   streamingEnabled: boolean;
-}
+};
 
 // ============================================================================
 // SINGLETON EXPORT

@@ -1,39 +1,39 @@
 /**
  * ECOSYSTEM STABILITY MANAGER
- * 
+ *
  * Monitors and maintains stability across the entire ecosystem
  * Prevents overwhelming banking partners
  * Maintains 100-year sustainability
  * Handles emergency situations
  */
 
-export interface SystemHealthMetric {
+export type SystemHealthMetric = {
   metricId: string;
   metricName: string;
   value: number;
   target: number;
   threshold: number;
-  status: 'healthy' | 'warning' | 'critical';
+  status: "healthy" | "warning" | "critical";
   timestamp: Date;
   history: Array<{ timestamp: Date; value: number }>;
-}
+};
 
-export interface StabilityCircuitBreaker {
+export type StabilityCircuitBreaker = {
   breakerId: string;
   breakerName: string;
   condition: string;
   threshold: number;
-  status: 'closed' | 'open' | 'tripped';
+  status: "closed" | "open" | "tripped";
   lastTripped?: Date;
   autoReset: boolean;
   resetDelay: number; // milliseconds
-}
+};
 
-export interface EcosystemStressTest {
+export type EcosystemStressTest = {
   testId: string;
   testName: string;
   scenario: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   stressLevel: number;
   systemResponse: {
     stabilityDropPercentage: number;
@@ -43,26 +43,27 @@ export interface EcosystemStressTest {
   };
   passedTest: boolean;
   timestamp: Date;
-}
+};
 
 /**
  * ECOSYSTEM STABILITY MANAGER
  */
 export class EcosystemStabilityManager {
   private static instance: EcosystemStabilityManager;
-  private healthMetrics: Map<string, SystemHealthMetric> = new Map();
-  private circuitBreakers: Map<string, StabilityCircuitBreaker> = new Map();
-  private stressTests: Map<string, EcosystemStressTest> = new Map();
+  private readonly healthMetrics: Map<string, SystemHealthMetric> = new Map();
+  private readonly circuitBreakers: Map<string, StabilityCircuitBreaker> =
+    new Map();
+  private readonly stressTests: Map<string, EcosystemStressTest> = new Map();
   private emergencyProtocols: Array<{
     protocolId: string;
     protocolName: string;
     triggerCondition: string;
     actions: string[];
     autoActivate: boolean;
-    status: 'ready' | 'active' | 'completed';
+    status: "ready" | "active" | "completed";
     activatedAt?: Date;
   }> = [];
-  private stablityLog: Array<{
+  private readonly stablityLog: Array<{
     timestamp: Date;
     event: string;
     severity: string;
@@ -89,16 +90,16 @@ export class EcosystemStabilityManager {
    */
   private initializeHealthMetrics(): void {
     const metricsConfig = [
-      { name: 'Overall System Stability', target: 99, threshold: 95 },
-      { name: 'Banking Partner Utilization', target: 40, threshold: 85 },
-      { name: 'Transaction Success Rate', target: 99.9, threshold: 99 },
-      { name: 'Network Latency (ms)', target: 50, threshold: 500 },
-      { name: 'Data Accuracy Score', target: 100, threshold: 99.5 },
-      { name: 'Blockchain Confirmation Time', target: 3, threshold: 10 },
-      { name: 'Hub Response Time (ms)', target: 100, threshold: 1000 },
-      { name: 'Cross-chain Bridge Health', target: 100, threshold: 95 },
-      { name: 'Price Stability Index', target: 99, threshold: 90 },
-      { name: 'User Satisfaction Score', target: 98, threshold: 90 }
+      { name: "Overall System Stability", target: 99, threshold: 95 },
+      { name: "Banking Partner Utilization", target: 40, threshold: 85 },
+      { name: "Transaction Success Rate", target: 99.9, threshold: 99 },
+      { name: "Network Latency (ms)", target: 50, threshold: 500 },
+      { name: "Data Accuracy Score", target: 100, threshold: 99.5 },
+      { name: "Blockchain Confirmation Time", target: 3, threshold: 10 },
+      { name: "Hub Response Time (ms)", target: 100, threshold: 1000 },
+      { name: "Cross-chain Bridge Health", target: 100, threshold: 95 },
+      { name: "Price Stability Index", target: 99, threshold: 90 },
+      { name: "User Satisfaction Score", target: 98, threshold: 90 },
     ];
 
     metricsConfig.forEach((config, index) => {
@@ -110,15 +111,17 @@ export class EcosystemStabilityManager {
         value: config.target - Math.random() * 2, // Start near target
         target: config.target,
         threshold: config.threshold,
-        status: 'healthy',
+        status: "healthy",
         timestamp: new Date(),
-        history: []
+        history: [],
       };
 
       this.healthMetrics.set(metricId, metric);
     });
 
-    console.log(`[STABILITY] Initialized ${this.healthMetrics.size} health metrics`);
+    console.log(
+      `[STABILITY] Initialized ${this.healthMetrics.size} health metrics`
+    );
   }
 
   /**
@@ -127,45 +130,45 @@ export class EcosystemStabilityManager {
   private initializeCircuitBreakers(): void {
     const breakersConfig = [
       {
-        name: 'Transaction Volume Circuit',
-        condition: 'Daily transaction volume exceeds 1M',
-        threshold: 1000000
+        name: "Transaction Volume Circuit",
+        condition: "Daily transaction volume exceeds 1M",
+        threshold: 1_000_000,
       },
       {
-        name: 'Banking Partner Load',
-        condition: 'Any banking partner exceeds 90% capacity',
-        threshold: 90
+        name: "Banking Partner Load",
+        condition: "Any banking partner exceeds 90% capacity",
+        threshold: 90,
       },
       {
-        name: 'System Latency Circuit',
-        condition: 'Average latency exceeds 1 second',
-        threshold: 1000
+        name: "System Latency Circuit",
+        condition: "Average latency exceeds 1 second",
+        threshold: 1000,
       },
       {
-        name: 'Error Rate Circuit',
-        condition: 'Transaction failure rate exceeds 1%',
-        threshold: 1
+        name: "Error Rate Circuit",
+        condition: "Transaction failure rate exceeds 1%",
+        threshold: 1,
       },
       {
-        name: 'Price Volatility Circuit',
-        condition: 'Price changes more than 20% in 1 hour',
-        threshold: 20
+        name: "Price Volatility Circuit",
+        condition: "Price changes more than 20% in 1 hour",
+        threshold: 20,
       },
       {
-        name: 'Node Failure Circuit',
-        condition: 'More than 2 nodes offline simultaneously',
-        threshold: 2
+        name: "Node Failure Circuit",
+        condition: "More than 2 nodes offline simultaneously",
+        threshold: 2,
       },
       {
-        name: 'Memory Circuit',
-        condition: 'System memory usage exceeds 90%',
-        threshold: 90
+        name: "Memory Circuit",
+        condition: "System memory usage exceeds 90%",
+        threshold: 90,
       },
       {
-        name: 'Database Connection Circuit',
-        condition: 'DB connections exceed 95% capacity',
-        threshold: 95
-      }
+        name: "Database Connection Circuit",
+        condition: "DB connections exceed 95% capacity",
+        threshold: 95,
+      },
     ];
 
     breakersConfig.forEach((config, index) => {
@@ -176,15 +179,17 @@ export class EcosystemStabilityManager {
         breakerName: config.name,
         condition: config.condition,
         threshold: config.threshold,
-        status: 'closed',
+        status: "closed",
         autoReset: true,
-        resetDelay: 300000 // 5 minutes
+        resetDelay: 300_000, // 5 minutes
       };
 
       this.circuitBreakers.set(breakerId, breaker);
     });
 
-    console.log(`[STABILITY] Initialized ${this.circuitBreakers.size} circuit breakers`);
+    console.log(
+      `[STABILITY] Initialized ${this.circuitBreakers.size} circuit breakers`
+    );
   }
 
   /**
@@ -193,83 +198,83 @@ export class EcosystemStabilityManager {
   private initializeEmergencyProtocols(): void {
     this.emergencyProtocols = [
       {
-        protocolId: 'ep_1',
-        protocolName: 'Capacity Overflow Protocol',
-        triggerCondition: 'Banking partner utilization > 85%',
+        protocolId: "ep_1",
+        protocolName: "Capacity Overflow Protocol",
+        triggerCondition: "Banking partner utilization > 85%",
         actions: [
-          'Rate-limit new transactions',
-          'Activate secondary banking partners',
-          'Increase price spreads temporarily',
-          'Alert all stakeholders'
+          "Rate-limit new transactions",
+          "Activate secondary banking partners",
+          "Increase price spreads temporarily",
+          "Alert all stakeholders",
         ],
         autoActivate: true,
-        status: 'ready'
+        status: "ready",
       },
       {
-        protocolId: 'ep_2',
-        protocolName: 'Price Stabilization Protocol',
-        triggerCondition: 'Price volatility > 15%',
+        protocolId: "ep_2",
+        protocolName: "Price Stabilization Protocol",
+        triggerCondition: "Price volatility > 15%",
         actions: [
-          'Activate price floor/ceiling',
-          'Adjust transaction fees',
-          'Notify market makers',
-          'Begin price smoothing'
+          "Activate price floor/ceiling",
+          "Adjust transaction fees",
+          "Notify market makers",
+          "Begin price smoothing",
         ],
         autoActivate: true,
-        status: 'ready'
+        status: "ready",
       },
       {
-        protocolId: 'ep_3',
-        protocolName: 'Node Failure Protocol',
-        triggerCondition: '3 or more nodes offline',
+        protocolId: "ep_3",
+        protocolName: "Node Failure Protocol",
+        triggerCondition: "3 or more nodes offline",
         actions: [
-          'Activate redundancy protocols',
-          'Failover to backup nodes',
-          'Pause non-critical operations',
-          'Initiate node recovery'
+          "Activate redundancy protocols",
+          "Failover to backup nodes",
+          "Pause non-critical operations",
+          "Initiate node recovery",
         ],
         autoActivate: true,
-        status: 'ready'
+        status: "ready",
       },
       {
-        protocolId: 'ep_4',
-        protocolName: 'Systemic Risk Protocol',
-        triggerCondition: 'Overall stability drops below 90%',
+        protocolId: "ep_4",
+        protocolName: "Systemic Risk Protocol",
+        triggerCondition: "Overall stability drops below 90%",
         actions: [
-          'Emergency governance meeting',
-          'Activate all circuit breakers',
-          'Pause new hub integrations',
-          'Trigger community support protocols'
+          "Emergency governance meeting",
+          "Activate all circuit breakers",
+          "Pause new hub integrations",
+          "Trigger community support protocols",
         ],
         autoActivate: true,
-        status: 'ready'
+        status: "ready",
       },
       {
-        protocolId: 'ep_5',
-        protocolName: 'Banking Partner Protection Protocol',
-        triggerCondition: 'Any partner shows signs of distress',
+        protocolId: "ep_5",
+        protocolName: "Banking Partner Protection Protocol",
+        triggerCondition: "Any partner shows signs of distress",
         actions: [
-          'Reduce transaction routing to that partner',
-          'Increase load on other partners',
-          'Provide liquidity support',
-          'Implement load balancing'
+          "Reduce transaction routing to that partner",
+          "Increase load on other partners",
+          "Provide liquidity support",
+          "Implement load balancing",
         ],
         autoActivate: true,
-        status: 'ready'
+        status: "ready",
       },
       {
-        protocolId: 'ep_6',
-        protocolName: '100-Year Sustainability Protocol',
-        triggerCondition: 'Projected ecosystem exhaustion detected',
+        protocolId: "ep_6",
+        protocolName: "100-Year Sustainability Protocol",
+        triggerCondition: "Projected ecosystem exhaustion detected",
         actions: [
-          'Begin resource rebalancing',
-          'Activate long-term sustainability measures',
-          'Adjust participation incentives',
-          'Implement generational wealth distribution'
+          "Begin resource rebalancing",
+          "Activate long-term sustainability measures",
+          "Adjust participation incentives",
+          "Implement generational wealth distribution",
         ],
         autoActivate: false,
-        status: 'ready'
-      }
+        status: "ready",
+      },
     ];
 
     console.log(
@@ -285,9 +290,9 @@ export class EcosystemStabilityManager {
       this.updateHealthMetrics();
       this.checkCircuitBreakers();
       this.evaluateEcosystemHealth();
-    }, 10000); // Every 10 seconds
+    }, 10_000); // Every 10 seconds
 
-    console.log(`[STABILITY] Health monitoring started`);
+    console.log("[STABILITY] Health monitoring started");
   }
 
   /**
@@ -302,7 +307,7 @@ export class EcosystemStabilityManager {
       // Record history
       metric.history.push({
         timestamp: new Date(),
-        value: metric.value
+        value: metric.value,
       });
 
       // Keep only last 100 readings
@@ -313,12 +318,12 @@ export class EcosystemStabilityManager {
       // Update status
       if (metric.value < metric.threshold) {
         if (metric.value < metric.threshold * 0.7) {
-          metric.status = 'critical';
+          metric.status = "critical";
         } else {
-          metric.status = 'warning';
+          metric.status = "warning";
         }
       } else {
-        metric.status = 'healthy';
+        metric.status = "healthy";
       }
 
       metric.timestamp = new Date();
@@ -333,15 +338,15 @@ export class EcosystemStabilityManager {
       // Simulate random circuit breaker conditions
       const shouldTrip = Math.random() > 0.95; // 5% chance
 
-      if (shouldTrip && breaker.status === 'closed') {
-        breaker.status = 'tripped';
+      if (shouldTrip && breaker.status === "closed") {
+        breaker.status = "tripped";
         breaker.lastTripped = new Date();
 
         this.stablityLog.push({
           timestamp: new Date(),
           event: `Circuit breaker triggered: ${breaker.breakerName}`,
-          severity: 'high',
-          action: 'Implementing safety measures'
+          severity: "high",
+          action: "Implementing safety measures",
         });
 
         console.log(`[CIRCUIT BREAKER] ${breaker.breakerName} TRIPPED`);
@@ -349,7 +354,7 @@ export class EcosystemStabilityManager {
         // Auto-reset if enabled
         if (breaker.autoReset) {
           setTimeout(() => {
-            breaker.status = 'closed';
+            breaker.status = "closed";
             console.log(`[CIRCUIT BREAKER] ${breaker.breakerName} RESET`);
           }, breaker.resetDelay);
         }
@@ -361,12 +366,16 @@ export class EcosystemStabilityManager {
    * Evaluate ecosystem health
    */
   private evaluateEcosystemHealth(): void {
-    const healthyMetrics = Array.from(this.healthMetrics.values()).filter(m => m.status === 'healthy').length;
+    const healthyMetrics = Array.from(this.healthMetrics.values()).filter(
+      (m) => m.status === "healthy"
+    ).length;
     const totalMetrics = this.healthMetrics.size;
     const healthPercentage = (healthyMetrics / totalMetrics) * 100;
 
     if (healthPercentage < 70) {
-      console.log(`[STABILITY WARNING] Ecosystem health: ${healthPercentage.toFixed(1)}%`);
+      console.log(
+        `[STABILITY WARNING] Ecosystem health: ${healthPercentage.toFixed(1)}%`
+      );
       this.activateEmergencyProtocols();
     }
   }
@@ -376,15 +385,15 @@ export class EcosystemStabilityManager {
    */
   private activateEmergencyProtocols(): void {
     for (const protocol of this.emergencyProtocols) {
-      if (protocol.autoActivate && protocol.status === 'ready') {
-        protocol.status = 'active';
+      if (protocol.autoActivate && protocol.status === "ready") {
+        protocol.status = "active";
         protocol.activatedAt = new Date();
 
         this.stablityLog.push({
           timestamp: new Date(),
           event: `Emergency protocol activated: ${protocol.protocolName}`,
-          severity: 'critical',
-          action: protocol.actions.join(', ')
+          severity: "critical",
+          action: protocol.actions.join(", "),
         });
 
         console.log(`[EMERGENCY PROTOCOL] ${protocol.protocolName} ACTIVATED`);
@@ -395,7 +404,10 @@ export class EcosystemStabilityManager {
   /**
    * Run ecosystem stress test
    */
-  async runStressTest(scenario: string, severity: 'low' | 'medium' | 'high' | 'critical'): Promise<EcosystemStressTest> {
+  async runStressTest(
+    scenario: string,
+    severity: "low" | "medium" | "high" | "critical"
+  ): Promise<EcosystemStressTest> {
     const testId = `stress_test_${Date.now()}`;
     const stressLevels = { low: 20, medium: 50, high: 80, critical: 100 };
 
@@ -409,10 +421,10 @@ export class EcosystemStabilityManager {
         stabilityDropPercentage: stressLevels[severity] * 0.1,
         timeToRecover: 1000 + stressLevels[severity] * 100,
         bankingImpact: stressLevels[severity] * 0.05,
-        transactionDelayMs: 50 + stressLevels[severity] * 5
+        transactionDelayMs: 50 + stressLevels[severity] * 5,
       },
       passedTest: stressLevels[severity] < 80,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.stressTests.set(testId, test);
@@ -420,11 +432,13 @@ export class EcosystemStabilityManager {
     this.stablityLog.push({
       timestamp: new Date(),
       event: `Stress test completed: ${scenario}`,
-      severity: test.passedTest ? 'low' : 'high',
-      result: test.passedTest ? 'PASSED' : 'FAILED'
+      severity: test.passedTest ? "low" : "high",
+      result: test.passedTest ? "PASSED" : "FAILED",
     });
 
-    console.log(`[STRESS TEST] ${scenario} - ${test.passedTest ? 'PASSED' : 'FAILED'}`);
+    console.log(
+      `[STRESS TEST] ${scenario} - ${test.passedTest ? "PASSED" : "FAILED"}`
+    );
 
     return test;
   }
@@ -442,23 +456,25 @@ export class EcosystemStabilityManager {
     recommendation: string;
   } {
     const metrics = Array.from(this.healthMetrics.values());
-    const healthy = metrics.filter(m => m.status === 'healthy').length;
-    const warning = metrics.filter(m => m.status === 'warning').length;
-    const critical = metrics.filter(m => m.status === 'critical').length;
+    const healthy = metrics.filter((m) => m.status === "healthy").length;
+    const warning = metrics.filter((m) => m.status === "warning").length;
+    const critical = metrics.filter((m) => m.status === "critical").length;
 
     const overallHealth = (healthy / metrics.length) * 100;
-    const activeCircuitBreakers = Array.from(this.circuitBreakers.values()).filter(
-      b => b.status !== 'closed'
+    const activeCircuitBreakers = Array.from(
+      this.circuitBreakers.values()
+    ).filter((b) => b.status !== "closed").length;
+    const activeProtocols = this.emergencyProtocols.filter(
+      (p) => p.status === "active"
     ).length;
-    const activeProtocols = this.emergencyProtocols.filter(p => p.status === 'active').length;
 
-    let recommendation = 'System healthy, continue normal operations';
+    let recommendation = "System healthy, continue normal operations";
     if (critical > 0) {
-      recommendation = 'CRITICAL: Immediate intervention required';
+      recommendation = "CRITICAL: Immediate intervention required";
     } else if (warning > 2) {
-      recommendation = 'WARNING: Monitor closely and prepare intervention';
+      recommendation = "WARNING: Monitor closely and prepare intervention";
     } else if (activeProtocols > 0) {
-      recommendation = 'Emergency protocols active, system recovering';
+      recommendation = "Emergency protocols active, system recovering";
     }
 
     return {
@@ -468,7 +484,7 @@ export class EcosystemStabilityManager {
       criticalMetrics: critical,
       ciruitBreakerStatus: activeCircuitBreakers,
       emergencyProtocolsActive: activeProtocols,
-      recommendation
+      recommendation,
     };
   }
 
@@ -496,7 +512,7 @@ export class EcosystemStabilityManager {
   /**
    * Get stability log
    */
-  getStabilityLog(limit: number = 100): typeof this.stablityLog {
+  getStabilityLog(limit = 100): typeof this.stablityLog {
     return this.stablityLog.slice(-limit);
   }
 }

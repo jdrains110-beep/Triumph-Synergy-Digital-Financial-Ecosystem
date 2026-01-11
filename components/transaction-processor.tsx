@@ -2,6 +2,7 @@
 
 import { AlertCircle, CheckCircle2, Info, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PiEnvironmentBanner } from "@/components/pi-environment-banner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,6 @@ import {
   logPiBrowserInfo,
 } from "@/lib/pi-sdk/pi-browser-detector";
 import { usePi } from "@/lib/pi-sdk/pi-provider";
-import { PiEnvironmentBanner } from "@/components/pi-environment-banner";
 
 type TransactionRequest = {
   amount: number;
@@ -20,7 +20,9 @@ type TransactionRequest = {
 
 export function TransactionProcessor() {
   const { isReady, isAuthenticated, user: piUser } = usePi();
-  const [user, setUser] = useState<{ uid: string; username: string } | null>(piUser);
+  const [user, setUser] = useState<{ uid: string; username: string } | null>(
+    piUser
+  );
   const [transactionId, setTransactionId] = useState<string>("");
   const [amount, setAmount] = useState<string>("10");
   const [memo, setMemo] = useState<string>("Triumph Synergy Payment");
@@ -57,7 +59,7 @@ export function TransactionProcessor() {
       console.log("[TransactionProcessor] Requesting approval...", txReq);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30_000); // 30s timeout
 
       const response = await fetch("/api/transactions/request-approval", {
         method: "POST",
@@ -115,7 +117,7 @@ export function TransactionProcessor() {
       });
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30_000); // 30s timeout
 
       const response = await fetch("/api/transactions/process", {
         method: "POST",
@@ -196,9 +198,7 @@ export function TransactionProcessor() {
       console.error("[TransactionProcessor] Error:", err);
       setIsProcessing(false);
       if (!error) {
-        setError(
-          err instanceof Error ? err.message : "Transaction failed"
-        );
+        setError(err instanceof Error ? err.message : "Transaction failed");
       }
     }
   };
@@ -337,7 +337,7 @@ export function TransactionProcessor() {
             <AlertCircle className="mt-0.5 h-5 w-5 text-red-600" />
             <div className="flex-1">
               <h3 className="font-medium text-red-900">❌ Payment Error</h3>
-              <p className="mt-2 text-red-800 text-sm font-semibold">{error}</p>
+              <p className="mt-2 font-semibold text-red-800 text-sm">{error}</p>
               <div className="mt-3 space-y-2 text-red-700 text-xs">
                 <p className="font-medium">Troubleshooting tips:</p>
                 <ul className="list-inside list-disc space-y-1">

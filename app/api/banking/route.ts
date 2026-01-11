@@ -1,17 +1,17 @@
 /**
  * Banking Partners API Route
- * 
+ *
  * Handles banking integration, transfers, and Pi conversions
  */
 
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  bankingPartnersPlatform,
   addBankingPartner,
-  openBankAccount,
-  initiateTransfer,
-  convertToPi,
+  bankingPartnersPlatform,
   convertFromPi,
+  convertToPi,
+  initiateTransfer,
+  openBankAccount,
 } from "@/lib/banking/banking-partners-platform";
 
 export async function GET(request: NextRequest) {
@@ -23,32 +23,45 @@ export async function GET(request: NextRequest) {
 
   try {
     switch (action) {
-      case "partners":
+      case "partners": {
         const partners = await bankingPartnersPlatform.listPartners();
         return NextResponse.json({ success: true, partners });
+      }
 
-      case "partner":
+      case "partner": {
         if (!partnerId) {
-          return NextResponse.json({ success: false, error: "Partner ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Partner ID required" },
+            { status: 400 }
+          );
         }
         const partner = await bankingPartnersPlatform.getPartner(partnerId);
         return NextResponse.json({ success: true, partner });
+      }
 
-      case "account":
+      case "account": {
         if (!accountId) {
-          return NextResponse.json({ success: false, error: "Account ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Account ID required" },
+            { status: 400 }
+          );
         }
         const account = await bankingPartnersPlatform.getAccount(accountId);
         return NextResponse.json({ success: true, account });
+      }
 
-      case "user-accounts":
+      case "user-accounts": {
         if (!userId) {
-          return NextResponse.json({ success: false, error: "User ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "User ID required" },
+            { status: 400 }
+          );
         }
         const accounts = await bankingPartnersPlatform.getUserAccounts(userId);
         return NextResponse.json({ success: true, accounts });
+      }
 
-      case "rates":
+      case "rates": {
         const dualRates = bankingPartnersPlatform.getDualRateInfo();
         return NextResponse.json({
           success: true,
@@ -66,6 +79,7 @@ export async function GET(request: NextRequest) {
             multiplier: dualRates.multiplier,
           },
         });
+      }
 
       default:
         return NextResponse.json({
@@ -77,13 +91,16 @@ export async function GET(request: NextRequest) {
             "GET ?action=account&accountId=X": "Get account details",
             "GET ?action=user-accounts&userId=X": "Get user accounts",
             "GET ?action=rates": "Get Pi/USD exchange rates",
-            "POST": "Open accounts, transfers, conversions",
+            POST: "Open accounts, transfers, conversions",
           },
         });
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
@@ -95,7 +112,7 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     switch (action) {
-      case "add-partner":
+      case "add-partner": {
         const newPartner = await addBankingPartner({
           name: body.name,
           type: body.type || "retail",
@@ -106,9 +123,23 @@ export async function POST(request: NextRequest) {
           charteredIn: body.charteredIn || "USA",
           fdicsInsured: body.fdicsInsured || true,
           ncuaInsured: body.ncuaInsured || false,
-          headquarters: body.headquarters || { street: "", city: "", state: "", zip: "", country: "USA" },
-          primaryContact: body.primaryContact || { name: "", email: "", phone: "" },
-          technicalContact: body.technicalContact || { name: "", email: "", phone: "" },
+          headquarters: body.headquarters || {
+            street: "",
+            city: "",
+            state: "",
+            zip: "",
+            country: "USA",
+          },
+          primaryContact: body.primaryContact || {
+            name: "",
+            email: "",
+            phone: "",
+          },
+          technicalContact: body.technicalContact || {
+            name: "",
+            email: "",
+            phone: "",
+          },
           apiEndpoint: body.apiEndpoint || "",
           apiVersion: body.apiVersion || "v1",
           authMethod: body.authMethod || "api-key",
@@ -123,8 +154,9 @@ export async function POST(request: NextRequest) {
           lastActiveAt: new Date(),
         });
         return NextResponse.json({ success: true, partner: newPartner });
+      }
 
-      case "open-account":
+      case "open-account": {
         const newAccount = await openBankAccount({
           userId: body.userId,
           partnerId: body.partnerId,
@@ -135,8 +167,9 @@ export async function POST(request: NextRequest) {
           piConversionThreshold: body.piConversionThreshold,
         });
         return NextResponse.json({ success: true, account: newAccount });
+      }
 
-      case "transfer":
+      case "transfer": {
         const transfer = await initiateTransfer({
           accountId: body.fromAccountId,
           type: body.type || "transfer-ach",
@@ -148,16 +181,28 @@ export async function POST(request: NextRequest) {
           piDestWallet: body.piDestWallet,
         });
         return NextResponse.json({ success: true, transfer });
+      }
 
-      case "convert-to-pi":
-        const piConversion = await convertToPi(body.accountId, body.usdAmount, body.piWallet);
+      case "convert-to-pi": {
+        const piConversion = await convertToPi(
+          body.accountId,
+          body.usdAmount,
+          body.piWallet
+        );
         return NextResponse.json({ success: true, conversion: piConversion });
+      }
 
-      case "convert-from-pi":
-        const usdConversion = await convertFromPi(body.accountId, body.piAmount, body.piWallet, body.piTxHash);
+      case "convert-from-pi": {
+        const usdConversion = await convertFromPi(
+          body.accountId,
+          body.piAmount,
+          body.piWallet,
+          body.piTxHash
+        );
         return NextResponse.json({ success: true, conversion: usdConversion });
+      }
 
-      case "setup-direct-deposit":
+      case "setup-direct-deposit": {
         const directDeposit = await bankingPartnersPlatform.setupDirectDeposit(
           body.accountId,
           {
@@ -169,6 +214,7 @@ export async function POST(request: NextRequest) {
           }
         );
         return NextResponse.json({ success: true, directDeposit });
+      }
 
       default:
         return NextResponse.json(
@@ -178,7 +224,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

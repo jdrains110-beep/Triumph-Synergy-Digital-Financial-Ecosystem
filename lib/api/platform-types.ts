@@ -1,6 +1,6 @@
 /**
  * TRIUMPH SYNERGY - Gaming & Health Platforms API
- * 
+ *
  * Comprehensive REST endpoints for:
  * - Gaming platform management and user rewards
  * - Health platform integration and payroll
@@ -9,11 +9,13 @@
  */
 
 export type RequestPayload = Record<string, unknown>;
-export type ResponseData = Record<string, unknown> | { success: boolean; data?: unknown; error?: string };
+export type ResponseData =
+  | Record<string, unknown>
+  | { success: boolean; data?: unknown; error?: string };
 
 /**
  * Gaming Platforms API Endpoints
- * 
+ *
  * POST /api/platforms/gaming/register - Register gaming platform
  * GET /api/platforms/gaming/list - List all gaming platforms
  * POST /api/platforms/gaming/rewards - Track user engagement and distribute rewards
@@ -23,22 +25,22 @@ export type ResponseData = Record<string, unknown> | { success: boolean; data?: 
  * GET /api/platforms/gaming/leaderboard - Get cross-platform leaderboard
  */
 
-export interface GamingApiRequest {
+export type GamingApiRequest = {
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "DELETE";
   payload?: RequestPayload;
-}
+};
 
-export interface GamingApiResponse {
+export type GamingApiResponse = {
   success: boolean;
   data?: unknown;
   error?: string;
   timestamp: Date;
-}
+};
 
 /**
  * Health Platforms API Endpoints
- * 
+ *
  * POST /api/platforms/health/register-institution - Register health institution
  * GET /api/platforms/health/institutions - List institutions
  * POST /api/platforms/health/payroll - Process payroll
@@ -48,22 +50,22 @@ export interface GamingApiResponse {
  * GET /api/platforms/health/reports - Generate compliance reports
  */
 
-export interface HealthApiRequest {
+export type HealthApiRequest = {
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "DELETE";
   payload?: RequestPayload;
-}
+};
 
-export interface HealthApiResponse {
+export type HealthApiResponse = {
   success: boolean;
   data?: unknown;
   error?: string;
   timestamp: Date;
-}
+};
 
 /**
  * Streaming API Endpoints
- * 
+ *
  * POST /api/platforms/streaming/session/start - Start streaming session
  * POST /api/platforms/streaming/session/update - Update stream metrics
  * POST /api/platforms/streaming/session/event - Record stream event
@@ -72,25 +74,25 @@ export interface HealthApiResponse {
  * GET /api/platforms/streaming/platform-stats - Get platform stats
  */
 
-export interface StreamingApiRequest {
+export type StreamingApiRequest = {
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "DELETE";
   payload?: RequestPayload;
-}
+};
 
-export interface StreamingApiResponse {
+export type StreamingApiResponse = {
   success: boolean;
   data?: unknown;
   error?: string;
   timestamp: Date;
-}
+};
 
 /**
  * Example API Request/Response Patterns
  */
 
 // Gaming Platforms - Register GTA6
-export interface RegisterGamingPlatformRequest {
+export type RegisterGamingPlatformRequest = {
   platformId: string; // 'gta6', 'ps5', 'battlefield-6'
   name: string;
   developer: string;
@@ -98,31 +100,37 @@ export interface RegisterGamingPlatformRequest {
   genre: string;
   engagementRateMultiplier: number;
   supportedStreamingPlatforms: Array<{ id: string; name: string }>;
-}
+};
 
 // Gaming Platforms - Track Engagement
-export interface TrackEngagementRequest {
+export type TrackEngagementRequest = {
   platformId: string;
   userId: string;
-  eventType: 'gameplay' | 'achievement' | 'purchase' | 'streaming' | 'social' | 'tournament';
+  eventType:
+    | "gameplay"
+    | "achievement"
+    | "purchase"
+    | "streaming"
+    | "social"
+    | "tournament";
   amount: number; // Pi reward
   description: string;
   metadata?: Record<string, unknown>;
-}
+};
 
 // Health Platforms - Register Institution
-export interface RegisterHealthInstitutionRequest {
+export type RegisterHealthInstitutionRequest = {
   institutionId: string; // 'shands-hospital', 'uf-health'
   name: string;
-  type: 'hospital' | 'clinic' | 'research' | 'wellness';
+  type: "hospital" | "clinic" | "research" | "wellness";
   locations: string[];
   piPaymentEnabled: boolean;
   triumphSynergyPartner: boolean;
-  partnershipLevel: 'associate' | 'partner' | 'owner';
-}
+  partnershipLevel: "associate" | "partner" | "owner";
+};
 
 // Health Platforms - Register Employee
-export interface RegisterEmployeeRequest {
+export type RegisterEmployeeRequest = {
   institutionId: string;
   firstName: string;
   lastName: string;
@@ -130,23 +138,23 @@ export interface RegisterEmployeeRequest {
   department: string;
   role: string;
   salary: number;
-  paymentFrequency: 'weekly' | 'biweekly' | 'monthly';
+  paymentFrequency: "weekly" | "biweekly" | "monthly";
   piWalletAddress: string;
-}
+};
 
 // Health Platforms - Process Payroll
-export interface ProcessPayrollRequest {
+export type ProcessPayrollRequest = {
   institutionId: string;
   date: string; // ISO date
   departmentId?: string; // Optional - department specific
-}
+};
 
 // Health Platforms - Create Policy
-export interface CreatePolicyRequest {
+export type CreatePolicyRequest = {
   institutionId: string;
   policyId: string;
   name: string;
-  category: 'vaccination' | 'birthing' | 'treatment' | 'testing' | 'prevention';
+  category: "vaccination" | "birthing" | "treatment" | "testing" | "prevention";
   description: string;
   alternatives: Array<{
     id: string;
@@ -155,76 +163,76 @@ export interface CreatePolicyRequest {
     isTraditional: boolean;
     isAlternative: boolean;
   }>;
-}
+};
 
 // Health Platforms - Set Policy Preference
-export interface SetPolicyPreferenceRequest {
+export type SetPolicyPreferenceRequest = {
   institutionId: string;
   personId: string;
   policyId: string;
   alternativeId: string; // User's choice
-}
+};
 
 // Streaming - Start Session
-export interface StartStreamingSessionRequest {
+export type StartStreamingSessionRequest = {
   streamerId: string;
-  platform: 'twitch' | 'youtube' | 'kick' | 'trovo';
+  platform: "twitch" | "youtube" | "kick" | "trovo";
   gamingPlatform: string; // 'gta6', 'ps5', 'battlefield-6'
   channelUrl: string;
-}
+};
 
 // Streaming - Update Metrics
-export interface UpdateStreamingMetricsRequest {
+export type UpdateStreamingMetricsRequest = {
   sessionId: string;
   currentViewers: number;
   avgWatchTimeMinutes: number;
   peakViewers?: number;
-}
+};
 
 // Streaming - Record Event
-export interface RecordStreamingEventRequest {
+export type RecordStreamingEventRequest = {
   sessionId: string;
-  eventType: 'subscribe' | 'donate' | 'cheer' | 'raid';
+  eventType: "subscribe" | "donate" | "cheer" | "raid";
   userId: string;
   amount?: number;
-}
+};
 
 // Streaming - End Session
-export interface EndStreamingSessionRequest {
+export type EndStreamingSessionRequest = {
   sessionId: string;
-}
+};
 
 /**
  * API Response Examples
  */
 
 // Success Response
-export interface SuccessResponse<T> {
+export type SuccessResponse<T> = {
   success: true;
   data: T;
   timestamp: string;
   message?: string;
-}
+};
 
 // Error Response
-export interface ErrorResponse {
+export type ErrorResponse = {
   success: false;
   error: string;
   code?: string;
   timestamp: string;
   details?: Record<string, unknown>;
-}
+};
 
 /**
  * Unified Platform Response Types
  */
 
-export interface PlatformListResponse {
+export type PlatformListResponse = {
   platforms: Array<{
     id: string;
     name: string;
-    type: 'gaming' | 'health' | 'streaming';
-    status: 'active' | 'inactive' | 'maintenance';
+    type: "gaming" | "health" | "streaming";
+    status: "active" | "inactive" | "maintenance";
     users: number;
     totalEarnings?: number;
     totalPayments?: number;
@@ -236,9 +244,9 @@ export interface PlatformListResponse {
     totalEarnings: number;
     totalPayments: number;
   };
-}
+};
 
-export interface UserStatsResponse {
+export type UserStatsResponse = {
   userId: string;
   platforms: Array<{
     platformId: string;
@@ -250,9 +258,9 @@ export interface UserStatsResponse {
   }>;
   totalEarnings: number;
   totalEngagement: number;
-}
+};
 
-export interface PayrollReportResponse {
+export type PayrollReportResponse = {
   institutionId: string;
   periodStart: string;
   periodEnd: string;
@@ -266,9 +274,9 @@ export interface PayrollReportResponse {
     type: string;
     blockchainHash?: string;
   }>;
-}
+};
 
-export interface PolicyStatsResponse {
+export type PolicyStatsResponse = {
   policyId: string;
   policyName: string;
   category: string;
@@ -280,9 +288,9 @@ export interface PolicyStatsResponse {
     adoptionCount: number;
     adoptionPercent: number;
   }>;
-}
+};
 
-export interface StreamingStatsResponse {
+export type StreamingStatsResponse = {
   streamerId: string;
   totalEarnings: number;
   activeSessions: number;
@@ -297,9 +305,9 @@ export interface StreamingStatsResponse {
     earnings: number;
     status: string;
   }>;
-}
+};
 
-export interface CrossPlatformReportResponse {
+export type CrossPlatformReportResponse = {
   reportDate: string;
   gamingMetrics: {
     activePlatforms: number;
@@ -328,36 +336,36 @@ export interface CrossPlatformReportResponse {
     totalTransactions: number;
     averageTransactionValue: number;
   };
-}
+};
 
 /**
  * Error Codes
  */
 export enum ApiErrorCode {
-  PLATFORM_NOT_FOUND = 'PLATFORM_NOT_FOUND',
-  USER_NOT_FOUND = 'USER_NOT_FOUND',
-  INVALID_PAYMENT_AMOUNT = 'INVALID_PAYMENT_AMOUNT',
-  PAYMENT_FAILED = 'PAYMENT_FAILED',
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  PLATFORM_NOT_FOUND = "PLATFORM_NOT_FOUND",
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+  INVALID_PAYMENT_AMOUNT = "INVALID_PAYMENT_AMOUNT",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
+  UNAUTHORIZED = "UNAUTHORIZED",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  INTERNAL_ERROR = "INTERNAL_ERROR",
 }
 
 /**
  * API Authentication
  */
-export interface ApiAuthContext {
+export type ApiAuthContext = {
   userId?: string;
   institutionId?: string;
-  role: 'user' | 'admin' | 'system';
+  role: "user" | "admin" | "system";
   scopes: string[];
   timestamp: Date;
-}
+};
 
 /**
  * Request Middleware Types
  */
-export interface ApiMiddlewareContext {
+export type ApiMiddlewareContext = {
   auth: ApiAuthContext;
   metadata: {
     ip: string;
@@ -365,21 +373,21 @@ export interface ApiMiddlewareContext {
     timestamp: Date;
     requestId: string;
   };
-}
+};
 
 /**
  * Batch Operation Support
  */
-export interface BatchApiRequest {
+export type BatchApiRequest = {
   operations: Array<{
     id: string;
-    type: 'gaming' | 'health' | 'streaming';
+    type: "gaming" | "health" | "streaming";
     endpoint: string;
     payload: RequestPayload;
   }>;
-}
+};
 
-export interface BatchApiResponse {
+export type BatchApiResponse = {
   results: Array<{
     operationId: string;
     success: boolean;
@@ -391,25 +399,30 @@ export interface BatchApiResponse {
     succeeded: number;
     failed: number;
   };
-}
+};
 
 /**
  * Real-time Updates via WebSocket
  */
-export interface WebSocketMessage {
-  type: 'session_started' | 'session_updated' | 'earnings_distributed' | 'policy_update' | 'payment_processed';
+export type WebSocketMessage = {
+  type:
+    | "session_started"
+    | "session_updated"
+    | "earnings_distributed"
+    | "policy_update"
+    | "payment_processed";
   data: Record<string, unknown>;
   timestamp: Date;
-}
+};
 
 /**
  * Webhook Events
  */
-export interface WebhookEvent {
+export type WebhookEvent = {
   eventId: string;
   eventType: string;
-  platform: 'gaming' | 'health' | 'streaming';
+  platform: "gaming" | "health" | "streaming";
   data: Record<string, unknown>;
   timestamp: Date;
   signature: string; // HMAC-SHA256
-}
+};

@@ -1,12 +1,12 @@
 /**
  * SUPPLY CHAIN INTEGRITY SYSTEM
- * 
+ *
  * Complete end-to-end traceability from farm/garden through delivery to hubs
  * Every product, every step, every timestamp, every handler
  * NO GAPS in the chain. NO EXCEPTIONS.
  */
 
-export interface FarmOriginRecord {
+export type FarmOriginRecord = {
   farmId: string;
   farmName: string;
   location: {
@@ -27,18 +27,18 @@ export interface FarmOriginRecord {
   harvestDate: Date;
   totalYield: {
     quantity: number;
-    unit: 'kg' | 'lbs' | 'units';
+    unit: "kg" | "lbs" | "units";
   };
   qualityInspection: {
     inspectionDate: Date;
     inspector: string;
-    visualRating: 'excellent' | 'good' | 'acceptable' | 'rejected';
+    visualRating: "excellent" | "good" | "acceptable" | "rejected";
     defectsFound: string[];
     overallApproval: boolean;
   };
-}
+};
 
-export interface ProcessingFacilityRecord {
+export type ProcessingFacilityRecord = {
   facilityId: string;
   facilityName: string;
   location: string;
@@ -55,11 +55,15 @@ export interface ProcessingFacilityRecord {
   qualityControlTests: Array<{
     testDate: Date;
     testType: string;
-    result: 'pass' | 'fail';
+    result: "pass" | "fail";
     parameters: Record<string, number>;
   }>;
   packagingDate: Date;
-  packagingMaterial: 'glass' | 'ceramic' | 'natural_fiber' | 'aluminum_free_container';
+  packagingMaterial:
+    | "glass"
+    | "ceramic"
+    | "natural_fiber"
+    | "aluminum_free_container";
   finalQuantity: {
     quantity: number;
     unit: string;
@@ -69,9 +73,9 @@ export interface ProcessingFacilityRecord {
     humidity: number;
     lightExposure: string;
   };
-}
+};
 
-export interface DistributionCenterRecord {
+export type DistributionCenterRecord = {
   centerId: string;
   centerName: string;
   location: string;
@@ -95,14 +99,14 @@ export interface DistributionCenterRecord {
     labelsCorrect: boolean;
     noMoistureDamage: boolean;
     noInsectInfestation: boolean;
-    overallCondition: 'excellent' | 'good' | 'acceptable' | 'rejected';
+    overallCondition: "excellent" | "good" | "acceptable" | "rejected";
   };
-}
+};
 
-export interface DeliveryTransportRecord {
+export type DeliveryTransportRecord = {
   transportId: string;
   shipmentBatchId: string;
-  transportMethod: 'truck' | 'van' | 'courier';
+  transportMethod: "truck" | "van" | "courier";
   vehicleId: string;
   driverId: string;
   departurePoint: string;
@@ -115,7 +119,7 @@ export interface DeliveryTransportRecord {
     timestamp: Date;
     temperature: number;
     humidity: number;
-    status: 'optimal' | 'warning' | 'critical';
+    status: "optimal" | "warning" | "critical";
   }>;
   gpsTracking: Array<{
     timestamp: Date;
@@ -137,13 +141,13 @@ export interface DeliveryTransportRecord {
     recipientName: string;
     signature: string;
     photoWithTimestamp: string;
-    conditionUponArrival: 'perfect' | 'good' | 'acceptable' | 'damaged';
+    conditionUponArrival: "perfect" | "good" | "acceptable" | "damaged";
   };
-}
+};
 
-export interface SupplyChainNode {
+export type SupplyChainNode = {
   nodeId: string;
-  nodeType: 'farm' | 'processing_facility' | 'distribution_center' | 'hub';
+  nodeType: "farm" | "processing_facility" | "distribution_center" | "hub";
   nodeName: string;
   nodeLocation: string;
   securityClearance: {
@@ -156,17 +160,17 @@ export interface SupplyChainNode {
     lastAuditDate: Date;
     auditPassed: boolean;
   };
-  operationalStatus: 'active' | 'suspended' | 'closed';
-}
+  operationalStatus: "active" | "suspended" | "closed";
+};
 
-export interface SupplyChainNode {
+export type SupplyChainNode = {
   nodeId: string;
-  nodeType: 'farm' | 'processing_facility' | 'distribution_center' | 'hub';
+  nodeType: "farm" | "processing_facility" | "distribution_center" | "hub";
   nodeName: string;
   nodeLocation: string;
-}
+};
 
-export interface SupplyChainTrace {
+export type SupplyChainTrace = {
   traceId: string;
   productBatchId: string;
   productName: string;
@@ -188,32 +192,35 @@ export interface SupplyChainTrace {
     notes: string;
   }>;
   currentLocation: string;
-  status: 'in_supply_chain' | 'at_hub' | 'delivered_to_customer';
+  status: "in_supply_chain" | "at_hub" | "delivered_to_customer";
   integrityVerified: boolean;
   issues: Array<{
     issueId: string;
     timestamp: Date;
     issue: string;
-    severity: 'low' | 'medium' | 'high' | 'critical' | 'emergency';
+    severity: "low" | "medium" | "high" | "critical" | "emergency";
     resolved: boolean;
     resolution?: string;
   }>;
-}
+};
 
 /**
  * SUPPLY CHAIN INTEGRITY SYSTEM
- * 
+ *
  * Complete traceability and verification from origin to delivery
  */
 export class SupplyChainIntegritySystem {
   private static instance: SupplyChainIntegritySystem;
-  private farmRecords: Map<string, FarmOriginRecord> = new Map();
-  private processingRecords: Map<string, ProcessingFacilityRecord> = new Map();
-  private distributionRecords: Map<string, DistributionCenterRecord> = new Map();
-  private transportRecords: Map<string, DeliveryTransportRecord> = new Map();
-  private supplyChainNodes: Map<string, SupplyChainNode> = new Map();
-  private supplyChainTraces: Map<string, SupplyChainTrace> = new Map();
-  private auditLog: Array<{
+  private readonly farmRecords: Map<string, FarmOriginRecord> = new Map();
+  private readonly processingRecords: Map<string, ProcessingFacilityRecord> =
+    new Map();
+  private readonly distributionRecords: Map<string, DistributionCenterRecord> =
+    new Map();
+  private readonly transportRecords: Map<string, DeliveryTransportRecord> =
+    new Map();
+  private readonly supplyChainNodes: Map<string, SupplyChainNode> = new Map();
+  private readonly supplyChainTraces: Map<string, SupplyChainTrace> = new Map();
+  private readonly auditLog: Array<{
     timestamp: Date;
     action: string;
     batchId?: string;
@@ -235,12 +242,16 @@ export class SupplyChainIntegritySystem {
   async registerSupplyChainNode(node: SupplyChainNode): Promise<string> {
     // Verify security clearance
     if (!node.securityClearance?.cleared) {
-      throw new Error(`SUPPLY CHAIN ERROR: Node ${node.nodeName} not security cleared`);
+      throw new Error(
+        `SUPPLY CHAIN ERROR: Node ${node.nodeName} not security cleared`
+      );
     }
 
     // Verify health compliance
     if (!node.healthCompliance?.certified) {
-      throw new Error(`SUPPLY CHAIN ERROR: Node ${node.nodeName} not health certified`);
+      throw new Error(
+        `SUPPLY CHAIN ERROR: Node ${node.nodeName} not health certified`
+      );
     }
 
     this.supplyChainNodes.set(node.nodeId, node);
@@ -248,7 +259,7 @@ export class SupplyChainIntegritySystem {
     this.auditLog.push({
       timestamp: new Date(),
       action: `Registered supply chain node: ${node.nodeName}`,
-      details: `Type: ${node.nodeType}, Location: ${node.nodeLocation}`
+      details: `Type: ${node.nodeType}, Location: ${node.nodeLocation}`,
     });
 
     return node.nodeId;
@@ -268,11 +279,11 @@ export class SupplyChainIntegritySystem {
     if (!farm.qualityInspection.overallApproval) {
       this.auditLog.push({
         timestamp: new Date(),
-        action: `REJECTED farm product batch`,
+        action: "REJECTED farm product batch",
         batchId: farm.cropBatchId,
-        details: `Quality inspection failed. Defects: ${farm.qualityInspection.defectsFound.join(', ')}`
+        details: `Quality inspection failed. Defects: ${farm.qualityInspection.defectsFound.join(", ")}`,
       });
-      throw new Error(`QUALITY REJECTION: Farm batch failed inspection`);
+      throw new Error("QUALITY REJECTION: Farm batch failed inspection");
     }
 
     this.farmRecords.set(farm.cropBatchId, farm);
@@ -288,7 +299,7 @@ export class SupplyChainIntegritySystem {
         {
           stepNumber: 1,
           nodeId: farm.farmId,
-          nodeType: 'farm',
+          nodeType: "farm",
           nodeName: farm.farmName,
           entryTime: farm.plantingDate,
           exitTime: farm.harvestDate,
@@ -296,24 +307,24 @@ export class SupplyChainIntegritySystem {
           quality: {
             condition: farm.qualityInspection.visualRating,
             integrityChecked: true,
-            testsPassed: farm.qualityInspection.overallApproval
+            testsPassed: farm.qualityInspection.overallApproval,
           },
-          notes: `Harvested: ${farm.totalYield.quantity} ${farm.totalYield.unit}`
-        }
+          notes: `Harvested: ${farm.totalYield.quantity} ${farm.totalYield.unit}`,
+        },
       ],
       currentLocation: farm.farmName,
-      status: 'in_supply_chain',
+      status: "in_supply_chain",
       integrityVerified: true,
-      issues: []
+      issues: [],
     };
 
     this.supplyChainTraces.set(trace.traceId, trace);
 
     this.auditLog.push({
       timestamp: new Date(),
-      action: `Recorded farm origin`,
+      action: "Recorded farm origin",
       batchId: farm.cropBatchId,
-      details: `Farm: ${farm.farmName}, Yield: ${farm.totalYield.quantity} ${farm.totalYield.unit}`
+      details: `Farm: ${farm.farmName}, Yield: ${farm.totalYield.quantity} ${farm.totalYield.unit}`,
     });
 
     return farm.cropBatchId;
@@ -322,51 +333,70 @@ export class SupplyChainIntegritySystem {
   /**
    * Record product at processing facility
    */
-  async recordProcessingFacility(processing: ProcessingFacilityRecord): Promise<void> {
+  async recordProcessingFacility(
+    processing: ProcessingFacilityRecord
+  ): Promise<void> {
     // Get current trace
-    const traces = Array.from(this.supplyChainTraces.values())
-      .filter(t => t.productBatchId === processing.processedBatchId);
+    const traces = Array.from(this.supplyChainTraces.values()).filter(
+      (t) => t.productBatchId === processing.processedBatchId
+    );
 
     if (traces.length === 0) {
-      throw new Error(`SUPPLY CHAIN ERROR: No trace found for batch ${processing.processedBatchId}`);
+      throw new Error(
+        `SUPPLY CHAIN ERROR: No trace found for batch ${processing.processedBatchId}`
+      );
     }
 
     const trace = traces[0];
 
     // Verify all quality control tests passed
-    const failedTests = processing.qualityControlTests.filter(t => t.result === 'fail');
+    const failedTests = processing.qualityControlTests.filter(
+      (t) => t.result === "fail"
+    );
     if (failedTests.length > 0) {
       trace.issues.push({
         issueId: `issue_${Date.now()}`,
         timestamp: new Date(),
-        issue: `Quality control tests failed: ${failedTests.map(t => t.testType).join(', ')}`,
-        severity: 'critical',
-        resolved: false
+        issue: `Quality control tests failed: ${failedTests.map((t) => t.testType).join(", ")}`,
+        severity: "critical",
+        resolved: false,
       });
 
       this.auditLog.push({
         timestamp: new Date(),
-        action: `QUALITY CONTROL FAILURE`,
+        action: "QUALITY CONTROL FAILURE",
         batchId: processing.processedBatchId,
-        details: `Tests failed: ${failedTests.map(t => t.testType).join(', ')}`
+        details: `Tests failed: ${failedTests.map((t) => t.testType).join(", ")}`,
       });
 
-      throw new Error('Quality control tests failed at processing facility');
+      throw new Error("Quality control tests failed at processing facility");
     }
 
     // Verify packaging material is safe
-    if (!['glass', 'ceramic', 'natural_fiber', 'aluminum_free_container'].includes(processing.packagingMaterial)) {
-      throw new Error(`PACKAGING ERROR: Unsafe packaging material: ${processing.packagingMaterial}`);
+    if (
+      ![
+        "glass",
+        "ceramic",
+        "natural_fiber",
+        "aluminum_free_container",
+      ].includes(processing.packagingMaterial)
+    ) {
+      throw new Error(
+        `PACKAGING ERROR: Unsafe packaging material: ${processing.packagingMaterial}`
+      );
     }
 
     // Record storage conditions
-    if (processing.storageConditions.temperature > 25 || processing.storageConditions.temperature < 0) {
+    if (
+      processing.storageConditions.temperature > 25 ||
+      processing.storageConditions.temperature < 0
+    ) {
       trace.issues.push({
         issueId: `issue_${Date.now()}`,
         timestamp: new Date(),
         issue: `Storage temperature out of range: ${processing.storageConditions.temperature}°C`,
-        severity: 'medium',
-        resolved: false
+        severity: "medium",
+        resolved: false,
       });
     }
 
@@ -376,17 +406,17 @@ export class SupplyChainIntegritySystem {
     trace.chainSteps.push({
       stepNumber: trace.chainSteps.length + 1,
       nodeId: processing.facilityId,
-      nodeType: 'processing_facility',
+      nodeType: "processing_facility",
       nodeName: processing.facilityName,
       entryTime: processing.receivedDate,
       exitTime: processing.packagingDate,
       handler: processing.facilityName,
       quality: {
-        condition: 'processed',
+        condition: "processed",
         integrityChecked: true,
-        testsPassed: true
+        testsPassed: true,
       },
-      notes: `Processed with ${processing.processingMethod}. Packaged in ${processing.packagingMaterial}`
+      notes: `Processed with ${processing.processingMethod}. Packaged in ${processing.packagingMaterial}`,
     });
 
     trace.lastUpdated = new Date();
@@ -394,50 +424,61 @@ export class SupplyChainIntegritySystem {
 
     this.auditLog.push({
       timestamp: new Date(),
-      action: `Recorded processing facility step`,
+      action: "Recorded processing facility step",
       batchId: processing.processedBatchId,
-      details: `Facility: ${processing.facilityName}, Quantity: ${processing.finalQuantity.quantity} ${processing.finalQuantity.unit}`
+      details: `Facility: ${processing.facilityName}, Quantity: ${processing.finalQuantity.quantity} ${processing.finalQuantity.unit}`,
     });
   }
 
   /**
    * Record product at distribution center
    */
-  async recordDistributionCenter(distribution: DistributionCenterRecord): Promise<void> {
+  async recordDistributionCenter(
+    distribution: DistributionCenterRecord
+  ): Promise<void> {
     // Get current trace
-    const traces = Array.from(this.supplyChainTraces.values())
-      .filter(t => t.productBatchId === distribution.receivedBatchId);
+    const traces = Array.from(this.supplyChainTraces.values()).filter(
+      (t) => t.productBatchId === distribution.receivedBatchId
+    );
 
     if (traces.length === 0) {
-      throw new Error(`SUPPLY CHAIN ERROR: No trace found for batch ${distribution.receivedBatchId}`);
+      throw new Error(
+        `SUPPLY CHAIN ERROR: No trace found for batch ${distribution.receivedBatchId}`
+      );
     }
 
     const trace = traces[0];
 
     // Verify integrity check
-    if (!distribution.integrityCheck.overallCondition || distribution.integrityCheck.overallCondition === 'rejected') {
+    if (
+      !distribution.integrityCheck.overallCondition ||
+      distribution.integrityCheck.overallCondition === "rejected"
+    ) {
       trace.issues.push({
         issueId: `issue_${Date.now()}`,
         timestamp: new Date(),
-        issue: `Integrity check failed at distribution center`,
-        severity: 'critical',
-        resolved: false
+        issue: "Integrity check failed at distribution center",
+        severity: "critical",
+        resolved: false,
       });
 
-      throw new Error('Product integrity compromised at distribution center');
+      throw new Error("Product integrity compromised at distribution center");
     }
 
     // Check for contamination indicators
-    if (!distribution.integrityCheck.noInsectInfestation || !distribution.integrityCheck.noMoistureDamage) {
+    if (
+      !distribution.integrityCheck.noInsectInfestation ||
+      !distribution.integrityCheck.noMoistureDamage
+    ) {
       trace.issues.push({
         issueId: `issue_${Date.now()}`,
         timestamp: new Date(),
-        issue: `Contamination detected: Insects or moisture damage`,
-        severity: 'critical',
-        resolved: false
+        issue: "Contamination detected: Insects or moisture damage",
+        severity: "critical",
+        resolved: false,
       });
 
-      throw new Error('Product contamination detected - batch quarantined');
+      throw new Error("Product contamination detected - batch quarantined");
     }
 
     this.distributionRecords.set(distribution.centerId, distribution);
@@ -446,7 +487,7 @@ export class SupplyChainIntegritySystem {
     trace.chainSteps.push({
       stepNumber: trace.chainSteps.length + 1,
       nodeId: distribution.centerId,
-      nodeType: 'distribution_center',
+      nodeType: "distribution_center",
       nodeName: distribution.centerName,
       entryTime: distribution.receivedDate,
       exitTime: undefined,
@@ -454,9 +495,9 @@ export class SupplyChainIntegritySystem {
       quality: {
         condition: distribution.integrityCheck.overallCondition,
         integrityChecked: true,
-        testsPassed: true
+        testsPassed: true,
       },
-      notes: `Storage conditions: ${distribution.storageConditions.temperature}°C, ${distribution.storageConditions.humidity}% humidity`
+      notes: `Storage conditions: ${distribution.storageConditions.temperature}°C, ${distribution.storageConditions.humidity}% humidity`,
     });
 
     trace.lastUpdated = new Date();
@@ -464,54 +505,66 @@ export class SupplyChainIntegritySystem {
 
     this.auditLog.push({
       timestamp: new Date(),
-      action: `Recorded distribution center receipt`,
+      action: "Recorded distribution center receipt",
       batchId: distribution.receivedBatchId,
-      details: `Center: ${distribution.centerName}, Quantity: ${distribution.receivedQuantity.quantity}`
+      details: `Center: ${distribution.centerName}, Quantity: ${distribution.receivedQuantity.quantity}`,
     });
   }
 
   /**
    * Record product delivery to hub
    */
-  async recordDeliveryTransport(transport: DeliveryTransportRecord): Promise<string> {
+  async recordDeliveryTransport(
+    transport: DeliveryTransportRecord
+  ): Promise<string> {
     // Get current trace
-    const traces = Array.from(this.supplyChainTraces.values())
-      .filter(t => t.productBatchId === transport.shipmentBatchId);
+    const traces = Array.from(this.supplyChainTraces.values()).filter(
+      (t) => t.productBatchId === transport.shipmentBatchId
+    );
 
     if (traces.length === 0) {
-      throw new Error(`SUPPLY CHAIN ERROR: No trace found for shipment ${transport.shipmentBatchId}`);
+      throw new Error(
+        `SUPPLY CHAIN ERROR: No trace found for shipment ${transport.shipmentBatchId}`
+      );
     }
 
     const trace = traces[0];
 
     // Verify security escort was present
-    if (!transport.securityEscort.guardId || !transport.securityEscort.licenseVerified) {
-      throw new Error(`DELIVERY ERROR: No verified security escort for shipment ${transport.shipmentBatchId}`);
+    if (
+      !transport.securityEscort.guardId ||
+      !transport.securityEscort.licenseVerified
+    ) {
+      throw new Error(
+        `DELIVERY ERROR: No verified security escort for shipment ${transport.shipmentBatchId}`
+      );
     }
 
     // Verify temperature integrity during transport
-    const tempViolations = transport.temperatureLog.filter(t => t.status !== 'optimal');
+    const tempViolations = transport.temperatureLog.filter(
+      (t) => t.status !== "optimal"
+    );
     if (tempViolations.length > 0) {
       trace.issues.push({
         issueId: `issue_${Date.now()}`,
         timestamp: new Date(),
         issue: `Temperature violations during transport: ${tempViolations.length} readings`,
-        severity: 'medium',
-        resolved: false
+        severity: "medium",
+        resolved: false,
       });
     }
 
     // Verify seal was intact upon arrival
-    if (transport.deliveryProof.conditionUponArrival === 'damaged') {
+    if (transport.deliveryProof.conditionUponArrival === "damaged") {
       trace.issues.push({
         issueId: `issue_${Date.now()}`,
         timestamp: new Date(),
-        issue: `Product damaged upon arrival at hub`,
-        severity: 'critical',
-        resolved: false
+        issue: "Product damaged upon arrival at hub",
+        severity: "critical",
+        resolved: false,
       });
 
-      throw new Error('Product damaged during transport - batch rejected');
+      throw new Error("Product damaged during transport - batch rejected");
     }
 
     this.transportRecords.set(transport.transportId, transport);
@@ -520,7 +573,7 @@ export class SupplyChainIntegritySystem {
     trace.chainSteps.push({
       stepNumber: trace.chainSteps.length + 1,
       nodeId: transport.destinationHub,
-      nodeType: 'hub',
+      nodeType: "hub",
       nodeName: transport.destinationHub,
       entryTime: transport.departureTime,
       exitTime: transport.actualArrival || transport.departureTime,
@@ -528,21 +581,23 @@ export class SupplyChainIntegritySystem {
       quality: {
         condition: transport.deliveryProof.conditionUponArrival,
         integrityChecked: true,
-        testsPassed: transport.deliveryProof.conditionUponArrival === 'perfect' || transport.deliveryProof.conditionUponArrival === 'good'
+        testsPassed:
+          transport.deliveryProof.conditionUponArrival === "perfect" ||
+          transport.deliveryProof.conditionUponArrival === "good",
       },
-      notes: `Delivered by ${transport.securityEscort.guardName}. Escort incidents: ${transport.securityEscort.incidentsReported}`
+      notes: `Delivered by ${transport.securityEscort.guardName}. Escort incidents: ${transport.securityEscort.incidentsReported}`,
     });
 
     trace.lastUpdated = new Date();
     trace.currentLocation = transport.destinationHub;
-    trace.status = 'at_hub';
+    trace.status = "at_hub";
     trace.integrityVerified = trace.issues.length === 0;
 
     this.auditLog.push({
       timestamp: new Date(),
-      action: `Recorded delivery to hub`,
+      action: "Recorded delivery to hub",
       batchId: transport.shipmentBatchId,
-      details: `Hub: ${transport.destinationHub}, Arrival: ${transport.deliveryProof.arrivalTime.toISOString()}`
+      details: `Hub: ${transport.destinationHub}, Arrival: ${transport.deliveryProof.arrivalTime.toISOString()}`,
     });
 
     return transport.transportId;
@@ -552,8 +607,9 @@ export class SupplyChainIntegritySystem {
    * Get complete supply chain trace for product
    */
   getSupplyChainTrace(batchId: string): SupplyChainTrace | null {
-    const traces = Array.from(this.supplyChainTraces.values())
-      .filter(t => t.productBatchId === batchId);
+    const traces = Array.from(this.supplyChainTraces.values()).filter(
+      (t) => t.productBatchId === batchId
+    );
 
     return traces.length > 0 ? traces[0] : null;
   }
@@ -573,7 +629,9 @@ export class SupplyChainIntegritySystem {
       throw new Error(`Batch not found: ${batchId}`);
     }
 
-    const criticalIssues = trace.issues.filter(i => i.severity === 'critical').length;
+    const criticalIssues = trace.issues.filter(
+      (i) => i.severity === "critical"
+    ).length;
     const totalIssues = trace.issues.length;
 
     return {
@@ -581,7 +639,7 @@ export class SupplyChainIntegritySystem {
       allStepsCompleted: trace.chainSteps.length >= 4,
       issuesFound: totalIssues,
       criticalIssues,
-      integrity: 100 - (totalIssues * 10)
+      integrity: 100 - totalIssues * 10,
     };
   }
 
@@ -598,29 +656,43 @@ export class SupplyChainIntegritySystem {
     timestamp: Date;
   } {
     const traces = Array.from(this.supplyChainTraces.values());
-    const completed = traces.filter(t => t.status === 'delivered_to_customer').length;
-    const inProgress = traces.filter(t => t.status !== 'delivered_to_customer').length;
+    const completed = traces.filter(
+      (t) => t.status === "delivered_to_customer"
+    ).length;
+    const inProgress = traces.filter(
+      (t) => t.status !== "delivered_to_customer"
+    ).length;
     const allIssues = traces.reduce((sum, t) => sum + t.issues.length, 0);
-    const resolvedIssues = traces.reduce((sum, t) => sum + t.issues.filter(i => i.resolved).length, 0);
-    const criticalOpen = traces.reduce((sum, t) => sum + t.issues.filter(i => !i.resolved && i.severity === 'critical').length, 0);
+    const resolvedIssues = traces.reduce(
+      (sum, t) => sum + t.issues.filter((i) => i.resolved).length,
+      0
+    );
+    const criticalOpen = traces.reduce(
+      (sum, t) =>
+        sum +
+        t.issues.filter((i) => !i.resolved && i.severity === "critical").length,
+      0
+    );
 
     return {
       totalBatchesTracked: traces.length,
       batchesCompleted: completed,
       batchesInProgress: inProgress,
-      integrityPercentage: traces.length > 0
-        ? (traces.filter(t => t.integrityVerified).length / traces.length) * 100
-        : 0,
+      integrityPercentage:
+        traces.length > 0
+          ? (traces.filter((t) => t.integrityVerified).length / traces.length) *
+            100
+          : 0,
       issuesResolved: resolvedIssues,
       criticalIssuesOpen: criticalOpen,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   /**
    * Get audit log
    */
-  getAuditLog(limit: number = 100): Array<{
+  getAuditLog(limit = 100): Array<{
     timestamp: Date;
     action: string;
     batchId?: string;

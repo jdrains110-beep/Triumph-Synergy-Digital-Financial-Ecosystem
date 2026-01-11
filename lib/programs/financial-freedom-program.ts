@@ -1,12 +1,12 @@
 /**
  * Triumph Synergy - Financial Freedom Program
- * 
+ *
  * Owner's program to spread the love to those in need:
  * - Financial assistance distribution
  * - UBI program enforcement
  * - Community support initiatives
  * - Pi-powered charitable giving
- * 
+ *
  * @module lib/programs/financial-freedom-program
  * @version 1.0.0
  */
@@ -16,7 +16,7 @@
 // ============================================================================
 
 const PI_EXTERNAL_RATE = 314.159;
-const PI_INTERNAL_RATE = 314159;
+const PI_INTERNAL_RATE = 314_159;
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -29,250 +29,268 @@ export function getPiRate(type: PiValueType = "external"): number {
 // TYPES & INTERFACES
 // ============================================================================
 
-export type ProgramType = 
-  | "ubi"                    // Universal Basic Income
-  | "emergency-relief"       // Emergency financial relief
-  | "education-support"      // Education funding
-  | "healthcare-assistance"  // Healthcare costs
-  | "housing-support"        // Housing assistance
-  | "business-grant"         // Small business grants
-  | "community-development"  // Community projects
-  | "disaster-relief"        // Natural disaster relief
-  | "veterans-support"       // Veterans assistance
-  | "elderly-care";          // Senior citizen support
+export type ProgramType =
+  | "ubi" // Universal Basic Income
+  | "emergency-relief" // Emergency financial relief
+  | "education-support" // Education funding
+  | "healthcare-assistance" // Healthcare costs
+  | "housing-support" // Housing assistance
+  | "business-grant" // Small business grants
+  | "community-development" // Community projects
+  | "disaster-relief" // Natural disaster relief
+  | "veterans-support" // Veterans assistance
+  | "elderly-care"; // Senior citizen support
 
-export type ApplicationStatus = "pending" | "under-review" | "approved" | "denied" | "disbursed" | "completed";
-export type DisbursementMethod = "pi-direct" | "pi-wallet" | "bank-transfer" | "check" | "hybrid";
+export type ApplicationStatus =
+  | "pending"
+  | "under-review"
+  | "approved"
+  | "denied"
+  | "disbursed"
+  | "completed";
+export type DisbursementMethod =
+  | "pi-direct"
+  | "pi-wallet"
+  | "bank-transfer"
+  | "check"
+  | "hybrid";
 
-export interface FinancialFreedomProgram {
+export type FinancialFreedomProgram = {
   id: string;
   name: string;
   description: string;
   type: ProgramType;
-  
+
   // Funding
   totalFunding: number;
   totalFundingInPi: number;
   remainingFunding: number;
   remainingFundingInPi: number;
-  
+
   // Distribution
   totalDistributed: number;
   totalDistributedInPi: number;
   beneficiariesServed: number;
-  
+
   // Eligibility
   eligibilityCriteria: EligibilityCriteria;
   incomeLimit: number | null;
-  
+
   // Amounts
   minimumGrant: number;
   maximumGrant: number;
   averageGrant: number;
-  
+
   // UBI Specific
   isRecurring: boolean;
   recurringAmount: number;
   recurringAmountInPi: number;
   recurringFrequency: "daily" | "weekly" | "biweekly" | "monthly";
-  
+
   // Status
   status: "active" | "paused" | "closed" | "coming-soon";
   applicationDeadline: Date | null;
-  
+
   // Metrics
   applicationCount: number;
   approvalRate: number;
   averageProcessingDays: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface EligibilityCriteria {
+export type EligibilityCriteria = {
   minimumAge: number;
   maximumAge: number | null;
   citizenshipRequired: boolean;
   piWalletRequired: boolean;
   incomeVerification: boolean;
-  employmentStatus: ("employed" | "unemployed" | "self-employed" | "retired" | "student" | "any")[];
+  employmentStatus: (
+    | "employed"
+    | "unemployed"
+    | "self-employed"
+    | "retired"
+    | "student"
+    | "any"
+  )[];
   additionalRequirements: string[];
-}
+};
 
-export interface Beneficiary {
+export type Beneficiary = {
   id: string;
   userId: string;
-  
+
   // Profile
   name: string;
   email: string;
   phone: string;
   dateOfBirth: Date;
-  
+
   // Location
   country: string;
   state: string;
   city: string;
-  
+
   // Verification
   identityVerified: boolean;
   piWalletVerified: boolean;
   incomeVerified: boolean;
-  
+
   // Pi Wallet
   piWalletAddress: string;
-  
+
   // Programs
   enrolledPrograms: string[];
   activeUBI: boolean;
-  
+
   // Financials
   reportedIncome: number;
   householdSize: number;
   employmentStatus: string;
-  
+
   // History
   totalReceived: number;
   totalReceivedInPi: number;
   disbursementsCount: number;
-  
+
   // Status
   status: "active" | "suspended" | "graduated" | "inactive";
-  
+
   createdAt: Date;
   lastDisbursement: Date | null;
-}
+};
 
-export interface Assistance {
+export type Assistance = {
   id: string;
   programId: string;
   beneficiaryId: string;
-  
+
   // Application
   applicationDate: Date;
   applicationStatus: ApplicationStatus;
   reviewedBy: string | null;
   reviewDate: Date | null;
-  
+
   // Request
   requestedAmount: number;
   requestedAmountInPi: number;
   purpose: string;
   supportingDocuments: string[];
-  
+
   // Approval
   approvedAmount: number;
   approvedAmountInPi: number;
   approvalNotes: string | null;
-  
+
   // Disbursement
   disbursementMethod: DisbursementMethod;
   disbursementStatus: "pending" | "processing" | "completed" | "failed";
   disbursementDate: Date | null;
   transactionId: string | null;
-  
+
   // Follow-up
   requiresFollowUp: boolean;
   followUpDate: Date | null;
   impactReport: string | null;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface UBIEnrollment {
+export type UBIEnrollment = {
   id: string;
   beneficiaryId: string;
   programId: string;
-  
+
   // Enrollment
   enrollmentDate: Date;
   status: "active" | "paused" | "graduated" | "terminated";
-  
+
   // Payment Details
   amount: number;
   amountInPi: number;
   frequency: "daily" | "weekly" | "biweekly" | "monthly";
   nextPaymentDate: Date;
-  
+
   // History
   totalPayments: number;
   totalPaid: number;
   totalPaidInPi: number;
   missedPayments: number;
-  
+
   // Conditions
   conditionsRequired: boolean;
   conditions: string[];
   conditionsMet: boolean;
-  
+
   // Duration
   enrollmentDuration: number | "indefinite"; // months
   monthsRemaining: number | "indefinite";
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface UBIPayment {
+export type UBIPayment = {
   id: string;
   enrollmentId: string;
   beneficiaryId: string;
-  
+
   // Payment
   amount: number;
   amountInPi: number;
   paymentDate: Date;
-  
+
   // Transaction
   method: DisbursementMethod;
   transactionId: string;
   status: "pending" | "processing" | "completed" | "failed";
-  
+
   // Pi Details
   piWalletAddress: string;
   piTransactionHash: string | null;
-  
-  createdAt: Date;
-}
 
-export interface CommunityImpact {
+  createdAt: Date;
+};
+
+export type CommunityImpact = {
   programId: string;
   period: "month" | "quarter" | "year" | "all-time";
-  
+
   // Financial
   totalDistributed: number;
   totalDistributedInPi: number;
-  
+
   // Reach
   beneficiariesReached: number;
   applicationsReceived: number;
   applicationsApproved: number;
-  
+
   // Impact
   livesImpacted: number;
   familiesHelped: number;
   communitiesServed: number;
-  
+
   // Success Stories
   successStoriesCount: number;
   graduationRate: number;
-  
+
   // By Category
   byPurpose: { purpose: string; amount: number; count: number }[];
   byRegion: { region: string; amount: number; count: number }[];
-}
+};
 
 // ============================================================================
 // FINANCIAL FREEDOM PROGRAM CLASS
 // ============================================================================
 
 class FinancialFreedomProgramManager {
-  private programs: Map<string, FinancialFreedomProgram> = new Map();
-  private beneficiaries: Map<string, Beneficiary> = new Map();
-  private assistances: Map<string, Assistance> = new Map();
-  private ubiEnrollments: Map<string, UBIEnrollment> = new Map();
-  private ubiPayments: Map<string, UBIPayment> = new Map();
+  private readonly programs: Map<string, FinancialFreedomProgram> = new Map();
+  private readonly beneficiaries: Map<string, Beneficiary> = new Map();
+  private readonly assistances: Map<string, Assistance> = new Map();
+  private readonly ubiEnrollments: Map<string, UBIEnrollment> = new Map();
+  private readonly ubiPayments: Map<string, UBIPayment> = new Map();
 
   constructor() {
     this.initializeDefaultPrograms();
@@ -283,12 +301,13 @@ class FinancialFreedomProgramManager {
     const ubiProgram: FinancialFreedomProgram = {
       id: "ubi-core",
       name: "Triumph Universal Basic Income",
-      description: "Monthly financial support to ensure basic needs are met for all participants in the Triumph-Synergy ecosystem.",
+      description:
+        "Monthly financial support to ensure basic needs are met for all participants in the Triumph-Synergy ecosystem.",
       type: "ubi",
-      totalFunding: 100000000,
-      totalFundingInPi: 100000000 / PI_EXTERNAL_RATE,
-      remainingFunding: 100000000,
-      remainingFundingInPi: 100000000 / PI_EXTERNAL_RATE,
+      totalFunding: 100_000_000,
+      totalFundingInPi: 100_000_000 / PI_EXTERNAL_RATE,
+      remainingFunding: 100_000_000,
+      remainingFundingInPi: 100_000_000 / PI_EXTERNAL_RATE,
       totalDistributed: 0,
       totalDistributedInPi: 0,
       beneficiariesServed: 0,
@@ -305,7 +324,7 @@ class FinancialFreedomProgramManager {
           "Valid Pi wallet address",
         ],
       },
-      incomeLimit: 50000,
+      incomeLimit: 50_000,
       minimumGrant: 100,
       maximumGrant: 2000,
       averageGrant: 500,
@@ -325,12 +344,13 @@ class FinancialFreedomProgramManager {
     const emergencyRelief: FinancialFreedomProgram = {
       id: "emergency-relief",
       name: "Emergency Financial Relief Fund",
-      description: "Immediate financial assistance for those facing unexpected hardships, medical emergencies, or crisis situations.",
+      description:
+        "Immediate financial assistance for those facing unexpected hardships, medical emergencies, or crisis situations.",
       type: "emergency-relief",
-      totalFunding: 25000000,
-      totalFundingInPi: 25000000 / PI_EXTERNAL_RATE,
-      remainingFunding: 25000000,
-      remainingFundingInPi: 25000000 / PI_EXTERNAL_RATE,
+      totalFunding: 25_000_000,
+      totalFundingInPi: 25_000_000 / PI_EXTERNAL_RATE,
+      remainingFunding: 25_000_000,
+      remainingFundingInPi: 25_000_000 / PI_EXTERNAL_RATE,
       totalDistributed: 0,
       totalDistributedInPi: 0,
       beneficiariesServed: 0,
@@ -348,7 +368,7 @@ class FinancialFreedomProgramManager {
       },
       incomeLimit: null,
       minimumGrant: 250,
-      maximumGrant: 10000,
+      maximumGrant: 10_000,
       averageGrant: 2500,
       isRecurring: false,
       recurringAmount: 0,
@@ -366,12 +386,13 @@ class FinancialFreedomProgramManager {
     const educationSupport: FinancialFreedomProgram = {
       id: "education-support",
       name: "Education & Learning Support",
-      description: "Scholarships and educational grants to support students and lifelong learners in achieving their educational goals.",
+      description:
+        "Scholarships and educational grants to support students and lifelong learners in achieving their educational goals.",
       type: "education-support",
-      totalFunding: 50000000,
-      totalFundingInPi: 50000000 / PI_EXTERNAL_RATE,
-      remainingFunding: 50000000,
-      remainingFundingInPi: 50000000 / PI_EXTERNAL_RATE,
+      totalFunding: 50_000_000,
+      totalFundingInPi: 50_000_000 / PI_EXTERNAL_RATE,
+      remainingFunding: 50_000_000,
+      remainingFundingInPi: 50_000_000 / PI_EXTERNAL_RATE,
       totalDistributed: 0,
       totalDistributedInPi: 0,
       beneficiariesServed: 0,
@@ -388,9 +409,9 @@ class FinancialFreedomProgramManager {
           "Personal statement",
         ],
       },
-      incomeLimit: 75000,
+      incomeLimit: 75_000,
       minimumGrant: 500,
-      maximumGrant: 25000,
+      maximumGrant: 25_000,
       averageGrant: 5000,
       isRecurring: false,
       recurringAmount: 0,
@@ -408,12 +429,13 @@ class FinancialFreedomProgramManager {
     const businessGrant: FinancialFreedomProgram = {
       id: "business-grant",
       name: "Small Business Development Grants",
-      description: "Supporting entrepreneurs and small business owners with grants to start or grow their Pi-integrated businesses.",
+      description:
+        "Supporting entrepreneurs and small business owners with grants to start or grow their Pi-integrated businesses.",
       type: "business-grant",
-      totalFunding: 75000000,
-      totalFundingInPi: 75000000 / PI_EXTERNAL_RATE,
-      remainingFunding: 75000000,
-      remainingFundingInPi: 75000000 / PI_EXTERNAL_RATE,
+      totalFunding: 75_000_000,
+      totalFundingInPi: 75_000_000 / PI_EXTERNAL_RATE,
+      remainingFunding: 75_000_000,
+      remainingFundingInPi: 75_000_000 / PI_EXTERNAL_RATE,
       totalDistributed: 0,
       totalDistributedInPi: 0,
       beneficiariesServed: 0,
@@ -432,8 +454,8 @@ class FinancialFreedomProgramManager {
       },
       incomeLimit: null,
       minimumGrant: 1000,
-      maximumGrant: 50000,
-      averageGrant: 15000,
+      maximumGrant: 50_000,
+      averageGrant: 15_000,
       isRecurring: false,
       recurringAmount: 0,
       recurringAmountInPi: 0,
@@ -568,7 +590,10 @@ class FinancialFreedomProgramManager {
     return this.beneficiaries.get(beneficiaryId) || null;
   }
 
-  async verifyBeneficiary(beneficiaryId: string, verificationType: "identity" | "piWallet" | "income"): Promise<boolean> {
+  async verifyBeneficiary(
+    beneficiaryId: string,
+    verificationType: "identity" | "piWallet" | "income"
+  ): Promise<boolean> {
     const beneficiary = this.beneficiaries.get(beneficiaryId);
     if (!beneficiary) {
       return false;
@@ -641,7 +666,13 @@ class FinancialFreedomProgramManager {
     return assistance;
   }
 
-  async reviewAssistance(assistanceId: string, reviewerId: string, approved: boolean, approvedAmount?: number, notes?: string): Promise<Assistance> {
+  async reviewAssistance(
+    assistanceId: string,
+    reviewerId: string,
+    approved: boolean,
+    approvedAmount?: number,
+    notes?: string
+  ): Promise<Assistance> {
     const assistance = this.assistances.get(assistanceId);
     if (!assistance) {
       throw new Error("Assistance not found");
@@ -660,8 +691,12 @@ class FinancialFreedomProgramManager {
     }
 
     if (program) {
-      const allAssistances = Array.from(this.assistances.values()).filter((a) => a.programId === program.id);
-      const approvedCount = allAssistances.filter((a) => a.applicationStatus === "approved").length;
+      const allAssistances = Array.from(this.assistances.values()).filter(
+        (a) => a.programId === program.id
+      );
+      const approvedCount = allAssistances.filter(
+        (a) => a.applicationStatus === "approved"
+      ).length;
       program.approvalRate = (approvedCount / allAssistances.length) * 100;
     }
 
@@ -711,7 +746,10 @@ class FinancialFreedomProgramManager {
   // UBI ENROLLMENT
   // ==========================================================================
 
-  async enrollInUBI(beneficiaryId: string, programId = "ubi-core"): Promise<UBIEnrollment> {
+  async enrollInUBI(
+    beneficiaryId: string,
+    programId = "ubi-core"
+  ): Promise<UBIEnrollment> {
     const program = this.programs.get(programId);
     const beneficiary = this.beneficiaries.get(beneficiaryId);
 
@@ -847,21 +885,30 @@ class FinancialFreedomProgramManager {
   }
 
   async getActiveUBIEnrollments(): Promise<UBIEnrollment[]> {
-    return Array.from(this.ubiEnrollments.values()).filter((e) => e.status === "active");
+    return Array.from(this.ubiEnrollments.values()).filter(
+      (e) => e.status === "active"
+    );
   }
 
   // ==========================================================================
   // IMPACT REPORTING
   // ==========================================================================
 
-  getCommunityImpact(programId: string, period: CommunityImpact["period"] = "all-time"): CommunityImpact {
+  getCommunityImpact(
+    programId: string,
+    period: CommunityImpact["period"] = "all-time"
+  ): CommunityImpact {
     const program = this.programs.get(programId);
     if (!program) {
       throw new Error("Program not found");
     }
 
-    const assistances = Array.from(this.assistances.values()).filter((a) => a.programId === programId);
-    const disbursed = assistances.filter((a) => a.applicationStatus === "disbursed");
+    const assistances = Array.from(this.assistances.values()).filter(
+      (a) => a.programId === programId
+    );
+    const disbursed = assistances.filter(
+      (a) => a.applicationStatus === "disbursed"
+    );
 
     // Calculate by purpose
     const byPurpose: Record<string, { amount: number; count: number }> = {};
@@ -903,7 +950,11 @@ class FinancialFreedomProgramManager {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,
@@ -933,7 +984,9 @@ export async function applyForHelp(
   return financialFreedomProgram.applyForAssistance(data);
 }
 
-export async function enrollInUBI(beneficiaryId: string): Promise<UBIEnrollment> {
+export async function enrollInUBI(
+  beneficiaryId: string
+): Promise<UBIEnrollment> {
   return financialFreedomProgram.enrollInUBI(beneficiaryId);
 }
 

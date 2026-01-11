@@ -14,19 +14,15 @@
  */
 
 import {
-  type CreditBureau,
   CreditBureauIntegration,
   type CreditReport,
-  disputeCreditItem,
   type PiNetworkCreditActivity,
   pullCreditReports,
-  reportPaymentToBureaus,
   reportPiPayments,
 } from "../credit-reporting/credit-bureau-integration";
 
 import {
   activateProsperity,
-  type DebtForgivenessRecord,
   NESARAGESARAEngine,
   type NESARAProfile,
   processDebtForgiveness,
@@ -36,7 +32,6 @@ import {
 import {
   distributeUBI,
   enrollInUBI,
-  type UBIDistribution,
   type UBIRecipient,
   UniversalBasicIncomeEngine,
 } from "../ubi/universal-basic-income";
@@ -45,7 +40,7 @@ import {
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface TriumphUser {
+export type TriumphUser = {
   id: string;
   piUserId: string;
   piUsername: string;
@@ -62,19 +57,19 @@ export interface TriumphUser {
 
   // Feature access
   features: TriumphFeatures;
-}
+};
 
 export type KYCStatus = "none" | "pending" | "verified" | "rejected";
 
-export interface TriumphFeatures {
+export type TriumphFeatures = {
   ubiEnabled: boolean;
   nesaraEnabled: boolean;
   creditReportingEnabled: boolean;
   piPaymentsEnabled: boolean;
   advancedAnalytics: boolean;
-}
+};
 
-export interface FinancialDashboard {
+export type FinancialDashboard = {
   user: TriumphUser;
 
   // UBI Status
@@ -116,9 +111,9 @@ export interface FinancialDashboard {
     totalTransacted: number;
     kycVerified: boolean;
   };
-}
+};
 
-export interface UnifiedTransaction {
+export type UnifiedTransaction = {
   id: string;
   userId: string;
   type: TransactionType;
@@ -130,7 +125,7 @@ export interface UnifiedTransaction {
   createdAt: Date;
   completedAt: Date | null;
   metadata: Record<string, unknown>;
-}
+};
 
 export type TransactionType =
   | "ubi-distribution"
@@ -154,12 +149,11 @@ export type TransactionSource =
 export class FinancialIntegrationHub {
   private static instance: FinancialIntegrationHub;
 
-  private users: Map<string, TriumphUser> = new Map();
-  private transactions: Map<string, UnifiedTransaction[]> = new Map();
+  private readonly users: Map<string, TriumphUser> = new Map();
+  private readonly transactions: Map<string, UnifiedTransaction[]> = new Map();
 
-  private ubiEngine: UniversalBasicIncomeEngine;
-  private nesaraEngine: NESARAGESARAEngine;
-  private creditEngine: CreditBureauIntegration;
+  private readonly ubiEngine: UniversalBasicIncomeEngine;
+  private readonly nesaraEngine: NESARAGESARAEngine;
 
   private constructor() {
     this.ubiEngine = UniversalBasicIncomeEngine.getInstance();
@@ -326,7 +320,9 @@ export class FinancialIntegrationHub {
     userId: string
   ): Promise<FinancialDashboard | null> {
     const user = this.users.get(userId);
-    if (!user) return null;
+    if (!user) {
+      return null;
+    }
 
     // Get UBI status
     let ubiStatus = {

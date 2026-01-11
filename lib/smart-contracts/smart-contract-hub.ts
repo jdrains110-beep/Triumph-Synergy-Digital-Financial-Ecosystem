@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Smart Contract Integration Hub
- * 
+ *
  * GitHub integration for smart contract management
  * Rust and Solidity language support with cross-chain compatibility
- * 
+ *
  * @module lib/smart-contracts/smart-contract-hub
  * @version 1.0.0
  */
@@ -15,61 +15,67 @@
 // Dual Pi Value System
 // Internally mined/contributed Pi = 1000x multiplier
 // External/non-contributed Pi = base rate
-const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
-const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_EXTERNAL_RATE = 314.159; // External non-contributed Pi
+const PI_INTERNAL_RATE = 314_159; // Internally mined/contributed Pi (1000x)
 const PI_INTERNAL_MULTIPLIER = 1000;
 const GITHUB_API_BASE = "https://api.github.com";
-const SUPPORTED_LANGUAGES = ["rust", "solidity", "move", "cairo", "vyper"] as const;
+const SUPPORTED_LANGUAGES = [
+  "rust",
+  "solidity",
+  "move",
+  "cairo",
+  "vyper",
+] as const;
 
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface SmartContract {
+export type SmartContract = {
   id: string;
   name: string;
   description: string;
   version: string;
   language: ContractLanguage;
   status: ContractStatus;
-  
+
   // Source
   sourceCode: string;
   compiledBytecode: string | null;
   abi: ContractABI | null;
-  
+
   // GitHub
   githubRepo: string | null;
   githubPath: string | null;
   githubBranch: string;
   commitHash: string | null;
   lastSyncAt: Date | null;
-  
+
   // Deployment
   deployedAddress: string | null;
   network: BlockchainNetwork;
   deployedAt: Date | null;
   deploymentTxHash: string | null;
-  
+
   // Metadata
   author: string;
   license: string;
   tags: string[];
   dependencies: ContractDependency[];
-  
+
   // Audit
   auditStatus: AuditStatus;
   auditReports: AuditReport[];
   securityScore: number;
-  
+
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export type ContractLanguage = typeof SUPPORTED_LANGUAGES[number];
+export type ContractLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
-export type ContractStatus = 
+export type ContractStatus =
   | "draft"
   | "compiled"
   | "tested"
@@ -78,7 +84,7 @@ export type ContractStatus =
   | "verified"
   | "deprecated";
 
-export type BlockchainNetwork = 
+export type BlockchainNetwork =
   | "pi-mainnet"
   | "pi-testnet"
   | "stellar-mainnet"
@@ -90,46 +96,46 @@ export type BlockchainNetwork =
   | "solana-mainnet"
   | "solana-devnet";
 
-export interface ContractABI {
+export type ContractABI = {
   functions: ABIFunction[];
   events: ABIEvent[];
   errors: ABIError[];
-}
+};
 
-export interface ABIFunction {
+export type ABIFunction = {
   name: string;
   inputs: ABIParameter[];
   outputs: ABIParameter[];
   stateMutability: "pure" | "view" | "nonpayable" | "payable";
   visibility: "public" | "external" | "internal" | "private";
-}
+};
 
-export interface ABIEvent {
+export type ABIEvent = {
   name: string;
   inputs: ABIParameter[];
   anonymous: boolean;
-}
+};
 
-export interface ABIError {
+export type ABIError = {
   name: string;
   inputs: ABIParameter[];
-}
+};
 
-export interface ABIParameter {
+export type ABIParameter = {
   name: string;
   type: string;
   indexed?: boolean;
   components?: ABIParameter[];
-}
+};
 
-export interface ContractDependency {
+export type ContractDependency = {
   name: string;
   version: string;
   source: "github" | "crates" | "npm" | "local";
   path: string;
-}
+};
 
-export type AuditStatus = 
+export type AuditStatus =
   | "not-audited"
   | "pending"
   | "in-progress"
@@ -137,16 +143,16 @@ export type AuditStatus =
   | "failed"
   | "conditional";
 
-export interface AuditReport {
+export type AuditReport = {
   id: string;
   auditor: string;
   date: Date;
   findings: AuditFinding[];
   overallRating: "critical" | "high" | "medium" | "low" | "informational";
   reportUrl: string;
-}
+};
 
-export interface AuditFinding {
+export type AuditFinding = {
   id: string;
   severity: "critical" | "high" | "medium" | "low" | "informational";
   title: string;
@@ -154,9 +160,9 @@ export interface AuditFinding {
   location: string;
   recommendation: string;
   status: "open" | "acknowledged" | "fixed" | "wontfix";
-}
+};
 
-export interface GitHubRepository {
+export type GitHubRepository = {
   owner: string;
   name: string;
   fullName: string;
@@ -168,17 +174,17 @@ export interface GitHubRepository {
   cloneUrl: string;
   sshUrl: string;
   lastPush: Date;
-}
+};
 
-export interface RustContractConfig {
+export type RustContractConfig = {
   cargoToml: string;
   edition: "2018" | "2021" | "2024";
   features: string[];
   target: "wasm32-unknown-unknown" | "native";
   optimizationLevel: 0 | 1 | 2 | 3 | "s" | "z";
-}
+};
 
-export interface ContractTemplate {
+export type ContractTemplate = {
   id: string;
   name: string;
   description: string;
@@ -187,9 +193,9 @@ export interface ContractTemplate {
   sourceCode: string;
   variables: TemplateVariable[];
   preview: string;
-}
+};
 
-export type TemplateCategory = 
+export type TemplateCategory =
   | "token"
   | "nft"
   | "defi"
@@ -200,22 +206,22 @@ export type TemplateCategory =
   | "identity"
   | "custom";
 
-export interface TemplateVariable {
+export type TemplateVariable = {
   name: string;
   type: "string" | "number" | "address" | "boolean";
   description: string;
   defaultValue: string;
   required: boolean;
-}
+};
 
 // ============================================================================
 // SMART CONTRACT HUB CLASS
 // ============================================================================
 
 class SmartContractHub {
-  private contracts: Map<string, SmartContract> = new Map();
-  private templates: Map<string, ContractTemplate> = new Map();
-  private repositories: Map<string, GitHubRepository> = new Map();
+  private readonly contracts: Map<string, SmartContract> = new Map();
+  private readonly templates: Map<string, ContractTemplate> = new Map();
+  private readonly repositories: Map<string, GitHubRepository> = new Map();
 
   constructor() {
     this.initializeDefaultTemplates();
@@ -277,9 +283,27 @@ impl PiToken {
 }
 `,
       variables: [
-        { name: "TOKEN_NAME", type: "string", description: "Token name", defaultValue: "Triumph Token", required: true },
-        { name: "TOKEN_SYMBOL", type: "string", description: "Token symbol", defaultValue: "TRI", required: true },
-        { name: "INITIAL_SUPPLY", type: "number", description: "Initial supply", defaultValue: "1000000", required: true },
+        {
+          name: "TOKEN_NAME",
+          type: "string",
+          description: "Token name",
+          defaultValue: "Triumph Token",
+          required: true,
+        },
+        {
+          name: "TOKEN_SYMBOL",
+          type: "string",
+          description: "Token symbol",
+          defaultValue: "TRI",
+          required: true,
+        },
+        {
+          name: "INITIAL_SUPPLY",
+          type: "number",
+          description: "Initial supply",
+          defaultValue: "1000000",
+          required: true,
+        },
       ],
       preview: "Standard ERC-20 compatible token for Pi Network",
     });
@@ -383,7 +407,13 @@ impl AllodialDeed {
 }
 `,
       variables: [
-        { name: "REGISTRY_AUTHORITY", type: "address", description: "Registry authority address", defaultValue: "", required: true },
+        {
+          name: "REGISTRY_AUTHORITY",
+          type: "address",
+          description: "Registry authority address",
+          defaultValue: "",
+          required: true,
+        },
       ],
       preview: "Allodial deed smart contract for property ownership",
     });
@@ -479,8 +509,20 @@ impl PiEscrow {
 }
 `,
       variables: [
-        { name: "PLATFORM_FEE_BPS", type: "number", description: "Platform fee in basis points", defaultValue: "250", required: true },
-        { name: "TREASURY_ADDRESS", type: "address", description: "Treasury address for fees", defaultValue: "", required: true },
+        {
+          name: "PLATFORM_FEE_BPS",
+          type: "number",
+          description: "Platform fee in basis points",
+          defaultValue: "250",
+          required: true,
+        },
+        {
+          name: "TREASURY_ADDRESS",
+          type: "address",
+          description: "Treasury address for fees",
+          defaultValue: "",
+          required: true,
+        },
       ],
       preview: "Secure escrow contract with dispute resolution",
     });
@@ -526,7 +568,7 @@ impl PiEscrow {
   async syncContractFromGitHub(
     repoFullName: string,
     path: string,
-    branch: string = "main"
+    branch = "main"
   ): Promise<SmartContract> {
     const repository = this.repositories.get(repoFullName);
     if (!repository) {
@@ -536,16 +578,25 @@ impl PiEscrow {
     // Detect language from file extension
     const extension = path.split(".").pop()?.toLowerCase();
     let language: ContractLanguage = "rust";
-    if (extension === "sol") language = "solidity";
-    else if (extension === "move") language = "move";
-    else if (extension === "cairo") language = "cairo";
-    else if (extension === "vy") language = "vyper";
+    if (extension === "sol") {
+      language = "solidity";
+    } else if (extension === "move") {
+      language = "move";
+    } else if (extension === "cairo") {
+      language = "cairo";
+    } else if (extension === "vy") {
+      language = "vyper";
+    }
 
     const id = `contract-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const contract: SmartContract = {
       id,
-      name: path.split("/").pop()?.replace(/\.[^.]+$/, "") || "Unknown",
+      name:
+        path
+          .split("/")
+          .pop()
+          ?.replace(/\.[^.]+$/, "") || "Unknown",
       description: `Contract synced from ${repoFullName}/${path}`,
       version: "1.0.0",
       language,
@@ -712,8 +763,8 @@ impl PiEscrow {
     return {
       address,
       txHash,
-      gasUsed: Math.floor(Math.random() * 1000000) + 100000,
-      blockNumber: Math.floor(Math.random() * 1000000) + 1000000,
+      gasUsed: Math.floor(Math.random() * 1_000_000) + 100_000,
+      blockNumber: Math.floor(Math.random() * 1_000_000) + 1_000_000,
     };
   }
 
@@ -772,7 +823,10 @@ impl PiEscrow {
     // Replace variables in source code
     let sourceCode = template.sourceCode;
     for (const [key, value] of Object.entries(variables)) {
-      sourceCode = sourceCode.replace(new RegExp(`\\$\\{${key}\\}`, "g"), value);
+      sourceCode = sourceCode.replace(
+        new RegExp(`\\$\\{${key}\\}`, "g"),
+        value
+      );
     }
 
     return this.createContract({

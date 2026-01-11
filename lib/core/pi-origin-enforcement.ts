@@ -1,22 +1,22 @@
 /**
  * lib/core/pi-origin-enforcement.ts
- * 
+ *
  * ENFORCEMENT LAYER - Applies Pi Origin Verification to ALL transactions
- * 
+ *
  * This middleware enforces the immutable Pi origin distinction across:
  * - All gaming platform payments
  * - All health institution payroll
  * - All streaming creator earnings
  * - All API endpoints
  * - All user transactions
- * 
+ *
  * NO EXCEPTIONS - Every single transaction goes through this filter
  */
 
 import {
+  type PiOriginType,
+  type PiPaymentWithOriginRequirement,
   piOriginVerificationEngine,
-  PiOriginType,
-  PiPaymentWithOriginRequirement,
 } from "./pi-origin-verification";
 
 // ============================================================================
@@ -38,11 +38,13 @@ export enum TransactionCategory {
 
 /**
  * Get the required Pi origin type for a transaction category
- * 
+ *
  * RULE: All ecosystem-generated earnings REQUIRE internal Pi
  * No exceptions - ecosystem will not accept external Pi for payouts
  */
-export function getRequiredOriginType(category: TransactionCategory): PiOriginType {
+export function getRequiredOriginType(
+  category: TransactionCategory
+): PiOriginType {
   // All ecosystem-generated payments must be from INTERNAL Pi
   // This is non-negotiable and applies to ALL categories
   switch (category) {
@@ -72,7 +74,7 @@ export function getRequiredOriginType(category: TransactionCategory): PiOriginTy
 export class PiOriginEnforcer {
   /**
    * CRITICAL: Process a transaction with mandatory origin verification
-   * 
+   *
    * This is the ONLY way transactions should flow through the system
    * - Blocks any transaction that doesn't match required origin
    * - Logs all attempts (approved and rejected)
@@ -118,7 +120,9 @@ export class PiOriginEnforcer {
     );
 
     if (!validation.isValid) {
-      console.error(`[Pi Origin Enforcer] ✗ TRANSACTION REJECTED: ${validation.reason}`);
+      console.error(
+        `[Pi Origin Enforcer] ✗ TRANSACTION REJECTED: ${validation.reason}`
+      );
 
       return {
         success: false,
@@ -242,7 +246,8 @@ export class PiOriginEnforcer {
     externalPi: number;
     lastUpdated: Date | null;
   } {
-    const state = piOriginVerificationEngine.getWalletOriginState(walletAddress);
+    const state =
+      piOriginVerificationEngine.getWalletOriginState(walletAddress);
 
     return {
       walletAddress,

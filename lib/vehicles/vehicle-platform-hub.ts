@@ -1,12 +1,12 @@
 /**
  * Triumph Synergy - Vehicle Platform Hub
- * 
+ *
  * Superior automotive marketplace hub for:
  * - Car dealers to sell vehicles
  * - Salesmen with Pi incentives and commissions
  * - Subscription programs for dealerships
  * - Pi Network integrated payments
- * 
+ *
  * @module lib/vehicles/vehicle-platform-hub
  * @version 1.0.0
  */
@@ -16,7 +16,7 @@
 // ============================================================================
 
 const PI_EXTERNAL_RATE = 314.159;
-const PI_INTERNAL_RATE = 314159;
+const PI_INTERNAL_RATE = 314_159;
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -29,23 +29,57 @@ export function getPiRate(type: PiValueType = "external"): number {
 // TYPES & INTERFACES
 // ============================================================================
 
-export type DealerType = "franchise" | "independent" | "certified-pre-owned" | "luxury" | "electric-specialty" | "commercial";
-export type DealerSubscriptionTier = "starter" | "professional" | "premier" | "enterprise" | "mega-dealer";
-export type SalesmanTier = "associate" | "senior" | "master" | "elite" | "platinum";
+export type DealerType =
+  | "franchise"
+  | "independent"
+  | "certified-pre-owned"
+  | "luxury"
+  | "electric-specialty"
+  | "commercial";
+export type DealerSubscriptionTier =
+  | "starter"
+  | "professional"
+  | "premier"
+  | "enterprise"
+  | "mega-dealer";
+export type SalesmanTier =
+  | "associate"
+  | "senior"
+  | "master"
+  | "elite"
+  | "platinum";
 
-export type VehicleType = "sedan" | "suv" | "truck" | "van" | "coupe" | "convertible" | "wagon" | "hatchback" | "electric" | "hybrid" | "commercial" | "motorcycle" | "rv";
-export type VehicleCondition = "new" | "certified-pre-owned" | "used-excellent" | "used-good" | "used-fair";
+export type VehicleType =
+  | "sedan"
+  | "suv"
+  | "truck"
+  | "van"
+  | "coupe"
+  | "convertible"
+  | "wagon"
+  | "hatchback"
+  | "electric"
+  | "hybrid"
+  | "commercial"
+  | "motorcycle"
+  | "rv";
+export type VehicleCondition =
+  | "new"
+  | "certified-pre-owned"
+  | "used-excellent"
+  | "used-good"
+  | "used-fair";
 
-export interface Dealership {
+export type Dealership = {
   id: string;
   userId: string;
-  
+
   // Business Info
   dealershipName: string;
   legalName: string;
   dealerType: DealerType;
   dealerLicense: string;
-  
+
   // Location
   address: {
     street: string;
@@ -57,11 +91,11 @@ export interface Dealership {
   phone: string;
   email: string;
   website: string | null;
-  
+
   // Brands
   brandsCarried: string[];
   primaryBrand: string | null;
-  
+
   // Subscription
   subscriptionTier: DealerSubscriptionTier;
   subscriptionStatus: "trial" | "active" | "past_due" | "cancelled";
@@ -69,65 +103,65 @@ export interface Dealership {
   subscriptionEndDate: Date;
   monthlyFee: number;
   monthlyFeeInPi: number;
-  
+
   // Team
   salesTeam: string[]; // Salesman IDs
   totalSalesmen: number;
-  
+
   // Inventory
   totalInventory: number;
   activeListings: number;
-  
+
   // Performance
   totalSales: number;
   totalRevenue: number;
   totalRevenueInPi: number;
   averageRating: number;
   totalReviews: number;
-  
+
   // Commission Structure
   basePlatformFee: number; // percentage
   piSaleBonus: number; // percentage discount for Pi sales
-  
+
   // Pi Integration
   piWalletLinked: boolean;
   acceptsPi: boolean;
   piOnlyInventory: number;
-  
+
   // Features
   featuredDealer: boolean;
   virtualShowroom: boolean;
   homeDelivery: boolean;
   financing: boolean;
   tradeIn: boolean;
-  
+
   createdAt: Date;
   lastActiveAt: Date;
-}
+};
 
-export interface Salesman {
+export type Salesman = {
   id: string;
   userId: string;
   dealershipId: string;
-  
+
   // Profile
   name: string;
   email: string;
   phone: string;
   photo: string;
   bio: string;
-  
+
   // Tier & Subscription
   tier: SalesmanTier;
   subscriptionActive: boolean;
   monthlyFee: number;
   monthlyFeeInPi: number;
-  
+
   // Certifications
   certifications: SalesmanCertification[];
   yearsExperience: number;
   specializations: string[];
-  
+
   // Performance
   totalSales: number;
   totalVolume: number;
@@ -136,42 +170,42 @@ export interface Salesman {
   quotaProgress: number;
   averageRating: number;
   totalReviews: number;
-  
+
   // Commission
   commissionRate: number;
   piSalesBonusRate: number;
   totalEarnings: number;
   totalEarningsInPi: number;
   pendingCommissions: number;
-  
+
   // Incentives
   currentIncentives: Incentive[];
   achievedIncentives: Incentive[];
   lifetimeIncentiveValue: number;
-  
+
   // Leads
   activeLeads: number;
   convertedLeads: number;
   conversionRate: number;
-  
+
   // Availability
   available: boolean;
   schedule: SalesmanSchedule;
-  
+
   createdAt: Date;
   lastActiveAt: Date;
-}
+};
 
-export interface SalesmanCertification {
+export type SalesmanCertification = {
   id: string;
   name: string;
   issuer: string;
   issuedAt: Date;
   expiresAt: Date | null;
   verified: boolean;
-}
+};
 
-export interface SalesmanSchedule {
+export type SalesmanSchedule = {
   monday: { start: string; end: string } | null;
   tuesday: { start: string; end: string } | null;
   wednesday: { start: string; end: string } | null;
@@ -179,9 +213,9 @@ export interface SalesmanSchedule {
   friday: { start: string; end: string } | null;
   saturday: { start: string; end: string } | null;
   sunday: { start: string; end: string } | null;
-}
+};
 
-export interface Incentive {
+export type Incentive = {
   id: string;
   name: string;
   description: string;
@@ -195,13 +229,13 @@ export interface Incentive {
   endDate: Date;
   achieved: boolean;
   achievedAt: Date | null;
-}
+};
 
-export interface Vehicle {
+export type Vehicle = {
   id: string;
   dealershipId: string;
   salesmanId: string | null;
-  
+
   // Basic Info
   vin: string;
   stockNumber: string;
@@ -211,60 +245,66 @@ export interface Vehicle {
   trim: string;
   vehicleType: VehicleType;
   condition: VehicleCondition;
-  
+
   // Details
   exteriorColor: string;
   interiorColor: string;
   mileage: number;
-  fuelType: "gasoline" | "diesel" | "electric" | "hybrid" | "plugin-hybrid" | "hydrogen";
+  fuelType:
+    | "gasoline"
+    | "diesel"
+    | "electric"
+    | "hybrid"
+    | "plugin-hybrid"
+    | "hydrogen";
   transmission: "automatic" | "manual" | "cvt";
   drivetrain: "fwd" | "rwd" | "awd" | "4wd";
   engine: string;
-  
+
   // Features
   features: string[];
   packages: string[];
-  
+
   // Pricing
   msrp: number;
   listPrice: number;
   listPriceInPi: number;
   minimumPrice: number;
   piOnlyPrice: number | null;
-  
+
   // Media
   images: string[];
   videos: string[];
   virtualTourUrl: string | null;
-  
+
   // Status
   status: "available" | "pending" | "sold" | "reserved" | "in-transit";
   daysOnLot: number;
   views: number;
   inquiries: number;
   testDrives: number;
-  
+
   // Carfax/History
   carfaxAvailable: boolean;
   accidents: number;
   owners: number;
   serviceRecords: boolean;
-  
+
   // Warranty
   warrantyRemaining: string | null;
   extendedWarrantyAvailable: boolean;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface VehicleSale {
+export type VehicleSale = {
   id: string;
   dealershipId: string;
   salesmanId: string;
   vehicleId: string;
   customerId: string;
-  
+
   // Vehicle Info
   vehicleInfo: {
     year: number;
@@ -272,38 +312,38 @@ export interface VehicleSale {
     model: string;
     vin: string;
   };
-  
+
   // Pricing
   salePrice: number;
   salePriceInPi: number;
   paidInPi: number;
   paidInFiat: number;
   paymentMethod: "pi-full" | "pi-partial" | "fiat" | "financing";
-  
+
   // Trade-In
   hasTradeIn: boolean;
   tradeInValue: number;
   tradeInVehicle: string | null;
-  
+
   // Fees
   platformFee: number;
   dealershipEarnings: number;
   salesmanCommission: number;
   salesmanCommissionInPi: number;
   piBonus: number;
-  
+
   // Add-Ons
   addOns: { name: string; price: number }[];
   warranty: { type: string; price: number } | null;
-  
+
   // Status
   status: "pending" | "approved" | "completed" | "cancelled";
-  
+
   createdAt: Date;
   completedAt: Date | null;
-}
+};
 
-export interface DealerSubscriptionPlan {
+export type DealerSubscriptionPlan = {
   tier: DealerSubscriptionTier;
   name: string;
   monthlyPrice: number;
@@ -311,15 +351,15 @@ export interface DealerSubscriptionPlan {
   annualPrice: number;
   annualPriceInPi: number;
   features: string[];
-  
+
   // Limits
   maxVehicleListings: number | "unlimited";
   maxSalesmen: number | "unlimited";
-  
+
   // Fees
   platformFeePerSale: number;
   piSaleDiscount: number;
-  
+
   // Features
   virtualShowroom: boolean;
   featuredListings: number;
@@ -327,42 +367,38 @@ export interface DealerSubscriptionPlan {
   financing: boolean;
   analytics: "basic" | "advanced" | "enterprise";
   support: "standard" | "priority" | "dedicated";
-}
+};
 
-export interface SalesmanSubscriptionPlan {
+export type SalesmanSubscriptionPlan = {
   tier: SalesmanTier;
   name: string;
   monthlyPrice: number;
   monthlyPriceInPi: number;
   features: string[];
-  
+
   // Commission
   baseCommission: number;
   piSalesBonus: number;
-  
+
   // Leads
   leadAllocation: number | "unlimited";
   priorityLeads: boolean;
-  
+
   // Tools
   crmAccess: boolean;
   mobileApp: boolean;
   customerInsights: boolean;
-}
+};
 
 // ============================================================================
 // VEHICLE PLATFORM HUB CLASS
 // ============================================================================
 
 class VehiclePlatformHub {
-  private dealerships: Map<string, Dealership> = new Map();
-  private salesmen: Map<string, Salesman> = new Map();
-  private vehicles: Map<string, Vehicle> = new Map();
-  private sales: Map<string, VehicleSale> = new Map();
-
-  constructor() {
-    // Initialize vehicle platform
-  }
+  private readonly dealerships: Map<string, Dealership> = new Map();
+  private readonly salesmen: Map<string, Salesman> = new Map();
+  private readonly vehicles: Map<string, Vehicle> = new Map();
+  private readonly sales: Map<string, VehicleSale> = new Map();
 
   // ==========================================================================
   // SUBSCRIPTION PLANS
@@ -427,8 +463,8 @@ class VehiclePlatformHub {
         name: "Premier Dealer",
         monthlyPrice: 1999,
         monthlyPriceInPi: 1999 / PI_EXTERNAL_RATE,
-        annualPrice: 19188,
-        annualPriceInPi: 19188 / PI_EXTERNAL_RATE,
+        annualPrice: 19_188,
+        annualPriceInPi: 19_188 / PI_EXTERNAL_RATE,
         features: [
           "Up to 500 vehicle listings",
           "50 salesman accounts",
@@ -456,8 +492,8 @@ class VehiclePlatformHub {
         name: "Enterprise Dealer",
         monthlyPrice: 4999,
         monthlyPriceInPi: 4999 / PI_EXTERNAL_RATE,
-        annualPrice: 47988,
-        annualPriceInPi: 47988 / PI_EXTERNAL_RATE,
+        annualPrice: 47_988,
+        annualPriceInPi: 47_988 / PI_EXTERNAL_RATE,
         features: [
           "Unlimited vehicle listings",
           "Unlimited salesman accounts",
@@ -482,10 +518,10 @@ class VehiclePlatformHub {
       {
         tier: "mega-dealer",
         name: "Mega Dealer Network",
-        monthlyPrice: 14999,
-        monthlyPriceInPi: 14999 / PI_EXTERNAL_RATE,
-        annualPrice: 143988,
-        annualPriceInPi: 143988 / PI_EXTERNAL_RATE,
+        monthlyPrice: 14_999,
+        monthlyPriceInPi: 14_999 / PI_EXTERNAL_RATE,
+        annualPrice: 143_988,
+        annualPriceInPi: 143_988 / PI_EXTERNAL_RATE,
         features: [
           "Everything in Enterprise",
           "Dealer group management",
@@ -692,15 +728,18 @@ class VehiclePlatformHub {
   // SALESMAN MANAGEMENT
   // ==========================================================================
 
-  async registerSalesman(dealershipId: string, data: {
-    userId: string;
-    name: string;
-    email: string;
-    phone: string;
-    tier: SalesmanTier;
-    yearsExperience: number;
-    specializations?: string[];
-  }): Promise<Salesman> {
+  async registerSalesman(
+    dealershipId: string,
+    data: {
+      userId: string;
+      name: string;
+      email: string;
+      phone: string;
+      tier: SalesmanTier;
+      yearsExperience: number;
+      specializations?: string[];
+    }
+  ): Promise<Salesman> {
     const dealership = this.dealerships.get(dealershipId);
     if (!dealership) {
       throw new Error("Dealership not found");
@@ -823,27 +862,30 @@ class VehiclePlatformHub {
   // VEHICLE MANAGEMENT
   // ==========================================================================
 
-  async listVehicle(dealershipId: string, data: {
-    vin: string;
-    year: number;
-    make: string;
-    model: string;
-    trim: string;
-    vehicleType: VehicleType;
-    condition: VehicleCondition;
-    exteriorColor: string;
-    interiorColor: string;
-    mileage: number;
-    fuelType: Vehicle["fuelType"];
-    transmission: Vehicle["transmission"];
-    drivetrain: Vehicle["drivetrain"];
-    engine: string;
-    msrp: number;
-    listPrice: number;
-    features?: string[];
-    images?: string[];
-    piOnlyPrice?: number;
-  }): Promise<Vehicle> {
+  async listVehicle(
+    dealershipId: string,
+    data: {
+      vin: string;
+      year: number;
+      make: string;
+      model: string;
+      trim: string;
+      vehicleType: VehicleType;
+      condition: VehicleCondition;
+      exteriorColor: string;
+      interiorColor: string;
+      mileage: number;
+      fuelType: Vehicle["fuelType"];
+      transmission: Vehicle["transmission"];
+      drivetrain: Vehicle["drivetrain"];
+      engine: string;
+      msrp: number;
+      listPrice: number;
+      features?: string[];
+      images?: string[];
+      piOnlyPrice?: number;
+    }
+  ): Promise<Vehicle> {
     const dealership = this.dealerships.get(dealershipId);
     if (!dealership) {
       throw new Error("Dealership not found");
@@ -890,7 +932,8 @@ class VehiclePlatformHub {
       accidents: 0,
       owners: data.condition === "new" ? 0 : 1,
       serviceRecords: true,
-      warrantyRemaining: data.condition === "new" ? "Full manufacturer warranty" : null,
+      warrantyRemaining:
+        data.condition === "new" ? "Full manufacturer warranty" : null,
       extendedWarrantyAvailable: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -937,15 +980,18 @@ class VehiclePlatformHub {
     }
 
     const id = `sale-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    
+
     // Calculate fees and commissions
-    const isPiSale = data.paymentMethod === "pi-full" || data.paymentMethod === "pi-partial";
-    const platformFee = isPiSale 
+    const isPiSale =
+      data.paymentMethod === "pi-full" || data.paymentMethod === "pi-partial";
+    const platformFee = isPiSale
       ? dealership.basePlatformFee * (1 - dealership.piSaleBonus / 100)
       : dealership.basePlatformFee;
-    
+
     const commission = data.salePrice * (salesman.commissionRate / 100);
-    const piBonus = isPiSale ? data.salePrice * (salesman.piSalesBonusRate / 100) : 0;
+    const piBonus = isPiSale
+      ? data.salePrice * (salesman.piSalesBonusRate / 100)
+      : 0;
 
     const sale: VehicleSale = {
       id,
@@ -1005,7 +1051,10 @@ class VehiclePlatformHub {
     // Check incentive progress
     for (const incentive of salesman.currentIncentives) {
       incentive.currentProgress += 1;
-      if (incentive.currentProgress >= incentive.targetSales && !incentive.achieved) {
+      if (
+        incentive.currentProgress >= incentive.targetSales &&
+        !incentive.achieved
+      ) {
         incentive.achieved = true;
         incentive.achievedAt = new Date();
         salesman.achievedIncentives.push(incentive);
@@ -1036,8 +1085,9 @@ class VehiclePlatformHub {
       .map((id) => this.salesmen.get(id))
       .filter((s): s is Salesman => s !== undefined);
 
-    const inventory = Array.from(this.vehicles.values())
-      .filter((v) => v.dealershipId === dealershipId && v.status === "available");
+    const inventory = Array.from(this.vehicles.values()).filter(
+      (v) => v.dealershipId === dealershipId && v.status === "available"
+    );
 
     const recentSales = Array.from(this.sales.values())
       .filter((s) => s.dealershipId === dealershipId)
@@ -1050,7 +1100,8 @@ class VehiclePlatformHub {
       salesTeam,
       inventory,
       recentSales,
-      subscriptionPlan: plans.find((p) => p.tier === dealership.subscriptionTier) || null,
+      subscriptionPlan:
+        plans.find((p) => p.tier === dealership.subscriptionTier) || null,
     };
   }
 
@@ -1062,7 +1113,11 @@ class VehiclePlatformHub {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,

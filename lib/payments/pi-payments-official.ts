@@ -1,7 +1,7 @@
 /**
  * lib/payments/pi-payments-official.ts
  * Official Pi Payments integration based on minepi.com/blog/10-minutes-pi-payments
- * 
+ *
  * References:
  * - https://minepi.com/blog/10-minutes-pi-payments
  * - https://github.com/pi-apps/pi-sdk-js
@@ -9,7 +9,7 @@
  * - https://github.com/pi-apps/pi-sdk-react
  */
 
-export interface OfficialPiPaymentConfig {
+export type OfficialPiPaymentConfig = {
   // Application identification
   appId: string;
   apiKey: string;
@@ -25,16 +25,16 @@ export interface OfficialPiPaymentConfig {
   cancelCallback?: (paymentId: string) => Promise<void>;
   errorCallback?: (paymentId: string, error: string) => Promise<void>;
   incompleteCallback?: (payment: any) => Promise<void>;
-}
+};
 
-export interface PiPaymentRequest {
+export type PiPaymentRequest = {
   amount: number;
   memo: string;
   metadata?: Record<string, unknown>;
   externalId?: string;
-}
+};
 
-export interface PiPaymentResponse {
+export type PiPaymentResponse = {
   paymentId: string;
   txid?: string;
   status: "pending" | "approved" | "completed" | "failed" | "cancelled";
@@ -42,22 +42,22 @@ export interface PiPaymentResponse {
   memo: string;
   timestamp: Date;
   error?: string;
-}
+};
 
-export interface PiUser {
+export type PiUser = {
   uid: string;
   username: string;
   email?: string;
-}
+};
 
 // =============================================================================
 // OFFICIAL PI PAYMENTS ADAPTER
 // =============================================================================
 
 export class OfficialPiPayments {
-  private config: OfficialPiPaymentConfig;
-  private user: PiUser | null = null;
-  private connected = false;
+  private readonly config: OfficialPiPaymentConfig;
+  private readonly user: PiUser | null = null;
+  private readonly connected = false;
 
   constructor(config: OfficialPiPaymentConfig) {
     this.config = {
@@ -82,7 +82,9 @@ export class OfficialPiPayments {
 
     const Pi = (window as any).Pi;
     if (!Pi) {
-      throw new Error("[Pi Payments] Pi SDK not available - ensure script is loaded");
+      throw new Error(
+        "[Pi Payments] Pi SDK not available - ensure script is loaded"
+      );
     }
 
     try {
@@ -122,10 +124,14 @@ export class OfficialPiPayments {
    * Disconnect from Pi Network
    */
   async disconnect(): Promise<void> {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     const Pi = (window as any).Pi;
-    if (!Pi) return;
+    if (!Pi) {
+      return;
+    }
 
     try {
       await Pi.auth.logout?.();
@@ -171,7 +177,7 @@ export class OfficialPiPayments {
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error("[Pi Payments] Payment timeout"));
-        }, 60000); // 60 second timeout
+        }, 60_000); // 60 second timeout
 
         // Payment approved by user
         const handleApproval = async (payment: any) => {

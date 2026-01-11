@@ -5,12 +5,12 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-interface Application {
+type Application = {
   id: string;
   name: string;
   description: string;
@@ -19,14 +19,14 @@ interface Application {
   categories: string[];
   enabled: boolean;
   features: string[];
-}
+};
 
-interface RegistryStatus {
+type RegistryStatus = {
   total: number;
   enabled: number;
   disabled: number;
   applications: string[];
-}
+};
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -34,7 +34,7 @@ export default function ApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -56,18 +56,18 @@ export default function ApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [fetchApplications]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="font-bold text-4xl text-gray-900">
             Integrated Applications
           </h1>
           <p className="mt-2 text-gray-600">
@@ -81,26 +81,26 @@ export default function ApplicationsPage() {
           <div className="mb-8 grid grid-cols-3 gap-4">
             <Card className="p-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">
+                <div className="font-bold text-3xl text-blue-600">
                   {summary.total}
                 </div>
-                <p className="text-sm text-gray-600">Total Applications</p>
+                <p className="text-gray-600 text-sm">Total Applications</p>
               </div>
             </Card>
             <Card className="p-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">
+                <div className="font-bold text-3xl text-green-600">
                   {summary.enabled}
                 </div>
-                <p className="text-sm text-gray-600">Enabled</p>
+                <p className="text-gray-600 text-sm">Enabled</p>
               </div>
             </Card>
             <Card className="p-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-amber-600">
+                <div className="font-bold text-3xl text-amber-600">
                   {summary.disabled}
                 </div>
-                <p className="text-sm text-gray-600">Disabled</p>
+                <p className="text-gray-600 text-sm">Disabled</p>
               </div>
             </Card>
           </div>
@@ -108,11 +108,11 @@ export default function ApplicationsPage() {
 
         {/* Refresh Button */}
         <div className="mb-6 flex justify-between">
-          <div></div>
+          <div />
           <Button
-            onClick={fetchApplications}
-            disabled={loading}
             className="gap-2"
+            disabled={loading}
+            onClick={fetchApplications}
           >
             <RefreshCw className="h-4 w-4" />
             {loading ? "Loading..." : "Refresh"}
@@ -134,10 +134,12 @@ export default function ApplicationsPage() {
           <div className="space-y-4">
             {applications.map((app) => (
               <Card
-                key={app.id}
                 className={`border-l-4 p-6 ${
-                  app.enabled ? "border-l-green-500 bg-green-50" : "border-l-gray-300"
+                  app.enabled
+                    ? "border-l-green-500 bg-green-50"
+                    : "border-l-gray-300"
                 }`}
+                key={app.id}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -145,10 +147,10 @@ export default function ApplicationsPage() {
                       {app.enabled && (
                         <CheckCircle2 className="h-5 w-5 text-green-600" />
                       )}
-                      <h3 className="text-xl font-bold text-gray-900">
+                      <h3 className="font-bold text-gray-900 text-xl">
                         {app.name}
                       </h3>
-                      <span className="rounded bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                      <span className="rounded bg-blue-100 px-3 py-1 font-medium text-blue-700 text-sm">
                         v{app.version}
                       </span>
                     </div>
@@ -156,25 +158,24 @@ export default function ApplicationsPage() {
                     <p className="mt-2 text-gray-600">{app.description}</p>
 
                     <div className="mt-4 space-y-2">
-                      <p className="text-sm text-gray-700">
+                      <p className="text-gray-700 text-sm">
                         <strong>Author:</strong> {app.author}
                       </p>
-                      <p className="text-sm text-gray-700">
-                        <strong>Categories:</strong>{" "}
-                        {app.categories.join(", ")}
+                      <p className="text-gray-700 text-sm">
+                        <strong>Categories:</strong> {app.categories.join(", ")}
                       </p>
                     </div>
 
                     {/* Features */}
                     <div className="mt-4">
-                      <p className="mb-2 text-sm font-semibold text-gray-700">
+                      <p className="mb-2 font-semibold text-gray-700 text-sm">
                         Features:
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {app.features.map((feature) => (
                           <span
+                            className="rounded-full bg-blue-100 px-3 py-1 text-blue-700 text-xs"
                             key={feature}
-                            className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700"
                           >
                             {feature}
                           </span>
@@ -190,7 +191,7 @@ export default function ApplicationsPage() {
                         app.enabled ? "bg-green-500" : "bg-gray-300"
                       }`}
                     />
-                    <span className="text-xs font-semibold text-gray-600">
+                    <span className="font-semibold text-gray-600 text-xs">
                       {app.enabled ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </div>
@@ -204,10 +205,8 @@ export default function ApplicationsPage() {
         {!loading && applications.length === 0 && !error && (
           <Card className="border-amber-200 bg-amber-50 p-8 text-center">
             <AlertCircle className="mx-auto h-8 w-8 text-amber-600" />
-            <p className="mt-4 text-gray-700">
-              No applications registered yet
-            </p>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-4 text-gray-700">No applications registered yet</p>
+            <p className="mt-1 text-gray-600 text-sm">
               Applications will appear here when they are registered with the
               ecosystem
             </p>
@@ -215,11 +214,11 @@ export default function ApplicationsPage() {
         )}
 
         {/* Info Box */}
-        <div className="mt-8 rounded-lg bg-blue-50 p-6 border border-blue-200">
-          <h3 className="font-semibold text-blue-900 mb-2">
+        <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6">
+          <h3 className="mb-2 font-semibold text-blue-900">
             📚 Application Ecosystem Info
           </h3>
-          <ul className="text-sm text-blue-800 space-y-1 ml-4 list-disc">
+          <ul className="ml-4 list-disc space-y-1 text-blue-800 text-sm">
             <li>Each application integrates with Pi Payments automatically</li>
             <li>All payments are processed through official Pi SDK</li>
             <li>Consistent transaction tracking across the ecosystem</li>
@@ -227,10 +226,10 @@ export default function ApplicationsPage() {
             <li>
               Reference:{" "}
               <a
+                className="font-medium underline"
                 href="https://minepi.com/blog/10-minutes-pi-payments"
-                target="_blank"
                 rel="noopener noreferrer"
-                className="underline font-medium"
+                target="_blank"
               >
                 minepi.com/blog/10-minutes-pi-payments
               </a>
@@ -239,19 +238,19 @@ export default function ApplicationsPage() {
         </div>
 
         {/* API Reference */}
-        <div className="mt-8 rounded-lg bg-gray-50 p-6 border border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-3">🔌 API Reference</h3>
-          <div className="space-y-2 text-sm font-mono text-gray-700">
-            <div className="bg-white p-3 rounded border">
+        <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50 p-6">
+          <h3 className="mb-3 font-semibold text-gray-900">🔌 API Reference</h3>
+          <div className="space-y-2 font-mono text-gray-700 text-sm">
+            <div className="rounded border bg-white p-3">
               <strong>GET</strong> /api/ecosystem/applications
             </div>
-            <div className="bg-white p-3 rounded border">
+            <div className="rounded border bg-white p-3">
               <strong>POST</strong> /api/ecosystem/applications
             </div>
-            <div className="bg-white p-3 rounded border">
+            <div className="rounded border bg-white p-3">
               <strong>POST</strong> /api/ecosystem/payments
             </div>
-            <div className="bg-white p-3 rounded border">
+            <div className="rounded border bg-white p-3">
               <strong>GET</strong> /api/ecosystem/payments?appId=xxx
             </div>
           </div>

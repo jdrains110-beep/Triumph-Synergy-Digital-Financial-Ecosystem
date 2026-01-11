@@ -1,12 +1,12 @@
 /**
  * Triumph Synergy - E-Commerce Marketplace Hub
- * 
+ *
  * Superior worldwide marketplace hub for:
  * - Companies to sell products and services
  * - Global vendor subscriptions
  * - Pi Network integrated payments
  * - Multi-vendor marketplace management
- * 
+ *
  * @module lib/commerce/ecommerce-marketplace-hub
  * @version 1.0.0
  */
@@ -16,7 +16,7 @@
 // ============================================================================
 
 const PI_EXTERNAL_RATE = 314.159;
-const PI_INTERNAL_RATE = 314159;
+const PI_INTERNAL_RATE = 314_159;
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -29,8 +29,14 @@ export function getPiRate(type: PiValueType = "external"): number {
 // TYPES & INTERFACES
 // ============================================================================
 
-export type VendorType = "individual" | "small-business" | "enterprise" | "manufacturer" | "wholesaler" | "service-provider";
-export type VendorCategory = 
+export type VendorType =
+  | "individual"
+  | "small-business"
+  | "enterprise"
+  | "manufacturer"
+  | "wholesaler"
+  | "service-provider";
+export type VendorCategory =
   | "electronics"
   | "fashion"
   | "home-garden"
@@ -46,15 +52,34 @@ export type VendorCategory =
   | "art-collectibles"
   | "other";
 
-export type VendorSubscriptionTier = "starter" | "professional" | "business" | "enterprise" | "global";
+export type VendorSubscriptionTier =
+  | "starter"
+  | "professional"
+  | "business"
+  | "enterprise"
+  | "global";
 export type VendorStatus = "pending" | "active" | "suspended" | "terminated";
-export type ListingStatus = "draft" | "pending-review" | "active" | "paused" | "sold-out" | "removed";
-export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "returned" | "cancelled" | "refunded";
+export type ListingStatus =
+  | "draft"
+  | "pending-review"
+  | "active"
+  | "paused"
+  | "sold-out"
+  | "removed";
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "returned"
+  | "cancelled"
+  | "refunded";
 
-export interface Vendor {
+export type Vendor = {
   id: string;
   userId: string;
-  
+
   // Business Profile
   businessName: string;
   legalName: string;
@@ -63,19 +88,19 @@ export interface Vendor {
   description: string;
   logo: string;
   banner: string;
-  
+
   // Contact
   email: string;
   phone: string;
   website: string | null;
-  
+
   // Location
   country: string;
   region: string;
   city: string;
   address: string;
   postalCode: string;
-  
+
   // Subscription
   subscriptionTier: VendorSubscriptionTier;
   subscriptionStatus: "trial" | "active" | "past_due" | "cancelled";
@@ -83,81 +108,81 @@ export interface Vendor {
   subscriptionEndDate: Date;
   monthlyFee: number;
   monthlyFeeInPi: number;
-  
+
   // Commission Structure
   commissionRate: number; // percentage
   piCommissionBonus: number; // percentage discount when paid in Pi
-  
+
   // Performance
   totalSales: number;
   totalRevenue: number;
   totalRevenueInPi: number;
   averageRating: number;
   totalReviews: number;
-  
+
   // Status
   status: VendorStatus;
   verificationStatus: "unverified" | "pending" | "verified" | "premium";
   taxCompliant: boolean;
-  
+
   // Pi Integration
   piWalletLinked: boolean;
   acceptsPi: boolean;
   piOnlyMode: boolean;
-  
+
   // Stats
   totalProducts: number;
   activeListings: number;
   totalOrders: number;
   pendingOrders: number;
-  
+
   // Features
   featuredVendor: boolean;
   storefront: boolean;
   apiAccess: boolean;
   bulkUploads: boolean;
   analyticsAccess: "basic" | "advanced" | "enterprise";
-  
+
   createdAt: Date;
   lastActiveAt: Date;
-}
+};
 
-export interface Product {
+export type Product = {
   id: string;
   vendorId: string;
-  
+
   // Basic Info
   name: string;
   description: string;
   shortDescription: string;
   brand: string | null;
-  
+
   // Categorization
   category: VendorCategory;
   subcategory: string;
   tags: string[];
-  
+
   // Pricing
   price: number;
   priceInPi: number;
   compareAtPrice: number | null;
   costPerItem: number | null;
-  
+
   // Inventory
   sku: string;
   barcode: string | null;
   trackInventory: boolean;
   quantity: number;
   lowStockThreshold: number;
-  
+
   // Variants
   hasVariants: boolean;
   variants: ProductVariant[];
-  
+
   // Media
   images: string[];
   videos: string[];
-  
+
   // Shipping
   weight: number;
   weightUnit: "kg" | "lb";
@@ -169,32 +194,32 @@ export interface Product {
   };
   shippingRequired: boolean;
   shippingClass: string;
-  
+
   // Digital
   isDigital: boolean;
   digitalUrl: string | null;
-  
+
   // Status
   status: ListingStatus;
   publishedAt: Date | null;
-  
+
   // SEO
   seoTitle: string | null;
   seoDescription: string | null;
   slug: string;
-  
+
   // Stats
   views: number;
   sales: number;
   revenue: number;
   rating: number;
   reviewCount: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface ProductVariant {
+export type ProductVariant = {
   id: string;
   productId: string;
   name: string;
@@ -204,17 +229,17 @@ export interface ProductVariant {
   quantity: number;
   options: Record<string, string>;
   image: string | null;
-}
+};
 
-export interface Order {
+export type Order = {
   id: string;
   orderNumber: string;
   vendorId: string;
   customerId: string;
-  
+
   // Items
   items: OrderItem[];
-  
+
   // Pricing
   subtotal: number;
   tax: number;
@@ -222,37 +247,37 @@ export interface Order {
   discount: number;
   total: number;
   totalInPi: number;
-  
+
   // Payment
   paymentMethod: "pi" | "card" | "crypto" | "hybrid";
   paidInPi: number;
   paidInFiat: number;
   paymentStatus: "pending" | "paid" | "refunded" | "failed";
-  
+
   // Status
   status: OrderStatus;
-  
+
   // Shipping
   shippingAddress: ShippingAddress;
   shippingMethod: string;
   trackingNumber: string | null;
   estimatedDelivery: Date | null;
   actualDelivery: Date | null;
-  
+
   // Fees
   platformFee: number;
   vendorEarnings: number;
   vendorEarningsInPi: number;
-  
+
   // Notes
   customerNotes: string | null;
   vendorNotes: string | null;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface OrderItem {
+export type OrderItem = {
   id: string;
   productId: string;
   variantId: string | null;
@@ -262,9 +287,9 @@ export interface OrderItem {
   price: number;
   priceInPi: number;
   total: number;
-}
+};
 
-export interface ShippingAddress {
+export type ShippingAddress = {
   name: string;
   company: string | null;
   addressLine1: string;
@@ -274,9 +299,9 @@ export interface ShippingAddress {
   postalCode: string;
   country: string;
   phone: string;
-}
+};
 
-export interface VendorSubscriptionPlan {
+export type VendorSubscriptionPlan = {
   tier: VendorSubscriptionTier;
   name: string;
   monthlyPrice: number;
@@ -284,17 +309,17 @@ export interface VendorSubscriptionPlan {
   annualPrice: number;
   annualPriceInPi: number;
   features: string[];
-  
+
   // Limits
   maxProducts: number | "unlimited";
   maxMonthlyOrders: number | "unlimited";
   maxStaff: number;
-  
+
   // Fees
   commissionRate: number;
   transactionFee: number;
   piTransactionBonus: number;
-  
+
   // Features
   storefront: boolean;
   customDomain: boolean;
@@ -303,52 +328,53 @@ export interface VendorSubscriptionPlan {
   inventoryManagement: boolean;
   analytics: "basic" | "advanced" | "enterprise";
   support: "community" | "email" | "priority" | "dedicated";
-  
+
   // Marketing
   featuredListings: number;
   adsCredits: number;
-}
+};
 
-export interface VendorAnalytics {
+export type VendorAnalytics = {
   vendorId: string;
   period: "day" | "week" | "month" | "year";
-  
+
   // Sales
   totalSales: number;
   totalRevenue: number;
   totalRevenueInPi: number;
   averageOrderValue: number;
-  
+
   // Traffic
   storeViews: number;
   productViews: number;
   conversionRate: number;
-  
+
   // Products
-  topProducts: { productId: string; name: string; sales: number; revenue: number }[];
+  topProducts: {
+    productId: string;
+    name: string;
+    sales: number;
+    revenue: number;
+  }[];
   lowStockProducts: { productId: string; name: string; quantity: number }[];
-  
+
   // Customers
   newCustomers: number;
   returningCustomers: number;
-  
+
   // Ratings
   averageRating: number;
   newReviews: number;
-}
+};
 
 // ============================================================================
 // E-COMMERCE MARKETPLACE HUB CLASS
 // ============================================================================
 
 class EcommerceMarketplaceHub {
-  private vendors: Map<string, Vendor> = new Map();
-  private products: Map<string, Product> = new Map();
-  private orders: Map<string, Order> = new Map();
-
-  constructor() {
-    // Initialize marketplace
-  }
+  private readonly vendors: Map<string, Vendor> = new Map();
+  private readonly products: Map<string, Product> = new Map();
+  private readonly orders: Map<string, Order> = new Map();
 
   // ==========================================================================
   // SUBSCRIPTION PLANS
@@ -469,8 +495,8 @@ class EcommerceMarketplaceHub {
           "10 staff accounts",
           "SLA guarantee",
         ],
-        maxProducts: 10000,
-        maxMonthlyOrders: 10000,
+        maxProducts: 10_000,
+        maxMonthlyOrders: 10_000,
         maxStaff: 10,
         commissionRate: 8,
         transactionFee: 1.5,
@@ -490,8 +516,8 @@ class EcommerceMarketplaceHub {
         name: "Global Marketplace",
         monthlyPrice: 1499,
         monthlyPriceInPi: 1499 / PI_EXTERNAL_RATE,
-        annualPrice: 14388,
-        annualPriceInPi: 14388 / PI_EXTERNAL_RATE,
+        annualPrice: 14_388,
+        annualPriceInPi: 14_388 / PI_EXTERNAL_RATE,
         features: [
           "Unlimited product listings",
           "Unlimited orders",
@@ -606,7 +632,10 @@ class EcommerceMarketplaceHub {
     return this.vendors.get(vendorId) || null;
   }
 
-  async upgradeVendorSubscription(vendorId: string, newTier: VendorSubscriptionTier): Promise<Vendor> {
+  async upgradeVendorSubscription(
+    vendorId: string,
+    newTier: VendorSubscriptionTier
+  ): Promise<Vendor> {
     const vendor = this.vendors.get(vendorId);
     if (!vendor) {
       throw new Error("Vendor not found");
@@ -632,31 +661,37 @@ class EcommerceMarketplaceHub {
   // PRODUCT MANAGEMENT
   // ==========================================================================
 
-  async createProduct(vendorId: string, data: {
-    name: string;
-    description: string;
-    shortDescription: string;
-    brand?: string;
-    category: VendorCategory;
-    subcategory: string;
-    tags?: string[];
-    price: number;
-    compareAtPrice?: number;
-    costPerItem?: number;
-    sku: string;
-    quantity: number;
-    images?: string[];
-    weight?: number;
-    shippingRequired?: boolean;
-    isDigital?: boolean;
-  }): Promise<Product> {
+  async createProduct(
+    vendorId: string,
+    data: {
+      name: string;
+      description: string;
+      shortDescription: string;
+      brand?: string;
+      category: VendorCategory;
+      subcategory: string;
+      tags?: string[];
+      price: number;
+      compareAtPrice?: number;
+      costPerItem?: number;
+      sku: string;
+      quantity: number;
+      images?: string[];
+      weight?: number;
+      shippingRequired?: boolean;
+      isDigital?: boolean;
+    }
+  ): Promise<Product> {
     const vendor = this.vendors.get(vendorId);
     if (!vendor) {
       throw new Error("Vendor not found");
     }
 
     const id = `product-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    const slug = data.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const slug = data.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
 
     const product: Product = {
       id,
@@ -739,7 +774,9 @@ class EcommerceMarketplaceHub {
     searchTerm?: string;
     acceptsPi?: boolean;
   }): Promise<Product[]> {
-    let products = Array.from(this.products.values()).filter((p) => p.status === "active");
+    let products = Array.from(this.products.values()).filter(
+      (p) => p.status === "active"
+    );
 
     if (filters.category) {
       products = products.filter((p) => p.category === filters.category);
@@ -796,7 +833,9 @@ class EcommerceMarketplaceHub {
 
     for (const item of data.items) {
       const product = this.products.get(item.productId);
-      if (!product) continue;
+      if (!product) {
+        continue;
+      }
 
       const orderItem: OrderItem = {
         id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 4)}`,
@@ -820,9 +859,10 @@ class EcommerceMarketplaceHub {
     const total = subtotal + tax + shipping - discount;
 
     // Calculate fees
-    const commissionRate = data.paymentMethod === "pi" 
-      ? vendor.commissionRate - vendor.piCommissionBonus 
-      : vendor.commissionRate;
+    const commissionRate =
+      data.paymentMethod === "pi"
+        ? vendor.commissionRate - vendor.piCommissionBonus
+        : vendor.commissionRate;
     const platformFee = total * (commissionRate / 100);
     const vendorEarnings = total - platformFee;
 
@@ -868,7 +908,11 @@ class EcommerceMarketplaceHub {
     return this.orders.get(orderId) || null;
   }
 
-  async updateOrderStatus(orderId: string, status: OrderStatus, trackingNumber?: string): Promise<Order> {
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    trackingNumber?: string
+  ): Promise<Order> {
     const order = this.orders.get(orderId);
     if (!order) {
       throw new Error("Order not found");
@@ -914,10 +958,12 @@ class EcommerceMarketplaceHub {
       throw new Error("Vendor not found");
     }
 
-    const vendorProducts = Array.from(this.products.values())
-      .filter((p) => p.vendorId === vendorId);
-    const vendorOrders = Array.from(this.orders.values())
-      .filter((o) => o.vendorId === vendorId);
+    const vendorProducts = Array.from(this.products.values()).filter(
+      (p) => p.vendorId === vendorId
+    );
+    const vendorOrders = Array.from(this.orders.values()).filter(
+      (o) => o.vendorId === vendorId
+    );
 
     const plans = this.getVendorSubscriptionPlans();
 
@@ -931,7 +977,8 @@ class EcommerceMarketplaceHub {
         totalSales: vendor.totalSales,
         totalRevenue: vendor.totalRevenue,
         totalRevenueInPi: vendor.totalRevenueInPi,
-        averageOrderValue: vendor.totalSales > 0 ? vendor.totalRevenue / vendor.totalSales : 0,
+        averageOrderValue:
+          vendor.totalSales > 0 ? vendor.totalRevenue / vendor.totalSales : 0,
         storeViews: 0,
         productViews: vendorProducts.reduce((sum, p) => sum + p.views, 0),
         conversionRate: 0,
@@ -943,13 +990,18 @@ class EcommerceMarketplaceHub {
         })),
         lowStockProducts: vendorProducts
           .filter((p) => p.quantity <= p.lowStockThreshold)
-          .map((p) => ({ productId: p.id, name: p.name, quantity: p.quantity })),
+          .map((p) => ({
+            productId: p.id,
+            name: p.name,
+            quantity: p.quantity,
+          })),
         newCustomers: 0,
         returningCustomers: 0,
         averageRating: vendor.averageRating,
         newReviews: 0,
       },
-      subscriptionInfo: plans.find((p) => p.tier === vendor.subscriptionTier) || null,
+      subscriptionInfo:
+        plans.find((p) => p.tier === vendor.subscriptionTier) || null,
     };
   }
 
@@ -961,7 +1013,11 @@ class EcommerceMarketplaceHub {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,

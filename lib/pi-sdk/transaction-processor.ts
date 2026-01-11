@@ -47,8 +47,6 @@ export type BlockchainSettlement = {
  * Handles user-to-app payment transactions
  */
 export class TransactionProcessor {
-  private readonly apiKey: string;
-  private readonly apiSecret: string;
   private readonly maxTransactionAmount: number = 100_000; // 100k Pi
   private readonly minTransactionAmount: number = 1; // 1 Pi
   private readonly approvalTimeout: number = 5 * 60 * 1000; // 5 minutes

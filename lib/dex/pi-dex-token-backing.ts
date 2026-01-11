@@ -1,8 +1,8 @@
 /**
  * lib/dex/pi-dex-token-backing.ts
- * 
+ *
  * TRIUMPH SYNERGY - PI DEX TOKEN BACKING SYSTEM
- * 
+ *
  * Backs ecosystem tokens through Pi DEX using physical hub pools
  * Creates token liquidity for:
  * - Ecosystem infrastructure usage
@@ -15,28 +15,28 @@
 // TOKEN TYPES & INTERFACES
 // ============================================================================
 
-export type TokenType = 
-  | 'hub_operational' 
-  | 'infrastructure' 
-  | 'pi_backed_stable' 
-  | 'growth_expansion' 
-  | 'liquidity_provider';
+export type TokenType =
+  | "hub_operational"
+  | "infrastructure"
+  | "pi_backed_stable"
+  | "growth_expansion"
+  | "liquidity_provider";
 
-export interface DexToken {
+export type DexToken = {
   tokenId: string;
   name: string;
   symbol: string;
   type: TokenType;
-  
+
   // Backing
   backedByPi: number; // Pi amount in reserve
   backingRatio: number; // Pi per token
   totalSupply: number; // Total tokens issued
-  
+
   // Hub relationships
   issuingHub?: string; // Hub that issued this token
   supportingHubs: string[]; // Hubs accepting this token
-  
+
   // Trading pairs
   dexListings: {
     exchange: string; // 'pi_dex_primary', 'pi_dex_secondary', etc.
@@ -44,20 +44,20 @@ export interface DexToken {
     liquidityPool: number; // Pi in liquidity pool
     volume24h: number; // 24h trading volume
   }[];
-  
+
   // Status
-  status: 'pending' | 'active' | 'trading' | 'mature';
+  status: "pending" | "active" | "trading" | "mature";
   createdAt: Date;
   lastUpdated: Date;
-}
+};
 
-export interface PiDexLiquidityPool {
+export type PiDexLiquidityPool = {
   poolId: string;
   hubId: string; // Hub providing liquidity
   tokenId: string; // Token in pool
   piReserve: number; // Pi side of pool
   tokenReserve: number; // Token side of pool
-  
+
   // Pool metrics
   liquidityProvider: string; // Hub providing liquidity
   feePercentage: number; // 0.3% typical
@@ -66,32 +66,32 @@ export interface PiDexLiquidityPool {
     pi: number;
     token: number;
   };
-  
+
   createdAt: Date;
   lastUpdated: Date;
-}
+};
 
-export interface TokenBackingTransaction {
+export type TokenBackingTransaction = {
   transactionId: string;
-  type: 'mint' | 'burn' | 'trade' | 'liquidity_add' | 'liquidity_remove';
+  type: "mint" | "burn" | "trade" | "liquidity_add" | "liquidity_remove";
   tokenId: string;
   hubId: string;
-  
+
   // Amounts
   piAmount: number;
   tokenAmount: number;
-  
+
   // Details
   description: string;
   timestamp: Date;
-  status: 'completed' | 'pending' | 'failed';
-  
+  status: "completed" | "pending" | "failed";
+
   // Blockchain
   blockchainHash?: string;
   confirmations?: number;
-}
+};
 
-export interface DexMetrics {
+export type DexMetrics = {
   totalTokensCreated: number;
   totalPiLocked: number;
   totalLiquidityPools: number;
@@ -108,7 +108,7 @@ export interface DexMetrics {
     stableTokens: number;
     growthTokens: number;
   };
-}
+};
 
 // ============================================================================
 // PI DEX TOKEN BACKING ENGINE
@@ -116,19 +116,19 @@ export interface DexMetrics {
 
 export class PiDexTokenBackingEngine {
   private static instance: PiDexTokenBackingEngine;
-  private tokens = new Map<string, DexToken>();
-  private liquidityPools = new Map<string, PiDexLiquidityPool>();
-  private transactions: TokenBackingTransaction[] = [];
+  private readonly tokens = new Map<string, DexToken>();
+  private readonly liquidityPools = new Map<string, PiDexLiquidityPool>();
+  private readonly transactions: TokenBackingTransaction[] = [];
 
   private constructor() {
-    console.log('[Pi DEX Token Backing] Engine initialized');
+    console.log("[Pi DEX Token Backing] Engine initialized");
   }
 
   static getInstance(): PiDexTokenBackingEngine {
-    if (!this.instance) {
-      this.instance = new PiDexTokenBackingEngine();
+    if (!PiDexTokenBackingEngine.instance) {
+      PiDexTokenBackingEngine.instance = new PiDexTokenBackingEngine();
     }
-    return this.instance;
+    return PiDexTokenBackingEngine.instance;
   }
 
   /**
@@ -157,7 +157,7 @@ export class PiDexTokenBackingEngine {
       issuingHub: hubId,
       supportingHubs: [hubId],
       dexListings: [],
-      status: 'pending',
+      status: "pending",
       createdAt: new Date(),
       lastUpdated: new Date(),
     };
@@ -194,11 +194,11 @@ export class PiDexTokenBackingEngine {
     const poolId = `pool_${tokenSymbol}_${exchange}_${Date.now()}`;
     const liquidityPool: PiDexLiquidityPool = {
       poolId,
-      hubId: token.issuingHub || '',
+      hubId: token.issuingHub || "",
       tokenId: token.tokenId,
       piReserve: piLiquidityAmount,
       tokenReserve: piLiquidityAmount, // 1:1 ratio
-      liquidityProvider: token.issuingHub || '',
+      liquidityProvider: token.issuingHub || "",
       feePercentage: 0.3,
       volume24h: 0,
       reserves: {
@@ -219,7 +219,7 @@ export class PiDexTokenBackingEngine {
       volume24h: 0,
     });
 
-    token.status = 'trading';
+    token.status = "trading";
     token.lastUpdated = new Date();
 
     console.log(
@@ -243,7 +243,9 @@ export class PiDexTokenBackingEngine {
       token.supportingHubs.push(hubId);
       token.lastUpdated = new Date();
 
-      console.log(`✅ Hub ${hubId} added as supporter for token ${tokenSymbol}`);
+      console.log(
+        `✅ Hub ${hubId} added as supporter for token ${tokenSymbol}`
+      );
     }
   }
 
@@ -266,14 +268,14 @@ export class PiDexTokenBackingEngine {
 
     const transaction: TokenBackingTransaction = {
       transactionId: `tx_mint_${tokenSymbol}_${Date.now()}`,
-      type: 'mint',
+      type: "mint",
       tokenId: token.tokenId,
       hubId,
       piAmount: additionalPiAmount,
       tokenAmount: additionalPiAmount, // 1:1 minting
       description: `Mint ${additionalPiAmount} tokens backed by ${additionalPiAmount} Pi`,
       timestamp: new Date(),
-      status: 'completed',
+      status: "completed",
     };
 
     // Update token
@@ -322,14 +324,14 @@ export class PiDexTokenBackingEngine {
 
     const transaction: TokenBackingTransaction = {
       transactionId: `tx_burn_${tokenSymbol}_${Date.now()}`,
-      type: 'burn',
+      type: "burn",
       tokenId: token.tokenId,
       hubId,
       piAmount: piRetrieved,
       tokenAmount,
       description: `Burn ${tokenAmount} tokens to retrieve ${piRetrieved} Pi`,
       timestamp: new Date(),
-      status: 'completed',
+      status: "completed",
     };
 
     // Update token
@@ -370,19 +372,19 @@ export class PiDexTokenBackingEngine {
 
     const token = this.tokens.get(pool.tokenId);
     if (!token) {
-      throw new Error(`Token for pool not found`);
+      throw new Error("Token for pool not found");
     }
 
     const transaction: TokenBackingTransaction = {
       transactionId: `tx_liq_add_${poolId}_${Date.now()}`,
-      type: 'liquidity_add',
+      type: "liquidity_add",
       tokenId: token.tokenId,
       hubId: pool.hubId,
       piAmount,
       tokenAmount,
       description: `Add ${piAmount} Pi and ${tokenAmount} tokens to liquidity pool`,
       timestamp: new Date(),
-      status: 'completed',
+      status: "completed",
     };
 
     // Update pool
@@ -474,14 +476,15 @@ export class PiDexTokenBackingEngine {
       .sort((a, b) => b.volume24h - a.volume24h)
       .slice(0, 5)
       .map((p) => ({
-        pair: `${this.tokens.get(p.tokenId)?.symbol || 'UNKNOWN'}_PI`,
+        pair: `${this.tokens.get(p.tokenId)?.symbol || "UNKNOWN"}_PI`,
         volume: p.volume24h,
         liquidity: p.piReserve + p.tokenReserve,
       }));
 
     const avgBackingRatio =
       allTokens.length > 0
-        ? allTokens.reduce((sum, t) => sum + t.backingRatio, 0) / allTokens.length
+        ? allTokens.reduce((sum, t) => sum + t.backingRatio, 0) /
+          allTokens.length
         : 0;
 
     return {
@@ -492,12 +495,15 @@ export class PiDexTokenBackingEngine {
       totalVolume24h,
       topTradigPairs: topPairs,
       tokenStats: {
-        operationalTokens: allTokens.filter((t) => t.type === 'hub_operational')
+        operationalTokens: allTokens.filter((t) => t.type === "hub_operational")
           .length,
-        infrastructureTokens: allTokens.filter((t) => t.type === 'infrastructure')
+        infrastructureTokens: allTokens.filter(
+          (t) => t.type === "infrastructure"
+        ).length,
+        stableTokens: allTokens.filter((t) => t.type === "pi_backed_stable")
           .length,
-        stableTokens: allTokens.filter((t) => t.type === 'pi_backed_stable').length,
-        growthTokens: allTokens.filter((t) => t.type === 'growth_expansion').length,
+        growthTokens: allTokens.filter((t) => t.type === "growth_expansion")
+          .length,
       },
     };
   }
@@ -508,7 +514,9 @@ export class PiDexTokenBackingEngine {
   getTransactionHistory(tokenSymbol?: string): TokenBackingTransaction[] {
     if (tokenSymbol) {
       const token = this.tokens.get(tokenSymbol);
-      if (!token) return [];
+      if (!token) {
+        return [];
+      }
       return this.transactions.filter((t) => t.tokenId === token.tokenId);
     }
     return this.transactions;

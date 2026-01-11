@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Banking Partners Integration Platform
- * 
+ *
  * Unified banking integration layer for financial institution partnerships
  * Supports traditional banking, digital banks, and Pi Network hybrid accounts
- * 
+ *
  * @module lib/banking/banking-partners-platform
  * @version 1.0.0
  */
@@ -15,8 +15,8 @@
 // Dual Pi Value System
 // Internally mined/contributed Pi = 1000x multiplier
 // External/non-contributed Pi = base rate
-const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
-const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_EXTERNAL_RATE = 314.159; // External non-contributed Pi
+const PI_INTERNAL_RATE = 314_159; // Internally mined/contributed Pi (1000x)
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -29,12 +29,12 @@ export function getPiRate(type: PiValueType = "external"): number {
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface BankingPartner {
+export type BankingPartner = {
   id: string;
   name: string;
   type: BankType;
   status: PartnerStatus;
-  
+
   // Institution Details
   routingNumber: string;
   swiftCode: string | null;
@@ -42,41 +42,41 @@ export interface BankingPartner {
   charteredIn: string;
   fdicsInsured: boolean;
   ncuaInsured: boolean;
-  
+
   // Contact
   headquarters: Address;
   primaryContact: ContactInfo;
   technicalContact: ContactInfo;
-  
+
   // Integration
   apiEndpoint: string;
   apiVersion: string;
   authMethod: AuthMethod;
   supportedOperations: BankingOperation[];
   rateLimit: number;
-  
+
   // Capabilities
   capabilities: BankCapabilities;
-  
+
   // Pi Network
   piNetworkEnabled: boolean;
   piCustodySupported: boolean;
   piSettlementAccount: string | null;
-  
+
   // Compliance
   compliance: ComplianceInfo;
-  
+
   // Metrics
   metrics: PartnerMetrics;
-  
+
   // Timestamps
   partnerSince: Date;
   lastActiveAt: Date;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export type BankType = 
+export type BankType =
   | "commercial"
   | "investment"
   | "retail"
@@ -86,21 +86,16 @@ export type BankType =
   | "central-bank"
   | "custodian";
 
-export type PartnerStatus = 
+export type PartnerStatus =
   | "pending"
   | "onboarding"
   | "active"
   | "suspended"
   | "terminated";
 
-export type AuthMethod = 
-  | "oauth2"
-  | "api-key"
-  | "mtls"
-  | "jwt"
-  | "basic";
+export type AuthMethod = "oauth2" | "api-key" | "mtls" | "jwt" | "basic";
 
-export type BankingOperation = 
+export type BankingOperation =
   | "account-inquiry"
   | "balance-check"
   | "transfer-ach"
@@ -116,24 +111,24 @@ export type BankingOperation =
   | "pi-custody"
   | "stablecoin-minting";
 
-export interface Address {
+export type Address = {
   street: string;
   suite: string | null;
   city: string;
   state: string;
   zip: string;
   country: string;
-}
+};
 
-export interface ContactInfo {
+export type ContactInfo = {
   name: string;
   title: string;
   email: string;
   phone: string;
   department: string;
-}
+};
 
-export interface BankCapabilities {
+export type BankCapabilities = {
   achOrigination: boolean;
   wireTransfer: boolean;
   rtpNetwork: boolean;
@@ -147,9 +142,9 @@ export interface BankCapabilities {
   stablecoinSupport: boolean;
   lendingServices: boolean;
   wealthManagement: boolean;
-}
+};
 
-export interface ComplianceInfo {
+export type ComplianceInfo = {
   kycAmlProvider: string;
   ofacScreening: boolean;
   pciDssCompliant: boolean;
@@ -158,9 +153,9 @@ export interface ComplianceInfo {
   regulators: string[];
   lastAuditDate: Date;
   nextAuditDate: Date;
-}
+};
 
-export interface PartnerMetrics {
+export type PartnerMetrics = {
   totalTransactions: number;
   totalVolume: number;
   avgTransactionTime: number;
@@ -168,41 +163,41 @@ export interface PartnerMetrics {
   disputeRate: number;
   piConversions: number;
   piVolume: number;
-}
+};
 
-export interface BankAccount {
+export type BankAccount = {
   id: string;
   partnerId: string;
   userId: string;
   type: AccountType;
   status: AccountStatus;
-  
+
   // Account Details
-  accountNumber: string;  // Encrypted
+  accountNumber: string; // Encrypted
   routingNumber: string;
   accountName: string;
   currency: string;
-  
+
   // Balances
   availableBalance: number;
   currentBalance: number;
   pendingBalance: number;
-  
+
   // Pi Integration
   linkedPiWallet: string | null;
   piAutoConvert: boolean;
   piConversionThreshold: number;
-  
+
   // Features
   features: AccountFeature[];
   limits: AccountLimits;
-  
+
   // Timestamps
   openedAt: Date;
   lastTransactionAt: Date | null;
-}
+};
 
-export type AccountType = 
+export type AccountType =
   | "checking"
   | "savings"
   | "money-market"
@@ -213,60 +208,56 @@ export type AccountType =
   | "pi-hybrid"
   | "custody";
 
-export type AccountStatus = 
-  | "pending"
-  | "active"
-  | "frozen"
-  | "closed";
+export type AccountStatus = "pending" | "active" | "frozen" | "closed";
 
-export interface AccountFeature {
+export type AccountFeature = {
   name: string;
   enabled: boolean;
   limit: number | null;
-}
+};
 
-export interface AccountLimits {
+export type AccountLimits = {
   dailyWithdrawal: number;
   dailyTransfer: number;
   monthlyTransfer: number;
   singleTransactionMax: number;
   piDailyConversion: number;
-}
+};
 
-export interface Transaction {
+export type Transaction = {
   id: string;
   partnerId: string;
   accountId: string;
   type: TransactionType;
   status: TransactionStatus;
-  
+
   // Details
   amount: number;
   currency: string;
   description: string;
   reference: string;
-  
+
   // Parties
   fromAccount: string;
   toAccount: string;
   fromRoutingNumber: string | null;
   toRoutingNumber: string | null;
-  
+
   // Pi Network
   piConversionRate: number | null;
   piAmount: number | null;
   piTransactionHash: string | null;
-  
+
   // Timing
   initiatedAt: Date;
   processedAt: Date | null;
   settledAt: Date | null;
-  
+
   // Metadata
   metadata: Record<string, unknown>;
-}
+};
 
-export type TransactionType = 
+export type TransactionType =
   | "deposit"
   | "withdrawal"
   | "transfer-internal"
@@ -278,7 +269,7 @@ export type TransactionType =
   | "pi-conversion"
   | "fee";
 
-export type TransactionStatus = 
+export type TransactionStatus =
   | "pending"
   | "processing"
   | "completed"
@@ -286,7 +277,7 @@ export type TransactionStatus =
   | "cancelled"
   | "reversed";
 
-export interface DirectDepositSetup {
+export type DirectDepositSetup = {
   id: string;
   accountId: string;
   employerName: string;
@@ -297,50 +288,50 @@ export interface DirectDepositSetup {
   status: "pending" | "active" | "cancelled";
   startDate: Date;
   lastDepositAt: Date | null;
-}
+};
 
-export interface PaymentInstruction {
+export type PaymentInstruction = {
   id: string;
   type: "ach" | "wire" | "rtp" | "pi";
   direction: "inbound" | "outbound";
-  
+
   // Source
   sourceAccount: string;
   sourceRouting: string | null;
   sourceName: string;
-  
+
   // Destination
   destAccount: string;
   destRouting: string | null;
   destName: string;
   destBank: string | null;
-  
+
   // Amount
   amount: number;
   currency: string;
-  
+
   // Pi Conversion
   convertToPi: boolean;
   piDestWallet: string | null;
-  
+
   // Schedule
   scheduleType: "immediate" | "scheduled" | "recurring";
   scheduledDate: Date | null;
   recurringFrequency: string | null;
-  
+
   // Memo
   memo: string;
   internalNotes: string;
-}
+};
 
 // ============================================================================
 // BANKING PARTNERS PLATFORM CLASS
 // ============================================================================
 
 class BankingPartnersPlatform {
-  private partners: Map<string, BankingPartner> = new Map();
-  private accounts: Map<string, BankAccount> = new Map();
-  private transactions: Map<string, Transaction> = new Map();
+  private readonly partners: Map<string, BankingPartner> = new Map();
+  private readonly accounts: Map<string, BankAccount> = new Map();
+  private readonly transactions: Map<string, Transaction> = new Map();
 
   constructor() {
     this.initializePartners();
@@ -348,7 +339,10 @@ class BankingPartnersPlatform {
 
   private initializePartners(): void {
     // Pre-configured banking partners
-    const defaultPartners: Omit<BankingPartner, "id" | "createdAt" | "updatedAt">[] = [
+    const defaultPartners: Omit<
+      BankingPartner,
+      "id" | "createdAt" | "updatedAt"
+    >[] = [
       {
         name: "Pi Federal Reserve Integration",
         type: "central-bank",
@@ -390,7 +384,7 @@ class BankingPartnersPlatform {
           "transfer-rtp",
           "stablecoin-minting",
         ],
-        rateLimit: 10000,
+        rateLimit: 10_000,
         capabilities: {
           achOrigination: false,
           wireTransfer: false,
@@ -535,7 +529,12 @@ class BankingPartnersPlatform {
   // PARTNER MANAGEMENT
   // ==========================================================================
 
-  async addPartner(partnerData: Omit<BankingPartner, "id" | "createdAt" | "updatedAt" | "metrics">): Promise<BankingPartner> {
+  async addPartner(
+    partnerData: Omit<
+      BankingPartner,
+      "id" | "createdAt" | "updatedAt" | "metrics"
+    >
+  ): Promise<BankingPartner> {
     const id = `partner-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     const partner: BankingPartner = {
@@ -576,7 +575,9 @@ class BankingPartnersPlatform {
       partners = partners.filter((p) => p.status === filters.status);
     }
     if (filters?.piEnabled !== undefined) {
-      partners = partners.filter((p) => p.piNetworkEnabled === filters.piEnabled);
+      partners = partners.filter(
+        (p) => p.piNetworkEnabled === filters.piEnabled
+      );
     }
 
     return partners;
@@ -623,14 +624,18 @@ class BankingPartnersPlatform {
         { name: "Online Banking", enabled: true, limit: null },
         { name: "Mobile Deposit", enabled: true, limit: 5000 },
         { name: "Bill Pay", enabled: true, limit: null },
-        { name: "Pi Conversion", enabled: partner.piNetworkEnabled, limit: 10000 },
+        {
+          name: "Pi Conversion",
+          enabled: partner.piNetworkEnabled,
+          limit: 10_000,
+        },
       ],
       limits: {
         dailyWithdrawal: 1000,
         dailyTransfer: 5000,
-        monthlyTransfer: 50000,
-        singleTransactionMax: 10000,
-        piDailyConversion: 10000,
+        monthlyTransfer: 50_000,
+        singleTransactionMax: 10_000,
+        piDailyConversion: 10_000,
       },
       openedAt: new Date(),
       lastTransactionAt: null,
@@ -645,7 +650,9 @@ class BankingPartnersPlatform {
   }
 
   async getUserAccounts(userId: string): Promise<BankAccount[]> {
-    return Array.from(this.accounts.values()).filter((a) => a.userId === userId);
+    return Array.from(this.accounts.values()).filter(
+      (a) => a.userId === userId
+    );
   }
 
   async activateAccount(accountId: string): Promise<BankAccount> {
@@ -736,7 +743,9 @@ class BankingPartnersPlatform {
 
   private async processTransaction(transactionId: string): Promise<void> {
     const transaction = this.transactions.get(transactionId);
-    if (!transaction) return;
+    if (!transaction) {
+      return;
+    }
 
     // Simulate processing delay
     setTimeout(() => {
@@ -988,7 +997,11 @@ class BankingPartnersPlatform {
     return usdAmount / getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,
@@ -1036,5 +1049,10 @@ export async function convertFromPi(
   piWallet: string,
   piTxHash: string
 ): Promise<ReturnType<typeof bankingPartnersPlatform.convertFromPi>> {
-  return bankingPartnersPlatform.convertFromPi(accountId, piAmount, piWallet, piTxHash);
+  return bankingPartnersPlatform.convertFromPi(
+    accountId,
+    piAmount,
+    piWallet,
+    piTxHash
+  );
 }

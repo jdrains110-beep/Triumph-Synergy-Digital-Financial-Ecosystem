@@ -9,7 +9,6 @@ import {
   financialHub,
   getDashboard,
   onboardNewUser,
-  processDistributions,
 } from "@/lib/integrations/financial-hub";
 
 export async function POST(request: NextRequest) {

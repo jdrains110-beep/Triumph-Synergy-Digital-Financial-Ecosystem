@@ -66,8 +66,11 @@ export function LiquidityPool() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="font-medium text-sm">Token A</label>
+                <label className="font-medium text-sm" htmlFor="token-a">
+                  Token A
+                </label>
                 <Input
+                  id="token-a"
                   onChange={(e) =>
                     setFormData({ ...formData, tokenA: e.target.value })
                   }
@@ -76,8 +79,11 @@ export function LiquidityPool() {
                 />
               </div>
               <div>
-                <label className="font-medium text-sm">Token B</label>
+                <label className="font-medium text-sm" htmlFor="token-b">
+                  Token B
+                </label>
                 <Input
+                  id="token-b"
                   onChange={(e) =>
                     setFormData({ ...formData, tokenB: e.target.value })
                   }
@@ -89,8 +95,11 @@ export function LiquidityPool() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="font-medium text-sm">Amount A</label>
+                <label className="font-medium text-sm" htmlFor="amount-a">
+                  Amount A
+                </label>
                 <Input
+                  id="amount-a"
                   onChange={(e) =>
                     setFormData({ ...formData, amountA: e.target.value })
                   }
@@ -100,8 +109,11 @@ export function LiquidityPool() {
                 />
               </div>
               <div>
-                <label className="font-medium text-sm">Amount B</label>
+                <label className="font-medium text-sm" htmlFor="amount-b">
+                  Amount B
+                </label>
                 <Input
+                  id="amount-b"
                   onChange={(e) =>
                     setFormData({ ...formData, amountB: e.target.value })
                   }

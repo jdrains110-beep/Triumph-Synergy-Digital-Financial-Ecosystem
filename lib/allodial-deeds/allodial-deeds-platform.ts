@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Allodial Deeds Platform
- * 
+ *
  * Superior application for homeowner allodial deed transfers
  * True property ownership without government encumbrances
- * 
+ *
  * @module lib/allodial-deeds/allodial-deeds-platform
  * @version 1.0.0
  */
@@ -15,8 +15,8 @@
 // Dual Pi Value System
 // Internally mined/contributed Pi = 1000x multiplier
 // External/non-contributed Pi = base rate
-const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
-const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_EXTERNAL_RATE = 314.159; // External non-contributed Pi
+const PI_INTERNAL_RATE = 314_159; // Internally mined/contributed Pi (1000x)
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -25,11 +25,17 @@ export function getPiRate(type: PiValueType = "external"): number {
   return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
 }
 
-export function convertToPi(usdAmount: number, type: PiValueType = "external"): number {
+export function convertToPi(
+  usdAmount: number,
+  type: PiValueType = "external"
+): number {
   return usdAmount / getPiRate(type);
 }
 
-export function convertToUsd(piAmount: number, type: PiValueType = "external"): number {
+export function convertToUsd(
+  piAmount: number,
+  type: PiValueType = "external"
+): number {
   return piAmount * getPiRate(type);
 }
 
@@ -37,59 +43,63 @@ export function convertToUsd(piAmount: number, type: PiValueType = "external"): 
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface AllodialDeed {
+export type AllodialDeed = {
   id: string;
   deedNumber: string;
   status: DeedStatus;
-  
+
   // Property Information
   property: PropertyDetails;
-  
+
   // Ownership
   currentOwner: DeedOwner;
   previousOwners: DeedTransfer[];
-  
+
   // Legal Status
   deedType: DeedType;
   isAllodial: boolean;
   allodialStatus: AllodialStatus;
   sovereignDeclaration: SovereignDeclaration | null;
-  
+
   // Recording
   recordingInfo: RecordingInfo;
   countyRecords: CountyRecord[];
-  
+
   // Encumbrances (should be NONE for true allodial)
   encumbrances: Encumbrance[];
   liens: Lien[];
   easements: Easement[];
-  
+
   // Valuation
   assessedValue: number;
   marketValue: number;
   piValue: number;
-  
+
   // Acquisition (for properties being purchased)
   acquisitionPrice?: number;
-  acquisitionStatus?: "pending-purchase" | "under-contract" | "acquired" | "allodial-converted";
+  acquisitionStatus?:
+    | "pending-purchase"
+    | "under-contract"
+    | "acquired"
+    | "allodial-converted";
   listingAgent?: string;
   listingDate?: Date;
-  
+
   // Documents
   documents: DeedDocument[];
-  
+
   // Blockchain
   blockchainRecordId: string | null;
   nftTokenId: string | null;
   smartContractAddress: string | null;
-  
+
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
   recordedAt: Date | null;
-}
+};
 
-export type DeedStatus = 
+export type DeedStatus =
   | "draft"
   | "pending-verification"
   | "verified"
@@ -99,7 +109,7 @@ export type DeedStatus =
   | "transferred"
   | "disputed";
 
-export type DeedType = 
+export type DeedType =
   | "warranty"
   | "quitclaim"
   | "grant"
@@ -108,7 +118,7 @@ export type DeedType =
   | "fee-simple"
   | "allodial";
 
-export type AllodialStatus = 
+export type AllodialStatus =
   | "not-claimed"
   | "claim-filed"
   | "taxes-redeemed"
@@ -116,7 +126,7 @@ export type AllodialStatus =
   | "sovereign-declared"
   | "perfected";
 
-export interface PropertyDetails {
+export type PropertyDetails = {
   address: {
     street: string;
     unit: string | null;
@@ -138,9 +148,9 @@ export interface PropertyDetails {
   propertyType: PropertyType;
   zoning: string;
   coordinates: { lat: number; lng: number };
-}
+};
 
-export type PropertyType = 
+export type PropertyType =
   | "single-family"
   | "multi-family"
   | "condo"
@@ -150,7 +160,7 @@ export type PropertyType =
   | "agricultural"
   | "mixed-use";
 
-export interface DeedOwner {
+export type DeedOwner = {
   id: string;
   type: "individual" | "joint" | "trust" | "llc" | "corporation";
   names: string[];
@@ -160,12 +170,12 @@ export interface DeedOwner {
   email: string;
   phone: string;
   mailingAddress: string;
-  ssn?: string;  // Encrypted
-  ein?: string;  // For entities
+  ssn?: string; // Encrypted
+  ein?: string; // For entities
   verificationStatus: "unverified" | "pending" | "verified";
-}
+};
 
-export type OwnershipType = 
+export type OwnershipType =
   | "sole"
   | "joint-tenancy"
   | "tenancy-in-common"
@@ -174,7 +184,7 @@ export type OwnershipType =
   | "trust"
   | "allodial-title";
 
-export interface DeedTransfer {
+export type DeedTransfer = {
   id: string;
   fromOwner: DeedOwner;
   toOwner: DeedOwner;
@@ -187,9 +197,9 @@ export interface DeedTransfer {
   notaryInfo: NotaryInfo | null;
   witnessNames: string[];
   blockchainTxHash: string | null;
-}
+};
 
-export type TransferType = 
+export type TransferType =
   | "sale"
   | "gift"
   | "inheritance"
@@ -198,15 +208,15 @@ export type TransferType =
   | "tax-sale"
   | "allodial-conversion";
 
-export interface NotaryInfo {
+export type NotaryInfo = {
   name: string;
   commission: string;
   state: string;
   expirationDate: Date;
   sealNumber: string;
-}
+};
 
-export interface SovereignDeclaration {
+export type SovereignDeclaration = {
   id: string;
   declarationDate: Date;
   declarationType: "land-patent" | "allodial-claim" | "quiet-title";
@@ -219,27 +229,27 @@ export interface SovereignDeclaration {
   taxRedemptionAmount: number;
   filingReferences: FilingReference[];
   perfectionDate: Date | null;
-}
+};
 
-export interface ChainOfTitleLink {
+export type ChainOfTitleLink = {
   grantorName: string;
   granteeName: string;
   instrumentType: string;
   recordingDate: Date;
   bookPage: string;
   documentNumber: string;
-}
+};
 
-export interface FilingReference {
+export type FilingReference = {
   type: "county" | "state" | "federal" | "ucc";
   jurisdiction: string;
   documentNumber: string;
   filingDate: Date;
   book: string | null;
   page: string | null;
-}
+};
 
-export interface RecordingInfo {
+export type RecordingInfo = {
   county: string;
   state: string;
   recordingDate: Date | null;
@@ -248,9 +258,9 @@ export interface RecordingInfo {
   page: string | null;
   feesPaid: number;
   recorder: string;
-}
+};
 
-export interface CountyRecord {
+export type CountyRecord = {
   county: string;
   state: string;
   recordType: string;
@@ -260,9 +270,9 @@ export interface CountyRecord {
   page: string;
   verified: boolean;
   verifiedAt: Date | null;
-}
+};
 
-export interface Encumbrance {
+export type Encumbrance = {
   id: string;
   type: EncumbranceType;
   holder: string;
@@ -272,9 +282,9 @@ export interface Encumbrance {
   endDate: Date | null;
   status: "active" | "released" | "disputed";
   releaseDocument: string | null;
-}
+};
 
-export type EncumbranceType = 
+export type EncumbranceType =
   | "mortgage"
   | "deed-of-trust"
   | "judgment"
@@ -284,7 +294,7 @@ export type EncumbranceType =
   | "lis-pendens"
   | "restriction";
 
-export interface Lien {
+export type Lien = {
   id: string;
   type: LienType;
   lienholder: string;
@@ -294,9 +304,9 @@ export interface Lien {
   documentNumber: string;
   status: "active" | "satisfied" | "released" | "expired";
   satisfactionDate: Date | null;
-}
+};
 
-export type LienType = 
+export type LienType =
   | "first-mortgage"
   | "second-mortgage"
   | "heloc"
@@ -307,7 +317,7 @@ export type LienType =
   | "irs"
   | "state-tax";
 
-export interface Easement {
+export type Easement = {
   id: string;
   type: EasementType;
   beneficiary: string;
@@ -316,9 +326,9 @@ export interface Easement {
   width: number | null;
   permanent: boolean;
   recordingInfo: string;
-}
+};
 
-export type EasementType = 
+export type EasementType =
   | "utility"
   | "access"
   | "drainage"
@@ -327,7 +337,7 @@ export type EasementType =
   | "solar"
   | "view";
 
-export interface DeedDocument {
+export type DeedDocument = {
   id: string;
   type: DocumentType;
   name: string;
@@ -339,9 +349,9 @@ export interface DeedDocument {
   uploadedAt: Date;
   verified: boolean;
   blockchainHash: string | null;
-}
+};
 
-export type DocumentType = 
+export type DocumentType =
   | "deed"
   | "title-insurance"
   | "survey"
@@ -355,7 +365,7 @@ export type DocumentType =
   | "sovereign-claim"
   | "other";
 
-export interface AllodialApplication {
+export type AllodialApplication = {
   id: string;
   deedId: string;
   applicant: DeedOwner;
@@ -367,9 +377,9 @@ export interface AllodialApplication {
   createdAt: Date;
   updatedAt: Date;
   completedAt: Date | null;
-}
+};
 
-export type ApplicationStatus = 
+export type ApplicationStatus =
   | "initiated"
   | "documents-gathering"
   | "chain-of-title-research"
@@ -381,7 +391,7 @@ export type ApplicationStatus =
   | "rejected"
   | "perfected";
 
-export interface ApplicationStep {
+export type ApplicationStep = {
   id: string;
   name: string;
   description: string;
@@ -389,9 +399,9 @@ export interface ApplicationStep {
   status: "pending" | "in-progress" | "completed" | "skipped";
   completedAt: Date | null;
   notes: string;
-}
+};
 
-export interface ApplicationFiling {
+export type ApplicationFiling = {
   id: string;
   type: "county" | "state" | "federal" | "ucc-1" | "land-patent";
   jurisdiction: string;
@@ -400,35 +410,40 @@ export interface ApplicationFiling {
   status: "pending" | "filed" | "accepted" | "rejected";
   fees: number;
   notes: string;
-}
+};
 
-export interface ApplicationPayment {
+export type ApplicationPayment = {
   id: string;
-  type: "filing-fee" | "tax-redemption" | "title-search" | "recording-fee" | "service-fee";
+  type:
+    | "filing-fee"
+    | "tax-redemption"
+    | "title-search"
+    | "recording-fee"
+    | "service-fee";
   amount: number;
   piAmount: number;
   status: "pending" | "paid" | "refunded";
   paidAt: Date | null;
   piTransactionId: string | null;
   receipt: string | null;
-}
+};
 
-export interface ApplicationEvent {
+export type ApplicationEvent = {
   id: string;
   type: string;
   description: string;
   timestamp: Date;
   userId: string | null;
-}
+};
 
 // ============================================================================
 // ALLODIAL DEEDS PLATFORM CLASS
 // ============================================================================
 
 class AllodialDeedsPlatform {
-  private deeds: Map<string, AllodialDeed> = new Map();
-  private applications: Map<string, AllodialApplication> = new Map();
-  private owners: Map<string, DeedOwner> = new Map();
+  private readonly deeds: Map<string, AllodialDeed> = new Map();
+  private readonly applications: Map<string, AllodialApplication> = new Map();
+  private readonly owners: Map<string, DeedOwner> = new Map();
 
   // Owner's Headquarters - First Property
   public readonly HEADQUARTERS_DEED_ID = "deed-hq-triumph-synergy-001";
@@ -445,7 +460,7 @@ class AllodialDeedsPlatform {
   /**
    * Initialize the Owner's Headquarters Property
    * 135 Lake Como Dr, Pomona Park, FL 32181
-   * 
+   *
    * This is the FIRST property and HEADQUARTERS for Triumph-Synergy
    * Allodial Title - True ownership without government encumbrances
    */
@@ -467,7 +482,7 @@ class AllodialDeedsPlatform {
       id: this.HEADQUARTERS_DEED_ID,
       deedNumber: "AD-TRIUMPH-HQ-001",
       status: "allodial-perfected",
-      
+
       property: {
         address: {
           street: "135 Lake Como Dr",
@@ -478,7 +493,8 @@ class AllodialDeedsPlatform {
           zip: "32181",
           country: "USA",
         },
-        legalDescription: "Lot and improvements located at 135 Lake Como Dr, Pomona Park, Putnam County, Florida 32181, as recorded in the Official Records of Putnam County, Florida",
+        legalDescription:
+          "Lot and improvements located at 135 Lake Como Dr, Pomona Park, Putnam County, Florida 32181, as recorded in the Official Records of Putnam County, Florida",
         parcelNumber: "", // To be filled with actual parcel number
         lotNumber: "",
         blockNumber: "",
@@ -555,9 +571,9 @@ class AllodialDeedsPlatform {
 
       // Valuation - Based on Watson Realty Listing Price
       assessedValue: 0, // Allodial - no assessment
-      marketValue: 675000, // $675,000 - Watson Realty asking price
-      piValue: 675000 / PI_EXTERNAL_RATE, // 2,147.85 π at external rate
-      acquisitionPrice: 675000, // Listed asking price
+      marketValue: 675_000, // $675,000 - Watson Realty asking price
+      piValue: 675_000 / PI_EXTERNAL_RATE, // 2,147.85 π at external rate
+      acquisitionPrice: 675_000, // Listed asking price
       acquisitionStatus: "pending-purchase", // Ready to acquire
       listingAgent: "Watson Realty",
       listingDate: new Date("2026-01-09"),
@@ -567,7 +583,8 @@ class AllodialDeedsPlatform {
           id: "doc-allodial-deed-hq",
           type: "allodial-declaration",
           name: "Allodial Deed - Triumph-Synergy Headquarters",
-          description: "Perfected allodial title for 135 Lake Como Dr, Pomona Park, FL 32181 - Triumph-Synergy World Headquarters",
+          description:
+            "Perfected allodial title for 135 Lake Como Dr, Pomona Park, FL 32181 - Triumph-Synergy World Headquarters",
           fileUrl: "",
           fileHash: "",
           mimeType: "application/pdf",
@@ -592,9 +609,13 @@ class AllodialDeedsPlatform {
     this.deeds.set(headquartersDeed.id, headquartersDeed);
     this.owners.set(headquartersOwner.id, headquartersOwner);
 
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
     console.log("   TRIUMPH-SYNERGY HEADQUARTERS - ALLODIAL DEED REGISTERED");
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
     console.log("   Property: 135 Lake Como Dr, Pomona Park, FL 32181");
     console.log("   Deed Number: AD-TRIUMPH-HQ-001");
     console.log("   Status: ALLODIAL PERFECTED");
@@ -603,7 +624,9 @@ class AllodialDeedsPlatform {
     console.log("   Liens: NONE");
     console.log("   Title Type: TRUE ALLODIAL - No Government Encumbrances");
     console.log("   Recorded: January 9, 2026");
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
   }
 
   /**
@@ -662,14 +685,14 @@ class AllodialDeedsPlatform {
     nextSteps: string[];
     estimatedClosingDays: { cash: number; financed: number };
   } {
-    const askingPrice = 675000;
+    const askingPrice = 675_000;
     const piEquivalent = askingPrice / PI_EXTERNAL_RATE;
-    
+
     return {
       property: "135 Lake Como Dr, Pomona Park, FL 32181",
-      askingPrice: askingPrice,
+      askingPrice,
       askingPriceFormatted: "$675,000",
-      piEquivalent: piEquivalent,
+      piEquivalent,
       piEquivalentFormatted: `${piEquivalent.toFixed(2)} π`,
       listingAgent: "Watson Realty",
       acquisitionStatus: "READY TO PURCHASE",
@@ -681,12 +704,12 @@ class AllodialDeedsPlatform {
         "3. Title search and escrow",
         "4. Close transaction - Sign deed transfer",
         "5. Allodial conversion - File sovereign declaration",
-        "6. Move in - Establish Triumph-Synergy Headquarters"
+        "6. Move in - Establish Triumph-Synergy Headquarters",
       ],
       estimatedClosingDays: {
         cash: 7,
-        financed: 30
-      }
+        financed: 30,
+      },
     };
   }
 
@@ -706,24 +729,37 @@ class AllodialDeedsPlatform {
     ownershipEffectiveDate: Date;
     message: string;
   } {
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
     console.log("   🎉 HEADQUARTERS ACQUISITION COMPLETE!");
-    console.log("═══════════════════════════════════════════════════════════════");
-    console.log(`   Property: 135 Lake Como Dr, Pomona Park, FL 32181`);
-    console.log(`   Final Price: $${closingDetails.finalPrice.toLocaleString()}`);
-    console.log(`   Payment Method: ${closingDetails.paymentMethod.toUpperCase()}`);
-    console.log(`   Closing Date: ${closingDetails.closingDate.toISOString().split('T')[0]}`);
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
+    console.log("   Property: 135 Lake Como Dr, Pomona Park, FL 32181");
+    console.log(
+      `   Final Price: $${closingDetails.finalPrice.toLocaleString()}`
+    );
+    console.log(
+      `   Payment Method: ${closingDetails.paymentMethod.toUpperCase()}`
+    );
+    console.log(
+      `   Closing Date: ${closingDetails.closingDate.toISOString().split("T")[0]}`
+    );
     console.log("   Status: ALLODIAL TITLE NOW ACTIVE");
     console.log("   Triumph-Synergy Headquarters: ESTABLISHED");
-    console.log("═══════════════════════════════════════════════════════════════");
-    
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
+
     return {
       success: true,
       property: "135 Lake Como Dr, Pomona Park, FL 32181",
       acquisitionComplete: true,
       allodialStatusActive: true,
       ownershipEffectiveDate: closingDetails.closingDate,
-      message: "Congratulations! 135 Lake Como Dr is now your headquarters with perfected allodial title."
+      message:
+        "Congratulations! 135 Lake Como Dr is now your headquarters with perfected allodial title.",
     };
   }
 
@@ -792,7 +828,10 @@ class AllodialDeedsPlatform {
     return this.deeds.get(deedId) || null;
   }
 
-  async updateDeed(deedId: string, updates: Partial<AllodialDeed>): Promise<AllodialDeed> {
+  async updateDeed(
+    deedId: string,
+    updates: Partial<AllodialDeed>
+  ): Promise<AllodialDeed> {
     const deed = this.deeds.get(deedId);
     if (!deed) {
       throw new Error("Deed not found");
@@ -819,16 +858,30 @@ class AllodialDeedsPlatform {
     let deeds = Array.from(this.deeds.values());
 
     if (filters.county) {
-      deeds = deeds.filter((d) => d.property.address.county.toLowerCase().includes(filters.county!.toLowerCase()));
+      deeds = deeds.filter((d) =>
+        d.property.address.county
+          .toLowerCase()
+          .includes(filters.county!.toLowerCase())
+      );
     }
     if (filters.state) {
-      deeds = deeds.filter((d) => d.property.address.state.toLowerCase() === filters.state!.toLowerCase());
+      deeds = deeds.filter(
+        (d) =>
+          d.property.address.state.toLowerCase() ===
+          filters.state!.toLowerCase()
+      );
     }
     if (filters.ownerName) {
-      deeds = deeds.filter((d) => d.currentOwner.names.some((n) => n.toLowerCase().includes(filters.ownerName!.toLowerCase())));
+      deeds = deeds.filter((d) =>
+        d.currentOwner.names.some((n) =>
+          n.toLowerCase().includes(filters.ownerName!.toLowerCase())
+        )
+      );
     }
     if (filters.parcelNumber) {
-      deeds = deeds.filter((d) => d.property.parcelNumber.includes(filters.parcelNumber!));
+      deeds = deeds.filter((d) =>
+        d.property.parcelNumber.includes(filters.parcelNumber!)
+      );
     }
     if (filters.status) {
       deeds = deeds.filter((d) => d.status === filters.status);
@@ -850,7 +903,9 @@ class AllodialDeedsPlatform {
   // ALLODIAL CONVERSION PROCESS
   // ==========================================================================
 
-  async initiateAllodialConversion(deedId: string): Promise<AllodialApplication> {
+  async initiateAllodialConversion(
+    deedId: string
+  ): Promise<AllodialApplication> {
     const deed = this.deeds.get(deedId);
     if (!deed) {
       throw new Error("Deed not found");
@@ -922,7 +977,8 @@ class AllodialDeedsPlatform {
       {
         id: "step-4",
         name: "Tax Redemption",
-        description: "Redeem property from tax rolls to establish true ownership",
+        description:
+          "Redeem property from tax rolls to establish true ownership",
         order: 4,
         status: "pending",
         completedAt: null,
@@ -1002,7 +1058,9 @@ class AllodialDeedsPlatform {
 
     step.status = "completed";
     step.completedAt = new Date();
-    if (notes) step.notes = notes;
+    if (notes) {
+      step.notes = notes;
+    }
 
     // Move next step to in-progress
     const nextStep = application.steps.find((s) => s.order === step.order + 1);
@@ -1020,7 +1078,9 @@ class AllodialDeedsPlatform {
     });
 
     // Update overall status
-    const completedSteps = application.steps.filter((s) => s.status === "completed").length;
+    const completedSteps = application.steps.filter(
+      (s) => s.status === "completed"
+    ).length;
     if (completedSteps === application.steps.length) {
       application.status = "perfected";
       application.completedAt = new Date();
@@ -1246,7 +1306,10 @@ class AllodialDeedsPlatform {
 
   async uploadDocument(
     deedId: string,
-    document: Omit<DeedDocument, "id" | "uploadedAt" | "verified" | "blockchainHash">
+    document: Omit<
+      DeedDocument,
+      "id" | "uploadedAt" | "verified" | "blockchainHash"
+    >
   ): Promise<DeedDocument> {
     const deed = this.deeds.get(deedId);
     if (!deed) {
@@ -1267,7 +1330,10 @@ class AllodialDeedsPlatform {
     return doc;
   }
 
-  async verifyDocument(deedId: string, documentId: string): Promise<DeedDocument> {
+  async verifyDocument(
+    deedId: string,
+    documentId: string
+  ): Promise<DeedDocument> {
     const deed = this.deeds.get(deedId);
     if (!deed) {
       throw new Error("Deed not found");
@@ -1303,8 +1369,10 @@ class AllodialDeedsPlatform {
     return {
       totalDeeds: deeds.length,
       allodialDeeds: deeds.filter((d) => d.isAllodial).length,
-      pendingApplications: applications.filter((a) => a.status !== "perfected").length,
-      completedConversions: applications.filter((a) => a.status === "perfected").length,
+      pendingApplications: applications.filter((a) => a.status !== "perfected")
+        .length,
+      completedConversions: applications.filter((a) => a.status === "perfected")
+        .length,
       totalValue: deeds.reduce((sum, d) => sum + d.marketValue, 0),
       totalPiValue: deeds.reduce((sum, d) => sum + d.piValue, 0),
     };
@@ -1324,7 +1392,9 @@ export async function createDeed(
   return allodialDeedsPlatform.createDeed(data);
 }
 
-export async function initiateAllodialConversion(deedId: string): Promise<AllodialApplication> {
+export async function initiateAllodialConversion(
+  deedId: string
+): Promise<AllodialApplication> {
   return allodialDeedsPlatform.initiateAllodialConversion(deedId);
 }
 
@@ -1336,7 +1406,9 @@ export async function transferDeed(
   return allodialDeedsPlatform.transferDeed(deedId, toOwner, transferData);
 }
 
-export async function registerDeedOnBlockchain(deedId: string): Promise<ReturnType<typeof allodialDeedsPlatform.registerOnBlockchain>> {
+export async function registerDeedOnBlockchain(
+  deedId: string
+): Promise<ReturnType<typeof allodialDeedsPlatform.registerOnBlockchain>> {
   return allodialDeedsPlatform.registerOnBlockchain(deedId);
 }
 
@@ -1349,7 +1421,9 @@ export function getHeadquartersDeed(): AllodialDeed {
   return allodialDeedsPlatform.getHeadquartersDeed();
 }
 
-export function verifyHeadquartersAllodialStatus(): ReturnType<typeof allodialDeedsPlatform.verifyHeadquartersAllodialStatus> {
+export function verifyHeadquartersAllodialStatus(): ReturnType<
+  typeof allodialDeedsPlatform.verifyHeadquartersAllodialStatus
+> {
   return allodialDeedsPlatform.verifyHeadquartersAllodialStatus();
 }
 

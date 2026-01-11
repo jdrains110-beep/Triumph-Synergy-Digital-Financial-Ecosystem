@@ -9,13 +9,13 @@ import { useEffect, useState } from "react";
 import {
   getPiBrowserInfo,
   getPiSDK,
-  isRunningInPiBrowser,
   isPiNetworkAvailable,
+  isRunningInPiBrowser,
   type PiBrowserInfo,
   type PiSDK,
 } from "@/lib/pi-sdk/pi-sdk-initialization";
 
-interface DebugStatus {
+type DebugStatus = {
   loading: boolean;
   browserInfo: PiBrowserInfo | null;
   sdk: PiSDK | null;
@@ -34,7 +34,7 @@ interface DebugStatus {
     piObjectType: string;
     piSDKMethods: string[];
   };
-}
+};
 
 export default function PiSDKDebugPage() {
   const [status, setStatus] = useState<DebugStatus>({
@@ -107,28 +107,28 @@ export default function PiSDKDebugPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="mx-auto max-w-4xl space-y-8">
         {/* Header */}
-        <div className="border-b-2 border-blue-500 pb-6">
-          <h1 className="text-4xl font-bold text-gray-900">
+        <div className="border-blue-500 border-b-2 pb-6">
+          <h1 className="font-bold text-4xl text-gray-900">
             Pi SDK & Pi Browser Debug
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="mt-2 text-gray-600">
             Verify Pi SDK and Pi Browser recognition
           </p>
         </div>
 
         {status.loading ? (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-            <div className="text-xl text-blue-600 font-semibold">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 text-center">
+            <div className="font-semibold text-blue-600 text-xl">
               Initializing...
             </div>
           </div>
         ) : (
           <>
             {/* Environment Status */}
-            <section className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 font-bold text-2xl text-gray-900">
                 Environment Status
               </h2>
               <div className="grid grid-cols-2 gap-4">
@@ -149,8 +149,8 @@ export default function PiSDKDebugPage() {
 
             {/* Browser Info */}
             {status.browserInfo && (
-              <section className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <section className="rounded-lg border border-gray-200 bg-white p-6">
+                <h2 className="mb-4 font-bold text-2xl text-gray-900">
                   Browser Information
                 </h2>
                 <div className="space-y-3">
@@ -173,8 +173,8 @@ export default function PiSDKDebugPage() {
             )}
 
             {/* Detection Methods */}
-            <section className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 font-bold text-2xl text-gray-900">
                 Detection Methods
               </h2>
               <div className="space-y-2">
@@ -199,8 +199,8 @@ export default function PiSDKDebugPage() {
 
             {/* Pi Object Details */}
             {status.piGlobalObject && (
-              <section className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <section className="rounded-lg border border-gray-200 bg-white p-6">
+                <h2 className="mb-4 font-bold text-2xl text-gray-900">
                   Pi SDK Object
                 </h2>
                 <div className="space-y-3">
@@ -209,13 +209,19 @@ export default function PiSDKDebugPage() {
                     value={status.detectionMethods.piObjectType}
                   />
                   <div>
-                    <label className="font-semibold text-gray-700 block mb-2">
+                    <label
+                      className="mb-2 block font-semibold text-gray-700"
+                      htmlFor="pi-methods"
+                    >
                       Available Methods:
                     </label>
-                    <div className="bg-gray-100 p-3 rounded text-sm font-mono space-y-1">
+                    <div
+                      className="space-y-1 rounded bg-gray-100 p-3 font-mono text-sm"
+                      id="pi-methods"
+                    >
                       {status.detectionMethods.piSDKMethods.length > 0 ? (
                         status.detectionMethods.piSDKMethods.map((method) => (
-                          <div key={method} className="text-gray-700">
+                          <div className="text-gray-700" key={method}>
                             • {method}
                           </div>
                         ))
@@ -231,32 +237,32 @@ export default function PiSDKDebugPage() {
             )}
 
             {/* Raw Objects */}
-            <section className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <section className="rounded-lg border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 font-bold text-2xl text-gray-900">
                 Raw Objects (Console)
               </h2>
-              <div className="bg-gray-100 p-3 rounded text-sm font-mono text-gray-700 mb-3">
+              <div className="mb-3 rounded bg-gray-100 p-3 font-mono text-gray-700 text-sm">
                 window.Pi = {status.piGlobalObject ? "defined" : "undefined"}
               </div>
               <button
+                className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 onClick={() => {
                   if (status.piGlobalObject) {
                     console.log("Pi SDK Object:", status.piGlobalObject);
                     alert("Pi SDK Object logged to console");
                   }
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Log Pi SDK to Console
               </button>
             </section>
 
             {/* Instructions */}
-            <section className="bg-amber-50 rounded-lg border border-amber-200 p-6">
-              <h3 className="font-semibold text-amber-900 mb-2">
+            <section className="rounded-lg border border-amber-200 bg-amber-50 p-6">
+              <h3 className="mb-2 font-semibold text-amber-900">
                 Testing Instructions:
               </h3>
-              <ol className="list-decimal list-inside space-y-1 text-amber-800 text-sm">
+              <ol className="list-inside list-decimal space-y-1 text-amber-800 text-sm">
                 <li>
                   If running in Pi Browser: All items should show ✓ (enabled)
                 </li>
@@ -268,23 +274,22 @@ export default function PiSDKDebugPage() {
                   Check browser console for detailed logs with keyboard shortcut
                   F12
                 </li>
-                <li>
-                  Pi SDK requires loading the Pi script in HTML head tag
-                </li>
+                <li>Pi SDK requires loading the Pi script in HTML head tag</li>
               </ol>
             </section>
 
             {/* Next Steps */}
             {!status.environment.isPiBrowser && (
-              <section className="bg-blue-50 rounded-lg border border-blue-200 p-6">
-                <h3 className="font-semibold text-blue-900 mb-2">
+              <section className="rounded-lg border border-blue-200 bg-blue-50 p-6">
+                <h3 className="mb-2 font-semibold text-blue-900">
                   To enable Pi Network integration:
                 </h3>
-                <ol className="list-decimal list-inside space-y-2 text-blue-800 text-sm">
+                <ol className="list-inside list-decimal space-y-2 text-blue-800 text-sm">
                   <li>
                     Add the Pi SDK script to your HTML head:{" "}
-                    <code className="bg-white px-2 py-1 rounded border border-blue-200">
-                      &lt;script src="https://sdk.minepi.com/pi-sdk.js"&gt;&lt;/script&gt;
+                    <code className="rounded border border-blue-200 bg-white px-2 py-1">
+                      &lt;script
+                      src="https://sdk.minepi.com/pi-sdk.js"&gt;&lt;/script&gt;
                     </code>
                   </li>
                   <li>Test the app in Pi Browser or Pi Testnet</li>
@@ -304,7 +309,7 @@ export default function PiSDKDebugPage() {
  */
 function StatusItem({ label, value }: { label: string; value: boolean }) {
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+    <div className="flex items-center justify-between rounded bg-gray-50 p-3">
       <span className="font-medium text-gray-700">{label}</span>
       <span
         className={`font-bold text-lg ${
@@ -321,10 +326,16 @@ function StatusItem({ label, value }: { label: string; value: boolean }) {
  * Info item component
  */
 function InfoItem({ label, value }: { label: string; value: string }) {
+  const id = label.toLowerCase().replace(/\s+/g, "-");
   return (
     <div>
-      <label className="font-semibold text-gray-700 block mb-1">{label}</label>
-      <div className="bg-gray-100 p-3 rounded text-sm font-mono break-all text-gray-700">
+      <label className="mb-1 block font-semibold text-gray-700" htmlFor={id}>
+        {label}
+      </label>
+      <div
+        className="break-all rounded bg-gray-100 p-3 font-mono text-gray-700 text-sm"
+        id={id}
+      >
         {value}
       </div>
     </div>

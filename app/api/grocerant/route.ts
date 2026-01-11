@@ -1,16 +1,16 @@
 /**
  * Phygital Grocerant API Route
- * 
+ *
  * Handles grocery/restaurant operations, orders, and smart cart
  */
 
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  phygitalGrocerantPlatform,
-  getAllGrocerantLocations,
-  searchGrocerantProducts,
   createGrocerantOrder,
+  getAllGrocerantLocations,
   getMenuItems,
+  phygitalGrocerantPlatform,
+  searchGrocerantProducts,
 } from "@/lib/grocerant/phygital-grocerant-platform";
 
 export async function GET(request: NextRequest) {
@@ -25,32 +25,47 @@ export async function GET(request: NextRequest) {
 
   try {
     switch (action) {
-      case "locations":
+      case "locations": {
         const locations = await getAllGrocerantLocations();
         return NextResponse.json({ success: true, locations });
+      }
 
-      case "location":
+      case "location": {
         if (!locationId) {
-          return NextResponse.json({ success: false, error: "Location ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Location ID required" },
+            { status: 400 }
+          );
         }
-        const location = await phygitalGrocerantPlatform.getLocation(locationId);
+        const location =
+          await phygitalGrocerantPlatform.getLocation(locationId);
         return NextResponse.json({ success: true, location });
+      }
 
-      case "nearby":
-        const lat = parseFloat(searchParams.get("lat") || "0");
-        const lng = parseFloat(searchParams.get("lng") || "0");
-        const radius = parseFloat(searchParams.get("radius") || "10");
-        const nearby = await phygitalGrocerantPlatform.getNearbyLocations(lat, lng, radius);
+      case "nearby": {
+        const lat = Number.parseFloat(searchParams.get("lat") || "0");
+        const lng = Number.parseFloat(searchParams.get("lng") || "0");
+        const radius = Number.parseFloat(searchParams.get("radius") || "10");
+        const nearby = await phygitalGrocerantPlatform.getNearbyLocations(
+          lat,
+          lng,
+          radius
+        );
         return NextResponse.json({ success: true, locations: nearby });
+      }
 
-      case "product":
+      case "product": {
         if (!productId) {
-          return NextResponse.json({ success: false, error: "Product ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Product ID required" },
+            { status: 400 }
+          );
         }
         const product = await phygitalGrocerantPlatform.getProduct(productId);
         return NextResponse.json({ success: true, product });
+      }
 
-      case "search-products":
+      case "search-products": {
         const query = searchParams.get("query");
         const category = searchParams.get("category");
         const isOrganic = searchParams.get("isOrganic") === "true";
@@ -63,40 +78,59 @@ export async function GET(request: NextRequest) {
           isVegan: searchParams.has("isVegan") ? isVegan : undefined,
         });
         return NextResponse.json({ success: true, products });
+      }
 
-      case "menu":
+      case "menu": {
         const menuItems = await getMenuItems();
         return NextResponse.json({ success: true, menuItems });
+      }
 
-      case "order":
+      case "order": {
         if (!orderId) {
-          return NextResponse.json({ success: false, error: "Order ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Order ID required" },
+            { status: 400 }
+          );
         }
         const order = await phygitalGrocerantPlatform.getOrder(orderId);
         return NextResponse.json({ success: true, order });
+      }
 
-      case "user-orders":
+      case "user-orders": {
         if (!userId) {
-          return NextResponse.json({ success: false, error: "User ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "User ID required" },
+            { status: 400 }
+          );
         }
         const orders = await phygitalGrocerantPlatform.getUserOrders(userId);
         return NextResponse.json({ success: true, orders });
+      }
 
-      case "customer":
+      case "customer": {
         if (!customerId) {
-          return NextResponse.json({ success: false, error: "Customer ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Customer ID required" },
+            { status: 400 }
+          );
         }
-        const customer = await phygitalGrocerantPlatform.getCustomer(customerId);
+        const customer =
+          await phygitalGrocerantPlatform.getCustomer(customerId);
         return NextResponse.json({ success: true, customer });
+      }
 
-      case "recipe":
+      case "recipe": {
         if (!recipeId) {
-          return NextResponse.json({ success: false, error: "Recipe ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Recipe ID required" },
+            { status: 400 }
+          );
         }
         const recipe = await phygitalGrocerantPlatform.getRecipe(recipeId);
         return NextResponse.json({ success: true, recipe });
+      }
 
-      case "rates":
+      case "rates": {
         const dualRates = phygitalGrocerantPlatform.getDualRateInfo();
         return NextResponse.json({
           success: true,
@@ -113,6 +147,7 @@ export async function GET(request: NextRequest) {
           },
           timestamp: new Date().toISOString(),
         });
+      }
 
       default:
         return NextResponse.json({
@@ -129,13 +164,16 @@ export async function GET(request: NextRequest) {
             "GET ?action=user-orders&userId=X": "Get user orders",
             "GET ?action=customer&customerId=X": "Get customer profile",
             "GET ?action=recipe&recipeId=X": "Get recipe details",
-            "POST": "Create orders, customers, smart cart sessions",
+            POST: "Create orders, customers, smart cart sessions",
           },
         });
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
@@ -147,7 +185,7 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     switch (action) {
-      case "create-order":
+      case "create-order": {
         const newOrder = await createGrocerantOrder({
           userId: body.userId,
           locationId: body.locationId,
@@ -159,15 +197,17 @@ export async function POST(request: NextRequest) {
           piAmount: body.piAmount,
         });
         return NextResponse.json({ success: true, order: newOrder });
+      }
 
-      case "update-order-status":
+      case "update-order-status": {
         const updated = await phygitalGrocerantPlatform.updateOrderStatus(
           body.orderId,
           body.status
         );
         return NextResponse.json({ success: true, order: updated });
+      }
 
-      case "create-customer":
+      case "create-customer": {
         const customer = await phygitalGrocerantPlatform.createCustomer({
           piUid: body.piUid,
           firstName: body.firstName,
@@ -177,16 +217,19 @@ export async function POST(request: NextRequest) {
           address: body.address,
         });
         return NextResponse.json({ success: true, customer });
+      }
 
-      case "update-loyalty":
-        const loyaltyUpdated = await phygitalGrocerantPlatform.updateLoyaltyPoints(
-          body.customerId,
-          body.points,
-          body.isPi || false
-        );
+      case "update-loyalty": {
+        const loyaltyUpdated =
+          await phygitalGrocerantPlatform.updateLoyaltyPoints(
+            body.customerId,
+            body.points,
+            body.isPi || false
+          );
         return NextResponse.json({ success: true, customer: loyaltyUpdated });
+      }
 
-      case "search-locations":
+      case "search-locations": {
         const locations = await phygitalGrocerantPlatform.searchLocations({
           city: body.city,
           type: body.type,
@@ -194,8 +237,9 @@ export async function POST(request: NextRequest) {
           acceptsPi: body.acceptsPi,
         });
         return NextResponse.json({ success: true, locations });
+      }
 
-      case "search-recipes":
+      case "search-recipes": {
         const recipes = await phygitalGrocerantPlatform.searchRecipes({
           cuisine: body.cuisine,
           difficulty: body.difficulty,
@@ -204,20 +248,23 @@ export async function POST(request: NextRequest) {
           maxPrepTime: body.maxPrepTime,
         });
         return NextResponse.json({ success: true, recipes });
+      }
 
-      case "start-smart-cart":
+      case "start-smart-cart": {
         const cart = await phygitalGrocerantPlatform.startSmartCartSession(
           body.locationId,
           body.customerId
         );
         return NextResponse.json({ success: true, cart });
+      }
 
-      case "scan-item":
+      case "scan-item": {
         const updatedCart = await phygitalGrocerantPlatform.scanItemToCart(
           body.cartId,
           body.productId
         );
         return NextResponse.json({ success: true, cart: updatedCart });
+      }
 
       default:
         return NextResponse.json(
@@ -227,7 +274,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

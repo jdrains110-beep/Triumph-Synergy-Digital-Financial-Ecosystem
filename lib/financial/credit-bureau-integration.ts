@@ -1,9 +1,9 @@
 /**
  * TRIUMPH-SYNERGY CREDIT BUREAU INTEGRATION
- * 
+ *
  * Real-world integration with major credit bureaus
  * Phygital merger: Digital ecosystem ↔ Real credit infrastructure
- * 
+ *
  * This module enables:
  * - Reporting credit data TO bureaus (as data furnisher)
  * - Pulling credit data FROM bureaus (for verification)
@@ -11,7 +11,7 @@
  */
 
 // Pi Value Constants
-const PI_INTERNAL_RATE = 314159; // $314,159 per π (internal)
+const PI_INTERNAL_RATE = 314_159; // $314,159 per π (internal)
 const PI_EXTERNAL_RATE = 314.159; // $314.159 per π (external)
 
 // =============================================================================
@@ -20,7 +20,7 @@ const PI_EXTERNAL_RATE = 314.159; // $314.159 per π (external)
 
 export type CreditBureau = "equifax" | "experian" | "transunion";
 
-export type IntegrationStatus = 
+export type IntegrationStatus =
   | "not-configured"
   | "pending-approval"
   | "active"
@@ -34,7 +34,7 @@ export type DataFurnisherStatus =
   | "approved"
   | "active-reporting";
 
-export interface CreditBureauConnection {
+export type CreditBureauConnection = {
   bureau: CreditBureau;
   integrationStatus: IntegrationStatus;
   dataFurnisherStatus: DataFurnisherStatus;
@@ -47,9 +47,9 @@ export interface CreditBureauConnection {
     apiKeySet: boolean;
     certificateInstalled: boolean;
   };
-}
+};
 
-export interface CreditReport {
+export type CreditReport = {
   bureau: CreditBureau;
   reportDate: Date;
   creditScore: number;
@@ -59,42 +59,48 @@ export interface CreditReport {
   publicRecords: PublicRecord[];
   collections: CollectionAccount[];
   summary: CreditSummary;
-}
+};
 
-export interface CreditAccount {
+export type CreditAccount = {
   creditorName: string;
   accountNumber: string; // Masked
   accountType: "revolving" | "installment" | "mortgage" | "open";
   balance: number;
   creditLimit: number;
-  paymentStatus: "current" | "30-days" | "60-days" | "90-days" | "120-days" | "charged-off";
+  paymentStatus:
+    | "current"
+    | "30-days"
+    | "60-days"
+    | "90-days"
+    | "120-days"
+    | "charged-off";
   dateOpened: Date;
   lastPaymentDate: Date;
   monthlyPayment: number;
-}
+};
 
-export interface CreditInquiry {
+export type CreditInquiry = {
   creditorName: string;
   inquiryDate: Date;
   inquiryType: "hard" | "soft";
-}
+};
 
-export interface PublicRecord {
+export type PublicRecord = {
   type: "bankruptcy" | "tax-lien" | "civil-judgment";
   filedDate: Date;
   amount: number;
   status: "active" | "released" | "dismissed";
-}
+};
 
-export interface CollectionAccount {
+export type CollectionAccount = {
   collectionAgency: string;
   originalCreditor: string;
   amount: number;
   dateReported: Date;
   status: "open" | "paid" | "settled";
-}
+};
 
-export interface CreditSummary {
+export type CreditSummary = {
   totalAccounts: number;
   openAccounts: number;
   closedAccounts: number;
@@ -104,10 +110,10 @@ export interface CreditSummary {
   oldestAccountAge: number; // months
   recentInquiries: number;
   negativeMarks: number;
-}
+};
 
 // Metro 2 Format for Credit Reporting
-export interface Metro2Record {
+export type Metro2Record = {
   recordDescriptorWord: string;
   processingIndicator: string;
   timestamp: Date;
@@ -152,15 +158,15 @@ export interface Metro2Record {
       zip: string;
     };
   };
-}
+};
 
 // =============================================================================
 // CREDIT BUREAU INTEGRATION CLASS
 // =============================================================================
 
 export class CreditBureauIntegration {
-  private connections: Map<CreditBureau, CreditBureauConnection> = new Map();
-  private ownerCreditProfile: CreditReport | null = null;
+  private readonly connections: Map<CreditBureau, CreditBureauConnection> =
+    new Map();
   private dataFurnisherRegistration!: {
     businessName: string;
     ein: string;
@@ -169,31 +175,25 @@ export class CreditBureauIntegration {
     metro2Compliant: boolean;
   };
 
-  // Triumph-Synergy credentials for bureau access
-  private readonly COMPANY_INFO = {
-    name: "TRIUMPH-SYNERGY",
-    ein: "41-6777102", // REAL EIN - Trust
-    nameControl: "TRIU",
-    entityType: "Trust",
-    address: "135 Lake Como Dr, Pomona Park, FL 32181",
-    phone: "",
-    website: "https://triumph-synergy.com",
-    industryCode: "FI", // Financial Institution
-  };
-
   constructor() {
     this.initializeBureauConnections();
     this.initializeDataFurnisherRegistration();
     this.syncOwnerCreditProfile();
-    
-    console.log("═══════════════════════════════════════════════════════════════");
+
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
     console.log("   CREDIT BUREAU INTEGRATION INITIALIZED");
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
     console.log("   Bureaus: Equifax, Experian, TransUnion");
     console.log("   Data Furnisher Status: REGISTRATION IN PROGRESS");
     console.log("   Metro 2 Format: READY");
     console.log("   Real-World Integration: PREPARING CONNECTION");
-    console.log("═══════════════════════════════════════════════════════════════");
+    console.log(
+      "═══════════════════════════════════════════════════════════════"
+    );
   }
 
   private initializeBureauConnections(): void {
@@ -270,7 +270,7 @@ export class CreditBureauIntegration {
           accountNumber: "****0001",
           accountType: "revolving",
           balance: 0,
-          creditLimit: 1000000000, // $1B credit line
+          creditLimit: 1_000_000_000, // $1B credit line
           paymentStatus: "current",
           dateOpened: new Date("2026-01-01"),
           lastPaymentDate: new Date(),
@@ -285,7 +285,7 @@ export class CreditBureauIntegration {
         openAccounts: 1,
         closedAccounts: 0,
         totalDebt: 0, // ALL DEBTS CLEARED
-        availableCredit: 1000000000,
+        availableCredit: 1_000_000_000,
         utilizationRate: 0, // 0% utilization = excellent
         oldestAccountAge: 1,
         recentInquiries: 0,
@@ -345,13 +345,15 @@ export class CreditBureauIntegration {
     readyForReporting: boolean;
     actionRequired: string[];
   } {
-    const bureauStatuses = Array.from(this.connections.values()).map((conn) => ({
-      name: conn.bureau,
-      status: conn.integrationStatus,
-      furnisherStatus: conn.dataFurnisherStatus,
-      connected: conn.integrationStatus === "active",
-      lastSync: conn.lastSync,
-    }));
+    const bureauStatuses = Array.from(this.connections.values()).map(
+      (conn) => ({
+        name: conn.bureau,
+        status: conn.integrationStatus,
+        furnisherStatus: conn.dataFurnisherStatus,
+        connected: conn.integrationStatus === "active",
+        lastSync: conn.lastSync,
+      })
+    );
 
     const connectedCount = bureauStatuses.filter((b) => b.connected).length;
     const actionRequired: string[] = [];
@@ -359,10 +361,14 @@ export class CreditBureauIntegration {
     // Determine what actions are needed
     for (const bureau of bureauStatuses) {
       if (!bureau.connected) {
-        actionRequired.push(`Configure API credentials for ${bureau.name.toUpperCase()}`);
+        actionRequired.push(
+          `Configure API credentials for ${bureau.name.toUpperCase()}`
+        );
       }
       if (bureau.furnisherStatus !== "active-reporting") {
-        actionRequired.push(`Complete data furnisher registration with ${bureau.name.toUpperCase()}`);
+        actionRequired.push(
+          `Complete data furnisher registration with ${bureau.name.toUpperCase()}`
+        );
       }
     }
 
@@ -371,8 +377,13 @@ export class CreditBureauIntegration {
 
     return {
       bureaus: bureauStatuses,
-      overallStatus: connectedCount === 3 ? "FULLY CONNECTED" : `${connectedCount}/3 BUREAUS CONNECTED`,
-      readyForReporting: connectedCount === 3 && this.dataFurnisherRegistration.status === "active-reporting",
+      overallStatus:
+        connectedCount === 3
+          ? "FULLY CONNECTED"
+          : `${connectedCount}/3 BUREAUS CONNECTED`,
+      readyForReporting:
+        connectedCount === 3 &&
+        this.dataFurnisherRegistration.status === "active-reporting",
       actionRequired,
     };
   }
@@ -401,7 +412,7 @@ export class CreditBureauIntegration {
     }
   ): Promise<{ success: boolean; report?: CreditReport; error?: string }> {
     const connection = this.connections.get(bureau);
-    
+
     if (!connection || connection.integrationStatus !== "active") {
       return {
         success: false,
@@ -410,15 +421,20 @@ export class CreditBureauIntegration {
     }
 
     // In production, this would make actual API call to bureau
-    console.log(`[CREDIT PULL] Requesting credit report from ${bureau.toUpperCase()}...`);
-    console.log(`[CREDIT PULL] Consumer: ${consumer.firstName} ${consumer.lastName}`);
-    
+    console.log(
+      `[CREDIT PULL] Requesting credit report from ${bureau.toUpperCase()}...`
+    );
+    console.log(
+      `[CREDIT PULL] Consumer: ${consumer.firstName} ${consumer.lastName}`
+    );
+
     // Simulated API call - replace with real integration
     // const response = await fetch(connection.apiEndpoint + "/credit-report", { ... });
 
     return {
       success: false,
-      error: "API credentials required. Configure credentials to enable credit pulls.",
+      error:
+        "API credentials required. Configure credentials to enable credit pulls.",
     };
   }
 
@@ -444,16 +460,19 @@ export class CreditBureauIntegration {
     ]);
 
     const successfulReports = results.filter((r) => r.success && r.report);
-    
+
     if (successfulReports.length === 0) {
       return {
         success: false,
-        error: "Could not retrieve reports from any bureau. Check API configurations.",
+        error:
+          "Could not retrieve reports from any bureau. Check API configurations.",
       };
     }
 
     // Calculate merged score (middle score methodology)
-    const scores = successfulReports.map((r) => r.report!.creditScore).sort((a, b) => a - b);
+    const scores = successfulReports
+      .map((r) => r.report!.creditScore)
+      .sort((a, b) => a - b);
     const mergedScore = scores.length === 3 ? scores[1] : scores[0];
 
     const reports = new Map<CreditBureau, CreditReport>();
@@ -483,9 +502,13 @@ export class CreditBureauIntegration {
     records: Metro2Record[]
   ): Promise<{ success: boolean; recordsSubmitted: number; error?: string }> {
     const connection = this.connections.get(bureau);
-    
+
     if (!connection) {
-      return { success: false, recordsSubmitted: 0, error: `Bureau ${bureau} not configured` };
+      return {
+        success: false,
+        recordsSubmitted: 0,
+        error: `Bureau ${bureau} not configured`,
+      };
     }
 
     if (connection.dataFurnisherStatus !== "active-reporting") {
@@ -499,9 +522,11 @@ export class CreditBureauIntegration {
     // Convert records to Metro 2 format
     const metro2Data = this.formatMetro2Submission(records);
 
-    console.log(`[CREDIT REPORT] Submitting ${records.length} records to ${bureau.toUpperCase()}`);
-    console.log(`[CREDIT REPORT] Metro 2 format: COMPLIANT`);
-    
+    console.log(
+      `[CREDIT REPORT] Submitting ${records.length} records to ${bureau.toUpperCase()}`
+    );
+    console.log("[CREDIT REPORT] Metro 2 format: COMPLIANT");
+
     // In production: Submit to bureau API
     // const response = await fetch(connection.apiEndpoint + "/data-furnisher/submit", {
     //   method: "POST",
@@ -512,7 +537,8 @@ export class CreditBureauIntegration {
     return {
       success: false,
       recordsSubmitted: 0,
-      error: "Data furnisher registration required. Complete bureau registration to submit credit data.",
+      error:
+        "Data furnisher registration required. Complete bureau registration to submit credit data.",
     };
   }
 
@@ -536,7 +562,7 @@ export class CreditBureauIntegration {
       portfolioType: "R", // Revolving
       accountType: "18", // Credit card
       dateOpened: new Date("2026-01-01"),
-      creditLimit: 1000000000, // $1B
+      creditLimit: 1_000_000_000, // $1B
       highestCredit: 0,
       termsDuration: "REV",
       termsFrequency: "M",
@@ -573,8 +599,12 @@ export class CreditBureauIntegration {
     };
 
     const results: CreditBureau[] = [];
-    
-    for (const bureau of ["equifax", "experian", "transunion"] as CreditBureau[]) {
+
+    for (const bureau of [
+      "equifax",
+      "experian",
+      "transunion",
+    ] as CreditBureau[]) {
       const result = await this.reportTobureau(bureau, [ownerRecord]);
       if (result.success) {
         results.push(bureau);
@@ -584,9 +614,10 @@ export class CreditBureauIntegration {
     return {
       success: results.length > 0,
       bureausUpdated: results,
-      message: results.length > 0 
-        ? `Successfully reported to ${results.length} bureaus` 
-        : "Registration required. See getRegistrationSteps() for next actions.",
+      message:
+        results.length > 0
+          ? `Successfully reported to ${results.length} bureaus`
+          : "Registration required. See getRegistrationSteps() for next actions.",
     };
   }
 
@@ -633,7 +664,9 @@ export class CreditBureauIntegration {
           description: "Register Triumph-Synergy as a legal business entity",
           status: "completed",
           action: "Verify EIN is on file",
-          resources: ["https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online"],
+          resources: [
+            "https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online",
+          ],
         },
         {
           step: 2,
@@ -679,10 +712,13 @@ export class CreditBureauIntegration {
         {
           step: 6,
           title: "Security Certification",
-          description: "Complete data security certification (required by bureaus)",
+          description:
+            "Complete data security certification (required by bureaus)",
           status: "pending",
           action: "Implement SOC 2 Type II compliance",
-          resources: ["https://www.aicpa.org/topic/audit-assurance/audit-and-assurance-greater-than-soc-2"],
+          resources: [
+            "https://www.aicpa.org/topic/audit-assurance/audit-and-assurance-greater-than-soc-2",
+          ],
         },
         {
           step: 7,
@@ -719,7 +755,8 @@ export class CreditBureauIntegration {
     return [
       {
         option: "Plaid",
-        description: "Financial data aggregation platform with credit bureau access",
+        description:
+          "Financial data aggregation platform with credit bureau access",
         timeToIntegrate: "1-2 weeks",
         cost: "Pay per API call",
         capabilities: [
@@ -810,7 +847,12 @@ export class CreditBureauIntegration {
    */
   async verifyOwnerCreditSync(
     ownerSSN: string,
-    ownerInfo: { firstName: string; lastName: string; dateOfBirth: Date; address: any }
+    ownerInfo: {
+      firstName: string;
+      lastName: string;
+      dateOfBirth: Date;
+      address: any;
+    }
   ): Promise<{
     inSync: boolean;
     ecosystemScore: number;
@@ -841,9 +883,10 @@ export class CreditBureauIntegration {
       ecosystemScore: 850,
       realWorldScore: report.mergedScore,
       discrepancy,
-      action: discrepancy > 0 
-        ? `Report positive tradelines to increase score by ${discrepancy} points`
-        : "Credit synchronized",
+      action:
+        discrepancy > 0
+          ? `Report positive tradelines to increase score by ${discrepancy} points`
+          : "Credit synchronized",
     };
   }
 }
@@ -882,5 +925,8 @@ export function configureBureauCredentials(
   bureau: CreditBureau,
   credentials: { apiKey: string; apiSecret: string; certificate?: string }
 ) {
-  return creditBureauIntegration.configureBureauCredentials(bureau, credentials);
+  return creditBureauIntegration.configureBureauCredentials(
+    bureau,
+    credentials
+  );
 }

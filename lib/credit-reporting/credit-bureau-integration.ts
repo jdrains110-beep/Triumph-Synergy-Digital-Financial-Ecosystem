@@ -24,7 +24,7 @@ export type CreditBureau =
   | "innovis"
   | "prbc";
 
-export interface CreditReport {
+export type CreditReport = {
   id: string;
   bureau: CreditBureau;
   consumerId: string;
@@ -38,7 +38,7 @@ export interface CreditReport {
   personalInfo: ConsumerInfo;
   alerts: CreditAlert[];
   summary: CreditSummary;
-}
+};
 
 export type ScoreModel =
   | "FICO8"
@@ -49,7 +49,7 @@ export type ScoreModel =
   | "VantageScore4"
   | "FICO_XD";
 
-export interface Tradeline {
+export type Tradeline = {
   id: string;
   creditorName: string;
   accountNumber: string; // Masked
@@ -64,7 +64,7 @@ export interface Tradeline {
   paymentHistory: PaymentHistoryEntry[];
   remarks: string[];
   disputeStatus: DisputeStatus | null;
-}
+};
 
 export type AccountType =
   | "revolving"
@@ -85,22 +85,22 @@ export type AccountStatus =
   | "paid"
   | "settled";
 
-export interface PaymentHistoryEntry {
+export type PaymentHistoryEntry = {
   month: string; // YYYY-MM format
   status: "OK" | "30" | "60" | "90" | "120" | "CO" | "FC" | "--";
-}
+};
 
 export type DisputeStatus = "pending" | "verified" | "updated" | "deleted";
 
-export interface CreditInquiry {
+export type CreditInquiry = {
   id: string;
   creditorName: string;
   inquiryDate: Date;
   inquiryType: "hard" | "soft" | "promotional";
   purpose: string;
-}
+};
 
-export interface PublicRecord {
+export type PublicRecord = {
   id: string;
   type: "bankruptcy" | "judgment" | "tax-lien" | "foreclosure";
   filingDate: Date;
@@ -109,9 +109,9 @@ export interface PublicRecord {
   amount: number;
   status: "filed" | "discharged" | "dismissed" | "satisfied" | "released";
   removalDate: Date | null;
-}
+};
 
-export interface CollectionAccount {
+export type CollectionAccount = {
   id: string;
   creditorName: string;
   originalCreditor: string;
@@ -121,9 +121,9 @@ export interface CollectionAccount {
   openDate: Date;
   status: "open" | "paid" | "settled" | "disputed";
   lastActivityDate: Date;
-}
+};
 
-export interface ConsumerInfo {
+export type ConsumerInfo = {
   firstName: string;
   lastName: string;
   middleName?: string;
@@ -133,30 +133,30 @@ export interface ConsumerInfo {
   addresses: Address[];
   employers: Employer[];
   phoneNumbers: string[];
-}
+};
 
-export interface Address {
+export type Address = {
   street: string;
   city: string;
   state: string;
   zip: string;
   type: "current" | "previous" | "mailing";
   reportedDate: Date;
-}
+};
 
-export interface Employer {
+export type Employer = {
   name: string;
   address?: string;
   reportedDate: Date;
-}
+};
 
-export interface CreditAlert {
+export type CreditAlert = {
   id: string;
   type: AlertType;
   message: string;
   severity: "info" | "warning" | "critical";
   createdAt: Date;
-}
+};
 
 export type AlertType =
   | "fraud-alert"
@@ -169,7 +169,7 @@ export type AlertType =
   | "balance-increase"
   | "late-payment";
 
-export interface CreditSummary {
+export type CreditSummary = {
   totalAccounts: number;
   openAccounts: number;
   closedAccounts: number;
@@ -183,9 +183,9 @@ export interface CreditSummary {
   negativeItems: number;
   publicRecordsCount: number;
   collectionsCount: number;
-}
+};
 
-export interface CreditReportingPayload {
+export type CreditReportingPayload = {
   consumerId: string;
   bureau: CreditBureau;
   reportType:
@@ -197,9 +197,9 @@ export interface CreditReportingPayload {
   data: Record<string, unknown>;
   timestamp: Date;
   submitterId: string;
-}
+};
 
-export interface DisputeRequest {
+export type DisputeRequest = {
   id: string;
   consumerId: string;
   bureaus: CreditBureau[];
@@ -211,7 +211,7 @@ export interface DisputeRequest {
   submissionDate: Date;
   resolutionDate: Date | null;
   resolution: string | null;
-}
+};
 
 export type DisputeReason =
   | "not-my-account"
@@ -231,8 +231,8 @@ export type DisputeReason =
 
 export class CreditBureauIntegration {
   private static instance: CreditBureauIntegration;
-  private reports: Map<string, CreditReport[]> = new Map();
-  private disputes: Map<string, DisputeRequest[]> = new Map();
+  private readonly reports: Map<string, CreditReport[]> = new Map();
+  private readonly disputes: Map<string, DisputeRequest[]> = new Map();
 
   // Bureau API endpoints (simulated - real integration requires contracts)
   private readonly bureauEndpoints: Record<CreditBureau, string> = {
@@ -411,7 +411,9 @@ export class CreditBureauIntegration {
   async getDisputeStatus(disputeId: string): Promise<DisputeRequest | null> {
     for (const disputes of this.disputes.values()) {
       const found = disputes.find((d) => d.id === disputeId);
-      if (found) return found;
+      if (found) {
+        return found;
+      }
     }
     return null;
   }
@@ -670,21 +672,21 @@ export class CreditBureauIntegration {
 // ADDITIONAL TYPES
 // ============================================================================
 
-export interface PositivePaymentData {
+export type PositivePaymentData = {
   type: "rent" | "utility" | "phone" | "streaming" | "insurance" | "other";
   merchantName: string;
   amount: number;
   date: Date;
   onTime: boolean;
-}
+};
 
-export interface PiNetworkCreditActivity {
+export type PiNetworkCreditActivity = {
   type: "payment" | "transfer" | "merchant-transaction" | "p2p" | "staking";
   amount: number;
   date: Date;
   verified: boolean;
   counterpartyVerified: boolean;
-}
+};
 
 // ============================================================================
 // EXPORTS

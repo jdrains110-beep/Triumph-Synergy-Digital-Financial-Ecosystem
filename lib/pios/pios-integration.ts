@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Pi OS (PIOS) Complete Integration
- * 
+ *
  * Full Pi Operating System enablement across all platform services
  * Deep integration with Pi Browser, Pi Wallet, and Pi Network ecosystem
- * 
+ *
  * @module lib/pios/pios-integration
  * @version 1.0.0
  */
@@ -15,8 +15,8 @@
 // Dual Pi Value System
 // Internally mined/contributed Pi = 1000x multiplier (Pioneer reward)
 // External/non-contributed Pi = base rate
-const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
-const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_EXTERNAL_RATE = 314.159; // External non-contributed Pi
+const PI_INTERNAL_RATE = 314_159; // Internally mined/contributed Pi (1000x)
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -25,11 +25,17 @@ export function getPiRate(type: PiValueType = "external"): number {
   return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
 }
 
-export function convertPiToUsdByType(piAmount: number, type: PiValueType = "external"): number {
+export function convertPiToUsdByType(
+  piAmount: number,
+  type: PiValueType = "external"
+): number {
   return piAmount * getPiRate(type);
 }
 
-export function convertUsdToPiByType(usdAmount: number, type: PiValueType = "external"): number {
+export function convertUsdToPiByType(
+  usdAmount: number,
+  type: PiValueType = "external"
+): number {
   return usdAmount / getPiRate(type);
 }
 const PI_NETWORK_VERSION = "1.0.0";
@@ -39,26 +45,26 @@ const PIOS_SDK_VERSION = "2.0.0";
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface PiOSConfig {
+export type PiOSConfig = {
   appId: string;
   appName: string;
   version: string;
   environment: "sandbox" | "production";
-  
+
   // Features
   features: PiOSFeatures;
-  
+
   // Permissions
   permissions: PiOSPermissions;
-  
+
   // Branding
   branding: PiOSBranding;
-  
+
   // Callbacks
   callbacks: PiOSCallbacks;
-}
+};
 
-export interface PiOSFeatures {
+export type PiOSFeatures = {
   payments: boolean;
   authentication: boolean;
   chat: boolean;
@@ -74,9 +80,9 @@ export interface PiOSFeatures {
   nfc: boolean;
   ar: boolean;
   ai: boolean;
-}
+};
 
-export interface PiOSPermissions {
+export type PiOSPermissions = {
   paymentCreate: boolean;
   paymentApprove: boolean;
   userInfo: boolean;
@@ -87,18 +93,18 @@ export interface PiOSPermissions {
   transactionHistory: boolean;
   notificationsPush: boolean;
   backgroundSync: boolean;
-}
+};
 
-export interface PiOSBranding {
+export type PiOSBranding = {
   primaryColor: string;
   secondaryColor: string;
   logo: string;
   icon: string;
   splashScreen: string;
   theme: "light" | "dark" | "auto";
-}
+};
 
-export interface PiOSCallbacks {
+export type PiOSCallbacks = {
   onReady: string;
   onPaymentComplete: string;
   onPaymentCancelled: string;
@@ -107,55 +113,55 @@ export interface PiOSCallbacks {
   onAuthError: string;
   onShare: string;
   onDeepLink: string;
-}
+};
 
-export interface PiUser {
+export type PiUser = {
   uid: string;
   username: string;
-  
+
   // Profile
   displayName: string | null;
   avatarUrl: string | null;
   bio: string | null;
-  
+
   // Verification
   verified: boolean;
   kycComplete: boolean;
   kycLevel: KYCLevel;
-  
+
   // Wallet
   walletAddress: string;
   walletBalance: number;
   lockedBalance: number;
-  
+
   // Mining
   miningStatus: MiningStatus;
   miningRate: number;
   totalMined: number;
-  
+
   // Network
   referralCount: number;
   securityCircleSize: number;
   roles: PiRole[];
-  
+
   // Triumph Synergy Specific
   triumphUserId: string | null;
   triumphTier: "basic" | "premium" | "enterprise";
   triumphServicesEnabled: string[];
-}
+};
 
 export type KYCLevel = "none" | "basic" | "intermediate" | "full";
 
-export interface MiningStatus {
+export type MiningStatus = {
   isActive: boolean;
   sessionStartedAt: Date | null;
   sessionEndsAt: Date | null;
   currentRate: number;
   boostMultiplier: number;
   boostReason: string | null;
-}
+};
 
-export type PiRole = 
+export type PiRole =
   | "pioneer"
   | "contributor"
   | "ambassador"
@@ -165,36 +171,36 @@ export type PiRole =
   | "validator"
   | "early-adopter";
 
-export interface PiPayment {
+export type PiPayment = {
   id: string;
   identifier: string;
   userId: string;
   amount: number;
   memo: string;
   metadata: Record<string, unknown>;
-  
+
   // Status
   status: PaymentStatus;
-  
+
   // Transaction
   transactionId: string | null;
   networkTransactionId: string | null;
-  
+
   // Direction
   direction: "user_to_app" | "app_to_user";
-  
+
   // Timestamps
   createdAt: Date;
   approvedAt: Date | null;
   completedAt: Date | null;
   cancelledAt: Date | null;
-  
+
   // Fees
   developerFee: number;
   networkFee: number;
-}
+};
 
-export type PaymentStatus = 
+export type PaymentStatus =
   | "created"
   | "pending_approval"
   | "approved"
@@ -204,7 +210,7 @@ export type PaymentStatus =
   | "failed"
   | "refunded";
 
-export interface PiNotification {
+export type PiNotification = {
   id: string;
   userId: string;
   type: NotificationType;
@@ -214,9 +220,9 @@ export interface PiNotification {
   read: boolean;
   sentAt: Date;
   expiresAt: Date | null;
-}
+};
 
-export type NotificationType = 
+export type NotificationType =
   | "payment"
   | "transaction"
   | "system"
@@ -225,15 +231,15 @@ export type NotificationType =
   | "mining"
   | "verification";
 
-export interface PiDeepLink {
+export type PiDeepLink = {
   scheme: "pi" | "triumphsynergy";
   host: string;
   path: string;
   params: Record<string, string>;
   action: DeepLinkAction;
-}
+};
 
-export type DeepLinkAction = 
+export type DeepLinkAction =
   | "open-app"
   | "pay"
   | "view-product"
@@ -243,7 +249,7 @@ export type DeepLinkAction =
   | "refer"
   | "authenticate";
 
-export interface PiShare {
+export type PiShare = {
   id: string;
   type: ShareType;
   content: ShareContent;
@@ -251,9 +257,9 @@ export interface PiShare {
   sentAt: Date;
   views: number;
   engagement: ShareEngagement;
-}
+};
 
-export type ShareType = 
+export type ShareType =
   | "text"
   | "image"
   | "link"
@@ -261,32 +267,32 @@ export type ShareType =
   | "referral"
   | "achievement";
 
-export interface ShareContent {
+export type ShareContent = {
   title: string;
   description: string;
   imageUrl: string | null;
   linkUrl: string | null;
   productId: string | null;
   referralCode: string | null;
-}
+};
 
-export interface ShareEngagement {
+export type ShareEngagement = {
   views: number;
   clicks: number;
   conversions: number;
   referralsGenerated: number;
-}
+};
 
-export interface PiOSEvent {
+export type PiOSEvent = {
   id: string;
   type: string;
   timestamp: Date;
   userId: string | null;
   sessionId: string;
   data: Record<string, unknown>;
-}
+};
 
-export interface PiOSSession {
+export type PiOSSession = {
   id: string;
   userId: string | null;
   startedAt: Date;
@@ -294,9 +300,9 @@ export interface PiOSSession {
   device: DeviceInfo;
   location: LocationInfo | null;
   events: PiOSEvent[];
-}
+};
 
-export interface DeviceInfo {
+export type DeviceInfo = {
   platform: "ios" | "android" | "web";
   osVersion: string;
   appVersion: string;
@@ -305,16 +311,16 @@ export interface DeviceInfo {
   screenSize: string;
   language: string;
   timezone: string;
-}
+};
 
-export interface LocationInfo {
+export type LocationInfo = {
   latitude: number;
   longitude: number;
   accuracy: number;
   country: string;
   region: string;
   city: string;
-}
+};
 
 // ============================================================================
 // PI OS INTEGRATION CLASS
@@ -322,11 +328,11 @@ export interface LocationInfo {
 
 class PiOSIntegration {
   private config: PiOSConfig;
-  private users: Map<string, PiUser> = new Map();
-  private payments: Map<string, PiPayment> = new Map();
-  private sessions: Map<string, PiOSSession> = new Map();
-  private notifications: Map<string, PiNotification[]> = new Map();
-  private isInitialized: boolean = false;
+  private readonly users: Map<string, PiUser> = new Map();
+  private readonly payments: Map<string, PiPayment> = new Map();
+  private readonly sessions: Map<string, PiOSSession> = new Map();
+  private readonly notifications: Map<string, PiNotification[]> = new Map();
+  private isInitialized = false;
 
   constructor() {
     this.config = this.getDefaultConfig();
@@ -444,8 +450,8 @@ class PiOSIntegration {
       lockedBalance: Math.random() * 500,
       miningStatus: {
         isActive: true,
-        sessionStartedAt: new Date(Date.now() - 3600000),
-        sessionEndsAt: new Date(Date.now() + 20000000),
+        sessionStartedAt: new Date(Date.now() - 3_600_000),
+        sessionEndsAt: new Date(Date.now() + 20_000_000),
         currentRate: 0.25,
         boostMultiplier: 1.5,
         boostReason: "Security Circle Complete",
@@ -481,9 +487,15 @@ class PiOSIntegration {
       throw new Error("User not found");
     }
 
-    if (updates.triumphUserId) user.triumphUserId = updates.triumphUserId;
-    if (updates.triumphTier) user.triumphTier = updates.triumphTier;
-    if (updates.triumphServicesEnabled) user.triumphServicesEnabled = updates.triumphServicesEnabled;
+    if (updates.triumphUserId) {
+      user.triumphUserId = updates.triumphUserId;
+    }
+    if (updates.triumphTier) {
+      user.triumphTier = updates.triumphTier;
+    }
+    if (updates.triumphServicesEnabled) {
+      user.triumphServicesEnabled = updates.triumphServicesEnabled;
+    }
 
     return user;
   }
@@ -546,7 +558,9 @@ class PiOSIntegration {
 
   private async processPayment(paymentId: string): Promise<void> {
     const payment = this.payments.get(paymentId);
-    if (!payment) return;
+    if (!payment) {
+      return;
+    }
 
     payment.status = "processing";
 
@@ -600,7 +614,9 @@ class PiOSIntegration {
   // NOTIFICATIONS
   // ==========================================================================
 
-  async sendNotification(notification: Omit<PiNotification, "id" | "read" | "sentAt">): Promise<PiNotification> {
+  async sendNotification(
+    notification: Omit<PiNotification, "id" | "read" | "sentAt">
+  ): Promise<PiNotification> {
     if (!this.config.features.notifications) {
       throw new Error("Notifications feature is not enabled");
     }
@@ -623,9 +639,14 @@ class PiOSIntegration {
     return this.notifications.get(userId) || [];
   }
 
-  async markNotificationRead(userId: string, notificationId: string): Promise<void> {
+  async markNotificationRead(
+    userId: string,
+    notificationId: string
+  ): Promise<void> {
     const userNotifications = this.notifications.get(userId);
-    if (!userNotifications) return;
+    if (!userNotifications) {
+      return;
+    }
 
     const notification = userNotifications.find((n) => n.id === notificationId);
     if (notification) {
@@ -637,7 +658,10 @@ class PiOSIntegration {
   // DEEP LINKS
   // ==========================================================================
 
-  generateDeepLink(action: DeepLinkAction, params: Record<string, string> = {}): string {
+  generateDeepLink(
+    action: DeepLinkAction,
+    params: Record<string, string> = {}
+  ): string {
     const baseUrl = "triumphsynergy://";
     const queryString = new URLSearchParams(params).toString();
 
@@ -660,7 +684,9 @@ class PiOSIntegration {
   parseDeepLink(url: string): PiDeepLink | null {
     try {
       const parsed = new URL(url);
-      const scheme = parsed.protocol.replace(":", "") as "pi" | "triumphsynergy";
+      const scheme = parsed.protocol.replace(":", "") as
+        | "pi"
+        | "triumphsynergy";
       const host = parsed.host;
       const path = parsed.pathname;
       const params: Record<string, string> = {};
@@ -670,12 +696,19 @@ class PiOSIntegration {
       });
 
       let action: DeepLinkAction = "open-app";
-      if (path.includes("pay")) action = "pay";
-      else if (path.includes("product")) action = "view-product";
-      else if (path.includes("order")) action = "view-order";
-      else if (path.includes("refer")) action = "refer";
-      else if (path.includes("share")) action = "share";
-      else if (path.includes("auth")) action = "authenticate";
+      if (path.includes("pay")) {
+        action = "pay";
+      } else if (path.includes("product")) {
+        action = "view-product";
+      } else if (path.includes("order")) {
+        action = "view-order";
+      } else if (path.includes("refer")) {
+        action = "refer";
+      } else if (path.includes("share")) {
+        action = "share";
+      } else if (path.includes("auth")) {
+        action = "authenticate";
+      }
 
       return { scheme, host, path, params, action };
     } catch {
@@ -719,7 +752,10 @@ class PiOSIntegration {
   // SESSIONS
   // ==========================================================================
 
-  async createSession(device: DeviceInfo, userId?: string): Promise<PiOSSession> {
+  async createSession(
+    device: DeviceInfo,
+    userId?: string
+  ): Promise<PiOSSession> {
     const session: PiOSSession = {
       id: `session-${Date.now()}`,
       userId: userId || null,
@@ -734,7 +770,10 @@ class PiOSIntegration {
     return session;
   }
 
-  async trackEvent(sessionId: string, event: Omit<PiOSEvent, "id" | "timestamp" | "sessionId">): Promise<PiOSEvent> {
+  async trackEvent(
+    sessionId: string,
+    event: Omit<PiOSEvent, "id" | "timestamp" | "sessionId">
+  ): Promise<PiOSEvent> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error("Session not found");
@@ -785,7 +824,11 @@ class PiOSIntegration {
     return usdAmount / getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,
@@ -886,15 +929,21 @@ class PiOSIntegration {
 export const piosIntegration = new PiOSIntegration();
 
 // Export helper functions
-export async function initializePiOS(config?: Partial<PiOSConfig>): Promise<ReturnType<typeof piosIntegration.initialize>> {
+export async function initializePiOS(
+  config?: Partial<PiOSConfig>
+): Promise<ReturnType<typeof piosIntegration.initialize>> {
   return piosIntegration.initialize(config);
 }
 
-export async function authenticatePiUser(authData: Parameters<typeof piosIntegration.authenticateUser>[0]): Promise<PiUser> {
+export async function authenticatePiUser(
+  authData: Parameters<typeof piosIntegration.authenticateUser>[0]
+): Promise<PiUser> {
   return piosIntegration.authenticateUser(authData);
 }
 
-export async function createPiPayment(data: Parameters<typeof piosIntegration.createPayment>[0]): Promise<PiPayment> {
+export async function createPiPayment(
+  data: Parameters<typeof piosIntegration.createPayment>[0]
+): Promise<PiPayment> {
   return piosIntegration.createPayment(data);
 }
 
@@ -902,6 +951,9 @@ export async function approvePiPayment(paymentId: string): Promise<PiPayment> {
   return piosIntegration.approvePayment(paymentId);
 }
 
-export function generateDeepLink(action: DeepLinkAction, params?: Record<string, string>): string {
+export function generateDeepLink(
+  action: DeepLinkAction,
+  params?: Record<string, string>
+): string {
   return piosIntegration.generateDeepLink(action, params);
 }

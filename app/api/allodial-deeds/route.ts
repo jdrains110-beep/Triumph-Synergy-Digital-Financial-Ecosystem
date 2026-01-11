@@ -1,6 +1,6 @@
 /**
  * Allodial Deeds API Route
- * 
+ *
  * Handles deed creation, allodial conversion, and blockchain registration
  */
 
@@ -9,8 +9,8 @@ import {
   allodialDeedsPlatform,
   createDeed,
   initiateAllodialConversion,
-  transferDeed,
   registerDeedOnBlockchain,
+  transferDeed,
 } from "@/lib/allodial-deeds/allodial-deeds-platform";
 
 export async function GET(request: NextRequest) {
@@ -21,19 +21,27 @@ export async function GET(request: NextRequest) {
 
   try {
     switch (action) {
-      case "get":
+      case "get": {
         if (!deedId) {
-          return NextResponse.json({ success: false, error: "Deed ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Deed ID required" },
+            { status: 400 }
+          );
         }
         const deed = await allodialDeedsPlatform.getDeed(deedId);
         return NextResponse.json({ success: true, deed });
+      }
 
-      case "owner-deeds":
+      case "owner-deeds": {
         if (!ownerId) {
-          return NextResponse.json({ success: false, error: "Owner ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Owner ID required" },
+            { status: 400 }
+          );
         }
         const ownerDeeds = await allodialDeedsPlatform.getOwnerDeeds(ownerId);
         return NextResponse.json({ success: true, deeds: ownerDeeds });
+      }
 
       case "conversion-steps":
         return NextResponse.json({
@@ -60,13 +68,16 @@ export async function GET(request: NextRequest) {
             "GET ?action=get&deedId=X": "Get deed details",
             "GET ?action=owner-deeds&ownerId=X": "Get owner's deeds",
             "GET ?action=conversion-steps": "List allodial conversion steps",
-            "POST": "Create deeds, initiate conversions, transfers",
+            POST: "Create deeds, initiate conversions, transfers",
           },
         });
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
@@ -78,7 +89,7 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     switch (action) {
-      case "create":
+      case "create": {
         const newDeed = await createDeed({
           property: {
             address: {
@@ -116,20 +127,23 @@ export async function POST(request: NextRequest) {
           deedType: body.existingDeedType || "warranty",
         });
         return NextResponse.json({ success: true, deed: newDeed });
+      }
 
-      case "initiate-conversion":
+      case "initiate-conversion": {
         const conversion = await initiateAllodialConversion(body.deedId);
         return NextResponse.json({ success: true, application: conversion });
+      }
 
-      case "complete-step":
+      case "complete-step": {
         const completed = await allodialDeedsPlatform.completeApplicationStep(
           body.applicationId,
           body.step,
           body.data
         );
         return NextResponse.json({ success: true, application: completed });
+      }
 
-      case "transfer":
+      case "transfer": {
         const transferred = await transferDeed(
           body.deedId,
           {
@@ -149,17 +163,20 @@ export async function POST(request: NextRequest) {
           }
         );
         return NextResponse.json({ success: true, transfer: transferred });
+      }
 
-      case "register-blockchain":
+      case "register-blockchain": {
         const registered = await registerDeedOnBlockchain(body.deedId);
         return NextResponse.json({ success: true, ...registered });
+      }
 
-      case "upload-document":
+      case "upload-document": {
         const doc = await allodialDeedsPlatform.uploadDocument(
           body.deedId,
           body.document
         );
         return NextResponse.json({ success: true, document: doc });
+      }
 
       default:
         return NextResponse.json(
@@ -169,7 +186,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

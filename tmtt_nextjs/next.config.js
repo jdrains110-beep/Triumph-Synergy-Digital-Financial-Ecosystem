@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
-}
+  pageExtensions: ["js", "jsx", "ts", "tsx"],
+};
 
-export default nextConfig
+export default nextConfig;

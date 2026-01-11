@@ -12,7 +12,7 @@
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface Vendor {
+export type Vendor = {
   id: string;
   name: string;
   slug: string;
@@ -29,7 +29,7 @@ export interface Vendor {
   settings: VendorSettings;
   stats: VendorStats;
   contact: VendorContact;
-}
+};
 
 export type VendorCategory =
   | "retail"
@@ -44,7 +44,7 @@ export type VendorCategory =
   | "health-beauty"
   | "enterprise";
 
-export interface VendorSettings {
+export type VendorSettings = {
   commissionRate: number;
   shippingEnabled: boolean;
   pickupEnabled: boolean;
@@ -52,24 +52,24 @@ export interface VendorSettings {
   internationalShipping: boolean;
   taxCollection: boolean;
   autoFulfillment: boolean;
-}
+};
 
-export interface VendorStats {
+export type VendorStats = {
   totalSales: number;
   totalOrders: number;
   totalProducts: number;
   avgOrderValue: number;
   conversionRate: number;
-}
+};
 
-export interface VendorContact {
+export type VendorContact = {
   email: string;
   phone: string;
   address: Address;
   supportHours: string;
-}
+};
 
-export interface Address {
+export type Address = {
   street: string;
   street2?: string;
   city: string;
@@ -77,9 +77,9 @@ export interface Address {
   zip: string;
   country: string;
   coordinates?: { lat: number; lng: number };
-}
+};
 
-export interface Product {
+export type Product = {
   id: string;
   vendorId: string;
   sku: string;
@@ -101,7 +101,7 @@ export interface Product {
   updatedAt: Date;
   seo: ProductSEO;
   shipping: ProductShipping;
-}
+};
 
 export type ProductCategory =
   | "physical"
@@ -113,15 +113,15 @@ export type ProductCategory =
   | "event-ticket"
   | "gift-card";
 
-export interface ProductImage {
+export type ProductImage = {
   id: string;
   url: string;
   alt: string;
   isPrimary: boolean;
   order: number;
-}
+};
 
-export interface ProductPricing {
+export type ProductPricing = {
   basePrice: number;
   salePrice: number | null;
   currency: "PI" | "USD" | "EUR" | "GBP";
@@ -130,17 +130,17 @@ export interface ProductPricing {
   margin: number;
   taxable: boolean;
   taxRate: number;
-}
+};
 
-export interface ProductInventory {
+export type ProductInventory = {
   tracked: boolean;
   quantity: number;
   lowStockThreshold: number;
   allowBackorder: boolean;
   maxPerOrder: number;
-}
+};
 
-export interface ProductVariant {
+export type ProductVariant = {
   id: string;
   name: string;
   sku: string;
@@ -148,24 +148,24 @@ export interface ProductVariant {
   inventory: number;
   attributes: Record<string, string>;
   image?: string;
-}
+};
 
-export interface ProductSEO {
+export type ProductSEO = {
   metaTitle: string;
   metaDescription: string;
   canonicalUrl: string;
   keywords: string[];
-}
+};
 
-export interface ProductShipping {
+export type ProductShipping = {
   weight: number;
   dimensions: { length: number; width: number; height: number };
   shippingClass: string;
   freeShipping: boolean;
   handlingTime: number;
-}
+};
 
-export interface CartItem {
+export type CartItem = {
   id: string;
   productId: string;
   variantId: string | null;
@@ -175,9 +175,9 @@ export interface CartItem {
   name: string;
   image: string;
   vendorId: string;
-}
+};
 
-export interface ShoppingCart {
+export type ShoppingCart = {
   id: string;
   userId: string;
   items: CartItem[];
@@ -191,9 +191,9 @@ export interface ShoppingCart {
   couponCode: string | null;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface Order {
+export type Order = {
   id: string;
   orderNumber: string;
   userId: string;
@@ -216,7 +216,7 @@ export interface Order {
   notes: string;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type OrderStatus =
   | "pending"
@@ -236,7 +236,7 @@ export type PaymentStatus =
   | "refunded"
   | "partially-refunded";
 
-export interface OrderItem {
+export type OrderItem = {
   id: string;
   productId: string;
   variantId: string | null;
@@ -246,9 +246,9 @@ export interface OrderItem {
   unitPrice: number;
   total: number;
   image: string;
-}
+};
 
-export interface OrderFulfillment {
+export type OrderFulfillment = {
   status: "unfulfilled" | "partial" | "fulfilled";
   carrier: string | null;
   trackingNumber: string | null;
@@ -256,9 +256,9 @@ export interface OrderFulfillment {
   shippedAt: Date | null;
   deliveredAt: Date | null;
   estimatedDelivery: Date | null;
-}
+};
 
-export interface Coupon {
+export type Coupon = {
   id: string;
   code: string;
   type: "percentage" | "fixed" | "free-shipping";
@@ -271,7 +271,7 @@ export interface Coupon {
   applicableVendors: string[];
   applicableProducts: string[];
   isActive: boolean;
-}
+};
 
 // ============================================================================
 // E-COMMERCE ENGINE
@@ -280,11 +280,11 @@ export interface Coupon {
 export class ECommerceHub {
   private static instance: ECommerceHub;
 
-  private vendors: Map<string, Vendor> = new Map();
-  private products: Map<string, Product> = new Map();
-  private carts: Map<string, ShoppingCart> = new Map();
-  private orders: Map<string, Order> = new Map();
-  private coupons: Map<string, Coupon> = new Map();
+  private readonly vendors: Map<string, Vendor> = new Map();
+  private readonly products: Map<string, Product> = new Map();
+  private readonly carts: Map<string, ShoppingCart> = new Map();
+  private readonly orders: Map<string, Order> = new Map();
+  private readonly coupons: Map<string, Coupon> = new Map();
 
   private readonly PI_TO_USD_RATE = 314.159; // Pi value
 

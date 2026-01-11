@@ -1,28 +1,23 @@
 /**
  * TRIUMPH SYNERGY - Gaming Platform Integration Framework
- * 
+ *
  * Enables major gaming platforms (GTA6, PlayStation 5, Battlefield 6, etc.)
  * to integrate Pi Network payments for user engagement monetization
- * 
+ *
  * Features:
  * - User interaction tracking and engagement rewards
  * - Streaming platform integration (Twitch, YouTube)
  * - Game economy tokenization
  * - Cross-platform user profiles
  * - Real-time Pi payment distribution
- * 
+ *
  * Official References:
  * - Pi SDK: github.com/pi-apps/pi-sdk-js
  * - Streaming APIs: Twitch/YouTube official docs
  */
 
-import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
-import { 
-  enforceGamingPayment, 
-  piOriginEnforcer,
-  TransactionCategory 
-} from '@/lib/core/pi-origin-enforcement';
-import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
+import { enforceGamingPayment } from "@/lib/core/pi-origin-enforcement";
+import { OfficialPiPayments } from "@/lib/payments/pi-payments-official";
 
 /**
  * CRITICAL: All gaming payments enforce Pi origin verification
@@ -34,31 +29,37 @@ import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
 /**
  * User engagement events tracked across platforms
  */
-export interface EngagementEvent {
+export type EngagementEvent = {
   userId: string;
   platformId: string;
-  eventType: 'gameplay' | 'achievement' | 'purchase' | 'streaming' | 'social' | 'tournament';
+  eventType:
+    | "gameplay"
+    | "achievement"
+    | "purchase"
+    | "streaming"
+    | "social"
+    | "tournament";
   amount: number; // Pi reward amount
   description: string;
   metadata: Record<string, any>;
   timestamp: Date;
-}
+};
 
 /**
  * Streaming platform configuration
  */
-export interface StreamingPlatform {
-  id: 'twitch' | 'youtube' | 'kick' | 'trovo';
+export type StreamingPlatform = {
+  id: "twitch" | "youtube" | "kick" | "trovo";
   name: string;
   apiKey?: string;
   webhookUrl?: string;
   enabled: boolean;
-}
+};
 
 /**
  * Game-specific configuration
  */
-export interface GamePlatformConfig {
+export type GamePlatformConfig = {
   id: string; // 'gta6', 'ps5', 'battlefield-6'
   name: string;
   developer: string;
@@ -66,7 +67,7 @@ export interface GamePlatformConfig {
   apiEndpoint: string;
   apiKey: string;
   apiSecret: string;
-  genre: 'action' | 'rpg' | 'fps' | 'sports' | 'mmo' | 'strategy' | 'casual';
+  genre: "action" | "rpg" | "fps" | "sports" | "mmo" | "strategy" | "casual";
   maxPlayersRewardPerDay?: number; // Pi cap per player daily
   engagementRateMultiplier: number; // 1.0 = 1 Pi per hour
   supportedStreamingPlatforms: StreamingPlatform[];
@@ -84,12 +85,12 @@ export interface GamePlatformConfig {
     referralReward: number; // Pi per referral
     streamReward: number; // Pi per hour streamed
   };
-}
+};
 
 /**
  * User gaming profile
  */
-export interface GamingUserProfile {
+export type GamingUserProfile = {
   userId: string;
   platformIds: string[];
   totalEarned: number; // Total Pi earned
@@ -108,12 +109,12 @@ export interface GamingUserProfile {
     minWithdrawalAmount: number;
     emergencyContact?: string;
   };
-}
+};
 
 /**
  * Tournament configuration
  */
-export interface GamingTournament {
+export type GamingTournament = {
   id: string;
   platformId: string;
   name: string;
@@ -127,95 +128,115 @@ export interface GamingTournament {
     score: number;
     prizeAmount: number;
   }[];
-  status: 'scheduled' | 'active' | 'completed' | 'cancelled';
-}
+  status: "scheduled" | "active" | "completed" | "cancelled";
+};
 
 /**
  * Gaming Platform Integration Interface
  * All gaming platforms must implement this
  */
-export interface GamingIntegration {
+export type GamingIntegration = {
   readonly platformId: string;
   readonly name: string;
   readonly developer: string;
-  
+
   // Core lifecycle
   connect(): Promise<void>;
   disconnect(): Promise<void>;
-  
+
   // User management
   getUserProfile(userId: string): Promise<GamingUserProfile>;
-  updateUserProfile(userId: string, profile: Partial<GamingUserProfile>): Promise<void>;
-  
+  updateUserProfile(
+    userId: string,
+    profile: Partial<GamingUserProfile>
+  ): Promise<void>;
+
   // Engagement tracking
   trackEngagementEvent(event: EngagementEvent): Promise<void>;
-  getEngagementStats(userId: string, platformId: string): Promise<{
+  getEngagementStats(
+    userId: string,
+    platformId: string
+  ): Promise<{
     totalHours: number;
     totalEvents: number;
     estimatedEarnings: number;
   }>;
-  
+
   // Reward distribution
-  distributeRewards(userId: string, amount: number, memo: string): Promise<{
+  distributeRewards(
+    userId: string,
+    amount: number,
+    memo: string
+  ): Promise<{
     transactionId: string;
     blockchainHash?: string;
     status: string;
   }>;
-  
+
   // Streaming integration
   connectStreamingPlatform(streaming: StreamingPlatform): Promise<void>;
-  trackStreamingSession(userId: string, platform: 'twitch' | 'youtube' | 'kick', durationHours: number, viewers: number): Promise<void>;
-  
+  trackStreamingSession(
+    userId: string,
+    platform: "twitch" | "youtube" | "kick",
+    durationHours: number,
+    viewers: number
+  ): Promise<void>;
+
   // Tournaments
-  createTournament(tournament: Omit<GamingTournament, 'id' | 'standings' | 'status'>): Promise<GamingTournament>;
-  updateTournamentStandings(tournamentId: string, standings: GamingTournament['standings']): Promise<void>;
+  createTournament(
+    tournament: Omit<GamingTournament, "id" | "standings" | "status">
+  ): Promise<GamingTournament>;
+  updateTournamentStandings(
+    tournamentId: string,
+    standings: GamingTournament["standings"]
+  ): Promise<void>;
   completeTournament(tournamentId: string): Promise<void>;
   distributeTournamentPrizes(tournamentId: string): Promise<void>;
-  
+
   // Social & referrals
   trackReferral(referrerId: string, referredUserId: string): Promise<void>;
   getReferralEarnings(userId: string): Promise<number>;
-  
+
   // Achievements
   trackAchievement(userId: string, achievementId: string): Promise<void>;
   getAchievements(userId: string): Promise<string[]>;
-  
+
   // Health check
   healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'offline';
+    status: "healthy" | "degraded" | "offline";
     uptime: number;
     activeUsers: number;
     lastSync: Date;
   }>;
-}
+};
 
 /**
  * Gaming Platform Registry - Manages all integrated gaming platforms
  */
 export class GamingPlatformRegistry {
   private static instance: GamingPlatformRegistry;
-  private platforms = new Map<string, GamingIntegration>();
-  private configs = new Map<string, GamePlatformConfig>();
-  private engagementEvents: EngagementEvent[] = [];
-  private userProfiles = new Map<string, GamingUserProfile>();
-  private tournaments = new Map<string, GamingTournament>();
-  private piPayments: OfficialPiPayments;
+  private readonly platforms = new Map<string, GamingIntegration>();
+  private readonly configs = new Map<string, GamePlatformConfig>();
+  private readonly engagementEvents: EngagementEvent[] = [];
+  private readonly userProfiles = new Map<string, GamingUserProfile>();
+  private readonly tournaments = new Map<string, GamingTournament>();
+  private readonly piPayments: OfficialPiPayments;
 
   private constructor() {
     // Initialize Pi Payments for reward distribution
     this.piPayments = new OfficialPiPayments({
-      appId: 'triumph-gaming-hub',
+      appId: "triumph-gaming-hub",
       apiKey: process.env.NEXT_PUBLIC_PI_API_KEY!,
       apiSecret: process.env.PI_API_SECRET!,
-      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== 'false',
+      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== "false",
     });
   }
 
   static getInstance(): GamingPlatformRegistry {
-    if (!this.instance) {
-      this.instance = new GamingPlatformRegistry();
+    if (!GamingPlatformRegistry.instance) {
+      GamingPlatformRegistry.instance = new GamingPlatformRegistry();
     }
-    return this.instance;
+    return GamingPlatformRegistry.instance;
   }
 
   /**
@@ -228,7 +249,7 @@ export class GamingPlatformRegistry {
     if (this.platforms.has(config.id)) {
       throw new Error(`Platform ${config.id} already registered`);
     }
-    
+
     this.platforms.set(config.id, integration);
     this.configs.set(config.id, config);
     console.log(`✅ Gaming platform registered: ${config.name}`);
@@ -252,15 +273,16 @@ export class GamingPlatformRegistry {
    * List all registered platforms
    */
   listPlatforms(): Array<{ config: GamePlatformConfig; isHealthy: boolean }> {
-    const result: Array<{ config: GamePlatformConfig; isHealthy: boolean }> = [];
-    
+    const result: Array<{ config: GamePlatformConfig; isHealthy: boolean }> =
+      [];
+
     for (const [platformId, config] of this.configs.entries()) {
       result.push({
         config,
         isHealthy: this.platforms.has(platformId),
       });
     }
-    
+
     return result;
   }
 
@@ -269,27 +291,35 @@ export class GamingPlatformRegistry {
    */
   async trackEngagement(event: EngagementEvent): Promise<void> {
     this.engagementEvents.push(event);
-    
+
     // Update user profile earnings
     const profile = await this.getUserProfile(event.userId, event.platformId);
     profile.totalEarned += event.amount;
     profile.monthlyEarned += event.amount;
-    profile.engagementHours += event.eventType === 'gameplay' ? 1 : 0;
-    
+    profile.engagementHours += event.eventType === "gameplay" ? 1 : 0;
+
     this.userProfiles.set(`${event.userId}:${event.platformId}`, profile);
-    
+
     // Distribute reward if exceeds threshold
     if (profile.monthlyEarned > 1 && profile.preferences.autoWithdraw) {
-      await this.distributeRewards(event.userId, event.platformId, event.amount, event.description);
+      await this.distributeRewards(
+        event.userId,
+        event.platformId,
+        event.amount,
+        event.description
+      );
     }
   }
 
   /**
    * Get or create user profile
    */
-  async getUserProfile(userId: string, platformId: string): Promise<GamingUserProfile> {
+  async getUserProfile(
+    userId: string,
+    platformId: string
+  ): Promise<GamingUserProfile> {
     const key = `${userId}:${platformId}`;
-    
+
     if (!this.userProfiles.has(key)) {
       this.userProfiles.set(key, {
         userId,
@@ -306,7 +336,7 @@ export class GamingPlatformRegistry {
         },
       });
     }
-    
+
     return this.userProfiles.get(key)!;
   }
 
@@ -330,7 +360,7 @@ export class GamingPlatformRegistry {
     const enforceResult = await enforceGamingPayment(
       userId, // User wallet
       amount,
-      'engagement', // Gaming category
+      "engagement", // Gaming category
       memo
     );
 
@@ -346,11 +376,11 @@ export class GamingPlatformRegistry {
       const payment = await this.piPayments.createPayment({
         amount,
         memo: `${memo} - ${platform.name} [INTERNAL PI VERIFIED]`,
-        metadata: { 
-          userId, 
+        metadata: {
+          userId,
           platformId,
           originEnforced: true, // Mark as origin-verified
-          piSource: 'internal', // Record source
+          piSource: "internal", // Record source
         },
       });
 
@@ -359,7 +389,7 @@ export class GamingPlatformRegistry {
         blockchainHash: payment.txid,
       };
     } catch (error) {
-      console.error('Error distributing rewards:', error);
+      console.error("Error distributing rewards:", error);
       throw error;
     }
   }
@@ -369,16 +399,16 @@ export class GamingPlatformRegistry {
    */
   async createTournament(
     platformId: string,
-    tournament: Omit<GamingTournament, 'id' | 'standings' | 'status'>
+    tournament: Omit<GamingTournament, "id" | "standings" | "status">
   ): Promise<GamingTournament> {
     const id = `tournament-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const newTournament: GamingTournament = {
       ...tournament,
       id,
       platformId,
       standings: [],
-      status: 'scheduled',
+      status: "scheduled",
     };
 
     this.tournaments.set(id, newTournament);
@@ -409,26 +439,31 @@ export class GamingPlatformRegistry {
       );
     }
 
-    tournament.status = 'completed';
+    tournament.status = "completed";
     this.tournaments.set(tournamentId, tournament);
   }
 
   /**
    * Get engagement stats for user
    */
-  getEngagementStats(userId: string, platformId: string): {
+  getEngagementStats(
+    userId: string,
+    platformId: string
+  ): {
     totalHours: number;
     totalEvents: number;
     estimatedEarnings: number;
     recentEvents: EngagementEvent[];
   } {
     const userEvents = this.engagementEvents.filter(
-      e => e.userId === userId && e.platformId === platformId
+      (e) => e.userId === userId && e.platformId === platformId
     );
 
     const totalEvents = userEvents.length;
     const estimatedEarnings = userEvents.reduce((sum, e) => sum + e.amount, 0);
-    const totalHours = userEvents.filter(e => e.eventType === 'gameplay').length;
+    const totalHours = userEvents.filter(
+      (e) => e.eventType === "gameplay"
+    ).length;
 
     return {
       totalHours,
@@ -442,7 +477,10 @@ export class GamingPlatformRegistry {
    * Health check all platforms
    */
   async healthCheckAll(): Promise<
-    Record<string, { status: 'healthy' | 'degraded' | 'offline'; uptime: number }>
+    Record<
+      string,
+      { status: "healthy" | "degraded" | "offline"; uptime: number }
+    >
   > {
     const results: Record<string, any> = {};
 
@@ -457,7 +495,7 @@ export class GamingPlatformRegistry {
         };
       } catch (error) {
         results[platformId] = {
-          status: 'offline',
+          status: "offline",
           error: String(error),
         };
       }
@@ -483,7 +521,7 @@ export class GamingPlatformRegistry {
         0
       ),
       activeTournaments: Array.from(this.tournaments.values()).filter(
-        t => t.status === 'active'
+        (t) => t.status === "active"
       ).length,
     };
   }
@@ -493,7 +531,9 @@ export class GamingPlatformRegistry {
    */
   getTournaments(platformId?: string): GamingTournament[] {
     if (platformId) {
-      return Array.from(this.tournaments.values()).filter(t => t.platformId === platformId);
+      return Array.from(this.tournaments.values()).filter(
+        (t) => t.platformId === platformId
+      );
     }
     return Array.from(this.tournaments.values());
   }

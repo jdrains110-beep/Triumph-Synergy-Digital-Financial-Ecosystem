@@ -1,9 +1,9 @@
 /**
  * Triumph-Synergy Quantum Mining Infrastructure
- * 
+ *
  * Digital Financial Ecosystem powered by Quantum Computing & Quantum Resistance
  * Internal Pi Mining Hub with dynamic rates based on company participation
- * 
+ *
  * All mined Pi is allocated by the Owner for infrastructure and ecosystem growth
  */
 
@@ -11,7 +11,7 @@
 // DUAL PI VALUE SYSTEM
 // ============================================================================
 
-const PI_INTERNAL_RATE = 314159; // $314,159 per Pi (internal/ecosystem)
+const PI_INTERNAL_RATE = 314_159; // $314,159 per Pi (internal/ecosystem)
 const PI_EXTERNAL_RATE = 314.159; // $314.159 per Pi (external/market)
 const PI_INTERNAL_MULTIPLIER = 1000;
 
@@ -25,7 +25,7 @@ function getPiRate(type: PiValueType): number {
 // QUANTUM COMPUTING TYPES
 // ============================================================================
 
-export type QuantumProcessorType = 
+export type QuantumProcessorType =
   | "superconducting"
   | "trapped-ion"
   | "photonic"
@@ -34,42 +34,42 @@ export type QuantumProcessorType =
   | "quantum-annealing";
 
 export type QuantumAlgorithm =
-  | "shors"           // Factoring
-  | "grovers"         // Search
-  | "qaoa"            // Optimization
-  | "vqe"             // Variational Quantum Eigensolver
-  | "qml"             // Quantum Machine Learning
-  | "quantum-walk"    // Graph algorithms
-  | "hhl"             // Linear systems
-  | "pi-consensus";   // Custom Pi Network consensus
+  | "shors" // Factoring
+  | "grovers" // Search
+  | "qaoa" // Optimization
+  | "vqe" // Variational Quantum Eigensolver
+  | "qml" // Quantum Machine Learning
+  | "quantum-walk" // Graph algorithms
+  | "hhl" // Linear systems
+  | "pi-consensus"; // Custom Pi Network consensus
 
 export type QuantumResistanceLevel =
-  | "standard"        // 128-bit post-quantum
-  | "enhanced"        // 256-bit post-quantum
-  | "maximum"         // 512-bit post-quantum
+  | "standard" // 128-bit post-quantum
+  | "enhanced" // 256-bit post-quantum
+  | "maximum" // 512-bit post-quantum
   | "military-grade"; // 1024-bit post-quantum
 
 export type CryptographicSuite =
-  | "crystals-kyber"      // Key encapsulation
-  | "crystals-dilithium"  // Digital signatures
-  | "falcon"              // Compact signatures
-  | "sphincs-plus"        // Hash-based signatures
-  | "ntru"                // Lattice-based encryption
-  | "classic-mceliece"    // Code-based encryption
-  | "sike"                // Isogeny-based (backup)
-  | "triumph-hybrid";     // Our custom hybrid approach
+  | "crystals-kyber" // Key encapsulation
+  | "crystals-dilithium" // Digital signatures
+  | "falcon" // Compact signatures
+  | "sphincs-plus" // Hash-based signatures
+  | "ntru" // Lattice-based encryption
+  | "classic-mceliece" // Code-based encryption
+  | "sike" // Isogeny-based (backup)
+  | "triumph-hybrid"; // Our custom hybrid approach
 
 // ============================================================================
 // MINING TYPES
 // ============================================================================
 
 export type MiningNodeType =
-  | "quantum-core"      // Full quantum processing node
-  | "hybrid"            // Quantum-classical hybrid
+  | "quantum-core" // Full quantum processing node
+  | "hybrid" // Quantum-classical hybrid
   | "classical-optimized" // Optimized classical with quantum algorithms
-  | "edge"              // Edge computing node
-  | "mobile"            // Mobile mining node
-  | "institutional";    // Enterprise-grade node
+  | "edge" // Edge computing node
+  | "mobile" // Mobile mining node
+  | "institutional"; // Enterprise-grade node
 
 export type MiningAllocationCategory =
   | "infrastructure"
@@ -82,277 +82,277 @@ export type MiningAllocationCategory =
   | "owner-discretionary";
 
 export type CompanyTier =
-  | "pioneer"       // Early adopters
-  | "partner"       // Standard partners
-  | "enterprise"    // Large enterprises
+  | "pioneer" // Early adopters
+  | "partner" // Standard partners
+  | "enterprise" // Large enterprises
   | "institutional" // Banks, governments
-  | "founding";     // Founding members
+  | "founding"; // Founding members
 
 // ============================================================================
 // QUANTUM PROCESSOR INTERFACE
 // ============================================================================
 
-export interface QuantumProcessor {
+export type QuantumProcessor = {
   id: string;
   name: string;
   type: QuantumProcessorType;
-  
+
   // Specifications
   qubits: number;
   logicalQubits: number;
   coherenceTime: number; // microseconds
   gateErrorRate: number;
   readoutErrorRate: number;
-  
+
   // Performance
   quantumVolume: number;
   clopsScore: number; // Circuit Layer Operations Per Second
-  
+
   // Connectivity
   connectivity: "all-to-all" | "linear" | "grid" | "heavy-hex" | "custom";
-  
+
   // Status
   status: "online" | "calibrating" | "maintenance" | "offline";
   uptime: number; // percentage
   temperature: number; // millikelvin
-  
+
   // Mining Capability
   miningHashRate: number; // Quantum hash operations per second
   piMiningEfficiency: number; // Pi mined per quantum operation
-  
+
   // Location
   dataCenter: string;
   region: string;
-  
+
   lastCalibration: Date;
   createdAt: Date;
-}
+};
 
-export interface QuantumSecurityModule {
+export type QuantumSecurityModule = {
   id: string;
-  
+
   // Resistance Level
   resistanceLevel: QuantumResistanceLevel;
-  
+
   // Cryptographic Suites
   primarySuite: CryptographicSuite;
   backupSuites: CryptographicSuite[];
-  
+
   // Key Management
   keyLength: number;
   keyRotationInterval: number; // hours
   lastKeyRotation: Date;
-  
+
   // Entropy
   quantumRandomness: boolean;
   entropySource: "quantum" | "hybrid" | "hardware";
   entropyRate: number; // bits per second
-  
+
   // Verification
   postQuantumVerified: boolean;
   nistCompliant: boolean;
-  
+
   // Status
   status: "active" | "rotating" | "upgrading";
   threatsBlocked: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 // ============================================================================
 // MINING NODE INTERFACE
 // ============================================================================
 
-export interface MiningNode {
+export type MiningNode = {
   id: string;
   ownerId: string;
   name: string;
   type: MiningNodeType;
-  
+
   // Hardware
   quantumProcessorId: string | null;
   classicalCores: number;
   memoryGB: number;
   storageGB: number;
-  
+
   // Mining Performance
   hashRate: number;
   quantumBoost: number; // multiplier from quantum processing
   effectiveHashRate: number;
-  
+
   // Pi Mining
   piMinedTotal: number;
   piMinedToday: number;
   piMinedThisMonth: number;
   miningEfficiency: number;
-  
+
   // Network Contribution
   blocksValidated: number;
   transactionsProcessed: number;
   consensusParticipation: number; // percentage
-  
+
   // Rewards
   baseRewardRate: number;
   companyBonusMultiplier: number;
   networkBonusMultiplier: number;
   totalRewardRate: number;
-  
+
   // Status
   status: "mining" | "idle" | "syncing" | "maintenance" | "offline";
   uptime: number;
   lastBlock: Date;
-  
+
   // Location
   region: string;
   dataCenter: string;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 // ============================================================================
 // COMPANY PARTICIPANT INTERFACE
 // ============================================================================
 
-export interface MiningCompany {
+export type MiningCompany = {
   id: string;
   name: string;
   tier: CompanyTier;
-  
+
   // Registration
   registrationDate: Date;
   verified: boolean;
   kycCompleted: boolean;
-  
+
   // Mining Contribution
   nodesDeployed: number;
   totalHashRate: number;
   quantumNodesCount: number;
   networkSharePercent: number;
-  
+
   // Pi Holdings
   piMined: number;
   piMinedValue: number;
   piMinedValueInternal: number;
-  
+
   // Rewards
   monthlyMiningReward: number;
   bonusMultiplier: number;
   tierBonus: number;
   networkContributionBonus: number;
-  
+
   // Impact on Network
   rateContribution: number; // How much this company increases mining rates
-  
+
   // Subscription
   subscriptionTier: "basic" | "professional" | "enterprise" | "unlimited";
   subscriptionPrice: number;
   subscriptionPriceInPi: number;
-  
+
   // Contact
   primaryContact: string;
   email: string;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 // ============================================================================
 // MINING ALLOCATION INTERFACE
 // ============================================================================
 
-export interface MiningAllocation {
+export type MiningAllocation = {
   id: string;
   category: MiningAllocationCategory;
-  
+
   // Allocation Details
   percentage: number;
   piAllocated: number;
   piAllocatedValue: number;
   piAllocatedValueInternal: number;
-  
+
   // Usage
   piUsed: number;
   piRemaining: number;
-  
+
   // Owner Control
   ownerApproved: boolean;
   ownerNotes: string;
   lastOwnerReview: Date;
-  
+
   // Purpose
   description: string;
   projects: string[];
-  
+
   // Period
   periodStart: Date;
   periodEnd: Date;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 // ============================================================================
 // NETWORK METRICS INTERFACE
 // ============================================================================
 
-export interface NetworkMetrics {
+export type NetworkMetrics = {
   // Overall Network
   totalNodes: number;
   quantumNodes: number;
   hybridNodes: number;
   classicalNodes: number;
-  
+
   // Companies
   totalCompanies: number;
   activeCompanies: number;
   companiesByTier: Record<CompanyTier, number>;
-  
+
   // Mining Rates
   baseRatePiPerHour: number;
   currentRatePiPerHour: number;
   networkBoostMultiplier: number;
   companyCountBonus: number;
-  
+
   // Pi Metrics
   totalPiMined: number;
   totalPiMinedValue: number;
   totalPiMinedValueInternal: number;
   piMinedToday: number;
   piMinedThisMonth: number;
-  
+
   // Hash Rate
   totalHashRate: number;
   quantumHashRate: number;
   averageNodeHashRate: number;
-  
+
   // Quantum Security
   quantumResistanceActive: boolean;
   threatsBlockedTotal: number;
   securityLevel: QuantumResistanceLevel;
-  
+
   // Uptime
   networkUptime: number;
   averageNodeUptime: number;
-  
+
   lastUpdated: Date;
-}
+};
 
 // ============================================================================
 // SUBSCRIPTION PLANS
 // ============================================================================
 
-export interface MiningSubscription {
+export type MiningSubscription = {
   tier: "basic" | "professional" | "enterprise" | "unlimited";
   name: string;
-  
+
   // Pricing
   monthlyPrice: number;
   monthlyPriceInPi: number;
   annualPrice: number;
   annualPriceInPi: number;
-  
+
   // Features
   maxNodes: number | "unlimited";
   quantumAccessLevel: "none" | "shared" | "dedicated" | "exclusive";
@@ -360,32 +360,33 @@ export interface MiningSubscription {
   prioritySupport: boolean;
   apiAccess: boolean;
   customAllocations: boolean;
-  
+
   // Mining Benefits
   baseRewardMultiplier: number;
   piPayoutBonus: number;
-  
+
   features: string[];
-}
+};
 
 // ============================================================================
 // QUANTUM MINING INFRASTRUCTURE CLASS
 // ============================================================================
 
 class QuantumMiningInfrastructure {
-  private quantumProcessors: Map<string, QuantumProcessor> = new Map();
-  private securityModules: Map<string, QuantumSecurityModule> = new Map();
-  private miningNodes: Map<string, MiningNode> = new Map();
-  private companies: Map<string, MiningCompany> = new Map();
-  private allocations: Map<string, MiningAllocation> = new Map();
-  
+  private readonly quantumProcessors: Map<string, QuantumProcessor> = new Map();
+  private readonly securityModules: Map<string, QuantumSecurityModule> =
+    new Map();
+  private readonly miningNodes: Map<string, MiningNode> = new Map();
+  private readonly companies: Map<string, MiningCompany> = new Map();
+  private readonly allocations: Map<string, MiningAllocation> = new Map();
+
   // Network state
-  private networkMetrics: NetworkMetrics;
-  
+  private readonly networkMetrics: NetworkMetrics;
+
   // Mining rate formula constants
   private readonly BASE_MINING_RATE = 100; // Base Pi per hour for the network
   private readonly COMPANY_RATE_BOOST = 0.05; // 5% increase per company
-  private readonly QUANTUM_NODE_BOOST = 0.10; // 10% boost per quantum node
+  private readonly QUANTUM_NODE_BOOST = 0.1; // 10% boost per quantum node
   private readonly MAX_RATE_MULTIPLIER = 10; // Maximum 10x base rate
 
   constructor() {
@@ -447,7 +448,7 @@ class QuantumMiningInfrastructure {
       status: "online",
       uptime: 99.99,
       temperature: 15, // 15 millikelvin
-      miningHashRate: 1000000000, // 1 billion quantum hash ops/sec
+      miningHashRate: 1_000_000_000, // 1 billion quantum hash ops/sec
       piMiningEfficiency: 0.0001,
       dataCenter: "Triumph Quantum Center Alpha",
       region: "global",
@@ -468,7 +469,7 @@ class QuantumMiningInfrastructure {
       lastKeyRotation: new Date(),
       quantumRandomness: true,
       entropySource: "quantum",
-      entropyRate: 1000000000, // 1 Gbps quantum random
+      entropyRate: 1_000_000_000, // 1 Gbps quantum random
       postQuantumVerified: true,
       nistCompliant: true,
       status: "active",
@@ -482,15 +483,51 @@ class QuantumMiningInfrastructure {
 
   private initializeAllocations(): void {
     // Owner-defined allocations for internally mined Pi
-    const allocationCategories: { category: MiningAllocationCategory; percentage: number; description: string }[] = [
-      { category: "infrastructure", percentage: 30, description: "Network infrastructure expansion and maintenance" },
-      { category: "research-development", percentage: 15, description: "Quantum computing and blockchain R&D" },
-      { category: "community-rewards", percentage: 15, description: "Community mining rewards and incentives" },
-      { category: "partner-incentives", percentage: 10, description: "Partner company bonuses and incentives" },
-      { category: "liquidity-pool", percentage: 10, description: "Pi liquidity for ecosystem operations" },
-      { category: "ubi-funding", percentage: 10, description: "Universal Basic Income program funding" },
-      { category: "emergency-reserve", percentage: 5, description: "Emergency reserve fund" },
-      { category: "owner-discretionary", percentage: 5, description: "Owner discretionary allocation" },
+    const allocationCategories: {
+      category: MiningAllocationCategory;
+      percentage: number;
+      description: string;
+    }[] = [
+      {
+        category: "infrastructure",
+        percentage: 30,
+        description: "Network infrastructure expansion and maintenance",
+      },
+      {
+        category: "research-development",
+        percentage: 15,
+        description: "Quantum computing and blockchain R&D",
+      },
+      {
+        category: "community-rewards",
+        percentage: 15,
+        description: "Community mining rewards and incentives",
+      },
+      {
+        category: "partner-incentives",
+        percentage: 10,
+        description: "Partner company bonuses and incentives",
+      },
+      {
+        category: "liquidity-pool",
+        percentage: 10,
+        description: "Pi liquidity for ecosystem operations",
+      },
+      {
+        category: "ubi-funding",
+        percentage: 10,
+        description: "Universal Basic Income program funding",
+      },
+      {
+        category: "emergency-reserve",
+        percentage: 5,
+        description: "Emergency reserve fund",
+      },
+      {
+        category: "owner-discretionary",
+        percentage: 5,
+        description: "Owner discretionary allocation",
+      },
     ];
 
     for (const alloc of allocationCategories) {
@@ -578,8 +615,8 @@ class QuantumMiningInfrastructure {
         name: "Enterprise Mining",
         monthlyPrice: 4999,
         monthlyPriceInPi: 4999 / PI_EXTERNAL_RATE,
-        annualPrice: 49990,
-        annualPriceInPi: 49990 / PI_EXTERNAL_RATE,
+        annualPrice: 49_990,
+        annualPriceInPi: 49_990 / PI_EXTERNAL_RATE,
         maxNodes: 100,
         quantumAccessLevel: "dedicated",
         hashRateBonus: 0.5,
@@ -587,7 +624,7 @@ class QuantumMiningInfrastructure {
         apiAccess: true,
         customAllocations: true,
         baseRewardMultiplier: 1.5,
-        piPayoutBonus: 0.10,
+        piPayoutBonus: 0.1,
         features: [
           "Up to 100 mining nodes",
           "Dedicated quantum processing",
@@ -602,10 +639,10 @@ class QuantumMiningInfrastructure {
       {
         tier: "unlimited",
         name: "Unlimited Mining",
-        monthlyPrice: 14999,
-        monthlyPriceInPi: 14999 / PI_EXTERNAL_RATE,
-        annualPrice: 149990,
-        annualPriceInPi: 149990 / PI_EXTERNAL_RATE,
+        monthlyPrice: 14_999,
+        monthlyPriceInPi: 14_999 / PI_EXTERNAL_RATE,
+        annualPrice: 149_990,
+        annualPriceInPi: 149_990 / PI_EXTERNAL_RATE,
         maxNodes: "unlimited",
         quantumAccessLevel: "exclusive",
         hashRateBonus: 1.0,
@@ -613,7 +650,7 @@ class QuantumMiningInfrastructure {
         apiAccess: true,
         customAllocations: true,
         baseRewardMultiplier: 2.0,
-        piPayoutBonus: 0.20,
+        piPayoutBonus: 0.2,
         features: [
           "Unlimited mining nodes",
           "Exclusive quantum processing access",
@@ -643,15 +680,15 @@ class QuantumMiningInfrastructure {
   }): Promise<MiningCompany> {
     const id = `company-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const plans = this.getMiningSubscriptionPlans();
-    const plan = plans.find(p => p.tier === data.subscriptionTier)!;
+    const plan = plans.find((p) => p.tier === data.subscriptionTier)!;
 
     // Tier bonuses
     const tierBonuses: Record<CompanyTier, number> = {
-      pioneer: 0.50,      // 50% bonus for early adopters
-      partner: 0.25,      // 25% bonus
-      enterprise: 0.35,   // 35% bonus
-      institutional: 0.40, // 40% bonus
-      founding: 1.00,     // 100% bonus for founding members
+      pioneer: 0.5, // 50% bonus for early adopters
+      partner: 0.25, // 25% bonus
+      enterprise: 0.35, // 35% bonus
+      institutional: 0.4, // 40% bonus
+      founding: 1.0, // 100% bonus for founding members
     };
 
     const company: MiningCompany = {
@@ -689,8 +726,12 @@ class QuantumMiningInfrastructure {
     await this.recalculateMiningRates();
 
     console.log(`[QUANTUM MINING] Company registered: ${data.name}`);
-    console.log(`[QUANTUM MINING] Tier: ${data.tier} | Subscription: ${data.subscriptionTier}`);
-    console.log(`[QUANTUM MINING] Network mining rate increased by ${(this.COMPANY_RATE_BOOST * 100).toFixed(1)}%`);
+    console.log(
+      `[QUANTUM MINING] Tier: ${data.tier} | Subscription: ${data.subscriptionTier}`
+    );
+    console.log(
+      `[QUANTUM MINING] Network mining rate increased by ${(this.COMPANY_RATE_BOOST * 100).toFixed(1)}%`
+    );
 
     return company;
   }
@@ -699,15 +740,18 @@ class QuantumMiningInfrastructure {
   // MINING NODE MANAGEMENT
   // ==========================================================================
 
-  async deployMiningNode(companyId: string, data: {
-    name: string;
-    type: MiningNodeType;
-    classicalCores: number;
-    memoryGB: number;
-    storageGB: number;
-    region: string;
-    dataCenter: string;
-  }): Promise<MiningNode> {
+  async deployMiningNode(
+    companyId: string,
+    data: {
+      name: string;
+      type: MiningNodeType;
+      classicalCores: number;
+      memoryGB: number;
+      storageGB: number;
+      region: string;
+      dataCenter: string;
+    }
+  ): Promise<MiningNode> {
     const company = this.companies.get(companyId);
     if (!company) {
       throw new Error("Company not found");
@@ -717,30 +761,35 @@ class QuantumMiningInfrastructure {
 
     // Calculate hash rate based on node type
     const baseHashRates: Record<MiningNodeType, number> = {
-      "quantum-core": 1000000000,     // 1 billion
-      "hybrid": 500000000,            // 500 million
-      "classical-optimized": 100000000, // 100 million
-      "edge": 10000000,               // 10 million
-      "mobile": 1000000,              // 1 million
-      "institutional": 750000000,     // 750 million
+      "quantum-core": 1_000_000_000, // 1 billion
+      hybrid: 500_000_000, // 500 million
+      "classical-optimized": 100_000_000, // 100 million
+      edge: 10_000_000, // 10 million
+      mobile: 1_000_000, // 1 million
+      institutional: 750_000_000, // 750 million
     };
 
     const quantumBoosts: Record<MiningNodeType, number> = {
       "quantum-core": 10.0,
-      "hybrid": 5.0,
+      hybrid: 5.0,
       "classical-optimized": 2.0,
-      "edge": 1.5,
-      "mobile": 1.2,
-      "institutional": 7.5,
+      edge: 1.5,
+      mobile: 1.2,
+      institutional: 7.5,
     };
 
     const baseHashRate = baseHashRates[data.type];
     const quantumBoost = quantumBoosts[data.type];
-    const effectiveHashRate = baseHashRate * quantumBoost * company.bonusMultiplier;
+    const effectiveHashRate =
+      baseHashRate * quantumBoost * company.bonusMultiplier;
 
     // Assign quantum processor for quantum nodes
     let quantumProcessorId: string | null = null;
-    if (data.type === "quantum-core" || data.type === "hybrid" || data.type === "institutional") {
+    if (
+      data.type === "quantum-core" ||
+      data.type === "hybrid" ||
+      data.type === "institutional"
+    ) {
       const processor = Array.from(this.quantumProcessors.values())[0];
       if (processor) {
         quantumProcessorId = processor.id;
@@ -780,7 +829,11 @@ class QuantumMiningInfrastructure {
     };
 
     // Calculate total reward rate
-    node.totalRewardRate = node.baseRewardRate * node.companyBonusMultiplier * node.networkBonusMultiplier * (1 + company.tierBonus);
+    node.totalRewardRate =
+      node.baseRewardRate *
+      node.companyBonusMultiplier *
+      node.networkBonusMultiplier *
+      (1 + company.tierBonus);
 
     this.miningNodes.set(id, node);
 
@@ -796,7 +849,9 @@ class QuantumMiningInfrastructure {
     await this.updateNetworkMetrics();
 
     console.log(`[QUANTUM MINING] Node deployed: ${data.name}`);
-    console.log(`[QUANTUM MINING] Type: ${data.type} | Hash Rate: ${effectiveHashRate.toLocaleString()}`);
+    console.log(
+      `[QUANTUM MINING] Type: ${data.type} | Hash Rate: ${effectiveHashRate.toLocaleString()}`
+    );
     console.log(`[QUANTUM MINING] Quantum Boost: ${quantumBoost}x`);
 
     return node;
@@ -808,8 +863,9 @@ class QuantumMiningInfrastructure {
 
   private async recalculateMiningRates(): Promise<void> {
     const companyCount = this.companies.size;
-    const quantumNodeCount = Array.from(this.miningNodes.values())
-      .filter(n => n.quantumProcessorId !== null).length;
+    const quantumNodeCount = Array.from(this.miningNodes.values()).filter(
+      (n) => n.quantumProcessorId !== null
+    ).length;
 
     // Calculate company bonus (more companies = higher rates)
     const companyBonus = Math.min(
@@ -827,16 +883,23 @@ class QuantumMiningInfrastructure {
     const networkBoost = 1 + companyBonus + quantumBonus;
 
     // New mining rate
-    const newRate = this.BASE_MINING_RATE * Math.min(networkBoost, this.MAX_RATE_MULTIPLIER);
+    const newRate =
+      this.BASE_MINING_RATE * Math.min(networkBoost, this.MAX_RATE_MULTIPLIER);
 
     this.networkMetrics.companyCountBonus = companyBonus;
     this.networkMetrics.networkBoostMultiplier = networkBoost;
     this.networkMetrics.currentRatePiPerHour = newRate;
 
-    console.log(`[QUANTUM MINING] Mining rate recalculated`);
-    console.log(`[QUANTUM MINING] Companies: ${companyCount} (+${(companyBonus * 100).toFixed(1)}% bonus)`);
-    console.log(`[QUANTUM MINING] Quantum Nodes: ${quantumNodeCount} (+${(quantumBonus * 100).toFixed(1)}% bonus)`);
-    console.log(`[QUANTUM MINING] Current Rate: ${newRate.toFixed(2)} π/hour (${networkBoost.toFixed(2)}x base)`);
+    console.log("[QUANTUM MINING] Mining rate recalculated");
+    console.log(
+      `[QUANTUM MINING] Companies: ${companyCount} (+${(companyBonus * 100).toFixed(1)}% bonus)`
+    );
+    console.log(
+      `[QUANTUM MINING] Quantum Nodes: ${quantumNodeCount} (+${(quantumBonus * 100).toFixed(1)}% bonus)`
+    );
+    console.log(
+      `[QUANTUM MINING] Current Rate: ${newRate.toFixed(2)} π/hour (${networkBoost.toFixed(2)}x base)`
+    );
   }
 
   private async updateNetworkMetrics(): Promise<void> {
@@ -844,37 +907,68 @@ class QuantumMiningInfrastructure {
     const companies = Array.from(this.companies.values());
 
     this.networkMetrics.totalNodes = nodes.length;
-    this.networkMetrics.quantumNodes = nodes.filter(n => n.type === "quantum-core").length;
-    this.networkMetrics.hybridNodes = nodes.filter(n => n.type === "hybrid").length;
-    this.networkMetrics.classicalNodes = nodes.filter(n => 
-      n.type === "classical-optimized" || n.type === "edge" || n.type === "mobile"
+    this.networkMetrics.quantumNodes = nodes.filter(
+      (n) => n.type === "quantum-core"
+    ).length;
+    this.networkMetrics.hybridNodes = nodes.filter(
+      (n) => n.type === "hybrid"
+    ).length;
+    this.networkMetrics.classicalNodes = nodes.filter(
+      (n) =>
+        n.type === "classical-optimized" ||
+        n.type === "edge" ||
+        n.type === "mobile"
     ).length;
 
     this.networkMetrics.totalCompanies = companies.length;
-    this.networkMetrics.activeCompanies = companies.filter(c => c.nodesDeployed > 0).length;
+    this.networkMetrics.activeCompanies = companies.filter(
+      (c) => c.nodesDeployed > 0
+    ).length;
 
     // Count by tier
-    for (const tier of ["pioneer", "partner", "enterprise", "institutional", "founding"] as CompanyTier[]) {
-      this.networkMetrics.companiesByTier[tier] = companies.filter(c => c.tier === tier).length;
+    for (const tier of [
+      "pioneer",
+      "partner",
+      "enterprise",
+      "institutional",
+      "founding",
+    ] as CompanyTier[]) {
+      this.networkMetrics.companiesByTier[tier] = companies.filter(
+        (c) => c.tier === tier
+      ).length;
     }
 
-    this.networkMetrics.totalHashRate = nodes.reduce((sum, n) => sum + n.effectiveHashRate, 0);
+    this.networkMetrics.totalHashRate = nodes.reduce(
+      (sum, n) => sum + n.effectiveHashRate,
+      0
+    );
     this.networkMetrics.quantumHashRate = nodes
-      .filter(n => n.quantumProcessorId)
+      .filter((n) => n.quantumProcessorId)
       .reduce((sum, n) => sum + n.effectiveHashRate, 0);
-    this.networkMetrics.averageNodeHashRate = nodes.length > 0 
-      ? this.networkMetrics.totalHashRate / nodes.length 
-      : 0;
+    this.networkMetrics.averageNodeHashRate =
+      nodes.length > 0 ? this.networkMetrics.totalHashRate / nodes.length : 0;
 
-    this.networkMetrics.totalPiMined = nodes.reduce((sum, n) => sum + n.piMinedTotal, 0);
-    this.networkMetrics.totalPiMinedValue = this.networkMetrics.totalPiMined * PI_EXTERNAL_RATE;
-    this.networkMetrics.totalPiMinedValueInternal = this.networkMetrics.totalPiMined * PI_INTERNAL_RATE;
-    this.networkMetrics.piMinedToday = nodes.reduce((sum, n) => sum + n.piMinedToday, 0);
-    this.networkMetrics.piMinedThisMonth = nodes.reduce((sum, n) => sum + n.piMinedThisMonth, 0);
+    this.networkMetrics.totalPiMined = nodes.reduce(
+      (sum, n) => sum + n.piMinedTotal,
+      0
+    );
+    this.networkMetrics.totalPiMinedValue =
+      this.networkMetrics.totalPiMined * PI_EXTERNAL_RATE;
+    this.networkMetrics.totalPiMinedValueInternal =
+      this.networkMetrics.totalPiMined * PI_INTERNAL_RATE;
+    this.networkMetrics.piMinedToday = nodes.reduce(
+      (sum, n) => sum + n.piMinedToday,
+      0
+    );
+    this.networkMetrics.piMinedThisMonth = nodes.reduce(
+      (sum, n) => sum + n.piMinedThisMonth,
+      0
+    );
 
-    this.networkMetrics.averageNodeUptime = nodes.length > 0
-      ? nodes.reduce((sum, n) => sum + n.uptime, 0) / nodes.length
-      : 100;
+    this.networkMetrics.averageNodeUptime =
+      nodes.length > 0
+        ? nodes.reduce((sum, n) => sum + n.uptime, 0) / nodes.length
+        : 100;
 
     this.networkMetrics.lastUpdated = new Date();
   }
@@ -904,14 +998,16 @@ class QuantumMiningInfrastructure {
     }
 
     // Calculate Pi mined based on node's share of network hash rate
-    const networkShare = node.effectiveHashRate / Math.max(this.networkMetrics.totalHashRate, 1);
+    const networkShare =
+      node.effectiveHashRate / Math.max(this.networkMetrics.totalHashRate, 1);
     const basePiMined = this.networkMetrics.currentRatePiPerHour * networkShare;
-    
+
     // Apply bonuses
     const tierBonus = 1 + company.tierBonus;
     const subscriptionBonus = company.bonusMultiplier;
-    
-    const piMined = basePiMined * tierBonus * subscriptionBonus * node.miningEfficiency;
+
+    const piMined =
+      basePiMined * tierBonus * subscriptionBonus * node.miningEfficiency;
     const piMinedValue = piMined * PI_EXTERNAL_RATE;
     const piMinedValueInternal = piMined * PI_INTERNAL_RATE;
 
@@ -948,26 +1044,32 @@ class QuantumMiningInfrastructure {
       const piShare = piAmount * (allocation.percentage / 100);
       allocation.piAllocated += piShare;
       allocation.piAllocatedValue = allocation.piAllocated * PI_EXTERNAL_RATE;
-      allocation.piAllocatedValueInternal = allocation.piAllocated * PI_INTERNAL_RATE;
+      allocation.piAllocatedValueInternal =
+        allocation.piAllocated * PI_INTERNAL_RATE;
       allocation.piRemaining = allocation.piAllocated - allocation.piUsed;
       allocation.updatedAt = new Date();
     }
 
     // Update network totals
     this.networkMetrics.totalPiMined += piAmount;
-    this.networkMetrics.totalPiMinedValue = this.networkMetrics.totalPiMined * PI_EXTERNAL_RATE;
-    this.networkMetrics.totalPiMinedValueInternal = this.networkMetrics.totalPiMined * PI_INTERNAL_RATE;
+    this.networkMetrics.totalPiMinedValue =
+      this.networkMetrics.totalPiMined * PI_EXTERNAL_RATE;
+    this.networkMetrics.totalPiMinedValueInternal =
+      this.networkMetrics.totalPiMined * PI_INTERNAL_RATE;
   }
 
   // ==========================================================================
   // OWNER ALLOCATION CONTROL
   // ==========================================================================
 
-  async ownerUpdateAllocation(category: MiningAllocationCategory, data: {
-    newPercentage?: number;
-    notes?: string;
-    addProject?: string;
-  }): Promise<MiningAllocation> {
+  async ownerUpdateAllocation(
+    category: MiningAllocationCategory,
+    data: {
+      newPercentage?: number;
+      notes?: string;
+      addProject?: string;
+    }
+  ): Promise<MiningAllocation> {
     const allocation = this.allocations.get(`alloc-${category}`);
     if (!allocation) {
       throw new Error("Allocation category not found");
@@ -1007,7 +1109,11 @@ class QuantumMiningInfrastructure {
     return allocation;
   }
 
-  async ownerWithdrawFromAllocation(category: MiningAllocationCategory, amount: number, purpose: string): Promise<{
+  async ownerWithdrawFromAllocation(
+    category: MiningAllocationCategory,
+    amount: number,
+    purpose: string
+  ): Promise<{
     withdrawn: number;
     withdrawnValue: number;
     withdrawnValueInternal: number;
@@ -1019,7 +1125,9 @@ class QuantumMiningInfrastructure {
     }
 
     if (amount > allocation.piRemaining) {
-      throw new Error(`Insufficient funds. Available: ${allocation.piRemaining.toFixed(4)} π`);
+      throw new Error(
+        `Insufficient funds. Available: ${allocation.piRemaining.toFixed(4)} π`
+      );
     }
 
     allocation.piUsed += amount;
@@ -1029,7 +1137,9 @@ class QuantumMiningInfrastructure {
 
     console.log(`[OWNER] Withdrew ${amount.toFixed(4)} π from ${category}`);
     console.log(`[OWNER] Purpose: ${purpose}`);
-    console.log(`[OWNER] Value: $${(amount * PI_EXTERNAL_RATE).toFixed(2)} (External) / $${(amount * PI_INTERNAL_RATE).toLocaleString()} (Internal)`);
+    console.log(
+      `[OWNER] Value: $${(amount * PI_EXTERNAL_RATE).toFixed(2)} (External) / $${(amount * PI_INTERNAL_RATE).toLocaleString()} (Internal)`
+    );
 
     return {
       withdrawn: amount,
@@ -1057,8 +1167,12 @@ class QuantumMiningInfrastructure {
       throw new Error("No security module found");
     }
 
-    const keyAge = (Date.now() - module.lastKeyRotation.getTime()) / (1000 * 60 * 60);
-    const nextRotation = new Date(module.lastKeyRotation.getTime() + module.keyRotationInterval * 60 * 60 * 1000);
+    const keyAge =
+      (Date.now() - module.lastKeyRotation.getTime()) / (1000 * 60 * 60);
+    const nextRotation = new Date(
+      module.lastKeyRotation.getTime() +
+        module.keyRotationInterval * 60 * 60 * 1000
+    );
 
     return {
       resistanceLevel: module.resistanceLevel,
@@ -1067,7 +1181,12 @@ class QuantumMiningInfrastructure {
       keyAge,
       nextRotation,
       quantumEntropyRate: module.entropyRate,
-      status: module.status === "active" ? "secure" : module.status === "rotating" ? "rotating" : "warning",
+      status:
+        module.status === "active"
+          ? "secure"
+          : module.status === "rotating"
+            ? "rotating"
+            : "warning",
     };
   }
 
@@ -1108,8 +1227,9 @@ class QuantumMiningInfrastructure {
       .sort((a, b) => b.piMinedTotal - a.piMinedTotal)
       .slice(0, 10);
 
-    const quantumNodeCount = Array.from(this.miningNodes.values())
-      .filter(n => n.quantumProcessorId !== null).length;
+    const quantumNodeCount = Array.from(this.miningNodes.values()).filter(
+      (n) => n.quantumProcessorId !== null
+    ).length;
 
     return {
       metrics: this.networkMetrics,
@@ -1152,11 +1272,12 @@ class QuantumMiningInfrastructure {
       throw new Error("Company not found");
     }
 
-    const nodes = Array.from(this.miningNodes.values())
-      .filter(n => n.ownerId === companyId);
+    const nodes = Array.from(this.miningNodes.values()).filter(
+      (n) => n.ownerId === companyId
+    );
 
     const plans = this.getMiningSubscriptionPlans();
-    const plan = plans.find(p => p.tier === company.subscriptionTier)!;
+    const plan = plans.find((p) => p.tier === company.subscriptionTier)!;
 
     const totalMined = nodes.reduce((sum, n) => sum + n.piMinedTotal, 0);
     const monthlyMined = nodes.reduce((sum, n) => sum + n.piMinedThisMonth, 0);
@@ -1178,7 +1299,10 @@ class QuantumMiningInfrastructure {
         tierBonus: company.tierBonus,
         subscriptionBonus: company.bonusMultiplier,
         networkBonus: this.networkMetrics.networkBoostMultiplier,
-        totalMultiplier: (1 + company.tierBonus) * company.bonusMultiplier * this.networkMetrics.networkBoostMultiplier,
+        totalMultiplier:
+          (1 + company.tierBonus) *
+          company.bonusMultiplier *
+          this.networkMetrics.networkBoostMultiplier,
       },
     };
   }
@@ -1191,7 +1315,11 @@ class QuantumMiningInfrastructure {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,
@@ -1269,23 +1397,35 @@ export async function ownerWithdrawFromAllocation(
   withdrawnValueInternal: number;
   remaining: number;
 }> {
-  return quantumMiningInfrastructure.ownerWithdrawFromAllocation(category, amount, purpose);
+  return quantumMiningInfrastructure.ownerWithdrawFromAllocation(
+    category,
+    amount,
+    purpose
+  );
 }
 
 export function getMiningSubscriptionPlans(): MiningSubscription[] {
   return quantumMiningInfrastructure.getMiningSubscriptionPlans();
 }
 
-export async function getNetworkDashboard(): Promise<Awaited<ReturnType<typeof quantumMiningInfrastructure.getNetworkDashboard>>> {
+export async function getNetworkDashboard(): Promise<
+  Awaited<ReturnType<typeof quantumMiningInfrastructure.getNetworkDashboard>>
+> {
   return quantumMiningInfrastructure.getNetworkDashboard();
 }
 
 export async function getCompanyDashboard(
   companyId: string
-): Promise<Awaited<ReturnType<typeof quantumMiningInfrastructure.getCompanyDashboard>>> {
+): Promise<
+  Awaited<ReturnType<typeof quantumMiningInfrastructure.getCompanyDashboard>>
+> {
   return quantumMiningInfrastructure.getCompanyDashboard(companyId);
 }
 
-export async function getQuantumSecurityStatus(): Promise<Awaited<ReturnType<typeof quantumMiningInfrastructure.getQuantumSecurityStatus>>> {
+export async function getQuantumSecurityStatus(): Promise<
+  Awaited<
+    ReturnType<typeof quantumMiningInfrastructure.getQuantumSecurityStatus>
+  >
+> {
   return quantumMiningInfrastructure.getQuantumSecurityStatus();
 }

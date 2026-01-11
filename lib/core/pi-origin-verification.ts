@@ -1,16 +1,16 @@
 /**
  * lib/core/pi-origin-verification.ts
- * 
+ *
  * CRITICAL SYSTEM: Pi Origin Tracking & Verification
- * 
+ *
  * This system enforces an immutable distinction between:
  * - INTERNAL PI: Mined/earned WITHIN the Triumph Synergy ecosystem
  * - EXTERNAL PI: Contributed from outside the ecosystem
- * 
+ *
  * NO EXCEPTIONS - All transactions must verify origin
  * NO MODIFICATIONS - Once origin is set, it cannot be changed
  * ENFORCEMENT: Every API endpoint, payment, and transaction validates
- * 
+ *
  * This is the foundational layer that controls what the ecosystem will accept
  */
 
@@ -20,16 +20,16 @@
 
 export type PiOriginType = "internal" | "external";
 
-export interface PiOriginRecord {
+export type PiOriginRecord = {
   readonly originType: PiOriginType; // Immutable
   readonly amount: number;
   readonly sourceTransaction: string; // Transaction hash
   readonly createdAt: Date; // Immutable timestamp
   readonly originProof: string; // Blockchain proof
   readonly immutableHash: string; // Hash of this record - prevents tampering
-}
+};
 
-export interface PiWalletOriginState {
+export type PiWalletOriginState = {
   readonly userId: string;
   readonly walletAddress: string;
   readonly internalPiTotal: number; // Total internally mined Pi
@@ -37,22 +37,22 @@ export interface PiWalletOriginState {
   readonly originHistory: readonly PiOriginRecord[]; // Immutable history
   readonly lastUpdated: Date;
   readonly stateHash: string; // Hash of entire state - prevents tampering
-}
+};
 
-export interface PiPaymentWithOriginRequirement {
+export type PiPaymentWithOriginRequirement = {
   readonly amount: number;
   readonly requiredOriginType: PiOriginType; // MUST match available Pi
   readonly memo: string;
   readonly metadata?: Record<string, unknown>;
   readonly originValidated: boolean; // Must be true before payment executes
-}
+};
 
 // ============================================================================
 // PI ORIGIN VERIFICATION ENGINE
 // ============================================================================
 
 export class PiOriginVerificationEngine {
-  private walletStates = new Map<string, PiWalletOriginState>();
+  private readonly walletStates = new Map<string, PiWalletOriginState>();
   private transactionLog: readonly PiOriginRecord[] = [];
 
   /**
@@ -62,8 +62,8 @@ export class PiOriginVerificationEngine {
   async initializeWalletOrigin(
     userId: string,
     walletAddress: string,
-    internalPiAmount: number = 0,
-    externalPiAmount: number = 0
+    internalPiAmount = 0,
+    externalPiAmount = 0
   ): Promise<PiWalletOriginState> {
     // Check if wallet already initialized
     if (this.walletStates.has(walletAddress)) {
@@ -107,9 +107,7 @@ export class PiOriginVerificationEngine {
   ): Promise<PiOriginRecord> {
     const state = this.walletStates.get(walletAddress);
     if (!state) {
-      throw new Error(
-        `[Pi Origin] Wallet not initialized: ${walletAddress}`
-      );
+      throw new Error(`[Pi Origin] Wallet not initialized: ${walletAddress}`);
     }
 
     const tempRecord: Omit<PiOriginRecord, "immutableHash"> = {
@@ -160,9 +158,7 @@ export class PiOriginVerificationEngine {
   ): Promise<PiOriginRecord> {
     const state = this.walletStates.get(walletAddress);
     if (!state) {
-      throw new Error(
-        `[Pi Origin] Wallet not initialized: ${walletAddress}`
-      );
+      throw new Error(`[Pi Origin] Wallet not initialized: ${walletAddress}`);
     }
 
     const tempRecord: Omit<PiOriginRecord, "immutableHash"> = {
@@ -203,7 +199,7 @@ export class PiOriginVerificationEngine {
 
   /**
    * CRITICAL: Verify that a payment can be executed
-   * 
+   *
    * NO EXCEPTIONS - All three conditions must pass:
    * 1. Sufficient Pi available of required origin type
    * 2. Wallet is verified and not tampered with
@@ -235,7 +231,8 @@ export class PiOriginVerificationEngine {
     if (computedHash !== state.stateHash) {
       return {
         isValid: false,
-        reason: `[Pi Origin] SECURITY VIOLATION: Wallet state hash mismatch. Possible tampering detected.`,
+        reason:
+          "[Pi Origin] SECURITY VIOLATION: Wallet state hash mismatch. Possible tampering detected.",
         availableInternal: state.internalPiTotal,
         availableExternal: state.externalPiTotal,
       };
@@ -251,15 +248,16 @@ export class PiOriginVerificationEngine {
           availableExternal: state.externalPiTotal,
         };
       }
-    } else if (payment.requiredOriginType === "external") {
-      if (state.externalPiTotal < payment.amount) {
-        return {
-          isValid: false,
-          reason: `[Pi Origin] REJECTION: Insufficient external Pi. Required: ${payment.amount}, Available: ${state.externalPiTotal}`,
-          availableInternal: state.internalPiTotal,
-          availableExternal: state.externalPiTotal,
-        };
-      }
+    } else if (
+      payment.requiredOriginType === "external" &&
+      state.externalPiTotal < payment.amount
+    ) {
+      return {
+        isValid: false,
+        reason: `[Pi Origin] REJECTION: Insufficient external Pi. Required: ${payment.amount}, Available: ${state.externalPiTotal}`,
+        availableInternal: state.internalPiTotal,
+        availableExternal: state.externalPiTotal,
+      };
     }
 
     return {
@@ -339,7 +337,9 @@ export class PiOriginVerificationEngine {
    */
   getWalletOriginState(walletAddress: string): PiWalletOriginState | null {
     const state = this.walletStates.get(walletAddress);
-    if (!state) return null;
+    if (!state) {
+      return null;
+    }
     // Return a deep readonly copy to prevent tampering
     return Object.freeze({ ...state });
   }
@@ -356,7 +356,9 @@ export class PiOriginVerificationEngine {
    * Compute immutable hash of an origin record
    * This prevents tampering with individual transactions
    */
-  private computeRecordHash(record: Omit<PiOriginRecord, "immutableHash">): string {
+  private computeRecordHash(
+    record: Omit<PiOriginRecord, "immutableHash">
+  ): string {
     const data = `${record.originType}|${record.amount}|${record.sourceTransaction}|${record.createdAt.toISOString()}|${record.originProof}`;
     return this.simpleHash(data);
   }
@@ -365,7 +367,9 @@ export class PiOriginVerificationEngine {
    * Compute immutable hash of wallet state
    * This prevents tampering with wallet totals
    */
-  private computeStateHash(state: Omit<PiWalletOriginState, "stateHash">): string {
+  private computeStateHash(
+    state: Omit<PiWalletOriginState, "stateHash">
+  ): string {
     const historyHash = state.originHistory
       .map((record) =>
         this.simpleHash(
@@ -387,7 +391,7 @@ export class PiOriginVerificationEngine {
     for (let i = 0; i < data.length; i++) {
       const char = data.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      hash &= hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
   }

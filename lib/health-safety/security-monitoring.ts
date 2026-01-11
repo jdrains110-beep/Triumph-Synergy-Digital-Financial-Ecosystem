@@ -1,17 +1,17 @@
 /**
  * SECURITY MONITORING ENGINE
- * 
+ *
  * 24/7/365 Licensed Security Guard Management System
  * - Perimeter monitoring
  * - Airspace defense against drones and overhead contamination
  * - Tampering prevention and detection
  * - Unauthorized access prevention
  * - Real-time incident response
- * 
+ *
  * NO EXCEPTIONS: Complete security coverage at all times
  */
 
-export interface SecurityGuardProfile {
+export type SecurityGuardProfile = {
   guardId: string;
   guardName: string;
   licenseNumber: string;
@@ -39,12 +39,12 @@ export interface SecurityGuardProfile {
     facilityName: string;
     startDate: Date;
     endDate?: Date;
-    shiftType: 'morning' | 'afternoon' | 'night' | '24hour';
-    status: 'active' | 'completed' | 'suspended';
+    shiftType: "morning" | "afternoon" | "night" | "24hour";
+    status: "active" | "completed" | "suspended";
   }>;
-}
+};
 
-export interface ShiftRecord {
+export type ShiftRecord = {
   shiftId: string;
   guardId: string;
   guardName: string;
@@ -53,7 +53,7 @@ export interface ShiftRecord {
   shiftDate: Date;
   shiftStart: Date;
   shiftEnd: Date;
-  status: 'scheduled' | 'in_progress' | 'completed' | 'incident_override';
+  status: "scheduled" | "in_progress" | "completed" | "incident_override";
   checkInTime?: Date;
   checkOutTime?: Date;
   activities: ShiftActivity[];
@@ -61,51 +61,51 @@ export interface ShiftRecord {
   breaks: Array<{
     breakStart: Date;
     breakEnd: Date;
-    breakType: 'rest' | 'meal' | 'emergency_response';
+    breakType: "rest" | "meal" | "emergency_response";
   }>;
   signatureLog: {
     guardSignature: string;
     supervisorSignature?: string;
     timestamp: Date;
   };
-}
+};
 
-export interface ShiftActivity {
+export type ShiftActivity = {
   activityId: string;
   timestamp: Date;
   activityType:
-    | 'perimeter_check'
-    | 'facility_inspection'
-    | 'airspace_scan'
-    | 'guard_rotation'
-    | 'documentation_update'
-    | 'alarm_check'
-    | 'gate_check'
-    | 'vehicle_inspection'
-    | 'visitor_screening';
+    | "perimeter_check"
+    | "facility_inspection"
+    | "airspace_scan"
+    | "guard_rotation"
+    | "documentation_update"
+    | "alarm_check"
+    | "gate_check"
+    | "vehicle_inspection"
+    | "visitor_screening";
   location: string;
   description: string;
   evidencePhoto?: {
     url: string;
     timestamp: Date;
   };
-  statusReport: 'clear' | 'attention_needed' | 'alert';
-}
+  statusReport: "clear" | "attention_needed" | "alert";
+};
 
-export interface IncidentReport {
+export type IncidentReport = {
   incidentId: string;
   shiftId: string;
   timestamp: Date;
   incidentType:
-    | 'drone_detected'
-    | 'perimeter_breach'
-    | 'unauthorized_access'
-    | 'tampering_attempt'
-    | 'environmental_contamination'
-    | 'suspicious_activity'
-    | 'equipment_failure'
-    | 'false_alarm';
-  severity: 'low' | 'medium' | 'high' | 'critical' | 'emergency';
+    | "drone_detected"
+    | "perimeter_breach"
+    | "unauthorized_access"
+    | "tampering_attempt"
+    | "environmental_contamination"
+    | "suspicious_activity"
+    | "equipment_failure"
+    | "false_alarm";
+  severity: "low" | "medium" | "high" | "critical" | "emergency";
   description: string;
   location: string;
   witnesses: string[];
@@ -125,9 +125,9 @@ export interface IncidentReport {
     notificationTime: Date;
     responseStatus: string;
   }>;
-}
+};
 
-export interface AirspaceMonitoringLog {
+export type AirspaceMonitoringLog = {
   logId: string;
   facilityId: string;
   facilityName: string;
@@ -142,7 +142,7 @@ export interface AirspaceMonitoringLog {
   };
   droneDetections: Array<{
     detectionTime: Date;
-    droneType: 'quadcopter' | 'fixed_wing' | 'unknown';
+    droneType: "quadcopter" | "fixed_wing" | "unknown";
     altitude: number;
     approachAngle: string;
     actionTaken: string;
@@ -150,14 +150,14 @@ export interface AirspaceMonitoringLog {
   }>;
   chemicalTesting: Array<{
     testTime: Date;
-    testType: 'airborne_particles' | 'chemical_residue' | 'atmospheric_quality';
-    result: 'normal' | 'abnormal' | 'contamination_detected';
+    testType: "airborne_particles" | "chemical_residue" | "atmospheric_quality";
+    result: "normal" | "abnormal" | "contamination_detected";
     parameters?: Record<string, number>;
   }>;
-  overallStatus: 'secure' | 'alert' | 'lockdown';
-}
+  overallStatus: "secure" | "alert" | "lockdown";
+};
 
-export interface PerimeterSecurityLog {
+export type PerimeterSecurityLog = {
   logId: string;
   facilityId: string;
   facilityName: string;
@@ -172,18 +172,22 @@ export interface PerimeterSecurityLog {
   };
   inspectionChecks: Array<{
     checkTime: Date;
-    checkType: 'fence_integrity' | 'gate_lock' | 'camera_function' | 'alarm_test';
+    checkType:
+      | "fence_integrity"
+      | "gate_lock"
+      | "camera_function"
+      | "alarm_test";
     location: string;
-    status: 'pass' | 'alert' | 'fail';
+    status: "pass" | "alert" | "fail";
     notes: string;
     actionRequired?: string;
   }>;
   breachAttempts: IncidentReport[];
   breachesDetected: number;
-  overallIntegrity: 'secure' | 'compromised' | 'under_repair';
-}
+  overallIntegrity: "secure" | "compromised" | "under_repair";
+};
 
-export interface GuardRotationSchedule {
+export type GuardRotationSchedule = {
   scheduleId: string;
   facilityId: string;
   facilityName: string;
@@ -193,28 +197,35 @@ export interface GuardRotationSchedule {
     guardName: string;
     shiftStart: Date;
     shiftEnd: Date;
-    positionAssignment: 'perimeter' | 'gate' | 'airspace' | 'facility_patrol' | 'incident_response';
+    positionAssignment:
+      | "perimeter"
+      | "gate"
+      | "airspace"
+      | "facility_patrol"
+      | "incident_response";
     backupGuard?: string;
   }>;
-  coverageStatus: 'full_24hour' | 'business_hours' | 'minimal' | 'gaps';
+  coverageStatus: "full_24hour" | "business_hours" | "minimal" | "gaps";
   overlapTime: number;
   reviewDate: Date;
-}
+};
 
 /**
  * SECURITY MONITORING ENGINE
- * 
+ *
  * Comprehensive 24/7 security operations management
  */
 export class SecurityMonitoringEngine {
   private static instance: SecurityMonitoringEngine;
-  private guards: Map<string, SecurityGuardProfile> = new Map();
-  private shifts: Map<string, ShiftRecord> = new Map();
-  private incidentReports: IncidentReport[] = [];
-  private airspaceMonitoring: Map<string, AirspaceMonitoringLog> = new Map();
-  private perimeterLogs: Map<string, PerimeterSecurityLog> = new Map();
-  private rotationSchedules: Map<string, GuardRotationSchedule> = new Map();
-  private alertLog: Array<{
+  private readonly guards: Map<string, SecurityGuardProfile> = new Map();
+  private readonly shifts: Map<string, ShiftRecord> = new Map();
+  private readonly incidentReports: IncidentReport[] = [];
+  private readonly airspaceMonitoring: Map<string, AirspaceMonitoringLog> =
+    new Map();
+  private readonly perimeterLogs: Map<string, PerimeterSecurityLog> = new Map();
+  private readonly rotationSchedules: Map<string, GuardRotationSchedule> =
+    new Map();
+  private readonly alertLog: Array<{
     alertId: string;
     timestamp: Date;
     severity: string;
@@ -237,26 +248,32 @@ export class SecurityMonitoringEngine {
   async registerSecurityGuard(profile: SecurityGuardProfile): Promise<string> {
     // Verify license is valid
     if (profile.licenseExpiryDate < new Date()) {
-      throw new Error(`SECURITY ERROR: Guard license expired for ${profile.guardName}`);
+      throw new Error(
+        `SECURITY ERROR: Guard license expired for ${profile.guardName}`
+      );
     }
 
     // Verify all required certifications
     const requiredCerts = [
-      'foodSafetySecurity',
-      'tamperDetection',
-      'airspaceMonitoring',
-      'incidentResponse'
+      "foodSafetySecurity",
+      "tamperDetection",
+      "airspaceMonitoring",
+      "incidentResponse",
     ];
 
     for (const cert of requiredCerts) {
       if (!(profile.training as Record<string, boolean>)[cert]) {
-        throw new Error(`SECURITY ERROR: Guard ${profile.guardName} missing required certification: ${cert}`);
+        throw new Error(
+          `SECURITY ERROR: Guard ${profile.guardName} missing required certification: ${cert}`
+        );
       }
     }
 
     // Verify background check passed
     if (!profile.background.backgroundCheckPassed) {
-      throw new Error(`SECURITY ERROR: Background check failed for ${profile.guardName}`);
+      throw new Error(
+        `SECURITY ERROR: Background check failed for ${profile.guardName}`
+      );
     }
 
     this.guards.set(profile.guardId, profile);
@@ -271,7 +288,7 @@ export class SecurityMonitoringEngine {
     guardId: string,
     facilityId: string,
     facilityName: string,
-    shiftType: 'morning' | 'afternoon' | 'night' | '24hour'
+    shiftType: "morning" | "afternoon" | "night" | "24hour"
   ): Promise<string> {
     const guard = this.guards.get(guardId);
     if (!guard) {
@@ -286,7 +303,7 @@ export class SecurityMonitoringEngine {
     const shiftId = `shift_${guardId}_${Date.now()}`;
     const now = new Date();
     const shiftEnd = new Date(now);
-    if (shiftType === '24hour') {
+    if (shiftType === "24hour") {
       shiftEnd.setDate(shiftEnd.getDate() + 1);
     } else {
       shiftEnd.setHours(shiftEnd.getHours() + 8);
@@ -301,20 +318,22 @@ export class SecurityMonitoringEngine {
       shiftDate: now,
       shiftStart: now,
       shiftEnd,
-      status: 'in_progress',
+      status: "in_progress",
       checkInTime: now,
       activities: [],
       incidents: [],
       breaks: [],
       signatureLog: {
         guardSignature: `${guard.guardName}_${Date.now()}`,
-        timestamp: now
-      }
+        timestamp: now,
+      },
     };
 
     this.shifts.set(shiftId, shift);
 
-    console.log(`[SECURITY] Shift started: Guard ${guard.guardName} at ${facilityName}`);
+    console.log(
+      `[SECURITY] Shift started: Guard ${guard.guardName} at ${facilityName}`
+    );
 
     return shiftId;
   }
@@ -327,7 +346,7 @@ export class SecurityMonitoringEngine {
     activityType: string,
     description: string,
     location: string,
-    statusReport: 'clear' | 'attention_needed' | 'alert',
+    statusReport: "clear" | "attention_needed" | "alert",
     evidencePhoto?: { url: string; timestamp: Date }
   ): Promise<void> {
     const shift = this.shifts.get(shiftId);
@@ -342,20 +361,22 @@ export class SecurityMonitoringEngine {
       location,
       description,
       evidencePhoto,
-      statusReport
+      statusReport,
     };
 
     shift.activities.push(activity);
 
-    if (statusReport === 'alert') {
+    if (statusReport === "alert") {
       await this.createAlert(
         shift.facilityId,
-        'warning',
+        "warning",
         `Guard reported alert during ${activityType}: ${description}`
       );
     }
 
-    console.log(`[ACTIVITY] ${shift.guardName} - ${activityType}: ${description}`);
+    console.log(
+      `[ACTIVITY] ${shift.guardName} - ${activityType}: ${description}`
+    );
   }
 
   /**
@@ -387,7 +408,7 @@ export class SecurityMonitoringEngine {
       actionsTaken: [],
       evidenceCollected: [],
       reportedBy: shift.guardName,
-      resolved: false
+      resolved: false,
     };
 
     this.incidentReports.push(incident);
@@ -396,7 +417,9 @@ export class SecurityMonitoringEngine {
     // Create critical alert
     await this.createAlert(
       shift.facilityId,
-      severity === 'critical' || severity === 'emergency' ? 'critical' : severity,
+      severity === "critical" || severity === "emergency"
+        ? "critical"
+        : severity,
       `SECURITY INCIDENT: ${incidentType.toUpperCase()} - ${description}`
     );
 
@@ -425,48 +448,51 @@ export class SecurityMonitoringEngine {
 
     const incidentId = await this.reportIncident(
       shiftId,
-      'drone_detected',
-      'emergency',
+      "drone_detected",
+      "emergency",
       `Unauthorized drone detected at altitude ${altitude}m, approaching from ${approachAngle}`,
       shift.facilityName
     );
 
     // Get airspace log for facility
-    const airspaceLogs = Array.from(this.airspaceMonitoring.values())
-      .filter(log => log.facilityId === shift.facilityId);
+    const airspaceLogs = Array.from(this.airspaceMonitoring.values()).filter(
+      (log) => log.facilityId === shift.facilityId
+    );
 
     if (airspaceLogs.length > 0) {
       const log = airspaceLogs[0];
       log.droneDetections.push({
         detectionTime: new Date(),
-        droneType: 'unknown',
+        droneType: "unknown",
         altitude,
         approachAngle,
-        actionTaken: 'EMERGENCY RESPONSE ACTIVATED',
-        photoEvidence: photoBUrl
+        actionTaken: "EMERGENCY RESPONSE ACTIVATED",
+        photoEvidence: photoBUrl,
       });
-      log.overallStatus = 'lockdown';
+      log.overallStatus = "lockdown";
     }
 
     // Escalate immediately
-    const incident = this.incidentReports.find(i => i.incidentId === incidentId);
+    const incident = this.incidentReports.find(
+      (i) => i.incidentId === incidentId
+    );
     if (incident) {
       incident.escalatedTo = [
         {
-          authority: 'Local Police',
+          authority: "Local Police",
           notificationTime: new Date(),
-          responseStatus: 'notified'
+          responseStatus: "notified",
         },
         {
-          authority: 'Airspace Authority',
+          authority: "Airspace Authority",
           notificationTime: new Date(),
-          responseStatus: 'notified'
+          responseStatus: "notified",
         },
         {
-          authority: 'Emergency Response Team',
+          authority: "Emergency Response Team",
           notificationTime: new Date(),
-          responseStatus: 'activated'
-        }
+          responseStatus: "activated",
+        },
       ];
     }
 
@@ -482,16 +508,16 @@ export class SecurityMonitoringEngine {
     if (log.droneDetections.length > 0) {
       await this.createAlert(
         log.facilityId,
-        'critical',
+        "critical",
         `${log.droneDetections.length} unauthorized drone(s) detected in airspace`
       );
     }
 
     for (const chemTest of log.chemicalTesting) {
-      if (chemTest.result === 'contamination_detected') {
+      if (chemTest.result === "contamination_detected") {
         await this.createAlert(
           log.facilityId,
-          'critical',
+          "critical",
           `AIRSPACE CONTAMINATION DETECTED: ${chemTest.testType}`
         );
       }
@@ -505,11 +531,13 @@ export class SecurityMonitoringEngine {
    */
   async recordPerimeterLog(log: PerimeterSecurityLog): Promise<string> {
     // Check for any failures
-    const failedChecks = log.inspectionChecks.filter(c => c.status === 'fail');
+    const failedChecks = log.inspectionChecks.filter(
+      (c) => c.status === "fail"
+    );
     if (failedChecks.length > 0) {
       await this.createAlert(
         log.facilityId,
-        'critical',
+        "critical",
         `Perimeter security compromised: ${failedChecks.length} failures detected`
       );
 
@@ -528,18 +556,24 @@ export class SecurityMonitoringEngine {
   /**
    * Create guard rotation schedule
    */
-  async createRotationSchedule(schedule: GuardRotationSchedule): Promise<string> {
+  async createRotationSchedule(
+    schedule: GuardRotationSchedule
+  ): Promise<string> {
     // Verify 24/7 coverage
     const totalHours = 24;
     let coveredHours = 0;
 
     for (const rotation of schedule.rotationPattern) {
-      const guardShift = new Date(rotation.shiftEnd).getTime() - new Date(rotation.shiftStart).getTime();
+      const guardShift =
+        new Date(rotation.shiftEnd).getTime() -
+        new Date(rotation.shiftStart).getTime();
       coveredHours += guardShift / (1000 * 60 * 60);
     }
 
     if (coveredHours < totalHours) {
-      throw new Error(`SCHEDULING ERROR: Rotation does not provide 24/7 coverage. Coverage: ${coveredHours}h/24h`);
+      throw new Error(
+        `SCHEDULING ERROR: Rotation does not provide 24/7 coverage. Coverage: ${coveredHours}h/24h`
+      );
     }
 
     this.rotationSchedules.set(schedule.scheduleId, schedule);
@@ -554,14 +588,14 @@ export class SecurityMonitoringEngine {
   /**
    * End shift
    */
-  async endShift(shiftId: string, notes: string = ''): Promise<void> {
+  async endShift(shiftId: string, notes = ""): Promise<void> {
     const shift = this.shifts.get(shiftId);
     if (!shift) {
       throw new Error(`Shift not found: ${shiftId}`);
     }
 
     shift.checkOutTime = new Date();
-    shift.status = 'completed';
+    shift.status = "completed";
 
     const incidentCount = shift.incidents.length;
     const activityCount = shift.activities.length;
@@ -574,13 +608,17 @@ export class SecurityMonitoringEngine {
   /**
    * Create security alert
    */
-  private async createAlert(facilityId: string, severity: string, message: string): Promise<void> {
+  private async createAlert(
+    facilityId: string,
+    severity: string,
+    message: string
+  ): Promise<void> {
     const alert = {
       alertId: `alert_${Date.now()}`,
       timestamp: new Date(),
       severity,
       message,
-      facilityId
+      facilityId,
     };
 
     this.alertLog.push(alert);
@@ -600,15 +638,23 @@ export class SecurityMonitoringEngine {
     perimeterStatus: string;
     lastUpdate: Date;
   } {
-    const activeShifts = Array.from(this.shifts.values()).filter(s => s.status === 'in_progress').length;
-    const openIncidents = this.incidentReports.filter(i => !i.resolved).length;
-    const criticalAlerts = this.alertLog.filter(a => a.severity === 'critical').length;
+    const activeShifts = Array.from(this.shifts.values()).filter(
+      (s) => s.status === "in_progress"
+    ).length;
+    const openIncidents = this.incidentReports.filter(
+      (i) => !i.resolved
+    ).length;
+    const criticalAlerts = this.alertLog.filter(
+      (a) => a.severity === "critical"
+    ).length;
 
     const airspaceLogs = Array.from(this.airspaceMonitoring.values()).slice(-1);
-    const airspaceStatus = airspaceLogs.length > 0 ? airspaceLogs[0].overallStatus : 'secure';
+    const airspaceStatus =
+      airspaceLogs.length > 0 ? airspaceLogs[0].overallStatus : "secure";
 
     const perimeterLogs = Array.from(this.perimeterLogs.values()).slice(-1);
-    const perimeterStatus = perimeterLogs.length > 0 ? perimeterLogs[0].overallIntegrity : 'secure';
+    const perimeterStatus =
+      perimeterLogs.length > 0 ? perimeterLogs[0].overallIntegrity : "secure";
 
     return {
       activeGuards: this.guards.size,
@@ -617,21 +663,21 @@ export class SecurityMonitoringEngine {
       criticalAlerts,
       airspaceStatus,
       perimeterStatus,
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
     };
   }
 
   /**
    * Get incident history
    */
-  getIncidentHistory(limit: number = 100): IncidentReport[] {
+  getIncidentHistory(limit = 100): IncidentReport[] {
     return this.incidentReports.slice(-limit);
   }
 
   /**
    * Get security audit log
    */
-  getSecurityAuditLog(limit: number = 100): Array<{
+  getSecurityAuditLog(limit = 100): Array<{
     alertId: string;
     timestamp: Date;
     severity: string;

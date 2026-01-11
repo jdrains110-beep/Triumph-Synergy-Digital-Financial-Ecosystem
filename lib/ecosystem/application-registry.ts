@@ -1,20 +1,20 @@
 /**
  * lib/ecosystem/application-registry.ts
  * Extensible application registry for integrating third-party apps
- * 
+ *
  * Allows the Triumph Synergy ecosystem to extend with additional applications
  * while maintaining consistent Pi Payment handling across all integrated apps
  */
 
-export interface PiPaymentConfig {
+export type PiPaymentConfig = {
   appId: string;
   apiKey?: string;
   apiSecret?: string;
   callbackUrl: string;
   sandbox?: boolean;
-}
+};
 
-export interface RegisteredApplication {
+export type RegisteredApplication = {
   id: string;
   name: string;
   description: string;
@@ -27,9 +27,9 @@ export interface RegisteredApplication {
   createdAt: Date;
   updatedAt: Date;
   features: string[];
-}
+};
 
-export interface ApplicationIntegration {
+export type ApplicationIntegration = {
   appId: string;
   name: string;
   connect: () => Promise<void>;
@@ -37,33 +37,33 @@ export interface ApplicationIntegration {
   executePayment: (config: PaymentExecutionConfig) => Promise<PaymentResult>;
   getStatus: () => Promise<ApplicationStatus>;
   healthCheck: () => Promise<boolean>;
-}
+};
 
-export interface PaymentExecutionConfig {
+export type PaymentExecutionConfig = {
   amount: number;
   memo: string;
   metadata?: Record<string, unknown>;
   userId?: string;
   appId: string;
-}
+};
 
-export interface PaymentResult {
+export type PaymentResult = {
   transactionId: string;
   status: "pending" | "approved" | "completed" | "failed" | "cancelled";
   amount: number;
   timestamp: Date;
   blockchainHash?: string;
   error?: string;
-}
+};
 
-export interface ApplicationStatus {
+export type ApplicationStatus = {
   appId: string;
   connected: boolean;
   healthy: boolean;
   lastChecked: Date;
   piPaymentReady: boolean;
   errorMessage?: string;
-}
+};
 
 // =============================================================================
 // APPLICATION REGISTRY
@@ -71,8 +71,9 @@ export interface ApplicationStatus {
 
 export class ApplicationRegistry {
   private static instance: ApplicationRegistry | null = null;
-  private applications: Map<string, RegisteredApplication> = new Map();
-  private integrations: Map<string, ApplicationIntegration> = new Map();
+  private readonly applications: Map<string, RegisteredApplication> = new Map();
+  private readonly integrations: Map<string, ApplicationIntegration> =
+    new Map();
 
   private constructor() {
     console.log("[ApplicationRegistry] Initialized");
@@ -82,10 +83,10 @@ export class ApplicationRegistry {
    * Get singleton instance
    */
   static getInstance(): ApplicationRegistry {
-    if (!this.instance) {
-      this.instance = new ApplicationRegistry();
+    if (!ApplicationRegistry.instance) {
+      ApplicationRegistry.instance = new ApplicationRegistry();
     }
-    return this.instance;
+    return ApplicationRegistry.instance;
   }
 
   /**
@@ -96,7 +97,9 @@ export class ApplicationRegistry {
     integration: ApplicationIntegration
   ): void {
     if (this.applications.has(app.id)) {
-      console.warn(`[ApplicationRegistry] Application ${app.id} already registered`);
+      console.warn(
+        `[ApplicationRegistry] Application ${app.id} already registered`
+      );
       return;
     }
 
@@ -140,7 +143,9 @@ export class ApplicationRegistry {
    */
   enableApplication(appId: string): boolean {
     const app = this.applications.get(appId);
-    if (!app) return false;
+    if (!app) {
+      return false;
+    }
 
     app.enabled = true;
     app.updatedAt = new Date();
@@ -153,7 +158,9 @@ export class ApplicationRegistry {
    */
   disableApplication(appId: string): boolean {
     const app = this.applications.get(appId);
-    if (!app) return false;
+    if (!app) {
+      return false;
+    }
 
     app.enabled = false;
     app.updatedAt = new Date();
@@ -164,9 +171,14 @@ export class ApplicationRegistry {
   /**
    * Update application
    */
-  updateApplication(appId: string, updates: Partial<RegisteredApplication>): boolean {
+  updateApplication(
+    appId: string,
+    updates: Partial<RegisteredApplication>
+  ): boolean {
     const app = this.applications.get(appId);
-    if (!app) return false;
+    if (!app) {
+      return false;
+    }
 
     Object.assign(app, updates, { updatedAt: new Date() });
     console.log(`[ApplicationRegistry] ✓ Updated: ${app.name}`);
@@ -188,11 +200,16 @@ export class ApplicationRegistry {
     }
 
     try {
-      console.log(`[ApplicationRegistry] Executing payment through ${app.name}`);
+      console.log(
+        `[ApplicationRegistry] Executing payment through ${app.name}`
+      );
       const result = await integration.executePayment(config);
       return result;
     } catch (error) {
-      console.error(`[ApplicationRegistry] Payment failed for ${app.name}:`, error);
+      console.error(
+        `[ApplicationRegistry] Payment failed for ${app.name}:`,
+        error
+      );
       throw error;
     }
   }
@@ -215,7 +232,8 @@ export class ApplicationRegistry {
           healthy: false,
           lastChecked: new Date(),
           piPaymentReady: false,
-          errorMessage: error instanceof Error ? error.message : "Unknown error",
+          errorMessage:
+            error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
@@ -270,7 +288,9 @@ export async function executeApplicationPayment(
 /**
  * Get all applications in registry
  */
-export function getRegisteredApplications(enabledOnly = false): RegisteredApplication[] {
+export function getRegisteredApplications(
+  enabledOnly = false
+): RegisteredApplication[] {
   return applicationRegistry.listApplications(enabledOnly);
 }
 
@@ -281,7 +301,9 @@ export async function getApplicationStatus(
   appId: string
 ): Promise<ApplicationStatus | null> {
   const integration = applicationRegistry.getIntegration(appId);
-  if (!integration) return null;
+  if (!integration) {
+    return null;
+  }
 
   return integration.getStatus();
 }

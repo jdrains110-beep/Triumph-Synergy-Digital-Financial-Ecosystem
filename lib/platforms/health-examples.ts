@@ -1,10 +1,10 @@
 /**
  * TRIUMPH SYNERGY - Health Platform Examples
- * 
+ *
  * Production-ready implementations for:
  * - Shands Hospital / UF Health System
  * - UF Health Gainesville
- * 
+ *
  * Features:
  * - Employee/contractor payroll in Pi
  * - Policy alternatives (optional vaccines, midwives)
@@ -13,41 +13,41 @@
  * - Transparent payment system
  */
 
-import {
-  HealthIntegration,
-  HealthcarePersonProfile,
-  HealthcarePayment,
+import { OfficialPiPayments } from "@/lib/payments/pi-payments-official";
+import type {
   HealthcareDepconfig,
+  HealthcarePayment,
+  HealthcarePersonProfile,
+  HealthIntegration,
   HealthPolicy,
-} from '@/lib/platforms/health-framework';
-import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
+} from "@/lib/platforms/health-framework";
 
 /**
  * Shands Hospital Integration
- * 
+ *
  * Major academic medical center serving Florida
  * - Multiple departments
  * - Thousands of employees and contractors
  * - Integration with UF Health system
  */
 export class ShandsHospitalIntegration implements HealthIntegration {
-  readonly institutionId = 'shands-hospital';
-  readonly name = 'Shands Hospital';
-  readonly type = 'hospital';
+  readonly institutionId = "shands-hospital";
+  readonly name = "Shands Hospital";
+  readonly type = "hospital";
 
-  private employees = new Map<string, HealthcarePersonProfile>();
-  private contractors = new Map<string, HealthcarePersonProfile>();
-  private payments: HealthcarePayment[] = [];
+  private readonly employees = new Map<string, HealthcarePersonProfile>();
+  private readonly contractors = new Map<string, HealthcarePersonProfile>();
+  private readonly payments: HealthcarePayment[] = [];
   private departments: HealthcareDepconfig[] = [];
-  private policies: HealthPolicy[] = [];
-  private piPayments: OfficialPiPayments;
+  private readonly policies: HealthPolicy[] = [];
+  private readonly piPayments: OfficialPiPayments;
   private connected = false;
 
   constructor() {
     this.piPayments = new OfficialPiPayments({
-      appId: 'shands-triumph',
-      apiKey: process.env.NEXT_PUBLIC_SHANDS_API_KEY || 'demo-shands-key',
-      apiSecret: process.env.SHANDS_API_SECRET || 'demo-shands-secret',
+      appId: "shands-triumph",
+      apiKey: process.env.NEXT_PUBLIC_SHANDS_API_KEY || "demo-shands-key",
+      apiSecret: process.env.SHANDS_API_SECRET || "demo-shands-secret",
     });
 
     // Initialize departments
@@ -57,49 +57,65 @@ export class ShandsHospitalIntegration implements HealthIntegration {
   private initializeDepartments(): void {
     this.departments = [
       {
-        id: 'cardiology',
-        name: 'Cardiology',
-        specialization: 'Heart and Cardiovascular',
+        id: "cardiology",
+        name: "Cardiology",
+        specialization: "Heart and Cardiovascular",
         employeeCount: 45,
         contractorCount: 12,
-        piPaymentPool: 25000,
-        equipmentIntegrated: ['ECG-Device', 'Ultrasound-Pro', 'Monitor-Advanced'],
+        piPaymentPool: 25_000,
+        equipmentIntegrated: [
+          "ECG-Device",
+          "Ultrasound-Pro",
+          "Monitor-Advanced",
+        ],
       },
       {
-        id: 'oncology',
-        name: 'Oncology',
-        specialization: 'Cancer Treatment',
+        id: "oncology",
+        name: "Oncology",
+        specialization: "Cancer Treatment",
         employeeCount: 60,
         contractorCount: 20,
-        piPaymentPool: 35000,
-        equipmentIntegrated: ['CT-Scanner', 'MRI-Pro', 'RadiationTherapy-Unit'],
+        piPaymentPool: 35_000,
+        equipmentIntegrated: ["CT-Scanner", "MRI-Pro", "RadiationTherapy-Unit"],
       },
       {
-        id: 'obstetrics',
-        name: 'Obstetrics & Gynecology (Including Midwifery)',
-        specialization: 'Pregnancy and Birth Services',
+        id: "obstetrics",
+        name: "Obstetrics & Gynecology (Including Midwifery)",
+        specialization: "Pregnancy and Birth Services",
         employeeCount: 35,
         contractorCount: 25, // Midwives and doulas
-        piPaymentPool: 20000,
-        equipmentIntegrated: ['Ultrasound-OB', 'Fetal-Monitor', 'DeliveryBed-Smart'],
+        piPaymentPool: 20_000,
+        equipmentIntegrated: [
+          "Ultrasound-OB",
+          "Fetal-Monitor",
+          "DeliveryBed-Smart",
+        ],
       },
       {
-        id: 'emergency',
-        name: 'Emergency Medicine',
-        specialization: 'Emergency Care',
+        id: "emergency",
+        name: "Emergency Medicine",
+        specialization: "Emergency Care",
         employeeCount: 80,
         contractorCount: 40,
-        piPaymentPool: 40000,
-        equipmentIntegrated: ['Defibrillator-Smart', 'Monitor-Multi', 'Ventilator-Pro'],
+        piPaymentPool: 40_000,
+        equipmentIntegrated: [
+          "Defibrillator-Smart",
+          "Monitor-Multi",
+          "Ventilator-Pro",
+        ],
       },
       {
-        id: 'pediatrics',
-        name: 'Pediatrics',
-        specialization: 'Children\'s Healthcare',
+        id: "pediatrics",
+        name: "Pediatrics",
+        specialization: "Children's Healthcare",
         employeeCount: 50,
         contractorCount: 15,
-        piPaymentPool: 28000,
-        equipmentIntegrated: ['Monitor-Peds', 'Ultrasound-Peds', 'Growth-Tracker'],
+        piPaymentPool: 28_000,
+        equipmentIntegrated: [
+          "Monitor-Peds",
+          "Ultrasound-Peds",
+          "Growth-Tracker",
+        ],
       },
     ];
   }
@@ -107,7 +123,7 @@ export class ShandsHospitalIntegration implements HealthIntegration {
   async connect(): Promise<void> {
     await this.piPayments.connect();
     this.connected = true;
-    console.log('✅ Shands Hospital connected to Pi Network');
+    console.log("✅ Shands Hospital connected to Pi Network");
   }
 
   async disconnect(): Promise<void> {
@@ -116,12 +132,14 @@ export class ShandsHospitalIntegration implements HealthIntegration {
   }
 
   async registerPerson(profile: HealthcarePersonProfile): Promise<void> {
-    if (profile.type === 'contractor') {
+    if (profile.type === "contractor") {
       this.contractors.set(profile.id, profile);
     } else {
       this.employees.set(profile.id, profile);
     }
-    console.log(`✅ Registered ${profile.type}: ${profile.firstName} ${profile.lastName}`);
+    console.log(
+      `✅ Registered ${profile.type}: ${profile.firstName} ${profile.lastName}`
+    );
   }
 
   async getPerson(personId: string): Promise<HealthcarePersonProfile> {
@@ -135,15 +153,20 @@ export class ShandsHospitalIntegration implements HealthIntegration {
     return person;
   }
 
-  async updatePerson(personId: string, updates: Partial<HealthcarePersonProfile>): Promise<void> {
+  async updatePerson(
+    personId: string,
+    updates: Partial<HealthcarePersonProfile>
+  ): Promise<void> {
     const person = await this.getPerson(personId);
     Object.assign(person, updates);
   }
 
-  async listEmployees(departmentId?: string): Promise<HealthcarePersonProfile[]> {
+  async listEmployees(
+    departmentId?: string
+  ): Promise<HealthcarePersonProfile[]> {
     const list = Array.from(this.employees.values());
     if (departmentId) {
-      return list.filter(e => e.department === departmentId);
+      return list.filter((e) => e.department === departmentId);
     }
     return list;
   }
@@ -163,11 +186,11 @@ export class ShandsHospitalIntegration implements HealthIntegration {
         fromEntityId: this.institutionId,
         toPersonId: employee.id,
         amount: monthlyAmount,
-        type: 'salary',
+        type: "salary",
         frequency: employee.paymentFrequency,
         description: `Monthly salary - ${employee.role}`,
         paymentDate: date,
-        status: 'pending',
+        status: "pending",
       };
       paymentList.push(payment);
     }
@@ -177,18 +200,22 @@ export class ShandsHospitalIntegration implements HealthIntegration {
     return paymentList;
   }
 
-  async processContractorPayment(contractorId: string, amount: number, memo: string): Promise<HealthcarePayment> {
+  async processContractorPayment(
+    contractorId: string,
+    amount: number,
+    memo: string
+  ): Promise<HealthcarePayment> {
     const contractor = await this.getPerson(contractorId);
-    
+
     const payment: HealthcarePayment = {
       id: `contractor-pay-${contractorId}-${Date.now()}`,
       fromEntityId: this.institutionId,
       toPersonId: contractorId,
       amount,
-      type: 'contractor_payment',
+      type: "contractor_payment",
       description: memo,
       paymentDate: new Date(),
-      status: 'pending',
+      status: "pending",
     };
 
     // Execute Pi payment
@@ -196,69 +223,77 @@ export class ShandsHospitalIntegration implements HealthIntegration {
       const piPayment = await this.piPayments.createPayment({
         amount,
         memo: `Shands Contractor: ${memo}`,
-        metadata: { contractorId, institution: 'shands-hospital' },
+        metadata: { contractorId, institution: "shands-hospital" },
       });
       payment.blockchainHash = piPayment.txid;
-      payment.status = 'completed';
+      payment.status = "completed";
     } catch (error) {
-      payment.status = 'failed';
-      console.error('Contractor payment failed:', error);
+      payment.status = "failed";
+      console.error("Contractor payment failed:", error);
     }
 
     this.payments.push(payment);
     return payment;
   }
 
-  async processBonus(personId: string, amount: number, reason: string): Promise<HealthcarePayment> {
+  async processBonus(
+    personId: string,
+    amount: number,
+    reason: string
+  ): Promise<HealthcarePayment> {
     const payment: HealthcarePayment = {
       id: `bonus-${personId}-${Date.now()}`,
       fromEntityId: this.institutionId,
       toPersonId: personId,
       amount,
-      type: 'bonus',
+      type: "bonus",
       description: `Bonus: ${reason}`,
       paymentDate: new Date(),
-      status: 'pending',
+      status: "pending",
     };
 
     try {
       const piPayment = await this.piPayments.createPayment({
         amount,
         memo: `Shands Bonus: ${reason}`,
-        metadata: { personId, type: 'bonus', institution: 'shands' },
+        metadata: { personId, type: "bonus", institution: "shands" },
       });
       payment.blockchainHash = piPayment.txid;
-      payment.status = 'completed';
+      payment.status = "completed";
     } catch (error) {
-      payment.status = 'failed';
+      payment.status = "failed";
     }
 
     this.payments.push(payment);
     return payment;
   }
 
-  async processReimbursement(personId: string, amount: number, description: string): Promise<HealthcarePayment> {
+  async processReimbursement(
+    personId: string,
+    amount: number,
+    description: string
+  ): Promise<HealthcarePayment> {
     const payment: HealthcarePayment = {
       id: `reimb-${personId}-${Date.now()}`,
       fromEntityId: this.institutionId,
       toPersonId: personId,
       amount,
-      type: 'reimbursement',
+      type: "reimbursement",
       description,
       paymentDate: new Date(),
-      status: 'pending',
+      status: "pending",
     };
 
     try {
       const piPayment = await this.piPayments.createPayment({
         amount,
         memo: `Shands Reimbursement: ${description}`,
-        metadata: { personId, type: 'reimbursement', institution: 'shands' },
+        metadata: { personId, type: "reimbursement", institution: "shands" },
       });
       payment.blockchainHash = piPayment.txid;
-      payment.status = 'completed';
+      payment.status = "completed";
     } catch (error) {
-      payment.status = 'failed';
+      payment.status = "failed";
     }
 
     this.payments.push(payment);
@@ -271,14 +306,18 @@ export class ShandsHospitalIntegration implements HealthIntegration {
   }
 
   async getPolicy(policyId: string): Promise<HealthPolicy> {
-    const policy = this.policies.find(p => p.id === policyId);
+    const policy = this.policies.find((p) => p.id === policyId);
     if (!policy) {
       throw new Error(`Policy ${policyId} not found`);
     }
     return policy;
   }
 
-  async updatePersonPolicyPreference(personId: string, policyId: string, alternativeId: string): Promise<void> {
+  async updatePersonPolicyPreference(
+    personId: string,
+    policyId: string,
+    alternativeId: string
+  ): Promise<void> {
     const person = await this.getPerson(personId);
     person.policyPreferences[policyId] = alternativeId;
     console.log(`✅ Updated policy preference for ${personId}`);
@@ -289,7 +328,7 @@ export class ShandsHospitalIntegration implements HealthIntegration {
     selectionBreakdown: Record<string, number>;
   }> {
     const breakdown: Record<string, number> = {};
-    
+
     for (const employee of this.employees.values()) {
       const selectedAlt = employee.policyPreferences[policyId];
       if (selectedAlt) {
@@ -308,7 +347,7 @@ export class ShandsHospitalIntegration implements HealthIntegration {
   }
 
   async getDepartment(deptId: string): Promise<HealthcareDepconfig> {
-    const dept = this.departments.find(d => d.id === deptId);
+    const dept = this.departments.find((d) => d.id === deptId);
     if (!dept) {
       throw new Error(`Department ${deptId} not found`);
     }
@@ -328,15 +367,18 @@ export class ShandsHospitalIntegration implements HealthIntegration {
     console.log(`✅ Integrated device: ${deviceName} (${deviceId})`);
   }
 
-  async getIntegratedDevices(): Promise<Array<{ name: string; deviceId: string; status: string }>> {
-    const devices: Array<{ name: string; deviceId: string; status: string }> = [];
-    
+  async getIntegratedDevices(): Promise<
+    Array<{ name: string; deviceId: string; status: string }>
+  > {
+    const devices: Array<{ name: string; deviceId: string; status: string }> =
+      [];
+
     for (const dept of this.departments) {
       for (const deviceId of dept.equipmentIntegrated) {
         devices.push({
           name: deviceId,
           deviceId,
-          status: 'operational',
+          status: "operational",
         });
       }
     }
@@ -344,20 +386,25 @@ export class ShandsHospitalIntegration implements HealthIntegration {
     return devices;
   }
 
-  async getPayrollReport(startDate: Date, endDate: Date): Promise<{
+  async getPayrollReport(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     totalPaid: number;
     employeeCount: number;
     contractorPayments: number;
     transactions: HealthcarePayment[];
   }> {
     const filtered = this.payments.filter(
-      p => p.paymentDate >= startDate && p.paymentDate <= endDate
+      (p) => p.paymentDate >= startDate && p.paymentDate <= endDate
     );
 
     return {
       totalPaid: filtered.reduce((sum, p) => sum + p.amount, 0),
       employeeCount: this.employees.size,
-      contractorPayments: filtered.filter(p => p.type === 'contractor_payment').length,
+      contractorPayments: filtered.filter(
+        (p) => p.type === "contractor_payment"
+      ).length,
       transactions: filtered,
     };
   }
@@ -370,7 +417,7 @@ export class ShandsHospitalIntegration implements HealthIntegration {
   }> {
     const policy = await this.getPolicy(policyId);
     const stats = await this.getPolicyStatistics(policyId);
-    
+
     return {
       policyName: policy.name,
       totalAffected: stats.totalAffected,
@@ -380,17 +427,17 @@ export class ShandsHospitalIntegration implements HealthIntegration {
   }
 
   async healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'offline';
+    status: "healthy" | "degraded" | "offline";
     uptime: number;
     activePersons: number;
-    paymentSystemStatus: 'operational' | 'degraded';
+    paymentSystemStatus: "operational" | "degraded";
     lastSync: Date;
   }> {
     return {
-      status: this.connected ? 'healthy' : 'offline',
+      status: this.connected ? "healthy" : "offline",
       uptime: this.connected ? 99.98 : 0,
       activePersons: this.employees.size + this.contractors.size,
-      paymentSystemStatus: 'operational',
+      paymentSystemStatus: "operational",
       lastSync: new Date(),
     };
   }
@@ -398,30 +445,30 @@ export class ShandsHospitalIntegration implements HealthIntegration {
 
 /**
  * UF Health Integration
- * 
+ *
  * University of Florida Health System
  * - Research focus
  * - Academic partnerships
  * - Innovation in healthcare payment
  */
 export class UFHealthIntegration implements HealthIntegration {
-  readonly institutionId = 'uf-health';
-  readonly name = 'UF Health';
-  readonly type = 'research';
+  readonly institutionId = "uf-health";
+  readonly name = "UF Health";
+  readonly type = "research";
 
-  private employees = new Map<string, HealthcarePersonProfile>();
-  private contractors = new Map<string, HealthcarePersonProfile>();
-  private payments: HealthcarePayment[] = [];
+  private readonly employees = new Map<string, HealthcarePersonProfile>();
+  private readonly contractors = new Map<string, HealthcarePersonProfile>();
+  private readonly payments: HealthcarePayment[] = [];
   private departments: HealthcareDepconfig[] = [];
-  private policies: HealthPolicy[] = [];
-  private piPayments: OfficialPiPayments;
+  private readonly policies: HealthPolicy[] = [];
+  private readonly piPayments: OfficialPiPayments;
   private connected = false;
 
   constructor() {
     this.piPayments = new OfficialPiPayments({
-      appId: 'ufhealth-triumph',
-      apiKey: process.env.NEXT_PUBLIC_UFHEALTH_API_KEY || 'demo-ufhealth-key',
-      apiSecret: process.env.UFHEALTH_API_SECRET || 'demo-ufhealth-secret',
+      appId: "ufhealth-triumph",
+      apiKey: process.env.NEXT_PUBLIC_UFHEALTH_API_KEY || "demo-ufhealth-key",
+      apiSecret: process.env.UFHEALTH_API_SECRET || "demo-ufhealth-secret",
     });
 
     this.initializeDepartments();
@@ -430,31 +477,35 @@ export class UFHealthIntegration implements HealthIntegration {
   private initializeDepartments(): void {
     this.departments = [
       {
-        id: 'research-genomics',
-        name: 'Genomics Research',
-        specialization: 'Genetic Research & Innovation',
+        id: "research-genomics",
+        name: "Genomics Research",
+        specialization: "Genetic Research & Innovation",
         employeeCount: 30,
         contractorCount: 15,
-        piPaymentPool: 18000,
-        equipmentIntegrated: ['DNA-Sequencer', 'Lab-Analyzer', 'Data-System'],
+        piPaymentPool: 18_000,
+        equipmentIntegrated: ["DNA-Sequencer", "Lab-Analyzer", "Data-System"],
       },
       {
-        id: 'clinical-trials',
-        name: 'Clinical Trials',
-        specialization: 'Medical Research',
+        id: "clinical-trials",
+        name: "Clinical Trials",
+        specialization: "Medical Research",
         employeeCount: 25,
         contractorCount: 20,
-        piPaymentPool: 16000,
-        equipmentIntegrated: ['Patient-Monitor', 'Data-Logger', 'Trial-System'],
+        piPaymentPool: 16_000,
+        equipmentIntegrated: ["Patient-Monitor", "Data-Logger", "Trial-System"],
       },
       {
-        id: 'integrative-medicine',
-        name: 'Integrative Medicine',
-        specialization: 'Alternative & Traditional',
+        id: "integrative-medicine",
+        name: "Integrative Medicine",
+        specialization: "Alternative & Traditional",
         employeeCount: 20,
         contractorCount: 25,
-        piPaymentPool: 14000,
-        equipmentIntegrated: ['Acupuncture-System', 'Herb-Library', 'Patient-Portal'],
+        piPaymentPool: 14_000,
+        equipmentIntegrated: [
+          "Acupuncture-System",
+          "Herb-Library",
+          "Patient-Portal",
+        ],
       },
     ];
   }
@@ -462,7 +513,7 @@ export class UFHealthIntegration implements HealthIntegration {
   async connect(): Promise<void> {
     await this.piPayments.connect();
     this.connected = true;
-    console.log('✅ UF Health connected to Pi Network');
+    console.log("✅ UF Health connected to Pi Network");
   }
 
   async disconnect(): Promise<void> {
@@ -471,7 +522,7 @@ export class UFHealthIntegration implements HealthIntegration {
   }
 
   async registerPerson(profile: HealthcarePersonProfile): Promise<void> {
-    if (profile.type === 'contractor') {
+    if (profile.type === "contractor") {
       this.contractors.set(profile.id, profile);
     } else {
       this.employees.set(profile.id, profile);
@@ -489,15 +540,20 @@ export class UFHealthIntegration implements HealthIntegration {
     return person;
   }
 
-  async updatePerson(personId: string, updates: Partial<HealthcarePersonProfile>): Promise<void> {
+  async updatePerson(
+    personId: string,
+    updates: Partial<HealthcarePersonProfile>
+  ): Promise<void> {
     const person = await this.getPerson(personId);
     Object.assign(person, updates);
   }
 
-  async listEmployees(departmentId?: string): Promise<HealthcarePersonProfile[]> {
+  async listEmployees(
+    departmentId?: string
+  ): Promise<HealthcarePersonProfile[]> {
     const list = Array.from(this.employees.values());
     if (departmentId) {
-      return list.filter(e => e.department === departmentId);
+      return list.filter((e) => e.department === departmentId);
     }
     return list;
   }
@@ -516,11 +572,11 @@ export class UFHealthIntegration implements HealthIntegration {
         fromEntityId: this.institutionId,
         toPersonId: employee.id,
         amount: monthlyAmount,
-        type: 'salary',
+        type: "salary",
         frequency: employee.paymentFrequency,
         description: `Research salary - ${employee.role}`,
         paymentDate: date,
-        status: 'pending',
+        status: "pending",
       };
       paymentList.push(payment);
     }
@@ -529,60 +585,72 @@ export class UFHealthIntegration implements HealthIntegration {
     return paymentList;
   }
 
-  async processContractorPayment(contractorId: string, amount: number, memo: string): Promise<HealthcarePayment> {
+  async processContractorPayment(
+    contractorId: string,
+    amount: number,
+    memo: string
+  ): Promise<HealthcarePayment> {
     const payment: HealthcarePayment = {
       id: `uf-contractor-${contractorId}-${Date.now()}`,
       fromEntityId: this.institutionId,
       toPersonId: contractorId,
       amount,
-      type: 'contractor_payment',
+      type: "contractor_payment",
       description: memo,
       paymentDate: new Date(),
-      status: 'pending',
+      status: "pending",
     };
 
     try {
       const piPayment = await this.piPayments.createPayment({
         amount,
         memo: `UF Health Contractor: ${memo}`,
-        metadata: { contractorId, institution: 'uf-health' },
+        metadata: { contractorId, institution: "uf-health" },
       });
       payment.blockchainHash = piPayment.txid;
-      payment.status = 'completed';
+      payment.status = "completed";
     } catch (error) {
-      payment.status = 'failed';
+      payment.status = "failed";
     }
 
     this.payments.push(payment);
     return payment;
   }
 
-  async processBonus(personId: string, amount: number, reason: string): Promise<HealthcarePayment> {
+  async processBonus(
+    personId: string,
+    amount: number,
+    reason: string
+  ): Promise<HealthcarePayment> {
     const payment: HealthcarePayment = {
       id: `uf-bonus-${personId}-${Date.now()}`,
       fromEntityId: this.institutionId,
       toPersonId: personId,
       amount,
-      type: 'bonus',
+      type: "bonus",
       description: `Research bonus: ${reason}`,
       paymentDate: new Date(),
-      status: 'pending',
+      status: "pending",
     };
 
     this.payments.push(payment);
     return payment;
   }
 
-  async processReimbursement(personId: string, amount: number, description: string): Promise<HealthcarePayment> {
+  async processReimbursement(
+    personId: string,
+    amount: number,
+    description: string
+  ): Promise<HealthcarePayment> {
     const payment: HealthcarePayment = {
       id: `uf-reimb-${personId}-${Date.now()}`,
       fromEntityId: this.institutionId,
       toPersonId: personId,
       amount,
-      type: 'reimbursement',
+      type: "reimbursement",
       description,
       paymentDate: new Date(),
-      status: 'pending',
+      status: "pending",
     };
 
     this.payments.push(payment);
@@ -594,14 +662,18 @@ export class UFHealthIntegration implements HealthIntegration {
   }
 
   async getPolicy(policyId: string): Promise<HealthPolicy> {
-    const policy = this.policies.find(p => p.id === policyId);
+    const policy = this.policies.find((p) => p.id === policyId);
     if (!policy) {
       throw new Error(`Policy ${policyId} not found`);
     }
     return policy;
   }
 
-  async updatePersonPolicyPreference(personId: string, policyId: string, alternativeId: string): Promise<void> {
+  async updatePersonPolicyPreference(
+    personId: string,
+    policyId: string,
+    alternativeId: string
+  ): Promise<void> {
     const person = await this.getPerson(personId);
     person.policyPreferences[policyId] = alternativeId;
   }
@@ -611,7 +683,7 @@ export class UFHealthIntegration implements HealthIntegration {
     selectionBreakdown: Record<string, number>;
   }> {
     const breakdown: Record<string, number> = {};
-    
+
     for (const employee of this.employees.values()) {
       const selectedAlt = employee.policyPreferences[policyId];
       if (selectedAlt) {
@@ -630,7 +702,7 @@ export class UFHealthIntegration implements HealthIntegration {
   }
 
   async getDepartment(deptId: string): Promise<HealthcareDepconfig> {
-    const dept = this.departments.find(d => d.id === deptId);
+    const dept = this.departments.find((d) => d.id === deptId);
     if (!dept) {
       throw new Error(`Department ${deptId} not found`);
     }
@@ -650,15 +722,18 @@ export class UFHealthIntegration implements HealthIntegration {
     console.log(`✅ UF Health device integrated: ${deviceName}`);
   }
 
-  async getIntegratedDevices(): Promise<Array<{ name: string; deviceId: string; status: string }>> {
-    const devices: Array<{ name: string; deviceId: string; status: string }> = [];
-    
+  async getIntegratedDevices(): Promise<
+    Array<{ name: string; deviceId: string; status: string }>
+  > {
+    const devices: Array<{ name: string; deviceId: string; status: string }> =
+      [];
+
     for (const dept of this.departments) {
       for (const deviceId of dept.equipmentIntegrated) {
         devices.push({
           name: deviceId,
           deviceId,
-          status: 'operational',
+          status: "operational",
         });
       }
     }
@@ -666,20 +741,25 @@ export class UFHealthIntegration implements HealthIntegration {
     return devices;
   }
 
-  async getPayrollReport(startDate: Date, endDate: Date): Promise<{
+  async getPayrollReport(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     totalPaid: number;
     employeeCount: number;
     contractorPayments: number;
     transactions: HealthcarePayment[];
   }> {
     const filtered = this.payments.filter(
-      p => p.paymentDate >= startDate && p.paymentDate <= endDate
+      (p) => p.paymentDate >= startDate && p.paymentDate <= endDate
     );
 
     return {
       totalPaid: filtered.reduce((sum, p) => sum + p.amount, 0),
       employeeCount: this.employees.size,
-      contractorPayments: filtered.filter(p => p.type === 'contractor_payment').length,
+      contractorPayments: filtered.filter(
+        (p) => p.type === "contractor_payment"
+      ).length,
       transactions: filtered,
     };
   }
@@ -692,7 +772,7 @@ export class UFHealthIntegration implements HealthIntegration {
   }> {
     const policy = await this.getPolicy(policyId);
     const stats = await this.getPolicyStatistics(policyId);
-    
+
     return {
       policyName: policy.name,
       totalAffected: stats.totalAffected,
@@ -702,17 +782,17 @@ export class UFHealthIntegration implements HealthIntegration {
   }
 
   async healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'offline';
+    status: "healthy" | "degraded" | "offline";
     uptime: number;
     activePersons: number;
-    paymentSystemStatus: 'operational' | 'degraded';
+    paymentSystemStatus: "operational" | "degraded";
     lastSync: Date;
   }> {
     return {
-      status: this.connected ? 'healthy' : 'offline',
+      status: this.connected ? "healthy" : "offline",
       uptime: this.connected ? 99.97 : 0,
       activePersons: this.employees.size + this.contractors.size,
-      paymentSystemStatus: 'operational',
+      paymentSystemStatus: "operational",
       lastSync: new Date(),
     };
   }

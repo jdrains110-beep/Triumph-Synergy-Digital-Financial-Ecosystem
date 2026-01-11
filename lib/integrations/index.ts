@@ -2,7 +2,7 @@
  * Triumph Synergy - Integrations Module Index
  *
  * Unified financial integration hub exports
- * 
+ *
  * Powered by:
  * - Pi Network Blockchain
  * - Chainlink Oracle Network
@@ -33,33 +33,33 @@ export {
 // ============================================================================
 
 export {
-  // Price Feeds
-  type ChainlinkPriceFeed,
-  type PriceFeedConfig,
-  CHAINLINK_PRICE_FEEDS,
-  getChainlinkPrice,
-  getChainlinkPrices,
-  // VRF (Verifiable Randomness)
-  type VRFRequestConfig,
-  type VRFRandomness,
-  CHAINLINK_VRF_CONFIG,
-  requestChainlinkVRF,
-  getVRFRandomness,
   // Chainlink Automation (Keepers)
   type AutomationRegistration,
   CHAINLINK_AUTOMATIONS,
-  registerChainlinkAutomation,
-  checkAutomationUpkeep,
-  // CCIP (Cross-Chain)
-  type CrossChainMessage,
-  sendCrossChainMessage,
-  receiveCrossChainMessage,
+  CHAINLINK_INTEGRATION_SUMMARY,
+  CHAINLINK_PRICE_FEEDS,
+  CHAINLINK_TRUST_METRICS,
+  CHAINLINK_VRF_CONFIG,
+  // Price Feeds
+  type ChainlinkPriceFeed,
   // Trust & Health
   type ChainlinkTrustMetrics,
-  CHAINLINK_TRUST_METRICS,
-  getChainlinkTrustMetrics,
+  // CCIP (Cross-Chain)
+  type CrossChainMessage,
+  checkAutomationUpkeep,
   checkChainlinkHealth,
+  getChainlinkPrice,
+  getChainlinkPrices,
+  getChainlinkTrustMetrics,
+  getVRFRandomness,
   // Initialization
   initializeChainlinkIntegration,
-  CHAINLINK_INTEGRATION_SUMMARY,
+  type PriceFeedConfig,
+  receiveCrossChainMessage,
+  registerChainlinkAutomation,
+  requestChainlinkVRF,
+  sendCrossChainMessage,
+  type VRFRandomness,
+  // VRF (Verifiable Randomness)
+  type VRFRequestConfig,
 } from "./chainlink-oracle";

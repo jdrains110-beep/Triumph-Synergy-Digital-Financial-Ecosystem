@@ -1,9 +1,9 @@
 /**
  * Triumph Synergy - Enterprise Travel Platform
- * 
+ *
  * Superior enterprise travel platform connecting TSA, global airports,
  * cruise lines, air taxis, and more with Pi Network payment integration
- * 
+ *
  * @module lib/travel/enterprise-travel-platform
  * @version 1.0.0
  */
@@ -15,8 +15,8 @@
 // Dual Pi Value System
 // Internally mined/contributed Pi = 1000x multiplier
 // External/non-contributed Pi = base rate
-const PI_EXTERNAL_RATE = 314.159;  // External non-contributed Pi
-const PI_INTERNAL_RATE = 314159;   // Internally mined/contributed Pi (1000x)
+const PI_EXTERNAL_RATE = 314.159; // External non-contributed Pi
+const PI_INTERNAL_RATE = 314_159; // Internally mined/contributed Pi (1000x)
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -25,11 +25,17 @@ export function getPiRate(type: PiValueType = "external"): number {
   return type === "internal" ? PI_INTERNAL_RATE : PI_EXTERNAL_RATE;
 }
 
-export function convertToPi(usdAmount: number, type: PiValueType = "external"): number {
+export function convertToPi(
+  usdAmount: number,
+  type: PiValueType = "external"
+): number {
   return usdAmount / getPiRate(type);
 }
 
-export function convertToUsd(piAmount: number, type: PiValueType = "external"): number {
+export function convertToUsd(
+  piAmount: number,
+  type: PiValueType = "external"
+): number {
   return piAmount * getPiRate(type);
 }
 
@@ -37,38 +43,38 @@ export function convertToUsd(piAmount: number, type: PiValueType = "external"): 
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface TravelBooking {
+export type TravelBooking = {
   id: string;
   userId: string;
   bookingType: BookingType;
   status: BookingStatus;
-  
+
   // Travel Details
   travelers: Traveler[];
   itinerary: Itinerary;
-  
+
   // Pricing
   pricing: TravelPricing;
-  
+
   // Documents
   documents: TravelDocument[];
-  
+
   // Loyalty
   loyaltyPointsEarned: number;
   loyaltyPointsRedeemed: number;
-  
+
   // Timestamps
   createdAt: Date;
   confirmedAt: Date | null;
   cancelledAt: Date | null;
-  
+
   // Metadata
   bookingReference: string;
   confirmationNumber: string | null;
   metadata: Record<string, unknown>;
-}
+};
 
-export type BookingType = 
+export type BookingType =
   | "flight"
   | "hotel"
   | "car-rental"
@@ -79,7 +85,7 @@ export type BookingType =
   | "vacation-package"
   | "experience";
 
-export type BookingStatus = 
+export type BookingStatus =
   | "pending"
   | "confirmed"
   | "ticketed"
@@ -88,10 +94,10 @@ export type BookingStatus =
   | "cancelled"
   | "refunded";
 
-export interface Traveler {
+export type Traveler = {
   id: string;
   type: "adult" | "child" | "infant";
-  
+
   // Personal Info
   firstName: string;
   middleName: string | null;
@@ -99,38 +105,38 @@ export interface Traveler {
   dateOfBirth: Date;
   gender: "male" | "female" | "other";
   nationality: string;
-  
+
   // Documents
   passportNumber: string | null;
   passportExpiry: Date | null;
   passportCountry: string | null;
-  
+
   // TSA Info
   tsaPreCheck: boolean;
   tsaKnownTravelerNumber: string | null;
   globalEntry: boolean;
   globalEntryNumber: string | null;
   clearMe: boolean;
-  
+
   // Contact
   email: string;
   phone: string;
-  
+
   // Preferences
   seatPreference: "window" | "aisle" | "middle" | "no-preference";
   mealPreference: string | null;
   specialAssistance: string[];
   frequentFlyerNumbers: FrequentFlyer[];
-}
+};
 
-export interface FrequentFlyer {
+export type FrequentFlyer = {
   airline: string;
   airlineCode: string;
   memberNumber: string;
   tier: string;
-}
+};
 
-export interface Itinerary {
+export type Itinerary = {
   id: string;
   segments: TravelSegment[];
   origin: Location;
@@ -138,47 +144,47 @@ export interface Itinerary {
   departureDate: Date;
   returnDate: Date | null;
   tripType: "one-way" | "round-trip" | "multi-city";
-}
+};
 
-export interface TravelSegment {
+export type TravelSegment = {
   id: string;
   segmentType: BookingType;
-  
+
   // Carrier Info
   carrier: Carrier;
-  
+
   // Route
   departure: SegmentPoint;
   arrival: SegmentPoint;
-  
+
   // Details
   classOfService: string;
   cabinClass: "economy" | "premium-economy" | "business" | "first";
-  
+
   // Status
   status: "scheduled" | "delayed" | "cancelled" | "completed";
-  
+
   // Extras
   baggageAllowance: BaggageAllowance;
   amenities: string[];
-}
+};
 
-export interface Carrier {
+export type Carrier = {
   code: string;
   name: string;
   type: "airline" | "cruise-line" | "air-taxi" | "train" | "bus" | "car-rental";
   logo: string | null;
   alliance: string | null;
-}
+};
 
-export interface SegmentPoint {
+export type SegmentPoint = {
   location: Location;
   dateTime: Date;
   terminal: string | null;
   gate: string | null;
-}
+};
 
-export interface Location {
+export type Location = {
   code: string;
   name: string;
   type: "airport" | "port" | "station" | "helipad" | "vertiport" | "address";
@@ -190,55 +196,62 @@ export interface Location {
     longitude: number;
   };
   timezone: string;
-}
+};
 
-export interface BaggageAllowance {
+export type BaggageAllowance = {
   carryOn: number;
   carryOnWeight: number;
   checkedBags: number;
   checkedBagWeight: number;
   personalItem: boolean;
-}
+};
 
-export interface TravelPricing {
+export type TravelPricing = {
   currency: string;
   baseFare: number;
   taxes: number;
   fees: number;
   total: number;
-  
+
   // Pi Network
   totalInPi: number;
   piDiscount: number;
-  
+
   // Breakdown
   fareBreakdown: FareBreakdown[];
-  
+
   // Payment
   paymentStatus: "unpaid" | "partial" | "paid" | "refunded";
   paymentMethod: "pi" | "usd" | "hybrid";
   piAmount: number;
   usdAmount: number;
-}
+};
 
-export interface FareBreakdown {
+export type FareBreakdown = {
   travelerType: "adult" | "child" | "infant";
   quantity: number;
   baseFare: number;
   taxes: number;
   fees: number;
   total: number;
-}
+};
 
-export interface TravelDocument {
+export type TravelDocument = {
   id: string;
-  type: "e-ticket" | "boarding-pass" | "hotel-voucher" | "cruise-ticket" | "car-voucher" | "invoice" | "receipt";
+  type:
+    | "e-ticket"
+    | "boarding-pass"
+    | "hotel-voucher"
+    | "cruise-ticket"
+    | "car-voucher"
+    | "invoice"
+    | "receipt";
   url: string;
   format: "pdf" | "pkpass" | "image";
   createdAt: Date;
-}
+};
 
-export interface Airport {
+export type Airport = {
   code: string;
   iata: string;
   icao: string;
@@ -246,161 +259,166 @@ export interface Airport {
   city: string;
   country: string;
   countryCode: string;
-  
+
   // Location
   coordinates: {
     latitude: number;
     longitude: number;
   };
-  
+
   // Details
   terminals: Terminal[];
   timezone: string;
   type: "international" | "domestic" | "regional";
-  
+
   // TSA
   tsaWaitTimes: TSAWaitTime[];
   tsaPreCheckAvailable: boolean;
   clearMeAvailable: boolean;
-  
+
   // Services
   lounges: AirportLounge[];
   services: string[];
-  
+
   // Airlines
   airlinesServed: string[];
-}
+};
 
-export interface Terminal {
+export type Terminal = {
   name: string;
   code: string;
   gates: string[];
   airlines: string[];
   amenities: string[];
-}
+};
 
-export interface TSAWaitTime {
+export type TSAWaitTime = {
   checkpoint: string;
   terminal: string;
   standard: number; // minutes
   preCheck: number; // minutes
   clear: number; // minutes
   lastUpdated: Date;
-}
+};
 
-export interface AirportLounge {
+export type AirportLounge = {
   name: string;
   terminal: string;
   operator: string;
-  accessTypes: ("membership" | "day-pass" | "class-of-service" | "credit-card")[];
+  accessTypes: (
+    | "membership"
+    | "day-pass"
+    | "class-of-service"
+    | "credit-card"
+  )[];
   amenities: string[];
   hours: string;
   dayPassPrice: number;
-}
+};
 
-export interface CruiseLine {
+export type CruiseLine = {
   id: string;
   name: string;
   code: string;
   logo: string;
-  
+
   // Fleet
   ships: CruiseShip[];
-  
+
   // Destinations
   destinations: string[];
   homeports: string[];
-  
+
   // Loyalty
   loyaltyProgram: string;
-  
+
   // Pi Integration
   acceptsPi: boolean;
   piDiscount: number;
-}
+};
 
-export interface CruiseShip {
+export type CruiseShip = {
   id: string;
   name: string;
   cruiseLineId: string;
-  
+
   // Specs
   passengerCapacity: number;
   crew: number;
   grossTonnage: number;
   yearBuilt: number;
   yearRefurbished: number | null;
-  
+
   // Amenities
   decks: number;
   restaurants: number;
   pools: number;
   amenities: string[];
-  
+
   // Cabins
   cabinCategories: CabinCategory[];
-}
+};
 
-export interface CabinCategory {
+export type CabinCategory = {
   code: string;
   name: string;
   type: "inside" | "oceanview" | "balcony" | "suite";
   squareFeet: number;
   maxOccupancy: number;
   amenities: string[];
-}
+};
 
-export interface CruiseItinerary {
+export type CruiseItinerary = {
   id: string;
   cruiseLineId: string;
   shipId: string;
-  
+
   // Route
   name: string;
   duration: number; // nights
   departurePort: string;
   arrivalPort: string;
   ports: CruisePort[];
-  
+
   // Dates
   sailDates: Date[];
-  
+
   // Pricing
   startingPrice: number;
   startingPriceInPi: number;
-}
+};
 
-export interface CruisePort {
+export type CruisePort = {
   port: Location;
   arrivalTime: string | null;
   departureTime: string | null;
   dayNumber: number;
   isSeaDay: boolean;
-}
+};
 
-export interface AirTaxiOperator {
+export type AirTaxiOperator = {
   id: string;
   name: string;
   code: string;
   type: "helicopter" | "evtol" | "seaplane" | "private-jet";
-  
+
   // Fleet
   aircraft: Aircraft[];
-  
+
   // Service Area
   serviceAreas: string[];
   vertiports: Vertiport[];
-  
+
   // Pi Integration
   acceptsPi: boolean;
   piDiscount: number;
-  
+
   // Booking
   minimumNotice: number; // hours
   cancellationPolicy: string;
-}
+};
 
-export interface Aircraft {
+export type Aircraft = {
   id: string;
   type: string;
   model: string;
@@ -408,9 +426,9 @@ export interface Aircraft {
   range: number; // miles
   cruiseSpeed: number; // mph
   amenities: string[];
-}
+};
 
-export interface Vertiport {
+export type Vertiport = {
   id: string;
   name: string;
   code: string;
@@ -418,9 +436,9 @@ export interface Vertiport {
   type: "helipad" | "vertiport" | "airport" | "marina";
   operatingHours: string;
   services: string[];
-}
+};
 
-export interface LoyaltyProgram {
+export type LoyaltyProgram = {
   id: string;
   userId: string;
   programName: string;
@@ -428,27 +446,31 @@ export interface LoyaltyProgram {
   tier: string;
   pointsBalance: number;
   milesBalance: number;
-  
+
   // Status
   qualifyingMiles: number;
   qualifyingSegments: number;
   qualifyingSpend: number;
-  
+
   // Benefits
   benefits: string[];
-  
+
   // Pi Integration
   piPointsEarned: number;
   piMilesEarned: number;
-}
+};
 
 // ============================================================================
 // TRAVEL AGENT HUB - SUBSCRIPTION & PARTNERSHIP SYSTEM
 // ============================================================================
 
-export type AgentSubscriptionTier = "starter" | "professional" | "enterprise" | "elite";
+export type AgentSubscriptionTier =
+  | "starter"
+  | "professional"
+  | "enterprise"
+  | "elite";
 export type AgentStatus = "pending" | "active" | "suspended" | "expired";
-export type AgentSpecialty = 
+export type AgentSpecialty =
   | "leisure"
   | "corporate"
   | "luxury"
@@ -462,23 +484,23 @@ export type AgentSpecialty =
   | "eco-tourism"
   | "cultural";
 
-export interface TravelAgent {
+export type TravelAgent = {
   id: string;
   userId: string;
-  
+
   // Profile
   agencyName: string;
   agentName: string;
   email: string;
   phone: string;
   website: string | null;
-  
+
   // Credentials
   iataNumber: string | null;
   arcNumber: string | null;
   cliaNumber: string | null;
   hostAgencyId: string | null;
-  
+
   // Location
   address: {
     street: string;
@@ -487,7 +509,7 @@ export interface TravelAgent {
     country: string;
     postalCode: string;
   };
-  
+
   // Subscription
   subscriptionTier: AgentSubscriptionTier;
   subscriptionStatus: AgentStatus;
@@ -495,12 +517,12 @@ export interface TravelAgent {
   subscriptionEndDate: Date;
   monthlyFee: number;
   monthlyFeeInPi: number;
-  
+
   // Commission Structure
   commissionRate: number;
   piCommissionBonus: number;
   overrideCommission: number;
-  
+
   // Performance
   totalBookings: number;
   totalRevenue: number;
@@ -508,69 +530,69 @@ export interface TravelAgent {
   totalPiEarned: number;
   averageBookingValue: number;
   clientSatisfactionScore: number;
-  
+
   // Clients
   clients: AgentClient[];
   totalClients: number;
   activeClients: number;
-  
+
   // Specialties
   specialties: AgentSpecialty[];
   certifications: AgentCertification[];
   preferredSuppliers: string[];
-  
+
   // Tools Access
   accessLevel: string[];
   apiAccess: boolean;
   whitelabelEnabled: boolean;
-  
+
   // Timestamps
   createdAt: Date;
   lastActiveAt: Date;
   verifiedAt: Date | null;
-}
+};
 
-export interface AgentClient {
+export type AgentClient = {
   id: string;
   agentId: string;
-  
+
   // Client Info
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  
+
   // Preferences
   preferredAirlines: string[];
   preferredHotels: string[];
   seatPreference: string;
   mealPreference: string;
-  
+
   // Loyalty
   loyaltyNumbers: Record<string, string>;
-  
+
   // History
   totalBookings: number;
   totalSpend: number;
   lastBookingDate: Date | null;
-  
+
   // Documents
   passportExpiry: Date | null;
   tsaPreCheckNumber: string | null;
   globalEntryNumber: string | null;
-  
-  createdAt: Date;
-}
 
-export interface AgentCertification {
+  createdAt: Date;
+};
+
+export type AgentCertification = {
   name: string;
   issuer: string;
   issuedAt: Date;
   expiresAt: Date | null;
   certificateNumber: string;
-}
+};
 
-export interface AgentSubscriptionPlan {
+export type AgentSubscriptionPlan = {
   tier: AgentSubscriptionTier;
   name: string;
   monthlyPrice: number;
@@ -584,20 +606,20 @@ export interface AgentSubscriptionPlan {
   apiAccess: boolean;
   whitelabelAccess: boolean;
   supportLevel: "email" | "priority" | "dedicated" | "24/7";
-}
+};
 
 // ============================================================================
 // ENTERPRISE TRAVEL PLATFORM CLASS
 // ============================================================================
 
 class EnterpriseTravelPlatform {
-  private bookings: Map<string, TravelBooking> = new Map();
-  private agents: Map<string, TravelAgent> = new Map();
-  private agentClients: Map<string, AgentClient> = new Map();
-  private airports: Map<string, Airport> = new Map();
-  private cruiseLines: Map<string, CruiseLine> = new Map();
-  private airTaxiOperators: Map<string, AirTaxiOperator> = new Map();
-  private loyaltyPrograms: Map<string, LoyaltyProgram> = new Map();
+  private readonly bookings: Map<string, TravelBooking> = new Map();
+  private readonly agents: Map<string, TravelAgent> = new Map();
+  private readonly agentClients: Map<string, AgentClient> = new Map();
+  private readonly airports: Map<string, Airport> = new Map();
+  private readonly cruiseLines: Map<string, CruiseLine> = new Map();
+  private readonly airTaxiOperators: Map<string, AirTaxiOperator> = new Map();
+  private readonly loyaltyPrograms: Map<string, LoyaltyProgram> = new Map();
 
   constructor() {
     this.initializeData();
@@ -606,10 +628,10 @@ class EnterpriseTravelPlatform {
   private initializeData(): void {
     // Initialize major airports
     this.initializeAirports();
-    
+
     // Initialize cruise lines
     this.initializeCruiseLines();
-    
+
     // Initialize air taxi operators
     this.initializeAirTaxiOperators();
   }
@@ -626,24 +648,82 @@ class EnterpriseTravelPlatform {
         countryCode: "US",
         coordinates: { latitude: 40.6413, longitude: -73.7781 },
         terminals: [
-          { name: "Terminal 1", code: "T1", gates: ["1-12"], airlines: ["Lufthansa", "Korean Air"], amenities: ["lounges", "shops", "restaurants"] },
-          { name: "Terminal 4", code: "T4", gates: ["A1-A12", "B20-B47"], airlines: ["Delta", "Emirates"], amenities: ["lounges", "shops", "restaurants", "spa"] },
-          { name: "Terminal 5", code: "T5", gates: ["1-31"], airlines: ["JetBlue"], amenities: ["shops", "restaurants"] },
-          { name: "Terminal 7", code: "T7", gates: ["1-12"], airlines: ["British Airways"], amenities: ["lounges", "shops"] },
-          { name: "Terminal 8", code: "T8", gates: ["1-50"], airlines: ["American Airlines"], amenities: ["lounges", "shops", "restaurants"] },
+          {
+            name: "Terminal 1",
+            code: "T1",
+            gates: ["1-12"],
+            airlines: ["Lufthansa", "Korean Air"],
+            amenities: ["lounges", "shops", "restaurants"],
+          },
+          {
+            name: "Terminal 4",
+            code: "T4",
+            gates: ["A1-A12", "B20-B47"],
+            airlines: ["Delta", "Emirates"],
+            amenities: ["lounges", "shops", "restaurants", "spa"],
+          },
+          {
+            name: "Terminal 5",
+            code: "T5",
+            gates: ["1-31"],
+            airlines: ["JetBlue"],
+            amenities: ["shops", "restaurants"],
+          },
+          {
+            name: "Terminal 7",
+            code: "T7",
+            gates: ["1-12"],
+            airlines: ["British Airways"],
+            amenities: ["lounges", "shops"],
+          },
+          {
+            name: "Terminal 8",
+            code: "T8",
+            gates: ["1-50"],
+            airlines: ["American Airlines"],
+            amenities: ["lounges", "shops", "restaurants"],
+          },
         ],
         timezone: "America/New_York",
         type: "international",
         tsaWaitTimes: [
-          { checkpoint: "Main", terminal: "T4", standard: 25, preCheck: 8, clear: 5, lastUpdated: new Date() },
+          {
+            checkpoint: "Main",
+            terminal: "T4",
+            standard: 25,
+            preCheck: 8,
+            clear: 5,
+            lastUpdated: new Date(),
+          },
         ],
         tsaPreCheckAvailable: true,
         clearMeAvailable: true,
         lounges: [
-          { name: "Delta Sky Club", terminal: "T4", operator: "Delta", accessTypes: ["membership", "class-of-service"], amenities: ["food", "drinks", "wifi", "showers"], hours: "5:00 AM - 11:00 PM", dayPassPrice: 59 },
+          {
+            name: "Delta Sky Club",
+            terminal: "T4",
+            operator: "Delta",
+            accessTypes: ["membership", "class-of-service"],
+            amenities: ["food", "drinks", "wifi", "showers"],
+            hours: "5:00 AM - 11:00 PM",
+            dayPassPrice: 59,
+          },
         ],
-        services: ["wifi", "currency-exchange", "medical", "lost-and-found", "pet-relief"],
-        airlinesServed: ["Delta", "American", "JetBlue", "United", "Emirates", "British Airways"],
+        services: [
+          "wifi",
+          "currency-exchange",
+          "medical",
+          "lost-and-found",
+          "pet-relief",
+        ],
+        airlinesServed: [
+          "Delta",
+          "American",
+          "JetBlue",
+          "United",
+          "Emirates",
+          "British Airways",
+        ],
       },
       {
         code: "LAX",
@@ -655,7 +735,13 @@ class EnterpriseTravelPlatform {
         countryCode: "US",
         coordinates: { latitude: 33.9425, longitude: -118.4081 },
         terminals: [
-          { name: "Tom Bradley International", code: "TBIT", gates: ["130-159"], airlines: ["International"], amenities: ["lounges", "shops", "restaurants"] },
+          {
+            name: "Tom Bradley International",
+            code: "TBIT",
+            gates: ["130-159"],
+            airlines: ["International"],
+            amenities: ["lounges", "shops", "restaurants"],
+          },
         ],
         timezone: "America/Los_Angeles",
         type: "international",
@@ -685,18 +771,59 @@ class EnterpriseTravelPlatform {
             cruiseLineId: "rcl",
             passengerCapacity: 6988,
             crew: 2300,
-            grossTonnage: 236857,
+            grossTonnage: 236_857,
             yearBuilt: 2022,
             yearRefurbished: null,
             decks: 18,
             restaurants: 20,
             pools: 4,
-            amenities: ["waterpark", "broadway-shows", "casino", "spa", "rock-climbing"],
+            amenities: [
+              "waterpark",
+              "broadway-shows",
+              "casino",
+              "spa",
+              "rock-climbing",
+            ],
             cabinCategories: [
-              { code: "IS", name: "Interior", type: "inside", squareFeet: 150, maxOccupancy: 4, amenities: ["tv", "safe", "bathroom"] },
-              { code: "OS", name: "Ocean View", type: "oceanview", squareFeet: 180, maxOccupancy: 4, amenities: ["tv", "safe", "bathroom", "window"] },
-              { code: "BC", name: "Balcony", type: "balcony", squareFeet: 200, maxOccupancy: 4, amenities: ["tv", "safe", "bathroom", "balcony"] },
-              { code: "SU", name: "Suite", type: "suite", squareFeet: 350, maxOccupancy: 6, amenities: ["tv", "safe", "bathroom", "balcony", "concierge", "priority-boarding"] },
+              {
+                code: "IS",
+                name: "Interior",
+                type: "inside",
+                squareFeet: 150,
+                maxOccupancy: 4,
+                amenities: ["tv", "safe", "bathroom"],
+              },
+              {
+                code: "OS",
+                name: "Ocean View",
+                type: "oceanview",
+                squareFeet: 180,
+                maxOccupancy: 4,
+                amenities: ["tv", "safe", "bathroom", "window"],
+              },
+              {
+                code: "BC",
+                name: "Balcony",
+                type: "balcony",
+                squareFeet: 200,
+                maxOccupancy: 4,
+                amenities: ["tv", "safe", "bathroom", "balcony"],
+              },
+              {
+                code: "SU",
+                name: "Suite",
+                type: "suite",
+                squareFeet: 350,
+                maxOccupancy: 6,
+                amenities: [
+                  "tv",
+                  "safe",
+                  "bathroom",
+                  "balcony",
+                  "concierge",
+                  "priority-boarding",
+                ],
+              },
             ],
           },
         ],
@@ -718,16 +845,36 @@ class EnterpriseTravelPlatform {
             cruiseLineId: "ccl",
             passengerCapacity: 5374,
             crew: 1735,
-            grossTonnage: 183521,
+            grossTonnage: 183_521,
             yearBuilt: 2022,
             yearRefurbished: null,
             decks: 17,
             restaurants: 15,
             pools: 3,
-            amenities: ["waterslides", "casino", "spa", "comedy-club", "roller-coaster"],
+            amenities: [
+              "waterslides",
+              "casino",
+              "spa",
+              "comedy-club",
+              "roller-coaster",
+            ],
             cabinCategories: [
-              { code: "IS", name: "Interior", type: "inside", squareFeet: 145, maxOccupancy: 4, amenities: ["tv", "safe", "bathroom"] },
-              { code: "BC", name: "Balcony", type: "balcony", squareFeet: 185, maxOccupancy: 4, amenities: ["tv", "safe", "bathroom", "balcony"] },
+              {
+                code: "IS",
+                name: "Interior",
+                type: "inside",
+                squareFeet: 145,
+                maxOccupancy: 4,
+                amenities: ["tv", "safe", "bathroom"],
+              },
+              {
+                code: "BC",
+                name: "Balcony",
+                type: "balcony",
+                squareFeet: 185,
+                maxOccupancy: 4,
+                amenities: ["tv", "safe", "bathroom", "balcony"],
+              },
             ],
           },
         ],
@@ -750,18 +897,69 @@ class EnterpriseTravelPlatform {
         code: "BLADE",
         type: "helicopter",
         aircraft: [
-          { id: "bell429", type: "helicopter", model: "Bell 429", capacity: 6, range: 411, cruiseSpeed: 161, amenities: ["leather-seats", "noise-cancelling"] },
-          { id: "airbus135", type: "helicopter", model: "Airbus H135", capacity: 5, range: 380, cruiseSpeed: 155, amenities: ["leather-seats", "panoramic-windows"] },
+          {
+            id: "bell429",
+            type: "helicopter",
+            model: "Bell 429",
+            capacity: 6,
+            range: 411,
+            cruiseSpeed: 161,
+            amenities: ["leather-seats", "noise-cancelling"],
+          },
+          {
+            id: "airbus135",
+            type: "helicopter",
+            model: "Airbus H135",
+            capacity: 5,
+            range: 380,
+            cruiseSpeed: 155,
+            amenities: ["leather-seats", "panoramic-windows"],
+          },
         ],
         serviceAreas: ["New York", "Los Angeles", "Miami", "Hamptons"],
         vertiports: [
-          { id: "jfk-blade", name: "BLADE Lounge JFK", code: "JFK-BL", location: { code: "JFK", name: "JFK Airport", type: "airport", city: "New York", country: "United States", countryCode: "US", coordinates: { latitude: 40.6413, longitude: -73.7781 }, timezone: "America/New_York" }, type: "helipad", operatingHours: "6AM-10PM", services: ["lounge", "valet", "refreshments"] },
-          { id: "manhattan-west30", name: "West 30th Street Heliport", code: "W30", location: { code: "W30", name: "West 30th St Heliport", type: "helipad", city: "New York", country: "United States", countryCode: "US", coordinates: { latitude: 40.7549, longitude: -74.0074 }, timezone: "America/New_York" }, type: "helipad", operatingHours: "7AM-7PM", services: ["lounge"] },
+          {
+            id: "jfk-blade",
+            name: "BLADE Lounge JFK",
+            code: "JFK-BL",
+            location: {
+              code: "JFK",
+              name: "JFK Airport",
+              type: "airport",
+              city: "New York",
+              country: "United States",
+              countryCode: "US",
+              coordinates: { latitude: 40.6413, longitude: -73.7781 },
+              timezone: "America/New_York",
+            },
+            type: "helipad",
+            operatingHours: "6AM-10PM",
+            services: ["lounge", "valet", "refreshments"],
+          },
+          {
+            id: "manhattan-west30",
+            name: "West 30th Street Heliport",
+            code: "W30",
+            location: {
+              code: "W30",
+              name: "West 30th St Heliport",
+              type: "helipad",
+              city: "New York",
+              country: "United States",
+              countryCode: "US",
+              coordinates: { latitude: 40.7549, longitude: -74.0074 },
+              timezone: "America/New_York",
+            },
+            type: "helipad",
+            operatingHours: "7AM-7PM",
+            services: ["lounge"],
+          },
         ],
         acceptsPi: true,
-        piDiscount: 0.10,
+        piDiscount: 0.1,
         minimumNotice: 2,
-        cancellationPolicy: "Full refund if cancelled 24 hours before departure",
+        cancellationPolicy:
+          "Full refund if cancelled 24 hours before departure",
       },
       {
         id: "joby",
@@ -769,16 +967,42 @@ class EnterpriseTravelPlatform {
         code: "JOBY",
         type: "evtol",
         aircraft: [
-          { id: "joby-s4", type: "evtol", model: "Joby S4", capacity: 4, range: 150, cruiseSpeed: 200, amenities: ["quiet-flight", "panoramic-views", "climate-control"] },
+          {
+            id: "joby-s4",
+            type: "evtol",
+            model: "Joby S4",
+            capacity: 4,
+            range: 150,
+            cruiseSpeed: 200,
+            amenities: ["quiet-flight", "panoramic-views", "climate-control"],
+          },
         ],
         serviceAreas: ["Los Angeles", "San Francisco", "New York"],
         vertiports: [
-          { id: "lax-joby", name: "LAX Vertiport", code: "LAX-V", location: { code: "LAX", name: "LAX Vertiport", type: "vertiport", city: "Los Angeles", country: "United States", countryCode: "US", coordinates: { latitude: 33.9425, longitude: -118.4081 }, timezone: "America/Los_Angeles" }, type: "vertiport", operatingHours: "6AM-10PM", services: ["lounge", "charging"] },
+          {
+            id: "lax-joby",
+            name: "LAX Vertiport",
+            code: "LAX-V",
+            location: {
+              code: "LAX",
+              name: "LAX Vertiport",
+              type: "vertiport",
+              city: "Los Angeles",
+              country: "United States",
+              countryCode: "US",
+              coordinates: { latitude: 33.9425, longitude: -118.4081 },
+              timezone: "America/Los_Angeles",
+            },
+            type: "vertiport",
+            operatingHours: "6AM-10PM",
+            services: ["lounge", "charging"],
+          },
         ],
         acceptsPi: true,
         piDiscount: 0.15,
         minimumNotice: 1,
-        cancellationPolicy: "Full refund if cancelled 12 hours before departure",
+        cancellationPolicy:
+          "Full refund if cancelled 12 hours before departure",
       },
     ];
 
@@ -802,7 +1026,10 @@ class EnterpriseTravelPlatform {
     const bookingReference = `TST${Date.now().toString().slice(-8)}`;
 
     // Calculate pricing
-    const baseFare = this.calculateBaseFare(bookingData.itinerary, bookingData.travelers.length);
+    const baseFare = this.calculateBaseFare(
+      bookingData.itinerary,
+      bookingData.travelers.length
+    );
     const taxes = baseFare * 0.12;
     const fees = baseFare * 0.05;
     const total = baseFare + taxes + fees;
@@ -829,8 +1056,12 @@ class EnterpriseTravelPlatform {
       })),
       paymentStatus: "unpaid",
       paymentMethod: bookingData.paymentMethod,
-      piAmount: bookingData.piAmount || (bookingData.paymentMethod === "pi" ? totalInPi : 0),
-      usdAmount: bookingData.usdAmount || (bookingData.paymentMethod === "usd" ? totalAfterDiscount : 0),
+      piAmount:
+        bookingData.piAmount ||
+        (bookingData.paymentMethod === "pi" ? totalInPi : 0),
+      usdAmount:
+        bookingData.usdAmount ||
+        (bookingData.paymentMethod === "usd" ? totalAfterDiscount : 0),
     };
 
     const booking: TravelBooking = {
@@ -856,7 +1087,10 @@ class EnterpriseTravelPlatform {
     return booking;
   }
 
-  private calculateBaseFare(itinerary: Itinerary, travelerCount: number): number {
+  private calculateBaseFare(
+    itinerary: Itinerary,
+    travelerCount: number
+  ): number {
     // Base calculation
     let baseFare = 250; // Base per segment
 
@@ -902,7 +1136,10 @@ class EnterpriseTravelPlatform {
     return booking;
   }
 
-  async cancelBooking(bookingId: string, reason?: string): Promise<TravelBooking> {
+  async cancelBooking(
+    bookingId: string,
+    reason?: string
+  ): Promise<TravelBooking> {
     const booking = this.bookings.get(bookingId);
     if (!booking) {
       throw new Error("Booking not found");
@@ -984,7 +1221,9 @@ class EnterpriseTravelPlatform {
     const itineraries: CruiseItinerary[] = [];
 
     for (const line of cruiseLines) {
-      if (filters.cruiseLineId && line.id !== filters.cruiseLineId) continue;
+      if (filters.cruiseLineId && line.id !== filters.cruiseLineId) {
+        continue;
+      }
 
       // Generate sample itineraries
       for (const ship of line.ships) {
@@ -998,14 +1237,32 @@ class EnterpriseTravelPlatform {
           arrivalPort: filters.departurePort || "Miami",
           ports: [
             {
-              port: { code: "MIA", name: "Miami", type: "port", city: "Miami", country: "United States", countryCode: "US", coordinates: { latitude: 25.7617, longitude: -80.1918 }, timezone: "America/New_York" },
+              port: {
+                code: "MIA",
+                name: "Miami",
+                type: "port",
+                city: "Miami",
+                country: "United States",
+                countryCode: "US",
+                coordinates: { latitude: 25.7617, longitude: -80.1918 },
+                timezone: "America/New_York",
+              },
               arrivalTime: null,
               departureTime: "5:00 PM",
               dayNumber: 1,
               isSeaDay: false,
             },
             {
-              port: { code: "CZM", name: "Cozumel", type: "port", city: "Cozumel", country: "Mexico", countryCode: "MX", coordinates: { latitude: 20.4318, longitude: -86.9203 }, timezone: "America/Cancun" },
+              port: {
+                code: "CZM",
+                name: "Cozumel",
+                type: "port",
+                city: "Cozumel",
+                country: "Mexico",
+                countryCode: "MX",
+                coordinates: { latitude: 20.4318, longitude: -86.9203 },
+                timezone: "America/Cancun",
+              },
               arrivalTime: "8:00 AM",
               departureTime: "5:00 PM",
               dayNumber: 3,
@@ -1038,13 +1295,18 @@ class EnterpriseTravelPlatform {
     return Array.from(this.airTaxiOperators.values());
   }
 
-  async searchAirTaxiRoutes(origin: string, destination: string): Promise<{
-    operator: AirTaxiOperator;
-    aircraft: Aircraft;
-    estimatedDuration: number;
-    estimatedPrice: number;
-    estimatedPriceInPi: number;
-  }[]> {
+  async searchAirTaxiRoutes(
+    origin: string,
+    destination: string
+  ): Promise<
+    {
+      operator: AirTaxiOperator;
+      aircraft: Aircraft;
+      estimatedDuration: number;
+      estimatedPrice: number;
+      estimatedPriceInPi: number;
+    }[]
+  > {
     const results = [];
 
     for (const operator of this.airTaxiOperators.values()) {
@@ -1052,7 +1314,8 @@ class EnterpriseTravelPlatform {
         const estimatedDuration = 30; // Simplified
         const estimatedPrice = 495;
         const discount = operator.acceptsPi ? operator.piDiscount : 0;
-        const estimatedPriceInPi = (estimatedPrice * (1 - discount)) / PI_EXTERNAL_RATE;
+        const estimatedPriceInPi =
+          (estimatedPrice * (1 - discount)) / PI_EXTERNAL_RATE;
 
         results.push({
           operator,
@@ -1156,7 +1419,7 @@ class EnterpriseTravelPlatform {
         monthlyPriceInPi: 149 / PI_EXTERNAL_RATE,
         annualPrice: 1430,
         annualPriceInPi: 1430 / PI_EXTERNAL_RATE,
-        commissionRate: 0.10,
+        commissionRate: 0.1,
         piBonus: 0.03,
         features: [
           "All Starter features",
@@ -1299,7 +1562,9 @@ class EnterpriseTravelPlatform {
   }
 
   async getAgentByUserId(userId: string): Promise<TravelAgent | null> {
-    return Array.from(this.agents.values()).find((a) => a.userId === userId) || null;
+    return (
+      Array.from(this.agents.values()).find((a) => a.userId === userId) || null
+    );
   }
 
   async listAgents(filters?: {
@@ -1322,19 +1587,22 @@ class EnterpriseTravelPlatform {
     return agents;
   }
 
-  async addAgentClient(agentId: string, clientData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    preferredAirlines?: string[];
-    preferredHotels?: string[];
-    seatPreference?: string;
-    mealPreference?: string;
-    passportExpiry?: Date;
-    tsaPreCheckNumber?: string;
-    globalEntryNumber?: string;
-  }): Promise<AgentClient> {
+  async addAgentClient(
+    agentId: string,
+    clientData: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+      preferredAirlines?: string[];
+      preferredHotels?: string[];
+      seatPreference?: string;
+      mealPreference?: string;
+      passportExpiry?: Date;
+      tsaPreCheckNumber?: string;
+      globalEntryNumber?: string;
+    }
+  ): Promise<AgentClient> {
     const agent = this.agents.get(agentId);
     if (!agent) {
       throw new Error("Agent not found");
@@ -1376,21 +1644,24 @@ class EnterpriseTravelPlatform {
     return agent?.clients || [];
   }
 
-  async recordAgentBooking(agentId: string, bookingData: {
-    bookingId: string;
-    bookingValue: number;
-    paidWithPi: boolean;
-    piAmount?: number;
-    clientId?: string;
-  }): Promise<{ commission: number; piBonus: number }> {
+  async recordAgentBooking(
+    agentId: string,
+    bookingData: {
+      bookingId: string;
+      bookingValue: number;
+      paidWithPi: boolean;
+      piAmount?: number;
+      clientId?: string;
+    }
+  ): Promise<{ commission: number; piBonus: number }> {
     const agent = this.agents.get(agentId);
     if (!agent) {
       throw new Error("Agent not found");
     }
 
     const commission = bookingData.bookingValue * agent.commissionRate;
-    const piBonus = bookingData.paidWithPi 
-      ? bookingData.bookingValue * agent.piCommissionBonus 
+    const piBonus = bookingData.paidWithPi
+      ? bookingData.bookingValue * agent.piCommissionBonus
       : 0;
 
     agent.totalBookings += 1;
@@ -1412,7 +1683,10 @@ class EnterpriseTravelPlatform {
     return { commission, piBonus };
   }
 
-  async upgradeAgentSubscription(agentId: string, newTier: AgentSubscriptionTier): Promise<TravelAgent> {
+  async upgradeAgentSubscription(
+    agentId: string,
+    newTier: AgentSubscriptionTier
+  ): Promise<TravelAgent> {
     const agent = this.agents.get(agentId);
     if (!agent) {
       throw new Error("Agent not found");
@@ -1464,7 +1738,9 @@ class EnterpriseTravelPlatform {
       },
       clientGrowth: agent.totalClients,
       upcomingRenewals: agent.clients.filter(
-        (c) => c.passportExpiry && c.passportExpiry < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+        (c) =>
+          c.passportExpiry &&
+          c.passportExpiry < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
       ),
     };
   }
@@ -1493,7 +1769,11 @@ class EnterpriseTravelPlatform {
     return usdAmount / getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,
@@ -1509,11 +1789,15 @@ class EnterpriseTravelPlatform {
 export const enterpriseTravelPlatform = new EnterpriseTravelPlatform();
 
 // Export helper functions
-export async function createTravelBooking(data: Parameters<typeof enterpriseTravelPlatform.createBooking>[0]): Promise<TravelBooking> {
+export async function createTravelBooking(
+  data: Parameters<typeof enterpriseTravelPlatform.createBooking>[0]
+): Promise<TravelBooking> {
   return enterpriseTravelPlatform.createBooking(data);
 }
 
-export async function confirmTravelBooking(bookingId: string): Promise<TravelBooking> {
+export async function confirmTravelBooking(
+  bookingId: string
+): Promise<TravelBooking> {
   return enterpriseTravelPlatform.confirmBooking(bookingId);
 }
 
@@ -1521,10 +1805,15 @@ export async function searchAirports(query: string): Promise<Airport[]> {
   return enterpriseTravelPlatform.searchAirports(query);
 }
 
-export async function searchCruises(filters: Parameters<typeof enterpriseTravelPlatform.searchCruises>[0]): Promise<CruiseItinerary[]> {
+export async function searchCruises(
+  filters: Parameters<typeof enterpriseTravelPlatform.searchCruises>[0]
+): Promise<CruiseItinerary[]> {
   return enterpriseTravelPlatform.searchCruises(filters);
 }
 
-export async function searchAirTaxis(origin: string, destination: string): ReturnType<typeof enterpriseTravelPlatform.searchAirTaxiRoutes> {
+export async function searchAirTaxis(
+  origin: string,
+  destination: string
+): ReturnType<typeof enterpriseTravelPlatform.searchAirTaxiRoutes> {
   return enterpriseTravelPlatform.searchAirTaxiRoutes(origin, destination);
 }

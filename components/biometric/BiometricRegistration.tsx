@@ -176,11 +176,15 @@ export function BiometricRegistration({
           </div>
 
           <div>
-            <label className="mb-2 block font-medium text-gray-700 text-sm">
+            <label
+              className="mb-2 block font-medium text-gray-700 text-sm"
+              htmlFor="credential-name-input"
+            >
               Credential Name (Optional)
             </label>
             <input
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              id="credential-name-input"
               onChange={(e) => setCredentialName(e.target.value)}
               placeholder="e.g., iPhone Face ID"
               type="text"

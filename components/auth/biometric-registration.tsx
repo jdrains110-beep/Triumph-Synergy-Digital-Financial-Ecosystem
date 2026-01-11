@@ -126,11 +126,12 @@ export function BiometricRegistration() {
           )}
 
           <div className="space-y-2">
-            <label className="font-medium text-sm">
+            <label className="font-medium text-sm" htmlFor="credential-name">
               Credential Name (Optional)
             </label>
             <Input
               disabled={isRegistering || registrationStep !== "idle"}
+              id="credential-name"
               onChange={(e) => setCredentialName(e.target.value)}
               placeholder="e.g., iPhone Face ID, Windows Hello"
               value={credentialName}

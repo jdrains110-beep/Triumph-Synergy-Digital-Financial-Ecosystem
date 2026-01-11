@@ -1,19 +1,24 @@
 /**
  * INGREDIENT VERIFICATION ENGINE
- * 
+ *
  * NO EXCEPTIONS: Zero tolerance for harmful substances
  * - NO silicon dioxide (silica) in any food/drink products
  * - NO aluminum in any food/drink products
  * - NO harmful dyes (synthetic, artificial)
  * - NO carcinogenic or cancer-causing ingredients
- * 
+ *
  * Every ingredient verified, tracked, and approved before use.
  * Complete supply chain for each ingredient from source to product.
  */
 
-export type IngredientStatus = 'approved' | 'pending_review' | 'flagged' | 'banned' | 'quarantined';
+export type IngredientStatus =
+  | "approved"
+  | "pending_review"
+  | "flagged"
+  | "banned"
+  | "quarantined";
 
-export interface IngredientRecord {
+export type IngredientRecord = {
   ingredientId: string;
   name: string;
   supplier: string;
@@ -29,42 +34,55 @@ export interface IngredientRecord {
     testsConducted: string[];
     results: IngredientTestResult[];
   };
-}
+};
 
-export interface IngredientTestResult {
+export type IngredientTestResult = {
   testId: string;
-  testType: 'pesticide' | 'heavy_metals' | 'synthetic_dyes' | 'carcinogens' | 'bacterial' | 'viral' | 'contaminants' | 'purity';
+  testType:
+    | "pesticide"
+    | "heavy_metals"
+    | "synthetic_dyes"
+    | "carcinogens"
+    | "bacterial"
+    | "viral"
+    | "contaminants"
+    | "purity";
   parameter: string;
   value: number;
   unit: string;
   safeLimit: number;
-  result: 'pass' | 'fail' | 'flag_for_review';
+  result: "pass" | "fail" | "flag_for_review";
   testDate: Date;
   verifiedBy: string;
-}
+};
 
-export interface BannedSubstanceList {
+export type BannedSubstanceList = {
   substanceId: string;
   commonName: string;
   scientificName: string;
-  category: 'silicon_dioxide' | 'aluminum_compound' | 'synthetic_dye' | 'carcinogen' | 'toxin';
+  category:
+    | "silicon_dioxide"
+    | "aluminum_compound"
+    | "synthetic_dye"
+    | "carcinogen"
+    | "toxin";
   reason: string;
   allowedInProducts: string[];
   allowedInDrinks: string[];
-  status: 'banned' | 'restricted' | 'under_review';
-}
+  status: "banned" | "restricted" | "under_review";
+};
 
-export interface ProductFormulation {
+export type ProductFormulation = {
   productId: string;
   productName: string;
-  category: 'food' | 'drink' | 'beverage' | 'supplement';
+  category: "food" | "drink" | "beverage" | "supplement";
   ingredients: Array<{
     ingredientId: string;
     ingredientName: string;
     percentageByWeight: number;
     supplier: string;
     batch: string;
-    verificationStatus: 'verified' | 'pending';
+    verificationStatus: "verified" | "pending";
   }>;
   formulation: {
     developedDate: Date;
@@ -75,40 +93,44 @@ export interface ProductFormulation {
   qualityChecks: Array<{
     checkDate: Date;
     checkType: string;
-    result: 'pass' | 'fail';
+    result: "pass" | "fail";
     notes: string;
   }>;
-}
+};
 
-export interface SupplierVerification {
+export type SupplierVerification = {
   supplierId: string;
   supplierName: string;
   location: string;
   certifications: string[];
   auditHistory: Array<{
     auditDate: Date;
-    auditType: 'initial' | 'annual' | 'follow_up' | 'surprise_inspection';
-    result: 'compliant' | 'minor_issues' | 'major_issues';
+    auditType: "initial" | "annual" | "follow_up" | "surprise_inspection";
+    result: "compliant" | "minor_issues" | "major_issues";
     findings: string[];
     correctionDate?: Date;
   }>;
   banned: boolean;
   banReason?: string;
-}
+};
 
 /**
  * INGREDIENT VERIFICATION ENGINE
- * 
+ *
  * Comprehensive ingredient validation system ensuring zero harmful substances
  */
 export class IngredientVerificationEngine {
   private static instance: IngredientVerificationEngine;
-  private ingredients: Map<string, IngredientRecord> = new Map();
-  private bannedSubstances: Map<string, BannedSubstanceList> = new Map();
-  private productFormulations: Map<string, ProductFormulation> = new Map();
-  private supplierVerifications: Map<string, SupplierVerification> = new Map();
-  private rejectedIngredients: Map<string, IngredientRecord> = new Map();
-  private auditTrail: Array<{
+  private readonly ingredients: Map<string, IngredientRecord> = new Map();
+  private readonly bannedSubstances: Map<string, BannedSubstanceList> =
+    new Map();
+  private readonly productFormulations: Map<string, ProductFormulation> =
+    new Map();
+  private readonly supplierVerifications: Map<string, SupplierVerification> =
+    new Map();
+  private readonly rejectedIngredients: Map<string, IngredientRecord> =
+    new Map();
+  private readonly auditTrail: Array<{
     timestamp: Date;
     action: string;
     ingredientId?: string;
@@ -121,7 +143,8 @@ export class IngredientVerificationEngine {
 
   static getInstance(): IngredientVerificationEngine {
     if (!IngredientVerificationEngine.instance) {
-      IngredientVerificationEngine.instance = new IngredientVerificationEngine();
+      IngredientVerificationEngine.instance =
+        new IngredientVerificationEngine();
     }
     return IngredientVerificationEngine.instance;
   }
@@ -131,111 +154,118 @@ export class IngredientVerificationEngine {
    */
   private initializeBannedSubstances(): void {
     // SILICON DIOXIDE - BAN IN FOOD/DRINK
-    this.bannedSubstances.set('silicon_dioxide', {
-      substanceId: 'sd_001',
-      commonName: 'Silicon Dioxide',
-      scientificName: 'SiO2',
-      category: 'silicon_dioxide',
-      reason: 'Harmful when ingested. Accumulates in body tissues. Associated with lung damage and autoimmune disorders.',
+    this.bannedSubstances.set("silicon_dioxide", {
+      substanceId: "sd_001",
+      commonName: "Silicon Dioxide",
+      scientificName: "SiO2",
+      category: "silicon_dioxide",
+      reason:
+        "Harmful when ingested. Accumulates in body tissues. Associated with lung damage and autoimmune disorders.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
     // ALUMINUM COMPOUNDS - BAN IN FOOD/DRINK
-    this.bannedSubstances.set('aluminum_hydroxide', {
-      substanceId: 'al_001',
-      commonName: 'Aluminum Hydroxide',
-      scientificName: 'Al(OH)3',
-      category: 'aluminum_compound',
-      reason: 'Neurotoxic. Associated with Alzheimer\'s and neurological disorders. Bioaccumulates.',
+    this.bannedSubstances.set("aluminum_hydroxide", {
+      substanceId: "al_001",
+      commonName: "Aluminum Hydroxide",
+      scientificName: "Al(OH)3",
+      category: "aluminum_compound",
+      reason:
+        "Neurotoxic. Associated with Alzheimer's and neurological disorders. Bioaccumulates.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
-    this.bannedSubstances.set('aluminum_silicate', {
-      substanceId: 'al_002',
-      commonName: 'Aluminum Silicate',
-      scientificName: 'Al2SiO5',
-      category: 'aluminum_compound',
-      reason: 'Toxic combination of aluminum and silica. Respiratory hazard.',
+    this.bannedSubstances.set("aluminum_silicate", {
+      substanceId: "al_002",
+      commonName: "Aluminum Silicate",
+      scientificName: "Al2SiO5",
+      category: "aluminum_compound",
+      reason: "Toxic combination of aluminum and silica. Respiratory hazard.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
     // SYNTHETIC DYES - BAN IN FOOD/DRINK
-    this.bannedSubstances.set('tartrazine', {
-      substanceId: 'dye_001',
-      commonName: 'Tartrazine',
-      scientificName: 'FD&C Yellow No. 5',
-      category: 'synthetic_dye',
-      reason: 'Synthetic dye. Causes allergic reactions and hyperactivity in children. Not naturally derived.',
+    this.bannedSubstances.set("tartrazine", {
+      substanceId: "dye_001",
+      commonName: "Tartrazine",
+      scientificName: "FD&C Yellow No. 5",
+      category: "synthetic_dye",
+      reason:
+        "Synthetic dye. Causes allergic reactions and hyperactivity in children. Not naturally derived.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
-    this.bannedSubstances.set('sunset_yellow', {
-      substanceId: 'dye_002',
-      commonName: 'Sunset Yellow',
-      scientificName: 'FD&C Yellow No. 6',
-      category: 'synthetic_dye',
-      reason: 'Synthetic dye. Potential carcinogen. Causes adverse reactions.',
+    this.bannedSubstances.set("sunset_yellow", {
+      substanceId: "dye_002",
+      commonName: "Sunset Yellow",
+      scientificName: "FD&C Yellow No. 6",
+      category: "synthetic_dye",
+      reason: "Synthetic dye. Potential carcinogen. Causes adverse reactions.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
-    this.bannedSubstances.set('allura_red', {
-      substanceId: 'dye_003',
-      commonName: 'Allura Red',
-      scientificName: 'FD&C Red No. 40',
-      category: 'synthetic_dye',
-      reason: 'Synthetic dye. Linked to cancer in animal studies. Banned in some countries.',
+    this.bannedSubstances.set("allura_red", {
+      substanceId: "dye_003",
+      commonName: "Allura Red",
+      scientificName: "FD&C Red No. 40",
+      category: "synthetic_dye",
+      reason:
+        "Synthetic dye. Linked to cancer in animal studies. Banned in some countries.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
     // CARCINOGENS - BAN ABSOLUTELY
-    this.bannedSubstances.set('bpa', {
-      substanceId: 'carc_001',
-      commonName: 'Bisphenol A (BPA)',
-      scientificName: 'BPA',
-      category: 'carcinogen',
-      reason: 'Endocrine disruptor. Carcinogenic. Bioaccumulates in fatty tissue.',
+    this.bannedSubstances.set("bpa", {
+      substanceId: "carc_001",
+      commonName: "Bisphenol A (BPA)",
+      scientificName: "BPA",
+      category: "carcinogen",
+      reason:
+        "Endocrine disruptor. Carcinogenic. Bioaccumulates in fatty tissue.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
-    this.bannedSubstances.set('artificial_sweeteners', {
-      substanceId: 'carc_002',
-      commonName: 'Certain Artificial Sweeteners',
-      scientificName: 'Aspartame, Saccharin, Sucralose',
-      category: 'carcinogen',
-      reason: 'Potential carcinogens with concerning animal study results. Metabolized into toxic compounds.',
+    this.bannedSubstances.set("artificial_sweeteners", {
+      substanceId: "carc_002",
+      commonName: "Certain Artificial Sweeteners",
+      scientificName: "Aspartame, Saccharin, Sucralose",
+      category: "carcinogen",
+      reason:
+        "Potential carcinogens with concerning animal study results. Metabolized into toxic compounds.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
-    this.bannedSubstances.set('brominated_vegetable_oil', {
-      substanceId: 'carc_003',
-      commonName: 'Brominated Vegetable Oil',
-      scientificName: 'BVO',
-      category: 'carcinogen',
-      reason: 'Neurotoxic. Bioaccumulates in body. Linked to cancer.',
+    this.bannedSubstances.set("brominated_vegetable_oil", {
+      substanceId: "carc_003",
+      commonName: "Brominated Vegetable Oil",
+      scientificName: "BVO",
+      category: "carcinogen",
+      reason: "Neurotoxic. Bioaccumulates in body. Linked to cancer.",
       allowedInProducts: [],
       allowedInDrinks: [],
-      status: 'banned'
+      status: "banned",
     });
 
     this.auditTrail.push({
       timestamp: new Date(),
-      action: 'Initialized banned substances database with zero-tolerance policy'
+      action:
+        "Initialized banned substances database with zero-tolerance policy",
     });
   }
 
@@ -244,13 +274,19 @@ export class IngredientVerificationEngine {
    */
   async registerSupplier(supplier: SupplierVerification): Promise<string> {
     // Verify supplier certifications
-    const requiredCerts = ['organic_certified', 'food_safety_certified', 'pesticide_free_verification'];
-    const hasCerts = requiredCerts.some(cert =>
-      supplier.certifications.some(s => s.includes(cert))
+    const requiredCerts = [
+      "organic_certified",
+      "food_safety_certified",
+      "pesticide_free_verification",
+    ];
+    const hasCerts = requiredCerts.some((cert) =>
+      supplier.certifications.some((s) => s.includes(cert))
     );
 
     if (!hasCerts) {
-      throw new Error(`INGREDIENT VERIFICATION FAILED: Supplier ${supplier.supplierName} lacks required certifications`);
+      throw new Error(
+        `INGREDIENT VERIFICATION FAILED: Supplier ${supplier.supplierName} lacks required certifications`
+      );
     }
 
     this.supplierVerifications.set(supplier.supplierId, supplier);
@@ -267,32 +303,40 @@ export class IngredientVerificationEngine {
    * Verify ingredient batch - comprehensive testing
    * NO EXCEPTIONS: Must pass all safety tests
    */
-  async verifyIngredientBatch(ingredient: IngredientRecord): Promise<'approved' | 'rejected'> {
+  async verifyIngredientBatch(
+    ingredient: IngredientRecord
+  ): Promise<"approved" | "rejected"> {
     // Check all test results against banned substances
     for (const testResult of ingredient.testing.results) {
       // Check for ANY presence of banned substances
-      const bannedSubstance = this.checkForBannedSubstances(testResult.parameter);
+      const bannedSubstance = this.checkForBannedSubstances(
+        testResult.parameter
+      );
       if (bannedSubstance) {
         this.rejectedIngredients.set(ingredient.ingredientId, ingredient);
         this.auditTrail.push({
           timestamp: new Date(),
-          action: `REJECTED ingredient batch`,
+          action: "REJECTED ingredient batch",
           ingredientId: ingredient.ingredientId,
-          reason: `Contains banned substance: ${bannedSubstance.commonName}`
+          reason: `Contains banned substance: ${bannedSubstance.commonName}`,
         });
-        throw new Error(`INGREDIENT VERIFICATION FAILED: Batch contains ${bannedSubstance.commonName}`);
+        throw new Error(
+          `INGREDIENT VERIFICATION FAILED: Batch contains ${bannedSubstance.commonName}`
+        );
       }
 
       // Verify test result passed safe limits
-      if (testResult.result === 'fail') {
+      if (testResult.result === "fail") {
         this.rejectedIngredients.set(ingredient.ingredientId, ingredient);
         this.auditTrail.push({
           timestamp: new Date(),
-          action: `REJECTED ingredient batch`,
+          action: "REJECTED ingredient batch",
           ingredientId: ingredient.ingredientId,
-          reason: `Test failed: ${testResult.testType} - ${testResult.parameter}`
+          reason: `Test failed: ${testResult.testType} - ${testResult.parameter}`,
         });
-        throw new Error(`INGREDIENT VERIFICATION FAILED: ${testResult.testType} test failed for ${ingredient.name}`);
+        throw new Error(
+          `INGREDIENT VERIFICATION FAILED: ${testResult.testType} test failed for ${ingredient.name}`
+        );
       }
     }
 
@@ -302,11 +346,13 @@ export class IngredientVerificationEngine {
       this.rejectedIngredients.set(ingredient.ingredientId, ingredient);
       this.auditTrail.push({
         timestamp: new Date(),
-        action: `REJECTED ingredient batch`,
+        action: "REJECTED ingredient batch",
         ingredientId: ingredient.ingredientId,
-        reason: `Supplier is banned or unverified`
+        reason: "Supplier is banned or unverified",
       });
-      throw new Error(`INGREDIENT VERIFICATION FAILED: Supplier ${ingredient.supplier} is not approved`);
+      throw new Error(
+        `INGREDIENT VERIFICATION FAILED: Supplier ${ingredient.supplier} is not approved`
+      );
     }
 
     // Approve ingredient
@@ -314,18 +360,20 @@ export class IngredientVerificationEngine {
 
     this.auditTrail.push({
       timestamp: new Date(),
-      action: `APPROVED ingredient batch`,
+      action: "APPROVED ingredient batch",
       ingredientId: ingredient.ingredientId,
-      reason: `All safety tests passed. Supplier verified.`
+      reason: "All safety tests passed. Supplier verified.",
     });
 
-    return 'approved';
+    return "approved";
   }
 
   /**
    * Check for banned substances in test results
    */
-  private checkForBannedSubstances(parameter: string): BannedSubstanceList | null {
+  private checkForBannedSubstances(
+    parameter: string
+  ): BannedSubstanceList | null {
     const lowerParam = parameter.toLowerCase();
 
     for (const banned of this.bannedSubstances.values()) {
@@ -348,48 +396,54 @@ export class IngredientVerificationEngine {
   /**
    * Create product formulation from verified ingredients
    */
-  async createProductFormulation(formulation: ProductFormulation): Promise<string> {
+  async createProductFormulation(
+    formulation: ProductFormulation
+  ): Promise<string> {
     // Verify all ingredients in formulation
     const ingredientVerifications: Array<{
       ingredientId: string;
-      status: 'verified' | 'failed';
+      status: "verified" | "failed";
       reason?: string;
     }> = [];
 
     for (const ingredient of formulation.ingredients) {
       const verifiedIngredient = this.ingredients.get(ingredient.ingredientId);
-      if (!verifiedIngredient) {
+      if (verifiedIngredient) {
         ingredientVerifications.push({
           ingredientId: ingredient.ingredientId,
-          status: 'failed',
-          reason: 'Ingredient not found in approved database'
+          status: "verified",
         });
       } else {
         ingredientVerifications.push({
           ingredientId: ingredient.ingredientId,
-          status: 'verified'
+          status: "failed",
+          reason: "Ingredient not found in approved database",
         });
       }
     }
 
     // All ingredients must be verified
-    const failedIngredients = ingredientVerifications.filter(v => v.status === 'failed');
+    const failedIngredients = ingredientVerifications.filter(
+      (v) => v.status === "failed"
+    );
     if (failedIngredients.length > 0) {
-      throw new Error(`FORMULATION VERIFICATION FAILED: ${failedIngredients.length} ingredients not approved`);
+      throw new Error(
+        `FORMULATION VERIFICATION FAILED: ${failedIngredients.length} ingredients not approved`
+      );
     }
 
     // Update verification status
     for (const ingredient of formulation.ingredients) {
-      ingredient.verificationStatus = 'verified';
+      ingredient.verificationStatus = "verified";
     }
 
     this.productFormulations.set(formulation.productId, formulation);
 
     this.auditTrail.push({
       timestamp: new Date(),
-      action: `Created product formulation`,
+      action: "Created product formulation",
       ingredientId: formulation.productId,
-      reason: `All ${formulation.ingredients.length} ingredients verified`
+      reason: `All ${formulation.ingredients.length} ingredients verified`,
     });
 
     return formulation.productId;
@@ -398,7 +452,10 @@ export class IngredientVerificationEngine {
   /**
    * Approve product formulation for production
    */
-  async approveForProduction(productId: string, approvedBy: string): Promise<void> {
+  async approveForProduction(
+    productId: string,
+    approvedBy: string
+  ): Promise<void> {
     const formulation = this.productFormulations.get(productId);
     if (!formulation) {
       throw new Error(`Product formulation not found: ${productId}`);
@@ -409,9 +466,9 @@ export class IngredientVerificationEngine {
 
     this.auditTrail.push({
       timestamp: new Date(),
-      action: `APPROVED product for production`,
+      action: "APPROVED product for production",
       ingredientId: productId,
-      reason: `Health officer approval: ${approvedBy}`
+      reason: `Health officer approval: ${approvedBy}`,
     });
   }
 
@@ -422,7 +479,7 @@ export class IngredientVerificationEngine {
     ingredientName: string;
     testDate: Date;
     testResults: IngredientTestResult[];
-    overallStatus: 'pass' | 'fail' | 'flag_for_review';
+    overallStatus: "pass" | "fail" | "flag_for_review";
     bannedSubstancesDetected: string[];
     certifications: string[];
     recommendation: string;
@@ -444,12 +501,13 @@ export class IngredientVerificationEngine {
       ingredientName: ingredient.name,
       testDate: ingredient.testing.testedDate,
       testResults: ingredient.testing.results,
-      overallStatus: bannedDetected.length > 0 ? 'fail' : 'pass',
+      overallStatus: bannedDetected.length > 0 ? "fail" : "pass",
       bannedSubstancesDetected: bannedDetected,
       certifications: ingredient.certifications,
-      recommendation: bannedDetected.length > 0
-        ? 'REJECT - Contains banned substances'
-        : 'APPROVE - All safety standards met'
+      recommendation:
+        bannedDetected.length > 0
+          ? "REJECT - Contains banned substances"
+          : "APPROVE - All safety standards met",
     };
   }
 
@@ -468,20 +526,23 @@ export class IngredientVerificationEngine {
     return {
       totalIngredientsApproved: this.ingredients.size,
       totalIngredientsRejected: this.rejectedIngredients.size,
-      approvalPercentage: this.ingredients.size > 0
-        ? (this.ingredients.size / (this.ingredients.size + this.rejectedIngredients.size)) * 100
-        : 0,
+      approvalPercentage:
+        this.ingredients.size > 0
+          ? (this.ingredients.size /
+              (this.ingredients.size + this.rejectedIngredients.size)) *
+            100
+          : 0,
       bannedSubstancesMonitored: this.bannedSubstances.size,
       suppliersVerified: this.supplierVerifications.size,
       productsFormulated: this.productFormulations.size,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   /**
    * Get audit trail for ingredient tracking
    */
-  getAuditTrail(limit: number = 100): Array<{
+  getAuditTrail(limit = 100): Array<{
     timestamp: Date;
     action: string;
     ingredientId?: string;
@@ -512,9 +573,9 @@ export class IngredientVerificationEngine {
 
     this.auditTrail.push({
       timestamp: new Date(),
-      action: `BANNED supplier`,
+      action: "BANNED supplier",
       ingredientId: supplierId,
-      reason
+      reason,
     });
   }
 }

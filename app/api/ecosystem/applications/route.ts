@@ -3,20 +3,20 @@
  * API endpoints for managing registered applications
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   applicationRegistry,
   getRegisteredApplications,
 } from "@/lib/ecosystem/application-registry";
-import {
-  exampleApplications,
-} from "@/lib/ecosystem/example-applications";
+import { exampleApplications } from "@/lib/ecosystem/example-applications";
 
 // Initialize with example applications on first load
 let initialized = false;
 
 function initializeApplications() {
-  if (initialized) return;
+  if (initialized) {
+    return;
+  }
 
   for (const { app, integration } of exampleApplications) {
     applicationRegistry.registerApplication(app, integration);

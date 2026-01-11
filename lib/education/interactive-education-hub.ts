@@ -1,13 +1,13 @@
 /**
  * Triumph Synergy - Interactive Education Hub
- * 
+ *
  * Superior interactive educational platform for:
  * - K-12 Students
  * - Kids (ages 4-12) with engaging STEM content
  * - Interactive learning experiences
  * - Gamified education
  * - Parent/Teacher dashboards
- * 
+ *
  * @module lib/education/interactive-education-hub
  * @version 1.0.0
  */
@@ -17,7 +17,7 @@
 // ============================================================================
 
 const PI_EXTERNAL_RATE = 314.159;
-const PI_INTERNAL_RATE = 314159;
+const PI_INTERNAL_RATE = 314_159;
 const PI_INTERNAL_MULTIPLIER = 1000;
 
 export type PiValueType = "internal" | "external";
@@ -30,8 +30,13 @@ export function getPiRate(type: PiValueType = "external"): number {
 // TYPES & INTERFACES
 // ============================================================================
 
-export type AgeGroup = "preschool" | "elementary" | "middle-school" | "high-school" | "adult";
-export type Subject = 
+export type AgeGroup =
+  | "preschool"
+  | "elementary"
+  | "middle-school"
+  | "high-school"
+  | "adult";
+export type Subject =
   | "math"
   | "science"
   | "technology"
@@ -48,24 +53,29 @@ export type Subject =
   | "life-skills";
 
 export type LearningStyle = "visual" | "auditory" | "reading" | "kinesthetic";
-export type SubscriptionType = "student" | "family" | "classroom" | "school" | "district";
+export type SubscriptionType =
+  | "student"
+  | "family"
+  | "classroom"
+  | "school"
+  | "district";
 
-export interface Student {
+export type Student = {
   id: string;
   userId: string;
-  
+
   // Profile
   displayName: string;
   avatar: string;
   ageGroup: AgeGroup;
   gradeLevel: number | null;
   birthYear: number;
-  
+
   // Learning Profile
   learningStyle: LearningStyle;
   preferredSubjects: Subject[];
   skillLevels: Record<Subject, SkillLevel>;
-  
+
   // Progress
   totalXP: number;
   currentLevel: number;
@@ -74,45 +84,45 @@ export interface Student {
   totalLessonsCompleted: number;
   totalQuizzesCompleted: number;
   totalTimeSpent: number; // minutes
-  
+
   // Achievements
   badges: Badge[];
   certificates: Certificate[];
   trophies: Trophy[];
-  
+
   // Goals
   dailyGoal: number; // minutes
   weeklyGoal: number;
   currentGoalProgress: number;
-  
+
   // Subscription
   subscriptionType: SubscriptionType;
   subscriptionStatus: "trial" | "active" | "expired" | "cancelled";
   subscriptionEndDate: Date;
-  
+
   // Parent/Guardian Link
   parentId: string | null;
   teacherIds: string[];
-  
+
   // Safety
   contentRestrictions: ContentRestriction[];
   chatEnabled: boolean;
   friendsEnabled: boolean;
-  
+
   createdAt: Date;
   lastActiveAt: Date;
-}
+};
 
-export interface SkillLevel {
+export type SkillLevel = {
   subject: Subject;
   level: number; // 1-100
   xp: number;
   lessonsCompleted: number;
   accuracy: number; // percentage
   lastPracticed: Date | null;
-}
+};
 
-export interface Badge {
+export type Badge = {
   id: string;
   name: string;
   description: string;
@@ -120,40 +130,40 @@ export interface Badge {
   category: "achievement" | "streak" | "mastery" | "social" | "special";
   earnedAt: Date;
   rarity: "common" | "rare" | "epic" | "legendary";
-}
+};
 
-export interface Certificate {
+export type Certificate = {
   id: string;
   courseId: string;
   courseName: string;
   issuedAt: Date;
   verificationCode: string;
   blockchain: boolean;
-}
+};
 
-export interface Trophy {
+export type Trophy = {
   id: string;
   name: string;
   competition: string;
   rank: number;
   earnedAt: Date;
-}
+};
 
-export interface ContentRestriction {
+export type ContentRestriction = {
   type: "age" | "subject" | "time";
   value: string | number;
-}
+};
 
-export interface Parent {
+export type Parent = {
   id: string;
   userId: string;
   name: string;
   email: string;
   phone: string;
-  
+
   // Family
   children: string[]; // Student IDs
-  
+
   // Subscription
   subscriptionType: SubscriptionType;
   subscriptionTier: FamilySubscriptionTier;
@@ -162,58 +172,62 @@ export interface Parent {
   subscriptionEndDate: Date;
   monthlyFee: number;
   monthlyFeeInPi: number;
-  
+
   // Settings
   notificationsEnabled: boolean;
   weeklyReportsEnabled: boolean;
   screenTimeAlerts: boolean;
-  
+
   // Payment
   piWalletLinked: boolean;
   autoRenew: boolean;
-  
+
   createdAt: Date;
-}
+};
 
 export type FamilySubscriptionTier = "basic" | "plus" | "premium" | "unlimited";
 
-export interface Teacher {
+export type Teacher = {
   id: string;
   userId: string;
-  
+
   // Profile
   name: string;
   email: string;
   school: string | null;
   gradesTaught: number[];
   subjectsTaught: Subject[];
-  
+
   // Subscription
   subscriptionType: "classroom" | "school" | "district";
   subscriptionTier: EducatorSubscriptionTier;
   subscriptionStatus: "trial" | "active" | "past_due" | "cancelled";
   monthlyFee: number;
   monthlyFeeInPi: number;
-  
+
   // Classroom
   classrooms: Classroom[];
   totalStudents: number;
-  
+
   // Content
   customLessons: string[];
   assignedCourses: string[];
-  
+
   // Analytics
   averageStudentProgress: number;
   averageEngagement: number;
-  
+
   createdAt: Date;
   lastActiveAt: Date;
-}
+};
 
-export type EducatorSubscriptionTier = "starter" | "professional" | "school" | "district";
+export type EducatorSubscriptionTier =
+  | "starter"
+  | "professional"
+  | "school"
+  | "district";
 
-export interface Classroom {
+export type Classroom = {
   id: string;
   teacherId: string;
   name: string;
@@ -221,20 +235,20 @@ export interface Classroom {
   subject: Subject | "general";
   studentIds: string[];
   classCode: string;
-  
+
   // Assignments
   activeAssignments: Assignment[];
   completedAssignments: Assignment[];
-  
+
   // Progress
   averageProgress: number;
   topPerformers: string[];
   needsAttention: string[];
-  
-  createdAt: Date;
-}
 
-export interface Assignment {
+  createdAt: Date;
+};
+
+export type Assignment = {
   id: string;
   classroomId: string;
   title: string;
@@ -246,52 +260,52 @@ export interface Assignment {
   status: "draft" | "active" | "completed" | "graded";
   submissions: number;
   averageScore: number;
-}
+};
 
-export interface InteractiveLesson {
+export type InteractiveLesson = {
   id: string;
   title: string;
   description: string;
   subject: Subject;
   ageGroup: AgeGroup;
   gradeLevel: number | null;
-  
+
   // Content
   type: "video" | "interactive" | "game" | "simulation" | "reading" | "project";
   contentUrl: string;
   duration: number; // minutes
-  
+
   // Learning
   learningObjectives: string[];
   skills: string[];
   prerequisites: string[];
-  
+
   // Interactivity
   interactivityLevel: "low" | "medium" | "high";
   hasQuiz: boolean;
   hasProject: boolean;
   hasGame: boolean;
-  
+
   // Gamification
   xpReward: number;
   bonusXP: number;
   unlocksLesson: string | null;
-  
+
   // Metadata
   difficulty: "easy" | "medium" | "hard";
   estimatedTime: number;
   rating: number;
   completions: number;
-  
+
   // STEM Focus
   isSTEM: boolean;
   stemComponents: ("science" | "technology" | "engineering" | "math")[];
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface InteractiveQuiz {
+export type InteractiveQuiz = {
   id: string;
   lessonId: string;
   title: string;
@@ -301,60 +315,66 @@ export interface InteractiveQuiz {
   attemptsAllowed: number | "unlimited";
   xpReward: number;
   bonusXPPerfect: number;
-}
+};
 
-export interface QuizQuestion {
+export type QuizQuestion = {
   id: string;
-  type: "multiple-choice" | "true-false" | "fill-blank" | "matching" | "ordering" | "drawing";
+  type:
+    | "multiple-choice"
+    | "true-false"
+    | "fill-blank"
+    | "matching"
+    | "ordering"
+    | "drawing";
   question: string;
   options: string[] | null;
   correctAnswer: string | string[];
   explanation: string;
   points: number;
   hint: string | null;
-}
+};
 
-export interface LearningPath {
+export type LearningPath = {
   id: string;
   name: string;
   description: string;
   subject: Subject;
   ageGroup: AgeGroup;
-  
+
   // Structure
   lessons: string[];
   milestones: Milestone[];
   totalLessons: number;
   estimatedDuration: number; // hours
-  
+
   // Progress
   difficulty: "beginner" | "intermediate" | "advanced";
   prerequisitePaths: string[];
-  
+
   // Rewards
   completionBadge: string;
   completionCertificate: boolean;
   totalXP: number;
-  
+
   // Stats
   enrollments: number;
   completionRate: number;
   rating: number;
-}
+};
 
-export interface Milestone {
+export type Milestone = {
   id: string;
   name: string;
   lessonsRequired: number;
   reward: "badge" | "trophy" | "certificate" | "xp-bonus";
   rewardId: string;
-}
+};
 
 // ============================================================================
 // SUBSCRIPTION PLANS
 // ============================================================================
 
-export interface StudentSubscriptionPlan {
+export type StudentSubscriptionPlan = {
   tier: FamilySubscriptionTier;
   name: string;
   monthlyPrice: number;
@@ -369,9 +389,9 @@ export interface StudentSubscriptionPlan {
   liveClasses: boolean;
   parentDashboard: boolean;
   progressReports: boolean;
-}
+};
 
-export interface EducatorSubscriptionPlan {
+export type EducatorSubscriptionPlan = {
   tier: EducatorSubscriptionTier;
   name: string;
   monthlyPrice: number;
@@ -385,20 +405,19 @@ export interface EducatorSubscriptionPlan {
   analytics: "basic" | "advanced" | "enterprise";
   lmsIntegration: boolean;
   adminDashboard: boolean;
-}
+};
 
 // ============================================================================
 // INTERACTIVE EDUCATION HUB CLASS
 // ============================================================================
 
 class InteractiveEducationHub {
-  private students: Map<string, Student> = new Map();
-  private parents: Map<string, Parent> = new Map();
-  private teachers: Map<string, Teacher> = new Map();
-  private classrooms: Map<string, Classroom> = new Map();
-  private lessons: Map<string, InteractiveLesson> = new Map();
-  private quizzes: Map<string, InteractiveQuiz> = new Map();
-  private learningPaths: Map<string, LearningPath> = new Map();
+  private readonly students: Map<string, Student> = new Map();
+  private readonly parents: Map<string, Parent> = new Map();
+  private readonly teachers: Map<string, Teacher> = new Map();
+  private readonly classrooms: Map<string, Classroom> = new Map();
+  private readonly lessons: Map<string, InteractiveLesson> = new Map();
+  private readonly learningPaths: Map<string, LearningPath> = new Map();
 
   constructor() {
     this.initializeSampleContent();
@@ -410,14 +429,19 @@ class InteractiveEducationHub {
       {
         id: "lesson-math-001",
         title: "Fun with Numbers: Counting Adventures",
-        description: "Join Triumph the Explorer on a counting adventure through magical lands!",
+        description:
+          "Join Triumph the Explorer on a counting adventure through magical lands!",
         subject: "math",
         ageGroup: "preschool",
         gradeLevel: null,
         type: "game",
         contentUrl: "/lessons/counting-adventures",
         duration: 15,
-        learningObjectives: ["Count to 20", "Recognize number patterns", "Basic addition concepts"],
+        learningObjectives: [
+          "Count to 20",
+          "Recognize number patterns",
+          "Basic addition concepts",
+        ],
         skills: ["counting", "number-recognition", "pattern-finding"],
         prerequisites: [],
         interactivityLevel: "high",
@@ -430,7 +454,7 @@ class InteractiveEducationHub {
         difficulty: "easy",
         estimatedTime: 15,
         rating: 4.9,
-        completions: 15420,
+        completions: 15_420,
         isSTEM: true,
         stemComponents: ["math"],
         createdAt: new Date(),
@@ -439,14 +463,19 @@ class InteractiveEducationHub {
       {
         id: "lesson-coding-001",
         title: "My First Code: Helping Robot Learn",
-        description: "Teach a friendly robot to move and solve puzzles using simple commands!",
+        description:
+          "Teach a friendly robot to move and solve puzzles using simple commands!",
         subject: "coding",
         ageGroup: "elementary",
         gradeLevel: 2,
         type: "interactive",
         contentUrl: "/lessons/first-code",
         duration: 20,
-        learningObjectives: ["Understand sequences", "Give simple commands", "Debug basic programs"],
+        learningObjectives: [
+          "Understand sequences",
+          "Give simple commands",
+          "Debug basic programs",
+        ],
         skills: ["logical-thinking", "sequencing", "problem-solving"],
         prerequisites: [],
         interactivityLevel: "high",
@@ -459,7 +488,7 @@ class InteractiveEducationHub {
         difficulty: "easy",
         estimatedTime: 20,
         rating: 4.95,
-        completions: 28750,
+        completions: 28_750,
         isSTEM: true,
         stemComponents: ["technology", "engineering"],
         createdAt: new Date(),
@@ -468,14 +497,19 @@ class InteractiveEducationHub {
       {
         id: "lesson-science-001",
         title: "Amazing Animals: Life Cycles",
-        description: "Explore how butterflies, frogs, and other animals grow and change!",
+        description:
+          "Explore how butterflies, frogs, and other animals grow and change!",
         subject: "science",
         ageGroup: "elementary",
         gradeLevel: 3,
         type: "simulation",
         contentUrl: "/lessons/life-cycles",
         duration: 25,
-        learningObjectives: ["Understand metamorphosis", "Identify life cycle stages", "Compare different animals"],
+        learningObjectives: [
+          "Understand metamorphosis",
+          "Identify life cycle stages",
+          "Compare different animals",
+        ],
         skills: ["observation", "comparison", "scientific-thinking"],
         prerequisites: [],
         interactivityLevel: "high",
@@ -488,7 +522,7 @@ class InteractiveEducationHub {
         difficulty: "medium",
         estimatedTime: 25,
         rating: 4.85,
-        completions: 19200,
+        completions: 19_200,
         isSTEM: true,
         stemComponents: ["science"],
         createdAt: new Date(),
@@ -502,14 +536,33 @@ class InteractiveEducationHub {
     const stemPath: LearningPath = {
       id: "path-stem-kids",
       name: "STEM Explorer: Junior Scientist",
-      description: "A fun journey through science, technology, engineering, and math for young learners!",
+      description:
+        "A fun journey through science, technology, engineering, and math for young learners!",
       subject: "science",
       ageGroup: "elementary",
       lessons: ["lesson-math-001", "lesson-coding-001", "lesson-science-001"],
       milestones: [
-        { id: "m1", name: "Math Wizard", lessonsRequired: 5, reward: "badge", rewardId: "badge-math-wizard" },
-        { id: "m2", name: "Code Champion", lessonsRequired: 10, reward: "badge", rewardId: "badge-code-champion" },
-        { id: "m3", name: "Science Star", lessonsRequired: 15, reward: "certificate", rewardId: "cert-science-star" },
+        {
+          id: "m1",
+          name: "Math Wizard",
+          lessonsRequired: 5,
+          reward: "badge",
+          rewardId: "badge-math-wizard",
+        },
+        {
+          id: "m2",
+          name: "Code Champion",
+          lessonsRequired: 10,
+          reward: "badge",
+          rewardId: "badge-code-champion",
+        },
+        {
+          id: "m3",
+          name: "Science Star",
+          lessonsRequired: 15,
+          reward: "certificate",
+          rewardId: "cert-science-star",
+        },
       ],
       totalLessons: 30,
       estimatedDuration: 15,
@@ -518,7 +571,7 @@ class InteractiveEducationHub {
       completionBadge: "badge-stem-explorer",
       completionCertificate: true,
       totalXP: 2500,
-      enrollments: 45000,
+      enrollments: 45_000,
       completionRate: 0.72,
       rating: 4.9,
     };
@@ -747,8 +800,19 @@ class InteractiveEducationHub {
   }): Promise<Student> {
     const id = `student-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-    const initialSkillLevels: Record<Subject, SkillLevel> = {} as Record<Subject, SkillLevel>;
-    const subjects: Subject[] = ["math", "science", "technology", "engineering", "reading", "writing", "coding"];
+    const initialSkillLevels: Record<Subject, SkillLevel> = {} as Record<
+      Subject,
+      SkillLevel
+    >;
+    const subjects: Subject[] = [
+      "math",
+      "science",
+      "technology",
+      "engineering",
+      "reading",
+      "writing",
+      "coding",
+    ];
     subjects.forEach((subject) => {
       initialSkillLevels[subject] = {
         subject,
@@ -804,7 +868,12 @@ class InteractiveEducationHub {
     return this.students.get(studentId) || null;
   }
 
-  async completeLesson(studentId: string, lessonId: string, score: number, timeSpent: number): Promise<{
+  async completeLesson(
+    studentId: string,
+    lessonId: string,
+    score: number,
+    timeSpent: number
+  ): Promise<{
     xpEarned: number;
     newLevel: boolean;
     badgeEarned: Badge | null;
@@ -838,7 +907,9 @@ class InteractiveEducationHub {
     if (skillLevel) {
       skillLevel.xp += xpEarned;
       skillLevel.lessonsCompleted += 1;
-      skillLevel.accuracy = (skillLevel.accuracy * (skillLevel.lessonsCompleted - 1) + score) / skillLevel.lessonsCompleted;
+      skillLevel.accuracy =
+        (skillLevel.accuracy * (skillLevel.lessonsCompleted - 1) + score) /
+        skillLevel.lessonsCompleted;
       skillLevel.lastPracticed = new Date();
       skillLevel.level = Math.floor(skillLevel.xp / 100) + 1;
     }
@@ -969,12 +1040,16 @@ class InteractiveEducationHub {
       children,
       weeklyProgress: {
         totalTime: children.reduce((sum, c) => sum + c.totalTimeSpent, 0),
-        lessonsCompleted: children.reduce((sum, c) => sum + c.totalLessonsCompleted, 0),
+        lessonsCompleted: children.reduce(
+          (sum, c) => sum + c.totalLessonsCompleted,
+          0
+        ),
         xpEarned: children.reduce((sum, c) => sum + c.totalXP, 0),
         streakDays: Math.max(...children.map((c) => c.streakDays), 0),
       },
       recommendations: Array.from(this.lessons.values()).slice(0, 5),
-      subscriptionInfo: plans.find((p) => p.tier === parent.subscriptionTier) || null,
+      subscriptionInfo:
+        plans.find((p) => p.tier === parent.subscriptionTier) || null,
     };
   }
 
@@ -1004,7 +1079,12 @@ class InteractiveEducationHub {
       school: data.school || null,
       gradesTaught: data.gradesTaught,
       subjectsTaught: data.subjectsTaught,
-      subscriptionType: data.subscriptionTier === "district" ? "district" : data.subscriptionTier === "school" ? "school" : "classroom",
+      subscriptionType:
+        data.subscriptionTier === "district"
+          ? "district"
+          : data.subscriptionTier === "school"
+            ? "school"
+            : "classroom",
       subscriptionTier: data.subscriptionTier,
       subscriptionStatus: "trial",
       monthlyFee: plan.monthlyPrice,
@@ -1023,11 +1103,14 @@ class InteractiveEducationHub {
     return teacher;
   }
 
-  async createClassroom(teacherId: string, data: {
-    name: string;
-    gradeLevel: number;
-    subject: Subject | "general";
-  }): Promise<Classroom> {
+  async createClassroom(
+    teacherId: string,
+    data: {
+      name: string;
+      gradeLevel: number;
+      subject: Subject | "general";
+    }
+  ): Promise<Classroom> {
     const teacher = this.teachers.get(teacherId);
     if (!teacher) {
       throw new Error("Teacher not found");
@@ -1058,13 +1141,18 @@ class InteractiveEducationHub {
     return classroom;
   }
 
-  async joinClassroom(studentId: string, classCode: string): Promise<Classroom> {
+  async joinClassroom(
+    studentId: string,
+    classCode: string
+  ): Promise<Classroom> {
     const student = this.students.get(studentId);
     if (!student) {
       throw new Error("Student not found");
     }
 
-    const classroom = Array.from(this.classrooms.values()).find((c) => c.classCode === classCode);
+    const classroom = Array.from(this.classrooms.values()).find(
+      (c) => c.classCode === classCode
+    );
     if (!classroom) {
       throw new Error("Classroom not found");
     }
@@ -1106,7 +1194,9 @@ class InteractiveEducationHub {
       lessons = lessons.filter((l) => l.ageGroup === filters.ageGroup);
     }
     if (filters.gradeLevel) {
-      lessons = lessons.filter((l) => l.gradeLevel === filters.gradeLevel || l.gradeLevel === null);
+      lessons = lessons.filter(
+        (l) => l.gradeLevel === filters.gradeLevel || l.gradeLevel === null
+      );
     }
     if (filters.isSTEM !== undefined) {
       lessons = lessons.filter((l) => l.isSTEM === filters.isSTEM);
@@ -1133,19 +1223,26 @@ class InteractiveEducationHub {
     return this.learningPaths.get(pathId) || null;
   }
 
-  async getRecommendedLessons(studentId: string, limit = 5): Promise<InteractiveLesson[]> {
+  async getRecommendedLessons(
+    studentId: string,
+    limit = 5
+  ): Promise<InteractiveLesson[]> {
     const student = this.students.get(studentId);
     if (!student) {
       throw new Error("Student not found");
     }
 
     // Simple recommendation based on preferred subjects and skill level
-    let lessons = Array.from(this.lessons.values())
+    const lessons = Array.from(this.lessons.values())
       .filter((l) => l.ageGroup === student.ageGroup)
-      .filter((l) => student.preferredSubjects.length === 0 || student.preferredSubjects.includes(l.subject));
+      .filter(
+        (l) =>
+          student.preferredSubjects.length === 0 ||
+          student.preferredSubjects.includes(l.subject)
+      );
 
     // Sort by rating and completions
-    lessons.sort((a, b) => (b.rating * b.completions) - (a.rating * a.completions));
+    lessons.sort((a, b) => b.rating * b.completions - a.rating * a.completions);
 
     return lessons.slice(0, limit);
   }
@@ -1158,7 +1255,11 @@ class InteractiveEducationHub {
     return getPiRate(type);
   }
 
-  getDualRateInfo(): { internal: number; external: number; multiplier: number } {
+  getDualRateInfo(): {
+    internal: number;
+    external: number;
+    multiplier: number;
+  } {
     return {
       internal: PI_INTERNAL_RATE,
       external: PI_EXTERNAL_RATE,

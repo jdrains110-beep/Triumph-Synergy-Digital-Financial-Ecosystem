@@ -12,7 +12,7 @@
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface Permit {
+export type Permit = {
   id: string;
   permitNumber: string;
   type: PermitType;
@@ -64,7 +64,7 @@ export interface Permit {
 
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type PermitType =
   | "building"
@@ -102,7 +102,7 @@ export type PermitStatus =
   | "revoked"
   | "denied";
 
-export interface PermitAddress {
+export type PermitAddress = {
   street: string;
   unit: string | null;
   city: string;
@@ -110,9 +110,9 @@ export interface PermitAddress {
   zip: string;
   county: string;
   apn: string; // Assessor's Parcel Number
-}
+};
 
-export interface ComplianceRequirement {
+export type ComplianceRequirement = {
   id: string;
   code: string;
   title: string;
@@ -122,7 +122,7 @@ export interface ComplianceRequirement {
   notes: string;
   reviewedBy: string | null;
   reviewedAt: Date | null;
-}
+};
 
 export type ComplianceCategory =
   | "building-code"
@@ -136,7 +136,7 @@ export type ComplianceCategory =
   | "health-safety"
   | "historic-preservation";
 
-export interface Inspection {
+export type Inspection = {
   id: string;
   type: InspectionType;
   status: InspectionStatus;
@@ -147,7 +147,7 @@ export interface Inspection {
   notes: string;
   corrections: InspectionCorrection[];
   photos: string[];
-}
+};
 
 export type InspectionType =
   | "foundation"
@@ -174,16 +174,16 @@ export type InspectionStatus =
   | "cancelled"
   | "rescheduled";
 
-export interface InspectionCorrection {
+export type InspectionCorrection = {
   id: string;
   description: string;
   severity: "minor" | "major" | "critical";
   deadline: Date;
   status: "open" | "corrected" | "verified";
   verifiedAt: Date | null;
-}
+};
 
-export interface Violation {
+export type Violation = {
   id: string;
   code: string;
   description: string;
@@ -194,9 +194,9 @@ export interface Violation {
   status: "open" | "correcting" | "resolved" | "escalated";
   resolvedDate: Date | null;
   resolution: string | null;
-}
+};
 
-export interface PermitFee {
+export type PermitFee = {
   id: string;
   type: FeeType;
   description: string;
@@ -204,7 +204,7 @@ export interface PermitFee {
   status: "pending" | "paid" | "waived" | "refunded";
   paidDate: Date | null;
   receiptNumber: string | null;
-}
+};
 
 export type FeeType =
   | "application"
@@ -220,7 +220,7 @@ export type FeeType =
   | "technology"
   | "administrative";
 
-export interface PermitDocument {
+export type PermitDocument = {
   id: string;
   name: string;
   type: DocumentCategory;
@@ -228,7 +228,7 @@ export interface PermitDocument {
   uploadedAt: Date;
   status: "pending" | "approved" | "rejected";
   comments: string;
-}
+};
 
 export type DocumentCategory =
   | "application-form"
@@ -246,7 +246,7 @@ export type DocumentCategory =
   | "insurance-certificate"
   | "owner-authorization";
 
-export interface BuildingPlan {
+export type BuildingPlan = {
   id: string;
   sheetNumber: string;
   title: string;
@@ -264,18 +264,18 @@ export interface BuildingPlan {
   comments: PlanComment[];
   uploadedAt: Date;
   approvedAt: Date | null;
-}
+};
 
-export interface PlanComment {
+export type PlanComment = {
   id: string;
   comment: string;
   location: { x: number; y: number };
   author: string;
   createdAt: Date;
   resolved: boolean;
-}
+};
 
-export interface Contractor {
+export type Contractor = {
   id: string;
   licenseNumber: string;
   licenseType: string;
@@ -292,9 +292,9 @@ export interface Contractor {
   verified: boolean;
   rating: number;
   completedProjects: number;
-}
+};
 
-export interface ZoningInfo {
+export type ZoningInfo = {
   parcelNumber: string;
   zoneCode: string;
   zoneName: string;
@@ -312,9 +312,9 @@ export interface ZoningInfo {
   parkingRequirements: string;
   overlayDistricts: string[];
   specialRestrictions: string[];
-}
+};
 
-export interface EnvironmentalReview {
+export type EnvironmentalReview = {
   id: string;
   projectId: string;
   type:
@@ -330,9 +330,9 @@ export interface EnvironmentalReview {
   documents: PermitDocument[];
   createdAt: Date;
   completedAt: Date | null;
-}
+};
 
-export interface EnvironmentalFinding {
+export type EnvironmentalFinding = {
   category: string;
   impact:
     | "none"
@@ -341,16 +341,16 @@ export interface EnvironmentalFinding {
     | "significant";
   description: string;
   mitigation: string | null;
-}
+};
 
-export interface MitigationMeasure {
+export type MitigationMeasure = {
   id: string;
   category: string;
   measure: string;
   timing: string;
   responsible: string;
   status: "pending" | "in-progress" | "complete" | "verified";
-}
+};
 
 // ============================================================================
 // PERMIT SYSTEM ENGINE
@@ -359,10 +359,9 @@ export interface MitigationMeasure {
 export class PermitSystem {
   private static instance: PermitSystem;
 
-  private permits: Map<string, Permit> = new Map();
-  private contractors: Map<string, Contractor> = new Map();
-  private zoningData: Map<string, ZoningInfo> = new Map();
-  private environmentalReviews: Map<string, EnvironmentalReview> = new Map();
+  private readonly permits: Map<string, Permit> = new Map();
+  private readonly contractors: Map<string, Contractor> = new Map();
+  private readonly zoningData: Map<string, ZoningInfo> = new Map();
 
   private constructor() {
     this.initializeZoningData();

@@ -9,13 +9,11 @@
  * @since 2026-01-08
  */
 
-import { transactionProcessor } from "../pi-sdk/transaction-processor";
-
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface UBIRecipient {
+export type UBIRecipient = {
   id: string;
   piUsername: string;
   walletAddress: string;
@@ -27,9 +25,9 @@ export interface UBIRecipient {
   country: string;
   region: string;
   metadata: Record<string, unknown>;
-}
+};
 
-export interface UBIDistribution {
+export type UBIDistribution = {
   id: string;
   recipientId: string;
   amount: number;
@@ -42,9 +40,9 @@ export interface UBIDistribution {
   timestamp: Date;
   nesaraCompliant: boolean;
   gesaraCompliant: boolean;
-}
+};
 
-export interface UBIProgram {
+export type UBIProgram = {
   id: string;
   name: string;
   description: string;
@@ -57,9 +55,9 @@ export interface UBIProgram {
   endDate: Date | null;
   totalDistributed: number;
   recipientCount: number;
-}
+};
 
-export interface EligibilityCriteria {
+export type EligibilityCriteria = {
   minAge: number;
   maxAge: number | null;
   kycRequired: boolean;
@@ -68,15 +66,15 @@ export interface EligibilityCriteria {
   citizenshipRequired: boolean;
   excludedCountries: string[];
   additionalRequirements: string[];
-}
+};
 
-export interface DistributionSchedule {
+export type DistributionSchedule = {
   frequency: "daily" | "weekly" | "biweekly" | "monthly";
   dayOfWeek?: number; // 0-6 for weekly
   dayOfMonth?: number; // 1-31 for monthly
   timeOfDay: string; // HH:MM format
   timezone: string;
-}
+};
 
 // ============================================================================
 // UBI DISTRIBUTION ENGINE
@@ -84,9 +82,9 @@ export interface DistributionSchedule {
 
 export class UniversalBasicIncomeEngine {
   private static instance: UniversalBasicIncomeEngine;
-  private programs: Map<string, UBIProgram> = new Map();
-  private recipients: Map<string, UBIRecipient> = new Map();
-  private distributionQueue: UBIDistribution[] = [];
+  private readonly programs: Map<string, UBIProgram> = new Map();
+  private readonly recipients: Map<string, UBIRecipient> = new Map();
+  private readonly distributionQueue: UBIDistribution[] = [];
   private isProcessing = false;
 
   private constructor() {
@@ -315,7 +313,9 @@ export class UniversalBasicIncomeEngine {
     try {
       while (this.distributionQueue.length > 0) {
         const distribution = this.distributionQueue.shift();
-        if (!distribution) continue;
+        if (!distribution) {
+          continue;
+        }
 
         try {
           distribution.status = "processing";
@@ -396,7 +396,9 @@ export class UniversalBasicIncomeEngine {
     const byMonth: Record<string, number> = {};
 
     for (const program of this.programs.values()) {
-      if (programId && program.id !== programId) continue;
+      if (programId && program.id !== programId) {
+        continue;
+      }
       totalDistributed += program.totalDistributed;
       recipientCount += program.recipientCount;
     }

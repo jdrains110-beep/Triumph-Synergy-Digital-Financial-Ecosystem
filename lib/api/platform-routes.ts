@@ -1,6 +1,6 @@
 /**
  * TRIUMPH SYNERGY - Gaming & Health Platforms REST API Routes
- * 
+ *
  * Comprehensive endpoints for platform management, user rewards, payroll, and streaming
  */
 
@@ -18,44 +18,44 @@ export const gamingRoutingLogic = {
       data: {
         platforms: [
           {
-            platformId: 'gta6',
-            name: 'Grand Theft Auto 6',
-            developer: 'Rockstar Games',
-            genre: 'action',
-            activeUsers: 15420,
-            totalEarnings: 485600,
-            monthlyEarnings: 125400,
-            status: 'active',
-            supportedStreaming: ['twitch', 'youtube'],
+            platformId: "gta6",
+            name: "Grand Theft Auto 6",
+            developer: "Rockstar Games",
+            genre: "action",
+            activeUsers: 15_420,
+            totalEarnings: 485_600,
+            monthlyEarnings: 125_400,
+            status: "active",
+            supportedStreaming: ["twitch", "youtube"],
           },
           {
-            platformId: 'ps5',
-            name: 'PlayStation 5 (Beyond+)',
-            developer: 'Sony Interactive Entertainment',
-            genre: 'mmo',
-            activeUsers: 22850,
-            totalEarnings: 680200,
-            monthlyEarnings: 180500,
-            status: 'active',
-            supportedStreaming: ['twitch', 'youtube'],
+            platformId: "ps5",
+            name: "PlayStation 5 (Beyond+)",
+            developer: "Sony Interactive Entertainment",
+            genre: "mmo",
+            activeUsers: 22_850,
+            totalEarnings: 680_200,
+            monthlyEarnings: 180_500,
+            status: "active",
+            supportedStreaming: ["twitch", "youtube"],
           },
           {
-            platformId: 'battlefield-6',
-            name: 'Battlefield 6',
-            developer: 'DICE / EA Games',
-            genre: 'fps',
-            activeUsers: 18920,
-            totalEarnings: 550800,
-            monthlyEarnings: 145200,
-            status: 'active',
-            supportedStreaming: ['twitch'],
+            platformId: "battlefield-6",
+            name: "Battlefield 6",
+            developer: "DICE / EA Games",
+            genre: "fps",
+            activeUsers: 18_920,
+            totalEarnings: 550_800,
+            monthlyEarnings: 145_200,
+            status: "active",
+            supportedStreaming: ["twitch"],
           },
         ],
         summary: {
           totalPlatforms: 3,
-          totalActiveUsers: 57190,
-          totalEarnings: 1716600,
-          totalMonthlyEarnings: 451100,
+          totalActiveUsers: 57_190,
+          totalEarnings: 1_716_600,
+          totalMonthlyEarnings: 451_100,
         },
       },
     };
@@ -96,48 +96,51 @@ export const gamingRoutingLogic = {
         rewardAmount: request.amount,
         description: request.description,
         blockchainHash: `0x${Math.random().toString(16).substr(2)}`,
-        status: 'completed',
+        status: "completed",
       },
     };
   },
 
   // GET /api/platforms/gaming/leaderboard - Get cross-platform leaderboard
-  async getLeaderboard(request?: { platform?: string; period?: 'week' | 'month' | 'all' }) {
+  async getLeaderboard(request?: {
+    platform?: string;
+    period?: "week" | "month" | "all";
+  }) {
     return {
       success: true,
       data: {
         leaderboard: [
           {
             rank: 1,
-            userId: 'user-elite-001',
-            username: 'PhantomGamer',
-            platform: 'gta6',
-            earnings: 12450,
+            userId: "user-elite-001",
+            username: "PhantomGamer",
+            platform: "gta6",
+            earnings: 12_450,
             engagementHours: 1240,
             achievements: 156,
           },
           {
             rank: 2,
-            userId: 'user-elite-002',
-            username: 'SilverStrike',
-            platform: 'battlefield-6',
-            earnings: 11200,
+            userId: "user-elite-002",
+            username: "SilverStrike",
+            platform: "battlefield-6",
+            earnings: 11_200,
             engagementHours: 1100,
             achievements: 142,
           },
           {
             rank: 3,
-            userId: 'user-elite-003',
-            username: 'GoldenStreamer',
-            platform: 'ps5',
-            earnings: 10800,
+            userId: "user-elite-003",
+            username: "GoldenStreamer",
+            platform: "ps5",
+            earnings: 10_800,
             engagementHours: 980,
             achievements: 138,
           },
         ],
         summary: {
-          period: request?.period || 'all',
-          totalRankedPlayers: 57190,
+          period: request?.period || "all",
+          totalRankedPlayers: 57_190,
         },
       },
     };
@@ -156,39 +159,39 @@ export const healthRoutingLogic = {
       data: {
         institutions: [
           {
-            institutionId: 'shands-hospital',
-            name: 'Shands Hospital',
-            type: 'hospital',
+            institutionId: "shands-hospital",
+            name: "Shands Hospital",
+            type: "hospital",
             triumphSynergyPartner: true,
-            partnershipLevel: 'owner',
+            partnershipLevel: "owner",
             employees: 270,
             contractors: 112,
             departments: 5,
-            monthlyPayroll: 85000,
-            totalPaid: 520000,
-            status: 'active',
+            monthlyPayroll: 85_000,
+            totalPaid: 520_000,
+            status: "active",
             policyComplianceRate: 0.95,
           },
           {
-            institutionId: 'uf-health',
-            name: 'UF Health',
-            type: 'research',
+            institutionId: "uf-health",
+            name: "UF Health",
+            type: "research",
             triumphSynergyPartner: true,
-            partnershipLevel: 'owner',
+            partnershipLevel: "owner",
             employees: 75,
             contractors: 60,
             departments: 3,
-            monthlyPayroll: 42000,
-            totalPaid: 268000,
-            status: 'active',
+            monthlyPayroll: 42_000,
+            totalPaid: 268_000,
+            status: "active",
             policyComplianceRate: 0.98,
           },
         ],
         summary: {
           totalInstitutions: 2,
           totalPersonnel: 517,
-          totalMonthlyPayroll: 127000,
-          totalPaid: 788000,
+          totalMonthlyPayroll: 127_000,
+          totalPaid: 788_000,
         },
       },
     };
@@ -208,15 +211,15 @@ export const healthRoutingLogic = {
         paymentDate: request.date,
         employeesPaid: 150,
         contractorsProcessed: 35,
-        totalAmount: 42500,
+        totalAmount: 42_500,
         transactions: [
           {
-            transactionId: 'tx-001',
-            recipientId: 'emp-001',
+            transactionId: "tx-001",
+            recipientId: "emp-001",
             amount: 3500,
-            type: 'salary',
+            type: "salary",
             blockchainHash: `0x${Math.random().toString(16).substr(2)}`,
-            status: 'completed',
+            status: "completed",
           },
         ],
       },
@@ -230,30 +233,58 @@ export const healthRoutingLogic = {
       data: {
         policies: [
           {
-            policyId: 'vaccination-optional',
-            name: 'Vaccination Policy',
-            category: 'vaccination',
-            description: 'Optional vaccination program - employee choice',
+            policyId: "vaccination-optional",
+            name: "Vaccination Policy",
+            category: "vaccination",
+            description: "Optional vaccination program - employee choice",
             isOptional: true,
             alternatives: [
-              { id: 'vaccine-mrna', name: 'mRNA Vaccination', adoptionCount: 120 },
-              { id: 'vaccine-traditional', name: 'Traditional Vaccination', adoptionCount: 85 },
-              { id: 'vaccine-none', name: 'No Vaccination', adoptionCount: 65 },
-              { id: 'vaccine-natural', name: 'Natural Immunity Building', adoptionCount: 30 },
+              {
+                id: "vaccine-mrna",
+                name: "mRNA Vaccination",
+                adoptionCount: 120,
+              },
+              {
+                id: "vaccine-traditional",
+                name: "Traditional Vaccination",
+                adoptionCount: 85,
+              },
+              { id: "vaccine-none", name: "No Vaccination", adoptionCount: 65 },
+              {
+                id: "vaccine-natural",
+                name: "Natural Immunity Building",
+                adoptionCount: 30,
+              },
             ],
             totalAffected: 300,
           },
           {
-            policyId: 'birthing-options',
-            name: 'Birthing Path Options',
-            category: 'birthing',
-            description: 'Choose your preferred birthing pathway',
+            policyId: "birthing-options",
+            name: "Birthing Path Options",
+            category: "birthing",
+            description: "Choose your preferred birthing pathway",
             isOptional: true,
             alternatives: [
-              { id: 'birth-hospital', name: 'Hospital Birth', adoptionCount: 28 },
-              { id: 'birth-midwife', name: 'Midwife Assisted Birth', adoptionCount: 15 },
-              { id: 'birth-home', name: 'Home Birth (Unassisted)', adoptionCount: 8 },
-              { id: 'birth-doula', name: 'Doula Supported Birth', adoptionCount: 12 },
+              {
+                id: "birth-hospital",
+                name: "Hospital Birth",
+                adoptionCount: 28,
+              },
+              {
+                id: "birth-midwife",
+                name: "Midwife Assisted Birth",
+                adoptionCount: 15,
+              },
+              {
+                id: "birth-home",
+                name: "Home Birth (Unassisted)",
+                adoptionCount: 8,
+              },
+              {
+                id: "birth-doula",
+                name: "Doula Supported Birth",
+                adoptionCount: 12,
+              },
             ],
             totalAffected: 63,
           },
@@ -268,19 +299,19 @@ export const healthRoutingLogic = {
       success: true,
       data: {
         policyId: request.policyId,
-        policyName: 'Vaccination Policy',
+        policyName: "Vaccination Policy",
         institutionId: request.institutionId,
         totalAffected: 300,
         complianceBreakdown: {
-          'mRNA Vaccination': { count: 120, percent: 40 },
-          'Traditional Vaccination': { count: 85, percent: 28.3 },
-          'No Vaccination': { count: 65, percent: 21.7 },
-          'Natural Immunity': { count: 30, percent: 10 },
+          "mRNA Vaccination": { count: 120, percent: 40 },
+          "Traditional Vaccination": { count: 85, percent: 28.3 },
+          "No Vaccination": { count: 65, percent: 21.7 },
+          "Natural Immunity": { count: 30, percent: 10 },
         },
         timeline: [
-          { date: '2026-01-01', adoptionCount: 280 },
-          { date: '2026-01-05', adoptionCount: 295 },
-          { date: '2026-01-09', adoptionCount: 300 },
+          { date: "2026-01-01", adoptionCount: 280 },
+          { date: "2026-01-05", adoptionCount: 295 },
+          { date: "2026-01-09", adoptionCount: 300 },
         ],
       },
     };
@@ -301,7 +332,7 @@ export const healthRoutingLogic = {
         amount: request.amount,
         memo: request.memo,
         blockchainHash: `0x${Math.random().toString(16).substr(2)}`,
-        status: 'completed',
+        status: "completed",
         piWalletCredit: request.amount,
       },
     };
@@ -328,7 +359,7 @@ export const streamingRoutingLogic = {
         platform: request.platform,
         gamingPlatform: request.gamingPlatform,
         startTime: new Date().toISOString(),
-        status: 'active',
+        status: "active",
         rewardRate: {
           perViewer: 0.001,
           subscribeBonus: 1.0,
@@ -344,7 +375,8 @@ export const streamingRoutingLogic = {
     currentViewers: number;
     avgWatchTimeMinutes: number;
   }) {
-    const estimatedEarnings = request.currentViewers * 0.001 * request.avgWatchTimeMinutes;
+    const estimatedEarnings =
+      request.currentViewers * 0.001 * request.avgWatchTimeMinutes;
     return {
       success: true,
       data: {
@@ -353,7 +385,7 @@ export const streamingRoutingLogic = {
         avgWatchTime: request.avgWatchTimeMinutes,
         estimatedEarnings,
         currentTotalEarnings: estimatedEarnings * 1.25,
-        status: 'updated',
+        status: "updated",
       },
     };
   },
@@ -365,7 +397,11 @@ export const streamingRoutingLogic = {
     userId: string;
     amount?: number;
   }) {
-    const bonus = request.amount ? request.amount : request.eventType === 'subscribe' ? 1.0 : 0.5;
+    const bonus = request.amount
+      ? request.amount
+      : request.eventType === "subscribe"
+        ? 1.0
+        : 0.5;
     return {
       success: true,
       data: {
@@ -384,7 +420,7 @@ export const streamingRoutingLogic = {
       success: true,
       data: {
         sessionId: request.sessionId,
-        status: 'ended',
+        status: "ended",
         totalEarnings: 125.5,
         transactionId: `tx-${Date.now()}`,
         blockchainHash: `0x${Math.random().toString(16).substr(2)}`,
@@ -403,18 +439,18 @@ export const streamingRoutingLogic = {
         activeSessions: 1,
         totalSessions: 42,
         avgViewers: 1250,
-        topPlatform: 'twitch',
-        topGame: 'gta6',
+        topPlatform: "twitch",
+        topGame: "gta6",
         sessions: [
           {
-            sessionId: 'stream-001',
-            platform: 'twitch',
-            gamingPlatform: 'gta6',
+            sessionId: "stream-001",
+            platform: "twitch",
+            gamingPlatform: "gta6",
             viewers: 2150,
             peakViewers: 3420,
             duration: 180,
             earnings: 125.5,
-            status: 'active',
+            status: "active",
           },
         ],
       },
@@ -434,32 +470,32 @@ export const summaryRoutingLogic = {
       data: {
         gamingMetrics: {
           activePlatforms: 3,
-          totalUsers: 57190,
-          totalEarnings: 1716600,
-          monthlyEarnings: 451100,
-          topGame: 'PlayStation 5',
-          topStreamer: 'PhantomGamer',
+          totalUsers: 57_190,
+          totalEarnings: 1_716_600,
+          monthlyEarnings: 451_100,
+          topGame: "PlayStation 5",
+          topStreamer: "PhantomGamer",
         },
         healthMetrics: {
           activeInstitutions: 2,
           totalPersonnel: 517,
-          totalPayroll: 788000,
-          monthlyPayroll: 127000,
+          totalPayroll: 788_000,
+          monthlyPayroll: 127_000,
           policyComplianceRate: 0.965,
           policiesManaged: 8,
         },
         streamingMetrics: {
           activeSessions: 45,
           totalStreamers: 890,
-          totalViewers: 125000,
-          totalStreamingEarnings: 425300,
-          monthlyStreamingEarnings: 125900,
-          topPlatform: 'twitch',
+          totalViewers: 125_000,
+          totalStreamingEarnings: 425_300,
+          monthlyStreamingEarnings: 125_900,
+          topPlatform: "twitch",
         },
         combinedMetrics: {
-          totalPiDistributed: 2930200,
-          uniqueUsers: 58100,
-          totalTransactions: 45820,
+          totalPiDistributed: 2_930_200,
+          uniqueUsers: 58_100,
+          totalTransactions: 45_820,
           averageTransactionValue: 63.95,
           uptime: 99.98,
           lastUpdate: new Date().toISOString(),
@@ -470,25 +506,25 @@ export const summaryRoutingLogic = {
 
   // GET /api/platforms/reports - Generate comprehensive report
   async generateReport(request?: {
-    period?: 'day' | 'week' | 'month' | 'quarter' | 'year';
-    format?: 'json' | 'csv' | 'pdf';
+    period?: "day" | "week" | "month" | "quarter" | "year";
+    format?: "json" | "csv" | "pdf";
   }) {
     return {
       success: true,
       data: {
         reportId: `report-${Date.now()}`,
-        period: request?.period || 'month',
-        format: request?.format || 'json',
+        period: request?.period || "month",
+        format: request?.format || "json",
         generated: new Date().toISOString(),
         sections: [
-          'gaming-platforms',
-          'health-institutions',
-          'streaming-integration',
-          'financial-summary',
-          'user-demographics',
-          'policy-compliance',
+          "gaming-platforms",
+          "health-institutions",
+          "streaming-integration",
+          "financial-summary",
+          "user-demographics",
+          "policy-compliance",
         ],
-        fileUrl: '/reports/triumph-synergy-report-2026-01.pdf',
+        fileUrl: "/reports/triumph-synergy-report-2026-01.pdf",
       },
     };
   },

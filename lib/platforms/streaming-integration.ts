@@ -1,6 +1,6 @@
 /**
  * TRIUMPH SYNERGY - Streaming Platform Integration
- * 
+ *
  * Enables real-time viewer monetization across streaming platforms
  * - Twitch streaming with Pi rewards
  * - YouTube Gaming with Pi earnings
@@ -8,13 +8,8 @@
  * - Real-time payment to streamers for engagement
  */
 
-import { OfficialPiPayments } from '@/lib/payments/pi-payments-official';
-import { 
-  enforceStreamingPayment, 
-  piOriginEnforcer,
-  TransactionCategory 
-} from '@/lib/core/pi-origin-enforcement';
-import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
+import { enforceStreamingPayment } from "@/lib/core/pi-origin-enforcement";
+import { OfficialPiPayments } from "@/lib/payments/pi-payments-official";
 
 /**
  * CRITICAL: All streaming earnings enforce Pi origin verification
@@ -26,10 +21,10 @@ import { piOriginVerificationEngine } from '@/lib/core/pi-origin-verification';
 /**
  * Streaming session data
  */
-export interface StreamingSession {
+export type StreamingSession = {
   sessionId: string;
   streamerId: string;
-  platform: 'twitch' | 'youtube' | 'kick' | 'trovo';
+  platform: "twitch" | "youtube" | "kick" | "trovo";
   gamingPlatform: string; // 'gta6', 'ps5', 'battlefield-6'
   startTime: Date;
   endTime?: Date;
@@ -37,25 +32,25 @@ export interface StreamingSession {
   peakViewers: number;
   avgWatchTime: number; // minutes
   totalEarned: number; // Pi earned
-  status: 'active' | 'ended' | 'archived';
-}
+  status: "active" | "ended" | "archived";
+};
 
 /**
  * Streaming event (viewer interaction)
  */
-export interface StreamingEvent {
+export type StreamingEvent = {
   sessionId: string;
-  eventType: 'subscribe' | 'donate' | 'watch' | 'cheer' | 'raid';
+  eventType: "subscribe" | "donate" | "watch" | "cheer" | "raid";
   userId: string;
   amount?: number; // For monetized events
   timestamp: Date;
-}
+};
 
 /**
  * Streaming platform configuration
  */
-export interface StreamingPlatformConfig {
-  id: 'twitch' | 'youtube' | 'kick' | 'trovo';
+export type StreamingPlatformConfig = {
+  id: "twitch" | "youtube" | "kick" | "trovo";
   name: string;
   baseUrl: string;
   apiKey?: string;
@@ -67,45 +62,45 @@ export interface StreamingPlatformConfig {
     subscribeBonus: number; // Pi per subscriber
     donateMultiplier: number; // Multiply viewer donations
   };
-}
+};
 
 /**
  * Streaming aggregator for cross-platform monetization
  */
 export class StreamingAggregator {
   private static instance: StreamingAggregator;
-  private sessions = new Map<string, StreamingSession>();
-  private events: StreamingEvent[] = [];
-  private platforms: Map<string, StreamingPlatformConfig> = new Map();
-  private piPayments: OfficialPiPayments;
-  private streamerEarnings = new Map<string, number>();
+  private readonly sessions = new Map<string, StreamingSession>();
+  private readonly events: StreamingEvent[] = [];
+  private readonly platforms: Map<string, StreamingPlatformConfig> = new Map();
+  private readonly piPayments: OfficialPiPayments;
+  private readonly streamerEarnings = new Map<string, number>();
 
   private constructor() {
     this.piPayments = new OfficialPiPayments({
-      appId: 'triumph-streaming-hub',
+      appId: "triumph-streaming-hub",
       apiKey: process.env.NEXT_PUBLIC_PI_API_KEY!,
       apiSecret: process.env.PI_API_SECRET!,
-      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== 'false',
+      sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== "false",
     });
 
     this.initializePlatforms();
   }
 
   static getInstance(): StreamingAggregator {
-    if (!this.instance) {
-      this.instance = new StreamingAggregator();
+    if (!StreamingAggregator.instance) {
+      StreamingAggregator.instance = new StreamingAggregator();
     }
-    return this.instance;
+    return StreamingAggregator.instance;
   }
 
   /**
    * Initialize streaming platforms
    */
   private initializePlatforms(): void {
-    this.platforms.set('twitch', {
-      id: 'twitch',
-      name: 'Twitch',
-      baseUrl: 'https://api.twitch.tv',
+    this.platforms.set("twitch", {
+      id: "twitch",
+      name: "Twitch",
+      baseUrl: "https://api.twitch.tv",
       apiKey: process.env.TWITCH_API_KEY,
       apiSecret: process.env.TWITCH_API_SECRET,
       webhookUrl: `${process.env.NEXT_PUBLIC_API_URL}/api/webhooks/twitch`,
@@ -117,10 +112,10 @@ export class StreamingAggregator {
       },
     });
 
-    this.platforms.set('youtube', {
-      id: 'youtube',
-      name: 'YouTube Gaming',
-      baseUrl: 'https://www.googleapis.com/youtube/v3',
+    this.platforms.set("youtube", {
+      id: "youtube",
+      name: "YouTube Gaming",
+      baseUrl: "https://www.googleapis.com/youtube/v3",
       apiKey: process.env.YOUTUBE_API_KEY,
       apiSecret: process.env.YOUTUBE_API_SECRET,
       webhookUrl: `${process.env.NEXT_PUBLIC_API_URL}/api/webhooks/youtube`,
@@ -132,10 +127,10 @@ export class StreamingAggregator {
       },
     });
 
-    this.platforms.set('kick', {
-      id: 'kick',
-      name: 'Kick',
-      baseUrl: 'https://api.kick.com',
+    this.platforms.set("kick", {
+      id: "kick",
+      name: "Kick",
+      baseUrl: "https://api.kick.com",
       apiKey: process.env.KICK_API_KEY,
       apiSecret: process.env.KICK_API_SECRET,
       webhookUrl: `${process.env.NEXT_PUBLIC_API_URL}/api/webhooks/kick`,
@@ -153,11 +148,11 @@ export class StreamingAggregator {
    */
   async startSession(
     streamerId: string,
-    platform: 'twitch' | 'youtube' | 'kick' | 'trovo',
+    platform: "twitch" | "youtube" | "kick" | "trovo",
     gamingPlatform: string
   ): Promise<StreamingSession> {
     const sessionId = `stream-${streamerId}-${platform}-${Date.now()}`;
-    
+
     const session: StreamingSession = {
       sessionId,
       streamerId,
@@ -168,12 +163,12 @@ export class StreamingAggregator {
       peakViewers: 0,
       avgWatchTime: 0,
       totalEarned: 0,
-      status: 'active',
+      status: "active",
     };
 
     this.sessions.set(sessionId, session);
     console.log(`✅ Streaming session started: ${sessionId}`);
-    
+
     return session;
   }
 
@@ -199,7 +194,8 @@ export class StreamingAggregator {
     // Calculate earnings for this update
     const platformConfig = this.platforms.get(session.platform);
     if (platformConfig) {
-      const earnedThisUpdate = currentViewers * platformConfig.rewardConfig.perViewer;
+      const earnedThisUpdate =
+        currentViewers * platformConfig.rewardConfig.perViewer;
       session.totalEarned += earnedThisUpdate;
     }
   }
@@ -209,7 +205,7 @@ export class StreamingAggregator {
    */
   async recordEvent(
     sessionId: string,
-    eventType: 'subscribe' | 'donate' | 'cheer' | 'raid',
+    eventType: "subscribe" | "donate" | "cheer" | "raid",
     userId: string,
     amount?: number
   ): Promise<void> {
@@ -232,16 +228,17 @@ export class StreamingAggregator {
     const platformConfig = this.platforms.get(session.platform);
     if (platformConfig) {
       let bonus = 0;
-      
-      if (eventType === 'subscribe') {
+
+      if (eventType === "subscribe") {
         bonus = platformConfig.rewardConfig.subscribeBonus;
-      } else if (eventType === 'donate' && amount) {
+      } else if (eventType === "donate" && amount) {
         bonus = amount * platformConfig.rewardConfig.donateMultiplier;
       }
 
       if (bonus > 0) {
         session.totalEarned += bonus;
-        const currentEarnings = this.streamerEarnings.get(session.streamerId) || 0;
+        const currentEarnings =
+          this.streamerEarnings.get(session.streamerId) || 0;
         this.streamerEarnings.set(session.streamerId, currentEarnings + bonus);
       }
     }
@@ -260,7 +257,7 @@ export class StreamingAggregator {
       throw new Error(`Session ${sessionId} not found`);
     }
 
-    session.status = 'ended';
+    session.status = "ended";
     session.endTime = new Date();
 
     // ✅ CRITICAL: Enforce Pi origin verification for streaming earnings
@@ -269,7 +266,7 @@ export class StreamingAggregator {
     const enforceResult = await enforceStreamingPayment(
       session.streamerId,
       session.totalEarned,
-      'earnings',
+      "earnings",
       `Streaming earnings from ${session.platform} (${session.gamingPlatform})`
     );
 
@@ -283,16 +280,18 @@ export class StreamingAggregator {
     const payment = await this.piPayments.createPayment({
       amount: session.totalEarned,
       memo: `Streaming earnings from ${session.platform} (${session.gamingPlatform}) [INTERNAL PI VERIFIED]`,
-      metadata: { 
-        streamerId: session.streamerId, 
-        sessionId, 
+      metadata: {
+        streamerId: session.streamerId,
+        sessionId,
         platform: session.platform,
         originEnforced: true, // Mark as origin-verified
-        piSource: 'internal', // Record source
+        piSource: "internal", // Record source
       },
     });
 
-    console.log(`✅ Session ended. Earnings: ${session.totalEarned} Pi [Origin Verified]`);
+    console.log(
+      `✅ Session ended. Earnings: ${session.totalEarned} Pi [Origin Verified]`
+    );
 
     return {
       earnings: session.totalEarned,
@@ -318,14 +317,21 @@ export class StreamingAggregator {
     avgViewers: number;
   } {
     const streamerSessions = Array.from(this.sessions.values()).filter(
-      s => s.streamerId === streamerId
+      (s) => s.streamerId === streamerId
     );
 
-    const activeSessions = streamerSessions.filter(s => s.status === 'active').length;
-    const totalEarnings = streamerSessions.reduce((sum, s) => sum + s.totalEarned, 0);
-    const avgViewers = streamerSessions.length > 0
-      ? streamerSessions.reduce((sum, s) => sum + s.avgWatchTime, 0) / streamerSessions.length
-      : 0;
+    const activeSessions = streamerSessions.filter(
+      (s) => s.status === "active"
+    ).length;
+    const totalEarnings = streamerSessions.reduce(
+      (sum, s) => sum + s.totalEarned,
+      0
+    );
+    const avgViewers =
+      streamerSessions.length > 0
+        ? streamerSessions.reduce((sum, s) => sum + s.avgWatchTime, 0) /
+          streamerSessions.length
+        : 0;
 
     return {
       totalEarnings,
@@ -338,20 +344,28 @@ export class StreamingAggregator {
   /**
    * Get platform statistics
    */
-  getPlatformStats(platform: 'twitch' | 'youtube' | 'kick' | 'trovo'): {
+  getPlatformStats(platform: "twitch" | "youtube" | "kick" | "trovo"): {
     activeSessions: number;
     totalStreamers: number;
     totalEarnings: number;
     totalViewers: number;
   } {
     const platformSessions = Array.from(this.sessions.values()).filter(
-      s => s.platform === platform
+      (s) => s.platform === platform
     );
 
-    const activeSessions = platformSessions.filter(s => s.status === 'active').length;
-    const streamers = new Set(platformSessions.map(s => s.streamerId));
-    const totalEarnings = platformSessions.reduce((sum, s) => sum + s.totalEarned, 0);
-    const totalViewers = platformSessions.reduce((sum, s) => sum + s.viewers, 0);
+    const activeSessions = platformSessions.filter(
+      (s) => s.status === "active"
+    ).length;
+    const streamers = new Set(platformSessions.map((s) => s.streamerId));
+    const totalEarnings = platformSessions.reduce(
+      (sum, s) => sum + s.totalEarned,
+      0
+    );
+    const totalViewers = platformSessions.reduce(
+      (sum, s) => sum + s.viewers,
+      0
+    );
 
     return {
       activeSessions,
@@ -365,7 +379,7 @@ export class StreamingAggregator {
    * Get all session events
    */
   getSessionEvents(sessionId: string): StreamingEvent[] {
-    return this.events.filter(e => e.sessionId === sessionId);
+    return this.events.filter((e) => e.sessionId === sessionId);
   }
 
   /**
@@ -377,12 +391,17 @@ export class StreamingAggregator {
     totalEarningsToday: number;
     platformBreakdown: Record<string, number>;
   } {
-    const activeSessions = Array.from(this.sessions.values()).filter(s => s.status === 'active');
-    const streamers = new Set(Array.from(this.sessions.values()).map(s => s.streamerId));
-    
+    const activeSessions = Array.from(this.sessions.values()).filter(
+      (s) => s.status === "active"
+    );
+    const streamers = new Set(
+      Array.from(this.sessions.values()).map((s) => s.streamerId)
+    );
+
     const platformBreakdown: Record<string, number> = {};
     for (const session of this.sessions.values()) {
-      platformBreakdown[session.platform] = (platformBreakdown[session.platform] || 0) + session.totalEarned;
+      platformBreakdown[session.platform] =
+        (platformBreakdown[session.platform] || 0) + session.totalEarned;
     }
 
     return {

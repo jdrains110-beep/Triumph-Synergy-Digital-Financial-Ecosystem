@@ -12,7 +12,7 @@
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface Property {
+export type Property = {
   id: string;
   mlsNumber: string;
   listingType: ListingType;
@@ -53,7 +53,7 @@ export interface Property {
   views: number;
   saves: number;
   inquiries: number;
-}
+};
 
 export type ListingType = "sale" | "rent" | "lease" | "auction" | "development";
 export type PropertyType =
@@ -79,7 +79,7 @@ export type PropertyStatus =
   | "coming-soon"
   | "development";
 
-export interface PropertyAddress {
+export type PropertyAddress = {
   street: string;
   unit: string | null;
   city: string;
@@ -87,9 +87,9 @@ export interface PropertyAddress {
   zip: string;
   county: string;
   country: string;
-}
+};
 
-export interface PropertyDetails {
+export type PropertyDetails = {
   bedrooms: number;
   bathrooms: number;
   halfBaths: number;
@@ -106,11 +106,11 @@ export interface PropertyDetails {
   hoaFrequency: "monthly" | "quarterly" | "annual" | null;
   propertyTax: number;
   zoning: string;
-}
+};
 
 export type BasementType = "none" | "partial" | "full" | "finished" | "walkout";
 
-export interface PropertyFeatures {
+export type PropertyFeatures = {
   interior: string[];
   exterior: string[];
   appliances: string[];
@@ -120,17 +120,17 @@ export interface PropertyFeatures {
   utilities: string[];
   accessibility: string[];
   green: string[];
-}
+};
 
-export interface PropertyImage {
+export type PropertyImage = {
   id: string;
   url: string;
   caption: string;
   category: "exterior" | "interior" | "aerial" | "floorplan" | "other";
   order: number;
-}
+};
 
-export interface PropertyPricing {
+export type PropertyPricing = {
   listPrice: number;
   pricePerSqFt: number;
   piEquivalent: number;
@@ -139,15 +139,15 @@ export interface PropertyPricing {
   priceHistory: PriceHistoryEntry[];
   estimatedValue: number;
   rentalEstimate: number | null;
-}
+};
 
-export interface PriceHistoryEntry {
+export type PriceHistoryEntry = {
   date: Date;
   price: number;
   event: "listed" | "price-change" | "sold" | "relisted";
-}
+};
 
-export interface RealEstateAgent {
+export type RealEstateAgent = {
   id: string;
   licenseNumber: string;
   licenseState: string;
@@ -163,7 +163,7 @@ export interface RealEstateAgent {
   reviewCount: number;
   piWalletAddress: string;
   verified: boolean;
-  
+
   // Subscription Hub Fields
   subscriptionTier?: AgentSubscriptionTier;
   subscriptionStatus?: AgentSubscriptionStatus;
@@ -173,7 +173,7 @@ export interface RealEstateAgent {
   monthlyFeeInPi?: number;
   commissionRate?: number;
   piCommissionBonus?: number;
-  
+
   // Performance Metrics
   totalListings?: number;
   activeListings?: number;
@@ -183,42 +183,58 @@ export interface RealEstateAgent {
   averageListingPrice?: number;
   averageDaysOnMarket?: number;
   clientSatisfactionScore?: number;
-  
+
   // Lead Management
   leads?: AgentLead[];
   totalLeads?: number;
   convertedLeads?: number;
-  
+
   // Tools Access
   accessLevel?: string[];
   crmAccess?: boolean;
   mlsIntegration?: boolean;
   virtualTourTools?: boolean;
   marketingAutomation?: boolean;
-  
+
   createdAt?: Date;
   lastActiveAt?: Date;
-}
+};
 
 // ============================================================================
 // REAL ESTATE AGENT HUB - SUBSCRIPTION SYSTEM
 // ============================================================================
 
-export type AgentSubscriptionTier = "basic" | "professional" | "broker" | "enterprise";
-export type AgentSubscriptionStatus = "trial" | "active" | "past_due" | "suspended" | "cancelled";
+export type AgentSubscriptionTier =
+  | "basic"
+  | "professional"
+  | "broker"
+  | "enterprise";
+export type AgentSubscriptionStatus =
+  | "trial"
+  | "active"
+  | "past_due"
+  | "suspended"
+  | "cancelled";
 
-export interface AgentLead {
+export type AgentLead = {
   id: string;
   agentId: string;
   type: "buyer" | "seller" | "investor" | "renter";
-  status: "new" | "contacted" | "qualified" | "showing" | "offer" | "closed" | "lost";
-  
+  status:
+    | "new"
+    | "contacted"
+    | "qualified"
+    | "showing"
+    | "offer"
+    | "closed"
+    | "lost";
+
   // Contact Info
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  
+
   // Requirements
   propertyType: PropertyType[];
   minBudget: number;
@@ -226,21 +242,27 @@ export interface AgentLead {
   desiredLocation: string[];
   timeline: string;
   preApproved: boolean;
-  
+
   // Tracking
-  source: "website" | "referral" | "pi-network" | "advertising" | "open-house" | "other";
+  source:
+    | "website"
+    | "referral"
+    | "pi-network"
+    | "advertising"
+    | "open-house"
+    | "other";
   notes: string[];
   nextFollowUp: Date | null;
-  
+
   // Financial
   estimatedCommission: number;
   estimatedPiBonus: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface AgentSubscriptionPlan {
+export type AgentSubscriptionPlan = {
   tier: AgentSubscriptionTier;
   name: string;
   monthlyPrice: number;
@@ -257,9 +279,9 @@ export interface AgentSubscriptionPlan {
   virtualTourTools: boolean;
   marketingAutomation: boolean;
   supportLevel: "community" | "email" | "priority" | "dedicated";
-}
+};
 
-export interface PropertyTransaction {
+export type PropertyTransaction = {
   id: string;
   propertyId: string;
   transactionType: "purchase" | "sale" | "lease" | "refinance";
@@ -298,7 +320,7 @@ export interface PropertyTransaction {
 
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type TransactionStatus =
   | "draft"
@@ -325,7 +347,7 @@ export type FinancingType =
   | "seller-financing"
   | "hard-money";
 
-export interface TransactionDocument {
+export type TransactionDocument = {
   id: string;
   name: string;
   type: DocumentType;
@@ -333,7 +355,7 @@ export interface TransactionDocument {
   uploadedAt: Date;
   signedAt: Date | null;
   signers: string[];
-}
+};
 
 export type DocumentType =
   | "purchase-agreement"
@@ -346,15 +368,15 @@ export type DocumentType =
   | "deed"
   | "other";
 
-export interface Contingency {
+export type Contingency = {
   id: string;
   type: "financing" | "inspection" | "appraisal" | "sale" | "other";
   description: string;
   deadline: Date;
   status: "pending" | "satisfied" | "waived" | "failed";
-}
+};
 
-export interface DevelopmentProject {
+export type DevelopmentProject = {
   id: string;
   name: string;
   description: string;
@@ -395,7 +417,7 @@ export interface DevelopmentProject {
 
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type DevelopmentType =
   | "residential-subdivision"
@@ -417,12 +439,12 @@ export type DevelopmentStatus =
   | "selling"
   | "complete";
 
-export interface UnitBreakdown {
+export type UnitBreakdown = {
   type: string;
   count: number;
   sqFtRange: { min: number; max: number };
   priceRange: { min: number; max: number };
-}
+};
 
 export type EnvironmentalReviewStatus =
   | "not-started"
@@ -431,7 +453,7 @@ export type EnvironmentalReviewStatus =
   | "conditional"
   | "rejected";
 
-export interface DevelopmentPhase {
+export type DevelopmentPhase = {
   id: string;
   name: string;
   description: string;
@@ -440,25 +462,25 @@ export interface DevelopmentPhase {
   status: "pending" | "in-progress" | "complete";
   completionPercentage: number;
   milestones: PhaseMilestone[];
-}
+};
 
-export interface PhaseMilestone {
+export type PhaseMilestone = {
   id: string;
   name: string;
   targetDate: Date;
   completedDate: Date | null;
   status: "pending" | "complete" | "delayed";
-}
+};
 
-export interface ProjectInvestor {
+export type ProjectInvestor = {
   userId: string;
   investmentAmount: number;
   equityPercentage: number;
   investmentDate: Date;
   piTransactionId: string | null;
-}
+};
 
-export interface Title {
+export type Title = {
   id: string;
   propertyId: string;
   currentOwner: string;
@@ -481,9 +503,9 @@ export interface Title {
 
   lastSearched: Date;
   lastTransferred: Date;
-}
+};
 
-export interface TitleChainEntry {
+export type TitleChainEntry = {
   id: string;
   grantor: string;
   grantee: string;
@@ -491,9 +513,9 @@ export interface TitleChainEntry {
   documentType: "deed" | "mortgage" | "release" | "other";
   recordingInfo: string;
   consideration: number;
-}
+};
 
-export interface Encumbrance {
+export type Encumbrance = {
   id: string;
   type: "mortgage" | "lien" | "easement" | "restriction" | "judgment";
   holder: string;
@@ -501,16 +523,16 @@ export interface Encumbrance {
   description: string;
   recordedDate: Date;
   releaseDate: Date | null;
-}
+};
 
-export interface TitleIssue {
+export type TitleIssue = {
   id: string;
   type: string;
   description: string;
   severity: "low" | "medium" | "high" | "critical";
   resolution: string | null;
   status: "open" | "resolved";
-}
+};
 
 // ============================================================================
 // REAL ESTATE ENGINE
@@ -519,11 +541,11 @@ export interface TitleIssue {
 export class RealEstatePlatform {
   private static instance: RealEstatePlatform;
 
-  private properties: Map<string, Property> = new Map();
-  private agents: Map<string, RealEstateAgent> = new Map();
-  private transactions: Map<string, PropertyTransaction> = new Map();
-  private projects: Map<string, DevelopmentProject> = new Map();
-  private titles: Map<string, Title> = new Map();
+  private readonly properties: Map<string, Property> = new Map();
+  private readonly agents: Map<string, RealEstateAgent> = new Map();
+  private readonly transactions: Map<string, PropertyTransaction> = new Map();
+  private readonly projects: Map<string, DevelopmentProject> = new Map();
+  private readonly titles: Map<string, Title> = new Map();
 
   private readonly PI_TO_USD = 314.159;
 
@@ -956,7 +978,7 @@ export class RealEstatePlatform {
         monthlyPriceInPi: 79 / this.PI_TO_USD,
         annualPrice: 758,
         annualPriceInPi: 758 / this.PI_TO_USD,
-        commissionSplit: 0.70,
+        commissionSplit: 0.7,
         piBonus: 0.02,
         features: [
           "Up to 10 active listings",
@@ -982,7 +1004,7 @@ export class RealEstatePlatform {
         monthlyPriceInPi: 199 / this.PI_TO_USD,
         annualPrice: 1910,
         annualPriceInPi: 1910 / this.PI_TO_USD,
-        commissionSplit: 0.80,
+        commissionSplit: 0.8,
         piBonus: 0.03,
         features: [
           "Up to 50 active listings",
@@ -1039,9 +1061,9 @@ export class RealEstatePlatform {
         name: "Enterprise Brokerage",
         monthlyPrice: 1499,
         monthlyPriceInPi: 1499 / this.PI_TO_USD,
-        annualPrice: 14390,
-        annualPriceInPi: 14390 / this.PI_TO_USD,
-        commissionSplit: 0.90,
+        annualPrice: 14_390,
+        annualPriceInPi: 14_390 / this.PI_TO_USD,
+        commissionSplit: 0.9,
         piBonus: 0.05,
         features: [
           "All Broker features",
@@ -1068,7 +1090,11 @@ export class RealEstatePlatform {
     ];
   }
 
-  async subscribeAgent(agentId: string, tier: AgentSubscriptionTier, payWithPi = false): Promise<RealEstateAgent> {
+  async subscribeAgent(
+    agentId: string,
+    tier: AgentSubscriptionTier,
+    payWithPi = false
+  ): Promise<RealEstateAgent> {
     const agent = this.agents.get(agentId);
     if (!agent) {
       throw new Error("Agent not found");
@@ -1103,7 +1129,10 @@ export class RealEstatePlatform {
     return agent;
   }
 
-  async addAgentLead(agentId: string, leadData: Omit<AgentLead, "id" | "agentId" | "createdAt" | "updatedAt">): Promise<AgentLead> {
+  async addAgentLead(
+    agentId: string,
+    leadData: Omit<AgentLead, "id" | "agentId" | "createdAt" | "updatedAt">
+  ): Promise<AgentLead> {
     const agent = this.agents.get(agentId);
     if (!agent) {
       throw new Error("Agent not found");
@@ -1125,7 +1154,11 @@ export class RealEstatePlatform {
     return lead;
   }
 
-  async updateLeadStatus(agentId: string, leadId: string, status: AgentLead["status"]): Promise<AgentLead> {
+  async updateLeadStatus(
+    agentId: string,
+    leadId: string,
+    status: AgentLead["status"]
+  ): Promise<AgentLead> {
     const agent = this.agents.get(agentId);
     if (!agent) {
       throw new Error("Agent not found");
@@ -1142,7 +1175,8 @@ export class RealEstatePlatform {
 
     if (status === "closed" && previousStatus !== "closed") {
       agent.convertedLeads = (agent.convertedLeads || 0) + 1;
-      agent.totalCommissionEarned = (agent.totalCommissionEarned || 0) + lead.estimatedCommission;
+      agent.totalCommissionEarned =
+        (agent.totalCommissionEarned || 0) + lead.estimatedCommission;
       agent.totalPiEarned = (agent.totalPiEarned || 0) + lead.estimatedPiBonus;
     }
 
@@ -1167,8 +1201,9 @@ export class RealEstatePlatform {
       throw new Error("Agent not found");
     }
 
-    const activeListings = Array.from(this.properties.values())
-      .filter((p) => p.agentId === agentId && p.status === "active");
+    const activeListings = Array.from(this.properties.values()).filter(
+      (p) => p.agentId === agentId && p.status === "active"
+    );
 
     const plans = this.getAgentSubscriptionPlans();
     const currentPlan = agent.subscriptionTier
@@ -1190,7 +1225,11 @@ export class RealEstatePlatform {
     };
   }
 
-  async recordAgentClosing(agentId: string, transactionId: string, paidWithPi = false): Promise<{
+  async recordAgentClosing(
+    agentId: string,
+    transactionId: string,
+    paidWithPi = false
+  ): Promise<{
     commission: number;
     piBonus: number;
   }> {
@@ -1204,12 +1243,16 @@ export class RealEstatePlatform {
       throw new Error("Transaction not found");
     }
 
-    const commission = transaction.purchasePrice * (agent.commissionRate || 0.03);
-    const piBonus = paidWithPi ? transaction.purchasePrice * (agent.piCommissionBonus || 0) : 0;
+    const commission =
+      transaction.purchasePrice * (agent.commissionRate || 0.03);
+    const piBonus = paidWithPi
+      ? transaction.purchasePrice * (agent.piCommissionBonus || 0)
+      : 0;
 
     agent.closedTransactions = (agent.closedTransactions || 0) + 1;
     agent.salesVolume += transaction.purchasePrice;
-    agent.totalCommissionEarned = (agent.totalCommissionEarned || 0) + commission;
+    agent.totalCommissionEarned =
+      (agent.totalCommissionEarned || 0) + commission;
     agent.totalPiEarned = (agent.totalPiEarned || 0) + piBonus;
     agent.lastActiveAt = new Date();
 
@@ -1221,8 +1264,9 @@ export class RealEstatePlatform {
     status?: AgentSubscriptionStatus;
     state?: string;
   }): Promise<RealEstateAgent[]> {
-    let agents = Array.from(this.agents.values())
-      .filter((a) => a.subscriptionTier !== undefined);
+    let agents = Array.from(this.agents.values()).filter(
+      (a) => a.subscriptionTier !== undefined
+    );
 
     if (filters?.tier) {
       agents = agents.filter((a) => a.subscriptionTier === filters.tier);

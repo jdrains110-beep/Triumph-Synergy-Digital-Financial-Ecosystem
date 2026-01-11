@@ -1,16 +1,16 @@
 /**
  * Smart Contracts API Route
- * 
+ *
  * Handles GitHub integration, contract management, and deployment
  */
 
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  smartContractHub,
-  createContract,
   compileContract,
-  deployContract,
   connectGitHub,
+  createContract,
+  deployContract,
+  smartContractHub,
   syncFromGitHub,
 } from "@/lib/smart-contracts/smart-contract-hub";
 
@@ -21,24 +21,39 @@ export async function GET(request: NextRequest) {
 
   try {
     switch (action) {
-      case "list":
+      case "list": {
         const contracts = await smartContractHub.listContracts();
         return NextResponse.json({ success: true, contracts });
+      }
 
-      case "get":
+      case "get": {
         if (!contractId) {
-          return NextResponse.json({ success: false, error: "Contract ID required" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: "Contract ID required" },
+            { status: 400 }
+          );
         }
         const contract = await smartContractHub.getContract(contractId);
         return NextResponse.json({ success: true, contract });
+      }
 
-      case "templates":
+      case "templates": {
         const templates = smartContractHub.listTemplates();
-        return NextResponse.json({ success: true, templates: templates.map(t => ({ id: t.id, name: t.name, category: t.category, language: t.language })) });
+        return NextResponse.json({
+          success: true,
+          templates: templates.map((t) => ({
+            id: t.id,
+            name: t.name,
+            category: t.category,
+            language: t.language,
+          })),
+        });
+      }
 
-      case "github-repos":
+      case "github-repos": {
         const repos = smartContractHub.listRepositories();
         return NextResponse.json({ success: true, repos });
+      }
 
       default:
         return NextResponse.json({
@@ -49,13 +64,16 @@ export async function GET(request: NextRequest) {
             "GET ?action=get&contractId=X": "Get contract details",
             "GET ?action=templates": "List Rust templates",
             "GET ?action=github-repos": "List connected GitHub repos",
-            "POST": "Create, compile, deploy contracts",
+            POST: "Create, compile, deploy contracts",
           },
         });
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
@@ -67,7 +85,7 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     switch (action) {
-      case "create":
+      case "create": {
         const newContract = await createContract({
           name: body.name,
           description: body.description || "Smart contract created via API",
@@ -77,26 +95,38 @@ export async function POST(request: NextRequest) {
           author: body.author || "triumph-synergy",
         });
         return NextResponse.json({ success: true, contract: newContract });
+      }
 
-      case "compile":
+      case "compile": {
         const compiled = await compileContract(body.contractId);
         return NextResponse.json({ success: true, contract: compiled });
+      }
 
-      case "deploy":
-        const deployed = await deployContract(body.contractId, body.network || "pi-mainnet");
+      case "deploy": {
+        const deployed = await deployContract(
+          body.contractId,
+          body.network || "pi-mainnet"
+        );
         return NextResponse.json({ success: true, contract: deployed });
+      }
 
-      case "connect-github":
+      case "connect-github": {
         const connection = await connectGitHub(
           body.owner,
           body.repo,
           body.accessToken
         );
         return NextResponse.json({ success: true, connection });
+      }
 
-      case "sync-github":
-        const synced = await syncFromGitHub(body.repoFullName, body.path, body.branch);
+      case "sync-github": {
+        const synced = await syncFromGitHub(
+          body.repoFullName,
+          body.path,
+          body.branch
+        );
         return NextResponse.json({ success: true, contract: synced });
+      }
 
       default:
         return NextResponse.json(
@@ -106,7 +136,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

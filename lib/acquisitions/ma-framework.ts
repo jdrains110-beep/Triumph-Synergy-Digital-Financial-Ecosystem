@@ -18,7 +18,7 @@ const PI_TO_USD_RATE = 314.159;
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface Company {
+export type Company = {
   id: string;
   legalName: string;
   tradeName: string;
@@ -68,7 +68,7 @@ export interface Company {
 
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type EntityType =
   | "corporation"
@@ -81,15 +81,15 @@ export type EntityType =
   | "cooperative"
   | "subsidiary";
 
-export interface CompanyAddress {
+export type CompanyAddress = {
   street: string;
   city: string;
   state: string;
   zip: string;
   country: string;
-}
+};
 
-export interface Executive {
+export type Executive = {
   name: string;
   title: string;
   email: string;
@@ -98,16 +98,16 @@ export interface Executive {
   compensation: number;
   shares: number;
   startDate: Date;
-}
+};
 
-export interface BoardMember {
+export type BoardMember = {
   name: string;
   role: "chairman" | "director" | "independent";
   committees: string[];
   shares: number;
-}
+};
 
-export interface TechAsset {
+export type TechAsset = {
   id: string;
   name: string;
   category: TechCategory;
@@ -122,7 +122,7 @@ export interface TechAsset {
   maintainers: number;
   linesOfCode: number;
   lastUpdate: Date;
-}
+};
 
 export type TechCategory =
   | "web-application"
@@ -137,16 +137,16 @@ export type TechCategory =
   | "blockchain"
   | "iot-platform";
 
-export interface Repository {
+export type Repository = {
   name: string;
   url: string;
   isPrivate: boolean;
   defaultBranch: string;
   lastCommit: Date;
   contributors: number;
-}
+};
 
-export interface IntellectualProperty {
+export type IntellectualProperty = {
   id: string;
   type: IPType;
   title: string;
@@ -156,7 +156,7 @@ export interface IntellectualProperty {
   jurisdiction: string;
   status: "pending" | "granted" | "expired" | "abandoned";
   value: number;
-}
+};
 
 export type IPType =
   | "patent"
@@ -166,7 +166,7 @@ export type IPType =
   | "domain"
   | "software-license";
 
-export interface Product {
+export type Product = {
   id: string;
   name: string;
   description: string;
@@ -176,9 +176,9 @@ export interface Product {
   mrr: number; // Monthly Recurring Revenue
   churnRate: number;
   status: "active" | "sunset" | "beta";
-}
+};
 
-export interface Contract {
+export type Contract = {
   id: string;
   type: "customer" | "vendor" | "partnership" | "employment" | "lease";
   counterparty: string;
@@ -188,9 +188,9 @@ export interface Contract {
   autoRenewal: boolean;
   terminationClause: string;
   assignable: boolean;
-}
+};
 
-export interface Acquisition {
+export type Acquisition = {
   id: string;
   dealName: string;
   type: AcquisitionType;
@@ -232,7 +232,7 @@ export interface Acquisition {
 
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type AcquisitionType =
   | "merger"
@@ -261,39 +261,39 @@ export type AcquisitionStatus =
   | "terminated"
   | "on-hold";
 
-export interface PaymentStructure {
+export type PaymentStructure = {
   cashAmount: number;
   stockAmount: number;
   piAmount: number;
   debtAssumption: number;
   escrow: { amount: number; period: number };
   paymentSchedule: PaymentMilestone[];
-}
+};
 
-export interface PaymentMilestone {
+export type PaymentMilestone = {
   description: string;
   amount: number;
   dueDate: Date;
   condition: string;
   paid: boolean;
-}
+};
 
-export interface Earnout {
+export type Earnout = {
   totalPotential: number;
   metrics: EarnoutMetric[];
   period: number; // months
   paymentFrequency: "monthly" | "quarterly" | "annually";
-}
+};
 
-export interface EarnoutMetric {
+export type EarnoutMetric = {
   name: string;
   target: number;
   achieved: number;
   payout: number;
   deadline: Date;
-}
+};
 
-export interface Valuation {
+export type Valuation = {
   method: ValuationMethod;
   enterpriseValue: number;
   equityValue: number;
@@ -302,7 +302,7 @@ export interface Valuation {
   comparables: Comparable[];
   premiumDiscount: number;
   notes: string;
-}
+};
 
 export type ValuationMethod =
   | "dcf"
@@ -312,31 +312,31 @@ export type ValuationMethod =
   | "revenue-multiple"
   | "ebitda-multiple";
 
-export interface ValuationMultiples {
+export type ValuationMultiples = {
   evRevenue: number;
   evEbitda: number;
   peRatio: number;
   pbRatio: number;
-}
+};
 
-export interface DCFAnalysis {
+export type DCFAnalysis = {
   projectionYears: number;
   discountRate: number;
   terminalGrowthRate: number;
   projectedCashFlows: number[];
   terminalValue: number;
   presentValue: number;
-}
+};
 
-export interface Comparable {
+export type Comparable = {
   company: string;
   evRevenue: number;
   evEbitda: number;
   recentDeal: boolean;
   dealDate: Date | null;
-}
+};
 
-export interface DueDiligence {
+export type DueDiligence = {
   status: "not-started" | "in-progress" | "completed";
   startDate: Date | null;
   endDate: Date | null;
@@ -359,17 +359,17 @@ export interface DueDiligence {
   // Data Room
   dataRoomUrl: string | null;
   dataRoomAccess: DataRoomAccess[];
-}
+};
 
-export interface DDArea {
+export type DDArea = {
   status: "not-started" | "in-progress" | "completed";
   lead: string;
   findings: DDFinding[];
   documents: string[];
   completionPercent: number;
-}
+};
 
-export interface DDFinding {
+export type DDFinding = {
   id: string;
   area: string;
   severity: "critical" | "high" | "medium" | "low";
@@ -378,9 +378,9 @@ export interface DDFinding {
   impact: string;
   mitigation: string;
   resolved: boolean;
-}
+};
 
-export interface DataRoomAccess {
+export type DataRoomAccess = {
   userId: string;
   name: string;
   email: string;
@@ -388,9 +388,9 @@ export interface DataRoomAccess {
   accessLevel: "full" | "limited" | "view-only";
   grantedAt: Date;
   expiresAt: Date;
-}
+};
 
-export interface IntegrationPlan {
+export type IntegrationPlan = {
   id: string;
   name: string;
   status: "planning" | "in-progress" | "completed";
@@ -418,9 +418,9 @@ export interface IntegrationPlan {
 
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface IntegrationMilestone {
+export type IntegrationMilestone = {
   id: string;
   name: string;
   description: string;
@@ -428,9 +428,9 @@ export interface IntegrationMilestone {
   dueDate: Date;
   status: "pending" | "in-progress" | "completed" | "at-risk" | "blocked";
   dependencies: string[];
-}
+};
 
-export interface IntegrationWorkstream {
+export type IntegrationWorkstream = {
   id: string;
   name: string;
   lead: string;
@@ -438,9 +438,9 @@ export interface IntegrationWorkstream {
   tasks: IntegrationTask[];
   budget: number;
   spend: number;
-}
+};
 
-export interface IntegrationTask {
+export type IntegrationTask = {
   id: string;
   name: string;
   description: string;
@@ -448,9 +448,9 @@ export interface IntegrationTask {
   dueDate: Date;
   status: "pending" | "in-progress" | "completed" | "blocked";
   priority: "critical" | "high" | "medium" | "low";
-}
+};
 
-export interface Synergy {
+export type Synergy = {
   id: string;
   type: "revenue" | "cost";
   category: string;
@@ -459,9 +459,9 @@ export interface Synergy {
   realizedAmount: number;
   timeline: number; // months to realize
   status: "identified" | "in-progress" | "realized" | "at-risk";
-}
+};
 
-export interface IntegrationRisk {
+export type IntegrationRisk = {
   id: string;
   title: string;
   description: string;
@@ -470,15 +470,15 @@ export interface IntegrationRisk {
   mitigation: string;
   owner: string;
   status: "open" | "mitigated" | "occurred";
-}
+};
 
-export interface DealTeamMember {
+export type DealTeamMember = {
   userId: string;
   name: string;
   role: DealRole;
   email: string;
   phone: string;
-}
+};
 
 export type DealRole =
   | "deal-lead"
@@ -491,7 +491,7 @@ export type DealRole =
   | "integration-lead"
   | "executive-sponsor";
 
-export interface DealDocument {
+export type DealDocument = {
   id: string;
   name: string;
   category: DocumentCategory;
@@ -500,7 +500,7 @@ export interface DealDocument {
   uploadedBy: string;
   uploadedAt: Date;
   status: "draft" | "review" | "final" | "executed";
-}
+};
 
 export type DocumentCategory =
   | "nda"
@@ -516,13 +516,13 @@ export type DocumentCategory =
   | "financial-model"
   | "due-diligence-report";
 
-export interface DealNote {
+export type DealNote = {
   id: string;
   author: string;
   content: string;
   createdAt: Date;
   isPrivate: boolean;
-}
+};
 
 // ============================================================================
 // M&A FRAMEWORK ENGINE
@@ -531,9 +531,9 @@ export interface DealNote {
 export class MAFramework {
   private static instance: MAFramework;
 
-  private companies: Map<string, Company> = new Map();
-  private acquisitions: Map<string, Acquisition> = new Map();
-  private integrationPlans: Map<string, IntegrationPlan> = new Map();
+  private readonly companies: Map<string, Company> = new Map();
+  private readonly acquisitions: Map<string, Acquisition> = new Map();
+  private readonly integrationPlans: Map<string, IntegrationPlan> = new Map();
 
   private constructor() {
     this.initializeTriumphSynergy();
@@ -747,7 +747,7 @@ export class MAFramework {
               projectionYears: 5,
               discountRate: 0.1,
               terminalGrowthRate: 0.03,
-              projectedCashFlows: Array(5)
+              projectedCashFlows: new Array(5)
                 .fill(0)
                 .map((_, i) => ebitda * 1.15 ** (i + 1)),
               terminalValue: enterpriseValue * 0.6,

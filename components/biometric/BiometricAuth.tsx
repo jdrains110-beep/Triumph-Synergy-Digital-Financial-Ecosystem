@@ -321,7 +321,10 @@ export function BiometricAuth({
           </div>
 
           <div>
-            <label className="mb-2 block font-medium text-gray-700 text-sm">
+            <label
+              className="mb-2 block font-medium text-gray-700 text-sm"
+              htmlFor="pin-input"
+            >
               PIN
             </label>
             <input
@@ -332,6 +335,7 @@ export function BiometricAuth({
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               }`}
               disabled={isAuthenticating}
+              id="pin-input"
               onChange={(e) => {
                 setPin(e.target.value);
                 setPinError("");

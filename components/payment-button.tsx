@@ -1,5 +1,6 @@
 "use client";
 
+import { CreditCardIcon, ShoppingCartIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreditCardIcon, ShoppingCartIcon } from "lucide-react";
 
 export function PaymentButton() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export function PaymentButton() {
   const [open, setOpen] = useState(false);
 
   const handlePayment = async () => {
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || Number.parseFloat(amount) <= 0) {
       alert("Please enter a valid amount");
       return;
     }
@@ -41,11 +41,11 @@ export function PaymentButton() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         <Button
-          variant="default"
           className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          variant="default"
         >
           <ShoppingCartIcon className="h-4 w-4" />
           <span>Buy Pi</span>
@@ -64,20 +64,20 @@ export function PaymentButton() {
         </DialogHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="amount" className="text-base font-semibold">
+            <Label className="font-semibold text-base" htmlFor="amount">
               Amount (π Pi)
             </Label>
             <Input
+              className="text-lg"
               id="amount"
-              type="number"
               min="0.01"
-              step="0.01"
-              value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="10"
-              className="text-lg"
+              step="0.01"
+              type="number"
+              value={amount}
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-gray-500 text-xs">
               Minimum: 0.01 π | Maximum: 314,159 π
             </p>
           </div>
@@ -86,7 +86,7 @@ export function PaymentButton() {
             <div className="mb-3 font-semibold text-blue-900 dark:text-blue-100">
               Transaction Details
             </div>
-            <div className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+            <div className="space-y-2 text-blue-800 text-sm dark:text-blue-200">
               <div className="flex justify-between">
                 <span>Amount:</span>
                 <span className="font-medium">π {amount}</span>
@@ -103,16 +103,16 @@ export function PaymentButton() {
           </div>
 
           <Button
-            onClick={handlePayment}
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 py-6 font-semibold text-base hover:from-green-700 hover:to-emerald-700"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 py-6 text-base font-semibold hover:from-green-700 hover:to-emerald-700"
+            onClick={handlePayment}
           >
             {isLoading ? "Processing..." : "Proceed to Payment"}
           </Button>
 
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-gray-500 text-xs">
             By proceeding, you agree to our{" "}
-            <a href="#" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="#">
               Payment Terms
             </a>
           </p>
