@@ -62,7 +62,10 @@
       },
       "performance": {
         /* Turned off to prevent VS Code crashes */
-        "noNamespaceImport": "off"
+        "noNamespaceImport": "off",
+
+        /* Index files for clean module exports are acceptable */
+        "noBarrelFile": "off"
       },
       "a11y": {
         /* Needs more work to fix */

@@ -137,12 +137,16 @@ export function PiPaymentForm({
         </div>
 
         <div className="space-y-2">
-          <label className="block font-medium text-gray-700 text-sm">
+          <label
+            className="block font-medium text-gray-700 text-sm"
+            htmlFor="order-id"
+          >
             Order ID
           </label>
           <Input
             className="w-full"
             disabled={!!initialOrderId}
+            id="order-id"
             onChange={(e) => setOrderId(e.target.value)}
             placeholder="Enter order ID"
             type="text"
@@ -151,12 +155,16 @@ export function PiPaymentForm({
         </div>
 
         <div className="space-y-2">
-          <label className="block font-medium text-gray-700 text-sm">
+          <label
+            className="block font-medium text-gray-700 text-sm"
+            htmlFor="payment-amount"
+          >
             Amount (π)
           </label>
           <div className="flex items-center gap-2">
             <Input
               className="flex-1"
+              id="payment-amount"
               max="100000"
               min="1"
               onChange={(e) => setAmount(e.target.value)}
@@ -171,11 +179,15 @@ export function PiPaymentForm({
         </div>
 
         <div className="space-y-2">
-          <label className="block font-medium text-gray-700 text-sm">
+          <label
+            className="block font-medium text-gray-700 text-sm"
+            htmlFor="payment-description"
+          >
             Description (Optional)
           </label>
           <Input
             className="w-full"
+            id="payment-description"
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Payment description"
             type="text"

@@ -122,7 +122,12 @@ export function Marketplace() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="marketplace-token-id" className="font-medium text-sm">Token ID</label>
+                <label
+                  className="font-medium text-sm"
+                  htmlFor="marketplace-token-id"
+                >
+                  Token ID
+                </label>
                 <Input
                   id="marketplace-token-id"
                   onChange={(e) =>
@@ -133,7 +138,12 @@ export function Marketplace() {
                 />
               </div>
               <div>
-                <label htmlFor="marketplace-amount" className="font-medium text-sm">Amount</label>
+                <label
+                  className="font-medium text-sm"
+                  htmlFor="marketplace-amount"
+                >
+                  Amount
+                </label>
                 <Input
                   id="marketplace-amount"
                   onChange={(e) =>
@@ -148,7 +158,10 @@ export function Marketplace() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="marketplace-price" className="font-medium text-sm">
+                <label
+                  className="font-medium text-sm"
+                  htmlFor="marketplace-price"
+                >
                   Price per Unit (Pi)
                 </label>
                 <Input
@@ -163,7 +176,12 @@ export function Marketplace() {
                 />
               </div>
               <div>
-                <label htmlFor="marketplace-category" className="font-medium text-sm">Category</label>
+                <label
+                  className="font-medium text-sm"
+                  htmlFor="marketplace-category"
+                >
+                  Category
+                </label>
                 <Input
                   id="marketplace-category"
                   onChange={(e) =>
@@ -176,10 +194,15 @@ export function Marketplace() {
             </div>
 
             <div>
-              <label htmlFor="marketplace-description" className="font-medium text-sm">Description</label>
+              <label
+                className="font-medium text-sm"
+                htmlFor="marketplace-description"
+              >
+                Description
+              </label>
               <textarea
-                id="marketplace-description"
                 className="w-full rounded border px-3 py-2"
+                id="marketplace-description"
                 onChange={(e) =>
                   setSellForm({ ...sellForm, description: e.target.value })
                 }

@@ -60,8 +60,11 @@ export function TradingInterface() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="font-medium text-sm">From Token</label>
+              <label className="font-medium text-sm" htmlFor="from-token">
+                From Token
+              </label>
               <Input
+                id="from-token"
                 onChange={(e) =>
                   setFormData({ ...formData, tokenA: e.target.value })
                 }
@@ -70,8 +73,11 @@ export function TradingInterface() {
               />
             </div>
             <div>
-              <label className="font-medium text-sm">To Token</label>
+              <label className="font-medium text-sm" htmlFor="to-token">
+                To Token
+              </label>
               <Input
+                id="to-token"
                 onChange={(e) =>
                   setFormData({ ...formData, tokenB: e.target.value })
                 }
@@ -82,8 +88,11 @@ export function TradingInterface() {
           </div>
 
           <div>
-            <label className="font-medium text-sm">Amount</label>
+            <label className="font-medium text-sm" htmlFor="swap-amount">
+              Amount
+            </label>
             <Input
+              id="swap-amount"
               onChange={(e) =>
                 setFormData({ ...formData, amountA: e.target.value })
               }

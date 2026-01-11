@@ -149,7 +149,7 @@ export function ContractManagementPage() {
             <div className="space-y-3">
               {contracts.map((contract) => (
                 <button
-                  className="w-full text-left rounded-lg border p-4 hover:bg-gray-50 transition-colors"
+                  className="w-full rounded-lg border p-4 text-left transition-colors hover:bg-gray-50"
                   key={contract.id}
                   onClick={() => handleSelectContract(contract.id)}
                   type="button"

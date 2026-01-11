@@ -3,6 +3,11 @@
  * Used for WebAuthn credential handling
  */
 
+// Performance: Define regex at module level
+const PLUS_REGEX = /\+/g;
+const SLASH_REGEX = /\//g;
+const EQUALS_REGEX = /=+$/;
+
 export const base64url = {
   /**
    * Encode buffer to base64url string
@@ -17,9 +22,9 @@ export const base64url = {
     }
 
     return btoa(binary)
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
+      .replace(PLUS_REGEX, "-")
+      .replace(SLASH_REGEX, "_")
+      .replace(EQUALS_REGEX, "");
   },
 
   /**

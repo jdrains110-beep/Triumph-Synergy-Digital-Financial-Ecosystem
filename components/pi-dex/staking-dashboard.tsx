@@ -51,8 +51,11 @@ export function StakingDashboard() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="font-medium text-sm">Token ID</label>
+            <label className="font-medium text-sm" htmlFor="staking-token-id">
+              Token ID
+            </label>
             <Input
+              id="staking-token-id"
               onChange={(e) =>
                 setFormData({ ...formData, tokenId: e.target.value })
               }
@@ -62,8 +65,11 @@ export function StakingDashboard() {
           </div>
 
           <div>
-            <label className="font-medium text-sm">Amount</label>
+            <label className="font-medium text-sm" htmlFor="staking-amount">
+              Amount
+            </label>
             <Input
+              id="staking-amount"
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
@@ -74,9 +80,15 @@ export function StakingDashboard() {
           </div>
 
           <div>
-            <label className="font-medium text-sm">Lockup Period (days)</label>
+            <label
+              className="font-medium text-sm"
+              htmlFor="staking-lockup-period"
+            >
+              Lockup Period (days)
+            </label>
             <select
               className="w-full rounded border px-3 py-2"
+              id="staking-lockup-period"
               onChange={(e) =>
                 setFormData({
                   ...formData,

@@ -51,8 +51,11 @@ export function TokenCreator() {
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="font-medium text-sm">Token Name</label>
+            <label className="font-medium text-sm" htmlFor="token-name">
+              Token Name
+            </label>
             <Input
+              id="token-name"
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
@@ -63,8 +66,11 @@ export function TokenCreator() {
           </div>
 
           <div>
-            <label className="font-medium text-sm">Symbol</label>
+            <label className="font-medium text-sm" htmlFor="token-symbol">
+              Symbol
+            </label>
             <Input
+              id="token-symbol"
               maxLength={10}
               onChange={(e) =>
                 setFormData({ ...formData, symbol: e.target.value })
@@ -76,8 +82,11 @@ export function TokenCreator() {
           </div>
 
           <div>
-            <label className="font-medium text-sm">Total Supply</label>
+            <label className="font-medium text-sm" htmlFor="token-supply">
+              Total Supply
+            </label>
             <Input
+              id="token-supply"
               onChange={(e) =>
                 setFormData({ ...formData, totalSupply: e.target.value })
               }

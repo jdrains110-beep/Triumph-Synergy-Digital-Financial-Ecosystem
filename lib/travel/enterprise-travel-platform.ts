@@ -754,7 +754,9 @@ class EnterpriseTravelPlatform {
       },
     ];
 
-    airports.forEach((airport) => this.airports.set(airport.code, airport));
+    for (const airport of airports) {
+      this.airports.set(airport.code, airport);
+    }
   }
 
   private initializeCruiseLines(): void {
@@ -886,7 +888,9 @@ class EnterpriseTravelPlatform {
       },
     ];
 
-    cruiseLines.forEach((line) => this.cruiseLines.set(line.id, line));
+    for (const line of cruiseLines) {
+      this.cruiseLines.set(line.id, line);
+    }
   }
 
   private initializeAirTaxiOperators(): void {
@@ -1006,7 +1010,9 @@ class EnterpriseTravelPlatform {
       },
     ];
 
-    operators.forEach((op) => this.airTaxiOperators.set(op.id, op));
+    for (const op of operators) {
+      this.airTaxiOperators.set(op.id, op);
+    }
   }
 
   // ==========================================================================

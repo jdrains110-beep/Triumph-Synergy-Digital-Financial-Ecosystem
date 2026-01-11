@@ -50,8 +50,6 @@ export class TransactionProcessor {
   private readonly maxTransactionAmount: number = 100_000; // 100k Pi
   private readonly minTransactionAmount: number = 1; // 1 Pi
   private readonly approvalTimeout: number = 5 * 60 * 1000; // 5 minutes
-  private apiKey: string;
-  private apiSecret: string;
 
   constructor() {
     this.apiKey = process.env.PI_API_KEY || "";

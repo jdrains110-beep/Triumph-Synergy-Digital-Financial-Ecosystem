@@ -18,6 +18,9 @@
 const PI_EXTERNAL_RATE = 314.159; // External non-contributed Pi
 const PI_INTERNAL_RATE = 314_159; // Internally mined/contributed Pi (1000x)
 const PI_INTERNAL_MULTIPLIER = 1000;
+
+// Performance: Define regex at module level
+const FILE_EXTENSION_REGEX = /\.[^.]+$/;
 const GITHUB_API_BASE = "https://api.github.com";
 const SUPPORTED_LANGUAGES = [
   "rust",
@@ -593,10 +596,7 @@ impl PiEscrow {
     const contract: SmartContract = {
       id,
       name:
-        path
-          .split("/")
-          .pop()
-          ?.replace(/\.[^.]+$/, "") || "Unknown",
+        path.split("/").pop()?.replace(FILE_EXTENSION_REGEX, "") || "Unknown",
       description: `Contract synced from ${repoFullName}/${path}`,
       version: "1.0.0",
       language,

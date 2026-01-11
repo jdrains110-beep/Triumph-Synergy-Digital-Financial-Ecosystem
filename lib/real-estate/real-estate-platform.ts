@@ -677,6 +677,10 @@ export class RealEstatePlatform {
       case "sqft":
         results.sort((a, b) => b.details.squareFeet - a.details.squareFeet);
         break;
+      default:
+        // Default to newest if sortBy is undefined or unrecognized
+        results.sort((a, b) => b.listedAt.getTime() - a.listedAt.getTime());
+        break;
     }
 
     const total = results.length;
