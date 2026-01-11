@@ -85,8 +85,8 @@ export enum PaymentStatus {
 export class PiSDKInitializer {
   private static instance: PiSDKInitializer | null = null;
   private sdk: PiSDK | null = null;
-  private readonly browserInfo: PiBrowserInfo | null = null;
-  private readonly initialized = false;
+  private browserInfo: PiBrowserInfo | null = null;
+  private initialized = false;
   private initPromise: Promise<void> | null = null;
 
   private constructor() {}

@@ -56,8 +56,8 @@ export type PiUser = {
 
 export class OfficialPiPayments {
   private readonly config: OfficialPiPaymentConfig;
-  private readonly user: PiUser | null = null;
-  private readonly connected = false;
+  private user: PiUser | null = null;
+  private connected = false;
 
   constructor(config: OfficialPiPaymentConfig) {
     this.config = {
