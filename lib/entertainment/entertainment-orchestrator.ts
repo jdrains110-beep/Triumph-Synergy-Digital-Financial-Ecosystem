@@ -483,7 +483,8 @@ export class EntertainmentHubOrchestrator {
    * Get healing report
    */
   getLatestHealingReport(): SelfHealingReport | null {
-    return this.healingCycles.length > 0 ? this.healingCycles.at(-1) : null;
+    const lastCycle = this.healingCycles.at(-1);
+    return lastCycle || null;
   }
 
   /**
@@ -514,6 +515,7 @@ export class EntertainmentHubOrchestrator {
   } {
     const dashboard = this.generateDashboard();
     const streamingStatus = this.streamingEngine.getSystemStatus();
+    const lastHealingCycle = this.healingCycles.at(-1);
 
     return {
       ecosystemStatus: dashboard.systemHealth > 80 ? "HEALTHY" : "MONITOR",
@@ -521,10 +523,7 @@ export class EntertainmentHubOrchestrator {
       transactionCapacity: `${streamingStatus.transactionCapacity.toLocaleString()}+ concurrent`,
       healthScore: dashboard.systemHealth,
       autoHealingActive: this.selfHealingEnabled,
-      lastOptimizationTime:
-        this.healingCycles.length > 0
-          ? this.healingCycles.at(-1).timestamp
-          : new Date(),
+      lastOptimizationTime: lastHealingCycle?.timestamp || new Date(),
     };
   }
 }

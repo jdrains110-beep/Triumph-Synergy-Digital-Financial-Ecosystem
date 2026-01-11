@@ -163,13 +163,6 @@ export type SupplyChainNode = {
   operationalStatus: "active" | "suspended" | "closed";
 };
 
-export type SupplyChainNode = {
-  nodeId: string;
-  nodeType: "farm" | "processing_facility" | "distribution_center" | "hub";
-  nodeName: string;
-  nodeLocation: string;
-};
-
 export type SupplyChainTrace = {
   traceId: string;
   productBatchId: string;

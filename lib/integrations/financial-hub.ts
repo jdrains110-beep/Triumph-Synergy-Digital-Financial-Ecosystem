@@ -154,6 +154,7 @@ export class FinancialIntegrationHub {
 
   private readonly ubiEngine: UniversalBasicIncomeEngine;
   private readonly nesaraEngine: NESARAGESARAEngine;
+  private readonly creditEngine: CreditBureauIntegration;
 
   private constructor() {
     this.ubiEngine = UniversalBasicIncomeEngine.getInstance();
