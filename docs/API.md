@@ -388,7 +388,7 @@ Official SDKs are available for:
 For API support:
 - Review this documentation
 - Check [GitHub Issues](https://github.com/jdrains110-beep/triumph-synergy/issues)
-- Submit a [question](https://github.com/jdrains110-beep/triumph-synergy/issues/new?template=question.md)
+- Submit a [question](../../issues/new?template=question.md)
 
 ## Changelog
 
