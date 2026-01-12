@@ -58,7 +58,7 @@
     "@vercel/blob": "^0.24.1",
     "@vercel/functions": "^2.0.0",
     "agora-rtc-sdk-ng": "^4.24.2",
-    "ai": "6.0.5",
+    "ai": "6.0.8",
     "axios": "^1.7.7",
     "bcrypt-ts": "^8.0.0",
     "class-variance-authority": "^0.7.1",
@@ -145,6 +145,7 @@
   },
   "packageManager": "pnpm@9.12.3",
   "overrides": {
-    "esbuild": "^0.27.2"
+    "esbuild": "^0.27.2",
+    "prismjs": "^1.30.0"
   }
 }

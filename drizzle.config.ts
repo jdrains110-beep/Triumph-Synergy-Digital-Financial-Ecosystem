@@ -10,7 +10,6 @@ export default defineConfig({
   out: "./lib/db/migrations",
   dialect: "postgresql",
   dbCredentials: {
-    // biome-ignore lint/style/noNonNullAssertion: Required for env variables
     url: process.env.SUPABASE_DB_URL!,
   },
 });

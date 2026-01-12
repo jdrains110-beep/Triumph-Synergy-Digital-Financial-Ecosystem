@@ -34,7 +34,6 @@ export const piNetworkConfig: PiPaymentConfig = {
  */
 export class PiNetworkPaymentProcessor {
   private readonly apiKey: string;
-  private readonly internalApiKey: string;
   private readonly horizon: Horizon.Server;
   private readonly stellar: {
     account: string;
