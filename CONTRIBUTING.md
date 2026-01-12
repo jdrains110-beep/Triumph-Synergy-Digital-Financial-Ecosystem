@@ -128,7 +128,7 @@ The application will be available at `http://localhost:3000`.
 
 ### Linting
 
-The project uses [Ultracite](https://github.com/biomejs/biome) for linting and formatting:
+The project uses Ultracite (a wrapper around Biome) for linting and formatting:
 
 ```bash
 pnpm lint          # Check for issues

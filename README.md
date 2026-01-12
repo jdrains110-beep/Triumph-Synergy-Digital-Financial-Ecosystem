@@ -210,9 +210,9 @@ Security is a top priority. Please review our [Security Policy](SECURITY_POLICY.
 ## Support
 
 - 📖 [Documentation](docs/)
-- 🐛 [Report a Bug](.github/ISSUE_TEMPLATE/bug_report.md)
-- 💡 [Request a Feature](.github/ISSUE_TEMPLATE/feature_request.md)
-- ❓ [Ask a Question](.github/ISSUE_TEMPLATE/question.md)
+- 🐛 [Report a Bug](../../issues/new?template=bug_report.md)
+- 💡 [Request a Feature](../../issues/new?template=feature_request.md)
+- ❓ [Ask a Question](../../issues/new?template=question.md)
 
 ## License
 
