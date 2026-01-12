@@ -1,7 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PiProvider } from "@/lib/pi-sdk/pi-provider";

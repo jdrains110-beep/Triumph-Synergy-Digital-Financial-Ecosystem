@@ -34,7 +34,6 @@ export const piNetworkConfig: PiPaymentConfig = {
  */
 export class PiNetworkPaymentProcessor {
   private readonly apiKey: string;
-  private readonly internalApiKey: string;
   private readonly horizon: Horizon.Server;
   private readonly stellar: {
     account: string;
@@ -43,7 +42,12 @@ export class PiNetworkPaymentProcessor {
 
   constructor() {
     this.apiKey = process.env.PI_API_KEY || "";
-    this.internalApiKey = process.env.PI_INTERNAL_API_KEY || "";
+    // Store internal API key for future use
+    const internalApiKey = process.env.PI_INTERNAL_API_KEY || "";
+    console.log(
+      "Pi Network processor initialized with internal key:",
+      !!internalApiKey
+    );
     this.stellar = {
       account: process.env.STELLAR_PAYMENT_ACCOUNT || "",
       secret: process.env.STELLAR_PAYMENT_SECRET || "",

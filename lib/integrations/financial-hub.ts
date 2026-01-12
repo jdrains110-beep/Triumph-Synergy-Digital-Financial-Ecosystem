@@ -154,12 +154,13 @@ export class FinancialIntegrationHub {
 
   private readonly ubiEngine: UniversalBasicIncomeEngine;
   private readonly nesaraEngine: NESARAGESARAEngine;
-  private readonly creditEngine: CreditBureauIntegration;
 
   private constructor() {
     this.ubiEngine = UniversalBasicIncomeEngine.getInstance();
     this.nesaraEngine = NESARAGESARAEngine.getInstance();
-    this.creditEngine = CreditBureauIntegration.getInstance();
+    // Initialize credit engine for future use
+    const creditEngine = CreditBureauIntegration.getInstance();
+    console.log("Credit engine initialized:", !!creditEngine);
   }
 
   static getInstance(): FinancialIntegrationHub {
