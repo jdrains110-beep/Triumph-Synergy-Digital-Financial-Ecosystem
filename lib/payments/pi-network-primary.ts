@@ -42,7 +42,13 @@ export class PiNetworkPaymentProcessor {
 
   constructor() {
     this.apiKey = process.env.PI_API_KEY || "";
-    this.internalApiKey = process.env.PI_INTERNAL_API_KEY || "";
+    // TODO: Implement internal API key validation for Pi Network internal transactions
+    // This will be used to differentiate between external and internal Pi payments
+    const internalApiKey = process.env.PI_INTERNAL_API_KEY || "";
+    console.log(
+      "Pi Network processor initialized with internal key:",
+      !!internalApiKey
+    );
     this.stellar = {
       account: process.env.STELLAR_PAYMENT_ACCOUNT || "",
       secret: process.env.STELLAR_PAYMENT_SECRET || "",

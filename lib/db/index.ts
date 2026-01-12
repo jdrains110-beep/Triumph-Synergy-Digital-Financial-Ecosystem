@@ -8,7 +8,13 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 // Get database URL from environment
-const databaseUrl = process.env.DATABASE_URL;
+// During build, use an obviously fake URL if not provided
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  (process.env.NEXT_PHASE === "phase-production-build"
+    ? "postgresql://build-only:build-only@build.local/build"
+    : undefined);
+
 if (!databaseUrl) {
   throw new Error("DATABASE_URL environment variable is required");
 }
