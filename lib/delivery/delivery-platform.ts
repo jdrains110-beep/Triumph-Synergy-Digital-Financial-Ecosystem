@@ -1089,6 +1089,9 @@ export class DeliveryPlatform {
       case "scheduled":
         fee *= 0.9;
         break;
+      default:
+        // No change to fee for unknown priority
+        break;
     }
 
     return Math.round(fee * 100) / 100;

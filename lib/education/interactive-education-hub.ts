@@ -530,7 +530,7 @@ class InteractiveEducationHub {
       },
     ];
 
-    sampleLessons.forEach((lesson) => this.lessons.set(lesson.id, lesson));
+    sampleLessons.forEach((lesson) => { this.lessons.set(lesson.id, lesson); });
 
     // Initialize sample learning paths
     const stemPath: LearningPath = {

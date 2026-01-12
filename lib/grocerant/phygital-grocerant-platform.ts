@@ -901,7 +901,7 @@ class PhygitalGrocerantPlatform {
       },
     ];
 
-    locations.forEach((loc) => this.locations.set(loc.id, loc));
+    locations.forEach((loc) => { this.locations.set(loc.id, loc); });
   }
 
   private initializeProducts(): void {
@@ -1073,7 +1073,7 @@ class PhygitalGrocerantPlatform {
       },
     ];
 
-    products.forEach((prod) => this.products.set(prod.id, prod));
+    products.forEach((prod) => { this.products.set(prod.id, prod); });
   }
 
   private initializeRecipes(): void {
@@ -1166,7 +1166,7 @@ class PhygitalGrocerantPlatform {
       },
     ];
 
-    recipes.forEach((r) => this.recipes.set(r.id, r));
+    recipes.forEach((r) => { this.recipes.set(r.id, r); });
   }
 
   // ==========================================================================

@@ -452,3 +452,33 @@ Server creates Stellar settlement
 
 **Last Updated:** January 6, 2026  
 **Status:** ✅ Production Ready
+
+---
+
+# Pi SDK Integration Guide for Triumph-synergy
+
+1. Install dependencies (after npm login):
+   npm install pi-sdk-js pi-sdk-react pi-sdk-nextjs
+
+2. Add your Pi App credentials to your .env.local file:
+   PI_API_KEY=your_pi_api_key
+   PI_APP_ID=your_pi_app_id
+   NEXT_PUBLIC_PI_API_KEY=your_pi_api_key
+   NEXT_PUBLIC_PI_APP_ID=your_pi_app_id
+
+3. Use the <PiPaymentButton /> component in your app:
+   import PiPaymentButton from '../components/PiPaymentButton';
+   // ...
+   <PiPaymentButton amount={1} memo="Test Payment" onSuccess={...} onError={...} />
+
+4. Backend endpoints for payment approval and completion are ready at:
+   /api/pi/approve
+   /api/pi/complete
+
+5. For C#, Rust, Rails, and OS-level SDKs:
+   - See the official repos for integration patterns.
+   - Add backend stubs as needed for cross-platform support.
+
+6. Reference: https://minepi.com/blog/10-minutes-pi-payments
+
+This setup enables secure, production-ready Pi user-to-app payments in Triumph-synergy.
