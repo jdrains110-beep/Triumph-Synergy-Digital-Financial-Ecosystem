@@ -8,11 +8,11 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 // Get database URL from environment
-// During build, use a dummy URL if not provided
+// During build, use an obviously fake URL if not provided
 const databaseUrl =
   process.env.DATABASE_URL ||
   (process.env.NEXT_PHASE === "phase-production-build"
-    ? "postgresql://dummy:dummy@localhost:5432/dummy"
+    ? "postgresql://build-only:build-only@build.local/build"
     : undefined);
 
 if (!databaseUrl) {

@@ -158,7 +158,8 @@ export class FinancialIntegrationHub {
   private constructor() {
     this.ubiEngine = UniversalBasicIncomeEngine.getInstance();
     this.nesaraEngine = NESARAGESARAEngine.getInstance();
-    // Initialize credit engine for future use
+    // TODO: Integrate credit engine with financial hub for credit reporting features
+    // This will enable automatic credit reporting for Pi Network transactions
     const creditEngine = CreditBureauIntegration.getInstance();
     console.log("Credit engine initialized:", !!creditEngine);
   }

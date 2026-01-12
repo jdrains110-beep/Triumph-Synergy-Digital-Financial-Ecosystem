@@ -259,7 +259,8 @@ export class CreditBureauIntegration {
   private syncOwnerCreditProfile(): void {
     // Target owner credit profile from ecosystem
     // This is what we're working to reflect in real bureaus
-    // Note: Storing for future use when credit reporting is fully integrated
+    // TODO: Store this profile in a persistent data store for credit bureau sync
+    // Once data furnisher registration is complete, this will be reported to bureaus
     const ownerCreditProfile = {
       bureau: "equifax", // Primary bureau for sync
       reportDate: new Date(),
