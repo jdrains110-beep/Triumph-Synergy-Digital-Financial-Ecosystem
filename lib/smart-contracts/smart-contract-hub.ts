@@ -932,3 +932,32 @@ export async function syncFromGitHub(
 ): Promise<SmartContract> {
   return smartContractHub.syncContractFromGitHub(repoFullName, path, branch);
 }
+
+// ============================================================================
+// INTEGRATED SMART CONTRACT MODULES
+// ============================================================================
+
+/**
+ * Pi Stable Revoluter Core Integration
+ * 
+ * Provides access to the PiStable stablecoin system with:
+ * - StableCoin (PST) contract
+ * - Reserve management
+ * - Community governance
+ * 
+ * @see lib/smart-contracts/pi-stable-revoluter-core
+ */
+export { 
+  PiStableRevoluterCoreManager,
+  getPiStableRevoluterCore 
+} from "./pi-stable-revoluter-core";
+
+export type {
+  PiStableRevoluterCore,
+  StableCoinConfig,
+  StableCoinState,
+  ReserveManagerState,
+  GovernanceState,
+  Proposal,
+  Reserve,
+} from "./pi-stable-revoluter-core";

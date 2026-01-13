@@ -92,6 +92,7 @@ Automatic CI/CD pipeline with:
 | [Architecture](docs/architecture.md) | System design and diagrams |
 | [Security](docs/security.md) | Security policies |
 | [Deployment](docs/deployment.md) | Deployment guide |
+| [Pi Stable Revoluter Core](docs/pi-stable-revoluter-core-integration.md) | Stablecoin integration guide |
 
 ## 🔌 API Endpoints
 
@@ -116,6 +117,7 @@ Automatic CI/CD pipeline with:
 - **Database**: PostgreSQL + Drizzle ORM
 - **Cache**: Redis
 - **Blockchain**: Stellar SDK
+- **Smart Contracts**: Solidity (OpenZeppelin) + Pi Stable Revoluter Core
 - **Testing**: Vitest (59 tests)
 - **Deployment**: Vercel + GitHub Actions
 
