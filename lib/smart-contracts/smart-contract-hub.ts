@@ -225,9 +225,28 @@ class SmartContractHub {
   private readonly contracts: Map<string, SmartContract> = new Map();
   private readonly templates: Map<string, ContractTemplate> = new Map();
   private readonly repositories: Map<string, GitHubRepository> = new Map();
+  private readonly externalContracts: Map<string, SmartContract> = new Map();
 
   constructor() {
     this.initializeDefaultTemplates();
+    this.initializeExternalContracts();
+  }
+
+  private async initializeExternalContracts(): Promise<void> {
+    try {
+      // Dynamically import Pi-Nexus integration
+      const { loadAllPiNexusContracts } = await import(
+        "./external/pi-nexus-autonomous-banking-network"
+      );
+      const piNexusContracts = await loadAllPiNexusContracts();
+      
+      for (const contract of piNexusContracts) {
+        this.externalContracts.set(contract.id, contract);
+      }
+    } catch (error) {
+      // External contracts are optional, log but don't fail
+      console.warn("Failed to load external contracts:", error);
+    }
   }
 
   private initializeDefaultTemplates(): void {
@@ -769,15 +788,33 @@ impl PiEscrow {
   }
 
   async getContract(contractId: string): Promise<SmartContract | null> {
-    return this.contracts.get(contractId) || null;
+    // Check internal contracts first
+    const internalContract = this.contracts.get(contractId);
+    if (internalContract) {
+      return internalContract;
+    }
+    
+    // Check external contracts
+    const externalContract = this.externalContracts.get(contractId);
+    if (externalContract) {
+      return externalContract;
+    }
+    
+    return null;
   }
 
   async listContracts(filters?: {
     language?: ContractLanguage;
     status?: ContractStatus;
     network?: BlockchainNetwork;
+    includeExternal?: boolean;
   }): Promise<SmartContract[]> {
     let contracts = Array.from(this.contracts.values());
+    
+    // Include external contracts if requested (default: true)
+    if (filters?.includeExternal !== false) {
+      contracts = [...contracts, ...Array.from(this.externalContracts.values())];
+    }
 
     if (filters?.language) {
       contracts = contracts.filter((c) => c.language === filters.language);
@@ -790,6 +827,27 @@ impl PiEscrow {
     }
 
     return contracts;
+  }
+
+  listExternalContracts(): SmartContract[] {
+    return Array.from(this.externalContracts.values());
+  }
+
+  async getExternalIntegrationStatus(): Promise<{
+    piNexus?: ReturnType<typeof import("./external/pi-nexus-autonomous-banking-network").getPiNexusIntegrationStatus>;
+  }> {
+    const status: ReturnType<typeof this.getExternalIntegrationStatus> = {};
+    
+    try {
+      const { getPiNexusIntegrationStatus } = await import(
+        "./external/pi-nexus-autonomous-banking-network"
+      );
+      status.piNexus = getPiNexusIntegrationStatus();
+    } catch (error) {
+      console.warn("Failed to get Pi-Nexus integration status:", error);
+    }
+    
+    return status;
   }
 
   getTemplate(templateId: string): ContractTemplate | null {

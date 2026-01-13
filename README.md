@@ -21,6 +21,18 @@ Triumph Synergy is the **#1 Pi Network payment platform** featuring complete int
 | Stellar Settlement | ✅ Active | Automatic blockchain settlement |
 | Webhooks | ✅ Active | Real-time payment notifications |
 
+### 🏦 Smart Contract Ecosystem
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Pi-Nexus Banking | ✅ Integrated | Kosasih's autonomous banking network |
+| DAO Governance | ✅ Available | Global Harmony Nexus for banking |
+| Compliance Modules | ✅ Available | PSD2 and GDPR compliant contracts |
+| Risk Management | ✅ Available | AI-powered fraud detection |
+| Native Contracts | ✅ Active | Rust and Solidity support |
+
+> **New**: Triumph-Synergy now hosts [Kosasih's pi-nexus-autonomous-banking-network](https://github.com/KOSASIH/pi-nexus-autonomous-banking-network) smart contracts with full integrity preservation. See [Pi-Nexus Integration Guide](docs/pi-nexus-integration.md) for details.
+
 ## ⚡ Quick Start
 
 ```bash
@@ -88,12 +100,18 @@ Automatic CI/CD pipeline with:
 |-------|-------------|
 | [Getting Started](docs/getting-started.md) | Installation and setup |
 | [Pi Network](docs/pi-network.md) | Pi SDK integration guide |
+| [Pi-Nexus Integration](docs/pi-nexus-integration.md) | Kosasih's banking smart contracts |
 | [API Reference](docs/api-reference.md) | Complete API documentation |
 | [Architecture](docs/architecture.md) | System design and diagrams |
 | [Security](docs/security.md) | Security policies |
 | [Deployment](docs/deployment.md) | Deployment guide |
 
 ## 🔌 API Endpoints
+
+### Smart Contracts
+- `GET /api/smart-contracts?action=pi-nexus` - List Pi-Nexus contracts
+- `GET /api/smart-contracts?action=external` - List external contracts
+- `GET /api/smart-contracts?action=external-status` - Integration status
 
 ### Pi Payment APIs
 - `POST /api/pi/approve` - Approve Pi payment

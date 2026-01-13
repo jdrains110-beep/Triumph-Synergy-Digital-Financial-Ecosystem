@@ -55,6 +55,32 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, repos });
       }
 
+      case "external": {
+        const externalContracts = smartContractHub.listExternalContracts();
+        return NextResponse.json({
+          success: true,
+          contracts: externalContracts,
+        });
+      }
+
+      case "external-status": {
+        const status = await smartContractHub.getExternalIntegrationStatus();
+        return NextResponse.json({ success: true, status });
+      }
+
+      case "pi-nexus": {
+        const { piNexusIntegration } = await import(
+          "@/lib/smart-contracts/external/pi-nexus-autonomous-banking-network"
+        );
+        const piNexusContracts = piNexusIntegration.listContracts();
+        const repoInfo = piNexusIntegration.getRepositoryInfo();
+        return NextResponse.json({
+          success: true,
+          contracts: piNexusContracts,
+          repository: repoInfo,
+        });
+      }
+
       default:
         return NextResponse.json({
           success: true,
@@ -64,6 +90,9 @@ export async function GET(request: NextRequest) {
             "GET ?action=get&contractId=X": "Get contract details",
             "GET ?action=templates": "List Rust templates",
             "GET ?action=github-repos": "List connected GitHub repos",
+            "GET ?action=external": "List external contracts",
+            "GET ?action=external-status": "Get external integration status",
+            "GET ?action=pi-nexus": "List Pi-Nexus contracts",
             POST: "Create, compile, deploy contracts",
           },
         });
