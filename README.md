@@ -1,6 +1,6 @@
-﻿# Triumph Synergy
+# Triumph Synergy
 
-Advanced payment routing with compliance automation powered by Pi Network.
+Digital financial ecosystem with Advanced payment routing with compliance automation powered by Pi Network.
 
 ## Overview
 
