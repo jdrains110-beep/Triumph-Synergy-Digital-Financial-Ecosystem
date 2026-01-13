@@ -1,11 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
-declare global {
-  interface Window {
-    Pi: any;
-  }
-}
+// Pi SDK types are declared in sdk/pi-sdk-react/index.ts
+// We use the global Window interface from there
 
 interface PiPaymentButtonProps {
   amount: number;
@@ -122,6 +119,10 @@ export default function PiPaymentButton({
 
     try {
       console.log('[Pi Payment] Creating payment:', { amount, memo, metadata });
+
+      if (!window.Pi) {
+        throw new Error('Pi SDK not available');
+      }
 
       const payment = await window.Pi.createPayment({
         amount,

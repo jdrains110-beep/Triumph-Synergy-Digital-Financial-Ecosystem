@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import postgres from "postgres";
 import { createClient } from "redis";
-import * as StellarSdk from "stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
 
 // Lazy initialization to avoid build-time connection attempts
 let redis: ReturnType<typeof createClient> | null = null;

@@ -176,7 +176,6 @@ export class CreditBureauIntegration {
     registeredBureaus: CreditBureau[];
     metro2Compliant: boolean;
   };
-  private ownerCreditProfile!: CreditReport;
 
   constructor() {
     this.initializeBureauConnections();

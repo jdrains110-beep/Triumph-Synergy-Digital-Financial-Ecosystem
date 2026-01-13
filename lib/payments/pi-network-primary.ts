@@ -2,7 +2,7 @@
 // Pi Network as PRIMARY Payment Method Configuration
 // 95% of transaction volume target
 
-import { Horizon, Keypair, Memo, TransactionBuilder } from "stellar-sdk";
+import { Horizon, Keypair, Memo, TransactionBuilder } from "@stellar/stellar-sdk";
 
 export type PiPaymentConfig = {
   enabled: boolean;
