@@ -98,7 +98,9 @@ contract Governance is Ownable {
 
     function totalSupply() internal view returns (uint256) {
         // This function should return the total supply of the governance token
-        // For example, if using an ERC20 token, you can call the token's totalSupply function
+        // TODO: Integrate with actual governance token contract
+        // For now, this is a placeholder that should be replaced with:
+        // return IERC20(governanceTokenAddress).totalSupply();
         // Placeholder for demonstration purposes
         return 1000000 * (10 ** 18); // Replace with actual total supply logic
     }

@@ -266,10 +266,24 @@ describe("PiStableRevoluterCore", () => {
   });
 
   describe("Singleton Pattern", () => {
-    it("should return same instance", () => {
+    it("should return same instance for same network", () => {
       const instance1 = getPiStableRevoluterCore("pi-mainnet");
       const instance2 = getPiStableRevoluterCore("pi-mainnet");
       expect(instance1).toBe(instance2);
+    });
+
+    it("should return different instances for different networks", () => {
+      const instance1 = getPiStableRevoluterCore("pi-mainnet");
+      const instance2 = getPiStableRevoluterCore("pi-testnet");
+      expect(instance1).not.toBe(instance2);
+    });
+
+    it("should maintain correct network for each instance", () => {
+      const mainnetInstance = getPiStableRevoluterCore("pi-mainnet");
+      const testnetInstance = getPiStableRevoluterCore("pi-testnet");
+      
+      expect(mainnetInstance.getNetworkInfo().network).toBe("pi-mainnet");
+      expect(testnetInstance.getNetworkInfo().network).toBe("pi-testnet");
     });
   });
 });

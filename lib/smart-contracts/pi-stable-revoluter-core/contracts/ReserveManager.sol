@@ -73,8 +73,12 @@ contract ReserveManager is Ownable {
         reserves[asset].amount = reserves[asset].amount.sub(amount);
         totalReserves = totalReserves.sub(amount);
 
-        // Logic to transfer the asset to the owner would go here
-        // For example, if it's an ERC20 token, you would call the transfer function
+        // TODO: Implement actual asset transfer logic
+        // This should transfer the asset to the owner address
+        // For ERC20 tokens:
+        // IERC20(asset).transfer(owner(), amount);
+        // For native ETH/PI:
+        // payable(owner()).transfer(amount);
 
         emit EmergencyWithdrawal(asset, amount);
     }

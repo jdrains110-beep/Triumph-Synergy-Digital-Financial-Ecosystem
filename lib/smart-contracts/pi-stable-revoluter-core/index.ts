@@ -446,16 +446,19 @@ export class PiStableRevoluterCoreManager {
 
 export * from "./types";
 
-// Singleton instance for easy access
-let instance: PiStableRevoluterCoreManager | null = null;
+// Network-specific instance cache
+const instanceCache = new Map<string, PiStableRevoluterCoreManager>();
 
 export function getPiStableRevoluterCore(
   network?: "pi-mainnet" | "pi-testnet" | "ethereum-mainnet" | "ethereum-sepolia"
 ): PiStableRevoluterCoreManager {
-  if (!instance) {
-    instance = new PiStableRevoluterCoreManager(network);
+  const networkKey = network || "pi-mainnet";
+  
+  if (!instanceCache.has(networkKey)) {
+    instanceCache.set(networkKey, new PiStableRevoluterCoreManager(networkKey));
   }
-  return instance;
+  
+  return instanceCache.get(networkKey)!;
 }
 
 export default PiStableRevoluterCoreManager;

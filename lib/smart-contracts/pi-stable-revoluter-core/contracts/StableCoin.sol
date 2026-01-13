@@ -47,8 +47,11 @@ contract StableCoin is ERC20, Ownable, Pausable, ERC20Snapshot {
         uint256 fee = amount.mul(transactionFee).div(100);
         uint256 amountAfterFee = amount.sub(fee);
 
-        super._transfer(sender, feeRecipient, fee); // Transfer fee to fee recipient
-        super._transfer(sender, recipient, amountAfterFee); // Transfer remaining amount
+        // Transfer total amount from sender first, then split to recipient and fee recipient
+        super._transfer(sender, recipient, amountAfterFee); // Transfer amount after fee
+        if (fee > 0) {
+            super._transfer(sender, feeRecipient, fee); // Transfer fee to fee recipient
+        }
     }
 
     function snapshot() external onlyOwner {
