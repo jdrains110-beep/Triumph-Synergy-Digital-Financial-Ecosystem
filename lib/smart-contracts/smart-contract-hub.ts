@@ -179,6 +179,32 @@ export type GitHubRepository = {
   lastPush: Date;
 };
 
+export type ExternalContractRepository = {
+  id: string;
+  owner: string;
+  name: string;
+  fullName: string;
+  description: string;
+  version: string;
+  license: string;
+  sourceUrl: string;
+  localPath: string;
+  integrationDate: Date;
+  contracts: ExternalContract[];
+  maintainedBy: string;
+  status: "active" | "deprecated" | "archived";
+};
+
+export type ExternalContract = {
+  name: string;
+  fileName: string;
+  language: ContractLanguage;
+  path: string;
+  description: string;
+  version: string;
+  features: string[];
+};
+
 export type RustContractConfig = {
   cargoToml: string;
   edition: "2018" | "2021" | "2024";
@@ -225,9 +251,11 @@ class SmartContractHub {
   private readonly contracts: Map<string, SmartContract> = new Map();
   private readonly templates: Map<string, ContractTemplate> = new Map();
   private readonly repositories: Map<string, GitHubRepository> = new Map();
+  private readonly externalRepositories: Map<string, ExternalContractRepository> = new Map();
 
   constructor() {
     this.initializeDefaultTemplates();
+    this.initializeExternalRepositories();
   }
 
   private initializeDefaultTemplates(): void {
@@ -531,6 +559,92 @@ impl PiEscrow {
     });
   }
 
+  private initializeExternalRepositories(): void {
+    // Register Kosasih's pi-supernode contracts
+    this.externalRepositories.set("kosasih/pi-supernode", {
+      id: "kosasih-pi-supernode",
+      owner: "kosasih",
+      name: "pi-supernode",
+      fullName: "kosasih/pi-supernode",
+      description: "A supernode for the Pi Network Mainnet using ARES architecture, powered by AI, quantum-resistant cryptography, and cross-chain interoperability.",
+      version: "2.0.0",
+      license: "MIT",
+      sourceUrl: "https://github.com/KOSASIH/pi-supernode",
+      localPath: "lib/smart-contracts/external/kosasih/pi-supernode",
+      integrationDate: new Date("2026-01-13"),
+      maintainedBy: "KOSASIH",
+      status: "active",
+      contracts: [
+        {
+          name: "PiCoin",
+          fileName: "PiCoin.sol",
+          language: "solidity",
+          path: "contracts/PiCoin.sol",
+          description: "Core Pi Coin token contract with minting, burning, and ERC-20 functionality",
+          version: "1.0.0",
+          features: [
+            "Token minting with 100B supply cap",
+            "Token burning",
+            "ERC-20 compatible transfers",
+            "Stable value reference ($314,159)",
+          ],
+        },
+        {
+          name: "Governance",
+          fileName: "Governance.sol",
+          language: "solidity",
+          path: "contracts/Governance.sol",
+          description: "Decentralized governance system with proposal creation and voting",
+          version: "1.0.0",
+          features: [
+            "Proposal creation",
+            "Time-bound voting",
+            "Community-driven decisions",
+            "Vote execution",
+          ],
+        },
+        {
+          name: "StableCoin",
+          fileName: "StableCoin.sol",
+          language: "solidity",
+          path: "contracts/StableCoin.sol",
+          description: "Stablecoin implementation for Pi ecosystem",
+          version: "1.0.0",
+          features: [
+            "Collateralization mechanisms",
+            "Price stability",
+            "Pi ecosystem integration",
+          ],
+        },
+        {
+          name: "WrappedPiToken",
+          fileName: "WrappedPiToken.sol",
+          language: "solidity",
+          path: "contracts/WrappedPiToken.sol",
+          description: "Wrapped token for cross-chain compatibility",
+          version: "1.0.0",
+          features: [
+            "Cross-chain compatibility",
+            "Enhanced liquidity",
+            "Bridge functionality",
+          ],
+        },
+        {
+          name: "Migrations",
+          fileName: "Migrations.sol",
+          language: "solidity",
+          path: "contracts/Migrations.sol",
+          description: "Contract deployment and migration management",
+          version: "1.0.0",
+          features: [
+            "Deployment tracking",
+            "Migration management",
+          ],
+        },
+      ],
+    });
+  }
+
   // ==========================================================================
   // GITHUB INTEGRATION
   // ==========================================================================
@@ -810,6 +924,107 @@ impl PiEscrow {
     return Array.from(this.repositories.values());
   }
 
+  // ==========================================================================
+  // EXTERNAL REPOSITORY MANAGEMENT
+  // ==========================================================================
+
+  listExternalRepositories(): ExternalContractRepository[] {
+    return Array.from(this.externalRepositories.values());
+  }
+
+  getExternalRepository(fullName: string): ExternalContractRepository | null {
+    return this.externalRepositories.get(fullName) || null;
+  }
+
+  getExternalContract(
+    repoFullName: string,
+    contractName: string
+  ): ExternalContract | null {
+    const repo = this.externalRepositories.get(repoFullName);
+    if (!repo) {
+      return null;
+    }
+    return repo.contracts.find((c) => c.name === contractName) || null;
+  }
+
+  listExternalContracts(
+    repoFullName?: string
+  ): Array<ExternalContract & { repository: string }> {
+    const repos = repoFullName
+      ? [this.externalRepositories.get(repoFullName)].filter(Boolean)
+      : Array.from(this.externalRepositories.values());
+
+    const contracts: Array<ExternalContract & { repository: string }> = [];
+    
+    for (const repo of repos) {
+      if (repo) {
+        for (const contract of repo.contracts) {
+          contracts.push({
+            ...contract,
+            repository: repo.fullName,
+          });
+        }
+      }
+    }
+
+    return contracts;
+  }
+
+  async connectExternalRepository(config: {
+    owner: string;
+    name: string;
+    description: string;
+    version: string;
+    license: string;
+    sourceUrl: string;
+    localPath: string;
+    maintainedBy: string;
+    contracts: ExternalContract[];
+  }): Promise<ExternalContractRepository> {
+    const fullName = `${config.owner}/${config.name}`;
+    const id = `${config.owner}-${config.name}`;
+
+    const repository: ExternalContractRepository = {
+      id,
+      owner: config.owner,
+      name: config.name,
+      fullName,
+      description: config.description,
+      version: config.version,
+      license: config.license,
+      sourceUrl: config.sourceUrl,
+      localPath: config.localPath,
+      integrationDate: new Date(),
+      maintainedBy: config.maintainedBy,
+      status: "active",
+      contracts: config.contracts,
+    };
+
+    this.externalRepositories.set(fullName, repository);
+    return repository;
+  }
+
+  async loadExternalContractSource(
+    repoFullName: string,
+    contractName: string
+  ): Promise<string> {
+    const contract = this.getExternalContract(repoFullName, contractName);
+    if (!contract) {
+      throw new Error(
+        `Contract ${contractName} not found in repository ${repoFullName}`
+      );
+    }
+
+    const repo = this.externalRepositories.get(repoFullName);
+    if (!repo) {
+      throw new Error(`Repository ${repoFullName} not found`);
+    }
+
+    // In a real implementation, this would read from the file system
+    // For now, we'll return a placeholder
+    return `// Source code for ${contractName}\n// Located at: ${repo.localPath}/${contract.path}`;
+  }
+
   async createFromTemplate(
     templateId: string,
     variables: Record<string, string>,
@@ -931,4 +1146,39 @@ export async function syncFromGitHub(
   branch?: string
 ): Promise<SmartContract> {
   return smartContractHub.syncContractFromGitHub(repoFullName, path, branch);
+}
+
+// External repository helper functions
+export function listExternalRepositories(): ExternalContractRepository[] {
+  return smartContractHub.listExternalRepositories();
+}
+
+export function getExternalRepository(fullName: string): ExternalContractRepository | null {
+  return smartContractHub.getExternalRepository(fullName);
+}
+
+export function getExternalContract(
+  repoFullName: string,
+  contractName: string
+): ExternalContract | null {
+  return smartContractHub.getExternalContract(repoFullName, contractName);
+}
+
+export function listExternalContracts(
+  repoFullName?: string
+): Array<ExternalContract & { repository: string }> {
+  return smartContractHub.listExternalContracts(repoFullName);
+}
+
+export async function connectExternalRepository(
+  config: Parameters<typeof smartContractHub.connectExternalRepository>[0]
+): Promise<ExternalContractRepository> {
+  return smartContractHub.connectExternalRepository(config);
+}
+
+export async function loadExternalContractSource(
+  repoFullName: string,
+  contractName: string
+): Promise<string> {
+  return smartContractHub.loadExternalContractSource(repoFullName, contractName);
 }
