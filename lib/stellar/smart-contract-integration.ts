@@ -1,6 +1,6 @@
 /**
  * Smart Contract Integration with Stellar SCP + Pi Coin SDK
- * 
+ *
  * This module provides the unified interface for:
  * - Smart contract payment processing with Pi Network
  * - Stellar blockchain verification and recording
@@ -8,11 +8,20 @@
  * - Escrow management for contract milestones
  */
 
-import { getStellarPiCoinSDK, type SmartContractPayment, type EscrowState, type PiPaymentProof } from "./stellar-pi-coin-sdk";
-import { getSCPAutoUpdate, initializeSCPAutoUpdate, type SCPState, type SCPUpdateEvent } from "./scp-auto-update";
 import * as StellarSdk from "@stellar/stellar-sdk";
+import {
+  getSCPAutoUpdate,
+  initializeSCPAutoUpdate,
+  type SCPState,
+  type SCPUpdateEvent,
+} from "./scp-auto-update";
+import {
+  type EscrowState,
+  getStellarPiCoinSDK,
+  type PiPaymentProof,
+} from "./stellar-pi-coin-sdk";
 
-export interface SmartContractConfig {
+export type SmartContractConfig = {
   contractId: string;
   contractType: "service" | "purchase" | "lease" | "partnership";
   parties: {
@@ -28,9 +37,9 @@ export interface SmartContractConfig {
   conditions: string[];
   effectiveDate: Date;
   expirationDate?: Date;
-}
+};
 
-export interface ContractExecutionResult {
+export type ContractExecutionResult = {
   success: boolean;
   contractId: string;
   stellarTxHash?: string;
@@ -38,9 +47,9 @@ export interface ContractExecutionResult {
   scpLedger?: number;
   error?: string;
   timestamp: Date;
-}
+};
 
-export interface ContractPaymentStatus {
+export type ContractPaymentStatus = {
   contractId: string;
   totalAmount: number;
   paidAmount: number;
@@ -53,7 +62,7 @@ export interface ContractPaymentStatus {
     stellarTxHash?: string;
   }[];
   lastUpdated: Date;
-}
+};
 
 /**
  * Smart Contract Manager
@@ -71,7 +80,9 @@ export class SmartContractManager {
    * Must be called before using any contract operations
    */
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {
+      return;
+    }
 
     console.log("[SmartContractManager] Initializing...");
 
@@ -88,7 +99,9 @@ export class SmartContractManager {
   /**
    * Register a new smart contract
    */
-  async registerContract(config: SmartContractConfig): Promise<ContractExecutionResult> {
+  async registerContract(
+    config: SmartContractConfig
+  ): Promise<ContractExecutionResult> {
     if (!this.initialized) {
       await this.initialize();
     }
@@ -113,7 +126,10 @@ export class SmartContractManager {
 
       // If escrow required, create escrow accounts for milestones
       const escrowAccounts: string[] = [];
-      if (config.paymentTerms.escrowRequired && config.paymentTerms.milestones) {
+      if (
+        config.paymentTerms.escrowRequired &&
+        config.paymentTerms.milestones
+      ) {
         const milestoneAmounts = config.paymentTerms.milestones.map((m) => ({
           amount: (config.paymentTerms.totalAmount * m.percentage) / 100,
           description: m.description,
@@ -129,20 +145,25 @@ export class SmartContractManager {
         );
 
         escrowAccounts.push(...channel.milestoneAccounts);
-        this.escrows.set(contractId, channel.milestoneAccounts.map((acc, i) => ({
-          id: `${contractId}-M${i + 1}`,
-          stellarEscrowAccount: acc,
-          amount: milestoneAmounts[i].amount,
-          status: "pending",
-          createdAt: new Date(),
-          parties: {
-            depositor: config.parties.partyA.stellarAccount,
-            beneficiary: config.parties.partyB.stellarAccount,
-          },
-        })));
+        this.escrows.set(
+          contractId,
+          channel.milestoneAccounts.map((acc, i) => ({
+            id: `${contractId}-M${i + 1}`,
+            stellarEscrowAccount: acc,
+            amount: milestoneAmounts[i].amount,
+            status: "pending",
+            createdAt: new Date(),
+            parties: {
+              depositor: config.parties.partyA.stellarAccount,
+              beneficiary: config.parties.partyB.stellarAccount,
+            },
+          }))
+        );
       }
 
-      console.log(`[SmartContractManager] ✅ Contract ${contractId} registered`);
+      console.log(
+        `[SmartContractManager] ✅ Contract ${contractId} registered`
+      );
 
       return {
         success: true,
@@ -152,7 +173,10 @@ export class SmartContractManager {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error(`[SmartContractManager] Contract registration failed:`, error);
+      console.error(
+        "[SmartContractManager] Contract registration failed:",
+        error
+      );
       return {
         success: false,
         contractId,
@@ -196,7 +220,8 @@ export class SmartContractManager {
       // Verify Pi payment amount matches milestone
       const expectedAmount = contract.paymentTerms.milestones?.[milestoneIndex];
       if (expectedAmount) {
-        const milestoneAmount = (contract.paymentTerms.totalAmount * expectedAmount.percentage) / 100;
+        const milestoneAmount =
+          (contract.paymentTerms.totalAmount * expectedAmount.percentage) / 100;
         if (Math.abs(piPaymentProof.amount - milestoneAmount) > 0.001) {
           return {
             success: false,
@@ -218,7 +243,9 @@ export class SmartContractManager {
       // Update escrow state
       escrows[milestoneIndex] = fundedEscrow;
 
-      console.log(`[SmartContractManager] ✅ Milestone ${milestoneIndex + 1} funded for ${contractId}`);
+      console.log(
+        `[SmartContractManager] ✅ Milestone ${milestoneIndex + 1} funded for ${contractId}`
+      );
 
       return {
         success: true,
@@ -228,7 +255,7 @@ export class SmartContractManager {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error(`[SmartContractManager] Milestone payment failed:`, error);
+      console.error("[SmartContractManager] Milestone payment failed:", error);
       return {
         success: false,
         contractId,
@@ -268,7 +295,9 @@ export class SmartContractManager {
 
       if (result.success) {
         escrows[milestoneIndex] = { ...escrow, status: "released" };
-        console.log(`[SmartContractManager] ✅ Milestone ${milestoneIndex + 1} released for ${contractId}`);
+        console.log(
+          `[SmartContractManager] ✅ Milestone ${milestoneIndex + 1} released for ${contractId}`
+        );
       }
 
       return {
@@ -280,7 +309,7 @@ export class SmartContractManager {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error(`[SmartContractManager] Milestone release failed:`, error);
+      console.error("[SmartContractManager] Milestone release failed:", error);
       return {
         success: false,
         contractId,
@@ -295,10 +324,12 @@ export class SmartContractManager {
    */
   getPaymentStatus(contractId: string): ContractPaymentStatus | null {
     const contract = this.contracts.get(contractId);
-    if (!contract) return null;
+    if (!contract) {
+      return null;
+    }
 
     const escrows = this.escrows.get(contractId) || [];
-    
+
     const milestones = escrows.map((e, i) => ({
       id: i + 1,
       amount: e.amount,
@@ -337,12 +368,15 @@ export class SmartContractManager {
    */
   private handleSCPUpdate(event: SCPUpdateEvent): void {
     if (event.type === "protocol") {
-      console.log(`[SmartContractManager] Protocol update detected:`, event.data);
+      console.log(
+        "[SmartContractManager] Protocol update detected:",
+        event.data
+      );
       // Handle protocol upgrades - may need to update contract validation logic
     }
 
     if (event.type === "error") {
-      console.error(`[SmartContractManager] SCP error:`, event.data);
+      console.error("[SmartContractManager] SCP error:", event.data);
     }
   }
 }
