@@ -26,7 +26,7 @@
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.4",
     "@ai-sdk/provider": "2.0.0",
-    "@ai-sdk/react": "3.0.3",
+    "@ai-sdk/react": "3.0.33",
     "@ai-sdk/xai": "3.0.3",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-python": "^6.1.6",
