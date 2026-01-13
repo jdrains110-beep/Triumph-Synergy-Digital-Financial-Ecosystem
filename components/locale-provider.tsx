@@ -22,11 +22,13 @@ export const LocaleProvider = ({
   children: React.ReactNode;
 }) => {
   const safeLocale = SUPPORTED_LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
-  const dictionary = useMemo(() => getDictionary(safeLocale), [safeLocale]);
-  const value = useMemo(
-    () => ({ locale: safeLocale, t: (key: string) => dictionary[key] ?? key }),
-    [dictionary, safeLocale]
-  );
+  const dictionary = useMemo<Record<string, string>>(() => getDictionary(safeLocale), [safeLocale]);
+  const value = useMemo(() => {
+    return {
+      locale: safeLocale,
+      t: (key: string) => (key in dictionary ? dictionary[key] : key),
+    } satisfies LocaleContextValue;
+  }, [dictionary, safeLocale]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 };

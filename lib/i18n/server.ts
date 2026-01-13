@@ -1,9 +1,12 @@
 import { cookies, headers } from "next/headers";
 import { DEFAULT_LOCALE, resolveLocale } from "./locale";
 
-export const getRequestLocale = () => {
-  const cookieLocale = cookies().get("ts-locale")?.value;
-  const acceptLanguage = headers().get("accept-language");
-  // Country is not always available on the server; middleware sets cookie first.
+export const getRequestLocale = async () => {
+  const cookieStore = await cookies();
+  const headerStore = await headers();
+
+  const cookieLocale = cookieStore.get("ts-locale")?.value;
+  const acceptLanguage = headerStore.get("accept-language");
+
   return resolveLocale({ cookieLocale, acceptLanguage }) || DEFAULT_LOCALE;
 };

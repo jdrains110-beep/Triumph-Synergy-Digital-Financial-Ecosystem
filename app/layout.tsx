@@ -65,12 +65,12 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = getRequestLocale();
+  const locale = await getRequestLocale();
 
   return (
     <html

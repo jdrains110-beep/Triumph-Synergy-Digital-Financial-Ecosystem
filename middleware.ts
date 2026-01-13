@@ -103,9 +103,9 @@ export function middleware(request: NextRequest) {
 
   const acceptLanguage = request.headers.get("accept-language");
   const cookieLocale = request.cookies.get("ts-locale")?.value;
-  const country = request.geo?.country || null;
+  const countryHeader = request.headers.get("x-vercel-ip-country") || null;
 
-  const locale = pickLocale(acceptLanguage, cookieLocale, country);
+  const locale = pickLocale(acceptLanguage, cookieLocale, countryHeader);
 
   const response = NextResponse.next();
   response.cookies.set("ts-locale", locale, {

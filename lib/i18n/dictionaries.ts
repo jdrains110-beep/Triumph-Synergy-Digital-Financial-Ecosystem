@@ -5,11 +5,13 @@ import pt from "./locales/pt";
 import hi from "./locales/hi";
 import zh from "./locales/zh";
 
-const dictionaries = { en, es, fr, pt, hi, zh } as const;
+type Dictionary = Record<string, string>;
 
-export const getDictionary = (locale: string) => {
+const dictionaries: Record<string, Dictionary> = { en, es, fr, pt, hi, zh };
+
+export const getDictionary = (locale: string): Dictionary => {
   if (locale in dictionaries) {
-    return dictionaries[locale as keyof typeof dictionaries];
+    return dictionaries[locale];
   }
   return dictionaries.en;
 };
