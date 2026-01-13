@@ -16,12 +16,16 @@ let _client: ReturnType<typeof postgres> | null = null;
  * This prevents build-time errors when DATABASE_URL is not available
  */
 function getDatabase() {
-  if (_db) return _db;
+  if (_db) {
+    return _db;
+  }
 
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     // During build, return a mock that will fail at runtime if used
-    console.warn("DATABASE_URL not set - database operations will fail at runtime");
+    console.warn(
+      "DATABASE_URL not set - database operations will fail at runtime"
+    );
     throw new Error("DATABASE_URL environment variable is required");
   }
 

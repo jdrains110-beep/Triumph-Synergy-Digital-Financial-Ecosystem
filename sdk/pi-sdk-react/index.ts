@@ -7,9 +7,9 @@
 import type {
   PiAuthResult,
   PiPayment,
-  PiPaymentData,
   PiPaymentCallbacks,
-} from '../../types/pi-sdk.d';
+  PiPaymentData,
+} from "../../types/pi-sdk.d";
 
 // Re-export types for consumers of this module
 export type { PiAuthResult, PiPayment, PiPaymentData, PiPaymentCallbacks };

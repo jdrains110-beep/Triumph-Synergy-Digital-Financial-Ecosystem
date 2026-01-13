@@ -1,7 +1,7 @@
 /**
  * Pi Network Global Type Definitions
  * Unified type declarations for Pi SDK across the entire application
- * 
+ *
  * This file contains the canonical Window.Pi type declaration.
  * All other files should import from here instead of declaring their own.
  */
@@ -64,13 +64,13 @@ export type PiSDKConfig = {
 // ============================================================================
 
 declare global {
-  interface Window {
+  type Window = {
     Pi?: {
       /**
        * Initialize the Pi SDK
        */
       init: (config: PiSDKConfig) => void;
-      
+
       /**
        * Authenticate with Pi Network
        */
@@ -78,7 +78,7 @@ declare global {
         scopes: string[],
         onIncompletePaymentFound?: (payment: PiPayment) => void
       ) => Promise<PiAuthResult>;
-      
+
       /**
        * Create a Pi payment
        */
@@ -87,8 +87,5 @@ declare global {
         callbacks: PiPaymentCallbacks
       ) => Promise<PiPayment>;
     };
-  }
+  };
 }
-
-// Ensure this file is treated as a module
-export {};

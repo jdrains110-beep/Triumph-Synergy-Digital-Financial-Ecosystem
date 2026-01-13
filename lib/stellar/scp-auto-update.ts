@@ -1,7 +1,7 @@
 /**
  * Stellar Consensus Protocol (SCP) Auto-Update System
  * Ensures Triumph-Synergy always stays synchronized with Stellar network
- * 
+ *
  * This module provides:
  * - Automatic ledger synchronization
  * - Real-time SCP state monitoring
@@ -12,7 +12,8 @@
 import * as StellarSdk from "@stellar/stellar-sdk";
 
 // Configuration
-const STELLAR_HORIZON_URL = process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org";
+const STELLAR_HORIZON_URL =
+  process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org";
 const STELLAR_NETWORK = process.env.STELLAR_NETWORK || "PUBLIC";
 const UPDATE_INTERVAL_MS = 5000; // 5 seconds
 const MAX_RECONNECT_ATTEMPTS = 10;
@@ -23,7 +24,7 @@ const NETWORK_PASSPHRASES = {
   TESTNET: StellarSdk.Networks.TESTNET,
 } as const;
 
-export interface SCPState {
+export type SCPState = {
   latestLedger: number;
   ledgerCloseTime: Date;
   protocolVersion: number;
@@ -35,22 +36,22 @@ export interface SCPState {
   currentPhase: "NOMINATING" | "PREPARING" | "CONFIRMING" | "EXTERNALIZED";
   validators: ValidatorInfo[];
   lastUpdated: Date;
-}
+};
 
-export interface ValidatorInfo {
+export type ValidatorInfo = {
   nodeId: string;
   isUp: boolean;
   lastHeartbeat: Date;
   quorumSet?: string[];
-}
+};
 
-export interface SCPUpdateEvent {
+export type SCPUpdateEvent = {
   type: "ledger" | "protocol" | "network" | "validator" | "error";
   timestamp: Date;
   data: unknown;
   previousState?: Partial<SCPState>;
   newState?: Partial<SCPState>;
-}
+};
 
 type SCPEventHandler = (event: SCPUpdateEvent) => void;
 
@@ -69,8 +70,13 @@ export class SCPAutoUpdate {
   private isRunning = false;
 
   constructor(horizonUrl?: string, network?: keyof typeof NETWORK_PASSPHRASES) {
-    this.server = new StellarSdk.Horizon.Server(horizonUrl || STELLAR_HORIZON_URL);
-    this.networkPassphrase = NETWORK_PASSPHRASES[network || (STELLAR_NETWORK as keyof typeof NETWORK_PASSPHRASES)] || StellarSdk.Networks.PUBLIC;
+    this.server = new StellarSdk.Horizon.Server(
+      horizonUrl || STELLAR_HORIZON_URL
+    );
+    this.networkPassphrase =
+      NETWORK_PASSPHRASES[
+        network || (STELLAR_NETWORK as keyof typeof NETWORK_PASSPHRASES)
+      ] || StellarSdk.Networks.PUBLIC;
   }
 
   /**
@@ -83,15 +89,17 @@ export class SCPAutoUpdate {
     }
 
     this.isRunning = true;
-    console.log("[SCP Auto-Update] Starting Stellar Consensus Protocol synchronization...");
+    console.log(
+      "[SCP Auto-Update] Starting Stellar Consensus Protocol synchronization..."
+    );
 
     try {
       // Initial state fetch
       await this.fetchCurrentState();
-      
+
       // Start streaming ledger updates
       this.startLedgerStream();
-      
+
       // Start periodic full state updates
       this.updateInterval = setInterval(() => {
         this.fetchCurrentState().catch(console.error);
@@ -106,8 +114,12 @@ export class SCPAutoUpdate {
 
       console.log("[SCP Auto-Update] ✅ Connected to Stellar network");
       console.log(`[SCP Auto-Update] Network: ${this.networkPassphrase}`);
-      console.log(`[SCP Auto-Update] Latest Ledger: ${this.state?.latestLedger}`);
-      console.log(`[SCP Auto-Update] Protocol Version: ${this.state?.protocolVersion}`);
+      console.log(
+        `[SCP Auto-Update] Latest Ledger: ${this.state?.latestLedger}`
+      );
+      console.log(
+        `[SCP Auto-Update] Protocol Version: ${this.state?.protocolVersion}`
+      );
     } catch (error) {
       console.error("[SCP Auto-Update] Failed to start:", error);
       this.handleReconnect();
@@ -119,7 +131,7 @@ export class SCPAutoUpdate {
    */
   stop(): void {
     this.isRunning = false;
-    
+
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
@@ -151,7 +163,11 @@ export class SCPAutoUpdate {
   /**
    * Check if a protocol upgrade is available
    */
-  async checkForProtocolUpgrade(): Promise<{ available: boolean; currentVersion: number; latestVersion?: number }> {
+  async checkForProtocolUpgrade(): Promise<{
+    available: boolean;
+    currentVersion: number;
+    latestVersion?: number;
+  }> {
     const root = await this.server.root();
     const currentVersion = this.state?.protocolVersion || 0;
     const networkVersion = root.current_protocol_version;
@@ -169,19 +185,26 @@ export class SCPAutoUpdate {
   private async fetchCurrentState(): Promise<void> {
     try {
       const root = await this.server.root();
-      const ledgerResponse = await this.server.ledgers().order("desc").limit(1).call();
+      const ledgerResponse = await this.server
+        .ledgers()
+        .order("desc")
+        .limit(1)
+        .call();
       const latestLedger = ledgerResponse.records[0];
 
       const previousState = this.state ? { ...this.state } : undefined;
 
       this.state = {
         latestLedger: latestLedger?.sequence || 0,
-        ledgerCloseTime: latestLedger ? new Date(latestLedger.closed_at) : new Date(),
+        ledgerCloseTime: latestLedger
+          ? new Date(latestLedger.closed_at)
+          : new Date(),
         protocolVersion: root.current_protocol_version,
         baseFee: 100, // Base fee in stroops
-        baseReserve: 5000000, // 0.5 XLM in stroops
+        baseReserve: 5_000_000, // 0.5 XLM in stroops
         networkPassphrase: this.networkPassphrase,
-        coreVersion: root.core_supported_protocol_version?.toString() || "unknown",
+        coreVersion:
+          root.core_supported_protocol_version?.toString() || "unknown",
         historyLatestLedger: root.history_latest_ledger,
         currentPhase: "EXTERNALIZED",
         validators: [],
@@ -189,7 +212,10 @@ export class SCPAutoUpdate {
       };
 
       // Check for protocol version change
-      if (previousState && previousState.protocolVersion !== this.state.protocolVersion) {
+      if (
+        previousState &&
+        previousState.protocolVersion !== this.state.protocolVersion
+      ) {
         this.emitEvent({
           type: "protocol",
           timestamp: new Date(),
@@ -202,7 +228,9 @@ export class SCPAutoUpdate {
           newState: this.state,
         });
 
-        console.log(`[SCP Auto-Update] 🔄 Protocol upgraded: v${previousState.protocolVersion} → v${this.state.protocolVersion}`);
+        console.log(
+          `[SCP Auto-Update] 🔄 Protocol upgraded: v${previousState.protocolVersion} → v${this.state.protocolVersion}`
+        );
       }
 
       this.reconnectAttempts = 0;
@@ -218,11 +246,11 @@ export class SCPAutoUpdate {
   private startLedgerStream(): void {
     try {
       const builder = this.server.ledgers().cursor("now").order("asc");
-      
+
       const streamResult = builder.stream({
         onmessage: (ledger) => {
           const previousLedger = this.state?.latestLedger;
-          
+
           if (this.state) {
             this.state.latestLedger = ledger.sequence;
             this.state.ledgerCloseTime = new Date(ledger.closed_at);
@@ -249,7 +277,14 @@ export class SCPAutoUpdate {
       });
 
       // Store the close function for cleanup
-      this.ledgerStream = { close: typeof streamResult === 'function' ? streamResult : () => {} };
+      this.ledgerStream = {
+        close:
+          typeof streamResult === "function"
+            ? streamResult
+            : () => {
+                // No-op for non-function stream results
+              },
+      };
 
       console.log("[SCP Auto-Update] 📡 Ledger stream connected");
     } catch (error) {
@@ -268,16 +303,21 @@ export class SCPAutoUpdate {
         this.emitEvent({
           type: "error",
           timestamp: new Date(),
-          data: { message: "Max reconnection attempts reached", attempts: this.reconnectAttempts },
+          data: {
+            message: "Max reconnection attempts reached",
+            attempts: this.reconnectAttempts,
+          },
         });
       }
       return;
     }
 
     this.reconnectAttempts++;
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-    
-    console.log(`[SCP Auto-Update] 🔄 Reconnecting in ${delay / 1000}s (attempt ${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
+    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30_000);
+
+    console.log(
+      `[SCP Auto-Update] 🔄 Reconnecting in ${delay / 1000}s (attempt ${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`
+    );
 
     setTimeout(() => {
       if (this.isRunning) {
@@ -347,9 +387,11 @@ export function createSCPSmartContractBinding(scp: SCPAutoUpdate) {
      */
     isSynchronized(): boolean {
       const state = scp.getState();
-      if (!state) return false;
-      
-      const staleThreshold = 30000; // 30 seconds
+      if (!state) {
+        return false;
+      }
+
+      const staleThreshold = 30_000; // 30 seconds
       return Date.now() - state.lastUpdated.getTime() < staleThreshold;
     },
 

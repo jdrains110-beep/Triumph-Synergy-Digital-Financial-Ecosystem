@@ -73,10 +73,7 @@
       "path": "contracts/Migrations.sol",
       "description": "Contract deployment and migration management",
       "version": "1.0.0",
-      "features": [
-        "Deployment tracking",
-        "Migration management"
-      ]
+      "features": ["Deployment tracking", "Migration management"]
     }
   ]
 }
