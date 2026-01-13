@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       }
 
       case "external": {
-        const externalContracts = smartContractHub.listExternalContracts();
+        const externalContracts = await smartContractHub.listExternalContracts();
         return NextResponse.json({
           success: true,
           contracts: externalContracts,

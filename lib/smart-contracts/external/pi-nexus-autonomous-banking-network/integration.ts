@@ -137,7 +137,7 @@ export class PiNexusIntegration {
       // Audit
       auditStatus: this.config.requireAudit ? "passed" : "not-audited",
       auditReports: [],
-      securityScore: 85, // Based on Kosasih's verification
+      securityScore: this.config.defaultSecurityScore,
 
       // Timestamps
       createdAt: now,

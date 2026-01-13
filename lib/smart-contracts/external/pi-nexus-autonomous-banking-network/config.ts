@@ -179,6 +179,7 @@ export const PI_NEXUS_INTEGRATION_CONFIG = {
   // Security settings
   requireAudit: true,
   auditProvider: "kosasih-verified",
+  defaultSecurityScore: 85, // Based on Kosasih's repository audit status
   
   // Compatibility settings
   triumphSynergyCompatible: true,

@@ -226,10 +226,13 @@ class SmartContractHub {
   private readonly templates: Map<string, ContractTemplate> = new Map();
   private readonly repositories: Map<string, GitHubRepository> = new Map();
   private readonly externalContracts: Map<string, SmartContract> = new Map();
+  private externalContractsLoaded = false;
+  private externalContractsLoading: Promise<void> | null = null;
 
   constructor() {
     this.initializeDefaultTemplates();
-    this.initializeExternalContracts();
+    // Start loading external contracts asynchronously
+    this.externalContractsLoading = this.initializeExternalContracts();
   }
 
   private async initializeExternalContracts(): Promise<void> {
@@ -243,9 +246,21 @@ class SmartContractHub {
       for (const contract of piNexusContracts) {
         this.externalContracts.set(contract.id, contract);
       }
+      this.externalContractsLoaded = true;
     } catch (error) {
       // External contracts are optional, log but don't fail
-      console.warn("Failed to load external contracts:", error);
+      console.warn(
+        "Failed to load Pi-Nexus external contracts:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    } finally {
+      this.externalContractsLoading = null;
+    }
+  }
+
+  private async ensureExternalContractsLoaded(): Promise<void> {
+    if (this.externalContractsLoading) {
+      await this.externalContractsLoading;
     }
   }
 
@@ -788,6 +803,9 @@ impl PiEscrow {
   }
 
   async getContract(contractId: string): Promise<SmartContract | null> {
+    // Ensure external contracts are loaded
+    await this.ensureExternalContractsLoaded();
+    
     // Check internal contracts first
     const internalContract = this.contracts.get(contractId);
     if (internalContract) {
@@ -809,6 +827,9 @@ impl PiEscrow {
     network?: BlockchainNetwork;
     includeExternal?: boolean;
   }): Promise<SmartContract[]> {
+    // Ensure external contracts are loaded
+    await this.ensureExternalContractsLoaded();
+    
     let contracts = Array.from(this.contracts.values());
     
     // Include external contracts if requested (default: true)
@@ -829,7 +850,9 @@ impl PiEscrow {
     return contracts;
   }
 
-  listExternalContracts(): SmartContract[] {
+  async listExternalContracts(): Promise<SmartContract[]> {
+    // Ensure external contracts are loaded
+    await this.ensureExternalContractsLoaded();
     return Array.from(this.externalContracts.values());
   }
 
