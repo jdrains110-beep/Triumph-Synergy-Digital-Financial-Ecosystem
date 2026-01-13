@@ -3,66 +3,16 @@
  * Local implementation for browser-side Pi payments
  */
 
-// Global Pi object that will be loaded from the Pi Browser
-declare global {
-  // biome-ignore lint/nursery/useConsistentTypeDefinitions: Interface merging required for global augmentation
-  interface Window {
-    Pi?: {
-      init: (config: { version: string; sandbox?: boolean }) => void;
-      authenticate: (
-        scopes: string[],
-        onIncompletePaymentFound?: (payment: PiPayment) => void
-      ) => Promise<PiAuthResult>;
-      createPayment: (
-        paymentData: PiPaymentData,
-        callbacks: PiPaymentCallbacks
-      ) => Promise<PiPayment>;
-    };
-  }
-}
+// Import types from the canonical type definition file
+import type {
+  PiAuthResult,
+  PiPayment,
+  PiPaymentData,
+  PiPaymentCallbacks,
+} from '../../types/pi-sdk.d';
 
-export type PiAuthResult = {
-  accessToken: string;
-  user: {
-    uid: string;
-    username: string;
-  };
-};
-
-export type PiPayment = {
-  identifier: string;
-  user_uid: string;
-  amount: number;
-  memo: string;
-  metadata: Record<string, unknown>;
-  status: {
-    developer_approved: boolean;
-    transaction_verified: boolean;
-    developer_completed: boolean;
-    cancelled: boolean;
-    user_cancelled: boolean;
-  };
-  transaction?: {
-    txid: string;
-    verified: boolean;
-  };
-};
-
-export type PiPaymentData = {
-  amount: number;
-  memo: string;
-  metadata?: Record<string, unknown>;
-};
-
-export type PiPaymentCallbacks = {
-  onReadyForServerApproval: (paymentId: string) => void | Promise<void>;
-  onReadyForServerCompletion: (
-    paymentId: string,
-    txid: string
-  ) => void | Promise<void>;
-  onCancel: (paymentId: string) => void;
-  onError: (error: Error, payment?: PiPayment) => void;
-};
+// Re-export types for consumers of this module
+export type { PiAuthResult, PiPayment, PiPaymentData, PiPaymentCallbacks };
 
 /**
  * Pi SDK wrapper for React applications

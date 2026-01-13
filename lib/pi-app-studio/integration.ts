@@ -464,30 +464,9 @@ export const GITHUB_CONFIG = {
   ],
 };
 
-// ============================================================================
-// TYPE DECLARATIONS
-// ============================================================================
-
-declare global {
-  interface Window {
-    Pi?: {
-      init: (config: { version: string; sandbox?: boolean }) => void;
-      authenticate: (
-        scopes: string[],
-        onIncompletePaymentFound: (payment: any) => void
-      ) => Promise<{ user: { uid: string; username: string }; accessToken: string }>;
-      createPayment: (
-        paymentData: { amount: number; memo: string; metadata?: any },
-        callbacks: {
-          onReadyForServerApproval: (paymentId: string) => void;
-          onReadyForServerCompletion: (paymentId: string, txid: string) => void;
-          onCancel: (paymentId: string) => void;
-          onError: (error: Error, payment?: any) => void;
-        }
-      ) => Promise<{ identifier: string }>;
-    };
-  }
-}
+// Import the canonical Window.Pi type declaration
+// The global declaration is in types/pi-sdk.d.ts
+import type {} from '../../types/pi-sdk.d';
 
 export default {
   config: PI_APP_CONFIG,
