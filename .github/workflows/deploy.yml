@@ -90,14 +90,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     if: always()
-
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
     steps:
       - name: Notify Slack
         uses: 8398a7/action-slack@v3
         if: always()
         continue-on-error: true
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
           status: ${{ job.status }}
           text: |
