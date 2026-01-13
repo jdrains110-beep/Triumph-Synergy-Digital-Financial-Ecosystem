@@ -91,6 +91,18 @@ When working with these contracts:
 - Regular security audits are recommended before mainnet deployment
 - Always test thoroughly in testnet environments
 
+### Known Review Findings
+
+During integration, automated code review identified the following items in the original contracts:
+
+1. **StableCoin.sol** (Line 111): Minor formatting inconsistency in array access
+2. **StableCoin.sol** (Lines 94-95): Token distribution in `adjustSupply()` function centralizes new tokens to owner
+3. **StableCoin.sol** (Lines 98-99): `adjustSupply()` burn mechanism should check for sufficient balance
+
+These findings have been documented for potential upstream reporting. **Users should conduct their own security audits** before deploying these contracts to production networks.
+
+See [CODE_REVIEW_NOTES.md](../../../CODE_REVIEW_NOTES.md) for detailed analysis.
+
 ## Links
 
 - **Original Repository**: https://github.com/KOSASIH/pi-supernode
