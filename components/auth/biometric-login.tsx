@@ -149,7 +149,9 @@ export function BiometricLogin({ onSuccess, onError }: BiometricLoginProps) {
 
       <CardContent>
         <Tabs
-          onValueChange={(value) => setActiveTab(value as any)}
+          onValueChange={(value: string) =>
+            setActiveTab(value as "biometric" | "pin" | "password")
+          }
           value={activeTab}
         >
           <TabsList className="grid w-full grid-cols-3">

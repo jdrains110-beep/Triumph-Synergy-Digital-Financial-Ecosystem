@@ -104,7 +104,7 @@ export function StreamControls({
               defaultValue={[volume]}
               id="volume-slider"
               max={100}
-              onValueChange={(val) => setVolume(val[0])}
+              onValueChange={(val: number[]) => setVolume(val[0])}
               step={1}
             />
           </div>

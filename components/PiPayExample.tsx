@@ -1,6 +1,5 @@
-
 // Example usage of PiPaymentButton for Pi Network payments
-import PiPaymentButton from './PiPaymentButton';
+import PiPaymentButton from "./PiPaymentButton";
 
 export default function PiPayExample() {
   return (
@@ -9,8 +8,8 @@ export default function PiPayExample() {
       <PiPaymentButton
         amount={1}
         memo="Test Pi Payment"
-        onSuccess={(payment) => alert('Payment successful!')}
-        onError={(err) => alert('Payment failed: ' + err)}
+        onError={(err: unknown) => alert("Payment failed: " + String(err))}
+        onSuccess={(payment: unknown) => alert("Payment successful!")}
       />
     </div>
   );

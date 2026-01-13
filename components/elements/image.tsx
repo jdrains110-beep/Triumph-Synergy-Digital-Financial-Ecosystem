@@ -12,7 +12,6 @@ export const Image = ({
   mediaType,
   ...props
 }: ImageProps) => (
-  
   <img
     {...props}
     alt={props.alt}

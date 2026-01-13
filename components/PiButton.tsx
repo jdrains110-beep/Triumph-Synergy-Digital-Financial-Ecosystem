@@ -1,23 +1,23 @@
-import React from 'react';
+import type React from "react";
 
-interface PiButtonProps {
+type PiButtonProps = {
   onClick?: () => void;
   children: React.ReactNode;
   disabled?: boolean;
   className?: string;
-}
+};
 
 export default function PiButton({
   onClick,
   children,
   disabled = false,
-  className = ''
+  className = "",
 }: PiButtonProps) {
   return (
     <button
-      onClick={onClick}
+      className={`rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
       disabled={disabled}
-      className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${className}`}
+      onClick={onClick}
     >
       {children}
     </button>

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -6,12 +6,15 @@ export async function POST(req: NextRequest) {
     const { paymentId, reason } = body;
 
     if (!paymentId) {
-      return NextResponse.json({ error: 'Payment ID required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Payment ID required" },
+        { status: 400 }
+      );
     }
 
-    console.log('[Pi Payment] Incomplete payment reported:', {
+    console.log("[Pi Payment] Incomplete payment reported:", {
       paymentId,
-      reason
+      reason,
     });
 
     // TODO: Implement incomplete payment recovery logic
@@ -19,12 +22,15 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Incomplete payment logged for recovery',
+      message: "Incomplete payment logged for recovery",
       paymentId,
-      status: 'incomplete'
+      status: "incomplete",
     });
   } catch (error) {
-    console.error('[Pi Payment] Incomplete handling failed:', error);
-    return NextResponse.json({ error: 'Failed to process incomplete payment' }, { status: 500 });
+    console.error("[Pi Payment] Incomplete handling failed:", error);
+    return NextResponse.json(
+      { error: "Failed to process incomplete payment" },
+      { status: 500 }
+    );
   }
 }

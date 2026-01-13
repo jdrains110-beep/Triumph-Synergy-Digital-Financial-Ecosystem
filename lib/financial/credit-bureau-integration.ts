@@ -167,6 +167,8 @@ export type Metro2Record = {
 export class CreditBureauIntegration {
   private readonly connections: Map<CreditBureau, CreditBureauConnection> =
     new Map();
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Property assigned for future credit sync operations
+  private ownerCreditProfile!: CreditReport;
   private dataFurnisherRegistration!: {
     businessName: string;
     ein: string;

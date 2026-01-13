@@ -607,7 +607,9 @@ class AuthorityGovernanceSystem {
       },
     ];
 
-    criticalServices.forEach((s) => { this.services.set(s.service, s); });
+    criticalServices.forEach((s) => {
+      this.services.set(s.service, s);
+    });
   }
 
   private initializeEmergencyProtocols(): void {
@@ -695,7 +697,9 @@ class AuthorityGovernanceSystem {
       },
     ];
 
-    protocols.forEach((p) => { this.emergencyProtocols.set(p.id, p); });
+    protocols.forEach((p) => {
+      this.emergencyProtocols.set(p.id, p);
+    });
   }
 
   // ==========================================================================
