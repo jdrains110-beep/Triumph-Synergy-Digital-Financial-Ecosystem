@@ -232,12 +232,12 @@ export default function PiPaymentButton({
             }
           },
 
-          onError: (error: any, payment?: any) => {
-            console.error("[Pi Payment] Payment error:", error, payment);
+          onError: (err: any, pmt?: any) => {
+            console.error("[Pi Payment] Payment error:", err, pmt);
             setLoading(false);
-            setError(error.message || "Payment failed");
+            setError(err.message || "Payment failed");
             if (onError) {
-              onError(error);
+              onError(err);
             }
           },
         }

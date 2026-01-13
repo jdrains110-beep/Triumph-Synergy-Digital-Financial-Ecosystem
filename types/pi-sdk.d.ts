@@ -64,7 +64,7 @@ export type PiSDKConfig = {
 // ============================================================================
 
 declare global {
-  type Window = {
+  interface Window {
     Pi?: {
       /**
        * Initialize the Pi SDK
@@ -87,5 +87,5 @@ declare global {
         callbacks: PiPaymentCallbacks
       ) => Promise<PiPayment>;
     };
-  };
+  }
 }

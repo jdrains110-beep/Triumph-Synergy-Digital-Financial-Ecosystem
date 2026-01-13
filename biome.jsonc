@@ -9,6 +9,18 @@
       "!hooks/use-mobile.ts"
     ]
   },
+  "overrides": [
+    {
+      "includes": ["types/pi-sdk.d.ts"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "useConsistentTypeDefinitions": "off"
+          }
+        }
+      }
+    }
+  ],
   "linter": {
     "rules": {
       "suspicious": {

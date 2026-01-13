@@ -356,8 +356,8 @@ export async function createPiPayment(
         onCancel: (paymentId: string) => {
           console.log("⚠️ Payment cancelled:", paymentId);
         },
-        onError: (error: Error, payment?: any) => {
-          console.error("❌ Payment error:", error, payment);
+        onError: (err: Error, pmt?: any) => {
+          console.error("❌ Payment error:", err, pmt);
         },
       }
     );

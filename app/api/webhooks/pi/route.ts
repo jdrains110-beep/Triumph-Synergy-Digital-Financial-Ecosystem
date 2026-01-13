@@ -87,6 +87,10 @@ async function handlePaymentWebhook(data: PaymentWebhookData): Promise<void> {
       console.log("❌ Payment failed");
       // Handle failure
       break;
+
+    default:
+      console.warn("⚠️ Unknown payment status:", data.status);
+      break;
   }
 }
 
@@ -107,6 +111,10 @@ async function handleUserWebhook(data: UserWebhookData): Promise<void> {
     case "deauthorized":
       console.log("⚠️ User deauthorized app");
       // Handle deauthorization
+      break;
+
+    default:
+      console.warn("⚠️ Unknown user event:", data.event);
       break;
   }
 }

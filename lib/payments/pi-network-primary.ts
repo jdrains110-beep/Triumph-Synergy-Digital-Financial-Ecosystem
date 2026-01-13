@@ -39,6 +39,8 @@ export const piNetworkConfig: PiPaymentConfig = {
  */
 export class PiNetworkPaymentProcessor {
   private readonly apiKey: string;
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Reserved for internal Pi multiplier logic
+  private readonly internalApiKey: string;
   private readonly horizon: Horizon.Server;
   private readonly stellar: {
     account: string;
