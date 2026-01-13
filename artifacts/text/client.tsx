@@ -30,18 +30,23 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
   },
   onStreamPart: ({ streamPart, setMetadata, setArtifact }) => {
     if (streamPart.type === "data-suggestion") {
+      const suggestion = streamPart.data as Suggestion;
       setMetadata((metadata) => {
         return {
-          suggestions: [...metadata.suggestions, streamPart.data],
+          suggestions: [...(metadata?.suggestions ?? []), suggestion],
         };
       });
     }
 
     if (streamPart.type === "data-textDelta") {
+      const delta =
+        typeof streamPart.data === "string"
+          ? streamPart.data
+          : String(streamPart.data ?? "");
       setArtifact((draftArtifact) => {
         return {
           ...draftArtifact,
-          content: draftArtifact.content + streamPart.data,
+          content: draftArtifact.content + delta,
           isVisible:
             draftArtifact.status === "streaming" &&
             draftArtifact.content.length > 400 &&
