@@ -1,12 +1,28 @@
 import { useEffect, useState } from 'react';
-import PiPaymentButton from '../../components/PiPaymentButton';
+import dynamic from 'next/dynamic';
+
+// Dynamically import PiPaymentButton to avoid SSR issues
+const PiPaymentButton = dynamic(() => import('../../components/PiPaymentButton'), {
+  ssr: false,
+  loading: () => <div>Loading payment button...</div>
+});
+
+// This page requires client-side rendering only
+export const dynamic_config = 'force-dynamic';
 
 export default function PiVerification() {
   const [verificationResults, setVerificationResults] = useState<any>({});
   const [isPiBrowser, setIsPiBrowser] = useState(false);
   const [piAuth, setPiAuth] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     // Run verification checks
     const runVerification = async () => {
       const results: any = {};
@@ -22,11 +38,13 @@ export default function PiVerification() {
       results.envApiKey = !!process.env.PI_API_KEY;
       results.envSandbox = !!process.env.NEXT_PUBLIC_PI_SANDBOX;
 
-      // Check browser
-      results.userAgent = navigator.userAgent;
-      results.isPiBrowser = navigator.userAgent.includes('PiBrowser') ||
-                           navigator.userAgent.includes('Pi Network') ||
-                           results.piSdkLoaded;
+      // Check browser - only access navigator on client side
+      const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'server';
+      results.userAgent = userAgent;
+      results.isPiBrowser = typeof navigator !== 'undefined' && (
+                           userAgent.includes('PiBrowser') ||
+                           userAgent.includes('Pi Network') ||
+                           results.piSdkLoaded);
       setIsPiBrowser(results.isPiBrowser);
 
       // Check API routes
@@ -231,4 +249,9 @@ export default function PiVerification() {
       </details>
     </div>
   );
+}
+
+// Force server-side rendering to prevent static generation issues with navigator
+export async function getServerSideProps() {
+  return { props: {} };
 }
