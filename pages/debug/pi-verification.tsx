@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import PiPaymentButton from '../components/PiPaymentButton';
+import PiPaymentButton from '../../components/PiPaymentButton';
 
 export default function PiVerification() {
   const [verificationResults, setVerificationResults] = useState<any>({});
@@ -55,7 +55,7 @@ export default function PiVerification() {
             results.authentication = { success: false, error };
           });
         } catch (error) {
-          results.authentication = { success: false, error: error.message };
+          results.authentication = { success: false, error: error instanceof Error ? error.message : String(error) };
         }
       }
 
