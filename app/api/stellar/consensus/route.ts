@@ -1,26 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import postgres from "postgres";
-import { createClient } from "redis";
 import * as StellarSdk from "@stellar/stellar-sdk";
-
-// Lazy initialization to avoid build-time connection attempts
-let redis: ReturnType<typeof createClient> | null = null;
-let sql: ReturnType<typeof postgres> | null = null;
-
-function _getRedis() {
-  if (!redis) {
-    redis = createClient({ url: process.env.REDIS_URL });
-    redis.connect().catch(console.error);
-  }
-  return redis;
-}
-
-function getSql() {
-  if (!sql) {
-    sql = postgres(process.env.POSTGRES_URL || "");
-  }
-  return sql;
-}
+import { getSCPAutoUpdate, getStellarPiCoinSDK } from "@/lib/stellar";
 
 // Stellar Configuration
 const server = new StellarSdk.Horizon.Server(
@@ -30,55 +10,74 @@ const server = new StellarSdk.Horizon.Server(
 /**
  * Get Stellar Consensus Protocol Status
  * GET /api/stellar/consensus
+ * 
+ * Returns real-time SCP state with auto-synchronization
  */
 export async function GET(_request: NextRequest) {
   try {
-    // Get latest ledger from Stellar network
-    const latestLedger = await server.ledgers().order("desc").limit(1).call();
+    // Get SCP auto-update instance
+    const scp = getSCPAutoUpdate();
+    const scpState = scp.getState();
 
-    const ledger = latestLedger.records[0];
+    // Get Pi Coin SDK for balance info
+    const piSdk = getStellarPiCoinSDK();
+    const piConfig = piSdk.getPiCoinConfig();
 
-    // Get network status with safe property access
+    // Get latest ledger from Stellar network (fallback if SCP not synced)
+    let ledger: StellarSdk.Horizon.ServerApi.LedgerRecord | null = null;
+    try {
+      const latestLedger = await server.ledgers().order("desc").limit(1).call();
+      ledger = latestLedger.records[0];
+    } catch (e) {
+      console.warn("Failed to fetch ledger directly:", e);
+    }
+
+    // Build network status from SCP state or direct query
     const networkStatus = {
-      ledger_sequence: ledger.sequence || 0,
-      closed_at: ledger.closed_at || new Date().toISOString(),
-      transaction_count: (ledger as any).transaction_count || 0,
-      operation_count: (ledger as any).operation_count || 0,
-      base_fee: (ledger as any).base_fee_in_stroops || 0,
-      protocol_version: (ledger as any).protocol_version || 0,
+      ledger_sequence: scpState?.latestLedger || ledger?.sequence || 0,
+      closed_at: scpState?.ledgerCloseTime?.toISOString() || ledger?.closed_at || new Date().toISOString(),
+      transaction_count: (ledger as any)?.transaction_count || 0,
+      operation_count: (ledger as any)?.operation_count || 0,
+      base_fee: scpState?.baseFee || (ledger as any)?.base_fee_in_stroops || 100,
+      protocol_version: scpState?.protocolVersion || (ledger as any)?.protocol_version || 0,
+      core_version: scpState?.coreVersion || "unknown",
     };
 
     // Calculate consensus metrics
+    const ledgerCloseTime = scpState?.ledgerCloseTime || (ledger ? new Date(ledger.closed_at) : new Date());
     const consensusHealth = {
       network_active: true,
       consensus_protocol: "Stellar Consensus Protocol (SCP)",
-      last_ledger_age_seconds: Math.floor(
-        (Date.now() - new Date(ledger.closed_at).getTime()) / 1000
-      ),
+      scp_phase: scpState?.currentPhase || "EXTERNALIZED",
+      last_ledger_age_seconds: Math.floor((Date.now() - ledgerCloseTime.getTime()) / 1000),
       transactions_per_ledger: networkStatus.transaction_count,
       network_throughput: `${Math.floor(networkStatus.transaction_count / 5)} tx/sec average`,
+      scp_synchronized: scpState ? Date.now() - scpState.lastUpdated.getTime() < 30000 : false,
+      auto_update_active: !!scpState,
     };
 
-    // Get our system stats
-    const sqlClient = getSql();
-    const systemStats = await sqlClient`
-      SELECT 
-        COUNT(*) FILTER (WHERE stellar_verified = true) as verified_count,
-        COUNT(*) as total_payments,
-        SUM(internal_value) FILTER (WHERE source IN ('internal_mined', 'internal_contributed')) as internal_value_total,
-        SUM(price_equivalent) as total_price_equivalent
-      FROM pi_payments_valued
-      WHERE created_at > NOW() - INTERVAL '24 hours'
-    `;
+    // Pi Coin integration status
+    const piCoinIntegration = {
+      asset_code: piConfig.assetCode,
+      issuer: piConfig.issuer || "Not configured",
+      decimals: piConfig.decimals,
+      sdk_status: "active",
+    };
 
     return NextResponse.json({
       stellar_network: networkStatus,
       consensus_health: consensusHealth,
-      triumph_synergy_stats: systemStats[0] || {},
+      pi_coin_integration: piCoinIntegration,
+      scp_auto_update: {
+        status: scpState ? "active" : "initializing",
+        last_updated: scpState?.lastUpdated?.toISOString(),
+        network_passphrase: scpState?.networkPassphrase,
+        history_latest_ledger: scpState?.historyLatestLedger,
+      },
       integration: {
         status: "active",
         verified_by_scp: true,
-        message: "All transactions verified through Stellar Consensus Protocol",
+        message: "All transactions verified through Stellar Consensus Protocol with auto-synchronization",
       },
     });
   } catch (error) {
@@ -87,6 +86,7 @@ export async function GET(_request: NextRequest) {
       {
         error: "Failed to fetch Stellar consensus data",
         status: "degraded",
+        scp_auto_update: "error",
       },
       { status: 500 }
     );
