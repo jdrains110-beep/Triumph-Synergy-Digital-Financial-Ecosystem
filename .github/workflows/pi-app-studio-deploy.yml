@@ -220,7 +220,8 @@ jobs:
           # Stellar Configuration
           STELLAR_HORIZON_URL: 'https://horizon.stellar.org'
           STELLAR_PAYMENT_ACCOUNT: ${{ secrets.STELLAR_PAYMENT_ACCOUNT }}
-          # Database (placeholder for build)
+          # Database Configuration (placeholder for build - actual URL used at runtime)
+          DATABASE_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
           POSTGRES_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
         run: pnpm build
 
