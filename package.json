@@ -130,6 +130,7 @@
 		"@types/pdf-parse": "^1.1.4",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
+		"@vitest/coverage-v8": "^4.0.17",
 		"baseline-browser-mapping": "^2.9.11",
 		"cross-env": "^10.1.0",
 		"drizzle-kit": "^0.31.8",
@@ -145,10 +146,7 @@
 	"packageManager": "pnpm@9.12.3",
 	"pnpm": {
 		"overrides": {
-			"esbuild": "0.25.0",
-			"@esbuild-kit/core-utils>esbuild": "0.25.0",
-			"drizzle-kit>esbuild": "0.25.0",
-			"drizzle-kit>esbuild-register>esbuild": "0.25.0"
+			"esbuild": "0.25.0"
 		}
 	}
 }

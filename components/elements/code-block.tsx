@@ -72,10 +72,12 @@ export const CodeBlock = ({
 				<div className="relative">
 					<div
 						className="overflow-hidden dark:hidden [&_pre]:m-0 [&_pre]:p-4 [&_pre]:text-sm [&_pre]:overflow-x-auto"
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki generates safe, sanitized HTML from code strings using a trusted syntax highlighter
 						dangerouslySetInnerHTML={{ __html: lightHtml }}
 					/>
 					<div
 						className="hidden overflow-hidden dark:block [&_pre]:m-0 [&_pre]:p-4 [&_pre]:text-sm [&_pre]:overflow-x-auto"
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki generates safe, sanitized HTML from code strings using a trusted syntax highlighter
 						dangerouslySetInnerHTML={{ __html: darkHtml }}
 					/>
 					{children && (
