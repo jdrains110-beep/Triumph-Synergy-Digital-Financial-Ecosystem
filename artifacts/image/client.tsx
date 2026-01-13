@@ -8,9 +8,13 @@ export const imageArtifact = new Artifact({
   description: "Useful for image generation",
   onStreamPart: ({ streamPart, setArtifact }) => {
     if (streamPart.type === "data-imageDelta") {
+      const content =
+        typeof streamPart.data === "string"
+          ? streamPart.data
+          : String(streamPart.data ?? "");
       setArtifact((draftArtifact) => ({
         ...draftArtifact,
-        content: streamPart.data,
+        content,
         isVisible: true,
         status: "streaming",
       }));
