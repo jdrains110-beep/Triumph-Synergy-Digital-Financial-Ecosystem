@@ -1,6 +1,9 @@
 # Multi-stage build for optimized production image
 FROM node:20-alpine AS base
 
+# Install minimal runtime helpers early
+RUN apk add --no-cache curl tini
+
 # Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
@@ -23,6 +26,7 @@ COPY . .
 
 # Set environment for build
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_OPTIONS="--enable-source-maps --max-old-space-size=2048"
 ENV RUN_MIGRATIONS false
 ENV DOCKER_BUILD true
 
@@ -46,9 +50,12 @@ COPY --from=builder /app/.next/static ./.next/static
 
 USER nextjs
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -qO- http://localhost:3000/api/health || exit 1
+
 EXPOSE 3000
 
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "server.js"]

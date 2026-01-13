@@ -89,6 +89,13 @@ services:
       - INTERNAL_PI_MIN_VALUE=10.0
       - EXTERNAL_PI_MIN_VALUE=1.0
       - DOCKER_BUILD=true
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     depends_on:
       postgres:
         condition: service_healthy
@@ -145,7 +152,8 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - triumph-network
     restart: unless-stopped
