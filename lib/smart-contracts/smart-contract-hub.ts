@@ -251,7 +251,10 @@ class SmartContractHub {
   private readonly contracts: Map<string, SmartContract> = new Map();
   private readonly templates: Map<string, ContractTemplate> = new Map();
   private readonly repositories: Map<string, GitHubRepository> = new Map();
-  private readonly externalRepositories: Map<string, ExternalContractRepository> = new Map();
+  private readonly externalRepositories: Map<
+    string,
+    ExternalContractRepository
+  > = new Map();
 
   constructor() {
     this.initializeDefaultTemplates();
@@ -566,7 +569,8 @@ impl PiEscrow {
       owner: "kosasih",
       name: "pi-supernode",
       fullName: "kosasih/pi-supernode",
-      description: "A supernode for the Pi Network Mainnet using ARES architecture, powered by AI, quantum-resistant cryptography, and cross-chain interoperability.",
+      description:
+        "A supernode for the Pi Network Mainnet using ARES architecture, powered by AI, quantum-resistant cryptography, and cross-chain interoperability.",
       version: "2.0.0",
       license: "MIT",
       sourceUrl: "https://github.com/KOSASIH/pi-supernode",
@@ -580,7 +584,8 @@ impl PiEscrow {
           fileName: "PiCoin.sol",
           language: "solidity",
           path: "contracts/PiCoin.sol",
-          description: "Core Pi Coin token contract with minting, burning, and ERC-20 functionality",
+          description:
+            "Core Pi Coin token contract with minting, burning, and ERC-20 functionality",
           version: "1.0.0",
           features: [
             "Token minting with 100B supply cap",
@@ -594,7 +599,8 @@ impl PiEscrow {
           fileName: "Governance.sol",
           language: "solidity",
           path: "contracts/Governance.sol",
-          description: "Decentralized governance system with proposal creation and voting",
+          description:
+            "Decentralized governance system with proposal creation and voting",
           version: "1.0.0",
           features: [
             "Proposal creation",
@@ -636,10 +642,7 @@ impl PiEscrow {
           path: "contracts/Migrations.sol",
           description: "Contract deployment and migration management",
           version: "1.0.0",
-          features: [
-            "Deployment tracking",
-            "Migration management",
-          ],
+          features: ["Deployment tracking", "Migration management"],
         },
       ],
     });
@@ -955,7 +958,7 @@ impl PiEscrow {
       : Array.from(this.externalRepositories.values());
 
     const contracts: Array<ExternalContract & { repository: string }> = [];
-    
+
     for (const repo of repos) {
       if (repo) {
         for (const contract of repo.contracts) {
@@ -1153,7 +1156,9 @@ export function listExternalRepositories(): ExternalContractRepository[] {
   return smartContractHub.listExternalRepositories();
 }
 
-export function getExternalRepository(fullName: string): ExternalContractRepository | null {
+export function getExternalRepository(
+  fullName: string
+): ExternalContractRepository | null {
   return smartContractHub.getExternalRepository(fullName);
 }
 
@@ -1180,5 +1185,8 @@ export async function loadExternalContractSource(
   repoFullName: string,
   contractName: string
 ): Promise<string> {
-  return smartContractHub.loadExternalContractSource(repoFullName, contractName);
+  return smartContractHub.loadExternalContractSource(
+    repoFullName,
+    contractName
+  );
 }
