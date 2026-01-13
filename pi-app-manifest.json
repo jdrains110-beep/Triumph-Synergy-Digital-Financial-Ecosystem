@@ -1,191 +1,186 @@
 {
-  "$schema": "https://json.schemastore.org/pi-app-manifest.json",
-  "name": "Triumph-Synergy",
-  "short_name": "Triumph",
-  "description": "Advanced payment routing platform powered by Pi Network with Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance.",
-  "version": "1.0.0",
-  "pi_sdk_version": "2.0",
-  
-  "developer": {
-    "name": "Jeremiah Drains",
-    "organization": "Triumph Synergy LLC",
-    "email": "contact@triumph-synergy.com",
-    "website": "https://triumph-synergy.com"
-  },
-  
-  "app": {
-    "id": "triumph-synergy",
-    "category": "finance",
-    "subcategory": "payments",
-    "rating": "E",
-    "languages": ["en", "es", "fr", "de", "zh", "ja"],
-    "countries": "all"
-  },
-  
-  "platform": {
-    "pi_network": {
-      "enabled": true,
-      "mainnet": true,
-      "testnet": true
-    },
-    "stellar": {
-      "enabled": true,
-      "network": "public",
-      "horizon_url": "https://horizon.stellar.org"
-    },
-    "web": {
-      "enabled": true,
-      "pwa": true
-    },
-    "mobile": {
-      "enabled": true,
-      "pi_browser": true
-    }
-  },
-  
-  "permissions": [
-    "payments",
-    "username", 
-    "wallet_address",
-    "user_info"
-  ],
-  
-  "payment_config": {
-    "enabled": true,
-    "endpoints": {
-      "approve": "/api/pi/approve",
-      "complete": "/api/pi/complete",
-      "cancel": "/api/pi/cancel",
-      "value": "/api/pi/value",
-      "status": "/api/pi/status"
-    },
-    "limits": {
-      "min_amount": 10.0,
-      "max_amount": 100000.0,
-      "daily_limit": 500000.0
-    },
-    "currencies": {
-      "primary": "PI",
-      "secondary": ["USD", "EUR"]
-    },
-    "settlement": {
-      "method": "stellar",
-      "automatic": true,
-      "batch_interval": 3600
-    },
-    "internal_pi": {
-      "enabled": true,
-      "multiplier": 1.5
-    },
-    "external_pi": {
-      "enabled": true,
-      "multiplier": 1.0
-    }
-  },
-  
-  "auth_config": {
-    "oauth": {
-      "enabled": true,
-      "callback_url": "/api/auth/pi/callback",
-      "logout_url": "/logout"
-    },
-    "biometric": {
-      "enabled": true,
-      "webauthn": true,
-      "passkeys": true
-    }
-  },
-  
-  "webhooks": {
-    "payment": "/api/webhooks/pi/payment",
-    "user": "/api/webhooks/pi/user",
-    "app": "/api/webhooks/pi/app"
-  },
-  
-  "urls": {
-    "production": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
-    "staging": "https://triumph-synergy-staging.vercel.app",
-    "development": "http://localhost:3000",
-    "documentation": "https://github.com/jdrains110-beep/triumph-synergy/tree/main/docs",
-    "support": "https://github.com/jdrains110-beep/triumph-synergy/issues",
-    "privacy_policy": "/legal/privacy",
-    "terms_of_service": "/legal/terms"
-  },
-  
-  "features": {
-    "payments": {
-      "pi_payments": true,
-      "stellar_settlement": true,
-      "smart_contracts": true,
-      "escrow": true,
-      "recurring": true
-    },
-    "security": {
-      "biometric_auth": true,
-      "two_factor": true,
-      "encryption": true,
-      "audit_logging": true
-    },
-    "compliance": {
-      "kyc": true,
-      "aml": true,
-      "mica_regulation": true,
-      "credit_bureau": true
-    },
-    "integrations": {
-      "streaming_royalties": true,
-      "gaming_platforms": true,
-      "health_platforms": true,
-      "entertainment_hub": true
-    }
-  },
-  
-  "integrations": {
-    "github": {
-      "repo": "jdrains110-beep/triumph-synergy",
-      "branch": "main",
-      "ci_cd": true
-    },
-    "vercel": {
-      "project": "triumph-synergy",
-      "team": "jeremiah-drains-projects",
-      "auto_deploy": true
-    },
-    "stellar": {
-      "network": "mainnet",
-      "horizon": "https://horizon.stellar.org"
-    },
-    "supabase": {
-      "enabled": true,
-      "database": true,
-      "auth": true
-    }
-  },
-  
-  "deployment": {
-    "provider": "vercel",
-    "regions": ["iad1"],
-    "edge_functions": true,
-    "serverless_functions": {
-      "max_duration": 30,
-      "memory": 1024
-    }
-  },
-  
-  "assets": {
-    "logo": "/logo.png",
-    "icon": "/icon.png",
-    "banner": "/banner.png",
-    "screenshots": [
-      "/screenshots/payment.png",
-      "/screenshots/dashboard.png",
-      "/screenshots/wallet.png"
-    ]
-  },
-  
-  "metadata": {
-    "created": "2025-01-01T00:00:00Z",
-    "updated": "2026-01-13T00:00:00Z",
-    "schema_version": "1.0"
-  }
+	"$schema": "https://json.schemastore.org/pi-app-manifest.json",
+	"name": "Triumph-Synergy",
+	"short_name": "Triumph",
+	"description": "Advanced payment routing platform powered by Pi Network with Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance.",
+	"version": "1.0.0",
+	"pi_sdk_version": "2.0",
+
+	"developer": {
+		"name": "Jeremiah Drains",
+		"organization": "Triumph Synergy LLC",
+		"email": "contact@triumph-synergy.com",
+		"website": "https://triumph-synergy.com"
+	},
+
+	"app": {
+		"id": "triumph-synergy",
+		"category": "finance",
+		"subcategory": "payments",
+		"rating": "E",
+		"languages": ["en", "es", "fr", "de", "zh", "ja"],
+		"countries": "all"
+	},
+
+	"platform": {
+		"pi_network": {
+			"enabled": true,
+			"mainnet": true,
+			"testnet": true
+		},
+		"stellar": {
+			"enabled": true,
+			"network": "public",
+			"horizon_url": "https://horizon.stellar.org"
+		},
+		"web": {
+			"enabled": true,
+			"pwa": true
+		},
+		"mobile": {
+			"enabled": true,
+			"pi_browser": true
+		}
+	},
+
+	"permissions": ["payments", "username", "wallet_address", "user_info"],
+
+	"payment_config": {
+		"enabled": true,
+		"endpoints": {
+			"approve": "/api/pi/approve",
+			"complete": "/api/pi/complete",
+			"cancel": "/api/pi/cancel",
+			"value": "/api/pi/value",
+			"status": "/api/pi/status"
+		},
+		"limits": {
+			"min_amount": 10.0,
+			"max_amount": 100000.0,
+			"daily_limit": 500000.0
+		},
+		"currencies": {
+			"primary": "PI",
+			"secondary": ["USD", "EUR"]
+		},
+		"settlement": {
+			"method": "stellar",
+			"automatic": true,
+			"batch_interval": 3600
+		},
+		"internal_pi": {
+			"enabled": true,
+			"multiplier": 1.5
+		},
+		"external_pi": {
+			"enabled": true,
+			"multiplier": 1.0
+		}
+	},
+
+	"auth_config": {
+		"oauth": {
+			"enabled": true,
+			"callback_url": "/api/auth/pi/callback",
+			"logout_url": "/logout"
+		},
+		"biometric": {
+			"enabled": true,
+			"webauthn": true,
+			"passkeys": true
+		}
+	},
+
+	"webhooks": {
+		"payment": "/api/webhooks/pi/payment",
+		"user": "/api/webhooks/pi/user",
+		"app": "/api/webhooks/pi/app"
+	},
+
+	"urls": {
+		"production": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+		"staging": "https://triumph-synergy-staging.vercel.app",
+		"development": "http://localhost:3000",
+		"documentation": "https://github.com/jdrains110-beep/triumph-synergy/tree/main/docs",
+		"support": "https://github.com/jdrains110-beep/triumph-synergy/issues",
+		"privacy_policy": "/legal/privacy",
+		"terms_of_service": "/legal/terms"
+	},
+
+	"features": {
+		"payments": {
+			"pi_payments": true,
+			"stellar_settlement": true,
+			"smart_contracts": true,
+			"escrow": true,
+			"recurring": true
+		},
+		"security": {
+			"biometric_auth": true,
+			"two_factor": true,
+			"encryption": true,
+			"audit_logging": true
+		},
+		"compliance": {
+			"kyc": true,
+			"aml": true,
+			"mica_regulation": true,
+			"credit_bureau": true
+		},
+		"integrations": {
+			"streaming_royalties": true,
+			"gaming_platforms": true,
+			"health_platforms": true,
+			"entertainment_hub": true
+		}
+	},
+
+	"integrations": {
+		"github": {
+			"repo": "jdrains110-beep/triumph-synergy",
+			"branch": "main",
+			"ci_cd": true
+		},
+		"vercel": {
+			"project": "triumph-synergy",
+			"team": "jeremiah-drains-projects",
+			"auto_deploy": true
+		},
+		"stellar": {
+			"network": "mainnet",
+			"horizon": "https://horizon.stellar.org"
+		},
+		"supabase": {
+			"enabled": true,
+			"database": true,
+			"auth": true
+		}
+	},
+
+	"deployment": {
+		"provider": "vercel",
+		"regions": ["iad1"],
+		"edge_functions": true,
+		"serverless_functions": {
+			"max_duration": 30,
+			"memory": 1024
+		}
+	},
+
+	"assets": {
+		"logo": "/logo.png",
+		"icon": "/icon.png",
+		"banner": "/banner.png",
+		"screenshots": [
+			"/screenshots/payment.png",
+			"/screenshots/dashboard.png",
+			"/screenshots/wallet.png"
+		]
+	},
+
+	"metadata": {
+		"created": "2025-01-01T00:00:00Z",
+		"updated": "2026-01-13T00:00:00Z",
+		"schema_version": "1.0"
+	}
 }

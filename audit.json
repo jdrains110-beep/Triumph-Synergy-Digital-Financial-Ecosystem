@@ -1,176 +1,176 @@
 ﻿{
-  "actions": [
-    {
-      "action": "review",
-      "module": "esbuild",
-      "resolves": [
-        {
-          "id": 1102341,
-          "path": ".>drizzle-kit>@esbuild-kit/esm-loader>@esbuild-kit/core-utils>esbuild",
-          "dev": false,
-          "optional": false,
-          "bundled": false
-        },
-        {
-          "id": 1102341,
-          "path": ".>drizzle-kit>esbuild",
-          "dev": false,
-          "optional": false,
-          "bundled": false
-        }
-      ]
-    },
-    {
-      "action": "review",
-      "module": "prismjs",
-      "resolves": [
-        {
-          "id": 1105770,
-          "path": ".>react-syntax-highlighter>refractor>prismjs",
-          "dev": false,
-          "optional": false,
-          "bundled": false
-        }
-      ]
-    },
-    {
-      "action": "review",
-      "module": "ai",
-      "resolves": [
-        {
-          "id": 1111095,
-          "path": ".>@ai-sdk/react>ai",
-          "dev": false,
-          "optional": false,
-          "bundled": false
-        }
-      ]
-    }
-  ],
-  "advisories": {
-    "1102341": {
-      "findings": [
-        {
-          "version": "0.18.20",
-          "paths": [
-            ". > drizzle-kit@0.25.0 > @esbuild-kit/esm-loader@2.6.5 > @esbuild-kit/core-utils@3.3.2 > esbuild@0.18.20"
-          ]
-        },
-        {
-          "version": "0.19.12",
-          "paths": [
-            ". > drizzle-kit@0.25.0 > esbuild@0.19.12",
-            ". > drizzle-kit@0.25.0 > esbuild-register@3.6.0 > esbuild@0.19.12"
-          ]
-        }
-      ],
-      "found_by": null,
-      "deleted": null,
-      "references": "- https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99\n- https://github.com/evanw/esbuild/commit/de85afd65edec9ebc44a11e245fd9e9a2e99760d\n- https://github.com/advisories/GHSA-67mh-4wv8-2f99",
-      "created": "2025-02-10T17:48:07.000Z",
-      "id": 1102341,
-      "npm_advisory_id": null,
-      "overview": "### Summary\n\nesbuild allows any websites to send any request to the development server and read the response due to default CORS settings.\n\n### Details\n\nesbuild sets `Access-Control-Allow-Origin: *` header to all requests, including the SSE connection, which allows any websites to send any request to the development server and read the response.\n\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L121\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L363\n\n**Attack scenario**:\n\n1. The attacker serves a malicious web page (`http://malicious.example.com`).\n1. The user accesses the malicious web page.\n1. The attacker sends a `fetch('http://127.0.0.1:8000/main.js')` request by JS in that malicious web page. This request is normally blocked by same-origin policy, but that's not the case for the reasons above.\n1. The attacker gets the content of `http://127.0.0.1:8000/main.js`.\n\nIn this scenario, I assumed that the attacker knows the URL of the bundle output file name. But the attacker can also get that information by\n\n- Fetching `/index.html`: normally you have a script tag here\n- Fetching `/assets`: it's common to have a `assets` directory when you have JS files and CSS files in a different directory and the directory listing feature tells the attacker the list of files\n- Connecting `/esbuild` SSE endpoint: the SSE endpoint sends the URL path of the changed files when the file is changed (`new EventSource('/esbuild').addEventListener('change', e => console.log(e.type, e.data))`)\n- Fetching URLs in the known file: once the attacker knows one file, the attacker can know the URLs imported from that file\n\nThe scenario above fetches the compiled content, but if the victim has the source map option enabled, the attacker can also get the non-compiled content by fetching the source map file.\n\n### PoC\n\n1. Download [reproduction.zip](https://github.com/user-attachments/files/18561484/reproduction.zip)\n2. Extract it and move to that directory\n1. Run `npm i`\n1. Run `npm run watch`\n1. Run `fetch('http://127.0.0.1:8000/app.js').then(r => r.text()).then(content => console.log(content))` in a different website's dev tools.\n\n![image](https://github.com/user-attachments/assets/08fc2e4d-e1ec-44ca-b0ea-78a73c3c40e9)\n\n### Impact\n\nUsers using the serve feature may get the source code stolen by malicious websites.",
-      "reported_by": null,
-      "title": "esbuild enables any website to send any requests to the development server and read the response",
-      "metadata": null,
-      "cves": [],
-      "access": "public",
-      "severity": "moderate",
-      "module_name": "esbuild",
-      "vulnerable_versions": "<=0.24.2",
-      "github_advisory_id": "GHSA-67mh-4wv8-2f99",
-      "recommendation": "Upgrade to version 0.25.0 or later",
-      "patched_versions": ">=0.25.0",
-      "updated": "2025-02-10T17:48:08.000Z",
-      "cvss": {
-        "score": 5.3,
-        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N"
-      },
-      "cwe": ["CWE-346"],
-      "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99"
-    },
-    "1105770": {
-      "findings": [
-        {
-          "version": "1.27.0",
-          "paths": [
-            ". > react-syntax-highlighter@15.6.6 > refractor@3.6.0 > prismjs@1.27.0"
-          ]
-        }
-      ],
-      "found_by": null,
-      "deleted": null,
-      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2024-53382\n- https://gist.github.com/jackfromeast/aeb128e44f05f95828a1a824708df660\n- https://github.com/PrismJS/prism/blob/59e5a3471377057de1f401ba38337aca27b80e03/prism.js#L226-L259\n- https://github.com/PrismJS/prism/pull/3863\n- https://github.com/PrismJS/prism/commit/8e8b9352dac64457194dd9e51096b4772532e53d\n- https://github.com/advisories/GHSA-x7hr-w5r2-h6wg",
-      "created": "2025-03-03T09:30:34.000Z",
-      "id": 1105770,
-      "npm_advisory_id": null,
-      "overview": "Prism (aka PrismJS) through 1.29.0 allows DOM Clobbering (with resultant XSS for untrusted input that contains HTML but does not directly contain JavaScript), because document.currentScript lookup can be shadowed by attacker-injected HTML elements.",
-      "reported_by": null,
-      "title": "PrismJS DOM Clobbering vulnerability",
-      "metadata": null,
-      "cves": ["CVE-2024-53382"],
-      "access": "public",
-      "severity": "moderate",
-      "module_name": "prismjs",
-      "vulnerable_versions": "<1.30.0",
-      "github_advisory_id": "GHSA-x7hr-w5r2-h6wg",
-      "recommendation": "Upgrade to version 1.30.0 or later",
-      "patched_versions": ">=1.30.0",
-      "updated": "2025-06-30T12:51:20.000Z",
-      "cvss": {
-        "score": 4.9,
-        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:L/I:L/A:N"
-      },
-      "cwe": ["CWE-79", "CWE-94"],
-      "url": "https://github.com/advisories/GHSA-x7hr-w5r2-h6wg"
-    },
-    "1111095": {
-      "findings": [
-        {
-          "version": "5.0.26",
-          "paths": [". > @ai-sdk/react@2.0.26 > ai@5.0.26"]
-        }
-      ],
-      "found_by": null,
-      "deleted": null,
-      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2025-48985\n- https://github.com/vercel/ai/commit/930399bb9839a8baf3d349614106d78268775eed\n- https://vercel.com/changelog/cve-2025-48985-input-validation-bypass-on-ai-sdk\n- https://github.com/vercel/ai/issues/8881\n- https://github.com/advisories/GHSA-rwvc-j5jr-mgvh",
-      "created": "2025-11-07T03:30:25.000Z",
-      "id": 1111095,
-      "npm_advisory_id": null,
-      "overview": "A vulnerability in VercelΓÇÖs AI SDK has been fixed in versions 5.0.52, 5.1.0-beta.9, and 6.0.0-beta. This issue may have allowed users to bypass filetype whitelists when uploading files. All users are encouraged to upgrade.",
-      "reported_by": null,
-      "title": "VercelΓÇÖs AI SDK's filetype whitelists can be bypassed when uploading files",
-      "metadata": null,
-      "cves": ["CVE-2025-48985"],
-      "access": "public",
-      "severity": "low",
-      "module_name": "ai",
-      "vulnerable_versions": "<5.0.52",
-      "github_advisory_id": "GHSA-rwvc-j5jr-mgvh",
-      "recommendation": "Upgrade to version 5.0.52 or later",
-      "patched_versions": ">=5.0.52",
-      "updated": "2025-12-02T01:27:16.000Z",
-      "cvss": {
-        "score": 3.7,
-        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
-      },
-      "cwe": ["CWE-20", "CWE-682"],
-      "url": "https://github.com/advisories/GHSA-rwvc-j5jr-mgvh"
-    }
-  },
-  "muted": [],
-  "metadata": {
-    "vulnerabilities": {
-      "info": 0,
-      "low": 1,
-      "moderate": 3,
-      "high": 0,
-      "critical": 0
-    },
-    "dependencies": 814,
-    "devDependencies": 0,
-    "optionalDependencies": 0,
-    "totalDependencies": 814
-  }
+	"actions": [
+		{
+			"action": "review",
+			"module": "esbuild",
+			"resolves": [
+				{
+					"id": 1102341,
+					"path": ".>drizzle-kit>@esbuild-kit/esm-loader>@esbuild-kit/core-utils>esbuild",
+					"dev": false,
+					"optional": false,
+					"bundled": false
+				},
+				{
+					"id": 1102341,
+					"path": ".>drizzle-kit>esbuild",
+					"dev": false,
+					"optional": false,
+					"bundled": false
+				}
+			]
+		},
+		{
+			"action": "review",
+			"module": "prismjs",
+			"resolves": [
+				{
+					"id": 1105770,
+					"path": ".>react-syntax-highlighter>refractor>prismjs",
+					"dev": false,
+					"optional": false,
+					"bundled": false
+				}
+			]
+		},
+		{
+			"action": "review",
+			"module": "ai",
+			"resolves": [
+				{
+					"id": 1111095,
+					"path": ".>@ai-sdk/react>ai",
+					"dev": false,
+					"optional": false,
+					"bundled": false
+				}
+			]
+		}
+	],
+	"advisories": {
+		"1102341": {
+			"findings": [
+				{
+					"version": "0.18.20",
+					"paths": [
+						". > drizzle-kit@0.25.0 > @esbuild-kit/esm-loader@2.6.5 > @esbuild-kit/core-utils@3.3.2 > esbuild@0.18.20"
+					]
+				},
+				{
+					"version": "0.19.12",
+					"paths": [
+						". > drizzle-kit@0.25.0 > esbuild@0.19.12",
+						". > drizzle-kit@0.25.0 > esbuild-register@3.6.0 > esbuild@0.19.12"
+					]
+				}
+			],
+			"found_by": null,
+			"deleted": null,
+			"references": "- https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99\n- https://github.com/evanw/esbuild/commit/de85afd65edec9ebc44a11e245fd9e9a2e99760d\n- https://github.com/advisories/GHSA-67mh-4wv8-2f99",
+			"created": "2025-02-10T17:48:07.000Z",
+			"id": 1102341,
+			"npm_advisory_id": null,
+			"overview": "### Summary\n\nesbuild allows any websites to send any request to the development server and read the response due to default CORS settings.\n\n### Details\n\nesbuild sets `Access-Control-Allow-Origin: *` header to all requests, including the SSE connection, which allows any websites to send any request to the development server and read the response.\n\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L121\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L363\n\n**Attack scenario**:\n\n1. The attacker serves a malicious web page (`http://malicious.example.com`).\n1. The user accesses the malicious web page.\n1. The attacker sends a `fetch('http://127.0.0.1:8000/main.js')` request by JS in that malicious web page. This request is normally blocked by same-origin policy, but that's not the case for the reasons above.\n1. The attacker gets the content of `http://127.0.0.1:8000/main.js`.\n\nIn this scenario, I assumed that the attacker knows the URL of the bundle output file name. But the attacker can also get that information by\n\n- Fetching `/index.html`: normally you have a script tag here\n- Fetching `/assets`: it's common to have a `assets` directory when you have JS files and CSS files in a different directory and the directory listing feature tells the attacker the list of files\n- Connecting `/esbuild` SSE endpoint: the SSE endpoint sends the URL path of the changed files when the file is changed (`new EventSource('/esbuild').addEventListener('change', e => console.log(e.type, e.data))`)\n- Fetching URLs in the known file: once the attacker knows one file, the attacker can know the URLs imported from that file\n\nThe scenario above fetches the compiled content, but if the victim has the source map option enabled, the attacker can also get the non-compiled content by fetching the source map file.\n\n### PoC\n\n1. Download [reproduction.zip](https://github.com/user-attachments/files/18561484/reproduction.zip)\n2. Extract it and move to that directory\n1. Run `npm i`\n1. Run `npm run watch`\n1. Run `fetch('http://127.0.0.1:8000/app.js').then(r => r.text()).then(content => console.log(content))` in a different website's dev tools.\n\n![image](https://github.com/user-attachments/assets/08fc2e4d-e1ec-44ca-b0ea-78a73c3c40e9)\n\n### Impact\n\nUsers using the serve feature may get the source code stolen by malicious websites.",
+			"reported_by": null,
+			"title": "esbuild enables any website to send any requests to the development server and read the response",
+			"metadata": null,
+			"cves": [],
+			"access": "public",
+			"severity": "moderate",
+			"module_name": "esbuild",
+			"vulnerable_versions": "<=0.24.2",
+			"github_advisory_id": "GHSA-67mh-4wv8-2f99",
+			"recommendation": "Upgrade to version 0.25.0 or later",
+			"patched_versions": ">=0.25.0",
+			"updated": "2025-02-10T17:48:08.000Z",
+			"cvss": {
+				"score": 5.3,
+				"vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N"
+			},
+			"cwe": ["CWE-346"],
+			"url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99"
+		},
+		"1105770": {
+			"findings": [
+				{
+					"version": "1.27.0",
+					"paths": [
+						". > react-syntax-highlighter@15.6.6 > refractor@3.6.0 > prismjs@1.27.0"
+					]
+				}
+			],
+			"found_by": null,
+			"deleted": null,
+			"references": "- https://nvd.nist.gov/vuln/detail/CVE-2024-53382\n- https://gist.github.com/jackfromeast/aeb128e44f05f95828a1a824708df660\n- https://github.com/PrismJS/prism/blob/59e5a3471377057de1f401ba38337aca27b80e03/prism.js#L226-L259\n- https://github.com/PrismJS/prism/pull/3863\n- https://github.com/PrismJS/prism/commit/8e8b9352dac64457194dd9e51096b4772532e53d\n- https://github.com/advisories/GHSA-x7hr-w5r2-h6wg",
+			"created": "2025-03-03T09:30:34.000Z",
+			"id": 1105770,
+			"npm_advisory_id": null,
+			"overview": "Prism (aka PrismJS) through 1.29.0 allows DOM Clobbering (with resultant XSS for untrusted input that contains HTML but does not directly contain JavaScript), because document.currentScript lookup can be shadowed by attacker-injected HTML elements.",
+			"reported_by": null,
+			"title": "PrismJS DOM Clobbering vulnerability",
+			"metadata": null,
+			"cves": ["CVE-2024-53382"],
+			"access": "public",
+			"severity": "moderate",
+			"module_name": "prismjs",
+			"vulnerable_versions": "<1.30.0",
+			"github_advisory_id": "GHSA-x7hr-w5r2-h6wg",
+			"recommendation": "Upgrade to version 1.30.0 or later",
+			"patched_versions": ">=1.30.0",
+			"updated": "2025-06-30T12:51:20.000Z",
+			"cvss": {
+				"score": 4.9,
+				"vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:L/I:L/A:N"
+			},
+			"cwe": ["CWE-79", "CWE-94"],
+			"url": "https://github.com/advisories/GHSA-x7hr-w5r2-h6wg"
+		},
+		"1111095": {
+			"findings": [
+				{
+					"version": "5.0.26",
+					"paths": [". > @ai-sdk/react@2.0.26 > ai@5.0.26"]
+				}
+			],
+			"found_by": null,
+			"deleted": null,
+			"references": "- https://nvd.nist.gov/vuln/detail/CVE-2025-48985\n- https://github.com/vercel/ai/commit/930399bb9839a8baf3d349614106d78268775eed\n- https://vercel.com/changelog/cve-2025-48985-input-validation-bypass-on-ai-sdk\n- https://github.com/vercel/ai/issues/8881\n- https://github.com/advisories/GHSA-rwvc-j5jr-mgvh",
+			"created": "2025-11-07T03:30:25.000Z",
+			"id": 1111095,
+			"npm_advisory_id": null,
+			"overview": "A vulnerability in VercelΓÇÖs AI SDK has been fixed in versions 5.0.52, 5.1.0-beta.9, and 6.0.0-beta. This issue may have allowed users to bypass filetype whitelists when uploading files. All users are encouraged to upgrade.",
+			"reported_by": null,
+			"title": "VercelΓÇÖs AI SDK's filetype whitelists can be bypassed when uploading files",
+			"metadata": null,
+			"cves": ["CVE-2025-48985"],
+			"access": "public",
+			"severity": "low",
+			"module_name": "ai",
+			"vulnerable_versions": "<5.0.52",
+			"github_advisory_id": "GHSA-rwvc-j5jr-mgvh",
+			"recommendation": "Upgrade to version 5.0.52 or later",
+			"patched_versions": ">=5.0.52",
+			"updated": "2025-12-02T01:27:16.000Z",
+			"cvss": {
+				"score": 3.7,
+				"vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
+			},
+			"cwe": ["CWE-20", "CWE-682"],
+			"url": "https://github.com/advisories/GHSA-rwvc-j5jr-mgvh"
+		}
+	},
+	"muted": [],
+	"metadata": {
+		"vulnerabilities": {
+			"info": 0,
+			"low": 1,
+			"moderate": 3,
+			"high": 0,
+			"critical": 0
+		},
+		"dependencies": 814,
+		"devDependencies": 0,
+		"optionalDependencies": 0,
+		"totalDependencies": 814
+	}
 }

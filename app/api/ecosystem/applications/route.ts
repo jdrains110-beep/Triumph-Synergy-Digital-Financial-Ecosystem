@@ -5,8 +5,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  applicationRegistry,
-  getRegisteredApplications,
+	applicationRegistry,
+	getRegisteredApplications,
 } from "@/lib/ecosystem/application-registry";
 import { exampleApplications } from "@/lib/ecosystem/example-applications";
 
@@ -14,15 +14,15 @@ import { exampleApplications } from "@/lib/ecosystem/example-applications";
 let initialized = false;
 
 function initializeApplications() {
-  if (initialized) {
-    return;
-  }
+	if (initialized) {
+		return;
+	}
 
-  for (const { app, integration } of exampleApplications) {
-    applicationRegistry.registerApplication(app, integration);
-  }
+	for (const { app, integration } of exampleApplications) {
+		applicationRegistry.registerApplication(app, integration);
+	}
 
-  initialized = true;
+	initialized = true;
 }
 
 /**
@@ -30,35 +30,35 @@ function initializeApplications() {
  * List all registered applications
  */
 export async function GET(request: NextRequest) {
-  try {
-    initializeApplications();
+	try {
+		initializeApplications();
 
-    const searchParams = request.nextUrl.searchParams;
-    const enabledOnly = searchParams.get("enabled") === "true";
+		const searchParams = request.nextUrl.searchParams;
+		const enabledOnly = searchParams.get("enabled") === "true";
 
-    const applications = getRegisteredApplications(enabledOnly);
-    const summary = applicationRegistry.getSummary();
+		const applications = getRegisteredApplications(enabledOnly);
+		const summary = applicationRegistry.getSummary();
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          applications,
-          summary,
-        },
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("[API] Error listing applications:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json(
+			{
+				success: true,
+				data: {
+					applications,
+					summary,
+				},
+			},
+			{ status: 200 },
+		);
+	} catch (error) {
+		console.error("[API] Error listing applications:", error);
+		return NextResponse.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : "Unknown error",
+			},
+			{ status: 500 },
+		);
+	}
 }
 
 /**
@@ -66,50 +66,50 @@ export async function GET(request: NextRequest) {
  * Register a new application (if extending ecosystem)
  */
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { id, name, description, apiEndpoint, categories } = body;
+	try {
+		const body = await request.json();
+		const { id, name, description, apiEndpoint, categories } = body;
 
-    if (!id || !name || !apiEndpoint) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Missing required fields: id, name, apiEndpoint",
-        },
-        { status: 400 }
-      );
-    }
+		if (!id || !name || !apiEndpoint) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: "Missing required fields: id, name, apiEndpoint",
+				},
+				{ status: 400 },
+			);
+		}
 
-    // Check if app already registered
-    if (applicationRegistry.getApplication(id)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Application ${id} already registered`,
-        },
-        { status: 409 }
-      );
-    }
+		// Check if app already registered
+		if (applicationRegistry.getApplication(id)) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: `Application ${id} already registered`,
+				},
+				{ status: 409 },
+			);
+		}
 
-    console.log(`[API] Registering new application: ${id}`);
+		console.log(`[API] Registering new application: ${id}`);
 
-    // Return success (actual registration would require integration implementation)
-    return NextResponse.json(
-      {
-        success: true,
-        message: `Application ${name} registered successfully`,
-        data: { id, name, apiEndpoint },
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("[API] Error registering application:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
-  }
+		// Return success (actual registration would require integration implementation)
+		return NextResponse.json(
+			{
+				success: true,
+				message: `Application ${name} registered successfully`,
+				data: { id, name, apiEndpoint },
+			},
+			{ status: 201 },
+		);
+	} catch (error) {
+		console.error("[API] Error registering application:", error);
+		return NextResponse.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : "Unknown error",
+			},
+			{ status: 500 },
+		);
+	}
 }

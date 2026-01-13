@@ -23,222 +23,222 @@ const PI_INTERNAL_MULTIPLIER = 1000;
 const FILE_EXTENSION_REGEX = /\.[^.]+$/;
 const GITHUB_API_BASE = "https://api.github.com";
 const SUPPORTED_LANGUAGES = [
-  "rust",
-  "solidity",
-  "move",
-  "cairo",
-  "vyper",
+	"rust",
+	"solidity",
+	"move",
+	"cairo",
+	"vyper",
 ] as const;
 
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
 
-export type SmartContract = {
-  id: string;
-  name: string;
-  description: string;
-  version: string;
-  language: ContractLanguage;
-  status: ContractStatus;
+export interface SmartContract {
+	id: string;
+	name: string;
+	description: string;
+	version: string;
+	language: ContractLanguage;
+	status: ContractStatus;
 
-  // Source
-  sourceCode: string;
-  compiledBytecode: string | null;
-  abi: ContractABI | null;
+	// Source
+	sourceCode: string;
+	compiledBytecode: string | null;
+	abi: ContractABI | null;
 
-  // GitHub
-  githubRepo: string | null;
-  githubPath: string | null;
-  githubBranch: string;
-  commitHash: string | null;
-  lastSyncAt: Date | null;
+	// GitHub
+	githubRepo: string | null;
+	githubPath: string | null;
+	githubBranch: string;
+	commitHash: string | null;
+	lastSyncAt: Date | null;
 
-  // Deployment
-  deployedAddress: string | null;
-  network: BlockchainNetwork;
-  deployedAt: Date | null;
-  deploymentTxHash: string | null;
+	// Deployment
+	deployedAddress: string | null;
+	network: BlockchainNetwork;
+	deployedAt: Date | null;
+	deploymentTxHash: string | null;
 
-  // Metadata
-  author: string;
-  license: string;
-  tags: string[];
-  dependencies: ContractDependency[];
+	// Metadata
+	author: string;
+	license: string;
+	tags: string[];
+	dependencies: ContractDependency[];
 
-  // Audit
-  auditStatus: AuditStatus;
-  auditReports: AuditReport[];
-  securityScore: number;
+	// Audit
+	auditStatus: AuditStatus;
+	auditReports: AuditReport[];
+	securityScore: number;
 
-  // Timestamps
-  createdAt: Date;
-  updatedAt: Date;
-};
+	// Timestamps
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 export type ContractLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export type ContractStatus =
-  | "draft"
-  | "compiled"
-  | "tested"
-  | "audited"
-  | "deployed"
-  | "verified"
-  | "deprecated";
+	| "draft"
+	| "compiled"
+	| "tested"
+	| "audited"
+	| "deployed"
+	| "verified"
+	| "deprecated";
 
 export type BlockchainNetwork =
-  | "pi-mainnet"
-  | "pi-testnet"
-  | "stellar-mainnet"
-  | "stellar-testnet"
-  | "ethereum-mainnet"
-  | "ethereum-sepolia"
-  | "polygon-mainnet"
-  | "polygon-mumbai"
-  | "solana-mainnet"
-  | "solana-devnet";
+	| "pi-mainnet"
+	| "pi-testnet"
+	| "stellar-mainnet"
+	| "stellar-testnet"
+	| "ethereum-mainnet"
+	| "ethereum-sepolia"
+	| "polygon-mainnet"
+	| "polygon-mumbai"
+	| "solana-mainnet"
+	| "solana-devnet";
 
-export type ContractABI = {
-  functions: ABIFunction[];
-  events: ABIEvent[];
-  errors: ABIError[];
-};
+export interface ContractABI {
+	functions: ABIFunction[];
+	events: ABIEvent[];
+	errors: ABIError[];
+}
 
-export type ABIFunction = {
-  name: string;
-  inputs: ABIParameter[];
-  outputs: ABIParameter[];
-  stateMutability: "pure" | "view" | "nonpayable" | "payable";
-  visibility: "public" | "external" | "internal" | "private";
-};
+export interface ABIFunction {
+	name: string;
+	inputs: ABIParameter[];
+	outputs: ABIParameter[];
+	stateMutability: "pure" | "view" | "nonpayable" | "payable";
+	visibility: "public" | "external" | "internal" | "private";
+}
 
-export type ABIEvent = {
-  name: string;
-  inputs: ABIParameter[];
-  anonymous: boolean;
-};
+export interface ABIEvent {
+	name: string;
+	inputs: ABIParameter[];
+	anonymous: boolean;
+}
 
-export type ABIError = {
-  name: string;
-  inputs: ABIParameter[];
-};
+export interface ABIError {
+	name: string;
+	inputs: ABIParameter[];
+}
 
-export type ABIParameter = {
-  name: string;
-  type: string;
-  indexed?: boolean;
-  components?: ABIParameter[];
-};
+export interface ABIParameter {
+	name: string;
+	type: string;
+	indexed?: boolean;
+	components?: ABIParameter[];
+}
 
-export type ContractDependency = {
-  name: string;
-  version: string;
-  source: "github" | "crates" | "npm" | "local";
-  path: string;
-};
+export interface ContractDependency {
+	name: string;
+	version: string;
+	source: "github" | "crates" | "npm" | "local";
+	path: string;
+}
 
 export type AuditStatus =
-  | "not-audited"
-  | "pending"
-  | "in-progress"
-  | "passed"
-  | "failed"
-  | "conditional";
+	| "not-audited"
+	| "pending"
+	| "in-progress"
+	| "passed"
+	| "failed"
+	| "conditional";
 
-export type AuditReport = {
-  id: string;
-  auditor: string;
-  date: Date;
-  findings: AuditFinding[];
-  overallRating: "critical" | "high" | "medium" | "low" | "informational";
-  reportUrl: string;
-};
+export interface AuditReport {
+	id: string;
+	auditor: string;
+	date: Date;
+	findings: AuditFinding[];
+	overallRating: "critical" | "high" | "medium" | "low" | "informational";
+	reportUrl: string;
+}
 
-export type AuditFinding = {
-  id: string;
-  severity: "critical" | "high" | "medium" | "low" | "informational";
-  title: string;
-  description: string;
-  location: string;
-  recommendation: string;
-  status: "open" | "acknowledged" | "fixed" | "wontfix";
-};
+export interface AuditFinding {
+	id: string;
+	severity: "critical" | "high" | "medium" | "low" | "informational";
+	title: string;
+	description: string;
+	location: string;
+	recommendation: string;
+	status: "open" | "acknowledged" | "fixed" | "wontfix";
+}
 
-export type GitHubRepository = {
-  owner: string;
-  name: string;
-  fullName: string;
-  description: string;
-  defaultBranch: string;
-  language: string;
-  topics: string[];
-  visibility: "public" | "private";
-  cloneUrl: string;
-  sshUrl: string;
-  lastPush: Date;
-};
+export interface GitHubRepository {
+	owner: string;
+	name: string;
+	fullName: string;
+	description: string;
+	defaultBranch: string;
+	language: string;
+	topics: string[];
+	visibility: "public" | "private";
+	cloneUrl: string;
+	sshUrl: string;
+	lastPush: Date;
+}
 
-export type RustContractConfig = {
-  cargoToml: string;
-  edition: "2018" | "2021" | "2024";
-  features: string[];
-  target: "wasm32-unknown-unknown" | "native";
-  optimizationLevel: 0 | 1 | 2 | 3 | "s" | "z";
-};
+export interface RustContractConfig {
+	cargoToml: string;
+	edition: "2018" | "2021" | "2024";
+	features: string[];
+	target: "wasm32-unknown-unknown" | "native";
+	optimizationLevel: 0 | 1 | 2 | 3 | "s" | "z";
+}
 
-export type ContractTemplate = {
-  id: string;
-  name: string;
-  description: string;
-  language: ContractLanguage;
-  category: TemplateCategory;
-  sourceCode: string;
-  variables: TemplateVariable[];
-  preview: string;
-};
+export interface ContractTemplate {
+	id: string;
+	name: string;
+	description: string;
+	language: ContractLanguage;
+	category: TemplateCategory;
+	sourceCode: string;
+	variables: TemplateVariable[];
+	preview: string;
+}
 
 export type TemplateCategory =
-  | "token"
-  | "nft"
-  | "defi"
-  | "governance"
-  | "escrow"
-  | "marketplace"
-  | "real-estate"
-  | "identity"
-  | "custom";
+	| "token"
+	| "nft"
+	| "defi"
+	| "governance"
+	| "escrow"
+	| "marketplace"
+	| "real-estate"
+	| "identity"
+	| "custom";
 
-export type TemplateVariable = {
-  name: string;
-  type: "string" | "number" | "address" | "boolean";
-  description: string;
-  defaultValue: string;
-  required: boolean;
-};
+export interface TemplateVariable {
+	name: string;
+	type: "string" | "number" | "address" | "boolean";
+	description: string;
+	defaultValue: string;
+	required: boolean;
+}
 
 // ============================================================================
 // SMART CONTRACT HUB CLASS
 // ============================================================================
 
 class SmartContractHub {
-  private readonly contracts: Map<string, SmartContract> = new Map();
-  private readonly templates: Map<string, ContractTemplate> = new Map();
-  private readonly repositories: Map<string, GitHubRepository> = new Map();
+	private readonly contracts: Map<string, SmartContract> = new Map();
+	private readonly templates: Map<string, ContractTemplate> = new Map();
+	private readonly repositories: Map<string, GitHubRepository> = new Map();
 
-  constructor() {
-    this.initializeDefaultTemplates();
-  }
+	constructor() {
+		this.initializeDefaultTemplates();
+	}
 
-  private initializeDefaultTemplates(): void {
-    // Pi Network Token Template (Rust)
-    this.templates.set("pi-token-rust", {
-      id: "pi-token-rust",
-      name: "Pi Network Token",
-      description: "Standard Pi Network token implementation in Rust",
-      language: "rust",
-      category: "token",
-      sourceCode: `
+	private initializeDefaultTemplates(): void {
+		// Pi Network Token Template (Rust)
+		this.templates.set("pi-token-rust", {
+			id: "pi-token-rust",
+			name: "Pi Network Token",
+			description: "Standard Pi Network token implementation in Rust",
+			language: "rust",
+			category: "token",
+			sourceCode: `
 use pi_sdk::prelude::*;
 
 #[pi_contract]
@@ -285,40 +285,40 @@ impl PiToken {
     }
 }
 `,
-      variables: [
-        {
-          name: "TOKEN_NAME",
-          type: "string",
-          description: "Token name",
-          defaultValue: "Triumph Token",
-          required: true,
-        },
-        {
-          name: "TOKEN_SYMBOL",
-          type: "string",
-          description: "Token symbol",
-          defaultValue: "TRI",
-          required: true,
-        },
-        {
-          name: "INITIAL_SUPPLY",
-          type: "number",
-          description: "Initial supply",
-          defaultValue: "1000000",
-          required: true,
-        },
-      ],
-      preview: "Standard ERC-20 compatible token for Pi Network",
-    });
+			variables: [
+				{
+					name: "TOKEN_NAME",
+					type: "string",
+					description: "Token name",
+					defaultValue: "Triumph Token",
+					required: true,
+				},
+				{
+					name: "TOKEN_SYMBOL",
+					type: "string",
+					description: "Token symbol",
+					defaultValue: "TRI",
+					required: true,
+				},
+				{
+					name: "INITIAL_SUPPLY",
+					type: "number",
+					description: "Initial supply",
+					defaultValue: "1000000",
+					required: true,
+				},
+			],
+			preview: "Standard ERC-20 compatible token for Pi Network",
+		});
 
-    // Real Estate Deed Template (Rust)
-    this.templates.set("real-estate-deed-rust", {
-      id: "real-estate-deed-rust",
-      name: "Real Estate Deed NFT",
-      description: "Allodial deed representation as NFT on Pi Network",
-      language: "rust",
-      category: "real-estate",
-      sourceCode: `
+		// Real Estate Deed Template (Rust)
+		this.templates.set("real-estate-deed-rust", {
+			id: "real-estate-deed-rust",
+			name: "Real Estate Deed NFT",
+			description: "Allodial deed representation as NFT on Pi Network",
+			language: "rust",
+			category: "real-estate",
+			sourceCode: `
 use pi_sdk::prelude::*;
 
 #[pi_contract]
@@ -409,26 +409,26 @@ impl AllodialDeed {
     }
 }
 `,
-      variables: [
-        {
-          name: "REGISTRY_AUTHORITY",
-          type: "address",
-          description: "Registry authority address",
-          defaultValue: "",
-          required: true,
-        },
-      ],
-      preview: "Allodial deed smart contract for property ownership",
-    });
+			variables: [
+				{
+					name: "REGISTRY_AUTHORITY",
+					type: "address",
+					description: "Registry authority address",
+					defaultValue: "",
+					required: true,
+				},
+			],
+			preview: "Allodial deed smart contract for property ownership",
+		});
 
-    // Escrow Template (Rust)
-    this.templates.set("escrow-rust", {
-      id: "escrow-rust",
-      name: "Pi Escrow Contract",
-      description: "Secure escrow for Pi Network transactions",
-      language: "rust",
-      category: "escrow",
-      sourceCode: `
+		// Escrow Template (Rust)
+		this.templates.set("escrow-rust", {
+			id: "escrow-rust",
+			name: "Pi Escrow Contract",
+			description: "Secure escrow for Pi Network transactions",
+			language: "rust",
+			category: "escrow",
+			sourceCode: `
 use pi_sdk::prelude::*;
 
 #[pi_contract]
@@ -511,364 +511,364 @@ impl PiEscrow {
     }
 }
 `,
-      variables: [
-        {
-          name: "PLATFORM_FEE_BPS",
-          type: "number",
-          description: "Platform fee in basis points",
-          defaultValue: "250",
-          required: true,
-        },
-        {
-          name: "TREASURY_ADDRESS",
-          type: "address",
-          description: "Treasury address for fees",
-          defaultValue: "",
-          required: true,
-        },
-      ],
-      preview: "Secure escrow contract with dispute resolution",
-    });
-  }
+			variables: [
+				{
+					name: "PLATFORM_FEE_BPS",
+					type: "number",
+					description: "Platform fee in basis points",
+					defaultValue: "250",
+					required: true,
+				},
+				{
+					name: "TREASURY_ADDRESS",
+					type: "address",
+					description: "Treasury address for fees",
+					defaultValue: "",
+					required: true,
+				},
+			],
+			preview: "Secure escrow contract with dispute resolution",
+		});
+	}
 
-  // ==========================================================================
-  // GITHUB INTEGRATION
-  // ==========================================================================
+	// ==========================================================================
+	// GITHUB INTEGRATION
+	// ==========================================================================
 
-  async connectGitHubRepository(
-    owner: string,
-    repo: string,
-    accessToken?: string
-  ): Promise<GitHubRepository> {
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github.v3+json",
-      "User-Agent": "Triumph-Synergy-Smart-Contracts",
-    };
+	async connectGitHubRepository(
+		owner: string,
+		repo: string,
+		accessToken?: string,
+	): Promise<GitHubRepository> {
+		const headers: Record<string, string> = {
+			Accept: "application/vnd.github.v3+json",
+			"User-Agent": "Triumph-Synergy-Smart-Contracts",
+		};
 
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
+		if (accessToken) {
+			headers.Authorization = `Bearer ${accessToken}`;
+		}
 
-    // Simulate GitHub API call
-    const repository: GitHubRepository = {
-      owner,
-      name: repo,
-      fullName: `${owner}/${repo}`,
-      description: `Smart contract repository for ${repo}`,
-      defaultBranch: "main",
-      language: "Rust",
-      topics: ["smart-contracts", "pi-network", "blockchain"],
-      visibility: "public",
-      cloneUrl: `https://github.com/${owner}/${repo}.git`,
-      sshUrl: `git@github.com:${owner}/${repo}.git`,
-      lastPush: new Date(),
-    };
+		// Simulate GitHub API call
+		const repository: GitHubRepository = {
+			owner,
+			name: repo,
+			fullName: `${owner}/${repo}`,
+			description: `Smart contract repository for ${repo}`,
+			defaultBranch: "main",
+			language: "Rust",
+			topics: ["smart-contracts", "pi-network", "blockchain"],
+			visibility: "public",
+			cloneUrl: `https://github.com/${owner}/${repo}.git`,
+			sshUrl: `git@github.com:${owner}/${repo}.git`,
+			lastPush: new Date(),
+		};
 
-    this.repositories.set(repository.fullName, repository);
-    return repository;
-  }
+		this.repositories.set(repository.fullName, repository);
+		return repository;
+	}
 
-  async syncContractFromGitHub(
-    repoFullName: string,
-    path: string,
-    branch = "main"
-  ): Promise<SmartContract> {
-    const repository = this.repositories.get(repoFullName);
-    if (!repository) {
-      throw new Error("Repository not connected");
-    }
+	async syncContractFromGitHub(
+		repoFullName: string,
+		path: string,
+		branch = "main",
+	): Promise<SmartContract> {
+		const repository = this.repositories.get(repoFullName);
+		if (!repository) {
+			throw new Error("Repository not connected");
+		}
 
-    // Detect language from file extension
-    const extension = path.split(".").pop()?.toLowerCase();
-    let language: ContractLanguage = "rust";
-    if (extension === "sol") {
-      language = "solidity";
-    } else if (extension === "move") {
-      language = "move";
-    } else if (extension === "cairo") {
-      language = "cairo";
-    } else if (extension === "vy") {
-      language = "vyper";
-    }
+		// Detect language from file extension
+		const extension = path.split(".").pop()?.toLowerCase();
+		let language: ContractLanguage = "rust";
+		if (extension === "sol") {
+			language = "solidity";
+		} else if (extension === "move") {
+			language = "move";
+		} else if (extension === "cairo") {
+			language = "cairo";
+		} else if (extension === "vy") {
+			language = "vyper";
+		}
 
-    const id = `contract-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+		const id = `contract-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-    const contract: SmartContract = {
-      id,
-      name:
-        path.split("/").pop()?.replace(FILE_EXTENSION_REGEX, "") || "Unknown",
-      description: `Contract synced from ${repoFullName}/${path}`,
-      version: "1.0.0",
-      language,
-      status: "draft",
-      sourceCode: "", // Would be fetched from GitHub
-      compiledBytecode: null,
-      abi: null,
-      githubRepo: repoFullName,
-      githubPath: path,
-      githubBranch: branch,
-      commitHash: null,
-      lastSyncAt: new Date(),
-      deployedAddress: null,
-      network: "pi-mainnet",
-      deployedAt: null,
-      deploymentTxHash: null,
-      author: repository.owner,
-      license: "MIT",
-      tags: ["github-synced"],
-      dependencies: [],
-      auditStatus: "not-audited",
-      auditReports: [],
-      securityScore: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+		const contract: SmartContract = {
+			id,
+			name:
+				path.split("/").pop()?.replace(FILE_EXTENSION_REGEX, "") || "Unknown",
+			description: `Contract synced from ${repoFullName}/${path}`,
+			version: "1.0.0",
+			language,
+			status: "draft",
+			sourceCode: "", // Would be fetched from GitHub
+			compiledBytecode: null,
+			abi: null,
+			githubRepo: repoFullName,
+			githubPath: path,
+			githubBranch: branch,
+			commitHash: null,
+			lastSyncAt: new Date(),
+			deployedAddress: null,
+			network: "pi-mainnet",
+			deployedAt: null,
+			deploymentTxHash: null,
+			author: repository.owner,
+			license: "MIT",
+			tags: ["github-synced"],
+			dependencies: [],
+			auditStatus: "not-audited",
+			auditReports: [],
+			securityScore: 0,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
 
-    this.contracts.set(id, contract);
-    return contract;
-  }
+		this.contracts.set(id, contract);
+		return contract;
+	}
 
-  // ==========================================================================
-  // CONTRACT MANAGEMENT
-  // ==========================================================================
+	// ==========================================================================
+	// CONTRACT MANAGEMENT
+	// ==========================================================================
 
-  async createContract(data: {
-    name: string;
-    description: string;
-    language: ContractLanguage;
-    sourceCode: string;
-    network: BlockchainNetwork;
-    author: string;
-  }): Promise<SmartContract> {
-    const id = `contract-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+	async createContract(data: {
+		name: string;
+		description: string;
+		language: ContractLanguage;
+		sourceCode: string;
+		network: BlockchainNetwork;
+		author: string;
+	}): Promise<SmartContract> {
+		const id = `contract-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-    const contract: SmartContract = {
-      id,
-      name: data.name,
-      description: data.description,
-      version: "1.0.0",
-      language: data.language,
-      status: "draft",
-      sourceCode: data.sourceCode,
-      compiledBytecode: null,
-      abi: null,
-      githubRepo: null,
-      githubPath: null,
-      githubBranch: "main",
-      commitHash: null,
-      lastSyncAt: null,
-      deployedAddress: null,
-      network: data.network,
-      deployedAt: null,
-      deploymentTxHash: null,
-      author: data.author,
-      license: "MIT",
-      tags: [],
-      dependencies: [],
-      auditStatus: "not-audited",
-      auditReports: [],
-      securityScore: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+		const contract: SmartContract = {
+			id,
+			name: data.name,
+			description: data.description,
+			version: "1.0.0",
+			language: data.language,
+			status: "draft",
+			sourceCode: data.sourceCode,
+			compiledBytecode: null,
+			abi: null,
+			githubRepo: null,
+			githubPath: null,
+			githubBranch: "main",
+			commitHash: null,
+			lastSyncAt: null,
+			deployedAddress: null,
+			network: data.network,
+			deployedAt: null,
+			deploymentTxHash: null,
+			author: data.author,
+			license: "MIT",
+			tags: [],
+			dependencies: [],
+			auditStatus: "not-audited",
+			auditReports: [],
+			securityScore: 0,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
 
-    this.contracts.set(id, contract);
-    return contract;
-  }
+		this.contracts.set(id, contract);
+		return contract;
+	}
 
-  async compileContract(contractId: string): Promise<{
-    success: boolean;
-    bytecode: string | null;
-    abi: ContractABI | null;
-    errors: string[];
-    warnings: string[];
-  }> {
-    const contract = this.contracts.get(contractId);
-    if (!contract) {
-      throw new Error("Contract not found");
-    }
+	async compileContract(contractId: string): Promise<{
+		success: boolean;
+		bytecode: string | null;
+		abi: ContractABI | null;
+		errors: string[];
+		warnings: string[];
+	}> {
+		const contract = this.contracts.get(contractId);
+		if (!contract) {
+			throw new Error("Contract not found");
+		}
 
-    // Simulate compilation based on language
-    const compilationResult = {
-      success: true,
-      bytecode: `0x${Buffer.from(contract.sourceCode).toString("hex").slice(0, 100)}...`,
-      abi: {
-        functions: [
-          {
-            name: "transfer",
-            inputs: [
-              { name: "to", type: "address" },
-              { name: "amount", type: "u128" },
-            ],
-            outputs: [{ name: "", type: "bool" }],
-            stateMutability: "nonpayable" as const,
-            visibility: "public" as const,
-          },
-        ],
-        events: [
-          {
-            name: "Transfer",
-            inputs: [
-              { name: "from", type: "address", indexed: true },
-              { name: "to", type: "address", indexed: true },
-              { name: "amount", type: "u128", indexed: false },
-            ],
-            anonymous: false,
-          },
-        ],
-        errors: [],
-      },
-      errors: [],
-      warnings: [],
-    };
+		// Simulate compilation based on language
+		const compilationResult = {
+			success: true,
+			bytecode: `0x${Buffer.from(contract.sourceCode).toString("hex").slice(0, 100)}...`,
+			abi: {
+				functions: [
+					{
+						name: "transfer",
+						inputs: [
+							{ name: "to", type: "address" },
+							{ name: "amount", type: "u128" },
+						],
+						outputs: [{ name: "", type: "bool" }],
+						stateMutability: "nonpayable" as const,
+						visibility: "public" as const,
+					},
+				],
+				events: [
+					{
+						name: "Transfer",
+						inputs: [
+							{ name: "from", type: "address", indexed: true },
+							{ name: "to", type: "address", indexed: true },
+							{ name: "amount", type: "u128", indexed: false },
+						],
+						anonymous: false,
+					},
+				],
+				errors: [],
+			},
+			errors: [],
+			warnings: [],
+		};
 
-    if (compilationResult.success) {
-      contract.status = "compiled";
-      contract.compiledBytecode = compilationResult.bytecode;
-      contract.abi = compilationResult.abi;
-      contract.updatedAt = new Date();
-    }
+		if (compilationResult.success) {
+			contract.status = "compiled";
+			contract.compiledBytecode = compilationResult.bytecode;
+			contract.abi = compilationResult.abi;
+			contract.updatedAt = new Date();
+		}
 
-    return compilationResult;
-  }
+		return compilationResult;
+	}
 
-  async deployContract(
-    contractId: string,
-    constructorArgs: unknown[] = []
-  ): Promise<{
-    address: string;
-    txHash: string;
-    gasUsed: number;
-    blockNumber: number;
-  }> {
-    const contract = this.contracts.get(contractId);
-    if (!contract) {
-      throw new Error("Contract not found");
-    }
+	async deployContract(
+		contractId: string,
+		constructorArgs: unknown[] = [],
+	): Promise<{
+		address: string;
+		txHash: string;
+		gasUsed: number;
+		blockNumber: number;
+	}> {
+		const contract = this.contracts.get(contractId);
+		if (!contract) {
+			throw new Error("Contract not found");
+		}
 
-    if (!contract.compiledBytecode) {
-      throw new Error("Contract must be compiled before deployment");
-    }
+		if (!contract.compiledBytecode) {
+			throw new Error("Contract must be compiled before deployment");
+		}
 
-    // Simulate deployment
-    const address = `0x${Math.random().toString(16).slice(2, 42)}`;
-    const txHash = `0x${Math.random().toString(16).slice(2, 66)}`;
+		// Simulate deployment
+		const address = `0x${Math.random().toString(16).slice(2, 42)}`;
+		const txHash = `0x${Math.random().toString(16).slice(2, 66)}`;
 
-    contract.deployedAddress = address;
-    contract.deploymentTxHash = txHash;
-    contract.deployedAt = new Date();
-    contract.status = "deployed";
-    contract.updatedAt = new Date();
+		contract.deployedAddress = address;
+		contract.deploymentTxHash = txHash;
+		contract.deployedAt = new Date();
+		contract.status = "deployed";
+		contract.updatedAt = new Date();
 
-    return {
-      address,
-      txHash,
-      gasUsed: Math.floor(Math.random() * 1_000_000) + 100_000,
-      blockNumber: Math.floor(Math.random() * 1_000_000) + 1_000_000,
-    };
-  }
+		return {
+			address,
+			txHash,
+			gasUsed: Math.floor(Math.random() * 1_000_000) + 100_000,
+			blockNumber: Math.floor(Math.random() * 1_000_000) + 1_000_000,
+		};
+	}
 
-  async getContract(contractId: string): Promise<SmartContract | null> {
-    return this.contracts.get(contractId) || null;
-  }
+	async getContract(contractId: string): Promise<SmartContract | null> {
+		return this.contracts.get(contractId) || null;
+	}
 
-  async listContracts(filters?: {
-    language?: ContractLanguage;
-    status?: ContractStatus;
-    network?: BlockchainNetwork;
-  }): Promise<SmartContract[]> {
-    let contracts = Array.from(this.contracts.values());
+	async listContracts(filters?: {
+		language?: ContractLanguage;
+		status?: ContractStatus;
+		network?: BlockchainNetwork;
+	}): Promise<SmartContract[]> {
+		let contracts = Array.from(this.contracts.values());
 
-    if (filters?.language) {
-      contracts = contracts.filter((c) => c.language === filters.language);
-    }
-    if (filters?.status) {
-      contracts = contracts.filter((c) => c.status === filters.status);
-    }
-    if (filters?.network) {
-      contracts = contracts.filter((c) => c.network === filters.network);
-    }
+		if (filters?.language) {
+			contracts = contracts.filter((c) => c.language === filters.language);
+		}
+		if (filters?.status) {
+			contracts = contracts.filter((c) => c.status === filters.status);
+		}
+		if (filters?.network) {
+			contracts = contracts.filter((c) => c.network === filters.network);
+		}
 
-    return contracts;
-  }
+		return contracts;
+	}
 
-  getTemplate(templateId: string): ContractTemplate | null {
-    return this.templates.get(templateId) || null;
-  }
+	getTemplate(templateId: string): ContractTemplate | null {
+		return this.templates.get(templateId) || null;
+	}
 
-  listTemplates(category?: TemplateCategory): ContractTemplate[] {
-    let templates = Array.from(this.templates.values());
+	listTemplates(category?: TemplateCategory): ContractTemplate[] {
+		let templates = Array.from(this.templates.values());
 
-    if (category) {
-      templates = templates.filter((t) => t.category === category);
-    }
+		if (category) {
+			templates = templates.filter((t) => t.category === category);
+		}
 
-    return templates;
-  }
+		return templates;
+	}
 
-  listRepositories(): GitHubRepository[] {
-    return Array.from(this.repositories.values());
-  }
+	listRepositories(): GitHubRepository[] {
+		return Array.from(this.repositories.values());
+	}
 
-  async createFromTemplate(
-    templateId: string,
-    variables: Record<string, string>,
-    contractName: string
-  ): Promise<SmartContract> {
-    const template = this.templates.get(templateId);
-    if (!template) {
-      throw new Error("Template not found");
-    }
+	async createFromTemplate(
+		templateId: string,
+		variables: Record<string, string>,
+		contractName: string,
+	): Promise<SmartContract> {
+		const template = this.templates.get(templateId);
+		if (!template) {
+			throw new Error("Template not found");
+		}
 
-    // Replace variables in source code
-    let sourceCode = template.sourceCode;
-    for (const [key, value] of Object.entries(variables)) {
-      sourceCode = sourceCode.replace(
-        new RegExp(`\\$\\{${key}\\}`, "g"),
-        value
-      );
-    }
+		// Replace variables in source code
+		let sourceCode = template.sourceCode;
+		for (const [key, value] of Object.entries(variables)) {
+			sourceCode = sourceCode.replace(
+				new RegExp(`\\$\\{${key}\\}`, "g"),
+				value,
+			);
+		}
 
-    return this.createContract({
-      name: contractName,
-      description: `Created from template: ${template.name}`,
-      language: template.language,
-      sourceCode,
-      network: "pi-mainnet",
-      author: "triumph-synergy",
-    });
-  }
+		return this.createContract({
+			name: contractName,
+			description: `Created from template: ${template.name}`,
+			language: template.language,
+			sourceCode,
+			network: "pi-mainnet",
+			author: "triumph-synergy",
+		});
+	}
 
-  // ==========================================================================
-  // RUST SPECIFIC FEATURES
-  // ==========================================================================
+	// ==========================================================================
+	// RUST SPECIFIC FEATURES
+	// ==========================================================================
 
-  async configureRustContract(
-    contractId: string,
-    config: Partial<RustContractConfig>
-  ): Promise<RustContractConfig> {
-    const contract = this.contracts.get(contractId);
-    if (!contract) {
-      throw new Error("Contract not found");
-    }
+	async configureRustContract(
+		contractId: string,
+		config: Partial<RustContractConfig>,
+	): Promise<RustContractConfig> {
+		const contract = this.contracts.get(contractId);
+		if (!contract) {
+			throw new Error("Contract not found");
+		}
 
-    if (contract.language !== "rust") {
-      throw new Error("Contract is not a Rust contract");
-    }
+		if (contract.language !== "rust") {
+			throw new Error("Contract is not a Rust contract");
+		}
 
-    const fullConfig: RustContractConfig = {
-      cargoToml: config.cargoToml || this.generateCargoToml(contract.name),
-      edition: config.edition || "2021",
-      features: config.features || ["pi-sdk", "serde"],
-      target: config.target || "wasm32-unknown-unknown",
-      optimizationLevel: config.optimizationLevel || 3,
-    };
+		const fullConfig: RustContractConfig = {
+			cargoToml: config.cargoToml || this.generateCargoToml(contract.name),
+			edition: config.edition || "2021",
+			features: config.features || ["pi-sdk", "serde"],
+			target: config.target || "wasm32-unknown-unknown",
+			optimizationLevel: config.optimizationLevel || 3,
+		};
 
-    return fullConfig;
-  }
+		return fullConfig;
+	}
 
-  private generateCargoToml(name: string): string {
-    return `
+	private generateCargoToml(name: string): string {
+		return `
 [package]
 name = "${name.toLowerCase().replace(/\s+/g, "-")}"
 version = "1.0.0"
@@ -888,7 +888,7 @@ opt-level = 3
 lto = true
 codegen-units = 1
 `;
-  }
+	}
 }
 
 // ============================================================================
@@ -899,36 +899,36 @@ export const smartContractHub = new SmartContractHub();
 
 // Export helper functions
 export async function createContract(
-  data: Parameters<typeof smartContractHub.createContract>[0]
+	data: Parameters<typeof smartContractHub.createContract>[0],
 ): Promise<SmartContract> {
-  return smartContractHub.createContract(data);
+	return smartContractHub.createContract(data);
 }
 
 export async function compileContract(
-  contractId: string
+	contractId: string,
 ): Promise<ReturnType<typeof smartContractHub.compileContract>> {
-  return smartContractHub.compileContract(contractId);
+	return smartContractHub.compileContract(contractId);
 }
 
 export async function deployContract(
-  contractId: string,
-  constructorArgs?: unknown[]
+	contractId: string,
+	constructorArgs?: unknown[],
 ): Promise<ReturnType<typeof smartContractHub.deployContract>> {
-  return smartContractHub.deployContract(contractId, constructorArgs);
+	return smartContractHub.deployContract(contractId, constructorArgs);
 }
 
 export async function connectGitHub(
-  owner: string,
-  repo: string,
-  token?: string
+	owner: string,
+	repo: string,
+	token?: string,
 ): Promise<GitHubRepository> {
-  return smartContractHub.connectGitHubRepository(owner, repo, token);
+	return smartContractHub.connectGitHubRepository(owner, repo, token);
 }
 
 export async function syncFromGitHub(
-  repoFullName: string,
-  path: string,
-  branch?: string
+	repoFullName: string,
+	path: string,
+	branch?: string,
 ): Promise<SmartContract> {
-  return smartContractHub.syncContractFromGitHub(repoFullName, path, branch);
+	return smartContractHub.syncContractFromGitHub(repoFullName, path, branch);
 }

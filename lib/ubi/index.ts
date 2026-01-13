@@ -5,14 +5,14 @@
  */
 
 export {
-  type DistributionSchedule,
-  distributeUBI,
-  type EligibilityCriteria,
-  enrollInUBI,
-  processUBIPayments,
-  type UBIDistribution,
-  type UBIProgram,
-  type UBIRecipient,
-  UniversalBasicIncomeEngine,
-  ubiEngine,
+	type DistributionSchedule,
+	distributeUBI,
+	type EligibilityCriteria,
+	enrollInUBI,
+	processUBIPayments,
+	type UBIDistribution,
+	type UBIProgram,
+	type UBIRecipient,
+	UniversalBasicIncomeEngine,
+	ubiEngine,
 } from "./universal-basic-income";

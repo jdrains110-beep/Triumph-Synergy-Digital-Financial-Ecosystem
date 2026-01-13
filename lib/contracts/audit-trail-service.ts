@@ -8,245 +8,246 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contractAuditLogs } from "./schema";
 
-type ScreenshotCapture = {
-  hash: string;
-  timestamp: Date;
-  description: string;
-  base64Data?: string; // Optional for storage
-};
+interface ScreenshotCapture {
+	hash: string;
+	timestamp: Date;
+	description: string;
+	base64Data?: string; // Optional for storage
+}
 
-type SigningContext = {
-  ipAddress: string;
-  userAgent: string;
-  platform: string;
-  browser: string;
-  deviceType: "mobile" | "tablet" | "desktop";
-  timestamp: Date;
-  country?: string;
-  city?: string;
-  latitude?: number;
-  longitude?: number;
-};
+interface SigningContext {
+	ipAddress: string;
+	userAgent: string;
+	platform: string;
+	browser: string;
+	deviceType: "mobile" | "tablet" | "desktop";
+	timestamp: Date;
+	country?: string;
+	city?: string;
+	latitude?: number;
+	longitude?: number;
+}
 
 export class AuditTrailService {
-  /**
-   * Capture screenshot hash (for evidence)
-   * Note: Client-side captures the actual screenshot, server validates the hash
-   */
-  static captureScreenshot(
-    screenshotBase64: string,
-    description: string
-  ): ScreenshotCapture {
-    const hash = crypto
-      .createHash("sha256")
-      .update(screenshotBase64)
-      .digest("hex");
+	/**
+	 * Capture screenshot hash (for evidence)
+	 * Note: Client-side captures the actual screenshot, server validates the hash
+	 */
+	static captureScreenshot(
+		screenshotBase64: string,
+		description: string,
+	): ScreenshotCapture {
+		const hash = crypto
+			.createHash("sha256")
+			.update(screenshotBase64)
+			.digest("hex");
 
-    return {
-      hash,
-      timestamp: new Date(),
-      description,
-    };
-  }
+		return {
+			hash,
+			timestamp: new Date(),
+			description,
+		};
+	}
 
-  /**
-   * Verify screenshot integrity
-   */
-  static verifyScreenshot(
-    screenshotBase64: string,
-    providedHash: string
-  ): boolean {
-    const calculatedHash = crypto
-      .createHash("sha256")
-      .update(screenshotBase64)
-      .digest("hex");
+	/**
+	 * Verify screenshot integrity
+	 */
+	static verifyScreenshot(
+		screenshotBase64: string,
+		providedHash: string,
+	): boolean {
+		const calculatedHash = crypto
+			.createHash("sha256")
+			.update(screenshotBase64)
+			.digest("hex");
 
-    return calculatedHash === providedHash;
-  }
+		return calculatedHash === providedHash;
+	}
 
-  /**
-   * Generate device fingerprint
-   */
-  static generateDeviceFingerprint(context: SigningContext): string {
-    const fingerprint = `${context.platform}|${context.browser}|${context.deviceType}|${context.ipAddress}`;
-    return crypto.createHash("sha256").update(fingerprint).digest("hex");
-  }
+	/**
+	 * Generate device fingerprint
+	 */
+	static generateDeviceFingerprint(context: SigningContext): string {
+		const fingerprint = `${context.platform}|${context.browser}|${context.deviceType}|${context.ipAddress}`;
+		return crypto.createHash("sha256").update(fingerprint).digest("hex");
+	}
 
-  /**
-   * Verify device fingerprint consistency
-   */
-  static verifyDeviceFingerprint(
-    context: SigningContext,
-    previousFingerprint: string
-  ): boolean {
-    const currentFingerprint =
-      AuditTrailService.generateDeviceFingerprint(context);
-    return currentFingerprint === previousFingerprint;
-  }
+	/**
+	 * Verify device fingerprint consistency
+	 */
+	static verifyDeviceFingerprint(
+		context: SigningContext,
+		previousFingerprint: string,
+	): boolean {
+		const currentFingerprint =
+			AuditTrailService.generateDeviceFingerprint(context);
+		return currentFingerprint === previousFingerprint;
+	}
 
-  /**
-   * Generate signing evidence token
-   * This token serves as proof of the signing context
-   */
-  static generateEvidenceToken(
-    contractId: string,
-    userId: string,
-    context: SigningContext,
-    screenshotHash?: string
-  ): string {
-    const data = {
-      contractId,
-      userId,
-      timestamp: context.timestamp.toISOString(),
-      ipAddress: context.ipAddress,
-      deviceFingerprint: AuditTrailService.generateDeviceFingerprint(context),
-      screenshotHash: screenshotHash || "none",
-    };
+	/**
+	 * Generate signing evidence token
+	 * This token serves as proof of the signing context
+	 */
+	static generateEvidenceToken(
+		contractId: string,
+		userId: string,
+		context: SigningContext,
+		screenshotHash?: string,
+	): string {
+		const data = {
+			contractId,
+			userId,
+			timestamp: context.timestamp.toISOString(),
+			ipAddress: context.ipAddress,
+			deviceFingerprint: AuditTrailService.generateDeviceFingerprint(context),
+			screenshotHash: screenshotHash || "none",
+		};
 
-    // Create HMAC token
-    const hmac = crypto.createHmac(
-      "sha256",
-      process.env.SIGNATURE_SECRET || "secret"
-    );
-    hmac.update(JSON.stringify(data));
-    return hmac.digest("hex");
-  }
+		// Create HMAC token
+		const hmac = crypto.createHmac(
+			"sha256",
+			process.env.SIGNATURE_SECRET || "secret",
+		);
+		hmac.update(JSON.stringify(data));
+		return hmac.digest("hex");
+	}
 
-  /**
-   * Verify evidence token
-   */
-  static verifyEvidenceToken(
-    token: string,
-    contractId: string,
-    userId: string,
-    context: SigningContext
-  ): boolean {
-    try {
-      const expectedToken = AuditTrailService.generateEvidenceToken(
-        contractId,
-        userId,
-        context
-      );
-      return token === expectedToken;
-    } catch {
-      return false;
-    }
-  }
+	/**
+	 * Verify evidence token
+	 */
+	static verifyEvidenceToken(
+		token: string,
+		contractId: string,
+		userId: string,
+		context: SigningContext,
+	): boolean {
+		try {
+			const expectedToken = AuditTrailService.generateEvidenceToken(
+				contractId,
+				userId,
+				context,
+			);
+			return token === expectedToken;
+		} catch {
+			return false;
+		}
+	}
 
-  /**
-   * Log comprehensive signing event
-   */
-  static async logSigningEvent(
-    contractId: string,
-    userId: string,
-    context: SigningContext,
-    additionalData: {
-      action: string;
-      screenshotHash?: string;
-      signatureData?: string;
-      method?: string;
-    }
-  ): Promise<void> {
-    const deviceFingerprint =
-      AuditTrailService.generateDeviceFingerprint(context);
+	/**
+	 * Log comprehensive signing event
+	 */
+	static async logSigningEvent(
+		contractId: string,
+		userId: string,
+		context: SigningContext,
+		additionalData: {
+			action: string;
+			screenshotHash?: string;
+			signatureData?: string;
+			method?: string;
+		},
+	): Promise<void> {
+		const deviceFingerprint =
+			AuditTrailService.generateDeviceFingerprint(context);
 
-    await db.insert(contractAuditLogs).values({
-      contractId,
-      userId,
-      action: additionalData.action,
-      timestamp: context.timestamp,
-      ipAddress: context.ipAddress,
-      userAgent: context.userAgent,
-      details: {
-        deviceType: context.deviceType,
-        platform: context.platform,
-        browser: context.browser,
-        country: context.country,
-        city: context.city,
-        coordinates:
-          context.latitude && context.longitude
-            ? { latitude: context.latitude, longitude: context.longitude }
-            : undefined,
-        deviceFingerprint,
-        method: additionalData.method,
-        signatureDataHash: additionalData.signatureData
-          ? crypto
-              .createHash("sha256")
-              .update(additionalData.signatureData)
-              .digest("hex")
-          : undefined,
-      },
-      screenshot: additionalData.screenshotHash
-        ? {
-            hash: additionalData.screenshotHash,
-            timestamp: context.timestamp,
-            description: "Signing acceptance screenshot",
-          }
-        : undefined,
-    });
-  }
+		await db.insert(contractAuditLogs).values({
+			contractId,
+			userId,
+			action: additionalData.action,
+			timestamp: context.timestamp,
+			ipAddress: context.ipAddress,
+			userAgent: context.userAgent,
+			details: {
+				deviceType: context.deviceType,
+				platform: context.platform,
+				browser: context.browser,
+				country: context.country,
+				city: context.city,
+				coordinates:
+					context.latitude && context.longitude
+						? { latitude: context.latitude, longitude: context.longitude }
+						: undefined,
+				deviceFingerprint,
+				method: additionalData.method,
+				signatureDataHash: additionalData.signatureData
+					? crypto
+							.createHash("sha256")
+							.update(additionalData.signatureData)
+							.digest("hex")
+					: undefined,
+			},
+			screenshot: additionalData.screenshotHash
+				? {
+						hash: additionalData.screenshotHash,
+						timestamp: context.timestamp,
+						description: "Signing acceptance screenshot",
+					}
+				: undefined,
+		});
+	}
 
-  /**
-   * Generate audit report for contract
-   */
-  static async generateAuditReport(contractId: string): Promise<string> {
-    const logs = await db
-      .select()
-      .from(contractAuditLogs)
-      .where(eq(contractAuditLogs.contractId, contractId));
+	/**
+	 * Generate audit report for contract
+	 */
+	static async generateAuditReport(contractId: string): Promise<string> {
+		const logs = await db
+			.select()
+			.from(contractAuditLogs)
+			.where(eq(contractAuditLogs.contractId, contractId));
 
-    const report = {
-      contractId,
-      generatedAt: new Date(),
-      totalEvents: logs.length,
-      events: logs.map((log: typeof contractAuditLogs.$inferSelect) => ({
-        action: log.action,
-        timestamp: log.timestamp,
-        userId: log.userId,
-        ipAddress: log.ipAddress,
-        location: (log.details as any)?.country
-          ? `${(log.details as any).city}, ${(log.details as any).country}`
-          : "Unknown",
-        deviceType: (log.details as any)?.deviceType,
-        browser: (log.details as any)?.browser,
-        screenshotHash: log.screenshot?.hash,
-      })),
-      summary: {
-        totalSignatures: logs.filter(
-          (l: typeof contractAuditLogs.$inferSelect) => l.action === "signed"
-        ).length,
-        totalAcceptances: logs.filter(
-          (l: typeof contractAuditLogs.$inferSelect) => l.action === "accepted"
-        ).length,
-        totalRejections: logs.filter(
-          (l: typeof contractAuditLogs.$inferSelect) => l.action === "rejected"
-        ).length,
-        totalWithdrawals: logs.filter(
-          (l: typeof contractAuditLogs.$inferSelect) => l.action === "withdrawn"
-        ).length,
-      },
-    };
+		const report = {
+			contractId,
+			generatedAt: new Date(),
+			totalEvents: logs.length,
+			events: logs.map((log: typeof contractAuditLogs.$inferSelect) => ({
+				action: log.action,
+				timestamp: log.timestamp,
+				userId: log.userId,
+				ipAddress: log.ipAddress,
+				location: (log.details as any)?.country
+					? `${(log.details as any).city}, ${(log.details as any).country}`
+					: "Unknown",
+				deviceType: (log.details as any)?.deviceType,
+				browser: (log.details as any)?.browser,
+				screenshotHash: log.screenshot?.hash,
+			})),
+			summary: {
+				totalSignatures: logs.filter(
+					(l: typeof contractAuditLogs.$inferSelect) => l.action === "signed",
+				).length,
+				totalAcceptances: logs.filter(
+					(l: typeof contractAuditLogs.$inferSelect) => l.action === "accepted",
+				).length,
+				totalRejections: logs.filter(
+					(l: typeof contractAuditLogs.$inferSelect) => l.action === "rejected",
+				).length,
+				totalWithdrawals: logs.filter(
+					(l: typeof contractAuditLogs.$inferSelect) =>
+						l.action === "withdrawn",
+				).length,
+			},
+		};
 
-    return JSON.stringify(report, null, 2);
-  }
+		return JSON.stringify(report, null, 2);
+	}
 
-  /**
-   * Generate legally admissible signing certificate
-   */
-  static generateSigningCertificate(data: {
-    contractId: string;
-    userId: string;
-    email: string;
-    displayName: string;
-    signedAt: Date;
-    ipAddress: string;
-    country?: string;
-    city?: string;
-    screenshotHash?: string;
-    deviceFingerprint: string;
-    signatureMethod: string;
-  }): string {
-    const certificate = `
+	/**
+	 * Generate legally admissible signing certificate
+	 */
+	static generateSigningCertificate(data: {
+		contractId: string;
+		userId: string;
+		email: string;
+		displayName: string;
+		signedAt: Date;
+		ipAddress: string;
+		country?: string;
+		city?: string;
+		screenshotHash?: string;
+		deviceFingerprint: string;
+		signatureMethod: string;
+	}): string {
+		const certificate = `
 DIGITAL SIGNATURE CERTIFICATE
 ===============================
 Generated: ${new Date().toISOString()}
@@ -276,20 +277,20 @@ Verification Code: ${crypto.randomBytes(16).toString("hex")}
 ===============================
     `;
 
-    return certificate;
-  }
+		return certificate;
+	}
 
-  /**
-   * Export complete audit evidence package
-   */
-  static async exportEvidencePackage(contractId: string): Promise<{
-    auditReport: string;
-    signingCertificates: string[];
-    complianceStatement: string;
-  }> {
-    const auditReport = await AuditTrailService.generateAuditReport(contractId);
+	/**
+	 * Export complete audit evidence package
+	 */
+	static async exportEvidencePackage(contractId: string): Promise<{
+		auditReport: string;
+		signingCertificates: string[];
+		complianceStatement: string;
+	}> {
+		const auditReport = await AuditTrailService.generateAuditReport(contractId);
 
-    const complianceStatement = `
+		const complianceStatement = `
 LEGAL COMPLIANCE STATEMENT
 ==========================
 
@@ -334,10 +335,10 @@ This contract and its signing process meet the highest standards
 of legal enforceability in electronic transactions.
     `;
 
-    return {
-      auditReport,
-      signingCertificates: [],
-      complianceStatement,
-    };
-  }
+		return {
+			auditReport,
+			signingCertificates: [],
+			complianceStatement,
+		};
+	}
 }

@@ -9,38 +9,38 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://triumphsynergy0576.pinet.com"),
-  title: "Triumph Synergy - Pi App Studio",
-  description:
-    "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
-  icons: {
-    icon: "/favicon.ico",
-  },
-  keywords: ["Pi Network", "Payment Processing", "Compliance", "Fintech", "AI"],
-  authors: [{ name: "Triumph Synergy Team" }],
-  openGraph: {
-    title: "Triumph Synergy - Pi App Studio",
-    description: "Advanced payment routing with compliance automation",
-    url: "https://triumphsynergy0576.pinet.com",
-    siteName: "Triumph Synergy",
-    type: "website",
-  },
+	metadataBase: new URL("https://triumphsynergy0576.pinet.com"),
+	title: "Triumph Synergy - Pi App Studio",
+	description:
+		"Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
+	icons: {
+		icon: "/favicon.ico",
+	},
+	keywords: ["Pi Network", "Payment Processing", "Compliance", "Fintech", "AI"],
+	authors: [{ name: "Triumph Synergy Team" }],
+	openGraph: {
+		title: "Triumph Synergy - Pi App Studio",
+		description: "Advanced payment routing with compliance automation",
+		url: "https://triumphsynergy0576.pinet.com",
+		siteName: "Triumph Synergy",
+		type: "website",
+	},
 };
 
 export const viewport = {
-  maximumScale: 1, // Disable auto-zoom on mobile Safari
+	maximumScale: 1, // Disable auto-zoom on mobile Safari
 };
 
 const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist",
+	subsets: ["latin"],
+	display: "swap",
+	variable: "--font-geist",
 });
 
 const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist-mono",
+	subsets: ["latin"],
+	display: "swap",
+	variable: "--font-geist-mono",
 });
 
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
@@ -64,44 +64,44 @@ const THEME_COLOR_SCRIPT = `\
 })();`;
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html
-      className={`${geist.variable} ${geistMono.variable}`}
-      // `next-themes` injects an extra classname to the body element to avoid
-      // visual flicker before hydration. Hence the `suppressHydrationWarning`
-      // prop is necessary to avoid the React hydration mismatch warning.
-      // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
-      lang="en"
-      suppressHydrationWarning
-    >
-      <head>
-        <script
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
-          dangerouslySetInnerHTML={{
-            __html: THEME_COLOR_SCRIPT,
-          }}
-        />
-        {/* Pi Network SDK - Version 2.0 */}
-        <script async src="https://sdk.minepi.com/pi-sdk.js" />
-      </head>
-      <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
-        >
-          <Toaster position="top-center" />
-          <SessionProvider>
-            <PiProvider>{children}</PiProvider>
-          </SessionProvider>
-        </ThemeProvider>
-        <Analytics />
-      </body>
-    </html>
-  );
+	return (
+		<html
+			className={`${geist.variable} ${geistMono.variable}`}
+			// `next-themes` injects an extra classname to the body element to avoid
+			// visual flicker before hydration. Hence the `suppressHydrationWarning`
+			// prop is necessary to avoid the React hydration mismatch warning.
+			// https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
+			lang="en"
+			suppressHydrationWarning
+		>
+			<head>
+				<script
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
+					dangerouslySetInnerHTML={{
+						__html: THEME_COLOR_SCRIPT,
+					}}
+				/>
+				{/* Pi Network SDK - Version 2.0 */}
+				<script async src="https://sdk.minepi.com/pi-sdk.js" />
+			</head>
+			<body className="antialiased">
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					disableTransitionOnChange
+					enableSystem
+				>
+					<Toaster position="top-center" />
+					<SessionProvider>
+						<PiProvider>{children}</PiProvider>
+					</SessionProvider>
+				</ThemeProvider>
+				<Analytics />
+			</body>
+		</html>
+	);
 }

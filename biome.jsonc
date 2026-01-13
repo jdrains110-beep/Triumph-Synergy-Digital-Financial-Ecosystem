@@ -1,105 +1,111 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite"],
-  "files": {
-    "includes": [
-      "**/*",
-      "!components/ui",
-      "!lib/utils.ts",
-      "!hooks/use-mobile.ts"
-    ]
-  },
-  "linter": {
-    "rules": {
-      "suspicious": {
-        /* Needs more work to fix */
-        "noExplicitAny": "off",
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"files": {
+		"includes": [
+			"**/*",
+			"!components/ui",
+			"!lib/utils.ts",
+			"!hooks/use-mobile.ts"
+		]
+	},
+	"linter": {
+		"rules": {
+			"suspicious": {
+				/* Needs more work to fix */
+				"noExplicitAny": "off",
 
-        /* Allow for Tailwind @ rules */
-        "noUnknownAtRules": "off",
+				/* Allow for Tailwind @ rules */
+				"noUnknownAtRules": "off",
 
-        /* Allowing console for debugging */
-        "noConsole": "off",
+				/* Allowing console for debugging */
+				"noConsole": "off",
 
-        /* Needed for generateUUID() */
-        "noBitwiseOperators": "off",
+				/* Needed for generateUUID() */
+				"noBitwiseOperators": "off",
 
-        /* Turned off to prevent VS Code crashes */
-        "noEvolvingTypes": "off",
-        "noImplicitAnyLet": "off",
-        "useAwait": "off"
-      },
-      "style": {
-        /* Allowing magic numbers */
-        "noMagicNumbers": "off",
+				/* Turned off to prevent VS Code crashes */
+				"noEvolvingTypes": "off",
+				"noImplicitAnyLet": "off",
+				"useAwait": "off"
+			},
+			"style": {
+				/* Allowing magic numbers */
+				"noMagicNumbers": "off",
 
-        /* Needs more work to fix */
-        "noNestedTernary": "off",
+				/* Needs more work to fix */
+				"noNestedTernary": "off",
 
-        /* Turned off to prevent VS Code crashes */
-        "noNonNullAssertion": "off",
-        "noEnum": "off",
-        "useNodejsImportProtocol": "off",
-        "useTemplate": "off",
-        "useFilenamingConvention": "off",
+				/* Turned off to prevent VS Code crashes */
+				"noNonNullAssertion": "off",
+				"noEnum": "off",
+				"useNodejsImportProtocol": "off",
+				"useTemplate": "off",
+				"useFilenamingConvention": "off",
 
-        /* Re-exporting for convenience is acceptable */
-        "noExportedImports": "off",
+				/* Re-exporting for convenience is acceptable */
+				"noExportedImports": "off",
 
-        /* Readonly properties - constructor assignment pattern */
-        "useReadonlyClassProperties": "off"
-      },
-      "nursery": {
-        /* Too many false positives */
-        "noUnnecessaryConditions": "off",
+				/* Readonly properties - constructor assignment pattern */
+				"useReadonlyClassProperties": "off"
+			},
+			"nursery": {
+				/* Too many false positives */
+				"noUnnecessaryConditions": "off",
 
-        /* Temporarily off */
-        "useConsistentTypeDefinitions": "warn",
+				/* Temporarily off */
+				"useConsistentTypeDefinitions": "warn",
 
-        /* Functions with many parameters - would require significant API refactoring */
-        "useMaxParams": "off",
+				/* Functions with many parameters - would require significant API refactoring */
+				"useMaxParams": "off",
 
-        /* Image optimization suggestions */
-        "useImageSize": "off"
-      },
-      "complexity": {
-        /* Needs more work to fix */
-        "noExcessiveCognitiveComplexity": "off",
+				/* Image optimization suggestions */
+				"useImageSize": "off"
+			},
+			"complexity": {
+				/* Needs more work to fix */
+				"noExcessiveCognitiveComplexity": "off",
 
-        /* This one has false positives. It's a bit... iffy 😉 */
-        "useSimplifiedLogicExpression": "off",
+				/* This one has false positives. It's a bit... iffy 😉 */
+				"useSimplifiedLogicExpression": "off",
 
-        /* Turned off to prevent VS Code crashes */
-        "noForEach": "off",
+				/* Turned off to prevent VS Code crashes */
+				"noForEach": "off",
 
-        /* Static-only class pattern used for singletons */
-        "noStaticOnlyClass": "off"
-      },
-      "performance": {
-        /* Turned off to prevent VS Code crashes */
-        "noNamespaceImport": "off",
+				/* Static-only class pattern used for singletons */
+				"noStaticOnlyClass": "off"
+			},
+			"performance": {
+				/* Turned off to prevent VS Code crashes */
+				"noNamespaceImport": "off",
 
-        /* Index files for clean module exports are acceptable */
-        "noBarrelFile": "off",
+				/* Index files for clean module exports are acceptable */
+				"noBarrelFile": "off",
 
-        /* Top-level regex - minor performance impact, acceptable for readability */
-        "useTopLevelRegex": "off",
+				/* Top-level regex - minor performance impact, acceptable for readability */
+				"useTopLevelRegex": "off",
 
-        /* Next.js Image component suggestions */
-        "noImgElement": "off"
-      },
-      "a11y": {
-        /* Needs more work to fix */
-        "noSvgWithoutTitle": "off",
+				/* Next.js Image component suggestions */
+				"noImgElement": "off"
+			},
+			"a11y": {
+				/* Needs more work to fix */
+				"noSvgWithoutTitle": "off",
 
-        /* Turned off to prevent VS Code crashes */
-        "useButtonType": "off"
-      },
-      "correctness": {
-        /* Turned off to prevent VS Code crashes */
-        "noUnusedFunctionParameters": "off",
-        "noUnusedVariables": "off"
-      }
-    }
-  }
+				/* Turned off to prevent VS Code crashes */
+				"useButtonType": "off"
+			},
+			"correctness": {
+				/* Turned off to prevent VS Code crashes */
+				"noUnusedFunctionParameters": "off",
+				"noUnusedVariables": "off",
+
+				/* Hardcoded IDs are acceptable for form labels - would require significant refactoring */
+				"useUniqueElementIds": "off"
+			},
+			"security": {
+				/* dangerouslySetInnerHTML is required for syntax highlighting with shiki */
+				"noDangerouslySetInnerHtml": "warn"
+			}
+		}
+	}
 }

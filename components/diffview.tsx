@@ -1,9 +1,9 @@
 import OrderedMap from "orderedmap";
 import {
-  DOMParser,
-  type MarkSpec,
-  type Node as ProsemirrorNode,
-  Schema,
+	DOMParser,
+	type MarkSpec,
+	type Node as ProsemirrorNode,
+	Schema,
 } from "prosemirror-model";
 import { schema } from "prosemirror-schema-basic";
 import { addListNodes } from "prosemirror-schema-list";
@@ -16,85 +16,85 @@ import { Streamdown } from "streamdown";
 import { DiffType, diffEditor } from "@/lib/editor/diff";
 
 const diffSchema = new Schema({
-  nodes: addListNodes(schema.spec.nodes, "paragraph block*", "block"),
-  marks: OrderedMap.from({
-    ...schema.spec.marks.toObject(),
-    diffMark: {
-      attrs: { type: { default: "" } },
-      toDOM(mark) {
-        let className = "";
+	nodes: addListNodes(schema.spec.nodes, "paragraph block*", "block"),
+	marks: OrderedMap.from({
+		...schema.spec.marks.toObject(),
+		diffMark: {
+			attrs: { type: { default: "" } },
+			toDOM(mark) {
+				let className = "";
 
-        switch (mark.attrs.type) {
-          case DiffType.Inserted:
-            className =
-              "bg-green-100 text-green-700 dark:bg-green-500/70 dark:text-green-300";
-            break;
-          case DiffType.Deleted:
-            className =
-              "bg-red-100 line-through text-red-600 dark:bg-red-500/70 dark:text-red-300";
-            break;
-          default:
-            className = "";
-        }
-        return ["span", { class: className }, 0];
-      },
-    } as MarkSpec,
-  }),
+				switch (mark.attrs.type) {
+					case DiffType.Inserted:
+						className =
+							"bg-green-100 text-green-700 dark:bg-green-500/70 dark:text-green-300";
+						break;
+					case DiffType.Deleted:
+						className =
+							"bg-red-100 line-through text-red-600 dark:bg-red-500/70 dark:text-red-300";
+						break;
+					default:
+						className = "";
+				}
+				return ["span", { class: className }, 0];
+			},
+		} as MarkSpec,
+	}),
 });
 
 function computeDiff(oldDoc: ProsemirrorNode, newDoc: ProsemirrorNode) {
-  return diffEditor(diffSchema, oldDoc.toJSON(), newDoc.toJSON());
+	return diffEditor(diffSchema, oldDoc.toJSON(), newDoc.toJSON());
 }
 
-type DiffEditorProps = {
-  oldContent: string;
-  newContent: string;
-};
+interface DiffEditorProps {
+	oldContent: string;
+	newContent: string;
+}
 
 export const DiffView = ({ oldContent, newContent }: DiffEditorProps) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
+	const editorRef = useRef<HTMLDivElement>(null);
+	const viewRef = useRef<EditorView | null>(null);
 
-  useEffect(() => {
-    if (editorRef.current && !viewRef.current) {
-      const parser = DOMParser.fromSchema(diffSchema);
+	useEffect(() => {
+		if (editorRef.current && !viewRef.current) {
+			const parser = DOMParser.fromSchema(diffSchema);
 
-      const oldHtmlContent = renderToString(
-        <Streamdown>{oldContent}</Streamdown>
-      );
-      const newHtmlContent = renderToString(
-        <Streamdown>{newContent}</Streamdown>
-      );
+			const oldHtmlContent = renderToString(
+				<Streamdown>{oldContent}</Streamdown>,
+			);
+			const newHtmlContent = renderToString(
+				<Streamdown>{newContent}</Streamdown>,
+			);
 
-      const oldContainer = document.createElement("div");
-      oldContainer.innerHTML = oldHtmlContent;
+			const oldContainer = document.createElement("div");
+			oldContainer.innerHTML = oldHtmlContent;
 
-      const newContainer = document.createElement("div");
-      newContainer.innerHTML = newHtmlContent;
+			const newContainer = document.createElement("div");
+			newContainer.innerHTML = newHtmlContent;
 
-      const oldDoc = parser.parse(oldContainer);
-      const newDoc = parser.parse(newContainer);
+			const oldDoc = parser.parse(oldContainer);
+			const newDoc = parser.parse(newContainer);
 
-      const diffedDoc = computeDiff(oldDoc, newDoc);
+			const diffedDoc = computeDiff(oldDoc, newDoc);
 
-      const state = EditorState.create({
-        doc: diffedDoc,
-        plugins: [],
-      });
+			const state = EditorState.create({
+				doc: diffedDoc,
+				plugins: [],
+			});
 
-      viewRef.current = new EditorView(editorRef.current, {
-        state,
-        editable: () => false,
-      });
-    }
+			viewRef.current = new EditorView(editorRef.current, {
+				state,
+				editable: () => false,
+			});
+		}
 
-    return () => {
-      if (viewRef.current) {
-        viewRef.current.destroy();
-        viewRef.current = null;
-      }
-    };
-  }, [oldContent, newContent]);
+		return () => {
+			if (viewRef.current) {
+				viewRef.current.destroy();
+				viewRef.current = null;
+			}
+		};
+	}, [oldContent, newContent]);
 
-  return <div className="diff-editor" ref={editorRef} />;
+	return <div className="diff-editor" ref={editorRef} />;
 };

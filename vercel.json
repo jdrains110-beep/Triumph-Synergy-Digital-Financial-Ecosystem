@@ -1,63 +1,63 @@
 {
-  "version": 2,
-  "framework": "nextjs",
-  "buildCommand": "next build",
-  "installCommand": "pnpm install",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXT_PRIVATE_SKIP_TURBOPACK": "true"
-  },
-  "rewrites": [
-    {
-      "source": "/validation-key.txt",
-      "destination": "/api/validation-key"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "geolocation=(), microphone=(), camera=()"
-        }
-      ]
-    },
-    {
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/plain"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ],
-      "source": "/validation-key.txt"
-    }
-  ],
-  "devCommand": "pnpm dev",
-  "regions": ["iad1"],
-  "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  }
+	"version": 2,
+	"framework": "nextjs",
+	"buildCommand": "next build",
+	"installCommand": "pnpm install",
+	"outputDirectory": ".next",
+	"env": {
+		"NEXT_PRIVATE_SKIP_TURBOPACK": "true"
+	},
+	"rewrites": [
+		{
+			"source": "/validation-key.txt",
+			"destination": "/api/validation-key"
+		}
+	],
+	"headers": [
+		{
+			"source": "/(.*)",
+			"headers": [
+				{
+					"key": "X-Content-Type-Options",
+					"value": "nosniff"
+				},
+				{
+					"key": "X-Frame-Options",
+					"value": "SAMEORIGIN"
+				},
+				{
+					"key": "X-XSS-Protection",
+					"value": "1; mode=block"
+				},
+				{
+					"key": "Referrer-Policy",
+					"value": "strict-origin-when-cross-origin"
+				},
+				{
+					"key": "Permissions-Policy",
+					"value": "geolocation=(), microphone=(), camera=()"
+				}
+			]
+		},
+		{
+			"headers": [
+				{
+					"key": "Content-Type",
+					"value": "text/plain"
+				},
+				{
+					"key": "Cache-Control",
+					"value": "public, max-age=3600"
+				}
+			],
+			"source": "/validation-key.txt"
+		}
+	],
+	"devCommand": "pnpm dev",
+	"regions": ["iad1"],
+	"functions": {
+		"app/api/**/*.ts": {
+			"maxDuration": 30
+		}
+	}
 }

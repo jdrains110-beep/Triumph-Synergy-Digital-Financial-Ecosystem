@@ -21,10 +21,10 @@ global.fetch = global.fetch || (async () => new Response());
 
 // Clean up after each test
 afterEach(() => {
-  // Clear any mocks
+	// Clear any mocks
 });
 
 // Global error handler for unhandled promises
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Promise Rejection:", reason);
+	console.error("Unhandled Promise Rejection:", reason);
 });
