@@ -179,7 +179,21 @@ export const PI_NEXUS_INTEGRATION_CONFIG = {
   // Security settings
   requireAudit: true,
   auditProvider: "kosasih-verified",
-  defaultSecurityScore: 85, // Based on Kosasih's repository audit status
+  /**
+   * Default security score for Pi-Nexus contracts
+   * 
+   * Score: 85/100
+   * Basis:
+   * - Repository includes CircleCI CI/CD validation
+   * - DeepSource code quality monitoring
+   * - Multi-license compliance (Galactic Chain, Universal Consensus, UCTR)
+   * - Active maintenance by KOSASIH
+   * - Production-ready status in upstream repository
+   * 
+   * Note: This is a baseline score. Individual contracts may have different
+   * scores based on specific audits and usage patterns.
+   */
+  defaultSecurityScore: 85,
   
   // Compatibility settings
   triumphSynergyCompatible: true,

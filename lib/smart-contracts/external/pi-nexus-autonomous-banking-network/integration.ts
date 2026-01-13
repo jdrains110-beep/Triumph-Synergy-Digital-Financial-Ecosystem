@@ -73,6 +73,25 @@ export class PiNexusIntegration {
   }
 
   /**
+   * Generate source code reference for a Pi-Nexus contract
+   * This creates a reference comment instead of copying actual source code
+   */
+  private generateSourceReference(piNexusContract: PiNexusContract): string {
+    return `// Pi-Nexus Contract Reference
+// Original repository: ${this.repository.url}
+// Path: ${piNexusContract.githubPath}
+// Maintained by: ${piNexusContract.maintainedBy}
+// License: ${piNexusContract.license}
+//
+// NOTE: This is a reference integration. The actual contract source
+// is maintained in the upstream repository to preserve integrity.
+// 
+// To access the full source code, visit:
+// ${this.repository.url}/tree/${this.repository.defaultBranch}/${piNexusContract.githubPath}
+`;
+  }
+
+  /**
    * Convert Pi-Nexus contract to Triumph-Synergy SmartContract format
    * This maintains original contract data while adapting to the hub format
    */
@@ -89,18 +108,7 @@ export class PiNexusIntegration {
       status: "verified",
 
       // Source - maintained as reference, not modified
-      sourceCode: `// Pi-Nexus Contract Reference
-// Original repository: ${this.repository.url}
-// Path: ${piNexusContract.githubPath}
-// Maintained by: ${piNexusContract.maintainedBy}
-// License: ${piNexusContract.license}
-//
-// NOTE: This is a reference integration. The actual contract source
-// is maintained in the upstream repository to preserve integrity.
-// 
-// To access the full source code, visit:
-// ${this.repository.url}/tree/${this.repository.defaultBranch}/${piNexusContract.githubPath}
-`,
+      sourceCode: this.generateSourceReference(piNexusContract),
       compiledBytecode: null,
       abi: null,
 

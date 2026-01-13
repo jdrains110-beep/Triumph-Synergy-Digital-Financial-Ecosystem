@@ -249,9 +249,14 @@ class SmartContractHub {
       this.externalContractsLoaded = true;
     } catch (error) {
       // External contracts are optional, log but don't fail
+      // Core Triumph-Synergy functionality continues to work without external contracts
       console.warn(
-        "Failed to load Pi-Nexus external contracts:",
-        error instanceof Error ? error.message : "Unknown error"
+        "Failed to load Pi-Nexus external contracts. " +
+        "External smart contract features will be unavailable. " +
+        "Core functionality is not affected.",
+        "\nError:",
+        error instanceof Error ? error.message : "Unknown error",
+        "\nTo resolve: Check network connectivity and Pi-Nexus repository availability."
       );
     } finally {
       this.externalContractsLoading = null;
