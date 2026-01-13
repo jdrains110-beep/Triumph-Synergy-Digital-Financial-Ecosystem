@@ -92,6 +92,26 @@ Automatic CI/CD pipeline with:
 | [Architecture](docs/architecture.md) | System design and diagrams |
 | [Security](docs/security.md) | Security policies |
 | [Deployment](docs/deployment.md) | Deployment guide |
+| [External Contracts](docs/external-contracts-integration.md) | Smart contract ecosystem integration |
+
+## 🔗 Smart Contract Ecosystem
+
+Triumph-Synergy hosts a modular smart contract ecosystem supporting multiple implementations:
+
+### Integrated External Contracts
+
+| Project | Owner | Contracts | Status |
+|---------|-------|-----------|--------|
+| [pi-supernode](https://github.com/KOSASIH/pi-supernode) | Kosasih | PiCoin, Governance, StableCoin, WrappedPiToken | ✅ Active |
+
+**Features:**
+- 🔄 Multi-contract support with maintained integrity
+- 📦 Modular architecture for easy integration
+- 🏷️ Proper attribution and licensing
+- 🔍 Contract discovery and metadata tracking
+- 🧪 Comprehensive testing framework
+
+See [External Contracts Integration Guide](docs/external-contracts-integration.md) for details.
 
 ## 🔌 API Endpoints
 
@@ -116,7 +136,8 @@ Automatic CI/CD pipeline with:
 - **Database**: PostgreSQL + Drizzle ORM
 - **Cache**: Redis
 - **Blockchain**: Stellar SDK
-- **Testing**: Vitest (59 tests)
+- **Smart Contracts**: Solidity (via external integrations)
+- **Testing**: Vitest (81 tests)
 - **Deployment**: Vercel + GitHub Actions
 
 ## 📊 Status
@@ -124,9 +145,10 @@ Automatic CI/CD pipeline with:
 | Metric | Value |
 |--------|-------|
 | Build | ✅ Passing |
-| Tests | 59/59 Passing |
+| Tests | 81/81 Passing |
 | Security | 0 Vulnerabilities |
 | Routes | 76 Compiled |
+| External Contracts | 5 Integrated |
 
 ## 📄 License
 
