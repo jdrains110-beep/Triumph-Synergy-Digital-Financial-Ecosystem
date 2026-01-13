@@ -43,6 +43,8 @@ export type CustomUIDataTypes = {
   clear: null;
   finish: null;
   usage: AppUsage;
+  // Allow future data-* parts without breaking the UIDataTypes constraint
+  [key: string]: unknown;
 };
 
 export type ChatMessage = UIMessage<
