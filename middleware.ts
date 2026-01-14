@@ -118,9 +118,9 @@ export function middleware(request: NextRequest) {
     const mainnetKey = "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
     
     // Determine which key to serve based on detection
-    // DEFAULT TO TESTNET - testnet portal checks this endpoint automatically
-    let validationKey = testnetKey; // Default to testnet for automatic checks
-    let detectedMode = "testnet";
+    // DEFAULT TO MAINNET - main branch serves mainnet
+    let validationKey = mainnetKey; // Default to mainnet
+    let detectedMode = "mainnet";
     
     // Explicit mode parameter takes priority
     if (mode === "testnet") {
