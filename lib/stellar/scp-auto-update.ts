@@ -278,7 +278,12 @@ export class SCPAutoUpdate {
 
       // Store the close function for cleanup
       this.ledgerStream = {
-        close: typeof streamResult === "function" ? streamResult : () => {},
+        close:
+          typeof streamResult === "function"
+            ? streamResult
+            : () => {
+                // No-op function if streamResult is not a function
+              },
       };
 
       console.log("[SCP Auto-Update] 📡 Ledger stream connected");

@@ -1,17 +1,17 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // Pi SDK types are declared in sdk/pi-sdk-react/index.ts
 // We use the global Window interface from there
 
-interface PiPaymentButtonProps {
+type PiPaymentButtonProps = {
   amount: number;
   memo: string;
   onSuccess?: (payment: any) => void;
   onError?: (error: any) => void;
   metadata?: Record<string, any>;
   isAdmin?: boolean;
-}
+};
 
 export default function PiPaymentButton({
   amount,
@@ -106,13 +106,15 @@ export default function PiPaymentButton({
     };
 
     initializePi();
-  }, []);
+  }, [appId]);
 
   const handlePayment = async () => {
     if (!isPiReady) {
       const errorMsg = "Pi SDK not ready. Please wait or refresh the page.";
       setError(errorMsg);
-      if (onError) onError(new Error(errorMsg));
+      if (onError) {
+        onError(new Error(errorMsg));
+      }
       return;
     }
 
@@ -228,14 +230,18 @@ export default function PiPaymentButton({
             console.log("[Pi Payment] Payment cancelled:", paymentId);
             setLoading(false);
             setError("Payment cancelled by user");
-            if (onError) onError(new Error("Payment cancelled by user"));
+            if (onError) {
+              onError(new Error("Payment cancelled by user"));
+            }
           },
 
-          onError: (error: any, payment?: any) => {
-            console.error("[Pi Payment] Payment error:", error, payment);
+          onError: (err: any, pmt?: any) => {
+            console.error("[Pi Payment] Payment error:", err, pmt);
             setLoading(false);
-            setError(error.message || "Payment failed");
-            if (onError) onError(error);
+            setError(err.message || "Payment failed");
+            if (onError) {
+              onError(err);
+            }
           },
         }
       );
@@ -259,7 +265,9 @@ export default function PiPaymentButton({
       const errorMsg =
         paymentError instanceof Error ? paymentError.message : "Payment failed";
       setError(errorMsg);
-      if (onError) onError(paymentError);
+      if (onError) {
+        onError(paymentError);
+      }
     }
   };
 
