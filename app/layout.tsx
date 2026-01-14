@@ -61,7 +61,9 @@ export default async function RootLayout({
 
   return (
     <html
-      // Use system fonts as fallback to avoid build-time network dependency
+      // Using system fonts instead of Google Fonts to avoid build-time network failures.
+      // Google Fonts (Geist, Geist Mono) were causing build errors when network requests failed during compilation.
+      // System fonts provide reliable fallback and similar visual appearance.
       lang={locale}
       suppressHydrationWarning
     >
