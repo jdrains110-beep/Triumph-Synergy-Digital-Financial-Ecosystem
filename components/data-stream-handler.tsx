@@ -36,9 +36,9 @@ export function DataStreamHandler() {
         });
       }
 
-      setArtifact((draftArtifact) => {
+      setArtifact((draftArtifact): UIArtifact => {
         if (!draftArtifact) {
-          return { ...initialArtifactData, status: "streaming" };
+          return { ...initialArtifactData, status: "streaming" } as UIArtifact;
         }
 
         switch (part.type) {
@@ -47,34 +47,34 @@ export function DataStreamHandler() {
               ...draftArtifact,
               documentId: String(part.data),
               status: "streaming",
-            };
+            } as UIArtifact;
 
           case "data-title":
             return {
               ...draftArtifact,
               title: String(part.data),
               status: "streaming",
-            };
+            } as UIArtifact;
 
           case "data-kind":
             return {
               ...draftArtifact,
               kind: part.data as UIArtifact["kind"],
               status: "streaming",
-            };
+            } as UIArtifact;
 
           case "data-clear":
             return {
               ...draftArtifact,
               content: "",
               status: "streaming",
-            };
+            } as UIArtifact;
 
           case "data-finish":
             return {
               ...draftArtifact,
               status: "idle",
-            };
+            } as UIArtifact;
 
           default:
             return draftArtifact;
