@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
 import * as StellarSdk from "@stellar/stellar-sdk";
+import { type NextRequest, NextResponse } from "next/server";
 import { getSCPAutoUpdate, getStellarPiCoinSDK } from "@/lib/stellar";
 
 // Stellar Configuration
@@ -10,7 +10,7 @@ const server = new StellarSdk.Horizon.Server(
 /**
  * Get Stellar Consensus Protocol Status
  * GET /api/stellar/consensus
- * 
+ *
  * Returns real-time SCP state with auto-synchronization
  */
 export async function GET(_request: NextRequest) {
@@ -35,24 +35,35 @@ export async function GET(_request: NextRequest) {
     // Build network status from SCP state or direct query
     const networkStatus = {
       ledger_sequence: scpState?.latestLedger || ledger?.sequence || 0,
-      closed_at: scpState?.ledgerCloseTime?.toISOString() || ledger?.closed_at || new Date().toISOString(),
+      closed_at:
+        scpState?.ledgerCloseTime?.toISOString() ||
+        ledger?.closed_at ||
+        new Date().toISOString(),
       transaction_count: (ledger as any)?.transaction_count || 0,
       operation_count: (ledger as any)?.operation_count || 0,
-      base_fee: scpState?.baseFee || (ledger as any)?.base_fee_in_stroops || 100,
-      protocol_version: scpState?.protocolVersion || (ledger as any)?.protocol_version || 0,
+      base_fee:
+        scpState?.baseFee || (ledger as any)?.base_fee_in_stroops || 100,
+      protocol_version:
+        scpState?.protocolVersion || (ledger as any)?.protocol_version || 0,
       core_version: scpState?.coreVersion || "unknown",
     };
 
     // Calculate consensus metrics
-    const ledgerCloseTime = scpState?.ledgerCloseTime || (ledger ? new Date(ledger.closed_at) : new Date());
+    const ledgerCloseTime =
+      scpState?.ledgerCloseTime ||
+      (ledger ? new Date(ledger.closed_at) : new Date());
     const consensusHealth = {
       network_active: true,
       consensus_protocol: "Stellar Consensus Protocol (SCP)",
       scp_phase: scpState?.currentPhase || "EXTERNALIZED",
-      last_ledger_age_seconds: Math.floor((Date.now() - ledgerCloseTime.getTime()) / 1000),
+      last_ledger_age_seconds: Math.floor(
+        (Date.now() - ledgerCloseTime.getTime()) / 1000
+      ),
       transactions_per_ledger: networkStatus.transaction_count,
       network_throughput: `${Math.floor(networkStatus.transaction_count / 5)} tx/sec average`,
-      scp_synchronized: scpState ? Date.now() - scpState.lastUpdated.getTime() < 30000 : false,
+      scp_synchronized: scpState
+        ? Date.now() - scpState.lastUpdated.getTime() < 30_000
+        : false,
       auto_update_active: !!scpState,
     };
 
@@ -77,7 +88,8 @@ export async function GET(_request: NextRequest) {
       integration: {
         status: "active",
         verified_by_scp: true,
-        message: "All transactions verified through Stellar Consensus Protocol with auto-synchronization",
+        message:
+          "All transactions verified through Stellar Consensus Protocol with auto-synchronization",
       },
     });
   } catch (error) {

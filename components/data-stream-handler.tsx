@@ -4,6 +4,7 @@ import type { DataUIPart } from "ai";
 import { useEffect } from "react";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
 import type { CustomUIDataTypes } from "@/lib/types";
+import type { UIArtifact } from "./artifact";
 import { artifactDefinitions } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 
@@ -44,21 +45,21 @@ export function DataStreamHandler() {
           case "data-id":
             return {
               ...draftArtifact,
-              documentId: part.data,
+              documentId: String(part.data),
               status: "streaming",
             };
 
           case "data-title":
             return {
               ...draftArtifact,
-              title: part.data,
+              title: String(part.data),
               status: "streaming",
             };
 
           case "data-kind":
             return {
               ...draftArtifact,
-              kind: part.data,
+              kind: part.data as UIArtifact["kind"],
               status: "streaming",
             };
 

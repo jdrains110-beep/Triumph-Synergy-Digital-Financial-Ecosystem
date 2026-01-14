@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
+import type React from "react";
+import { createContext, useContext, useMemo } from "react";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "@/lib/i18n/locale";
 
@@ -21,8 +22,13 @@ export const LocaleProvider = ({
   locale: string;
   children: React.ReactNode;
 }) => {
-  const safeLocale = SUPPORTED_LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
-  const dictionary = useMemo<Record<string, string>>(() => getDictionary(safeLocale), [safeLocale]);
+  const safeLocale = SUPPORTED_LOCALES.includes(locale)
+    ? locale
+    : DEFAULT_LOCALE;
+  const dictionary = useMemo<Record<string, string>>(
+    () => getDictionary(safeLocale),
+    [safeLocale]
+  );
   const value = useMemo(() => {
     return {
       locale: safeLocale,
@@ -30,7 +36,9 @@ export const LocaleProvider = ({
     } satisfies LocaleContextValue;
   }, [dictionary, safeLocale]);
 
-  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
+  return (
+    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
+  );
 };
 
 export const useLocale = () => useContext(LocaleContext);
