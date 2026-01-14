@@ -23,7 +23,10 @@ export default function RootPage() {
         <div className="space-y-2">
           <h1 className="font-bold text-3xl tracking-tight">Triumph Synergy</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Advanced Payment Routing & Compliance
+            The World's Most Advanced Payment Platform
+          </p>
+          <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">
+            Superior to all others on this planet 🌍
           </p>
         </div>
         <div className={isReady ? "opacity-50" : "animate-pulse"}>
