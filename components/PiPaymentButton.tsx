@@ -21,6 +21,7 @@ export default function PiPaymentButton({
   metadata = { custom: 'triumph-synergy' },
   isAdmin = false
 }: PiPaymentButtonProps) {
+  const appId = process.env.NEXT_PUBLIC_PI_APP_ID || process.env.PI_APP_ID || '';
   const [isPiReady, setIsPiReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -72,6 +73,7 @@ export default function PiPaymentButton({
         // Initialize Pi SDK
         await window.Pi.init({
           version: '2.0',
+          appId,
           sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === 'true'
         });
 
