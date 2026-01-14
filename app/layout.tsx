@@ -90,7 +90,7 @@ export default async function RootLayout({
           }}
         />
         {/* Pi Network SDK - Version 2.0 */}
-        <script async src="https://sdk.minepi.com/pi-sdk.js" />
+        {/* Pi SDK loaded dynamically in PiPaymentButton with fallbacks */}
       </head>
       <body className="antialiased">
         <ThemeProvider

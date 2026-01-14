@@ -86,6 +86,20 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Allow Pi Network to access domain verification file
+        source: "/.well-known/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+          {
+            key: "Content-Type",
+            value: "text/plain",
+          },
+        ],
+      },
     ];
   },
 };

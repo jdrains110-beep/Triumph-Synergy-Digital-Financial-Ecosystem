@@ -73,32 +73,103 @@ export function middleware(request: NextRequest) {
   // PRIORITY: Serve validation key BEFORE any redirects
   // This is required for Pi Network domain verification
   // ============================================================================
+  
+  // Dedicated testnet endpoint - ALWAYS returns testnet key
+  if (pathname === "/validation-key-testnet.txt") {
+    const testnetKey = "75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc883adeeeccdce9240b4cb8c10faaed93a3";
+    return new NextResponse(testnetKey, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": "public, max-age=3600",
+        "X-Pi-Verification": "testnet-dedicated",
+      },
+    });
+  }
+  
+  // Dedicated mainnet endpoint - ALWAYS returns mainnet key
+  if (pathname === "/validation-key-mainnet.txt") {
+    const mainnetKey = "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
+    return new NextResponse(mainnetKey, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": "public, max-age=3600",
+        "X-Pi-Verification": "mainnet-dedicated",
+      },
+    });
+  }
+  
+  // Legacy endpoint with smart detection (kept for backward compatibility)
   if (
     pathname === "/validation-key.txt" ||
     pathname === "/api/validation-key"
   ) {
-    const validationKey =
-      "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
+    // Support BOTH testnet and mainnet verification on same domain
+    // Detect which Pi Network portal is requesting
+    const referer = request.headers.get("referer") || "";
+    const origin = request.headers.get("origin") || "";
+    const searchParams = request.nextUrl.searchParams;
+    const mode = searchParams.get("mode"); // ?mode=testnet or ?mode=mainnet
+    
+    // Testnet key
+    const testnetKey = "75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc883adeeeccdce9240b4cb8c10faaed93a3";
+    // Mainnet key
+    const mainnetKey = "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
+    
+    // Determine which key to serve based on detection
+    // DEFAULT TO TESTNET - testnet portal checks this endpoint automatically
+    let validationKey = testnetKey; // Default to testnet for automatic checks
+    let detectedMode = "testnet";
+    
+    // Explicit mode parameter takes priority
+    if (mode === "testnet") {
+      validationKey = testnetKey;
+      detectedMode = "testnet";
+    } else if (mode === "mainnet") {
+      validationKey = mainnetKey;
+      detectedMode = "mainnet";
+    }
+    // Detect from referer (Pi Network portal URLs)
+    else if (referer.includes("develop.pi") || origin.includes("develop.pi")) {
+      validationKey = testnetKey;
+      detectedMode = "testnet";
+    } else if (referer.includes("developers.minepi.com") || origin.includes("developers.minepi.com")) {
+      validationKey = mainnetKey;
+      detectedMode = "mainnet";
+    }
+    // Check for testnet subdomain patterns
+    else if (referer.includes("testnet") || referer.includes(".sandbox.")) {
+      validationKey = testnetKey;
+      detectedMode = "testnet";
+    }
+    
     return new NextResponse(validationKey, {
       status: 200,
       headers: {
         "Content-Type": "text/plain",
         "Cache-Control": "public, max-age=3600",
+        "X-Pi-Verification": detectedMode,
+        "X-Pi-Referer": referer || "none",
       },
     });
   }
   // ============================================================================
 
   // ============================================================================
-  // LOCKED REDIRECT: All Vercel URLs → triumphsynergy0576.pinet.com
-  // This is required for Pi App Studio connectivity
+  // DOMAIN VERIFICATION MODE: Vercel redirect DISABLED during verification
+  // Both domains must be accessible independently for Pi Network verification
+  // After verification is complete, uncomment the redirect below
   // ============================================================================
+  /*
+  // LOCKED REDIRECT: All Vercel URLs → triumphsynergy0576.pinet.com
   if (host.includes("triumph-synergy") && host.includes("vercel.app")) {
     return NextResponse.redirect(
       `https://triumphsynergy0576.pinet.com${pathname}${search}`,
       { status: 307 }
     );
   }
+  */
   // ============================================================================
 
   const acceptLanguage = request.headers.get("accept-language");

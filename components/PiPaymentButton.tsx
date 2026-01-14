@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { loadPiSDKScript } from "@/lib/pi-sdk/pi-sdk-script-loader";
 
 // Pi SDK types are declared in sdk/pi-sdk-react/index.ts
 // We use the global Window interface from there
@@ -32,22 +33,26 @@ export default function PiPaymentButton({
   useEffect(() => {
     const initializePi = async () => {
       try {
-        // Load Pi SDK script if not already loaded
-        if (!document.querySelector('script[src*="sdk.minepi.com"]')) {
-          const script = document.createElement('script');
-          script.src = 'https://sdk.minepi.com/pi-sdk.js';
-          script.async = true;
-          script.onload = () => {
-            console.log('[Pi SDK] Script loaded successfully');
-            initializePiSDK();
-          };
-          script.onerror = () => {
-            setError('Failed to load Pi SDK');
-          };
-          document.head.appendChild(script);
-        } else {
-          initializePiSDK();
+        // Load SDK with shared multi-CDN fallback
+        const loaded = await loadPiSDKScript();
+
+        // Check if we're in Pi Browser
+        const userAgent = navigator.userAgent || '';
+        const isPiBrowser = userAgent.includes('PiBrowser') || 
+                           userAgent.includes('Pi Network') ||
+                           (window as any).PiNetwork !== undefined;
+        
+        console.log('[Pi SDK] User Agent:', userAgent);
+        console.log('[Pi SDK] Is Pi Browser:', isPiBrowser);
+        console.log('[Pi SDK] Window.Pi exists:', !!window.Pi);
+        console.log('[Pi SDK] Window.PiNetwork exists:', !!(window as any).PiNetwork);
+
+        if (!loaded) {
+          setError('Pi SDK CDN unavailable. Please ensure you are using Pi Browser.');
+          return;
         }
+
+        initializePiSDK();
       } catch (err) {
         console.error('[Pi SDK] Initialization error:', err);
         setError('Pi SDK initialization failed');
@@ -70,12 +75,14 @@ export default function PiPaymentButton({
 
         console.log('[Pi SDK] Initializing Pi Network v2.0...');
 
-        // Initialize Pi SDK
-        await window.Pi.init({
+        // Initialize Pi SDK (cast to allow appId for Pi Browser recognition)
+        const piInitConfig: any = {
           version: '2.0',
           appId,
           sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === 'true'
-        });
+        };
+
+        await window.Pi.init(piInitConfig);
 
         console.log('[Pi SDK] Initialized successfully');
         setIsPiReady(true);

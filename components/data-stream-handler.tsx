@@ -44,21 +44,21 @@ export function DataStreamHandler() {
           case "data-id":
             return {
               ...draftArtifact,
-              documentId: part.data,
+              documentId: typeof part.data === "string" ? part.data : String(part.data ?? ""),
               status: "streaming",
             };
 
           case "data-title":
             return {
               ...draftArtifact,
-              title: part.data,
+              title: typeof part.data === "string" ? part.data : String(part.data ?? ""),
               status: "streaming",
             };
 
           case "data-kind":
             return {
               ...draftArtifact,
-              kind: part.data,
+              kind: (part.data as any) ?? draftArtifact.kind,
               status: "streaming",
             };
 
