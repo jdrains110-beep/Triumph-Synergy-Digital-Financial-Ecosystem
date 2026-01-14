@@ -282,7 +282,8 @@ export class SCPAutoUpdate {
           typeof streamResult === "function"
             ? streamResult
             : () => {
-                // No-op function if streamResult is not a function
+                // No-op function for cases where streamResult is not a function.
+                // The Stellar SDK may return different types depending on the connection state.
               },
       };
 
