@@ -34,10 +34,13 @@ const COUNTRY_LOCALE_MAP: Record<string, string> = {
   SG: "zh",
 };
 
-const normalizeLocale = (value?: string | null) => value?.toLowerCase().split(/[._-]/)[0];
+const normalizeLocale = (value?: string | null) =>
+  value?.toLowerCase().split(/[._-]/)[0];
 
 const fromAcceptLanguage = (acceptLanguage?: string | null) => {
-  if (!acceptLanguage) return null;
+  if (!acceptLanguage) {
+    return null;
+  }
   return (
     acceptLanguage
       .split(",")
@@ -47,7 +50,11 @@ const fromAcceptLanguage = (acceptLanguage?: string | null) => {
   );
 };
 
-export const resolveLocale = ({ cookieLocale, acceptLanguage, country }: ResolveParams) => {
+export const resolveLocale = ({
+  cookieLocale,
+  acceptLanguage,
+  country,
+}: ResolveParams) => {
   const cookieCandidate = normalizeLocale(cookieLocale);
   if (cookieCandidate && SUPPORTED_LOCALES.includes(cookieCandidate)) {
     return cookieCandidate;

@@ -2,8 +2,8 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/components/locale-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 

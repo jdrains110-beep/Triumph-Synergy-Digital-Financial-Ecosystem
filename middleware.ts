@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 const SUPPORTED_LOCALES = ["en", "es", "fr", "pt", "hi", "zh"];
 const DEFAULT_LOCALE = "en";
 
-const normalizeLocale = (value?: string | null) => value?.toLowerCase().split(/[._-]/)[0];
+const normalizeLocale = (value?: string | null) =>
+  value?.toLowerCase().split(/[._-]/)[0];
 
 const pickLocale = (
   acceptLanguage: string | null,
@@ -22,7 +23,9 @@ const pickLocale = (
       .map((part) => part.trim().split(";")[0])
       .map(normalizeLocale)
       .find((loc) => loc && SUPPORTED_LOCALES.includes(loc));
-    if (headerLocale) return headerLocale;
+    if (headerLocale) {
+      return headerLocale;
+    }
   }
 
   const countryLocaleMap: Record<string, string> = {
@@ -51,7 +54,9 @@ const pickLocale = (
     CN: "zh",
     SG: "zh",
   };
-  const countryCandidate = country ? countryLocaleMap[country.toUpperCase()] : null;
+  const countryCandidate = country
+    ? countryLocaleMap[country.toUpperCase()]
+    : null;
   if (countryCandidate && SUPPORTED_LOCALES.includes(countryCandidate)) {
     return countryCandidate;
   }

@@ -1,7 +1,7 @@
 /**
  * Stellar Pi Coin SDK Integration
  * Bridges Pi Network payments with Stellar blockchain smart contracts
- * 
+ *
  * This SDK provides:
  * - Pi Coin ↔ Stellar asset bridging
  * - Smart contract payment validation
@@ -10,22 +10,26 @@
  */
 
 import * as StellarSdk from "@stellar/stellar-sdk";
-import { getSCPAutoUpdate, createSCPSmartContractBinding } from "./scp-auto-update";
+import {
+  createSCPSmartContractBinding,
+  getSCPAutoUpdate,
+} from "./scp-auto-update";
 
 // Pi Coin asset configuration on Stellar
 const PI_COIN_ASSET_CODE = "PI";
 const PI_COIN_ISSUER = process.env.PI_COIN_STELLAR_ISSUER || "";
-const STELLAR_HORIZON_URL = process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org";
+const STELLAR_HORIZON_URL =
+  process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org";
 
-export interface PiCoinConfig {
+export type PiCoinConfig = {
   assetCode: string;
   issuer: string;
   decimals: number;
   minTransfer: string;
   maxTransfer: string;
-}
+};
 
-export interface PiPaymentProof {
+export type PiPaymentProof = {
   piPaymentId: string;
   piTxHash?: string;
   amount: number;
@@ -33,16 +37,16 @@ export interface PiPaymentProof {
   userId: string;
   timestamp: Date;
   verified: boolean;
-}
+};
 
-export interface StellarPaymentResult {
+export type StellarPaymentResult = {
   success: boolean;
   stellarTxHash?: string;
   ledger?: number;
   error?: string;
-}
+};
 
-export interface SmartContractPayment {
+export type SmartContractPayment = {
   contractId: string;
   paymentType: "escrow" | "direct" | "milestone" | "subscription";
   amount: number;
@@ -51,15 +55,15 @@ export interface SmartContractPayment {
   recipient: string;
   conditions?: PaymentCondition[];
   metadata?: Record<string, unknown>;
-}
+};
 
-export interface PaymentCondition {
+export type PaymentCondition = {
   type: "time" | "approval" | "milestone" | "signature";
   value: string | number;
   met: boolean;
-}
+};
 
-export interface EscrowState {
+export type EscrowState = {
   id: string;
   stellarEscrowAccount: string;
   piPaymentId?: string;
@@ -72,7 +76,7 @@ export interface EscrowState {
     beneficiary: string;
     arbiter?: string;
   };
-}
+};
 
 /**
  * Stellar Pi Coin SDK
@@ -84,12 +88,18 @@ export class StellarPiCoinSDK {
   private piAsset: StellarSdk.Asset | null = null;
   private scpBinding: ReturnType<typeof createSCPSmartContractBinding>;
 
-  constructor(config?: { horizonUrl?: string; network?: "PUBLIC" | "TESTNET" }) {
-    this.server = new StellarSdk.Horizon.Server(config?.horizonUrl || STELLAR_HORIZON_URL);
-    this.networkPassphrase = config?.network === "TESTNET" 
-      ? StellarSdk.Networks.TESTNET 
-      : StellarSdk.Networks.PUBLIC;
-    
+  constructor(config?: {
+    horizonUrl?: string;
+    network?: "PUBLIC" | "TESTNET";
+  }) {
+    this.server = new StellarSdk.Horizon.Server(
+      config?.horizonUrl || STELLAR_HORIZON_URL
+    );
+    this.networkPassphrase =
+      config?.network === "TESTNET"
+        ? StellarSdk.Networks.TESTNET
+        : StellarSdk.Networks.PUBLIC;
+
     // Initialize SCP binding for smart contract integration
     this.scpBinding = createSCPSmartContractBinding(getSCPAutoUpdate());
 
@@ -137,7 +147,9 @@ export class StellarPiCoinSDK {
       }
 
       // Load source account
-      const sourceAccount = await this.server.loadAccount(signerKeypair.publicKey());
+      const sourceAccount = await this.server.loadAccount(
+        signerKeypair.publicKey()
+      );
 
       // Build transaction with Pi payment memo
       const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
@@ -151,7 +163,9 @@ export class StellarPiCoinSDK {
             amount: piPaymentProof.amount.toFixed(7),
           })
         )
-        .addMemo(StellarSdk.Memo.text(`PI:${piPaymentProof.piPaymentId.slice(0, 20)}`))
+        .addMemo(
+          StellarSdk.Memo.text(`PI:${piPaymentProof.piPaymentId.slice(0, 20)}`)
+        )
         .setTimeout(180)
         .build();
 
@@ -185,7 +199,9 @@ export class StellarPiCoinSDK {
 
     try {
       // Load funder account
-      const funderAccount = await this.server.loadAccount(funderKeypair.publicKey());
+      const funderAccount = await this.server.loadAccount(
+        funderKeypair.publicKey()
+      );
 
       // Create escrow account with initial funding
       const createAccountTx = new StellarSdk.TransactionBuilder(funderAccount, {
@@ -198,7 +214,9 @@ export class StellarPiCoinSDK {
             startingBalance: "2", // Minimum for account + trustline
           })
         )
-        .addMemo(StellarSdk.Memo.text(`ESC:${contractPayment.contractId.slice(0, 18)}`))
+        .addMemo(
+          StellarSdk.Memo.text(`ESC:${contractPayment.contractId.slice(0, 18)}`)
+        )
         .setTimeout(180)
         .build();
 
@@ -207,8 +225,10 @@ export class StellarPiCoinSDK {
 
       // If using Pi asset, add trustline
       if (this.piAsset && contractPayment.currency === "PI") {
-        const escrowAccount = await this.server.loadAccount(escrowKeypair.publicKey());
-        
+        const escrowAccount = await this.server.loadAccount(
+          escrowKeypair.publicKey()
+        );
+
         const trustlineTx = new StellarSdk.TransactionBuilder(escrowAccount, {
           fee: StellarSdk.BASE_FEE,
           networkPassphrase: this.networkPassphrase,
@@ -226,8 +246,10 @@ export class StellarPiCoinSDK {
       }
 
       // Set up multi-sig for escrow release
-      const escrowAccount = await this.server.loadAccount(escrowKeypair.publicKey());
-      
+      const escrowAccount = await this.server.loadAccount(
+        escrowKeypair.publicKey()
+      );
+
       const multiSigTx = new StellarSdk.TransactionBuilder(escrowAccount, {
         fee: StellarSdk.BASE_FEE,
         networkPassphrase: this.networkPassphrase,
@@ -288,11 +310,15 @@ export class StellarPiCoinSDK {
     }
 
     if (piPaymentProof.amount !== escrowState.amount) {
-      throw new Error(`Amount mismatch: expected ${escrowState.amount}, got ${piPaymentProof.amount}`);
+      throw new Error(
+        `Amount mismatch: expected ${escrowState.amount}, got ${piPaymentProof.amount}`
+      );
     }
 
     try {
-      const depositorAccount = await this.server.loadAccount(depositorKeypair.publicKey());
+      const depositorAccount = await this.server.loadAccount(
+        depositorKeypair.publicKey()
+      );
       const asset = this.piAsset || StellarSdk.Asset.native();
 
       const fundTx = new StellarSdk.TransactionBuilder(depositorAccount, {
@@ -306,7 +332,11 @@ export class StellarPiCoinSDK {
             amount: escrowState.amount.toFixed(7),
           })
         )
-        .addMemo(StellarSdk.Memo.text(`FUND:${piPaymentProof.piPaymentId.slice(0, 17)}`))
+        .addMemo(
+          StellarSdk.Memo.text(
+            `FUND:${piPaymentProof.piPaymentId.slice(0, 17)}`
+          )
+        )
         .setTimeout(180)
         .build();
 
@@ -340,20 +370,24 @@ export class StellarPiCoinSDK {
     }
 
     try {
-      const escrowAccount = await this.server.loadAccount(escrowState.stellarEscrowAccount);
+      const escrowAccount = await this.server.loadAccount(
+        escrowState.stellarEscrowAccount
+      );
       const asset = this.piAsset || StellarSdk.Asset.native();
 
       // Get escrow balance
       const balance = escrowAccount.balances.find(
-        (b) => b.asset_type === "native" || 
-              (b.asset_type === "credit_alphanum4" && b.asset_code === PI_COIN_ASSET_CODE)
+        (b) =>
+          b.asset_type === "native" ||
+          (b.asset_type === "credit_alphanum4" &&
+            b.asset_code === PI_COIN_ASSET_CODE)
       );
 
       if (!balance) {
         return { success: false, error: "No balance found in escrow" };
       }
 
-      const releaseAmount = this.piAsset 
+      const releaseAmount = this.piAsset
         ? (balance as StellarSdk.Horizon.HorizonApi.BalanceLineAsset).balance
         : (balance as StellarSdk.Horizon.HorizonApi.BalanceLineNative).balance;
 
@@ -399,14 +433,16 @@ export class StellarPiCoinSDK {
   async getPiCoinBalance(accountId: string): Promise<string> {
     try {
       const account = await this.server.loadAccount(accountId);
-      
+
       if (this.piAsset) {
         const piBalance = account.balances.find(
-          (b) => b.asset_type === "credit_alphanum4" && 
-                 b.asset_code === PI_COIN_ASSET_CODE &&
-                 (b as StellarSdk.Horizon.HorizonApi.BalanceLineAsset).asset_issuer === PI_COIN_ISSUER
+          (b) =>
+            b.asset_type === "credit_alphanum4" &&
+            b.asset_code === PI_COIN_ASSET_CODE &&
+            (b as StellarSdk.Horizon.HorizonApi.BalanceLineAsset)
+              .asset_issuer === PI_COIN_ISSUER
         ) as StellarSdk.Horizon.HorizonApi.BalanceLineAsset | undefined;
-        
+
         return piBalance?.balance || "0";
       }
 
@@ -414,7 +450,7 @@ export class StellarPiCoinSDK {
       const nativeBalance = account.balances.find(
         (b) => b.asset_type === "native"
       ) as StellarSdk.Horizon.HorizonApi.BalanceLineNative;
-      
+
       return nativeBalance?.balance || "0";
     } catch (error) {
       console.error("[StellarPiCoinSDK] Balance query failed:", error);

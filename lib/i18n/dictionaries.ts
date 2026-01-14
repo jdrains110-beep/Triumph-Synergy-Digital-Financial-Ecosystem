@@ -1,8 +1,8 @@
 import en from "./locales/en";
 import es from "./locales/es";
 import fr from "./locales/fr";
-import pt from "./locales/pt";
 import hi from "./locales/hi";
+import pt from "./locales/pt";
 import zh from "./locales/zh";
 
 type Dictionary = Record<string, string>;
