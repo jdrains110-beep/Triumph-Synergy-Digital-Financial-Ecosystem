@@ -157,15 +157,10 @@ export function middleware(request: NextRequest) {
   // ============================================================================
 
   // ============================================================================
-  // REDIRECT: All Vercel URLs → triumphsynergy0576.pinet.com
-  // Validation key endpoints are handled above and will still work for verification
-  // ============================================================================
-  if (host.includes("triumph-synergy") && host.includes("vercel.app")) {
-    return NextResponse.redirect(
-      `https://triumphsynergy0576.pinet.com${pathname}${search}`,
-      { status: 307 }
-    );
-  }
+  // NOTE: triumphsynergy0576.pinet.com is Pi Network's PROXY to our app
+  // Pi Browser accesses our app THROUGH the pinet.com domain
+  // Our Vercel URLs serve the actual app - DO NOT redirect
+  // Pi SDK will work because Pi Browser routes through their proxy
   // ============================================================================
 
   const acceptLanguage = request.headers.get("accept-language");
