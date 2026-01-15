@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -6,7 +5,6 @@ import { Toaster } from "sonner";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/components/locale-provider";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 
@@ -73,11 +71,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [locale, cookieStore] = await Promise.all([
-    getRequestLocale(),
-    cookies(),
-  ]);
-  const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
+  const locale = await getRequestLocale();
 
   return (
     <html
@@ -110,9 +104,7 @@ export default async function RootLayout({
           <SessionProvider>
             <LocaleProvider locale={locale}>
               <DataStreamProvider>
-                <SidebarProvider defaultOpen={!isCollapsed}>
-                  <PiProvider>{children}</PiProvider>
-                </SidebarProvider>
+                <PiProvider>{children}</PiProvider>
               </DataStreamProvider>
             </LocaleProvider>
           </SessionProvider>

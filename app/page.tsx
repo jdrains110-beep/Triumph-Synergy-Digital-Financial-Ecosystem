@@ -1,6 +1,6 @@
 ﻿import { cookies } from "next/headers";
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarInset } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
@@ -11,9 +11,10 @@ export default async function Page() {
   const id = generateUUID();
   const [session, cookieStore] = await Promise.all([auth(), cookies()]);
   const modelIdFromCookie = cookieStore.get("chat-model");
+  const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
 
   return (
-    <>
+    <SidebarProvider defaultOpen={!isCollapsed}>
       <AppSidebar user={session?.user} />
       <SidebarInset>
         <Chat
@@ -27,6 +28,6 @@ export default async function Page() {
         />
         <DataStreamHandler />
       </SidebarInset>
-    </>
+    </SidebarProvider>
   );
 }
