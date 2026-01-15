@@ -63,9 +63,16 @@ export function PiProvider({ children }: { children: ReactNode }) {
       try {
         console.log("[Pi SDK] Starting initialization...");
 
-        // Check if we're in Pi Browser by looking for Pi object
-        // Give it a short time to appear
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Wait for Pi SDK script to load (it's loaded via script tag in HTML)
+        // Pi Browser injects window.Pi when it loads the app
+        let attempts = 0;
+        const maxAttempts = 20; // Wait up to 10 seconds (20 * 500ms)
+        
+        while (!(window as any).Pi && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          attempts++;
+          console.log(`[Pi SDK] Waiting for Pi object... (${attempts}/${maxAttempts})`);
+        }
 
         if (!(window as any).Pi) {
           console.log("[Pi SDK] Not in Pi Browser - using fallback mode");
@@ -79,6 +86,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         }
 
         const Pi = (window as any).Pi;
+        console.log("[Pi SDK] Pi object detected!");
 
         // Initialize Pi SDK with version 2.0
         // Wrap in try-catch to handle any SDK errors gracefully
