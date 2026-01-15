@@ -157,10 +157,23 @@ export function middleware(request: NextRequest) {
   // ============================================================================
 
   // ============================================================================
-  // NOTE: triumphsynergy0576.pinet.com is Pi Network's PROXY to our app
-  // Pi Browser accesses our app THROUGH the pinet.com domain
-  // Our Vercel URLs serve the actual app - DO NOT redirect
-  // Pi SDK will work because Pi Browser routes through their proxy
+  // REDIRECT: Route all traffic to triumphsynergy0576.pinet.com
+  // This ensures the Pi Network proxy handles all requests properly
+  // ============================================================================
+  
+  // Don't redirect API routes, static files, or validation endpoints
+  if (
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/validation-key") ||
+    pathname === "/favicon.ico"
+  ) {
+    // Let these through without redirect
+  } else {
+    // Redirect everything else to the pinet.com URL
+    const pinetUrl = new URL(`https://triumphsynergy0576.pinet.com${pathname}${search}`);
+    return NextResponse.redirect(pinetUrl);
+  }
   // ============================================================================
 
   const acceptLanguage = request.headers.get("accept-language");
