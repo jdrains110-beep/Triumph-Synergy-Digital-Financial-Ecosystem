@@ -182,7 +182,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         onReadyForServerApproval: async (paymentId: string) => {
           console.log("[Pi SDK] Payment ready for server approval:", paymentId);
           try {
-            const response = await fetch("/api/pi_payment/approve", {
+            const response = await fetch("/api/pi/approve", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -210,7 +210,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         onReadyForServerCompletion: async (paymentId: string, txid: string) => {
           console.log("[Pi SDK] Payment ready for server completion:", { paymentId, txid });
           try {
-            const response = await fetch("/api/pi_payment/complete", {
+            const response = await fetch("/api/pi/complete", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
