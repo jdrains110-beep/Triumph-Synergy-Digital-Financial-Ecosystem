@@ -34,6 +34,7 @@ type PiContextType = {
   requestApproval: (memo?: string) => Promise<string>;
   isLoading: boolean;
   error: string | null;
+  authenticate: () => Promise<void>;
 };
 
 const PiContext = createContext<PiContextType | undefined>(undefined);
@@ -42,95 +43,106 @@ export function PiProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<PiUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sdkInitialized, setSdkInitialized] = useState(false);
 
-  // Initialize Pi SDK
+  // Initialize Pi SDK (without auto-authentication to prevent crashes)
   useEffect(() => {
+    // Skip on server
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    // Prevent re-initialization
+    if (sdkInitialized) {
+      return;
+    }
+
     const initializePi = async () => {
       try {
-        // Check if Pi SDK is loaded
-        if (typeof window === "undefined") {
-          console.log(
-            "[Pi SDK] Server-side rendering - skipping initialization"
-          );
-          return;
-        }
+        console.log("[Pi SDK] Starting initialization...");
 
-        // Wait for Pi SDK script to load
-        let attempts = 0;
-        const maxAttempts = 50; // 5 seconds max wait (50 * 100ms)
-
-        while (!(window as any).Pi && attempts < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          attempts++;
-        }
+        // Check if we're in Pi Browser by looking for Pi object
+        // Give it a short time to appear
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         if (!(window as any).Pi) {
-          console.log(
-            "[Pi SDK] Pi SDK not available - continuing in fallback mode"
-          );
-          setTimeout(() => {
-            if (!isReady) {
-              setIsReady(true);
-              setIsLoading(false);
-              console.log("[Pi SDK] ✓ Fallback mode enabled - app continues");
-            }
-          }, 500);
+          console.log("[Pi SDK] Not in Pi Browser - using fallback mode");
+          setIsReady(true);
+          setSdkInitialized(true);
+          setUser({
+            uid: `web-${Date.now()}`,
+            username: "Web User",
+          });
           return;
         }
 
         const Pi = (window as any).Pi;
 
         // Initialize Pi SDK with version 2.0
-        await Pi.init({
-          version: "2.0",
-          sandbox:
-            process.env.NEXT_PUBLIC_PI_SANDBOX === "true" ||
-            process.env.NODE_ENV === "development",
-        });
-
-        console.log("[Pi SDK] Pi SDK initialized successfully");
-
-        // Authenticate user
+        // Wrap in try-catch to handle any SDK errors gracefully
         try {
-          const authResult = await Pi.authenticate();
-          console.log("[Pi SDK] User authenticated:", authResult);
-
-          setIsAuthenticated(true);
-          setUser({
-            uid: authResult.user.uid,
-            username: authResult.user.username,
-            email: authResult.user.email,
+          await Pi.init({
+            version: "2.0",
+            sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === "true",
           });
-        } catch (authError) {
-          console.log(
-            "[Pi SDK] User not authenticated (not required for some operations):",
-            authError
-          );
-          setIsAuthenticated(false);
-          // Still allow guest payments
-          setUser({
-            uid: `guest-${Date.now()}`,
-            username: "Guest User",
-          });
+          console.log("[Pi SDK] SDK initialized successfully");
+        } catch (initError) {
+          console.warn("[Pi SDK] Init warning:", initError);
+          // Continue anyway - some init errors are non-fatal
         }
 
+        // Mark as ready WITHOUT auto-authenticating
+        // Authentication should be triggered by user action
         setIsReady(true);
-        setIsLoading(false);
+        setSdkInitialized(true);
+        console.log("[Pi SDK] Ready (authentication available on demand)");
+
       } catch (err) {
         console.error("[Pi SDK] Initialization error:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to initialize Pi SDK"
-        );
-        // Still allow app to continue
+        setError(err instanceof Error ? err.message : "SDK init failed");
+        // Still mark as ready so app doesn't hang
         setIsReady(true);
-        setIsLoading(false);
+        setSdkInitialized(true);
       }
     };
 
     initializePi();
-  }, [isReady]);
+  }, [sdkInitialized]);
+
+  // Manual authentication function (call when user initiates action)
+  const authenticate = async (): Promise<void> => {
+    if (!(window as any).Pi) {
+      console.log("[Pi SDK] Not in Pi Browser - skipping authentication");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const Pi = (window as any).Pi;
+      const authResult = await Pi.authenticate(
+        ["username"],
+        (payment: any) => {
+          // Incomplete payment callback
+          console.log("[Pi SDK] Incomplete payment found:", payment);
+        }
+      );
+
+      console.log("[Pi SDK] User authenticated:", authResult);
+      setIsAuthenticated(true);
+      setUser({
+        uid: authResult.user.uid,
+        username: authResult.user.username,
+        email: authResult.user.email,
+      });
+    } catch (authError) {
+      console.log("[Pi SDK] Authentication declined or failed:", authError);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Request payment through Pi SDK
   const requestPayment = async (
@@ -221,6 +233,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
     requestApproval,
     isLoading,
     error,
+    authenticate,
   };
 
   return <PiContext.Provider value={value}>{children}</PiContext.Provider>;
