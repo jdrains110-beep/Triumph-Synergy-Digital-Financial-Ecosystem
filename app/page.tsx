@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import { PiPaymentButton } from "@/components/PiPaymentButton";
+import PiPaymentButton from "@/components/PiPaymentButton";
 import { auth } from "./(auth)/auth";
 
 export default async function Page() {
