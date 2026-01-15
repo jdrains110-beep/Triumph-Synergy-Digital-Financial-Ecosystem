@@ -13,20 +13,34 @@ import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://triumphsynergy0576.pinet.com"),
-  title: "Triumph Synergy - Pi App Studio",
+  title: "Triumph Synergy - Pi Network Payment Platform",
   description:
-    "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
+    "Advanced payment routing platform powered by Pi Network with Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance. Accept Pi payments globally.",
   icons: {
     icon: "/favicon.ico",
   },
-  keywords: ["Pi Network", "Payment Processing", "Compliance", "Fintech", "AI"],
-  authors: [{ name: "Triumph Synergy Team" }],
+  keywords: ["Pi Network", "Pi Payments", "Payment Processing", "Cryptocurrency", "Compliance", "Fintech", "Blockchain", "Stellar"],
+  authors: [{ name: "Triumph Synergy LLC" }],
   openGraph: {
-    title: "Triumph Synergy - Pi App Studio",
-    description: "Advanced payment routing with compliance automation",
+    title: "Triumph Synergy - Pi Network Payment Platform",
+    description: "Advanced payment routing powered by Pi Network - Accept Pi payments globally",
     url: "https://triumphsynergy0576.pinet.com",
     siteName: "Triumph Synergy",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Triumph Synergy - Pi Network Payment Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Triumph Synergy - Pi Network Payment Platform",
+    description: "Advanced payment routing powered by Pi Network",
+    images: ["/og-image.png"],
   },
 };
 
