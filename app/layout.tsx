@@ -104,8 +104,8 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        {/* Pi Network SDK - Version 2.0 */}
-        {/* Pi SDK loaded dynamically in PiPaymentButton with fallbacks */}
+        {/* Pi Network SDK - Official Integration */}
+        <script src="https://sdk.minepi.com/pi-sdk.js" async />
       </head>
       <body className="antialiased">
         <ThemeProvider
