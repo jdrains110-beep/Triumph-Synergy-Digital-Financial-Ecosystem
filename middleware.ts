@@ -157,23 +157,15 @@ export function middleware(request: NextRequest) {
   // ============================================================================
 
   // ============================================================================
-  // REDIRECT: Route all traffic to triumphsynergy0576.pinet.com
-  // This ensures the Pi Network proxy handles all requests properly
-  // ============================================================================
-  
-  // Don't redirect API routes, static files, or validation endpoints
-  if (
-    pathname.startsWith("/api/") ||
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/validation-key") ||
-    pathname === "/favicon.ico"
-  ) {
-    // Let these through without redirect
-  } else {
-    // Redirect everything else to the pinet.com URL
-    const pinetUrl = new URL(`https://triumphsynergy0576.pinet.com${pathname}${search}`);
-    return NextResponse.redirect(pinetUrl);
-  }
+  // Pi Browser SDK Injection
+  // Pi Browser must load Vercel URLs directly (as configured in Developer Portal)
+  // to properly inject the Pi SDK. DO NOT redirect - it breaks SDK recognition.
+  // 
+  // How it works:
+  // 1. Pi Developer Portal configured with: triumph-synergy.vercel.app
+  // 2. Pi Browser loads that URL and injects window.Pi SDK
+  // 3. Users can also access via triumphsynergy0576.pinet.com (Pi's proxy)
+  // 4. Both routes serve the same app from Vercel
   // ============================================================================
 
   const acceptLanguage = request.headers.get("accept-language");
