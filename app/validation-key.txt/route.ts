@@ -17,9 +17,9 @@ export async function GET(request: Request) {
   const mainnetKey = "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
   
   // Smart detection: which Pi portal is requesting?
-  // DEFAULT TO MAINNET - main branch serves mainnet
-  let validationKey = mainnetKey; // Default to mainnet
-  let detectedMode = "mainnet";
+  // DEFAULT TO TESTNET - testnet branch serves testnet
+  let validationKey = testnetKey; // Default to testnet
+  let detectedMode = "testnet";
   
   if (mode === "testnet") {
     validationKey = testnetKey;
