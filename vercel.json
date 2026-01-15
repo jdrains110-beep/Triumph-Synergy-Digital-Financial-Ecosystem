@@ -7,12 +7,6 @@
   "env": {
     "NEXT_PRIVATE_SKIP_TURBOPACK": "true"
   },
-  "rewrites": [
-    {
-      "source": "/validation-key.txt",
-      "destination": "/api/validation-key"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
