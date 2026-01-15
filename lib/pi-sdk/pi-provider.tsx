@@ -144,7 +144,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Request payment through Pi SDK
+  // Request payment through Pi SDK with proper server callbacks
   const requestPayment = async (
     payments: Array<{
       amount: number;
@@ -153,45 +153,99 @@ export function PiProvider({ children }: { children: ReactNode }) {
     }>,
     memo?: string
   ): Promise<string> => {
-    if (!isReady || !(window as any).Pi) {
-      throw new Error("Pi SDK not ready");
+    if (!(window as any).Pi) {
+      throw new Error("Pi SDK not available - must be accessed from Pi Browser");
     }
 
     try {
       setIsLoading(true);
+      setError(null);
       const Pi = (window as any).Pi;
 
-      // Add timeout protection
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-          () =>
-            reject(
-              new Error(
-                "Payment request timeout - Pi SDK did not respond within 30 seconds"
-              )
-            ),
-          30_000
-        )
-      );
-
-      const paymentPromise = Pi.payments.request({
+      const paymentData = {
         amount: payments[0]?.amount || 0,
         memo: memo || payments[0]?.memo || "Triumph Synergy Payment",
         metadata: payments[0]?.metadata || {},
+      };
+
+      // Pi SDK createPayment with required server-side callbacks
+      const payment = await Pi.createPayment(paymentData, {
+        // Called when payment is ready for server approval
+        onReadyForServerApproval: async (paymentId: string) => {
+          console.log("[Pi SDK] Payment ready for server approval:", paymentId);
+          try {
+            const response = await fetch("/api/pi_payment/approve", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                paymentId,
+                amount: paymentData.amount,
+                memo: paymentData.memo,
+                metadata: paymentData.metadata,
+              }),
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || "Server approval failed");
+            }
+            
+            const result = await response.json();
+            console.log("[Pi SDK] Server approval successful:", result);
+          } catch (err) {
+            console.error("[Pi SDK] Server approval error:", err);
+            throw err;
+          }
+        },
+        
+        // Called when payment is ready for server completion
+        onReadyForServerCompletion: async (paymentId: string, txid: string) => {
+          console.log("[Pi SDK] Payment ready for server completion:", { paymentId, txid });
+          try {
+            const response = await fetch("/api/pi_payment/complete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                paymentId,
+                txid,
+                amount: paymentData.amount,
+                memo: paymentData.memo,
+                metadata: paymentData.metadata,
+              }),
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || "Server completion failed");
+            }
+            
+            const result = await response.json();
+            console.log("[Pi SDK] Server completion successful:", result);
+          } catch (err) {
+            console.error("[Pi SDK] Server completion error:", err);
+            throw err;
+          }
+        },
+        
+        // Called when payment is cancelled
+        onCancel: (paymentId: string) => {
+          console.log("[Pi SDK] Payment cancelled:", paymentId);
+          setError("Payment was cancelled");
+        },
+        
+        // Called on error
+        onError: (error: Error, payment?: any) => {
+          console.error("[Pi SDK] Payment error:", error, payment);
+          setError(error.message || "Payment failed");
+        },
       });
 
-      const paymentResult = await Promise.race([
-        paymentPromise,
-        timeoutPromise,
-      ]);
-
-      console.log("[Pi SDK] Payment requested:", paymentResult);
+      console.log("[Pi SDK] Payment completed:", payment);
       setIsLoading(false);
 
-      return paymentResult.transaction.txid || paymentResult.transaction;
+      return payment?.transaction?.txid || payment?.identifier || "success";
     } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Payment request failed";
+      const errorMsg = err instanceof Error ? err.message : "Payment request failed";
       console.error("[Pi SDK] Payment error:", err);
       setError(errorMsg);
       setIsLoading(false);
