@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { DataStreamProvider } from "@/components/data-stream-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/components/locale-provider";
 import { getRequestLocale } from "@/lib/i18n/server";
@@ -102,7 +103,9 @@ export default async function RootLayout({
           <Toaster position="top-center" />
           <SessionProvider>
             <LocaleProvider locale={locale}>
-              <PiProvider>{children}</PiProvider>
+              <DataStreamProvider>
+                <PiProvider>{children}</PiProvider>
+              </DataStreamProvider>
             </LocaleProvider>
           </SessionProvider>
         </ThemeProvider>
