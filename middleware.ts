@@ -157,19 +157,15 @@ export function middleware(request: NextRequest) {
   // ============================================================================
 
   // ============================================================================
-  // DOMAIN VERIFICATION MODE: Vercel redirect DISABLED during verification
-  // Both domains must be accessible independently for Pi Network verification
-  // After verification is complete, uncomment the redirect below
+  // REDIRECT: All Vercel URLs → triumphsynergy0576.pinet.com
+  // Validation key endpoints are handled above and will still work for verification
   // ============================================================================
-  /*
-  // LOCKED REDIRECT: All Vercel URLs → triumphsynergy0576.pinet.com
   if (host.includes("triumph-synergy") && host.includes("vercel.app")) {
     return NextResponse.redirect(
       `https://triumphsynergy0576.pinet.com${pathname}${search}`,
       { status: 307 }
     );
   }
-  */
   // ============================================================================
 
   const acceptLanguage = request.headers.get("accept-language");
