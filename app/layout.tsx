@@ -12,40 +12,12 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://triumphsynergy0576.pinet.com"),
-  title: "Triumph Synergy - Pi Network Payment Platform",
-  description:
-    "Advanced payment routing platform powered by Pi Network with Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance. Accept Pi payments globally.",
-  icons: {
-    icon: "/favicon.ico",
-  },
-  keywords: ["Pi Network", "Pi Payments", "Payment Processing", "Cryptocurrency", "Compliance", "Fintech", "Blockchain", "Stellar"],
-  authors: [{ name: "Triumph Synergy LLC" }],
-  openGraph: {
-    title: "Triumph Synergy - Pi Network Payment Platform",
-    description: "Advanced payment routing powered by Pi Network - Accept Pi payments globally",
-    url: "https://triumphsynergy0576.pinet.com",
-    siteName: "Triumph Synergy",
-    type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Triumph Synergy - Pi Network Payment Platform",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Triumph Synergy - Pi Network Payment Platform",
-    description: "Advanced payment routing powered by Pi Network",
-    images: ["/og-image.png"],
-  },
+  title: "Triumph Synergy",
+  description: "Pi Network Payment Platform",
 };
 
 export const viewport = {
-  maximumScale: 1, // Disable auto-zoom on mobile Safari
+  maximumScale: 1,
 };
 
 const geist = Geist({
@@ -90,21 +62,15 @@ export default async function RootLayout({
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
-      // `next-themes` injects an extra classname to the body element to avoid
-      // visual flicker before hydration. Hence the `suppressHydrationWarning`
-      // prop is necessary to avoid the React hydration mismatch warning.
-      // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
       lang={locale}
       suppressHydrationWarning
     >
       <head>
         <script
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        {/* Pi Network SDK - Official Integration */}
         <script src="https://sdk.minepi.com/pi-sdk.js" async />
       </head>
       <body className="antialiased">
@@ -128,3 +94,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

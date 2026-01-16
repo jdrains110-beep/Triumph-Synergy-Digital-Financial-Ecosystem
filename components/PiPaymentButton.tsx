@@ -78,7 +78,7 @@ export default function PiPaymentButton({
         // Initialize Pi SDK (cast to allow appId for Pi Browser recognition)
         const piInitConfig: any = {
           version: '2.0',
-          appId,
+          appId: appId,
           sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === 'true'
         };
 

@@ -74,6 +74,12 @@ const nextConfig: NextConfig = {
   // Prevent potential issues with trailing slashes
   trailingSlash: false,
 
+  // No rewrites needed - pinet.com proxies to this Vercel app automatically
+  // Pi Developer Portal configures the routing
+  async rewrites() {
+    return [];
+  },
+
   // Ensure proper headers for caching
   headers: async () => {
     return [
@@ -97,6 +103,24 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Type",
             value: "text/plain",
+          },
+        ],
+      },
+      {
+        // Allow all routes to be accessible through pinet proxy
+        source: "/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
+          },
+          {
+            key: "Cross-Origin-Embedder-Policy",
+            value: "require-corp",
           },
         ],
       },
