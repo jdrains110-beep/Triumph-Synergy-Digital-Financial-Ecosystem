@@ -6,6 +6,7 @@
  */
 
 import { base64url } from "@/lib/utils/base64url";
+import { APP_CONFIG } from "@/lib/config/app-domain-config";
 
 // WebAuthn Type Aliases - only for types not in DOM
 type AttestationConveyanceFormat =
@@ -72,11 +73,11 @@ export class WebAuthnService {
   private readonly rpId =
     typeof window !== "undefined"
       ? window.location.hostname
-      : process.env.NEXT_PUBLIC_APP_DOMAIN || "localhost";
+      : new URL(APP_CONFIG.PINET_PRIMARY_DOMAIN).hostname;
   private readonly origin =
     typeof window !== "undefined"
       ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      : APP_CONFIG.PINET_PRIMARY_DOMAIN;
 
   /**
    * Generate registration options for WebAuthn.create()

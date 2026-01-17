@@ -49,17 +49,16 @@ efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1
 ### Mainnet (main branch - vercel.json)
 ```env
 NEXT_PRIVATE_SKIP_TURBOPACK=true
-NEXT_PUBLIC_APP_URL=https://triumph-synergy.vercel.app
-NEXTAUTH_URL=https://triumph-synergy.vercel.app
+NEXT_PUBLIC_APP_URL=https://triumphsynergy0576.pinet.com
+NEXTAUTH_URL=https://triumphsynergy0576.pinet.com
 PI_API_KEY=<your-pi-api-key>
 PI_APP_ID=<your-pi-app-id>
 ```
 
 ### Testnet (testnet branch - vercel.testnet.json)
 ```env
-PI_NETWORK_MODE=testnet
-NEXT_PUBLIC_APP_URL=https://triumph-synergy.vercel.app
-NEXTAUTH_URL=https://triumph-synergy.vercel.app
+NEXT_PUBLIC_APP_URL=https://triumphsynergy0576.pinet.com
+NEXTAUTH_URL=https://triumphsynergy0576.pinet.com
 PI_API_KEY=<your-pi-api-key>
 PI_APP_ID=<your-pi-app-id>
 ```
