@@ -11,13 +11,8 @@ import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
-// Determine the correct domain based on environment
-const getMetadataUrl = () => {
-  const isTestnet = process.env.PI_NETWORK_MODE === "testnet";
-  return isTestnet ? "https://triumphsynergy7386.pinet.com" : "https://triumphsynergy0576.pinet.com";
-};
-
-const metadataUrl = getMetadataUrl();
+// Primary app domain
+const metadataUrl = "https://triumphsynergy0576.pinet.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(metadataUrl),

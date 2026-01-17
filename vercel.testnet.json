@@ -6,6 +6,5 @@
   "framework": "nextjs",
   "outputDirectory": ".next",
   "env": {
-    "PI_NETWORK_MODE": "testnet"
   }
 }
