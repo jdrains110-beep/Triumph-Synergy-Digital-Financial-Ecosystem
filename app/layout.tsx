@@ -11,9 +11,18 @@ import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
+// Determine the correct domain based on environment
+const getMetadataUrl = () => {
+  const isTestnet = process.env.PI_NETWORK_MODE === "testnet";
+  return isTestnet ? "https://triumphsynergy7386.pinet.com" : "https://triumphsynergy0576.pinet.com";
+};
+
+const metadataUrl = getMetadataUrl();
+
 export const metadata: Metadata = {
-  title: "Triumph Synergy",
-  description: "Pi Network Payment Platform",
+  metadataBase: new URL(metadataUrl),
+  title: "Triumph Synergy - Pi Network Payment Platform",
+  description: "Advanced payment routing platform powered by Pi Network with Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance. Accept Pi payments globally.",
 };
 
 export const viewport = {
