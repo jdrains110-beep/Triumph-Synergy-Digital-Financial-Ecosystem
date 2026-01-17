@@ -6,7 +6,6 @@
   "framework": "nextjs",
   "outputDirectory": ".next",
   "env": {
-    "PI_NETWORK_MODE": "testnet",
     "NEXT_PUBLIC_APP_URL": "https://triumph-synergy.vercel.app",
     "NEXTAUTH_URL": "https://triumph-synergy.vercel.app"
   }
