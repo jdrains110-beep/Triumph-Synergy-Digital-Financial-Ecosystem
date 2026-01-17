@@ -73,11 +73,11 @@ export class WebAuthnService {
   private readonly rpId =
     typeof window !== "undefined"
       ? window.location.hostname
-      : new URL(APP_CONFIG.PINET_PRIMARY_DOMAIN).hostname;
+      : APP_CONFIG.getDomain();
   private readonly origin =
     typeof window !== "undefined"
       ? window.location.origin
-      : APP_CONFIG.PINET_PRIMARY_DOMAIN;
+      : APP_CONFIG.ULTIMATE_URL;
 
   /**
    * Generate registration options for WebAuthn.create()

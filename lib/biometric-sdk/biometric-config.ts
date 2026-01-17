@@ -29,7 +29,7 @@ export const BIOMETRIC_CONFIG = {
       id:
         typeof window !== "undefined"
           ? window.location.hostname
-          : new URL(APP_CONFIG.PINET_PRIMARY_DOMAIN).hostname,
+          : APP_CONFIG.getDomain(),
     },
   },
   registration: {
