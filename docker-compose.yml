@@ -71,6 +71,7 @@ services:
       - AUTH_SECRET=production-auth-secret-32-chars-minimum-secure-key
       - NEXTAUTH_SECRET=production-nextauth-secret-32-chars-minimum-secure
       - NEXTAUTH_URL=https://triumphsynergy0576.pinet.com
+      - PI_NETWORK_MODE=mainnet
       - SUPABASE_DB_URL="postgres://jdrains30:DariusA35$@Triumph-Synergy:5432/database?pgbouncer=true&connection_limit=1"
       - NEXT_PUBLIC_SUPABASE_URL=https://triumph-synergy.supabase.co
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyaXVtcGgtc3luZXJneSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjgzNjQ4MDAwLCJleHAiOjE5OTkyMjQwMDB9.production-anon-key-placeholder

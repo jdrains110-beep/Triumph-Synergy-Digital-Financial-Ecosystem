@@ -24,6 +24,7 @@ jobs:
           AUTH_SECRET: production-auth-secret-32-chars-minimum-secure-key
           NEXTAUTH_SECRET: production-nextauth-secret-32-chars-minimum-secure
           NEXTAUTH_URL: https://triumphsynergy0576.pinet.com
+          PI_NETWORK_MODE: mainnet
           REDIS_URL: redis://localhost:6379
           SUPABASE_URL: https://triumph-synergy.supabase.co
           SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyaXVtcGgtc3luZXJneSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjgzNjQ4MDAwLCJleHAiOjE5OTkyMjQwMDB9.production-anon-key-placeholder
