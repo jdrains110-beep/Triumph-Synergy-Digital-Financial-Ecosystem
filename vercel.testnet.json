@@ -10,6 +10,8 @@
     "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com",
     "NEXT_PUBLIC_PI_APP_ID": "triumph-synergy",
     "NEXT_PUBLIC_PI_SANDBOX": "true",
-    "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true"
+    "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true",
+    "DEPLOYMENT_URL_MAINNET": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+    "DEPLOYMENT_URL_TESTNET": "https://triumph-synergy-testnet.vercel.app"
   }
 }
