@@ -45,7 +45,7 @@ export function DataStreamHandler() {
           case "data-id": {
             return {
               ...currentArtifact,
-              documentId: part.data,
+              documentId: toString(part.data),
               status: "streaming" as const,
             };
           }
@@ -53,7 +53,7 @@ export function DataStreamHandler() {
           case "data-title": {
             return {
               ...currentArtifact,
-              title: part.data,
+              title: toString(part.data),
               status: "streaming" as const,
             };
           }
@@ -69,7 +69,7 @@ export function DataStreamHandler() {
 
             return {
               ...currentArtifact,
-              kind: part.data,
+              kind: resolvedKind,
               status: "streaming" as const,
             };
           }
