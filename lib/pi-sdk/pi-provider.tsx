@@ -34,6 +34,7 @@ type PiContextType = {
   requestApproval: (memo?: string) => Promise<string>;
   isLoading: boolean;
   error: string | null;
+  authenticate: () => Promise<void>;
 };
 
 const PiContext = createContext<PiContextType | undefined>(undefined);
@@ -42,97 +43,116 @@ export function PiProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<PiUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sdkInitialized, setSdkInitialized] = useState(false);
 
-  // Initialize Pi SDK
+  // Initialize Pi SDK (without auto-authentication to prevent crashes)
   useEffect(() => {
+    // Skip on server
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    // Prevent re-initialization
+    if (sdkInitialized) {
+      return;
+    }
+
     const initializePi = async () => {
       try {
-        // Check if Pi SDK is loaded
-        if (typeof window === "undefined") {
-          console.log(
-            "[Pi SDK] Server-side rendering - skipping initialization"
-          );
-          return;
-        }
+        console.log("[Pi SDK] Starting initialization...");
 
-        // Wait for Pi SDK script to load
+        // Wait for Pi SDK script to load (it's loaded via script tag in HTML)
+        // Pi Browser injects window.Pi when it loads the app
         let attempts = 0;
-        const maxAttempts = 50; // 5 seconds max wait (50 * 100ms)
-
+        const maxAttempts = 20; // Wait up to 10 seconds (20 * 500ms)
+        
         while (!(window as any).Pi && attempts < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           attempts++;
+          console.log(`[Pi SDK] Waiting for Pi object... (${attempts}/${maxAttempts})`);
         }
 
         if (!(window as any).Pi) {
-          console.log(
-            "[Pi SDK] Pi SDK not available - continuing in fallback mode"
-          );
-          setTimeout(() => {
-            if (!isReady) {
-              setIsReady(true);
-              setIsLoading(false);
-              console.log("[Pi SDK] ✓ Fallback mode enabled - app continues");
-            }
-          }, 500);
+          console.log("[Pi SDK] Not in Pi Browser - using fallback mode");
+          setIsReady(true);
+          setSdkInitialized(true);
+          setUser({
+            uid: `web-${Date.now()}`,
+            username: "Web User",
+          });
           return;
         }
 
         const Pi = (window as any).Pi;
+        console.log("[Pi SDK] Pi object detected!");
 
         // Initialize Pi SDK with version 2.0
-        await Pi.init({
-          version: "2.0",
-          sandbox:
-            process.env.NEXT_PUBLIC_PI_SANDBOX === "true" ||
-            process.env.NODE_ENV === "development",
-        });
-
-        console.log("[Pi SDK] Pi SDK initialized successfully");
-
-        // Authenticate user
+        // Wrap in try-catch to handle any SDK errors gracefully
         try {
-          const authResult = await Pi.authenticate();
-          console.log("[Pi SDK] User authenticated:", authResult);
-
-          setIsAuthenticated(true);
-          setUser({
-            uid: authResult.user.uid,
-            username: authResult.user.username,
-            email: authResult.user.email,
+          await Pi.init({
+            version: "2.0",
+            sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === "true",
           });
-        } catch (authError) {
-          console.log(
-            "[Pi SDK] User not authenticated (not required for some operations):",
-            authError
-          );
-          setIsAuthenticated(false);
-          // Still allow guest payments
-          setUser({
-            uid: `guest-${Date.now()}`,
-            username: "Guest User",
-          });
+          console.log("[Pi SDK] SDK initialized successfully");
+        } catch (initError) {
+          console.warn("[Pi SDK] Init warning:", initError);
+          // Continue anyway - some init errors are non-fatal
         }
 
+        // Mark as ready WITHOUT auto-authenticating
+        // Authentication should be triggered by user action
         setIsReady(true);
-        setIsLoading(false);
+        setSdkInitialized(true);
+        console.log("[Pi SDK] Ready (authentication available on demand)");
+
       } catch (err) {
         console.error("[Pi SDK] Initialization error:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to initialize Pi SDK"
-        );
-        // Still allow app to continue
+        setError(err instanceof Error ? err.message : "SDK init failed");
+        // Still mark as ready so app doesn't hang
         setIsReady(true);
-        setIsLoading(false);
+        setSdkInitialized(true);
       }
     };
 
     initializePi();
-  }, [isReady]);
+  }, [sdkInitialized]);
 
-  // Request payment through Pi SDK
+  // Manual authentication function (call when user initiates action)
+  const authenticate = async (): Promise<void> => {
+    if (!(window as any).Pi) {
+      console.log("[Pi SDK] Not in Pi Browser - skipping authentication");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const Pi = (window as any).Pi;
+      const authResult = await Pi.authenticate(
+        ["username"],
+        (payment: any) => {
+          // Incomplete payment callback
+          console.log("[Pi SDK] Incomplete payment found:", payment);
+        }
+      );
+
+      console.log("[Pi SDK] User authenticated:", authResult);
+      setIsAuthenticated(true);
+      setUser({
+        uid: authResult.user.uid,
+        username: authResult.user.username,
+        email: authResult.user.email,
+      });
+    } catch (authError) {
+      console.log("[Pi SDK] Authentication declined or failed:", authError);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Request payment through Pi SDK with proper server callbacks
   const requestPayment = async (
     payments: Array<{
       amount: number;
@@ -141,45 +161,99 @@ export function PiProvider({ children }: { children: ReactNode }) {
     }>,
     memo?: string
   ): Promise<string> => {
-    if (!isReady || !(window as any).Pi) {
-      throw new Error("Pi SDK not ready");
+    if (!(window as any).Pi) {
+      throw new Error("Pi SDK not available - must be accessed from Pi Browser");
     }
 
     try {
       setIsLoading(true);
+      setError(null);
       const Pi = (window as any).Pi;
 
-      // Add timeout protection
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-          () =>
-            reject(
-              new Error(
-                "Payment request timeout - Pi SDK did not respond within 30 seconds"
-              )
-            ),
-          30_000
-        )
-      );
-
-      const paymentPromise = Pi.payments.request({
+      const paymentData = {
         amount: payments[0]?.amount || 0,
         memo: memo || payments[0]?.memo || "Triumph Synergy Payment",
         metadata: payments[0]?.metadata || {},
+      };
+
+      // Pi SDK createPayment with required server-side callbacks
+      const payment = await Pi.createPayment(paymentData, {
+        // Called when payment is ready for server approval
+        onReadyForServerApproval: async (paymentId: string) => {
+          console.log("[Pi SDK] Payment ready for server approval:", paymentId);
+          try {
+            const response = await fetch("/api/pi/approve", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                paymentId,
+                amount: paymentData.amount,
+                memo: paymentData.memo,
+                metadata: paymentData.metadata,
+              }),
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || "Server approval failed");
+            }
+            
+            const result = await response.json();
+            console.log("[Pi SDK] Server approval successful:", result);
+          } catch (err) {
+            console.error("[Pi SDK] Server approval error:", err);
+            throw err;
+          }
+        },
+        
+        // Called when payment is ready for server completion
+        onReadyForServerCompletion: async (paymentId: string, txid: string) => {
+          console.log("[Pi SDK] Payment ready for server completion:", { paymentId, txid });
+          try {
+            const response = await fetch("/api/pi/complete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                paymentId,
+                txid,
+                amount: paymentData.amount,
+                memo: paymentData.memo,
+                metadata: paymentData.metadata,
+              }),
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || "Server completion failed");
+            }
+            
+            const result = await response.json();
+            console.log("[Pi SDK] Server completion successful:", result);
+          } catch (err) {
+            console.error("[Pi SDK] Server completion error:", err);
+            throw err;
+          }
+        },
+        
+        // Called when payment is cancelled
+        onCancel: (paymentId: string) => {
+          console.log("[Pi SDK] Payment cancelled:", paymentId);
+          setError("Payment was cancelled");
+        },
+        
+        // Called on error
+        onError: (error: Error, payment?: any) => {
+          console.error("[Pi SDK] Payment error:", error, payment);
+          setError(error.message || "Payment failed");
+        },
       });
 
-      const paymentResult = await Promise.race([
-        paymentPromise,
-        timeoutPromise,
-      ]);
-
-      console.log("[Pi SDK] Payment requested:", paymentResult);
+      console.log("[Pi SDK] Payment completed:", payment);
       setIsLoading(false);
 
-      return paymentResult.transaction.txid || paymentResult.transaction;
+      return payment?.transaction?.txid || payment?.identifier || "success";
     } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Payment request failed";
+      const errorMsg = err instanceof Error ? err.message : "Payment request failed";
       console.error("[Pi SDK] Payment error:", err);
       setError(errorMsg);
       setIsLoading(false);
@@ -221,6 +295,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
     requestApproval,
     isLoading,
     error,
+    authenticate,
   };
 
   return <PiContext.Provider value={value}>{children}</PiContext.Provider>;

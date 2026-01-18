@@ -1,33 +1,30 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Pi Network API Configuration
 const PI_API_KEY = process.env.PI_API_KEY || '';
 const PI_APP_ID = process.env.PI_APP_ID || '';
-const PI_SANDBOX = process.env.NEXT_PUBLIC_PI_SANDBOX === 'true';
 
-// Approve payment endpoint with enhanced verification
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { paymentId, amount, memo, metadata, user, isAdmin } = req.body;
-
-  if (!paymentId) {
-    return res.status(400).json({ error: 'Payment ID required' });
-  }
-
-  console.log('[Pi API] Approving payment:', {
-    paymentId,
-    amount,
-    memo,
-    user,
-    isAdmin,
-    metadata
-  });
-
+/**
+ * Pi Payment Approval Endpoint
+ * POST /api/pi/approve
+ *
+ * Server-side approval of Pi payments as required by Pi Platform docs
+ */
+export async function POST(req: NextRequest) {
   try {
-    // Verify payment exists and is valid
+    const body = await req.json();
+    const { paymentId } = body;
+
+    if (!paymentId) {
+      return NextResponse.json({
+        error: 'Payment ID required',
+        code: 'MISSING_PAYMENT_ID'
+      }, { status: 400 });
+    }
+
+    console.log('[Pi API] Approving payment:', paymentId);
+
+    // Verify payment exists and is valid using Pi Platform API
     const verifyResponse = await fetch(`https://api.minepi.com/v2/payments/${paymentId}`, {
       method: 'GET',
       headers: {
@@ -38,53 +35,50 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!verifyResponse.ok) {
       console.error('[Pi API] Payment verification failed:', verifyResponse.status);
-      return res.status(400).json({
+      return NextResponse.json({
         error: 'Payment verification failed',
+        code: 'PAYMENT_NOT_FOUND',
         details: 'Invalid or expired payment ID'
-      });
+      }, { status: 400 });
     }
 
     const paymentData = await verifyResponse.json();
     console.log('[Pi API] Payment verified:', paymentData);
 
-    // Validate payment details
-    if (amount && paymentData.amount !== amount) {
-      return res.status(400).json({
-        error: 'Amount mismatch',
-        expected: paymentData.amount,
-        received: amount
+    // Check if payment is already approved
+    if (paymentData.status?.developer_approved) {
+      return NextResponse.json({
+        success: true,
+        paymentId,
+        status: 'already_approved',
+        message: 'Payment was already approved'
       });
     }
 
-    // Admin override logic
-    if (isAdmin && metadata?.adminOverride) {
-      console.log('[Pi API] Admin override applied for payment:', paymentId);
-    }
-
-    // Approve the payment
+    // Approve the payment using Pi Platform API
     const approveResponse = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
       method: 'POST',
       headers: {
         'Authorization': `Key ${PI_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        // Additional approval metadata can be added here
-      }),
+      body: JSON.stringify({}),
     });
 
     if (!approveResponse.ok) {
       console.error('[Pi API] Payment approval failed:', approveResponse.status);
-      return res.status(400).json({
+      const errorText = await approveResponse.text();
+      return NextResponse.json({
         error: 'Payment approval failed',
-        details: await approveResponse.text()
-      });
+        code: 'APPROVAL_FAILED',
+        details: errorText
+      }, { status: 400 });
     }
 
     const approvalData = await approveResponse.json();
-    console.log('[Pi API] Payment approved:', approvalData);
+    console.log('[Pi API] Payment approved successfully:', approvalData);
 
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       paymentId,
       status: 'approved',
@@ -94,9 +88,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error) {
     console.error('[Pi API] Approval error:', error);
-    return res.status(500).json({
+    return NextResponse.json({
       error: 'Internal server error',
+      code: 'INTERNAL_ERROR',
       details: error instanceof Error ? error.message : 'Unknown error'
-    });
+    }, { status: 500 });
   }
 }

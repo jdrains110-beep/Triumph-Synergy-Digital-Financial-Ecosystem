@@ -44,16 +44,16 @@ export function DataStreamHandler() {
         switch (part.type) {
           case "data-id": {
             return {
-              ...currentArtifact,
-              documentId: toString(part.data),
+              ...draftArtifact,
+              documentId: part.data,
               status: "streaming",
             };
           }
 
           case "data-title": {
             return {
-              ...currentArtifact,
-              title: toString(part.data),
+              ...draftArtifact,
+              title: part.data,
               status: "streaming",
             };
           }
@@ -68,8 +68,8 @@ export function DataStreamHandler() {
               : currentArtifact.kind;
 
             return {
-              ...currentArtifact,
-              kind: resolvedKind,
+              ...draftArtifact,
+              kind: part.data,
               status: "streaming",
             };
           }

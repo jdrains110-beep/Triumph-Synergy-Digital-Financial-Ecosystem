@@ -1,0 +1,5 @@
+# Pi Network Domain Verification
+# Replace this with your actual verification token from Pi Developer Portal
+# Get this from: https://develop.pi or https://developers.minepi.com
+
+YOUR_VERIFICATION_TOKEN_HERE

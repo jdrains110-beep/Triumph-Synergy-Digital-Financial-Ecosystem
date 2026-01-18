@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { DataStreamProvider } from "@/components/data-stream-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/components/locale-provider";
 import { getRequestLocale } from "@/lib/i18n/server";
@@ -10,27 +11,17 @@ import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
+// Primary app domain
+const metadataUrl = "https://triumphsynergy0576.pinet.com";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://triumphsynergy0576.pinet.com"),
-  title: "Triumph Synergy - Pi App Studio",
-  description:
-    "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
-  icons: {
-    icon: "/favicon.ico",
-  },
-  keywords: ["Pi Network", "Payment Processing", "Compliance", "Fintech", "AI"],
-  authors: [{ name: "Triumph Synergy Team" }],
-  openGraph: {
-    title: "Triumph Synergy - Pi App Studio",
-    description: "Advanced payment routing with compliance automation",
-    url: "https://triumphsynergy0576.pinet.com",
-    siteName: "Triumph Synergy",
-    type: "website",
-  },
+  metadataBase: new URL(metadataUrl),
+  title: "Triumph Synergy - Pi Network Payment Platform",
+  description: "Advanced payment routing platform powered by Pi Network with Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance. Accept Pi payments globally.",
 };
 
 export const viewport = {
-  maximumScale: 1, // Disable auto-zoom on mobile Safari
+  maximumScale: 1,
 };
 
 const geist = Geist({
@@ -75,22 +66,16 @@ export default async function RootLayout({
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
-      // `next-themes` injects an extra classname to the body element to avoid
-      // visual flicker before hydration. Hence the `suppressHydrationWarning`
-      // prop is necessary to avoid the React hydration mismatch warning.
-      // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
       lang={locale}
       suppressHydrationWarning
     >
       <head>
         <script
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        {/* Pi Network SDK - Version 2.0 */}
-        <script async src="https://sdk.minepi.com/pi-sdk.js" />
+        <script src="https://sdk.minepi.com/pi-sdk.js" async />
       </head>
       <body className="antialiased">
         <ThemeProvider
@@ -102,7 +87,9 @@ export default async function RootLayout({
           <Toaster position="top-center" />
           <SessionProvider>
             <LocaleProvider locale={locale}>
-              <PiProvider>{children}</PiProvider>
+              <DataStreamProvider>
+                <PiProvider>{children}</PiProvider>
+              </DataStreamProvider>
             </LocaleProvider>
           </SessionProvider>
         </ThemeProvider>
@@ -111,3 +98,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

@@ -4,6 +4,7 @@
  */
 
 import { detectPiBrowser, type PiBrowserInfo } from "./pi-browser-detector";
+import { loadPiSDKScript, waitForPiSDK } from "./pi-sdk-script-loader";
 
 // =============================================================================
 // RE-EXPORTS FROM BROWSER DETECTOR
@@ -141,7 +142,19 @@ export class PiSDKInitializer {
    */
   private async _performInitialization(): Promise<void> {
     try {
-      // Detect Pi Browser
+      // Attempt to load the SDK (with CDN fallbacks) before detection
+      // Don't block if SDK fails to load
+      try {
+        await Promise.race([
+          loadPiSDKScript(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("SDK load timeout")), 3000))
+        ]);
+        await waitForPiSDK(10, 100); // Max 1 second wait
+      } catch (err) {
+        console.warn("[Pi SDK] Failed to load SDK, continuing anyway:", err);
+      }
+
+      // Detect Pi Browser after attempting load
       this.browserInfo = detectPiBrowser();
 
       if (!this.browserInfo.isAvailable) {
@@ -178,6 +191,9 @@ export class PiSDKInitializer {
     if (typeof window === "undefined") {
       return;
     }
+
+    // Ensure the SDK had time to attach to window
+    await waitForPiSDK();
 
     const piGlobal = (window as any).Pi;
 

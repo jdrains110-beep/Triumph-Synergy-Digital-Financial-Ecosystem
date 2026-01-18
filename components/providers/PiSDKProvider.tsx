@@ -27,11 +27,17 @@ export function PiSDKProvider({ children }: PiSDKProviderProps) {
   const [isPiBrowser, setIsPiBrowser] = useState(false);
 
   useEffect(() => {
-    // Load Pi SDK script
-    loadPiSDKScript();
-
-    // Initialize Pi SDK on mount
+    // Initialize Pi SDK on mount (non-blocking)
     const init = async () => {
+      try {
+        // Don't block app loading if SDK fails
+        await Promise.race([
+          loadPiSDKScript(),
+          new Promise((resolve) => setTimeout(resolve, 3000))
+        ]);
+      } catch (err) {
+        console.warn("[Pi SDK] SDK load timeout, continuing:", err);
+      }
       await initializePiSDKOnStartup();
 
       // Log environment info

@@ -3,6 +3,8 @@
  * Central configuration for all biometric authentication settings
  */
 
+import { APP_CONFIG } from "@/lib/config/app-domain-config";
+
 // Type definitions for WebAuthn (defined first)
 export type AuthenticatorTransport =
   | "usb"
@@ -27,7 +29,7 @@ export const BIOMETRIC_CONFIG = {
       id:
         typeof window !== "undefined"
           ? window.location.hostname
-          : process.env.NEXT_PUBLIC_APP_DOMAIN || "localhost",
+          : APP_CONFIG.getDomain(),
     },
   },
   registration: {
