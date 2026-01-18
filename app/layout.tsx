@@ -79,15 +79,6 @@ export default async function RootLayout({
         <Script 
           src="https://sdk.minepi.com/pi-sdk.js" 
           strategy="beforeInteractive"
-          onLoad={() => {
-            // Initialize Pi SDK after script loads
-            if ((window as any).Pi) {
-              (window as any).Pi.init({
-                version: "2.0",
-                appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
-              });
-            }
-          }}
         />
       </head>
       <body className="antialiased">
