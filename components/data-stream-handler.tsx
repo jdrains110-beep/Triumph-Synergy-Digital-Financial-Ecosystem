@@ -37,24 +37,24 @@ export function DataStreamHandler() {
 
       setArtifact((draftArtifact) => {
         const currentArtifact =
-          draftArtifact ?? { ...initialArtifactData, status: "streaming" };
+          draftArtifact ?? { ...initialArtifactData, status: "streaming" as const };
         const toString = (value: unknown) =>
           typeof value === "string" ? value : String(value ?? "");
 
         switch (part.type) {
           case "data-id": {
             return {
-              ...draftArtifact,
+              ...currentArtifact,
               documentId: part.data,
-              status: "streaming",
+              status: "streaming" as const,
             };
           }
 
           case "data-title": {
             return {
-              ...draftArtifact,
+              ...currentArtifact,
               title: part.data,
-              status: "streaming",
+              status: "streaming" as const,
             };
           }
 
@@ -68,9 +68,9 @@ export function DataStreamHandler() {
               : currentArtifact.kind;
 
             return {
-              ...draftArtifact,
+              ...currentArtifact,
               kind: part.data,
-              status: "streaming",
+              status: "streaming" as const,
             };
           }
 
@@ -78,14 +78,14 @@ export function DataStreamHandler() {
             return {
               ...currentArtifact,
               content: "",
-              status: "streaming",
+              status: "streaming" as const,
             };
           }
 
           case "data-finish": {
             return {
               ...currentArtifact,
-              status: "idle",
+              status: "idle" as const,
             };
           }
 
