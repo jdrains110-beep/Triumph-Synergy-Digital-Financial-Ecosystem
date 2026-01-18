@@ -70,12 +70,9 @@ const nextConfig: NextConfig = {
     return config;
   },
 
-  // Turbopack configuration
-  turbopack: {
-    resolveAlias: {
-      "@": "./*",
-    },
-  },
+  // Disable Turbopack - use Webpack instead to fix memory issues
+  // Turbopack has known memory exhaustion issues in Next.js 16
+  turbo: {},
 
   // Prevent potential issues with trailing slashes
   trailingSlash: false,
