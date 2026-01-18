@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     // Disable type checking completely - we validate separately
     ignoreBuildErrors: true,
   },
-  
+
   images: {
     remotePatterns: [
       {
@@ -24,10 +24,11 @@ const nextConfig: NextConfig = {
   // - Local: undefined (development mode)
   output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
 
-  // Production optimizations
-  compress: true,
+  // Production optimizations - but disable some to reduce memory during build
+  compress: false, // Disable compression to reduce memory during build
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+  swcMinify: false, // Disable minification to reduce memory usage during build
 
   // Experimental features for better performance
   experimental: {
