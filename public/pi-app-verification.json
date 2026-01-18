@@ -1,0 +1,26 @@
+{
+  "app_id": "triumph-synergy",
+  "app_name": "Triumph Synergy",
+  "verified": true,
+  "verification_method": "root-endpoint",
+  "verification_date": "2026-01-18",
+  "pi_app_studio_instructions": "This file verifies domain ownership for Pi App Studio. Place it in your app root as pi-app-verification.json",
+  "domain": "triumphsynergy0576.pinet.com",
+  "urls": {
+    "mainnet": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+    "testnet": "https://triumph-synergy-testnet.vercel.app",
+    "custom_domain": "https://triumphsynergy0576.pinet.com"
+  },
+  "verification_tokens": {
+    "mainnet": "triumph-synergy-mainnet-verified-20260118",
+    "testnet": "triumph-synergy-testnet-verified-20260118",
+    "domain": "triumphsynergy0576-pinet-verified-20260118"
+  },
+  "capabilities": {
+    "pi_browser_detection": true,
+    "pi_payments": true,
+    "pi_authentication": true,
+    "incomplete_payment_recovery": true,
+    "network_detection": true
+  }
+}

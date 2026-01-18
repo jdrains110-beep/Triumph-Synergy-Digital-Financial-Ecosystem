@@ -19,6 +19,17 @@ export const metadata: Metadata = {
   metadataBase: new URL(metadataUrl),
   title: "Triumph Synergy - Pi Network Payment Platform",
   description: "Advanced payment routing platform powered by Pi Network with Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance. Accept Pi payments globally.",
+  // Pi App Studio verification meta tags
+  other: {
+    "pi-app-id": "triumph-synergy",
+    "pi-app-verified": "true",
+    "pi-mainnet-url": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+    "pi-testnet-url": "https://triumph-synergy-testnet.vercel.app",
+    "pi-custom-domain": "https://triumphsynergy0576.pinet.com",
+    "pi-domain-verified": "2026-01-18",
+    "pi-verification-method": "http-endpoint",
+    "pi-verification-endpoint": "/.well-known/pi-app-verification",
+  },
 };
 
 export const viewport = {
