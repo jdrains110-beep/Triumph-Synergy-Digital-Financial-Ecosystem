@@ -1,6 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { Toaster } from "sonner";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -75,7 +76,19 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        <script src="https://sdk.minepi.com/pi-sdk.js" async />
+        <Script 
+          src="https://sdk.minepi.com/pi-sdk.js" 
+          strategy="beforeInteractive"
+          onLoad={() => {
+            // Initialize Pi SDK after script loads
+            if ((window as any).Pi) {
+              (window as any).Pi.init({
+                version: "2.0",
+                appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+              });
+            }
+          }}
+        />
       </head>
       <body className="antialiased">
         <ThemeProvider

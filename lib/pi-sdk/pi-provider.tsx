@@ -76,10 +76,16 @@ export function PiProvider({ children }: { children: ReactNode }) {
 
         if (!(window as any).Pi) {
           console.log("[Pi SDK] Not in Pi Browser - using fallback mode");
+          // Create a persistent fallback user ID
+          const storedUserId = localStorage.getItem("triumph_synergy_web_user_id");
+          const fallbackUserId = storedUserId || `web-${Date.now()}`;
+          if (!storedUserId) {
+            localStorage.setItem("triumph_synergy_web_user_id", fallbackUserId);
+          }
           setIsReady(true);
           setSdkInitialized(true);
           setUser({
-            uid: `web-${Date.now()}`,
+            uid: fallbackUserId,
             username: "Web User",
           });
           return;
@@ -93,6 +99,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         try {
           await Pi.init({
             version: "2.0",
+            appId: "triumph-synergy",
             sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === "true",
           });
           console.log("[Pi SDK] SDK initialized successfully");
