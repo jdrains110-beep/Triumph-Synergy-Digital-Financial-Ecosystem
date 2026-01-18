@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Disable type checking during build to reduce memory usage
-  // TypeScript errors are caught by CI/CD pipeline
+  // Enable type checking during build to catch real errors
   typescript: {
-    // Disable type checking completely - we validate separately
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   images: {
@@ -14,21 +12,16 @@ const nextConfig: NextConfig = {
         hostname: "avatar.vercel.sh",
       },
     ],
-    unoptimized: process.env.VERCEL === "1", // Disable image optimization on Vercel
+    unoptimized: process.env.VERCEL === "1",
     minimumCacheTTL: 31_536_000,
   },
 
   // Platform-aware output configuration
-  // - Vercel: undefined (uses Vercel's output optimization)
-  // - Docker: "standalone" (self-contained binary for containerization)
-  // - Local: undefined (development mode)
   output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
 
-  // Production optimizations - but disable some to reduce memory during build
-  compress: false, // Disable compression to reduce memory during build
+  // Enable production optimizations
+  compress: true,
   poweredByHeader: false,
-  productionBrowserSourceMaps: false,
-  swcMinify: false, // Disable minification to reduce memory usage during build
 
   // Experimental features for better performance
   experimental: {
@@ -40,47 +33,16 @@ const nextConfig: NextConfig = {
 
   // Ensure database connections aren't attempted during build
   env: {
-    // These are build-time, not runtime
     NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || "1.0.0",
   },
 
-  // Webpack configuration for better dependency handling
-  webpack: (config, { isServer }) => {
-    // Ignore optional dependencies that might not be available during build
-    if (isServer) {
-      config.externals = [
-        ...(config.externals || []),
-        {
-          // Make these optional: only load if available
-          redis: "redis",
-          postgres: "postgres",
-          pg: "pg",
-        },
-      ];
-    }
-
-    // Ensure proper memory usage during build
-    config.optimization = config.optimization || {};
-    config.optimization.splitChunks = {
-      chunks: "all",
-      cacheGroups: {
-        default: false,
-        vendors: false,
-      },
-    };
-
-    return config;
-  },
-
-  // Disable Turbopack - use Webpack instead to fix memory issues
-  // Turbopack has known memory exhaustion issues in Next.js 16
-  turbo: {},
+  // Configure Turbopack for proper bundling
+  turbopack: {},
 
   // Prevent potential issues with trailing slashes
   trailingSlash: false,
 
   // No rewrites needed - pinet.com proxies to this Vercel app automatically
-  // Pi Developer Portal configures the routing
   async rewrites() {
     return [];
   },
@@ -134,3 +96,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+
+
+

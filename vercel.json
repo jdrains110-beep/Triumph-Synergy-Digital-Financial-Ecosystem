@@ -5,7 +5,6 @@
   "installCommand": "pnpm install",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PRIVATE_SKIP_TURBOPACK": "true",
     "NEXT_PUBLIC_APP_URL": "https://triumphsynergy0576.pinet.com",
     "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com"
   },
