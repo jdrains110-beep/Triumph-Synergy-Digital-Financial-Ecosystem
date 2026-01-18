@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -22,13 +25,42 @@ jobs:
         with:
           version: 9.12.3
 
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "PNPM_HOME=$(pnpm config get storeDir)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PNPM_HOME }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
+        continue-on-error: false
+
+      - name: Check Node version
+        run: node --version && npm --version && pnpm --version
 
       - name: Build project
         run: pnpm run build
         env:
           SKIP_ENV_VALIDATION: true
+        continue-on-error: false
 
       - name: Verify build output
-        run: ls -la .next && echo "✓ Build successful"
+        run: |
+          if [ -d .next ]; then
+            echo "✓ Build successful - .next directory exists"
+            du -sh .next
+          else
+            echo "✗ Build failed - .next directory not found"
+            exit 1
+          fi
+
+      - name: Build summary
+        if: always()
+        run: echo "Build workflow completed"
