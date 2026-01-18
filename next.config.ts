@@ -25,10 +25,11 @@ const nextConfig: NextConfig = {
 
   // Experimental features for better performance
   experimental: {
-    serverActions: {
-      bodySizeLimit: "10mb",
-    },
-    optimizePackageImports: ["@radix-ui/react-dialog", "sonner"],
+    // Disable serverActions for now due to build memory issues
+    // serverActions: {
+    //   bodySizeLimit: "10mb",
+    // },
+    optimizePackageImports: ["@radix-ui/react-dialog"],
   },
 
   // Ensure database connections aren't attempted during build
@@ -36,8 +37,8 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || "1.0.0",
   },
 
-  // Configure Turbopack for proper bundling
-  turbopack: {},
+  // Disable Turbopack - using SWC compiler instead due to memory constraints
+  // turbopack: {},
 
   // Prevent potential issues with trailing slashes
   trailingSlash: false,
