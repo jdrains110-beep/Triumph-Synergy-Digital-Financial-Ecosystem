@@ -1,0 +1,37 @@
+{
+  "app_id": "triumph-synergy",
+  "app_name": "Triumph Synergy",
+  "description": "Triumph Synergy - Complete ecosystem integration with Pi Network",
+  "mainnet_url": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+  "testnet_url": "https://triumph-synergy-testnet.vercel.app",
+  "custom_domain": "https://triumphsynergy0576.pinet.com",
+  "domain_verified": true,
+  "verification_date": "2026-01-18",
+  "capabilities": {
+    "pi_browser_detection": true,
+    "pi_payments": true,
+    "pi_authentication": true,
+    "incomplete_payment_recovery": true,
+    "network_detection": true
+  },
+  "networks": {
+    "mainnet": {
+      "url": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+      "sandbox": false,
+      "max_payment": 10000,
+      "currency": "π",
+      "api_endpoint": "https://api.minepi.com"
+    },
+    "testnet": {
+      "url": "https://triumph-synergy-testnet.vercel.app",
+      "sandbox": true,
+      "max_payment": 100,
+      "currency": "π",
+      "api_endpoint": "https://testnet-api.minepi.com"
+    }
+  },
+  "sdk_version": "2.0",
+  "next_js_version": "16.1.1",
+  "verification_status": "VERIFIED",
+  "last_verified": "2026-01-18T00:00:00Z"
+}

@@ -36,6 +36,10 @@
         {
           "key": "Permissions-Policy",
           "value": "geolocation=(), microphone=(), camera=()"
+        },
+        {
+          "key": "X-Pi-App-Verification",
+          "value": "triumph-synergy-mainnet-verified"
         }
       ]
     },
@@ -51,6 +55,19 @@
         }
       ],
       "source": "/validation-key.txt"
+    },
+    {
+      "source": "/.well-known/pi-verification.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
     }
   ],
   "devCommand": "pnpm dev",
