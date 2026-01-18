@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Disable Turbopack due to memory issues on local build
+  typescript: {
+    // Reduce memory usage
+    tsconfigPath: "./tsconfig.json",
+  },
+  
   images: {
     remotePatterns: [
       {
