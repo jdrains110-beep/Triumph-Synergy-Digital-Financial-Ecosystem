@@ -25,19 +25,6 @@ jobs:
         with:
           version: 9.12.3
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "PNPM_HOME=$(pnpm config get storeDir)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.PNPM_HOME }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
         continue-on-error: false
@@ -46,18 +33,20 @@ jobs:
         run: node --version && npm --version && pnpm --version
 
       - name: Build project
-        run: pnpm run build
+        run: pnpm run build 2>&1
         env:
           SKIP_ENV_VALIDATION: true
-        continue-on-error: false
 
-      - name: Verify build output
+      - name: Check build status
         run: |
+          echo "Checking build output..."
           if [ -d .next ]; then
-            echo "✓ Build successful - .next directory exists"
-            du -sh .next
+            echo "✓ Build successful"
+            ls -la .next | head -20
           else
-            echo "✗ Build failed - .next directory not found"
+            echo "✗ Build failed - .next not found"
+            echo "Contents of current directory:"
+            ls -la
             exit 1
           fi
 
