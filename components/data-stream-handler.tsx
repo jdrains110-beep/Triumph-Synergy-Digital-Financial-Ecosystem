@@ -36,47 +36,61 @@ export function DataStreamHandler() {
       }
 
       setArtifact((draftArtifact) => {
-        if (!draftArtifact) {
-          return { ...initialArtifactData, status: "streaming" };
-        }
+        const currentArtifact =
+          draftArtifact ?? { ...initialArtifactData, status: "streaming" };
+        const toString = (value: unknown) =>
+          typeof value === "string" ? value : String(value ?? "");
 
         switch (part.type) {
-          case "data-id":
+          case "data-id": {
             return {
-              ...draftArtifact,
-              documentId: part.data,
+              ...currentArtifact,
+              documentId: toString(part.data),
               status: "streaming",
             };
+          }
 
-          case "data-title":
+          case "data-title": {
             return {
-              ...draftArtifact,
-              title: part.data,
+              ...currentArtifact,
+              title: toString(part.data),
               status: "streaming",
             };
+          }
 
-          case "data-kind":
+          case "data-kind": {
+            const maybeKind = toString(part.data);
+            const knownKinds = artifactDefinitions.map(
+              (artifactDefinition) => artifactDefinition.kind
+            ) as typeof artifactDefinitions[number]["kind"][];
+            const resolvedKind = knownKinds.includes(maybeKind as typeof knownKinds[number])
+              ? (maybeKind as typeof knownKinds[number])
+              : currentArtifact.kind;
+
             return {
-              ...draftArtifact,
-              kind: part.data,
+              ...currentArtifact,
+              kind: resolvedKind,
               status: "streaming",
             };
+          }
 
-          case "data-clear":
+          case "data-clear": {
             return {
-              ...draftArtifact,
+              ...currentArtifact,
               content: "",
               status: "streaming",
             };
+          }
 
-          case "data-finish":
+          case "data-finish": {
             return {
-              ...draftArtifact,
+              ...currentArtifact,
               status: "idle",
             };
+          }
 
           default:
-            return draftArtifact;
+            return currentArtifact;
         }
       });
     }
