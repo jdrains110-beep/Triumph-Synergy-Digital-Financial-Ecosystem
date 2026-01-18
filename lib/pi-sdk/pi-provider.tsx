@@ -7,6 +7,12 @@ import {
   useEffect,
   useState,
 } from "react";
+import {
+  handleIncompletePaymentFound,
+  recoverIncompletePayments,
+  type IncompletePayment,
+} from "./pi-incomplete-payment-handler";
+import { getPiNetworkInfo } from "./pi-network-detection";
 
 /**
  * Pi SDK Context
@@ -136,11 +142,16 @@ export function PiProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const Pi = (window as any).Pi;
+      const networkInfo = getPiNetworkInfo();
+
+      console.log(`[Pi SDK] Authenticating on ${networkInfo.description}...`);
+
       const authResult = await Pi.authenticate(
-        ["username"],
-        (payment: any) => {
+        ["username", "payments"],
+        async (payment: any) => {
           // Incomplete payment callback
           console.log("[Pi SDK] Incomplete payment found:", payment);
+          await handleIncompletePaymentFound(payment);
         }
       );
 
@@ -151,6 +162,21 @@ export function PiProvider({ children }: { children: ReactNode }) {
         username: authResult.user.username,
         email: authResult.user.email,
       });
+
+      // Attempt to recover incomplete payments
+      try {
+        const recovered = await recoverIncompletePayments((payment) => {
+          console.log("[Pi SDK] Recovered incomplete payment:", payment);
+        });
+        if (recovered.length > 0) {
+          console.log(
+            `[Pi SDK] Successfully recovered ${recovered.length} incomplete payment(s)`
+          );
+        }
+      } catch (recoveryErr) {
+        console.warn("[Pi SDK] Error recovering incomplete payments:", recoveryErr);
+        // Don't fail auth if recovery fails
+      }
     } catch (authError) {
       console.log("[Pi SDK] Authentication declined or failed:", authError);
       setIsAuthenticated(false);
