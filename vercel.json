@@ -5,13 +5,12 @@
   "installCommand": "pnpm install",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy0576.pinet.com",
-    "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com",
+    "NEXT_PUBLIC_APP_URL": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
+    "NEXTAUTH_URL": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
     "NEXT_PUBLIC_PI_APP_ID": "triumph-synergy",
     "NEXT_PUBLIC_PI_SANDBOX": "false",
     "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true",
-    "DEPLOYMENT_URL_MAINNET": "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
-    "DEPLOYMENT_URL_TESTNET": "https://triumph-synergy-testnet.vercel.app"
+    "DEPLOYMENT_ENV": "mainnet"
   },
   "headers": [
     {
