@@ -6,8 +6,8 @@
   "framework": "nextjs",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://triumph-synergy-testnet.vercel.app",
-    "NEXTAUTH_URL": "https://triumph-synergy-testnet.vercel.app",
+    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy7386.pinet.com",
+    "NEXTAUTH_URL": "https://triumphsynergy7386.pinet.com",
     "NEXT_PUBLIC_PI_APP_ID": "triumph-synergy",
     "NEXT_PUBLIC_PI_SANDBOX": "true",
     "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true",
