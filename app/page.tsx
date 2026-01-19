@@ -5,11 +5,11 @@ export default function HomePage() {
     <div style={{ padding: '40px', fontFamily: 'system-ui', maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{ color: '#2563eb' }}>🎉 Triumph Synergy</h1>
       <h2 style={{ color: '#64748b' }}>Pi Network Payment Platform</h2>
-      
-      <div style={{ 
-        backgroundColor: '#f1f5f9', 
-        padding: '20px', 
-        borderRadius: '8px', 
+
+      <div style={{
+        backgroundColor: '#f1f5f9',
+        padding: '20px',
+        borderRadius: '8px',
         marginTop: '20px',
         border: '1px solid #cbd5e1'
       }}>
@@ -25,10 +25,10 @@ export default function HomePage() {
         </ul>
       </div>
 
-      <div style={{ 
-        backgroundColor: '#ecfdf5', 
-        padding: '20px', 
-        borderRadius: '8px', 
+      <div style={{
+        backgroundColor: '#ecfdf5',
+        padding: '20px',
+        borderRadius: '8px',
         marginTop: '20px',
         border: '1px solid #a7f3d0'
       }}>
@@ -40,10 +40,10 @@ export default function HomePage() {
         </ul>
       </div>
 
-      <div style={{ 
-        backgroundColor: '#fef3c7', 
-        padding: '20px', 
-        borderRadius: '8px', 
+      <div style={{
+        backgroundColor: '#fef3c7',
+        padding: '20px',
+        borderRadius: '8px',
         marginTop: '20px',
         border: '1px solid #fcd34d'
       }}>

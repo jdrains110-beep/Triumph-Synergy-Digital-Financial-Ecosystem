@@ -87,8 +87,8 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        <Script 
-          src="https://sdk.minepi.com/pi-sdk.js" 
+        <Script
+          src="https://sdk.minepi.com/pi-sdk.js"
           strategy="beforeInteractive"
         />
       </head>

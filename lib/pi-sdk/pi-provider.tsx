@@ -73,7 +73,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         // Pi Browser injects window.Pi when it loads the app
         let attempts = 0;
         const maxAttempts = 20; // Wait up to 10 seconds (20 * 500ms)
-        
+
         while (!(window as any).Pi && attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, 500));
           attempts++;
@@ -225,12 +225,12 @@ export function PiProvider({ children }: { children: ReactNode }) {
                 metadata: paymentData.metadata,
               }),
             });
-            
+
             if (!response.ok) {
               const errorData = await response.json();
               throw new Error(errorData.error || "Server approval failed");
             }
-            
+
             const result = await response.json();
             console.log("[Pi SDK] Server approval successful:", result);
           } catch (err) {
@@ -238,7 +238,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
             throw err;
           }
         },
-        
+
         // Called when payment is ready for server completion
         onReadyForServerCompletion: async (paymentId: string, txid: string) => {
           console.log("[Pi SDK] Payment ready for server completion:", { paymentId, txid });
@@ -254,12 +254,12 @@ export function PiProvider({ children }: { children: ReactNode }) {
                 metadata: paymentData.metadata,
               }),
             });
-            
+
             if (!response.ok) {
               const errorData = await response.json();
               throw new Error(errorData.error || "Server completion failed");
             }
-            
+
             const result = await response.json();
             console.log("[Pi SDK] Server completion successful:", result);
           } catch (err) {
@@ -267,13 +267,13 @@ export function PiProvider({ children }: { children: ReactNode }) {
             throw err;
           }
         },
-        
+
         // Called when payment is cancelled
         onCancel: (paymentId: string) => {
           console.log("[Pi SDK] Payment cancelled:", paymentId);
           setError("Payment was cancelled");
         },
-        
+
         // Called on error
         onError: (error: Error, payment?: any) => {
           console.error("[Pi SDK] Payment error:", error, payment);

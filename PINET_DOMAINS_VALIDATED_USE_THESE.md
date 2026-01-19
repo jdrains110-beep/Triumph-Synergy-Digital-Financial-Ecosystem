@@ -1,21 +1,25 @@
-# 🥧 Pi Network Domain Configuration - RESTORED TO VALIDATED DOMAINS
+# 🥧 Pi Network Domain Configuration - CORRECT VALIDATED DOMAINS
 
-## ✅ Use Your Already-Validated pinet.com Domains
+## ✅ CORRECT Validated Domains
 
-You had these domains **already validated** with Pi Network. We should KEEP using them:
+These are your ACTUAL validated domains with Pi Network:
 
 ### Mainnet (VALIDATED)
 ```
-Domain: triumphsynergy0576.pinet.com
+Domain: https://triumphsynergy7386.pinet.com
 Portal: developers.minepi.com
 Validation Key: efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195
+Validation Key URL: https://triumphsynergy7386.pinet.com/validation-key-mainnet.txt
+Sandbox Mode: false
 ```
 
 ### Testnet (VALIDATED)
 ```
-Domain: triumphsynergy7386.pinet.com
+Domain: https://triumphsynergy1991.pinet.com
 Portal: develop.pi
 Validation Key: 75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc883adeeeccdce9240b4cb8c10faaed93a3
+Validation Key URL: https://triumphsynergy1991.pinet.com/validation-key-testnet.txt
+Sandbox Mode: true
 ```
 
 ---
@@ -26,13 +30,13 @@ Point the pinet.com domains to Vercel:
 
 ### Mainnet CNAME Setup
 ```
-Domain: triumphsynergy0576.pinet.com
+Domain: triumphsynergy7386.pinet.com
 CNAME: cname.vercel.app
 ```
 
 ### Testnet CNAME Setup  
 ```
-Domain: triumphsynergy7386.pinet.com
+Domain: triumphsynergy1991.pinet.com
 CNAME: cname-testnet.vercel.app
 ```
 
@@ -44,9 +48,10 @@ CNAME: cname-testnet.vercel.app
 ```json
 {
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy0576.pinet.com",
-    "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com",
-    "NEXT_PUBLIC_PI_SANDBOX": "false"
+    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy7386.pinet.com",
+    "NEXTAUTH_URL": "https://triumphsynergy7386.pinet.com",
+    "NEXT_PUBLIC_PI_SANDBOX": "false",
+    "DEPLOYMENT_ENV": "mainnet"
   }
 }
 ```
@@ -55,34 +60,47 @@ CNAME: cname-testnet.vercel.app
 ```json
 {
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy7386.pinet.com",
-    "NEXTAUTH_URL": "https://triumphsynergy7386.pinet.com",
-    "NEXT_PUBLIC_PI_SANDBOX": "true"
+    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy1991.pinet.com",
+    "NEXTAUTH_URL": "https://triumphsynergy1991.pinet.com",
+    "NEXT_PUBLIC_PI_SANDBOX": "true",
+    "DEPLOYMENT_ENV": "testnet"
   }
 }
 ```
 
 ---
 
-## ✅ These Domains Are Validated
+## ✅ Validation Key Endpoints
 
-DO NOT change the domain verification URLs in Pi portals - keep using your already-verified domains:
+**Mainnet**:
+```
+https://triumphsynergy7386.pinet.com/validation-key-mainnet.txt
+Returns: efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195
+```
 
-**Mainnet Portal (developers.minepi.com)**:
-- App URL: `https://triumphsynergy0576.pinet.com`
-- Keep as verified ✅
-
-**Testnet Portal (develop.pi)**:
-- App URL: `https://triumphsynergy7386.pinet.com`
-- Keep as verified ✅
+**Testnet**:
+```
+https://triumphsynergy1991.pinet.com/validation-key-testnet.txt
+Returns: 75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc883adeeeccdce9240b4cb8c10faaed93a3
+```
 
 ---
 
-## No Re-Verification Needed
+## 📋 Pi Portal Configuration
 
-Your domains are already validated. Just ensure:
-1. Vercel is serving these domains (CNAME configured)
-2. Validation key endpoints are accessible at those domains
-3. Both pinet.com domains point to Vercel
+**Mainnet Portal (developers.minepi.com)**:
+- App URL: `https://triumphsynergy7386.pinet.com`
+- Validation Key: `efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195`
+- Status: ✅ VALIDATED (Do not change)
 
-The pinet.com domains are the OFFICIAL validated domains - don't change them!
+**Testnet Portal (develop.pi)**:
+- App URL: `https://triumphsynergy1991.pinet.com`
+- Validation Key: `75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc883adeeeccdce9240b4cb8c10faaed93a3`
+- Status: ✅ VALIDATED (Do not change)
+
+---
+
+## ⚠️ CRITICAL
+
+These domains are already validated with Pi Network. **DO NOT CHANGE THEM** or validation will be lost again.
+
