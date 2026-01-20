@@ -167,20 +167,22 @@ const COMPLIANCE_SYSTEM = {
     },
 
     statusReport: {
-      file: "FINAL_COMPLIANCE_STATUS.md",
-      description: "Current compliance status and metrics",
+      file: "HANDBOOK.md",
+      description: "Complete system handbook including compliance status",
       sections: [
-        "Executive summary",
-        "All frameworks status",
-        "Certifications list",
-        "Performance metrics",
-        "Operations status",
-        "Contact information",
+        "Overview",
+        "Quick Start",
+        "Configuration",
+        "Pi Network Integration",
+        "Deployment",
+        "API Reference",
+        "Security & Compliance",
+        "Troubleshooting",
       ],
     },
 
     completionReport: {
-      file: "COMPLIANCE_IMPLEMENTATION_COMPLETE.md",
+      file: "docs/FINAL_COMPLIANCE_IMPLEMENTATION.md",
       description: "Completion summary and next steps",
       sections: [
         "What was completed",
