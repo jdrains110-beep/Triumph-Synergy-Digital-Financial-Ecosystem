@@ -86,6 +86,7 @@ Automatic CI/CD pipeline with:
 
 | Guide | Description |
 |-------|-------------|
+| [**Handbook**](HANDBOOK.md) | **Complete reference guide** |
 | [Getting Started](docs/getting-started.md) | Installation and setup |
 | [Pi Network](docs/pi-network.md) | Pi SDK integration guide |
 | [API Reference](docs/api-reference.md) | Complete API documentation |
