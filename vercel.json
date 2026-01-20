@@ -6,8 +6,12 @@
   "outputDirectory": ".next",
   "env": {
     "NEXT_PRIVATE_SKIP_TURBOPACK": "true",
-    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy0576.pinet.com",
-    "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com"
+    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy1991.pinet.com",
+    "NEXTAUTH_URL": "https://triumphsynergy1991.pinet.com",
+    "NEXT_PUBLIC_PI_APP_ID": "triumph-synergy",
+    "NEXT_PUBLIC_PI_SANDBOX": "true",
+    "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true",
+    "DEPLOYMENT_ENV": "testnet"
   },
   "headers": [
     {
