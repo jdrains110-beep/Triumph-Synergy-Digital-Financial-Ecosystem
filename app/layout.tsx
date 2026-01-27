@@ -11,7 +11,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy0576.pinet.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy7386.pinet.com"),
   title: "Triumph Synergy - Pi App Studio",
   description:
     "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Triumph Synergy - Pi App Studio",
     description: "Advanced payment routing with compliance automation",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy0576.pinet.com",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy7386.pinet.com",
     siteName: "Triumph Synergy",
     type: "website",
   },
