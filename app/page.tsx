@@ -16,9 +16,9 @@ export default function HomePage() {
         <h3>✅ System Status</h3>
         <ul style={{ lineHeight: '1.8' }}>
           <li>✅ <strong>Server</strong>: Running on Vercel</li>
-          <li>✅ <strong>App URL</strong>: https://triumphsynergy0576.pinet.com</li>
+          <li>✅ <strong>App URL</strong>: https://triumphsynergy7386.pinet.com</li>
           <li>✅ <strong>Pi Network</strong>: Connected & Ready</li>
-          <li>✅ <strong>Pinet Domain</strong>: triumphsynergy0576.pinet.com</li>
+          <li>✅ <strong>Pinet Domain</strong>: triumphsynergy7386.pinet.com</li>
           <li>✅ <strong>API Routes</strong>: Active</li>
           <li>✅ <strong>Payment Processing</strong>: Ready</li>
           <li>✅ <strong>Pi SDK</strong>: Initialized</li>
@@ -34,7 +34,7 @@ export default function HomePage() {
       }}>
         <h3>🔗 Access Points</h3>
         <ul style={{ lineHeight: '1.8' }}>
-          <li><strong>Pi App Studio:</strong> https://triumphsynergy0576.pinet.com</li>
+          <li><strong>Pi App Studio:</strong> https://triumphsynergy7386.pinet.com</li>
           <li><strong>Vercel Direct:</strong> https://triumph-synergy.vercel.app</li>
           <li><strong>Validation Key:</strong> /validation-key.txt</li>
         </ul>

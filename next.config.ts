@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Force webpack instead of Turbopack for compatibility
-  // turbopack: {}, // Empty object to explicitly use Turbopack config, or omit to use webpack
+  // Force webpack instead of Turbopack to avoid module resolution issues
+  experimental: {
+    turbopack: false, // Explicitly disable Turbopack
+  },
 
   // Enable type checking during build to catch real errors
   typescript: {
