@@ -1,0 +1,64 @@
+{
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[graphql]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferGoToProjectRootOnDefinition": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+  "emmet.showExpandedAbbreviation": "never",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "editor.codeActions.triggerOnFocusChange": false,
+  "files.autoSave": "off",
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true,
+    "**/out/**": true,
+    "**/.git/**": true
+  },
+  "editor.maxTokensPerLine": 10000,
+  "editor.wordBasedSuggestions": "off",
+  "editor.quickSuggestions": {
+    "other": false,
+    "comments": false,
+    "strings": false
+  },
+  "DockerRun.DisableDockerrc": true,
+  "DockerRun.DisableAutoGenerateConfig": true,
+  "extensions.ignoreRecommendations": false,
+  "[markdown]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "chat.mcp.serverSampling": {
+    "triumph-synergy/.vscode/mcp.json: io.github.github/github-mcp-server": {
+      "allowedModels": []
+    }
+  }
+}

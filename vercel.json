@@ -1,0 +1,156 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "pnpm build --webpack",
+  "installCommand": "pnpm install",
+  "headers": [
+    {
+      "source": "/api/pi/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://sdk.minepi.com"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Pi-App-Id"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/pi-app-verification",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=()"
+        },
+        {
+          "key": "X-Pi-App-Verification",
+          "value": "triumph-synergy-validated"
+        }
+      ]
+    },
+    {
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ],
+      "source": "/validation-key.txt"
+    },
+    {
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ],
+      "source": "/validation-key-mainnet.txt"
+    },
+    {
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ],
+      "source": "/validation-key-testnet.txt"
+    }
+  ],
+  "outputDirectory": ".next",
+  "devCommand": "pnpm dev",
+  "regions": ["iad1"],
+  "functions": {
+    "app/api/pi/**/*.ts": {
+      "maxDuration": 30,
+      "memory": 1024
+    },
+    "app/api/stellar/**/*.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    },
+    "pages/api/pi/**/*.ts": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/.well-known/pi-app-verification",
+      "destination": "/api/pi-verification"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy0576.pinet.com",
+    "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com",
+    "NEXT_PUBLIC_PI_APP_ID": "triumph-synergy",
+    "NEXT_PUBLIC_PI_SANDBOX": "false",
+    "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true",
+    "DEPLOYMENT_ENV": "mainnet",
+    "NEXT_PUBLIC_PI_SDK_URL": "https://sdk.minepi.com/pi-sdk.js"
+  },
+  "crons": [
+    {
+      "path": "/api/cron/stellar-settlement",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/payment-reconciliation",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Add Docker and service directories
+services/
+*.log
+.env.local
+
+# Redis data
+redis_data/
+
+# PostgreSQL data
+postgres_data/
+
+# Docker volumes
+volumes/

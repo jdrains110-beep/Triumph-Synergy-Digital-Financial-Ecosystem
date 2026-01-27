@@ -1,0 +1,86 @@
+# ⚡ MAINNET QUICK REFERENCE CARD
+
+**STATUS**: ✅ LIVE  
+**DATE**: January 7, 2026
+
+---
+
+## 🎯 WHAT HAPPENED
+Testnet → Mainnet migration completed.  
+Real transactions now active. Demo app replaced.
+
+---
+
+## 📍 YOUR PRODUCTION URL
+```
+https://triumphsynergy0576.pinet.com
+```
+
+---
+
+## ✅ WHAT'S DEPLOYED
+| Component | Status |
+|-----------|--------|
+| Mainnet Config | ✅ Active |
+| Validation Key | ✅ Deployed |
+| Code Committed | ✅ Pushed |
+| Vercel Build | ⏳ In Progress |
+| Real Transactions | ✅ Enabled |
+
+---
+
+## 🔑 VALIDATION KEY
+```
+efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195
+```
+
+**Accessible at:**
+```
+https://triumphsynergy0576.pinet.com/validation-key.txt
+```
+
+---
+
+## 📋 YOUR IMMEDIATE TO-DO
+
+1. **Wait** ⏳ (5-10 min for Vercel build)
+2. **Test** 🧪 (Open pinet domain URL)
+3. **Verify** ✅ (Click verify on Pi Platform)
+4. **Launch** 🚀 (Go live with real payments)
+
+---
+
+## 🔗 IMPORTANT LINKS
+
+| Link | Purpose |
+|------|---------|
+| https://vercel.com/jeremiah-drains-projects/triumph-synergy | Track deployment |
+| https://pi-apps.github.io | Verify domain |
+| https://triumphsynergy0576.pinet.com/validation-key.txt | Test file access |
+| https://github.com/jdrains110-beep/triumph-synergy | Repository |
+
+---
+
+## ⚠️ CRITICAL NOTES
+
+✅ **Real Money Active** - Every transaction is real Pi tokens  
+✅ **Permanent Binding** - Domain bound to mainnet when verified  
+✅ **No Testnet** - Demo app is gone, production only  
+✅ **Users Ready** - Can start onboarding real users  
+
+---
+
+## 🎉 NEXT: DOMAIN VERIFICATION
+
+1. Go to: **https://pi-apps.github.io**
+2. Sign in with **MAINNET** Pi account
+3. Find your app: **triumph-synergy**
+4. Click: **Verify Domain**
+5. Confirmation: Domain bound ✅
+
+---
+
+**App ID**: triumph-synergy  
+**Username**: jdrains30  
+**Commit**: 09e4661  
+**Status**: MAINNET LIVE 🚀

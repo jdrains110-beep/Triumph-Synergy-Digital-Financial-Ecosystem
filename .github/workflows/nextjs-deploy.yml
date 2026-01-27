@@ -1,0 +1,55 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.3
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+        continue-on-error: false
+
+      - name: Check Node version
+        run: node --version && npm --version && pnpm --version
+
+      - name: Build project
+        run: pnpm run build 2>&1
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: Check build status
+        run: |
+          echo "Checking build output..."
+          if [ -d .next ]; then
+            echo "✓ Build successful"
+            ls -la .next | head -20
+          else
+            echo "✗ Build failed - .next not found"
+            echo "Contents of current directory:"
+            ls -la
+            exit 1
+          fi
+
+      - name: Build summary
+        if: always()
+        run: echo "Build workflow completed"

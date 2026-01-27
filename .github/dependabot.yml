@@ -1,0 +1,10 @@
+# Dependabot keeps dependencies up to date and secure.
+version: 2
+updates:
+  - package-ecosystem: "npm"           # Use npm/pnpm ecosystem for package.json
+    directory: "/"                     # Root directory where package.json lives
+    schedule:
+      interval: "weekly"               # Run every week
+    allow:
+      - dependency-type: "all"        # App + dev dependencies
+    open-pull-requests-limit: 5         # Avoid PR spam
