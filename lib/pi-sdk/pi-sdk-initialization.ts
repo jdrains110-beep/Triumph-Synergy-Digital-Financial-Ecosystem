@@ -202,6 +202,17 @@ export class PiSDKInitializer {
       return;
     }
 
+    // ✅ CRITICAL: Initialize Pi SDK with version and appId
+    try {
+      await piGlobal.init({
+        version: "2.0",
+        appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+      });
+      console.log("[Pi SDK] ✓ Pi.init() called successfully");
+    } catch (error) {
+      console.warn("[Pi SDK] Pi.init() call failed (may be OK in web mode):", error);
+    }
+
     // Wrap the global Pi object with proper typing
     this.sdk = {
       auth: {
