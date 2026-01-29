@@ -57,6 +57,10 @@ function getActualHostname(): string {
 
 /**
  * Detect if this is testnet or mainnet based on hostname
+ * Domain mapping:
+ *   0576 = Primary app domain (mainnet)
+ *   1991 = Testnet (development/testing)
+ *   7386 = Mainnet (production)
  */
 function getEnvironmentNetwork(): "testnet" | "mainnet" {
   const hostname = getActualHostname();
@@ -66,8 +70,9 @@ function getEnvironmentNetwork(): "testnet" | "mainnet" {
   if (isSandbox) return "testnet";
   
   // Check hostname patterns
-  if (hostname.includes("0576")) return "testnet";
+  if (hostname.includes("1991")) return "testnet";
   if (hostname.includes("7386")) return "mainnet";
+  if (hostname.includes("0576")) return "mainnet";
   if (hostname.includes("testnet")) return "testnet";
   if (hostname.includes("staging")) return "testnet";
   if (hostname.includes("vercel.app")) {

@@ -76,11 +76,13 @@ export function middleware(request: NextRequest) {
   }
   
   // Set Pi Network environment based on hostname
-  // triumphsynergy0576 = testnet, triumphsynergy7386 = mainnet
-  const isMainnet = hostname.includes("7386") || hostname.includes("triumph-synergy.vercel.app");
-  const isTestnet = hostname.includes("0576");
+  // triumphsynergy0576 = mainnet (primary app domain)
+  // triumphsynergy1991 = testnet (development/testing)
+  // triumphsynergy7386 = mainnet (production)
+  const isTestnet = hostname.includes("1991");
+  const isMainnet = hostname.includes("7386") || hostname.includes("0576") || hostname.includes("triumph-synergy.vercel.app");
   
-  response.headers.set("X-Pi-Network", isMainnet ? "mainnet" : "testnet");
+  response.headers.set("X-Pi-Network", isTestnet ? "testnet" : "mainnet");
   response.headers.set("X-Hostname", hostname);
   
   // Add CORS headers for Pi SDK
