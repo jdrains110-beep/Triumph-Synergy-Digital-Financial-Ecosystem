@@ -41,28 +41,26 @@ export function getVerifiedDeploymentURLs() {
 
 /**
  * Checks if running on verified mainnet deployment
+ * Validated mainnet domain: triumphsynergy7386.pinet.com
  */
 export function isMainnetDeployment(): boolean {
   if (typeof window === "undefined") return false;
   
   const currentUrl = window.location.origin;
-  const expectedPiAppStudioUrl = "https://triumphsynergy0576.pinet.com";
-  const expectedMainnetUrl = "https://triumph-synergy-jeremiah-drains-projects.vercel.app";
+  const expectedMainnetUrl = "https://triumphsynergy7386.pinet.com";
   
-  return (
-    currentUrl === expectedPiAppStudioUrl ||
-    currentUrl === expectedMainnetUrl
-  );
+  return currentUrl === expectedMainnetUrl;
 }
 
 /**
  * Checks if running on verified testnet deployment
+ * Validated testnet domain: triumphsynergy1991.pinet.com
  */
 export function isTestnetDeployment(): boolean {
   if (typeof window === "undefined") return false;
   
   const currentUrl = window.location.origin;
-  const expectedTestnetUrl = "https://triumph-synergy-testnet.vercel.app";
+  const expectedTestnetUrl = "https://triumphsynergy1991.pinet.com";
   
   return currentUrl === expectedTestnetUrl;
 }

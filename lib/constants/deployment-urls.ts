@@ -1,25 +1,26 @@
 /**
- * IMMUTABLE DEPLOYMENT URL CONSTANTS
+ * IMMUTABLE DEPLOYMENT URL CONSTANTS - VALIDATED PINET DOMAINS
  * 
- * These URLs are locked for Pi Network domain verification.
- * DO NOT MODIFY - Changes require Pi Developer Portal re-verification
+ * Domains are locked for Pi Network verification:
+ * - Primary App: triumphsynergy0576.pinet.com (main app domain)
+ * - Mainnet: triumphsynergy7386.pinet.com (VALIDATED)
+ * - Testnet: triumphsynergy1991.pinet.com (VALIDATED)
  * 
- * Last Verified: January 18, 2026
- * Commit Hash: (see git log)
+ * Last Verified: January 29, 2026
  */
 
 // ============================================================================
-// PRODUCTION (MAINNET) - https://triumphsynergy0576.pinet.com
+// PRODUCTION (MAINNET) - https://triumphsynergy7386.pinet.com (VALIDATED)
 // ============================================================================
 export const MAINNET_DEPLOYMENT = {
-  // Primary Pi App Studio URL (Immutable)
-  primaryUrl: "https://triumphsynergy0576.pinet.com",
+  // Mainnet Pi App Studio URL (VALIDATED)
+  primaryUrl: "https://triumphsynergy7386.pinet.com",
   
   // Vercel URL (for fallback/reference)
   vercelUrl: "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
   
   // Custom pinet domain (registered & verified)
-  customDomain: "https://triumphsynergy0576.pinet.com",
+  customDomain: "https://triumphsynergy7386.pinet.com",
   
   // Network Configuration
   sandbox: false,
@@ -36,21 +37,21 @@ export const MAINNET_DEPLOYMENT = {
   
   // Verification Status
   verified: true,
-  verificationDate: "2026-01-18",
+  verificationDate: "2026-01-29",
 } as const;
 
 // ============================================================================
-// TESTNET (SANDBOX) - https://triumphsynergy0576.pinet.com
+// TESTNET (SANDBOX) - https://triumphsynergy1991.pinet.com (VALIDATED)
 // ============================================================================
 export const TESTNET_DEPLOYMENT = {
-  // Primary Pi App Studio URL (Immutable)
-  primaryUrl: "https://triumphsynergy0576.pinet.com",
+  // Testnet Pi App Studio URL (VALIDATED)
+  primaryUrl: "https://triumphsynergy1991.pinet.com",
   
-  // Testnet Vercel URL (Immutable)
+  // Testnet Vercel URL (for fallback)
   vercelUrl: "https://triumph-synergy-testnet.vercel.app",
   
-  // Same custom domain (routes to testnet via subdomain or env)
-  customDomain: "https://triumphsynergy0576.pinet.com",
+  // Testnet custom domain (registered & verified)
+  customDomain: "https://triumphsynergy1991.pinet.com",
   
   // Network Configuration
   sandbox: true,

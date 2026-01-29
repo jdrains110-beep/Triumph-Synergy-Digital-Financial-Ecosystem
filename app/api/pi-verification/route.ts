@@ -34,8 +34,8 @@ export async function GET(request: Request) {
 
     // App URLs
     urls: {
-      mainnet: "https://triumphsynergy0576.pinet.com",
-      testnet: "https://triumphsynergy0576.pinet.com",
+      mainnet: "https://triumphsynergy7386.pinet.com",
+      testnet: "https://triumphsynergy1991.pinet.com",
       custom_domain: "https://triumphsynergy0576.pinet.com",
       current_host: host,
     },

@@ -152,8 +152,8 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy0576.pinet.com",
-    "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com",
+    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy7386.pinet.com",
+    "NEXTAUTH_URL": "https://triumphsynergy7386.pinet.com",
     "NEXT_PUBLIC_PI_APP_ID": "triumph-synergy",
     "NEXT_PUBLIC_PI_SANDBOX": "false",
     "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true",
@@ -161,7 +161,7 @@
     "NEXT_PUBLIC_PI_SDK_URL": "https://sdk.minepi.com/pi-sdk.js",
     "AUTH_SECRET": "triumph-synergy-pi-app-studio-auth-secret-2026-production",
     "NEXTAUTH_SECRET": "triumph-synergy-pi-app-studio-auth-secret-2026-production",
-    "VERCEL_URL": "triumphsynergy0576.pinet.com"
+    "VERCEL_URL": "triumphsynergy7386.pinet.com"
   },
   "crons": [
     {
