@@ -51,18 +51,21 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Pi-Browser-Version", piVersion);
   }
   
-  // Set Pi Network environment based on pinet subdomain
-  // triumphsynergy1991.pinet.com = testnet, triumphsynergy7386.pinet.com = mainnet
+  // Set Pi Network environment based on hostname
+  // triumphsynergy0576 = testnet, triumphsynergy7386 = mainnet
   const hostname = request.nextUrl.hostname;
-  const isMainnet = !hostname.includes("1991") && process.env.NEXT_PUBLIC_PI_SANDBOX !== "true";
+  const isMainnet = hostname.includes("7386") || hostname.includes("triumph-synergy.vercel.app");
+  const isTestnet = hostname.includes("0576");
   
   response.headers.set("X-Pi-Network", isMainnet ? "mainnet" : "testnet");
+  response.headers.set("X-Hostname", hostname);
   
   // Add CORS headers for Pi SDK
   const origin = request.headers.get("origin") || "";
   if (
     origin.includes("minepi.com") ||
     origin.includes("pinet.com") ||
+    origin.includes("vercel.app") ||
     origin.includes("localhost")
   ) {
     response.headers.set("Access-Control-Allow-Origin", origin);

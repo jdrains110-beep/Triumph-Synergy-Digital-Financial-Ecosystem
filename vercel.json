@@ -128,6 +128,24 @@
   "outputDirectory": ".next",
   "devCommand": "pnpm dev",
   "regions": ["iad1"],
+  "domains": [
+    {
+      "domain": "triumph-synergy.vercel.app",
+      "redirect": 307,
+      "redirectStatusCode": 307
+    },
+    {
+      "domain": "triumphsynergy0576.pinet.com"
+    },
+    {
+      "domain": "triumphsynergy7386.pinet.com"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
   "functions": {
     "app/api/pi/**/*.ts": {
       "maxDuration": 30,
@@ -152,15 +170,16 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://triumph-synergy.vercel.app",
-    "NEXTAUTH_URL": "https://triumph-synergy.vercel.app",
+    "NEXT_PUBLIC_APP_URL": "https://triumphsynergy0576.pinet.com",
+    "NEXTAUTH_URL": "https://triumphsynergy0576.pinet.com",
     "NEXT_PUBLIC_PI_APP_ID": "triumph-synergy",
     "NEXT_PUBLIC_PI_SANDBOX": "false",
     "NEXT_PUBLIC_PI_BROWSER_DETECTION": "true",
     "DEPLOYMENT_ENV": "mainnet",
     "NEXT_PUBLIC_PI_SDK_URL": "https://sdk.minepi.com/pi-sdk.js",
     "AUTH_SECRET": "triumph-synergy-pi-app-studio-auth-secret-2026-production",
-    "NEXTAUTH_SECRET": "triumph-synergy-pi-app-studio-auth-secret-2026-production"
+    "NEXTAUTH_SECRET": "triumph-synergy-pi-app-studio-auth-secret-2026-production",
+    "VERCEL_URL": "triumphsynergy0576.pinet.com"
   },
   "crons": [
     {
