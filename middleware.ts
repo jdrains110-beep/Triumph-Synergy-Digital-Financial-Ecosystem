@@ -50,14 +50,23 @@ export function middleware(request: NextRequest) {
     hostname.includes("-git-") ||
     (hostname.includes("vercel.app") && !hostname.includes("triumph-synergy.vercel.app"))
   ) {
-    // Redirect to testnet domain by default
+    // Redirect to testnet domain by default with permanent redirect
     const redirectUrl = new URL(request.nextUrl);
     redirectUrl.hostname = "triumphsynergy0576.pinet.com";
-    return NextResponse.redirect(redirectUrl, 301);
+    const response = NextResponse.redirect(redirectUrl, 301);
+    // Ensure no caching of redirect to prevent stale preview URLs
+    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
   }
   
   // Create response with modified headers
   const response = NextResponse.next();
+  
+  // Mark response as coming from validated domain (not preview)
+  response.headers.set("X-Validated-Domain", "true");
+  response.headers.set("X-Deployment-Source", hostname.includes("pinet.com") ? "pinet" : "vercel");
   
   // Set Pi Browser detection headers
   response.headers.set("X-Pi-Browser", isPi ? "true" : "false");
