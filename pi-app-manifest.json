@@ -103,7 +103,7 @@
   },
   
   "urls": {
-    "production": "https://triumphsynergy7386.pinet.com",
+    "production": "https://triumphsynergy0576.pinet.com",
     "staging": "https://triumph-synergy-staging.vercel.app",
     "development": "http://localhost:3000",
     "documentation": "https://github.com/jdrains110-beep/triumph-synergy/tree/main/docs",

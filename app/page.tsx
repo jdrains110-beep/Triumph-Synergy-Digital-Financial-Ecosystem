@@ -15,10 +15,12 @@ export default function HomePage() {
       }}>
         <h3>✅ System Status</h3>
         <ul style={{ lineHeight: '1.8' }}>
-          <li>✅ <strong>Server</strong>: Running on Vercel</li>
-          <li>✅ <strong>App URL</strong>: https://triumphsynergy7386.pinet.com</li>
+          <li>✅ <strong>Server</strong>: Running on Vercel (Mainnet)</li>
+          <li>✅ <strong>App URL</strong>: https://triumph-synergy.vercel.app</li>
           <li>✅ <strong>Pi Network</strong>: Connected & Ready</li>
-          <li>✅ <strong>Pinet Domain</strong>: triumphsynergy7386.pinet.com</li>
+          <li>✅ <strong>Main Pinet Domain</strong>: triumphsynergy0576.pinet.com (Primary)</li>
+          <li>✅ <strong>Mainnet Pinet Domain</strong>: triumphsynergy7386.pinet.com</li>
+          <li>✅ <strong>Testnet Pinet Domain</strong>: triumphsynergy1991.pinet.com</li>
           <li>✅ <strong>API Routes</strong>: Active</li>
           <li>✅ <strong>Payment Processing</strong>: Ready</li>
           <li>✅ <strong>Pi SDK</strong>: Initialized</li>
@@ -34,8 +36,11 @@ export default function HomePage() {
       }}>
         <h3>🔗 Access Points</h3>
         <ul style={{ lineHeight: '1.8' }}>
-          <li><strong>Pi App Studio:</strong> https://triumphsynergy7386.pinet.com</li>
-          <li><strong>Vercel Direct:</strong> https://triumph-synergy.vercel.app</li>
+          <li><strong>Main Domain (0576):</strong> https://triumphsynergy0576.pinet.com</li>
+          <li><strong>Mainnet Domain (7386):</strong> https://triumphsynergy7386.pinet.com</li>
+          <li><strong>Testnet Domain (1991):</strong> https://triumphsynergy1991.pinet.com</li>
+          <li><strong>Mainnet Vercel:</strong> https://triumph-synergy.vercel.app</li>
+          <li><strong>Testnet Vercel:</strong> https://triumph-synergy-testnet.vercel.app</li>
           <li><strong>Validation Key:</strong> /validation-key.txt</li>
         </ul>
       </div>
