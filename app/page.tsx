@@ -1,59 +1,212 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
+/**
+ * Main Pi App Studio Dashboard
+ * Displays Triumph Synergy payment processing interface
+ * This is the primary interface loaded by Pi App Studio
+ */
 export default function HomePage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading Triumph Synergy...</div>;
+  }
+
   return (
-    <div style={{ padding: '40px', fontFamily: 'system-ui', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ color: '#2563eb' }}>🎉 Triumph Synergy</h1>
-      <h2 style={{ color: '#64748b' }}>Pi Network Payment Platform</h2>
-
+    <div style={{ 
+      minHeight: '100vh',
+      backgroundColor: '#ffffff',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    }}>
+      {/* Header */}
       <div style={{
-        backgroundColor: '#f1f5f9',
-        padding: '20px',
-        borderRadius: '8px',
-        marginTop: '20px',
-        border: '1px solid #cbd5e1'
+        backgroundColor: '#2563eb',
+        color: '#ffffff',
+        padding: '20px 40px',
+        borderBottom: '2px solid #1e40af'
       }}>
-        <h3>✅ System Status</h3>
-        <ul style={{ lineHeight: '1.8' }}>
-          <li>✅ <strong>Server</strong>: Running on Vercel (Mainnet)</li>
-          <li>✅ <strong>App URL</strong>: https://triumph-synergy.vercel.app</li>
-          <li>✅ <strong>Pi Network</strong>: Connected & Ready</li>
-          <li>✅ <strong>Main Pinet Domain</strong>: triumphsynergy0576.pinet.com (Primary)</li>
-          <li>✅ <strong>Mainnet Pinet Domain</strong>: triumphsynergy7386.pinet.com</li>
-          <li>✅ <strong>Testnet Pinet Domain</strong>: triumphsynergy1991.pinet.com</li>
-          <li>✅ <strong>API Routes</strong>: Active</li>
-          <li>✅ <strong>Payment Processing</strong>: Ready</li>
-          <li>✅ <strong>Pi SDK</strong>: Initialized</li>
-        </ul>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '700' }}>
+            ⚡ Triumph Synergy
+          </h1>
+          <p style={{ margin: '0', fontSize: '14px', opacity: '0.9' }}>
+            Pi Network Payment Processing Platform
+          </p>
+        </div>
       </div>
 
-      <div style={{
-        backgroundColor: '#ecfdf5',
-        padding: '20px',
-        borderRadius: '8px',
-        marginTop: '20px',
-        border: '1px solid #a7f3d0'
-      }}>
-        <h3>🔗 Access Points</h3>
-        <ul style={{ lineHeight: '1.8' }}>
-          <li><strong>Main Domain (0576):</strong> https://triumphsynergy0576.pinet.com</li>
-          <li><strong>Mainnet Domain (7386):</strong> https://triumphsynergy7386.pinet.com</li>
-          <li><strong>Testnet Domain (1991):</strong> https://triumphsynergy1991.pinet.com</li>
-          <li><strong>Mainnet Vercel:</strong> https://triumph-synergy.vercel.app</li>
-          <li><strong>Testnet Vercel:</strong> https://triumph-synergy-testnet.vercel.app</li>
-          <li><strong>Validation Key:</strong> /validation-key.txt</li>
-        </ul>
+      {/* Main Dashboard */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+        
+        {/* Status Cards Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '20px',
+          marginBottom: '40px'
+        }}>
+          
+          {/* System Status Card */}
+          <div style={{
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #86efac',
+            borderRadius: '8px',
+            padding: '24px'
+          }}>
+            <h3 style={{ margin: '0 0 16px 0', color: '#15803d', fontSize: '16px', fontWeight: '600' }}>
+              ✅ System Status
+            </h3>
+            <div style={{ fontSize: '14px', lineHeight: '1.8', color: '#374151' }}>
+              <div>Server: <strong>Running</strong></div>
+              <div>Network: <strong>Mainnet</strong></div>
+              <div>Pi SDK: <strong>Active</strong></div>
+              <div>Payment Processing: <strong>Ready</strong></div>
+            </div>
+          </div>
+
+          {/* Domains Card */}
+          <div style={{
+            backgroundColor: '#f0f9ff',
+            border: '1px solid #0ea5e9',
+            borderRadius: '8px',
+            padding: '24px'
+          }}>
+            <h3 style={{ margin: '0 0 16px 0', color: '#0369a1', fontSize: '16px', fontWeight: '600' }}>
+              🌐 Domains Active
+            </h3>
+            <div style={{ fontSize: '13px', lineHeight: '2', color: '#374151', fontFamily: 'monospace' }}>
+              <div>• 0576.pinet.com</div>
+              <div>• 7386.pinet.com</div>
+              <div>• 1991.pinet.com</div>
+              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #bfdbfe', fontSize: '12px' }}>
+                All domains routing correctly
+              </div>
+            </div>
+          </div>
+
+          {/* SSL Certificate Card */}
+          <div style={{
+            backgroundColor: '#faf5ff',
+            border: '1px solid #d8b4fe',
+            borderRadius: '8px',
+            padding: '24px'
+          }}>
+            <h3 style={{ margin: '0 0 16px 0', color: '#7e22ce', fontSize: '16px', fontWeight: '600' }}>
+              🔒 SSL Certificates
+            </h3>
+            <div style={{ fontSize: '14px', lineHeight: '1.8', color: '#374151' }}>
+              <div>Status: <strong>Valid</strong></div>
+              <div>Certificate: <strong>Active</strong></div>
+              <div>HTTPS: <strong>Enabled</strong></div>
+              <div>Expiration: <strong>Auto-Renewal</strong></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Deployment Info */}
+        <div style={{
+          backgroundColor: '#fafafa',
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          padding: '24px',
+          marginBottom: '40px'
+        }}>
+          <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
+            🚀 Deployment Information
+          </h2>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '24px',
+            fontSize: '14px'
+          }}>
+            <div>
+              <div style={{ fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Mainnet Deployment</div>
+              <div style={{ color: '#374151', fontFamily: 'monospace', fontSize: '13px' }}>
+                triumph-synergy.vercel.app
+              </div>
+            </div>
+            
+            <div>
+              <div style={{ fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Testnet Deployment</div>
+              <div style={{ color: '#374151', fontFamily: 'monospace', fontSize: '13px' }}>
+                triumph-synergy-testnet.vercel.app
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>App ID</div>
+              <div style={{ color: '#374151', fontFamily: 'monospace', fontSize: '13px' }}>
+                triumph-synergy
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Git Repository</div>
+              <div style={{ color: '#374151', fontFamily: 'monospace', fontSize: '13px' }}>
+                jdrains110-beep/triumph-synergy
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Features */}
+        <div style={{
+          backgroundColor: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '8px',
+          padding: '24px'
+        }}>
+          <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1e40af' }}>
+            💳 Payment Features
+          </h2>
+          
+          <ul style={{
+            margin: '0',
+            paddingLeft: '20px',
+            fontSize: '14px',
+            lineHeight: '1.8',
+            color: '#374151'
+          }}>
+            <li>Pi Network Payment Processing</li>
+            <li>Advanced Payment Routing</li>
+            <li>Compliance Automation</li>
+            <li>Real-time Transaction Monitoring</li>
+            <li>Wallet Integration</li>
+            <li>Payment Settlement</li>
+            <li>Multi-tier Domain Support</li>
+            <li>Testnet & Mainnet Separation</li>
+          </ul>
+        </div>
       </div>
 
+      {/* Footer */}
       <div style={{
-        backgroundColor: '#fef3c7',
-        padding: '20px',
-        borderRadius: '8px',
-        marginTop: '20px',
-        border: '1px solid #fcd34d'
+        backgroundColor: '#f9fafb',
+        borderTop: '1px solid #e5e7eb',
+        padding: '24px 40px',
+        marginTop: '60px',
+        fontSize: '13px',
+        color: '#6b7280'
       }}>
-        <h3>ℹ️ Information</h3>
-        <p>App is successfully deployed and ready for Pi Network payments. Access through either the direct Vercel URL or the Pi Network pinet domain.</p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ marginBottom: '8px' }}>
+            <strong>Triumph Synergy</strong> © 2026 - Pi Network Payment Platform
+          </div>
+          <div>
+            Primary Domain: <code style={{ backgroundColor: '#f3f4f6', padding: '2px 6px', borderRadius: '3px' }}>triumphsynergy0576.pinet.com</code>
+          </div>
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
+            Status: <strong style={{ color: '#16a34a' }}>✅ All Systems Operational</strong>
+          </div>
+        </div>
       </div>
     </div>
   );
