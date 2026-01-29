@@ -41,6 +41,21 @@ export function middleware(request: NextRequest) {
   const isPi = isPiBrowser(userAgent);
   const piVersion = getPiBrowserVersion(userAgent);
   
+  const hostname = request.nextUrl.hostname;
+  
+  // CRITICAL: Redirect preview URLs to production pinet domains
+  // Prevent accessing via random Vercel preview deployments
+  if (
+    hostname.includes("-jeremiah-drains-projects.vercel.app") ||
+    hostname.includes("-git-") ||
+    (hostname.includes("vercel.app") && !hostname.includes("triumph-synergy.vercel.app"))
+  ) {
+    // Redirect to testnet domain by default
+    const redirectUrl = new URL(request.nextUrl);
+    redirectUrl.hostname = "triumphsynergy0576.pinet.com";
+    return NextResponse.redirect(redirectUrl, 301);
+  }
+  
   // Create response with modified headers
   const response = NextResponse.next();
   
@@ -53,7 +68,6 @@ export function middleware(request: NextRequest) {
   
   // Set Pi Network environment based on hostname
   // triumphsynergy0576 = testnet, triumphsynergy7386 = mainnet
-  const hostname = request.nextUrl.hostname;
   const isMainnet = hostname.includes("7386") || hostname.includes("triumph-synergy.vercel.app");
   const isTestnet = hostname.includes("0576");
   
