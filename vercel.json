@@ -128,24 +128,6 @@
   "outputDirectory": ".next",
   "devCommand": "pnpm dev",
   "regions": ["iad1"],
-  "domains": [
-    {
-      "domain": "triumph-synergy.vercel.app",
-      "redirect": 307,
-      "redirectStatusCode": 307
-    },
-    {
-      "domain": "triumphsynergy0576.pinet.com"
-    },
-    {
-      "domain": "triumphsynergy7386.pinet.com"
-    }
-  ],
-  "git": {
-    "deploymentEnabled": {
-      "main": true
-    }
-  },
   "functions": {
     "app/api/pi/**/*.ts": {
       "maxDuration": 30,
