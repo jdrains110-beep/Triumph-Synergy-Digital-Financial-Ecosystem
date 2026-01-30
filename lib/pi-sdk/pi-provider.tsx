@@ -67,18 +67,48 @@ export function PiProvider({ children }: { children: ReactNode }) {
 
     const initializePi = async () => {
       try {
-        console.log("[Pi SDK] Starting initialization...");
+        console.log("[Pi SDK Provider] Starting initialization...");
+        console.log("[Pi SDK Provider] window.Pi on mount:", typeof (window as any).Pi, (window as any).Pi);
 
-        // Wait for Pi SDK script to load (loaded in HTML head)
+        // In Pi Browser, window.Pi might ALREADY be injected by the browser
+        // Don't wait for script - check immediately
+        if ((window as any).Pi) {
+          console.log("[Pi SDK Provider] ✓ window.Pi ALREADY available (injected by Pi Browser)");
+          const Pi = (window as any).Pi;
+          
+          // Try to initialize immediately
+          try {
+            await Pi.init({
+              version: "2.0",
+              appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+            });
+            console.log("[Pi SDK Provider] ✓ Pi.init() succeeded");
+            setIsReady(true);
+            setSdkInitialized(true);
+            return;
+          } catch (initErr) {
+            console.log("[Pi SDK Provider] Pi.init() not needed or already initialized:", initErr);
+            setIsReady(true);
+            setSdkInitialized(true);
+            return;
+          }
+        }
+
+        // If not immediately available, wait for script to load
+        console.log("[Pi SDK Provider] Waiting for Pi SDK script to inject window.Pi...");
         let attempts = 0;
         while (!(window as any).Pi && attempts < 100) {
           await new Promise(resolve => setTimeout(resolve, 100));
           attempts++;
+          
+          if (attempts % 10 === 0) {
+            console.log(`[Pi SDK Provider] Still waiting... attempt ${attempts}/100`);
+          }
         }
 
         // Check for Pi SDK (Pi Browser injects window.Pi)
         if (!(window as any).Pi) {
-          console.log("[Pi SDK] Not in Pi Browser - using web fallback mode");
+          console.log("[Pi SDK Provider] ❌ window.Pi never became available - using web fallback");
           // Create a persistent fallback user ID
           const storedUserId = localStorage.getItem("triumph_synergy_web_user_id");
           const fallbackUserId = storedUserId || `web-${Date.now()}`;
@@ -96,7 +126,18 @@ export function PiProvider({ children }: { children: ReactNode }) {
         }
 
         const Pi = (window as any).Pi;
-        console.log("[Pi SDK] Pi object detected!");
+        console.log("[Pi SDK Provider] ✓ Pi object detected after waiting!");
+
+        // Try to initialize
+        try {
+          await Pi.init({
+            version: "2.0",
+            appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+          });
+          console.log("[Pi SDK Provider] ✓ Pi.init() succeeded");
+        } catch (initErr) {
+          console.warn("[Pi SDK Provider] Pi.init() warning (may be OK):", initErr);
+        }
 
         // Initialize Pi SDK immediately for proper readiness
         console.log("[Pi SDK] Initializing SDK...");
