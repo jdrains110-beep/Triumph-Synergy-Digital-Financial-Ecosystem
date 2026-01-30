@@ -89,41 +89,83 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        {/* CRITICAL DIAGNOSTIC: Log when page starts loading */}
+        
+        {/* Load Pi SDK scripts FIRST - BEFORE React initialization */}
+        <script src="https://sdk.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" />
+        <script src="https://app-cdn.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" async defer />
+        
+        {/* CRITICAL: Auto-initialize Pi SDK immediately after scripts load */}
+        {/* This is what was missing - without this, Pi Browser doesn't recognize the app */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              console.log("[TRIUMPH SYNERGY] Page loaded at:", new Date().toISOString());
-              console.log("[TRIUMPH SYNERGY] Current domain:", window.location.hostname);
-              console.log("[TRIUMPH SYNERGY] User Agent:", navigator.userAgent);
-              
-              // Check if Pi object exists before SDK loads
-              console.log("[TRIUMPH SYNERGY] window.Pi before script:", typeof window.Pi);
-              
-              // Log when Pi SDK loads
-              window.__piSDKLoaded = false;
-              const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'Pi');
-              Object.defineProperty(window, 'Pi', {
-                get() {
-                  if (!this.__pi) return undefined;
-                  return this.__pi;
-                },
-                set(value) {
-                  console.log("[TRIUMPH SYNERGY] 🎉 Pi SDK LOADED:", value);
-                  window.__piSDKLoaded = true;
-                  this.__pi = value;
-                },
-                configurable: true
-              });
+(function() {
+  window.__piInitialization = {
+    status: 'initializing',
+    startTime: Date.now()
+  };
+
+  async function initializePi() {
+    const hostname = window.location.hostname;
+    const isSandbox = hostname.includes('1991');
+    const network = isSandbox ? 'testnet' : 'mainnet';
+    
+    console.log('[Pi SDK Auto-Init] ===== AUTOMATIC INITIALIZATION =====');
+    console.log('[Pi SDK Auto-Init] Domain:', hostname);
+    console.log('[Pi SDK Auto-Init] Network:', network);
+    console.log('[Pi SDK Auto-Init] Sandbox:', isSandbox);
+
+    try {
+      // Wait for Pi SDK to load
+      let attempts = 0;
+      while (!window.Pi && attempts < 200) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        attempts++;
+      }
+
+      if (!window.Pi) throw new Error('window.Pi never loaded');
+      console.log('[Pi SDK Auto-Init] ✓ window.Pi loaded');
+
+      // Initialize Pi SDK
+      await window.Pi.init({
+        version: '2.0',
+        sandbox: isSandbox,
+        appId: 'triumph-synergy'
+      });
+      console.log('[Pi SDK Auto-Init] ✓ Pi.init() succeeded');
+
+      // CRITICAL: Authenticate with payments scope
+      // This is what tells Pi Browser this is a valid payments app
+      const auth = await window.Pi.authenticate(
+        ['payments'],
+        (payment) => console.log('[Pi SDK] Incomplete payment:', payment)
+      );
+      console.log('[Pi SDK Auto-Init] ✓ AUTHENTICATED - User:', auth.user.uid);
+      
+      window.__piInitialization.status = 'ready';
+      window.__piInitialization.authenticated = true;
+      window.__piInitialization.duration = Date.now() - window.__piInitialization.startTime;
+      
+      console.log('[Pi SDK Auto-Init] ===== READY FOR PAYMENTS =====');
+      window.dispatchEvent(new CustomEvent('piReady', { detail: auth }));
+      
+    } catch (error) {
+      console.error('[Pi SDK Auto-Init] ❌ FAILED:', error);
+      window.__piInitialization.status = 'failed';
+      window.__piInitialization.error = error.message;
+      window.dispatchEvent(new CustomEvent('piError', { detail: error }));
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePi);
+  } else {
+    initializePi();
+  }
+})();
             `,
           }}
         />
-        
-        {/* Load Pi SDK script FIRST - synchronously, no defer */}
-        <script src="https://sdk.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" />
-        
-        {/* Fallback CDN if primary fails */}
-        <script src="https://app-cdn.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" async defer />
       </head>
       <body className="antialiased">
         <ThemeProvider

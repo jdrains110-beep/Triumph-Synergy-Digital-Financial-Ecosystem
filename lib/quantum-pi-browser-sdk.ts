@@ -185,18 +185,39 @@ export const realPi = {
   },
 
   /**
-   * Check if Pi SDK is available and ready for payments
+   * Check if Pi SDK is available and authenticated
+   * Payment buttons should only be enabled when this returns true
    */
   async isAvailable(): Promise<boolean> {
     if (typeof window === "undefined") {
+      console.log("[Real Pi] isAvailable: Server-side");
       return false;
     }
 
+    // Check if window.Pi exists
     if (!window.Pi) {
-      console.warn("[Real Pi] Pi SDK not available");
+      console.log("[Real Pi] isAvailable: window.Pi not found");
       return false;
     }
 
+    // Check if Pi has been authenticated (done by auto-init script)
+    const piInit = (window as any).__piInitialization;
+    if (!piInit) {
+      console.log("[Real Pi] isAvailable: No __piInitialization state");
+      return false;
+    }
+
+    if (piInit.status !== "ready") {
+      console.log("[Real Pi] isAvailable: Pi SDK status is", piInit.status, "not ready");
+      return false;
+    }
+
+    if (!piInit.authenticated) {
+      console.log("[Real Pi] isAvailable: Pi SDK not authenticated");
+      return false;
+    }
+
+    console.log("[Real Pi] ✓ isAvailable: True - Pi authenticated and ready for payments");
     return true;
   },
 

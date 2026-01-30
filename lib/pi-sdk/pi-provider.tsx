@@ -53,7 +53,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [sdkInitialized, setSdkInitialized] = useState(false);
 
-  // Initialize Pi SDK (without auto-authentication to prevent crashes)
+  // Monitor Pi SDK auto-initialization (happens in layout.tsx script)
   useEffect(() => {
     // Skip on server
     if (typeof window === "undefined") {
@@ -65,100 +65,68 @@ export function PiProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const initializePi = async () => {
-      try {
-        console.log("[Pi SDK Provider] Starting initialization...");
-        console.log("[Pi SDK Provider] window.Pi on mount:", typeof (window as any).Pi, (window as any).Pi);
-
-        // In Pi Browser, window.Pi might ALREADY be injected by the browser
-        // Don't wait for script - check immediately
-        if ((window as any).Pi) {
-          console.log("[Pi SDK Provider] ✓ window.Pi ALREADY available (injected by Pi Browser)");
-          const Pi = (window as any).Pi;
-          
-          // Try to initialize with correct sandbox mode based on domain
-        try {
-          const piConfig = {
-            version: "2.0",
-            appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
-            // Detect sandbox from hostname, not env var
-            sandbox: window.location.hostname.includes("1991"), // 1991 = testnet = sandbox
-          };
-          console.log("[Pi SDK Provider] Calling Pi.init() with config:", piConfig);
-          await Pi.init(piConfig);
-          console.log("[Pi SDK Provider] ✓ Pi.init() succeeded");
-        } catch (initErr) {
-          console.warn("[Pi SDK Provider] Pi.init() warning (may be OK):", initErr);
-        }
-        }
-
-        // If not immediately available, wait for script to load
-        console.log("[Pi SDK Provider] Waiting for Pi SDK script to inject window.Pi...");
-        let attempts = 0;
-        while (!(window as any).Pi && attempts < 100) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          attempts++;
-          
-          if (attempts % 10 === 0) {
-            console.log(`[Pi SDK Provider] Still waiting... attempt ${attempts}/100`);
-          }
-        }
-
-        // Check for Pi SDK (Pi Browser injects window.Pi)
-        if (!(window as any).Pi) {
-          console.log("[Pi SDK Provider] ❌ window.Pi never became available - using web fallback");
-          // Create a persistent fallback user ID
-          const storedUserId = localStorage.getItem("triumph_synergy_web_user_id");
-          const fallbackUserId = storedUserId || `web-${Date.now()}`;
-          if (!storedUserId) {
-            localStorage.setItem("triumph_synergy_web_user_id", fallbackUserId);
-          }
-          setUser({
-            uid: fallbackUserId,
-            username: "Web User",
-          });
-          // Mark as ready only after fallback setup
-          setIsReady(true);
-          setSdkInitialized(true);
-          return;
-        }
-
-        const Pi = (window as any).Pi;
-        console.log("[Pi SDK Provider] ✓ Pi object detected after waiting!");
-
-        // Try to initialize
-        try {
-          await Pi.init({
-            version: "2.0",
-            appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
-          });
-          console.log("[Pi SDK Provider] ✓ Pi.init() succeeded");
-        } catch (initErr) {
-          console.warn("[Pi SDK Provider] Pi.init() warning (may be OK):", initErr);
-        }
-
-        // Initialize Pi SDK immediately for proper readiness
-        console.log("[Pi SDK] Initializing SDK...");
-        await Pi.init({ 
-          version: "2.0", 
-          sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === "true",
-          appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+    const handlePiReady = (event: any) => {
+      console.log("[Pi SDK Provider] 🎉 Received piReady event from auto-init");
+      const auth = event.detail;
+      if (auth && auth.user) {
+        console.log("[Pi SDK Provider] User authenticated:", auth.user.uid);
+        setUser({
+          uid: auth.user.uid,
+          username: auth.user.username || "Pi User",
+          email: auth.user.email,
         });
-
-        console.log("[Pi SDK] SDK initialized successfully");
-        setIsReady(true);
-        setSdkInitialized(true);
-
-      } catch (err) {
-        console.error("[Pi SDK] Initialization error:", err);
-        setError(err instanceof Error ? err.message : "SDK init failed");
-        // Still mark as ready so app doesn't hang, but with error state
-        setIsReady(true);
-        setSdkInitialized(true);
+        setIsAuthenticated(true);
       }
+      setIsReady(true);
+      setSdkInitialized(true);
     };
 
-    initializePi();
+    const handlePiError = (event: any) => {
+      console.error("[Pi SDK Provider] Received piError event from auto-init:", event.detail);
+      setError(event.detail?.message || "Pi SDK initialization failed");
+      
+      // Still mark as ready so app doesn't hang
+      setIsReady(true);
+      setSdkInitialized(true);
+    };
+
+    // Listen for auto-init completion
+    window.addEventListener("piReady", handlePiReady);
+    window.addEventListener("piError", handlePiError);
+
+    // Check if already initialized (auto-init finished before listener attached)
+    if ((window as any).__piInitialization) {
+      const initState = (window as any).__piInitialization;
+      console.log("[Pi SDK Provider] Auto-init already in progress/completed:", initState.status);
+      
+      if (initState.status === "ready") {
+        // Already ready
+        setIsReady(true);
+        if (initState.authenticated) {
+          setIsAuthenticated(true);
+          if (initState.user) {
+            setUser({
+              uid: initState.user.uid,
+              username: initState.user.username || "Pi User",
+              email: initState.user.email,
+            });
+          }
+        }
+      } else if (initState.status === "failed") {
+        // Failed
+        setError(initState.error || "Pi SDK failed to initialize");
+        setIsReady(true);
+      }
+      // If still "initializing", wait for events
+    } else {
+      // Auto-init should be running, wait for it
+      console.log("[Pi SDK Provider] Waiting for auto-init to complete...");
+    }
+
+    return () => {
+      window.removeEventListener("piReady", handlePiReady);
+      window.removeEventListener("piError", handlePiError);
+    };
   }, [sdkInitialized]);
 
   // Manual authentication function (call when user initiates action)
