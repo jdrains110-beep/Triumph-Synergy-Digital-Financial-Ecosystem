@@ -19,6 +19,7 @@ export async function loadPiSDKScript(): Promise<boolean> {
 
   // If already present, skip loading
   if ((window as any).Pi !== undefined) {
+    console.log("[Pi SDK] ✓ Pi SDK already loaded");
     return true;
   }
 
@@ -38,22 +39,28 @@ export async function loadPiSDKScript(): Promise<boolean> {
     // If an existing pi-sdk script tag is already in the DOM, let it finish
     const existing = document.querySelector('script[src*="pi-sdk"]');
     if (existing) {
-      await waitForPiSDK();
+      console.log("[Pi SDK] Found existing pi-sdk script, waiting for load...");
+      await waitForPiSDK(50, 200); // Longer timeout for existing script
       return (window as any).Pi !== undefined;
     }
 
-    for (const url of cdnUrls) {
+    console.log("[Pi SDK] Attempting to load from", cdnUrls.length, "CDN sources");
+    for (let i = 0; i < cdnUrls.length; i++) {
+      const url = cdnUrls[i];
+      console.log(`[Pi SDK] Attempting CDN ${i + 1}/${cdnUrls.length}: ${url}`);
       try {
         const loaded = await injectScript(url);
         if (loaded) {
+          console.log("[Pi SDK] ✓ Successfully loaded from:", url);
           return true;
         }
       } catch (err) {
-        console.warn("[Pi SDK] CDN load failed", url, err);
+        console.warn(`[Pi SDK] CDN ${i + 1} failed:`, url, err instanceof Error ? err.message : err);
       }
     }
 
-    console.error("[Pi SDK] All CDN sources failed. Pi SDK unavailable.");
+    console.error("[Pi SDK] ❌ All CDN sources failed. Pi SDK unavailable.");
+    console.error("[Pi SDK] Tried URLs:", cdnUrls);
     return false;
   })();
 
@@ -65,48 +72,64 @@ async function injectScript(src: string): Promise<boolean> {
     const script = document.createElement("script");
     script.src = src;
     script.async = true;
-    script.defer = true;
+    script.defer = false; // Don't defer - we need it available ASAP
+    script.crossOrigin = "anonymous"; // Allow CORS
+    script.type = "text/javascript";
 
     script.onload = async () => {
-      console.log("[Pi SDK] Script loaded from", src);
-      const ready = await waitForPiSDK();
-      return ready ? resolve(true) : reject(new Error("Pi object not ready"));
+      console.log("[Pi SDK] ✓ Script tag loaded from", src);
+      // Give extra time for Pi global to be attached
+      const ready = await waitForPiSDK(50, 200);
+      if (ready) {
+        resolve(true);
+      } else {
+        reject(new Error("Pi object not ready after script load"));
+      }
     };
 
     script.onerror = () => {
-      console.error("[Pi SDK] Failed to load Pi SDK script from", src);
+      console.error("[Pi SDK] ❌ Failed to load Pi SDK script from", src);
       script.remove();
       reject(new Error(`Failed to load Pi SDK from ${src}`));
     };
 
+    // Add to DOM
     const head = document.head || document.getElementsByTagName("head")[0];
     head.appendChild(script);
-    console.log("[Pi SDK] Script injection initiated", src);
+    console.log("[Pi SDK] Script tag injected for:", src);
   });
 }
 
 /**
  * Wait for Pi SDK to be ready
- * Reduced timeout to prevent blocking app load
+ * Configurable timeout to handle slow CDN loads
  */
 export async function waitForPiSDK(
-  maxAttempts = 20,
-  delayMs = 100
+  maxAttempts = 50,
+  delayMs = 200
 ): Promise<boolean> {
   if (typeof window === "undefined") {
     return false;
   }
 
+  console.log(`[Pi SDK] Waiting for Pi SDK... (${maxAttempts} attempts, ${delayMs}ms each = ${maxAttempts * delayMs}ms total)`);
+  
   for (let i = 0; i < maxAttempts; i++) {
-    if ((window as any).Pi !== undefined) {
-      console.log("[Pi SDK] ✓ Pi SDK is ready");
+    if ((window as any).Pi !== undefined && typeof (window as any).Pi === "object") {
+      console.log(`[Pi SDK] ✓ Pi SDK is ready (attempt ${i + 1}/${maxAttempts})`);
       return true;
     }
 
     await new Promise((resolve) => setTimeout(resolve, delayMs));
+    
+    // Log progress every 10 attempts
+    if ((i + 1) % 10 === 0) {
+      console.log(`[Pi SDK] Still waiting... (${i + 1}/${maxAttempts} attempts, ${((i + 1) * delayMs) / 1000}s elapsed)`);
+    }
   }
 
-  console.warn("[Pi SDK] Timeout waiting for Pi SDK after", maxAttempts * delayMs, "ms");
+  console.error(`[Pi SDK] ❌ Timeout waiting for Pi SDK after ${maxAttempts * delayMs}ms (${maxAttempts} attempts)`);
+  console.error(`[Pi SDK] window.Pi is:`, typeof (window as any).Pi, (window as any).Pi);
   return false;
 }
 

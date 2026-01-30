@@ -89,8 +89,11 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        {/* Load Pi SDK script for Pi Browser compatibility */}
-        <script src="https://sdk.minepi.com/pi-sdk.js" async defer />
+        {/* Load Pi SDK script FIRST - this is critical for Pi Browser detection */}
+        {/* Do NOT use async/defer - load synchronously to ensure window.Pi is available */}
+        <script src="https://sdk.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" />
+        {/* Fallback CDN if primary fails */}
+        <script src="https://app-cdn.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" async defer />
       </head>
       <body className="antialiased">
         <ThemeProvider
