@@ -89,9 +89,39 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        {/* Load Pi SDK script FIRST - this is critical for Pi Browser detection */}
-        {/* Do NOT use async/defer - load synchronously to ensure window.Pi is available */}
+        {/* CRITICAL DIAGNOSTIC: Log when page starts loading */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              console.log("[TRIUMPH SYNERGY] Page loaded at:", new Date().toISOString());
+              console.log("[TRIUMPH SYNERGY] Current domain:", window.location.hostname);
+              console.log("[TRIUMPH SYNERGY] User Agent:", navigator.userAgent);
+              
+              // Check if Pi object exists before SDK loads
+              console.log("[TRIUMPH SYNERGY] window.Pi before script:", typeof window.Pi);
+              
+              // Log when Pi SDK loads
+              window.__piSDKLoaded = false;
+              const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'Pi');
+              Object.defineProperty(window, 'Pi', {
+                get() {
+                  if (!this.__pi) return undefined;
+                  return this.__pi;
+                },
+                set(value) {
+                  console.log("[TRIUMPH SYNERGY] 🎉 Pi SDK LOADED:", value);
+                  window.__piSDKLoaded = true;
+                  this.__pi = value;
+                },
+                configurable: true
+              });
+            `,
+          }}
+        />
+        
+        {/* Load Pi SDK script FIRST - synchronously, no defer */}
         <script src="https://sdk.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" />
+        
         {/* Fallback CDN if primary fails */}
         <script src="https://app-cdn.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" async defer />
       </head>

@@ -1,0 +1,75 @@
+/**
+ * Pi App Verification Endpoint
+ * CRITICAL: Pi Browser calls this to verify the app is legitimate
+ * If this returns wrong data or 404, Pi Browser shows blank screen
+ * 
+ * Official docs: https://github.com/pi-apps/pi-platform-docs
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(request: NextRequest) {
+  try {
+    const hostname = request.headers.get("host") || "";
+    
+    // Determine which domain is being accessed
+    let domain = "triumphsynergy0576.pinet.com";
+    let network = "mainnet";
+    let verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
+
+    // Check hostname to determine environment
+    if (hostname.includes("1991")) {
+      domain = "triumphsynergy1991.pinet.com";
+      network = "testnet";
+      verificationKey = process.env.PI_NETWORK_TESTNET_VALIDATION_KEY || "";
+    } else if (hostname.includes("7386")) {
+      domain = "triumphsynergy7386.pinet.com";
+      network = "mainnet";
+      verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
+    } else {
+      // Default to primary (0576) for mainnet
+      domain = "triumphsynergy0576.pinet.com";
+      network = "mainnet";
+      verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
+    }
+
+    console.log("[Pi Verification] Request from:", hostname);
+    console.log("[Pi Verification] Returning domain:", domain, "network:", network);
+
+    // Return verification data
+    const response = {
+      domain: domain,
+      appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+      verification: verificationKey, // This MUST match what's in Pi App Studio
+      network: network,
+      version: "1.0",
+    };
+
+    const result = NextResponse.json(response);
+    
+    // Add CORS headers for Pi Browser
+    result.headers.set("Access-Control-Allow-Origin", "*");
+    result.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+    result.headers.set("Access-Control-Allow-Headers", "Content-Type");
+    result.headers.set("Content-Type", "application/json");
+    
+    return result;
+  } catch (error) {
+    console.error("[Pi Verification] Error:", error);
+    return NextResponse.json(
+      { error: "Verification failed" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
