@@ -7,22 +7,31 @@
 
 /**
  * Get the canonical application URL
- * Priority: process.env > VERCEL_URL > fallback
+ * Priority: hostname detection > process.env > fallback
  */
 function getCanonicalAppUrl(): string {
-  // If explicitly set in environment (production deployment)
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  
-  // If running on Vercel, use VERCEL_URL
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  
   // If in browser, use current location
   if (typeof window !== "undefined") {
     return `${window.location.protocol}//${window.location.host}`;
+  }
+  
+  // If running on Vercel, use VERCEL_URL with hostname detection
+  if (process.env.VERCEL_URL) {
+    // Detect domain from VERCEL_URL
+    const hostname = process.env.VERCEL_URL.toLowerCase();
+    if (hostname.includes("1991")) {
+      return "https://triumphsynergy1991.pinet.com";
+    } else if (hostname.includes("7386")) {
+      return "https://triumphsynergy7386.pinet.com";
+    } else if (hostname.includes("0576")) {
+      return "https://triumphsynergy0576.pinet.com";
+    }
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // If explicitly set in environment (legacy)
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
   }
   
   // Fallback for server-side without env vars
@@ -59,29 +68,39 @@ function getActualHostname(): string {
  * Detect if this is testnet or mainnet based on hostname
  * Domain mapping:
  *   0576 = Primary app domain (mainnet)
- *   1991 = Testnet (development/testing)
+ *   1991 = Testnet (development/testing) ← ALWAYS testnet
  *   7386 = Mainnet (production)
  */
 function getEnvironmentNetwork(): "testnet" | "mainnet" {
-  const hostname = getActualHostname();
-  const isSandbox = process.env.NEXT_PUBLIC_PI_SANDBOX === "true";
+  const hostname = getActualHostname().toLowerCase();
   
-  // Explicit environment variable takes precedence
-  if (isSandbox) return "testnet";
+  // EXPLICIT: 1991 is ALWAYS testnet, regardless of env vars
+  if (hostname.includes("1991")) {
+    return "testnet";
+  }
   
-  // Check hostname patterns
-  if (hostname.includes("1991")) return "testnet";
-  if (hostname.includes("7386")) return "mainnet";
-  if (hostname.includes("0576")) return "mainnet";
-  if (hostname.includes("testnet")) return "testnet";
-  if (hostname.includes("staging")) return "testnet";
+  // EXPLICIT: 7386 and 0576 are mainnet
+  if (hostname.includes("7386") || hostname.includes("0576")) {
+    return "mainnet";
+  }
+  
+  // Named domains
+  if (hostname.includes("testnet")) {
+    return "testnet";
+  }
+  
+  if (hostname.includes("staging")) {
+    return "testnet";
+  }
+  
+  // Vercel preview deployments
   if (hostname.includes("vercel.app")) {
-    // For Vercel, check if it's a preview/staging or production
+    // Preview branches are testnet
     return hostname.includes("-") ? "testnet" : "mainnet";
   }
   
-  // Default based on NEXT_PUBLIC_PI_SANDBOX
-  return isSandbox ? "testnet" : "mainnet";
+  // Default to mainnet
+  return "mainnet";
 }
 
 export const APP_CONFIG = {
@@ -112,9 +131,10 @@ export const APP_CONFIG = {
   
   // Get Pi-specific configuration
   getPiConfig: () => ({
-    sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === "true",
+    sandbox: getEnvironmentNetwork() === "testnet", // Testnet = sandbox mode
     appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
     network: getEnvironmentNetwork(),
+    domain: getActualHostname(),
   }),
 } as const;
 

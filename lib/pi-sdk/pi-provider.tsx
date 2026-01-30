@@ -76,22 +76,20 @@ export function PiProvider({ children }: { children: ReactNode }) {
           console.log("[Pi SDK Provider] ✓ window.Pi ALREADY available (injected by Pi Browser)");
           const Pi = (window as any).Pi;
           
-          // Try to initialize immediately
-          try {
-            await Pi.init({
-              version: "2.0",
-              appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
-            });
-            console.log("[Pi SDK Provider] ✓ Pi.init() succeeded");
-            setIsReady(true);
-            setSdkInitialized(true);
-            return;
-          } catch (initErr) {
-            console.log("[Pi SDK Provider] Pi.init() not needed or already initialized:", initErr);
-            setIsReady(true);
-            setSdkInitialized(true);
-            return;
-          }
+          // Try to initialize with correct sandbox mode based on domain
+        try {
+          const piConfig = {
+            version: "2.0",
+            appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+            // Detect sandbox from hostname, not env var
+            sandbox: window.location.hostname.includes("1991"), // 1991 = testnet = sandbox
+          };
+          console.log("[Pi SDK Provider] Calling Pi.init() with config:", piConfig);
+          await Pi.init(piConfig);
+          console.log("[Pi SDK Provider] ✓ Pi.init() succeeded");
+        } catch (initErr) {
+          console.warn("[Pi SDK Provider] Pi.init() warning (may be OK):", initErr);
+        }
         }
 
         // If not immediately available, wait for script to load

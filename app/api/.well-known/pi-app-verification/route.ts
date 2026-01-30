@@ -12,36 +12,42 @@ export async function GET(request: NextRequest) {
   try {
     const hostname = request.headers.get("host") || "";
     
-    // Determine which domain is being accessed
+    // ALWAYS detect from hostname, never from env vars
+    // This ensures each domain gets the correct config
     let domain = "triumphsynergy0576.pinet.com";
     let network = "mainnet";
     let verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
 
     // Check hostname to determine environment
     if (hostname.includes("1991")) {
+      // 1991 is ALWAYS testnet
       domain = "triumphsynergy1991.pinet.com";
       network = "testnet";
       verificationKey = process.env.PI_NETWORK_TESTNET_VALIDATION_KEY || "";
+      console.log("[Pi Verification] 1991 detected - using testnet config");
     } else if (hostname.includes("7386")) {
+      // 7386 is mainnet
       domain = "triumphsynergy7386.pinet.com";
       network = "mainnet";
       verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
+      console.log("[Pi Verification] 7386 detected - using mainnet config");
     } else {
-      // Default to primary (0576) for mainnet
+      // Default to primary domain (0576) as mainnet
       domain = "triumphsynergy0576.pinet.com";
       network = "mainnet";
       verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
+      console.log("[Pi Verification] 0576 or unknown - using mainnet config");
     }
 
-    console.log("[Pi Verification] Request from:", hostname);
-    console.log("[Pi Verification] Returning domain:", domain, "network:", network);
+    console.log("[Pi Verification] Request from:", hostname, "→ Domain:", domain, "Network:", network);
 
     // Return verification data
     const response = {
       domain: domain,
       appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
-      verification: verificationKey, // This MUST match what's in Pi App Studio
+      verification: verificationKey,
       network: network,
+      sandbox: network === "testnet",
       version: "1.0",
     };
 
