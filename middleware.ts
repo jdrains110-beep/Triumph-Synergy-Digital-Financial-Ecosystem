@@ -75,12 +75,13 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Pi-Browser-Version", piVersion);
   }
   
-  // Set Pi Network environment based on hostname
-  // triumphsynergy0576 = mainnet (primary app domain)
-  // triumphsynergy1991 = testnet (development/testing) ← ALWAYS testnet
-  // triumphsynergy7386 = mainnet (production)
-  const isTestnet = hostname.includes("1991");
-  const isMainnet = hostname.includes("7386") || hostname.includes("0576") || hostname.includes("triumph-synergy.vercel.app");
+  // Set Pi Network environment based on FULL DOMAIN URLS
+  // triumphsynergy0576.pinet.com = mainnet (primary app domain)
+  // triumphsynergy1991.pinet.com = testnet (development/testing) ← ALWAYS testnet
+  // triumphsynergy7386.pinet.com = mainnet (production)
+  // triumph-synergy.vercel.app = mainnet (Vercel main)
+  const isTestnet = hostname === "triumphsynergy1991.pinet.com" || hostname.endsWith(".vercel.app") && hostname !== "triumph-synergy.vercel.app";
+  const isMainnet = hostname === "triumphsynergy7386.pinet.com" || hostname === "triumphsynergy0576.pinet.com" || hostname === "triumph-synergy.vercel.app";
   
   response.headers.set("X-Pi-Network", isTestnet ? "testnet" : "mainnet");
   response.headers.set("X-Pi-Sandbox", isTestnet ? "true" : "false");

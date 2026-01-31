@@ -106,14 +106,27 @@ export default async function RootLayout({
   };
 
   function detectNetwork(hostname) {
-    // EXPLICIT: 1991 is ALWAYS testnet
-    if (hostname.includes('1991')) {
+    // EXPLICIT FULL DOMAIN MATCHING - PINET DOMAINS
+    if (hostname === 'triumphsynergy1991.pinet.com') {
       return { network: 'testnet', sandbox: true };
     }
     
-    // EXPLICIT: 7386 and 0576 are mainnet
-    if (hostname.includes('7386') || hostname.includes('0576')) {
+    if (hostname === 'triumphsynergy7386.pinet.com') {
       return { network: 'mainnet', sandbox: false };
+    }
+    
+    if (hostname === 'triumphsynergy0576.pinet.com') {
+      return { network: 'mainnet', sandbox: false };
+    }
+    
+    // EXPLICIT FULL DOMAIN MATCHING - VERCEL DOMAINS
+    if (hostname === 'triumph-synergy.vercel.app') {
+      return { network: 'mainnet', sandbox: false };
+    }
+    
+    // Vercel preview deployments (branch deploys like feature-xyz.vercel.app)
+    if (hostname.endsWith('.vercel.app')) {
+      return { network: 'testnet', sandbox: true };
     }
     
     // Keywords for testnet
@@ -121,15 +134,7 @@ export default async function RootLayout({
       return { network: 'testnet', sandbox: true };
     }
     
-    // Vercel preview deployments - branches with dashes are testnet
-    if (hostname.includes('vercel.app')) {
-      const isBranch = hostname.split('.')[0].includes('-');
-      return isBranch 
-        ? { network: 'testnet', sandbox: true }
-        : { network: 'mainnet', sandbox: false };
-    }
-    
-    // Default to mainnet
+    // Default to mainnet for localhost and unknown domains
     return { network: 'mainnet', sandbox: false };
   }
 

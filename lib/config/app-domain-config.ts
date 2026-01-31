@@ -15,16 +15,18 @@ function getCanonicalAppUrl(): string {
     return `${window.location.protocol}//${window.location.host}`;
   }
   
-  // If running on Vercel, use VERCEL_URL with hostname detection
+  // If running on Vercel, use VERCEL_URL with FULL DOMAIN URL detection
   if (process.env.VERCEL_URL) {
-    // Detect domain from VERCEL_URL
+    // Detect domain from VERCEL_URL - EXPLICIT FULL DOMAIN MATCHING
     const hostname = process.env.VERCEL_URL.toLowerCase();
-    if (hostname.includes("1991")) {
+    if (hostname === "triumphsynergy1991.pinet.com") {
       return "https://triumphsynergy1991.pinet.com";
-    } else if (hostname.includes("7386")) {
+    } else if (hostname === "triumphsynergy7386.pinet.com") {
       return "https://triumphsynergy7386.pinet.com";
-    } else if (hostname.includes("0576")) {
+    } else if (hostname === "triumphsynergy0576.pinet.com") {
       return "https://triumphsynergy0576.pinet.com";
+    } else if (hostname === "triumph-synergy.vercel.app") {
+      return "https://triumph-synergy.vercel.app";
     }
     return `https://${process.env.VERCEL_URL}`;
   }
@@ -74,29 +76,32 @@ function getActualHostname(): string {
 function getEnvironmentNetwork(): "testnet" | "mainnet" {
   const hostname = getActualHostname().toLowerCase();
   
-  // EXPLICIT: 1991 is ALWAYS testnet, regardless of env vars
-  if (hostname.includes("1991")) {
+  // EXPLICIT FULL DOMAIN URL MATCHING - PINET DOMAINS
+  if (hostname === "triumphsynergy1991.pinet.com") {
     return "testnet";
   }
   
-  // EXPLICIT: 7386 and 0576 are mainnet
-  if (hostname.includes("7386") || hostname.includes("0576")) {
+  if (hostname === "triumphsynergy7386.pinet.com") {
     return "mainnet";
   }
   
+  if (hostname === "triumphsynergy0576.pinet.com") {
+    return "mainnet";
+  }
+  
+  // EXPLICIT FULL DOMAIN URL MATCHING - VERCEL DOMAINS
+  if (hostname === "triumph-synergy.vercel.app") {
+    return "mainnet";
+  }
+  
+  // Vercel branch preview deployments are testnet
+  if (hostname.endsWith(".vercel.app")) {
+    return "testnet";
+  }
+  
   // Named domains
-  if (hostname.includes("testnet")) {
+  if (hostname.includes("testnet") || hostname.includes("staging")) {
     return "testnet";
-  }
-  
-  if (hostname.includes("staging")) {
-    return "testnet";
-  }
-  
-  // Vercel preview deployments
-  if (hostname.includes("vercel.app")) {
-    // Preview branches are testnet
-    return hostname.includes("-") ? "testnet" : "mainnet";
   }
   
   // Default to mainnet

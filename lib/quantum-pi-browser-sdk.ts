@@ -63,15 +63,22 @@ export const realPi = {
 
       // Create payment - this opens Pi Browser wallet dialog
       return new Promise((resolve) => {
+        // Determine network before creating payment
+        const hostname = window.location.hostname;
+        let environment: "testnet" | "mainnet" = "mainnet";
+        if (hostname === "triumphsynergy1991.pinet.com") environment = "testnet";
+        else if (hostname === "triumphsynergy7386.pinet.com") environment = "mainnet";
+        else if (hostname === "triumphsynergy0576.pinet.com") environment = "mainnet";
+        else if (hostname === "triumph-synergy.vercel.app") environment = "mainnet";
+        else if (hostname.endsWith(".vercel.app")) environment = "testnet";
+        
         Pi.createPayment(
           {
             amount: config.amount,
             memo: config.memo,
             metadata: {
               ...config.metadata,
-              environment: window.location.hostname.includes("1991")
-                ? "testnet"
-                : "mainnet",
+              environment,
               createdAt: new Date().toISOString(),
             },
           },
@@ -229,7 +236,15 @@ export const realPi = {
       return "mainnet";
     }
 
-    return window.location.hostname.includes("1991") ? "testnet" : "mainnet";
+    const hostname = window.location.hostname;
+    // EXPLICIT FULL DOMAIN MATCHING
+    if (hostname === "triumphsynergy1991.pinet.com") return "testnet";
+    if (hostname === "triumphsynergy7386.pinet.com") return "mainnet";
+    if (hostname === "triumphsynergy0576.pinet.com") return "mainnet";
+    if (hostname === "triumph-synergy.vercel.app") return "mainnet";
+    // Vercel branch previews are testnet
+    if (hostname.endsWith(".vercel.app")) return "testnet";
+    return "mainnet";
   },
 
   /**

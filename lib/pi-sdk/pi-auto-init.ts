@@ -24,11 +24,28 @@ export function getPiInitializationScript(): string {
     startTime: Date.now()
   };
 
-  // Helper to get domain info
+  // Helper to get domain info with FULL DOMAIN URL MATCHING
   function getDomainInfo() {
     const hostname = window.location.hostname;
-    const isSandbox = hostname.includes('1991');
-    const network = isSandbox ? 'testnet' : 'mainnet';
+    let isSandbox = false;
+    let network = 'mainnet';
+    
+    // EXPLICIT FULL DOMAIN MATCHING - PINET DOMAINS
+    if (hostname === 'triumphsynergy1991.pinet.com') {
+      isSandbox = true;
+      network = 'testnet';
+    } else if (hostname === 'triumphsynergy7386.pinet.com' || hostname === 'triumphsynergy0576.pinet.com') {
+      isSandbox = false;
+      network = 'mainnet';
+    } else if (hostname === 'triumph-synergy.vercel.app') {
+      isSandbox = false;
+      network = 'mainnet';
+    } else if (hostname.endsWith('.vercel.app')) {
+      // Vercel branch previews are testnet
+      isSandbox = true;
+      network = 'testnet';
+    }
+    
     return { hostname, isSandbox, network };
   }
 
