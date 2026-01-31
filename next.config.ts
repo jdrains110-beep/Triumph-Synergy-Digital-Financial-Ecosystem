@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Build configuration for Vercel - use webpack instead of Turbopack
+  // Build configuration for Vercel
+  // Setting empty turbopack config to silence migration warning
+  turbopack: {},
+
   webpack: (config, { isServer }) => {
     return config;
   },
@@ -32,8 +35,6 @@ const nextConfig: NextConfig = {
 
   // Experimental features for better performance
   experimental: {
-    // Force webpack - disable Turbopack which has issues with streamdown's bundled modules
-    turbopack: false,
     // Optimize Radix UI imports
     optimizePackageImports: ["@radix-ui/react-dialog"],
   },
@@ -96,7 +97,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-
-
-

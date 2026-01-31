@@ -2,7 +2,12 @@
 // Pi Network as PRIMARY Payment Method Configuration
 // 95% of transaction volume target
 
-import { Horizon, Keypair, Memo, TransactionBuilder } from "@stellar/stellar-sdk";
+import {
+  Horizon,
+  Keypair,
+  Memo,
+  TransactionBuilder,
+} from "@stellar/stellar-sdk";
 
 export type PiPaymentConfig = {
   enabled: boolean;
@@ -34,6 +39,7 @@ export const piNetworkConfig: PiPaymentConfig = {
  */
 export class PiNetworkPaymentProcessor {
   private readonly apiKey: string;
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Reserved for internal API integration
   private readonly internalApiKey: string;
   private readonly horizon: Horizon.Server;
   private readonly stellar: {

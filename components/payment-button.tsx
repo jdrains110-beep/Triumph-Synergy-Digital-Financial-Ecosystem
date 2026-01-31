@@ -3,7 +3,6 @@
 import { CreditCardIcon, ShoppingCartIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { piSDK2026 } from "@/lib/pi-sdk-2026";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { piSDK2026 } from "@/lib/pi-sdk-2026";
 
 export function PaymentButton() {
   const router = useRouter();

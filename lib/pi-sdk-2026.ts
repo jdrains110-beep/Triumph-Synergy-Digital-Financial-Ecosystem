@@ -14,12 +14,18 @@ export const piSDK2026 = {
    * Per minepi.com docs: https://github.com/pi-apps/pi-platform-docs/blob/master/SDK_reference.md
    */
   async pay(
-    { amount, memo, metadata }: { amount: number; memo: string; metadata: Record<string, any> },
+    {
+      amount,
+      memo,
+      metadata,
+    }: { amount: number; memo: string; metadata: Record<string, any> },
     callbacks?: PaymentCallbacks
   ) {
     try {
       if (typeof window === "undefined" || !(window as any).Pi) {
-        throw new Error("Pi SDK not available - must be accessed from Pi Browser");
+        throw new Error(
+          "Pi SDK not available - must be accessed from Pi Browser"
+        );
       }
 
       const Pi = (window as any).Pi;
@@ -34,7 +40,10 @@ export const piSDK2026 = {
             memo,
             metadata: {
               ...metadata,
-              environment: process.env.NEXT_PUBLIC_PI_SANDBOX === "true" ? "testnet" : "mainnet",
+              environment:
+                process.env.NEXT_PUBLIC_PI_SANDBOX === "true"
+                  ? "testnet"
+                  : "mainnet",
               created_at: new Date().toISOString(),
             },
           },
@@ -42,7 +51,10 @@ export const piSDK2026 = {
             // Phase I: Server-Side Approval
             onReadyForServerApproval: async (currentPaymentId: string) => {
               paymentId = currentPaymentId;
-              console.log("[piSDK2026] Payment ready for approval:", currentPaymentId);
+              console.log(
+                "[piSDK2026] Payment ready for approval:",
+                currentPaymentId
+              );
               try {
                 const approveRes = await fetch("/api/pi/approve", {
                   method: "POST",
@@ -54,7 +66,9 @@ export const piSDK2026 = {
                     metadata,
                   }),
                 });
-                if (!approveRes.ok) throw new Error("Server approval failed");
+                if (!approveRes.ok) {
+                  throw new Error("Server approval failed");
+                }
                 console.log("[piSDK2026] Server approval successful");
               } catch (err) {
                 console.error("[piSDK2026] Approval error:", err);
@@ -64,8 +78,16 @@ export const piSDK2026 = {
             },
 
             // Phase III: Server-Side Completion
-            onReadyForServerCompletion: async (currentPaymentId: string, txid: string) => {
-              console.log("[piSDK2026] Payment ready for completion:", currentPaymentId, "txid:", txid);
+            onReadyForServerCompletion: async (
+              currentPaymentId: string,
+              txid: string
+            ) => {
+              console.log(
+                "[piSDK2026] Payment ready for completion:",
+                currentPaymentId,
+                "txid:",
+                txid
+              );
               try {
                 const completeRes = await fetch("/api/pi/complete", {
                   method: "POST",
@@ -78,7 +100,9 @@ export const piSDK2026 = {
                     metadata,
                   }),
                 });
-                if (!completeRes.ok) throw new Error("Server completion failed");
+                if (!completeRes.ok) {
+                  throw new Error("Server completion failed");
+                }
                 console.log("[piSDK2026] Server completion successful");
                 callbacks?.onSuccess?.(currentPaymentId, txid);
                 resolve({

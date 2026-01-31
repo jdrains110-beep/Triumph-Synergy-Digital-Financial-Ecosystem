@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { realPi } from '@/lib/quantum-pi-browser-sdk';
+import type React from "react";
+import { useEffect, useState } from "react";
+import { realPi } from "@/lib/quantum-pi-browser-sdk";
 
-interface PiPaymentButtonProps {
+type PiPaymentButtonProps = {
   amount: number;
   memo: string;
   metadata?: Record<string, any>;
@@ -12,7 +13,7 @@ interface PiPaymentButtonProps {
   disabled?: boolean;
   className?: string;
   children?: React.ReactNode;
-}
+};
 
 export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
   amount,
@@ -21,23 +22,25 @@ export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
   onPaymentSuccess,
   onPaymentError,
   disabled = false,
-  className = '',
-  children
+  className = "",
+  children,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAvailable, setIsAvailable] = useState(false);
-  const [network, setNetwork] = useState<'testnet' | 'mainnet'>('mainnet');
+  const [network, setNetwork] = useState<"testnet" | "mainnet">("mainnet");
 
   useEffect(() => {
     const checkAvailability = async () => {
       const available = await realPi.isAvailable();
       setIsAvailable(available);
       setNetwork(realPi.getNetwork());
-      
-      if (!available) {
-        console.warn('⚠️ Pi SDK not available - payments disabled. Must open in Pi Browser.');
+
+      if (available) {
+        console.log("✓ Pi SDK available on", network);
       } else {
-        console.log('✓ Pi SDK available on', network);
+        console.warn(
+          "⚠️ Pi SDK not available - payments disabled. Must open in Pi Browser."
+        );
       }
     };
 
@@ -45,17 +48,21 @@ export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
 
     // Check again when window gains focus (user might have opened Pi Browser)
     const handleFocus = () => checkAvailability();
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, []);
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [network]);
 
   const handlePayment = async () => {
-    if (isProcessing || !isAvailable) return;
-    
+    if (isProcessing || !isAvailable) {
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      console.log(`[Payment] Starting real Pi payment: ${amount} Pi on ${network}`);
-      
+      console.log(
+        `[Payment] Starting real Pi payment: ${amount} Pi on ${network}`
+      );
+
       const result = await realPi.createPayment({
         amount,
         memo,
@@ -63,13 +70,13 @@ export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
       });
 
       if (result.success) {
-        console.log('✓ Payment completed:', result);
-        onPaymentSuccess?.(result.paymentId || '', result.txid);
+        console.log("✓ Payment completed:", result);
+        onPaymentSuccess?.(result.paymentId || "", result.txid);
       } else {
-        throw new Error(result.error || 'Payment failed');
+        throw new Error(result.error || "Payment failed");
       }
     } catch (error) {
-      console.error('✗ Payment failed:', error);
+      console.error("✗ Payment failed:", error);
       onPaymentError?.(error);
     } finally {
       setIsProcessing(false);
@@ -77,18 +84,22 @@ export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
   };
 
   const isDisabled = disabled || isProcessing || !isAvailable;
-  const buttonLabel = !isAvailable
-    ? 'Open in Pi Browser'
-    : isProcessing
-    ? 'Processing...'
-    : children || `Pay ${amount} Pi`;
+  const buttonLabel = isAvailable
+    ? isProcessing
+      ? "Processing..."
+      : children || `Pay ${amount} Pi`
+    : "Open in Pi Browser";
 
   return (
     <button
-      onClick={handlePayment}
+      className={`rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-400 ${className}`}
       disabled={isDisabled}
-      title={!isAvailable ? 'Must open app in Pi Browser to enable payments' : undefined}
-      className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${className}`}
+      onClick={handlePayment}
+      title={
+        isAvailable
+          ? undefined
+          : "Must open app in Pi Browser to enable payments"
+      }
     >
       {buttonLabel}
     </button>

@@ -41,16 +41,17 @@ export function PiPaymentButton({
           metadata: { orderId },
         },
         {
-          onSuccess: (paymentId, txid) => {
+          onSuccess: (resultPaymentId, txid) => {
             setStatus("success");
-            setPaymentId(paymentId);
-            onSuccess?.(paymentId);
+            setPaymentId(resultPaymentId);
+            onSuccess?.(resultPaymentId);
           },
           onError: (err) => {
             setStatus("error");
-            const errorMsg = err instanceof Error ? err.message : "Payment failed";
-            setError(errorMsg);
-            onError?.(errorMsg);
+            const formErrorMsg =
+              err instanceof Error ? err.message : "Payment failed";
+            setError(formErrorMsg);
+            onError?.(formErrorMsg);
           },
         }
       );
@@ -74,7 +75,7 @@ export function PiPaymentButton({
           disabled={false}
           onClick={handlePayment}
         >
-          <>Pay {amount} π</>
+          Pay {amount} π
         </Button>
       )}
 

@@ -36,16 +36,18 @@ export function DataStreamHandler() {
       }
 
       setArtifact((draftArtifact) => {
-        const currentArtifact =
-          draftArtifact ?? { ...initialArtifactData, status: "streaming" as const };
-        const toString = (value: unknown) =>
+        const currentArtifact = draftArtifact ?? {
+          ...initialArtifactData,
+          status: "streaming" as const,
+        };
+        const convertToString = (value: unknown) =>
           typeof value === "string" ? value : String(value ?? "");
 
         switch (part.type) {
           case "data-id": {
             return {
               ...currentArtifact,
-              documentId: toString(part.data),
+              documentId: convertToString(part.data),
               status: "streaming" as const,
             };
           }
@@ -53,18 +55,20 @@ export function DataStreamHandler() {
           case "data-title": {
             return {
               ...currentArtifact,
-              title: toString(part.data),
+              title: convertToString(part.data),
               status: "streaming" as const,
             };
           }
 
           case "data-kind": {
-            const maybeKind = toString(part.data);
+            const maybeKind = convertToString(part.data);
             const knownKinds = artifactDefinitions.map(
-              (artifactDefinition) => artifactDefinition.kind
-            ) as typeof artifactDefinitions[number]["kind"][];
-            const resolvedKind = knownKinds.includes(maybeKind as typeof knownKinds[number])
-              ? (maybeKind as typeof knownKinds[number])
+              (artDef) => artDef.kind
+            ) as (typeof artifactDefinitions)[number]["kind"][];
+            const resolvedKind = knownKinds.includes(
+              maybeKind as (typeof knownKinds)[number]
+            )
+              ? (maybeKind as (typeof knownKinds)[number])
               : currentArtifact.kind;
 
             return {

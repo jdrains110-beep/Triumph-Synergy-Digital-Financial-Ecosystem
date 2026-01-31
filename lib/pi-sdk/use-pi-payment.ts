@@ -32,11 +32,16 @@ export function usePiPayment() {
       setIsPending(true);
       setError(undefined);
       try {
-        const result = await piSDK2026.pay({
+        const result = (await piSDK2026.pay({
           amount: options.amount,
           memo: options.memo || `Order ${options.orderId || "unknown"}`,
           metadata: options.metadata || {},
-        });
+        })) as {
+          success: boolean;
+          txid?: string;
+          paymentId?: string;
+          error?: { message?: string } | string;
+        };
 
         if (result.success) {
           return {
@@ -44,14 +49,16 @@ export function usePiPayment() {
             transactionId: result.txid,
             paymentId: result.paymentId,
           };
-        } else {
-          const errorMsg = result.error?.message || result.error || "Payment failed";
-          setError(errorMsg);
-          return {
-            success: false,
-            error: errorMsg,
-          };
         }
+        const errorMsg =
+          typeof result.error === "object" && result.error?.message
+            ? result.error.message
+            : String(result.error || "Payment failed");
+        setError(errorMsg);
+        return {
+          success: false,
+          error: errorMsg,
+        };
       } catch (err: any) {
         const errorMsg = err?.message || "Payment failed";
         setError(errorMsg);
@@ -72,4 +79,3 @@ export function usePiPayment() {
     error,
   };
 }
-

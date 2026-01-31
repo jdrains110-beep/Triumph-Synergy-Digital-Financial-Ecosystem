@@ -142,7 +142,9 @@ async function handleProcessTransaction(request: NextRequest) {
     );
 
     if (!result || (result as any).success === false) {
-      console.error(`[TRANSACTIONS] ❌ Process failed: ${(result as any).error}`);
+      console.error(
+        `[TRANSACTIONS] ❌ Process failed: ${(result as any).error}`
+      );
 
       return NextResponse.json(
         {

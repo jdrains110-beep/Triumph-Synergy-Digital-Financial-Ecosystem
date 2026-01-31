@@ -7,9 +7,9 @@
 import type {
   PiAuthResult,
   PiPayment,
-  PiPaymentData,
   PiPaymentCallbacks,
-} from '../../types/pi-sdk.d';
+  PiPaymentData,
+} from "../../types/pi-sdk.d";
 
 // Re-export types for consumers of this module
 export type { PiAuthResult, PiPayment, PiPaymentData, PiPaymentCallbacks };
@@ -23,7 +23,9 @@ export const Pi = {
    * NOTE: Pi SDK should be initialized by PiProvider, not here
    */
   init(config: { version?: string; sandbox?: boolean } = {}): boolean {
-    console.warn('[Pi SDK React] init called - SDK should be initialized by PiProvider');
+    console.warn(
+      "[Pi SDK React] init called - SDK should be initialized by PiProvider"
+    );
     return true;
   },
 

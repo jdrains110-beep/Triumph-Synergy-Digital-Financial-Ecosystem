@@ -1,9 +1,9 @@
 /**
  * Real Pi Browser SDK Implementation
  * Direct integration with Pi Network for REAL payments
- * 
+ *
  * Official Reference: https://github.com/pi-apps/pi-platform-docs/blob/master/payments.md
- * 
+ *
  * Payment Flow:
  * 1. User clicks "Pay with Pi" button
  * 2. App calls realPi.createPayment() with amount, memo, metadata
@@ -34,7 +34,7 @@ export const realPi = {
   /**
    * Create a real Pi payment
    * This opens the Pi Browser wallet for the user to approve the transaction
-   * 
+   *
    * @param config - Payment configuration with amount, memo, metadata
    * @returns Promise resolving to payment result with transaction ID
    */
@@ -69,21 +69,34 @@ export const realPi = {
         // ============================================
         const hostname = window.location.hostname;
         let environment: "testnet" | "mainnet" = "mainnet";
-        
+
         // PINET TESTNET
-        if (hostname === "triumphsynergy1991.pinet.com") environment = "testnet";
+        if (hostname === "triumphsynergy1991.pinet.com") {
+          environment = "testnet";
+        }
         // PINET MAINNET
-        else if (hostname === "triumphsynergy7386.pinet.com") environment = "mainnet";
-        else if (hostname === "triumphsynergy0576.pinet.com") environment = "mainnet";
+        else if (hostname === "triumphsynergy7386.pinet.com") {
+          environment = "mainnet";
+        } else if (hostname === "triumphsynergy0576.pinet.com") {
+          environment = "mainnet";
+        }
         // VERCEL MAINNET
-        else if (hostname === "triumph-synergy.vercel.app") environment = "mainnet";
+        else if (hostname === "triumph-synergy.vercel.app") {
+          environment = "mainnet";
+        }
         // VERCEL TESTNET (EXPLICIT)
-        else if (hostname === "triumph-synergy-testnet.vercel.app") environment = "testnet";
+        else if (hostname === "triumph-synergy-testnet.vercel.app") {
+          environment = "testnet";
+        }
         // Fallback: Other vercel.app = testnet
-        else if (hostname.endsWith(".vercel.app")) environment = "testnet";
+        else if (hostname.endsWith(".vercel.app")) {
+          environment = "testnet";
+        }
         // Fallback: localhost = testnet
-        else if (hostname === "localhost" || hostname === "127.0.0.1") environment = "testnet";
-        
+        else if (hostname === "localhost" || hostname === "127.0.0.1") {
+          environment = "testnet";
+        }
+
         Pi.createPayment(
           {
             amount: config.amount,
@@ -98,7 +111,10 @@ export const realPi = {
             // PHASE I: Payment created, ready for server approval
             onReadyForServerApproval: async (currentPaymentId: string) => {
               paymentId = currentPaymentId;
-              console.log("[Real Pi] Phase I - Ready for server approval:", paymentId);
+              console.log(
+                "[Real Pi] Phase I - Ready for server approval:",
+                paymentId
+              );
 
               try {
                 // Backend approves the payment
@@ -119,7 +135,10 @@ export const realPi = {
 
                 console.log("[Real Pi] Phase I - Server approval successful");
               } catch (err) {
-                console.error("[Real Pi] Phase I - Server approval error:", err);
+                console.error(
+                  "[Real Pi] Phase I - Server approval error:",
+                  err
+                );
                 throw err;
               }
             },
@@ -154,7 +173,9 @@ export const realPi = {
                   throw new Error("Server completion failed");
                 }
 
-                console.log("[Real Pi] Phase II - Server completion successful");
+                console.log(
+                  "[Real Pi] Phase II - Server completion successful"
+                );
 
                 // SUCCESS
                 resolve({
@@ -163,7 +184,10 @@ export const realPi = {
                   txid,
                 });
               } catch (err) {
-                console.error("[Real Pi] Phase II - Server completion error:", err);
+                console.error(
+                  "[Real Pi] Phase II - Server completion error:",
+                  err
+                );
                 resolve({
                   success: false,
                   paymentId,
@@ -227,7 +251,11 @@ export const realPi = {
     }
 
     if (piInit.status !== "ready") {
-      console.log("[Real Pi] isAvailable: Pi SDK status is", piInit.status, "not ready");
+      console.log(
+        "[Real Pi] isAvailable: Pi SDK status is",
+        piInit.status,
+        "not ready"
+      );
       return false;
     }
 
@@ -236,7 +264,9 @@ export const realPi = {
       return false;
     }
 
-    console.log("[Real Pi] ✓ isAvailable: True - Pi authenticated and ready for payments");
+    console.log(
+      "[Real Pi] ✓ isAvailable: True - Pi authenticated and ready for payments"
+    );
     return true;
   },
 
@@ -253,21 +283,35 @@ export const realPi = {
     // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
     // ============================================
     const hostname = window.location.hostname;
-    
+
     // PINET TESTNET
-    if (hostname === "triumphsynergy1991.pinet.com") return "testnet";
+    if (hostname === "triumphsynergy1991.pinet.com") {
+      return "testnet";
+    }
     // PINET MAINNET
-    if (hostname === "triumphsynergy7386.pinet.com") return "mainnet";
-    if (hostname === "triumphsynergy0576.pinet.com") return "mainnet";
+    if (hostname === "triumphsynergy7386.pinet.com") {
+      return "mainnet";
+    }
+    if (hostname === "triumphsynergy0576.pinet.com") {
+      return "mainnet";
+    }
     // VERCEL MAINNET
-    if (hostname === "triumph-synergy.vercel.app") return "mainnet";
+    if (hostname === "triumph-synergy.vercel.app") {
+      return "mainnet";
+    }
     // VERCEL TESTNET (EXPLICIT)
-    if (hostname === "triumph-synergy-testnet.vercel.app") return "testnet";
+    if (hostname === "triumph-synergy-testnet.vercel.app") {
+      return "testnet";
+    }
     // Fallback: Other vercel.app = testnet
-    if (hostname.endsWith(".vercel.app")) return "testnet";
+    if (hostname.endsWith(".vercel.app")) {
+      return "testnet";
+    }
     // Fallback: localhost = testnet
-    if (hostname === "localhost" || hostname === "127.0.0.1") return "testnet";
-    
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "testnet";
+    }
+
     return "mainnet";
   },
 

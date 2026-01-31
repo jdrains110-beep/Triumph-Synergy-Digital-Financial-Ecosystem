@@ -1,4 +1,7 @@
-import { buildValidationResponse, resolveValidationKey } from "@/lib/validation/keys";
+import {
+  buildValidationResponse,
+  resolveValidationKey,
+} from "@/lib/validation/keys";
 
 export const dynamic = "force-dynamic";
 

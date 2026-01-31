@@ -26,7 +26,9 @@ export function getIncompletePayments(): IncompletePayment[] {
 
   try {
     const stored = localStorage.getItem(INCOMPLETE_PAYMENTS_STORAGE_KEY);
-    if (!stored) return [];
+    if (!stored) {
+      return [];
+    }
 
     const payments = JSON.parse(stored) as IncompletePayment[];
     const now = Date.now();
@@ -88,7 +90,9 @@ export function removeIncompletePayment(paymentId: string): void {
  * Handle callback for incomplete payments found during authentication
  * Called when user logs in and Pi SDK finds incomplete payments
  */
-export async function handleIncompletePaymentFound(payment: any): Promise<void> {
+export async function handleIncompletePaymentFound(
+  payment: any
+): Promise<void> {
   console.log("[Incomplete Payments] Payment found during auth:", payment);
 
   const incompletePayment: IncompletePayment = {

@@ -5,8 +5,8 @@
  * Implements registration, authentication, and credential management
  */
 
-import { base64url } from "@/lib/utils/base64url";
 import { APP_CONFIG } from "@/lib/config/app-domain-config";
+import { base64url } from "@/lib/utils/base64url";
 
 // WebAuthn Type Aliases - only for types not in DOM
 type AttestationConveyanceFormat =
@@ -77,7 +77,7 @@ export class WebAuthnService {
   private readonly origin =
     typeof window !== "undefined"
       ? window.location.origin
-      : APP_CONFIG.ULTIMATE_URL;
+      : APP_CONFIG.getCanonicalUrl();
 
   /**
    * Generate registration options for WebAuthn.create()

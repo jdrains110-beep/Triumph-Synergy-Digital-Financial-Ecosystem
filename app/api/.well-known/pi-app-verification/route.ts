@@ -2,16 +2,16 @@
  * Pi App Verification Endpoint
  * CRITICAL: Pi Browser calls this to verify the app is legitimate
  * If this returns wrong data or 404, Pi Browser shows blank screen
- * 
+ *
  * Official docs: https://github.com/pi-apps/pi-platform-docs
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
     const hostname = request.headers.get("host") || "";
-    
+
     // ALWAYS detect from hostname, never from env vars
     // This ensures each domain gets the correct config
     let domain = "triumphsynergy0576.pinet.com";
@@ -39,33 +39,37 @@ export async function GET(request: NextRequest) {
       console.log("[Pi Verification] 0576 or unknown - using mainnet config");
     }
 
-    console.log("[Pi Verification] Request from:", hostname, "→ Domain:", domain, "Network:", network);
+    console.log(
+      "[Pi Verification] Request from:",
+      hostname,
+      "→ Domain:",
+      domain,
+      "Network:",
+      network
+    );
 
     // Return verification data
     const response = {
-      domain: domain,
+      domain,
       appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
       verification: verificationKey,
-      network: network,
+      network,
       sandbox: network === "testnet",
       version: "1.0",
     };
 
     const result = NextResponse.json(response);
-    
+
     // Add CORS headers for Pi Browser
     result.headers.set("Access-Control-Allow-Origin", "*");
     result.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
     result.headers.set("Access-Control-Allow-Headers", "Content-Type");
     result.headers.set("Content-Type", "application/json");
-    
+
     return result;
   } catch (error) {
     console.error("[Pi Verification] Error:", error);
-    return NextResponse.json(
-      { error: "Verification failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Verification failed" }, { status: 500 });
   }
 }
 

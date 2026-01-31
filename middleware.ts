@@ -1,21 +1,23 @@
 /**
  * middleware.ts
  * Next.js Edge Middleware for Pi Browser Detection and Request Handling
- * 
+ *
  * This middleware runs on every request to:
  * 1. Detect Pi Browser from User-Agent
  * 2. Set headers for Pi SDK integration
  * 3. Route requests appropriately based on browser context
  */
 
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 /**
  * Detect if request is from Pi Browser
  */
 function isPiBrowser(userAgent: string): boolean {
-  if (!userAgent) return false;
+  if (!userAgent) {
+    return false;
+  }
   const ua = userAgent.toLowerCase();
   return (
     ua.includes("pibrowser") ||
@@ -28,7 +30,9 @@ function isPiBrowser(userAgent: string): boolean {
  * Extract Pi Browser version from User-Agent
  */
 function getPiBrowserVersion(userAgent: string): string | null {
-  if (!userAgent) return null;
+  if (!userAgent) {
+    return null;
+  }
   const match = userAgent.match(/PiBrowser\/([^\s]+)/i);
   return match ? match[1] : null;
 }
@@ -40,58 +44,64 @@ export function middleware(request: NextRequest) {
   const userAgent = request.headers.get("user-agent") || "";
   const isPi = isPiBrowser(userAgent);
   const piVersion = getPiBrowserVersion(userAgent);
-  
+
   const hostname = request.nextUrl.hostname;
-  
+
   // ============================================
   // ALLOWED DOMAINS - DO NOT REDIRECT THESE
   // ============================================
   const ALLOWED_DOMAINS = [
-    "triumphsynergy1991.pinet.com",     // PINET TESTNET
-    "triumphsynergy7386.pinet.com",     // PINET MAINNET
-    "triumphsynergy0576.pinet.com",     // PINET PRIMARY
-    "triumph-synergy.vercel.app",       // VERCEL MAINNET
+    "triumphsynergy1991.pinet.com", // PINET TESTNET
+    "triumphsynergy7386.pinet.com", // PINET MAINNET
+    "triumphsynergy0576.pinet.com", // PINET PRIMARY
+    "triumph-synergy.vercel.app", // VERCEL MAINNET
     "triumph-synergy-testnet.vercel.app", // VERCEL TESTNET
     "localhost",
-    "127.0.0.1"
+    "127.0.0.1",
   ];
-  
+
   // Only redirect if NOT an allowed domain
   const isAllowedDomain = ALLOWED_DOMAINS.includes(hostname);
-  
+
   // CRITICAL: Redirect preview URLs to production pinet domains
   // But allow explicit testnet domain through
   if (
     !isAllowedDomain &&
     (hostname.includes("-jeremiah-drains-projects.vercel.app") ||
-     hostname.includes("-git-") ||
-     hostname.includes("vercel.app"))
+      hostname.includes("-git-") ||
+      hostname.includes("vercel.app"))
   ) {
     // Redirect to primary domain with permanent redirect
     const redirectUrl = new URL(request.nextUrl);
     redirectUrl.hostname = "triumphsynergy0576.pinet.com";
     const response = NextResponse.redirect(redirectUrl, 301);
     // Ensure no caching of redirect to prevent stale preview URLs
-    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.headers.set(
+      "Cache-Control",
+      "no-cache, no-store, must-revalidate"
+    );
     response.headers.set("Pragma", "no-cache");
     response.headers.set("Expires", "0");
     return response;
   }
-  
+
   // Create response with modified headers
   const response = NextResponse.next();
-  
+
   // Mark response as coming from validated domain (not preview)
   response.headers.set("X-Validated-Domain", "true");
-  response.headers.set("X-Deployment-Source", hostname.includes("pinet.com") ? "pinet" : "vercel");
-  
+  response.headers.set(
+    "X-Deployment-Source",
+    hostname.includes("pinet.com") ? "pinet" : "vercel"
+  );
+
   // Set Pi Browser detection headers
   response.headers.set("X-Pi-Browser", isPi ? "true" : "false");
-  
+
   if (piVersion) {
     response.headers.set("X-Pi-Browser-Version", piVersion);
   }
-  
+
   // ============================================
   // EXPLICIT FULL DOMAIN URL MATCHING
   // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
@@ -104,20 +114,22 @@ export function middleware(request: NextRequest) {
   //   triumph-synergy.vercel.app = MAINNET
   //   triumph-synergy-testnet.vercel.app = TESTNET
   // ============================================
-  const isTestnet = 
-    hostname === "triumphsynergy1991.pinet.com" || 
+  const isTestnet =
+    hostname === "triumphsynergy1991.pinet.com" ||
     hostname === "triumph-synergy-testnet.vercel.app" ||
-    (hostname.endsWith(".vercel.app") && hostname !== "triumph-synergy.vercel.app" && hostname !== "triumph-synergy-testnet.vercel.app");
-  
-  const isMainnet = 
-    hostname === "triumphsynergy7386.pinet.com" || 
-    hostname === "triumphsynergy0576.pinet.com" || 
+    (hostname.endsWith(".vercel.app") &&
+      hostname !== "triumph-synergy.vercel.app" &&
+      hostname !== "triumph-synergy-testnet.vercel.app");
+
+  const isMainnet =
+    hostname === "triumphsynergy7386.pinet.com" ||
+    hostname === "triumphsynergy0576.pinet.com" ||
     hostname === "triumph-synergy.vercel.app";
-  
+
   response.headers.set("X-Pi-Network", isTestnet ? "testnet" : "mainnet");
   response.headers.set("X-Pi-Sandbox", isTestnet ? "true" : "false");
   response.headers.set("X-Hostname", hostname);
-  
+
   // Add CORS headers for Pi SDK
   const origin = request.headers.get("origin") || "";
   if (
@@ -137,7 +149,7 @@ export function middleware(request: NextRequest) {
       "Content-Type, Authorization, X-Pi-App-Id, X-Requested-With"
     );
   }
-  
+
   // Handle preflight requests
   if (request.method === "OPTIONS") {
     return new NextResponse(null, {
@@ -145,12 +157,14 @@ export function middleware(request: NextRequest) {
       headers: response.headers,
     });
   }
-  
+
   // Log Pi Browser detection (only in development)
   if (process.env.NODE_ENV === "development" && isPi) {
-    console.log(`[Middleware] Pi Browser detected: ${piVersion || "unknown version"}`);
+    console.log(
+      `[Middleware] Pi Browser detected: ${piVersion || "unknown version"}`
+    );
   }
-  
+
   return response;
 }
 

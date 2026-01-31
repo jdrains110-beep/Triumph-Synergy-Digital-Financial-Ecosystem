@@ -10,7 +10,6 @@ import {
 import {
   handleIncompletePaymentFound,
   recoverIncompletePayments,
-  type IncompletePayment,
 } from "./pi-incomplete-payment-handler";
 import { getPiNetworkInfo } from "./pi-network-detection";
 
@@ -68,7 +67,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
     const handlePiReady = (event: any) => {
       console.log("[Pi SDK Provider] 🎉 Received piReady event from auto-init");
       const auth = event.detail;
-      if (auth && auth.user) {
+      if (auth?.user) {
         console.log("[Pi SDK Provider] User authenticated:", auth.user.uid);
         setUser({
           uid: auth.user.uid,
@@ -82,9 +81,12 @@ export function PiProvider({ children }: { children: ReactNode }) {
     };
 
     const handlePiError = (event: any) => {
-      console.error("[Pi SDK Provider] Received piError event from auto-init:", event.detail);
+      console.error(
+        "[Pi SDK Provider] Received piError event from auto-init:",
+        event.detail
+      );
       setError(event.detail?.message || "Pi SDK initialization failed");
-      
+
       // Still mark as ready so app doesn't hang
       setIsReady(true);
       setSdkInitialized(true);
@@ -97,8 +99,11 @@ export function PiProvider({ children }: { children: ReactNode }) {
     // Check if already initialized (auto-init finished before listener attached)
     if ((window as any).__piInitialization) {
       const initState = (window as any).__piInitialization;
-      console.log("[Pi SDK Provider] Auto-init already in progress/completed:", initState.status);
-      
+      console.log(
+        "[Pi SDK Provider] Auto-init already in progress/completed:",
+        initState.status
+      );
+
       if (initState.status === "ready") {
         // Already ready
         setIsReady(true);
@@ -143,8 +148,8 @@ export function PiProvider({ children }: { children: ReactNode }) {
       // SDK should already be initialized in useEffect
       if (!sdkInitialized) {
         console.warn("[Pi SDK] SDK not initialized, initializing now...");
-        await Pi.init({ 
-          version: "2.0", 
+        await Pi.init({
+          version: "2.0",
           sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === "true",
           appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
         });
@@ -183,7 +188,10 @@ export function PiProvider({ children }: { children: ReactNode }) {
           );
         }
       } catch (recoveryErr) {
-        console.warn("[Pi SDK] Error recovering incomplete payments:", recoveryErr);
+        console.warn(
+          "[Pi SDK] Error recovering incomplete payments:",
+          recoveryErr
+        );
         // Don't fail auth if recovery fails
       }
     } catch (authError) {
@@ -204,7 +212,9 @@ export function PiProvider({ children }: { children: ReactNode }) {
     memo?: string
   ): Promise<string> => {
     if (!(window as any).Pi) {
-      throw new Error("Pi SDK not available - must be accessed from Pi Browser");
+      throw new Error(
+        "Pi SDK not available - must be accessed from Pi Browser"
+      );
     }
 
     try {
@@ -250,7 +260,10 @@ export function PiProvider({ children }: { children: ReactNode }) {
 
         // Called when payment is ready for server completion
         onReadyForServerCompletion: async (paymentId: string, txid: string) => {
-          console.log("[Pi SDK] Payment ready for server completion:", { paymentId, txid });
+          console.log("[Pi SDK] Payment ready for server completion:", {
+            paymentId,
+            txid,
+          });
           try {
             const response = await fetch("/api/pi/complete", {
               method: "POST",
@@ -284,9 +297,13 @@ export function PiProvider({ children }: { children: ReactNode }) {
         },
 
         // Called on error
-        onError: (error: Error, payment?: any) => {
-          console.error("[Pi SDK] Payment error:", error, payment);
-          setError(error.message || "Payment failed");
+        onError: (paymentError: Error, errorPaymentData?: any) => {
+          console.error(
+            "[Pi SDK] Payment error:",
+            paymentError,
+            errorPaymentData
+          );
+          setError(paymentError.message || "Payment failed");
         },
       });
 
@@ -295,7 +312,8 @@ export function PiProvider({ children }: { children: ReactNode }) {
 
       return payment?.transaction?.txid || payment?.identifier || "success";
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Payment request failed";
+      const errorMsg =
+        err instanceof Error ? err.message : "Payment request failed";
       console.error("[Pi SDK] Payment error:", err);
       setError(errorMsg);
       setIsLoading(false);

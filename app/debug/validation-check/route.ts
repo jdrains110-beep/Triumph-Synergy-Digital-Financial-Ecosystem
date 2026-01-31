@@ -1,6 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { pickValidationMode, resolveValidationKey } from "@/lib/validation/keys";
+import {
+  pickValidationMode,
+  resolveValidationKey,
+} from "@/lib/validation/keys";
 
 export const dynamic = "force-dynamic";
 

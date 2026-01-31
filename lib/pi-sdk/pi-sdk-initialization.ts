@@ -147,7 +147,9 @@ export class PiSDKInitializer {
       try {
         await Promise.race([
           loadPiSDKScript(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("SDK load timeout")), 3000))
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("SDK load timeout")), 3000)
+          ),
         ]);
         await waitForPiSDK(10, 100); // Max 1 second wait
       } catch (err) {
@@ -210,7 +212,10 @@ export class PiSDKInitializer {
       });
       console.log("[Pi SDK] ✓ Pi.init() called successfully");
     } catch (error) {
-      console.warn("[Pi SDK] Pi.init() call failed (may be OK in web mode):", error);
+      console.warn(
+        "[Pi SDK] Pi.init() call failed (may be OK in web mode):",
+        error
+      );
     }
 
     // Wrap the global Pi object with proper typing

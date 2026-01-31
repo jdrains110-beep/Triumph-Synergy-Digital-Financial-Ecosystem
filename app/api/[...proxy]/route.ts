@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * Proxy all API requests to the actual Pi Studio Triumph Synergy app
@@ -9,32 +9,32 @@ export async function GET(
   { params }: { params: { proxy: string[] } }
 ) {
   try {
-    const path = params.proxy.join('/');
+    const path = params.proxy.join("/");
     const piStudioUrl = `https://triumphsynergy0576.pinet.com/${path}`;
     const searchParams = request.nextUrl.search;
-    
+
     const response = await fetch(piStudioUrl + searchParams, {
-      method: 'GET',
+      method: "GET",
       headers: {
         ...Object.fromEntries(
           Array.from(request.headers.entries()).filter(
-            ([key]) => !['host', 'connection'].includes(key.toLowerCase())
+            ([key]) => !["host", "connection"].includes(key.toLowerCase())
           )
         ),
       },
     });
 
     const data = await response.text();
-    
+
     return new NextResponse(data, {
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
     });
   } catch (error) {
-    console.error('[Proxy Error]', error);
+    console.error("[Proxy Error]", error);
     return NextResponse.json(
-      { error: 'Proxy request failed' },
+      { error: "Proxy request failed" },
       { status: 500 }
     );
   }
@@ -45,16 +45,19 @@ export async function POST(
   { params }: { params: { proxy: string[] } }
 ) {
   try {
-    const path = params.proxy.join('/');
+    const path = params.proxy.join("/");
     const piStudioUrl = `https://triumphsynergy0576.pinet.com/${path}`;
     const body = await request.text();
 
     const response = await fetch(piStudioUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
         ...Object.fromEntries(
           Array.from(request.headers.entries()).filter(
-            ([key]) => !['host', 'connection', 'content-length'].includes(key.toLowerCase())
+            ([key]) =>
+              !["host", "connection", "content-length"].includes(
+                key.toLowerCase()
+              )
           )
         ),
       },
@@ -69,9 +72,9 @@ export async function POST(
       headers: response.headers,
     });
   } catch (error) {
-    console.error('[Proxy Error]', error);
+    console.error("[Proxy Error]", error);
     return NextResponse.json(
-      { error: 'Proxy request failed' },
+      { error: "Proxy request failed" },
       { status: 500 }
     );
   }

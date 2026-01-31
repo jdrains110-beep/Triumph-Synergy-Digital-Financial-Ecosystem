@@ -33,7 +33,7 @@ export function PiSDKProvider({ children }: PiSDKProviderProps) {
         // Don't block app loading if SDK fails
         await Promise.race([
           loadPiSDKScript(),
-          new Promise((resolve) => setTimeout(resolve, 3000))
+          new Promise((resolve) => setTimeout(resolve, 3000)),
         ]);
       } catch (err) {
         console.warn("[Pi SDK] SDK load timeout, continuing:", err);

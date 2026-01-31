@@ -154,6 +154,7 @@ export class FinancialIntegrationHub {
 
   private readonly ubiEngine: UniversalBasicIncomeEngine;
   private readonly nesaraEngine: NESARAGESARAEngine;
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Reserved for future credit bureau integration
   private readonly creditEngine: CreditBureauIntegration;
 
   private constructor() {

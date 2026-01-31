@@ -15,12 +15,18 @@ export const pickValidationMode = (
   request: Request,
   explicitMode?: ValidationMode
 ): ValidationMode => {
-  if (explicitMode) return explicitMode;
+  if (explicitMode) {
+    return explicitMode;
+  }
 
   const url = new URL(request.url);
   const modeParam = url.searchParams.get("mode");
-  if (modeParam === "testnet") return "testnet";
-  if (modeParam === "mainnet") return "mainnet";
+  if (modeParam === "testnet") {
+    return "testnet";
+  }
+  if (modeParam === "mainnet") {
+    return "mainnet";
+  }
 
   const host = (request.headers.get("host") || url.host || "").toLowerCase();
   const isTestnetHost = TESTNET_HOST_HINTS.some((hint) => host.includes(hint));

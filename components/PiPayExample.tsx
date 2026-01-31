@@ -9,7 +9,9 @@ export default function PiPayExample() {
         amount={1}
         memo="Test Pi Payment"
         metadata={{}}
-        onPaymentError={(error: any) => alert("Payment failed: " + String(error))}
+        onPaymentError={(error: any) =>
+          alert("Payment failed: " + String(error))
+        }
         onPaymentSuccess={(paymentId: string) => alert("Payment successful!")}
       />
     </div>

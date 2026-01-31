@@ -10,12 +10,17 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const [session, cookieStore, headersStore] = await Promise.all([auth(), cookies(), headers()]);
+  const [session, cookieStore, headersStore] = await Promise.all([
+    auth(),
+    cookies(),
+    headers(),
+  ]);
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
 
   // Check if in Pi Browser (user agent contains 'Pi')
   const userAgent = headersStore.get("user-agent") || "";
-  const isPiBrowser = userAgent.includes("Pi") || userAgent.includes("Pi Browser");
+  const isPiBrowser =
+    userAgent.includes("Pi") || userAgent.includes("Pi Browser");
 
   return (
     <>

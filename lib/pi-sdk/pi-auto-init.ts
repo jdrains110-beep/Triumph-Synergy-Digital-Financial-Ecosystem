@@ -1,13 +1,13 @@
 /**
  * Pi SDK Immediate Initialization Script
- * 
+ *
  * This script runs BEFORE React hydration to ensure:
  * 1. window.Pi is available (loaded from CDN)
  * 2. Pi.init() is called immediately
  * 3. Pi.authenticate(['payments']) is called to register app with Pi Browser
  * 4. Incomplete payments are recovered
  * 5. App is marked as "ready" for payments
- * 
+ *
  * This is the critical missing piece - without auto-authentication,
  * Pi Browser doesn't recognize the app as a valid Pi app.
  */
@@ -124,7 +124,7 @@ export function getPiInitializationScript(): string {
 
       // Step 4: Call Pi.authenticate() with payments scope
       // THIS IS THE CRITICAL STEP THAT WAS MISSING!
-      console.log('[Pi SDK Auto-Init] Step 4: Calling Pi.authenticate([\\\"payments\\\"])...');
+      console.log('[Pi SDK Auto-Init] Step 4: Calling Pi.authenticate([\\"payments\\"])...');
       
       const auth = await window.Pi.authenticate(
         ['payments'],  // REQUIRED: Ask for payments permission

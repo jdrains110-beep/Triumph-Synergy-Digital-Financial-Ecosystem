@@ -1,15 +1,15 @@
 /**
  * Pi Browser Detection API Route
- * 
+ *
  * Replaces the deprecated middleware pattern
  * Provides Pi Browser detection via API endpoint
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const userAgent = request.headers.get("user-agent") || "";
-  
+
   // Pi Browser detection patterns
   const PI_BROWSER_PATTERNS = [
     /PiBrowser/i,
@@ -17,11 +17,11 @@ export async function GET(request: NextRequest) {
     /pi-browser/i,
     /minepi/i,
   ];
-  
+
   const isPiBrowser = PI_BROWSER_PATTERNS.some((pattern) =>
     pattern.test(userAgent)
   );
-  
+
   return NextResponse.json(
     {
       isPiBrowser,

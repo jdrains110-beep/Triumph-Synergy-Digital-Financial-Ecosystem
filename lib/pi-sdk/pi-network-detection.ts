@@ -17,7 +17,7 @@ export function detectPiNetworkEnvironment(): PiNetworkEnvironment {
   const Pi = (window as any).Pi;
 
   // If Pi SDK is available, use it to determine network
-  if (Pi && Pi.network) {
+  if (Pi?.network) {
     try {
       const network = Pi.network.getNetwork?.();
       if (network === "testnet" || network === "mainnet") {
@@ -50,8 +50,8 @@ export function getPiNetworkInfo(): {
   description: string;
 } {
   const environment = detectPiNetworkEnvironment();
-  const isSandbox = environment === "testnet" || 
-                    process.env.NEXT_PUBLIC_PI_SANDBOX === "true";
+  const isSandbox =
+    environment === "testnet" || process.env.NEXT_PUBLIC_PI_SANDBOX === "true";
 
   const config =
     environment === "mainnet"
@@ -99,9 +99,11 @@ export function getPiApiEndpoint(path: string): string {
 /**
  * Get Pi Browser app URL based on current network
  */
-export function getPiAppUrl(path: string = ""): string {
+export function getPiAppUrl(path = ""): string {
   const { appUrl } = getPiNetworkInfo();
-  if (!path) return appUrl;
+  if (!path) {
+    return appUrl;
+  }
   return `${appUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
@@ -130,7 +132,7 @@ export function isValidPaymentAmount(amount: number): {
   }
 
   // Mainnet might have higher limits
-  if (isMainnet() && amount > 10000) {
+  if (isMainnet() && amount > 10_000) {
     return {
       valid: false,
       reason: "Mainnet payments are limited to 10,000 π",

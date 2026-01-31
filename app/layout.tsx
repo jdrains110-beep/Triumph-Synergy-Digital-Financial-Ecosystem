@@ -2,8 +2,9 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/components/locale-provider";
+import { PiSdkDebugPanel } from "@/components/pi-sdk-debug-panel";
+import { ThemeProvider } from "@/components/theme-provider";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 
@@ -11,7 +12,9 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.vercel.app"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.vercel.app"
+  ),
   title: "Triumph Synergy - Pi App Studio",
   description:
     "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
@@ -23,7 +26,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Triumph Synergy - Pi App Studio",
     description: "Advanced payment routing with compliance automation",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.vercel.app",
+    url:
+      process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.vercel.app",
     siteName: "Triumph Synergy",
     type: "website",
   },
@@ -89,14 +93,25 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-        
+
         {/* Load Pi SDK scripts FIRST - BEFORE React initialization */}
-        <script src="https://sdk.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" />
-        <script src="https://app-cdn.minepi.com/pi-sdk.js" type="text/javascript" crossOrigin="anonymous" async defer />
-        
+        <script
+          crossOrigin="anonymous"
+          src="https://sdk.minepi.com/pi-sdk.js"
+          type="text/javascript"
+        />
+        <script
+          async
+          crossOrigin="anonymous"
+          defer
+          src="https://app-cdn.minepi.com/pi-sdk.js"
+          type="text/javascript"
+        />
+
         {/* CRITICAL: Auto-initialize Pi SDK immediately after scripts load */}
         {/* This is what was missing - without this, Pi Browser doesn't recognize the app */}
         <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for inline Pi SDK initialization script
           dangerouslySetInnerHTML={{
             __html: `
 (function() {
@@ -221,6 +236,8 @@ export default async function RootLayout({
           <SessionProvider>
             <LocaleProvider locale={locale}>
               <PiProvider>{children}</PiProvider>
+              {/* Pi SDK Debug Panel - Shows on all pages for testing */}
+              <PiSdkDebugPanel />
             </LocaleProvider>
           </SessionProvider>
         </ThemeProvider>
