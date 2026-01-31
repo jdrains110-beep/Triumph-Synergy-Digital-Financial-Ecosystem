@@ -106,11 +106,17 @@ export default async function RootLayout({
   };
 
   function detectNetwork(hostname) {
-    // EXPLICIT FULL DOMAIN MATCHING - PINET DOMAINS
+    // ============================================
+    // EXPLICIT FULL DOMAIN URL MATCHING
+    // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
+    // ============================================
+    
+    // PINET TESTNET DOMAIN
     if (hostname === 'triumphsynergy1991.pinet.com') {
       return { network: 'testnet', sandbox: true };
     }
     
+    // PINET MAINNET DOMAINS
     if (hostname === 'triumphsynergy7386.pinet.com') {
       return { network: 'mainnet', sandbox: false };
     }
@@ -119,22 +125,27 @@ export default async function RootLayout({
       return { network: 'mainnet', sandbox: false };
     }
     
-    // EXPLICIT FULL DOMAIN MATCHING - VERCEL DOMAINS
+    // VERCEL MAINNET DOMAIN
     if (hostname === 'triumph-synergy.vercel.app') {
       return { network: 'mainnet', sandbox: false };
     }
     
-    // Vercel preview deployments (branch deploys like feature-xyz.vercel.app)
+    // VERCEL TESTNET DOMAIN (EXPLICIT)
+    if (hostname === 'triumph-synergy-testnet.vercel.app') {
+      return { network: 'testnet', sandbox: true };
+    }
+    
+    // Fallback: Any other vercel.app subdomain = testnet
     if (hostname.endsWith('.vercel.app')) {
       return { network: 'testnet', sandbox: true };
     }
     
-    // Keywords for testnet
-    if (hostname.includes('testnet') || hostname.includes('staging')) {
+    // Fallback: localhost = testnet for development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return { network: 'testnet', sandbox: true };
     }
     
-    // Default to mainnet for localhost and unknown domains
+    // Default to mainnet for unknown domains
     return { network: 'mainnet', sandbox: false };
   }
 

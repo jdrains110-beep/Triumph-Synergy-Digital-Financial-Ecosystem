@@ -17,17 +17,31 @@ function getCanonicalAppUrl(): string {
   
   // If running on Vercel, use VERCEL_URL with FULL DOMAIN URL detection
   if (process.env.VERCEL_URL) {
-    // Detect domain from VERCEL_URL - EXPLICIT FULL DOMAIN MATCHING
+    // ============================================
+    // EXPLICIT FULL DOMAIN URL MATCHING
+    // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
+    // ============================================
     const hostname = process.env.VERCEL_URL.toLowerCase();
+    
+    // PINET DOMAINS
     if (hostname === "triumphsynergy1991.pinet.com") {
       return "https://triumphsynergy1991.pinet.com";
-    } else if (hostname === "triumphsynergy7386.pinet.com") {
+    }
+    if (hostname === "triumphsynergy7386.pinet.com") {
       return "https://triumphsynergy7386.pinet.com";
-    } else if (hostname === "triumphsynergy0576.pinet.com") {
+    }
+    if (hostname === "triumphsynergy0576.pinet.com") {
       return "https://triumphsynergy0576.pinet.com";
-    } else if (hostname === "triumph-synergy.vercel.app") {
+    }
+    
+    // VERCEL DOMAINS
+    if (hostname === "triumph-synergy.vercel.app") {
       return "https://triumph-synergy.vercel.app";
     }
+    if (hostname === "triumph-synergy-testnet.vercel.app") {
+      return "https://triumph-synergy-testnet.vercel.app";
+    }
+    
     return `https://${process.env.VERCEL_URL}`;
   }
 
@@ -76,11 +90,17 @@ function getActualHostname(): string {
 function getEnvironmentNetwork(): "testnet" | "mainnet" {
   const hostname = getActualHostname().toLowerCase();
   
-  // EXPLICIT FULL DOMAIN URL MATCHING - PINET DOMAINS
+  // ============================================
+  // EXPLICIT FULL DOMAIN URL MATCHING
+  // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
+  // ============================================
+  
+  // PINET TESTNET
   if (hostname === "triumphsynergy1991.pinet.com") {
     return "testnet";
   }
   
+  // PINET MAINNET
   if (hostname === "triumphsynergy7386.pinet.com") {
     return "mainnet";
   }
@@ -89,18 +109,23 @@ function getEnvironmentNetwork(): "testnet" | "mainnet" {
     return "mainnet";
   }
   
-  // EXPLICIT FULL DOMAIN URL MATCHING - VERCEL DOMAINS
+  // VERCEL MAINNET
   if (hostname === "triumph-synergy.vercel.app") {
     return "mainnet";
   }
   
-  // Vercel branch preview deployments are testnet
+  // VERCEL TESTNET (EXPLICIT)
+  if (hostname === "triumph-synergy-testnet.vercel.app") {
+    return "testnet";
+  }
+  
+  // Fallback: Other vercel.app = testnet
   if (hostname.endsWith(".vercel.app")) {
     return "testnet";
   }
   
-  // Named domains
-  if (hostname.includes("testnet") || hostname.includes("staging")) {
+  // Fallback: localhost = testnet
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
     return "testnet";
   }
   

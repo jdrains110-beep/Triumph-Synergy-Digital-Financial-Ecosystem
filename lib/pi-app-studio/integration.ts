@@ -112,9 +112,20 @@ export const PI_APP_CONFIG: PiAppConfig = {
     status: '/api/pi/status',
   },
   
+  // ============================================
+  // ALL 5 PRODUCTION DOMAINS
+  // ============================================
   urls: {
+    // PINET DOMAINS
+    pinetTestnet: 'https://triumphsynergy1991.pinet.com',
+    pinetMainnet: 'https://triumphsynergy7386.pinet.com',
+    pinetPrimary: 'https://triumphsynergy0576.pinet.com',
+    // VERCEL DOMAINS
+    vercelMainnet: 'https://triumph-synergy.vercel.app',
+    vercelTestnet: 'https://triumph-synergy-testnet.vercel.app',
+    // Legacy aliases
     production: 'https://triumphsynergy0576.pinet.com',
-    staging: 'https://triumph-synergy-staging.vercel.app',
+    staging: 'https://triumph-synergy-testnet.vercel.app',
     development: 'http://localhost:3000',
   },
 };

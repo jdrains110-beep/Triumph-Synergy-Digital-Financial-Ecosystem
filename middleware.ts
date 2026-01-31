@@ -43,14 +43,31 @@ export function middleware(request: NextRequest) {
   
   const hostname = request.nextUrl.hostname;
   
+  // ============================================
+  // ALLOWED DOMAINS - DO NOT REDIRECT THESE
+  // ============================================
+  const ALLOWED_DOMAINS = [
+    "triumphsynergy1991.pinet.com",     // PINET TESTNET
+    "triumphsynergy7386.pinet.com",     // PINET MAINNET
+    "triumphsynergy0576.pinet.com",     // PINET PRIMARY
+    "triumph-synergy.vercel.app",       // VERCEL MAINNET
+    "triumph-synergy-testnet.vercel.app", // VERCEL TESTNET
+    "localhost",
+    "127.0.0.1"
+  ];
+  
+  // Only redirect if NOT an allowed domain
+  const isAllowedDomain = ALLOWED_DOMAINS.includes(hostname);
+  
   // CRITICAL: Redirect preview URLs to production pinet domains
-  // Prevent accessing via random Vercel preview deployments
+  // But allow explicit testnet domain through
   if (
-    hostname.includes("-jeremiah-drains-projects.vercel.app") ||
-    hostname.includes("-git-") ||
-    (hostname.includes("vercel.app") && !hostname.includes("triumph-synergy.vercel.app"))
+    !isAllowedDomain &&
+    (hostname.includes("-jeremiah-drains-projects.vercel.app") ||
+     hostname.includes("-git-") ||
+     hostname.includes("vercel.app"))
   ) {
-    // Redirect to testnet domain by default with permanent redirect
+    // Redirect to primary domain with permanent redirect
     const redirectUrl = new URL(request.nextUrl);
     redirectUrl.hostname = "triumphsynergy0576.pinet.com";
     const response = NextResponse.redirect(redirectUrl, 301);
@@ -75,13 +92,27 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Pi-Browser-Version", piVersion);
   }
   
-  // Set Pi Network environment based on FULL DOMAIN URLS
-  // triumphsynergy0576.pinet.com = mainnet (primary app domain)
-  // triumphsynergy1991.pinet.com = testnet (development/testing) ← ALWAYS testnet
-  // triumphsynergy7386.pinet.com = mainnet (production)
-  // triumph-synergy.vercel.app = mainnet (Vercel main)
-  const isTestnet = hostname === "triumphsynergy1991.pinet.com" || hostname.endsWith(".vercel.app") && hostname !== "triumph-synergy.vercel.app";
-  const isMainnet = hostname === "triumphsynergy7386.pinet.com" || hostname === "triumphsynergy0576.pinet.com" || hostname === "triumph-synergy.vercel.app";
+  // ============================================
+  // EXPLICIT FULL DOMAIN URL MATCHING
+  // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
+  // ============================================
+  // PINET DOMAINS:
+  //   triumphsynergy1991.pinet.com = TESTNET
+  //   triumphsynergy7386.pinet.com = MAINNET
+  //   triumphsynergy0576.pinet.com = MAINNET (primary)
+  // VERCEL DOMAINS:
+  //   triumph-synergy.vercel.app = MAINNET
+  //   triumph-synergy-testnet.vercel.app = TESTNET
+  // ============================================
+  const isTestnet = 
+    hostname === "triumphsynergy1991.pinet.com" || 
+    hostname === "triumph-synergy-testnet.vercel.app" ||
+    (hostname.endsWith(".vercel.app") && hostname !== "triumph-synergy.vercel.app" && hostname !== "triumph-synergy-testnet.vercel.app");
+  
+  const isMainnet = 
+    hostname === "triumphsynergy7386.pinet.com" || 
+    hostname === "triumphsynergy0576.pinet.com" || 
+    hostname === "triumph-synergy.vercel.app";
   
   response.headers.set("X-Pi-Network", isTestnet ? "testnet" : "mainnet");
   response.headers.set("X-Pi-Sandbox", isTestnet ? "true" : "false");
