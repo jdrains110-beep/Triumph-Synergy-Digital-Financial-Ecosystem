@@ -105,15 +105,42 @@ export default async function RootLayout({
     startTime: Date.now()
   };
 
+  function detectNetwork(hostname) {
+    // EXPLICIT: 1991 is ALWAYS testnet
+    if (hostname.includes('1991')) {
+      return { network: 'testnet', sandbox: true };
+    }
+    
+    // EXPLICIT: 7386 and 0576 are mainnet
+    if (hostname.includes('7386') || hostname.includes('0576')) {
+      return { network: 'mainnet', sandbox: false };
+    }
+    
+    // Keywords for testnet
+    if (hostname.includes('testnet') || hostname.includes('staging')) {
+      return { network: 'testnet', sandbox: true };
+    }
+    
+    // Vercel preview deployments - branches with dashes are testnet
+    if (hostname.includes('vercel.app')) {
+      const isBranch = hostname.split('.')[0].includes('-');
+      return isBranch 
+        ? { network: 'testnet', sandbox: true }
+        : { network: 'mainnet', sandbox: false };
+    }
+    
+    // Default to mainnet
+    return { network: 'mainnet', sandbox: false };
+  }
+
   async function initializePi() {
     const hostname = window.location.hostname;
-    const isSandbox = hostname.includes('1991');
-    const network = isSandbox ? 'testnet' : 'mainnet';
+    const networkInfo = detectNetwork(hostname);
     
     console.log('[Pi SDK Auto-Init] ===== AUTOMATIC INITIALIZATION =====');
     console.log('[Pi SDK Auto-Init] Domain:', hostname);
-    console.log('[Pi SDK Auto-Init] Network:', network);
-    console.log('[Pi SDK Auto-Init] Sandbox:', isSandbox);
+    console.log('[Pi SDK Auto-Init] Network:', networkInfo.network);
+    console.log('[Pi SDK Auto-Init] Sandbox:', networkInfo.sandbox);
 
     try {
       // Wait for Pi SDK to load
@@ -129,7 +156,7 @@ export default async function RootLayout({
       // Initialize Pi SDK
       await window.Pi.init({
         version: '2.0',
-        sandbox: isSandbox,
+        sandbox: networkInfo.sandbox,
         appId: 'triumph-synergy'
       });
       console.log('[Pi SDK Auto-Init] ✓ Pi.init() succeeded');
