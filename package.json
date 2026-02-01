@@ -122,7 +122,7 @@
     "use-stick-to-bottom": "^1.1.1",
     "usehooks-ts": "^3.1.0",
     "uuid": "^13.0.0",
-    "zod": "^4.3.4"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",

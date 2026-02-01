@@ -14,16 +14,16 @@ importers:
     dependencies:
       '@ai-sdk/gateway':
         specifier: ^3.0.4
-        version: 3.0.4(zod@4.3.4)
+        version: 3.0.4(zod@4.3.6)
       '@ai-sdk/provider':
         specifier: 2.0.0
         version: 2.0.0
       '@ai-sdk/react':
         specifier: 3.0.3
-        version: 3.0.3(react@18.2.0)(zod@4.3.4)
+        version: 3.0.3(react@18.2.0)(zod@4.3.6)
       '@ai-sdk/xai':
         specifier: 3.0.3
-        version: 3.0.3(zod@4.3.4)
+        version: 3.0.3(zod@4.3.6)
       '@codemirror/lang-javascript':
         specifier: ^6.2.2
         version: 6.2.4
@@ -137,7 +137,7 @@ importers:
         version: 2.2.13
       ai:
         specifier: 6.0.5
-        version: 6.0.5(zod@4.3.4)
+        version: 6.0.5(zod@4.3.6)
       axios:
         specifier: ^1.13.2
         version: 1.13.2
@@ -307,8 +307,8 @@ importers:
         specifier: ^13.0.0
         version: 13.0.0
       zod:
-        specifier: ^4.3.4
-        version: 4.3.4
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.2
@@ -475,8 +475,8 @@ packages:
       nodemailer:
         optional: true
 
-  '@babel/code-frame@7.28.6':
-    resolution: {integrity: sha512-JYgintcMjRiCvS8mMECzaEn+m3PfoQiyqukOMCCVQtoJGYJw8j/8LBJEiqkHLkfwCcs74E3pbAUFNg7d9VNJ+Q==}
+  '@babel/code-frame@7.29.0':
+    resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-identifier@7.28.5':
@@ -5023,8 +5023,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.3.4:
-    resolution: {integrity: sha512-Zw/uYiiyF6pUT1qmKbZziChgNPRu+ZRneAsMUDU6IwmXdWt5JwcUfy2bvLOCUtz5UniaN/Zx5aFttZYbYc7O/A==}
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -5035,39 +5035,39 @@ snapshots:
 
   '@adobe/css-tools@4.4.4': {}
 
-  '@ai-sdk/gateway@3.0.2(zod@4.3.4)':
+  '@ai-sdk/gateway@3.0.2(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.1(zod@4.3.4)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.3.6)
       '@vercel/oidc': 3.0.5
-      zod: 4.3.4
+      zod: 4.3.6
 
-  '@ai-sdk/gateway@3.0.4(zod@4.3.4)':
+  '@ai-sdk/gateway@3.0.4(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.4)
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.6)
       '@vercel/oidc': 3.0.5
-      zod: 4.3.4
+      zod: 4.3.6
 
-  '@ai-sdk/openai-compatible@2.0.2(zod@4.3.4)':
+  '@ai-sdk/openai-compatible@2.0.2(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.4)
-      zod: 4.3.4
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.6)
+      zod: 4.3.6
 
-  '@ai-sdk/provider-utils@4.0.1(zod@4.3.4)':
+  '@ai-sdk/provider-utils@4.0.1(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
-      zod: 4.3.4
+      zod: 4.3.6
 
-  '@ai-sdk/provider-utils@4.0.2(zod@4.3.4)':
+  '@ai-sdk/provider-utils@4.0.2(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
-      zod: 4.3.4
+      zod: 4.3.6
 
   '@ai-sdk/provider@2.0.0':
     dependencies:
@@ -5081,22 +5081,22 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.3(react@18.2.0)(zod@4.3.4)':
+  '@ai-sdk/react@3.0.3(react@18.2.0)(zod@4.3.6)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.1(zod@4.3.4)
-      ai: 6.0.3(zod@4.3.4)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.3.6)
+      ai: 6.0.3(zod@4.3.6)
       react: 18.2.0
       swr: 2.3.8(react@18.2.0)
       throttleit: 2.1.0
     transitivePeerDependencies:
       - zod
 
-  '@ai-sdk/xai@3.0.3(zod@4.3.4)':
+  '@ai-sdk/xai@3.0.3(zod@4.3.6)':
     dependencies:
-      '@ai-sdk/openai-compatible': 2.0.2(zod@4.3.4)
+      '@ai-sdk/openai-compatible': 2.0.2(zod@4.3.6)
       '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.4)
-      zod: 4.3.4
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.6)
+      zod: 4.3.6
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -5131,7 +5131,7 @@ snapshots:
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
 
-  '@babel/code-frame@7.28.6':
+  '@babel/code-frame@7.29.0':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
       js-tokens: 4.0.0
@@ -6804,7 +6804,7 @@ snapshots:
 
   '@testing-library/dom@10.4.1':
     dependencies:
-      '@babel/code-frame': 7.28.6
+      '@babel/code-frame': 7.29.0
       '@babel/runtime': 7.28.6
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
@@ -7170,21 +7170,21 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ai@6.0.3(zod@4.3.4):
+  ai@6.0.3(zod@4.3.6):
     dependencies:
-      '@ai-sdk/gateway': 3.0.2(zod@4.3.4)
+      '@ai-sdk/gateway': 3.0.2(zod@4.3.6)
       '@ai-sdk/provider': 3.0.0
-      '@ai-sdk/provider-utils': 4.0.1(zod@4.3.4)
+      '@ai-sdk/provider-utils': 4.0.1(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
-      zod: 4.3.4
+      zod: 4.3.6
 
-  ai@6.0.5(zod@4.3.4):
+  ai@6.0.5(zod@4.3.6):
     dependencies:
-      '@ai-sdk/gateway': 3.0.4(zod@4.3.4)
+      '@ai-sdk/gateway': 3.0.4(zod@4.3.6)
       '@ai-sdk/provider': 3.0.1
-      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.4)
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
-      zod: 4.3.4
+      zod: 4.3.6
 
   ansi-regex@5.0.1: {}
 
@@ -9625,7 +9625,7 @@ snapshots:
       nypm: 0.6.2
       trpc-cli: 0.10.2(typescript@5.9.3)
       vitest: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(tsx@4.21.0)
-      zod: 4.3.4
+      zod: 4.3.6
     transitivePeerDependencies:
       - '@edge-runtime/vm'
       - '@inquirer/prompts'
@@ -9939,6 +9939,6 @@ snapshots:
 
   zod@3.25.76: {}
 
-  zod@4.3.4: {}
+  zod@4.3.6: {}
 
   zwitch@2.0.4: {}
