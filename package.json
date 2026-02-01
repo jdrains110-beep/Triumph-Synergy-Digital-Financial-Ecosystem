@@ -91,7 +91,7 @@
     "orderedmap": "^2.1.1",
     "papaparse": "^5.5.2",
     "pg": "^8.16.3",
-    "postgres": "^3.4.4",
+    "postgres": "^3.4.8",
     "prosemirror-example-setup": "^1.2.3",
     "prosemirror-inputrules": "^1.4.0",
     "prosemirror-markdown": "^1.13.1",

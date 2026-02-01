@@ -167,7 +167,7 @@ importers:
         version: 16.6.1
       drizzle-orm:
         specifier: ^0.34.0
-        version: 0.34.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(@types/react@18.3.27)(pg@8.16.3)(postgres@3.4.7)(react@18.2.0)
+        version: 0.34.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(@types/react@18.3.27)(pg@8.16.3)(postgres@3.4.8)(react@18.2.0)
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@18.2.0)
@@ -214,8 +214,8 @@ importers:
         specifier: ^8.16.3
         version: 8.16.3
       postgres:
-        specifier: ^3.4.4
-        version: 3.4.7
+        specifier: ^3.4.8
+        version: 3.4.8
       prosemirror-example-setup:
         specifier: ^1.2.3
         version: 1.2.3
@@ -475,8 +475,8 @@ packages:
       nodemailer:
         optional: true
 
-  '@babel/code-frame@7.28.6':
-    resolution: {integrity: sha512-JYgintcMjRiCvS8mMECzaEn+m3PfoQiyqukOMCCVQtoJGYJw8j/8LBJEiqkHLkfwCcs74E3pbAUFNg7d9VNJ+Q==}
+  '@babel/code-frame@7.29.0':
+    resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-identifier@7.28.5':
@@ -4207,8 +4207,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  postgres@3.4.7:
-    resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
+  postgres@3.4.8:
+    resolution: {integrity: sha512-d+JFcLM17njZaOLkv6SCev7uoLaBtfK86vMUXhW1Z4glPWh4jozno9APvW/XKFJ3CCxVoC7OL38BqRydtu5nGg==}
     engines: {node: '>=12'}
 
   preact-render-to-string@6.5.11:
@@ -5131,7 +5131,7 @@ snapshots:
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
 
-  '@babel/code-frame@7.28.6':
+  '@babel/code-frame@7.29.0':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
       js-tokens: 4.0.0
@@ -6804,7 +6804,7 @@ snapshots:
 
   '@testing-library/dom@10.4.1':
     dependencies:
-      '@babel/code-frame': 7.28.6
+      '@babel/code-frame': 7.29.0
       '@babel/runtime': 7.28.6
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
@@ -7643,13 +7643,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.34.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(@types/react@18.3.27)(pg@8.16.3)(postgres@3.4.7)(react@18.2.0):
+  drizzle-orm@0.34.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(@types/react@18.3.27)(pg@8.16.3)(postgres@3.4.8)(react@18.2.0):
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
       '@types/pg': 8.16.0
       '@types/react': 18.3.27
       pg: 8.16.3
-      postgres: 3.4.7
+      postgres: 3.4.8
       react: 18.2.0
 
   dunder-proto@1.0.1:
@@ -8913,7 +8913,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  postgres@3.4.7: {}
+  postgres@3.4.8: {}
 
   preact-render-to-string@6.5.11(preact@10.24.3):
     dependencies:
