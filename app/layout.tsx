@@ -132,21 +132,40 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   }
   
   // Ensure Pi SDK script is loaded (fallback injector)
+  var sdkSources = [
+    'https://sdk.minepi.com/pi-sdk.js',
+    'https://app-cdn.minepi.com/pi-sdk.js'
+  ];
+  var sdkSourceIndex = 0;
+
   function loadPiSdkScript() {
-    if (document.getElementById('pi-sdk-script')) {
+    if (window.__piInitialization.sdkLoaded) {
       return;
     }
+
+    window.__piInitialization.status = 'loading-sdk';
+
+    var scriptId = 'pi-sdk-script-' + sdkSourceIndex;
+    if (document.getElementById(scriptId)) {
+      return;
+    }
+
+    var src = sdkSources[sdkSourceIndex];
     var script = document.createElement('script');
-    script.id = 'pi-sdk-script';
-    script.src = 'https://sdk.minepi.com/pi-sdk.js';
+    script.id = scriptId;
+    script.src = src;
     script.type = 'text/javascript';
     script.async = true;
     script.onload = function() {
       window.__piInitialization.sdkLoaded = true;
-      console.log('[Pi SDK] SDK script loaded (fallback injector)');
+      console.log('[Pi SDK] SDK script loaded from:', src);
     };
     script.onerror = function() {
-      console.error('[Pi SDK] SDK script failed to load');
+      console.error('[Pi SDK] SDK script failed to load from:', src);
+      sdkSourceIndex += 1;
+      if (sdkSourceIndex < sdkSources.length) {
+        loadPiSdkScript();
+      }
     };
     document.head.appendChild(script);
   }
