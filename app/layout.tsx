@@ -113,14 +113,15 @@ export default async function RootLayout({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Pi SDK tracking
           dangerouslySetInnerHTML={{
             __html: `
-window.__piInitialization = { status: 'pending', authenticated: false };
+window.__piInitialization = { status: 'pending', authenticated: false, sdkLoaded: false };
 console.log('[Pi SDK] Script loaded, checking environment...');
 
 // Safely check for Pi Browser and initialize
 (function initPiSdk() {
   // Check if we're in Pi Browser first
   var ua = navigator.userAgent || '';
-  var isPiBrowser = ua.indexOf('PiBrowser') !== -1 || ua.indexOf('Pi Browser') !== -1 || ua.indexOf('PiNetwork') !== -1;
+  var uaLower = ua.toLowerCase();
+  var isPiBrowser = uaLower.indexOf('pibrowser') !== -1 || uaLower.indexOf('pi browser') !== -1 || uaLower.indexOf('pinetwork') !== -1;
   
   console.log('[Pi SDK] User-Agent:', ua);
   console.log('[Pi SDK] In Pi Browser:', isPiBrowser);
@@ -132,11 +133,32 @@ console.log('[Pi SDK] Script loaded, checking environment...');
     return;
   }
   
+  // Ensure Pi SDK script is loaded (fallback injector)
+  function loadPiSdkScript() {
+    if (document.getElementById('pi-sdk-script')) {
+      return;
+    }
+    var script = document.createElement('script');
+    script.id = 'pi-sdk-script';
+    script.src = 'https://sdk.minepi.com/pi-sdk.js';
+    script.type = 'text/javascript';
+    script.async = true;
+    script.onload = function() {
+      window.__piInitialization.sdkLoaded = true;
+      console.log('[Pi SDK] SDK script loaded (fallback injector)');
+    };
+    script.onerror = function() {
+      console.error('[Pi SDK] SDK script failed to load');
+    };
+    document.head.appendChild(script);
+  }
+
   // Wait for Pi SDK to load
   function checkAndInit() {
     if (typeof window.Pi === 'undefined') {
       console.log('[Pi SDK] window.Pi not yet available, waiting...');
-      setTimeout(checkAndInit, 200);
+      loadPiSdkScript();
+      setTimeout(checkAndInit, 250);
       return;
     }
     
@@ -192,6 +214,7 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   }
   
   // Start check after short delay to let scripts load
+  loadPiSdkScript();
   setTimeout(checkAndInit, 100);
 })();
             `,

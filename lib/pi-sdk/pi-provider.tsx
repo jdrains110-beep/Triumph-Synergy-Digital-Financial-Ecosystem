@@ -137,8 +137,34 @@ export function PiProvider({ children }: { children: ReactNode }) {
   // Manual authentication function (call when user initiates action)
   const authenticate = async (): Promise<void> => {
     if (!(window as any).Pi) {
-      console.log("[Pi SDK] Not in Pi Browser - skipping authentication");
-      return;
+      const initState = (window as any).__piInitialization;
+      const status = initState?.status || "unknown";
+      console.log("[Pi SDK] Pi SDK not available yet. Status:", status);
+      if (status === "unavailable") {
+        setError("Pi SDK not available. Open in Pi Browser.");
+        return;
+      }
+
+      // Wait briefly for SDK to load in Pi Browser
+      await new Promise<void>((resolve) => {
+        const start = Date.now();
+        const timer = setInterval(() => {
+          if ((window as any).Pi) {
+            clearInterval(timer);
+            resolve();
+            return;
+          }
+          if (Date.now() - start > 6000) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 200);
+      });
+
+      if (!(window as any).Pi) {
+        setError("Pi SDK not available. Open in Pi Browser.");
+        return;
+      }
     }
 
     try {
