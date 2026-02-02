@@ -7,11 +7,11 @@ import {
   useEffect,
   useState,
 } from "react";
+import { getNetworkConfig } from "./domain-config";
 import {
   handleIncompletePaymentFound,
   recoverIncompletePayments,
 } from "./pi-incomplete-payment-handler";
-import { getPiNetworkInfo } from "./pi-network-detection";
 
 /**
  * Pi SDK Context
@@ -145,20 +145,23 @@ export function PiProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       const Pi = (window as any).Pi;
 
-      // SDK should already be initialized in useEffect
+      // SDK should already be initialized in useEffect, but if not, init with domain detection
       if (!sdkInitialized) {
         console.warn("[Pi SDK] SDK not initialized, initializing now...");
+        // Use runtime domain detection, NOT env vars
+        const networkConfig = getNetworkConfig();
+        console.log("[Pi SDK] Domain config:", networkConfig);
+
         await Pi.init({
           version: "2.0",
-          sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX === "true",
-          appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+          sandbox: networkConfig.sandbox,
         });
         setSdkInitialized(true);
       }
 
-      const networkInfo = getPiNetworkInfo();
+      const networkConfig = getNetworkConfig();
 
-      console.log(`[Pi SDK] Authenticating on ${networkInfo.description}...`);
+      console.log(`[Pi SDK] Authenticating on ${networkConfig.description}...`);
 
       const authResult = await Pi.authenticate(
         ["username", "payments"],

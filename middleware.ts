@@ -45,10 +45,12 @@ export function middleware(request: NextRequest) {
   const isPi = isPiBrowser(userAgent);
   const piVersion = getPiBrowserVersion(userAgent);
 
-  const hostname = request.nextUrl.hostname;
+  // Normalize hostname to lowercase for comparison
+  const hostname = request.nextUrl.hostname.toLowerCase();
 
   // ============================================
   // ALLOWED DOMAINS - DO NOT REDIRECT THESE
+  // All lowercase for case-insensitive comparison
   // ============================================
   const ALLOWED_DOMAINS = [
     "triumphsynergy1991.pinet.com", // PINET TESTNET
@@ -63,13 +65,24 @@ export function middleware(request: NextRequest) {
   // Only redirect if NOT an allowed domain
   const isAllowedDomain = ALLOWED_DOMAINS.includes(hostname);
 
+  // Log for debugging (only in development or if debug header present)
+  if (
+    process.env.NODE_ENV === "development" ||
+    request.headers.get("x-debug")
+  ) {
+    console.log(
+      `[Middleware] Hostname: ${hostname}, Allowed: ${isAllowedDomain}`
+    );
+  }
+
   // CRITICAL: Redirect preview URLs to production pinet domains
   // But allow explicit testnet domain through
   if (
     !isAllowedDomain &&
     (hostname.includes("-jeremiah-drains-projects.vercel.app") ||
       hostname.includes("-git-") ||
-      hostname.includes("vercel.app"))
+      (hostname.endsWith(".vercel.app") &&
+        !hostname.startsWith("triumph-synergy")))
   ) {
     // Redirect to primary domain with permanent redirect
     const redirectUrl = new URL(request.nextUrl);

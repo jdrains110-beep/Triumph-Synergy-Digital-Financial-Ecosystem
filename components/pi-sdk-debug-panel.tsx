@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getNetworkConfig } from "@/lib/pi-sdk/domain-config";
 
 type PiInitState = {
   status: string;
@@ -67,51 +68,9 @@ export function PiSdkDebugPanel() {
     );
   };
 
-  // Detect domain and network
+  // Detect domain and network using centralized config
   const detectDomainInfo = (): DomainInfo => {
-    const hostname =
-      typeof window !== "undefined" ? window.location.hostname : "unknown";
-    let network: "testnet" | "mainnet" = "mainnet";
-    let sandbox = false;
-
-    // ============================================
-    // EXPLICIT FULL DOMAIN URL MATCHING
-    // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
-    // ============================================
-
-    // PINET TESTNET DOMAIN
-    if (hostname === "triumphsynergy1991.pinet.com") {
-      network = "testnet";
-      sandbox = true;
-    }
-    // PINET MAINNET DOMAINS
-    else if (hostname === "triumphsynergy7386.pinet.com") {
-      network = "mainnet";
-      sandbox = false;
-    } else if (hostname === "triumphsynergy0576.pinet.com") {
-      network = "mainnet";
-      sandbox = false;
-    }
-    // VERCEL MAINNET DOMAIN
-    else if (hostname === "triumph-synergy.vercel.app") {
-      network = "mainnet";
-      sandbox = false;
-    }
-    // VERCEL TESTNET DOMAIN (EXPLICIT)
-    else if (hostname === "triumph-synergy-testnet.vercel.app") {
-      network = "testnet";
-      sandbox = true;
-    }
-    // Fallback: Any other vercel.app subdomain = testnet
-    else if (hostname.endsWith(".vercel.app")) {
-      network = "testnet";
-      sandbox = true;
-    }
-    // Fallback: localhost = testnet for development
-    else if (hostname === "localhost" || hostname === "127.0.0.1") {
-      network = "testnet";
-      sandbox = true;
-    }
+    const config = getNetworkConfig();
 
     const isPiBrowser =
       typeof window !== "undefined" &&
@@ -121,7 +80,13 @@ export function PiSdkDebugPanel() {
 
     const piSdkLoaded = typeof window !== "undefined" && !!(window as any).Pi;
 
-    return { hostname, network, sandbox, isPiBrowser, piSdkLoaded };
+    return {
+      hostname: config.hostname,
+      network: config.network,
+      sandbox: config.sandbox,
+      isPiBrowser,
+      piSdkLoaded,
+    };
   };
 
   // Check Pi initialization state
@@ -148,13 +113,16 @@ export function PiSdkDebugPanel() {
     }
 
     try {
-      const info = detectDomainInfo();
+      const config = getNetworkConfig();
+      addLog(`📍 Domain: ${config.hostname}`, "info");
+      addLog(`🌐 Network: ${config.network}`, "info");
+      addLog(`🧪 Sandbox: ${config.sandbox}`, "info");
+
       await Pi.init({
         version: "2.0",
-        sandbox: info.sandbox,
-        appId: "triumph-synergy",
+        sandbox: config.sandbox,
       });
-      addLog(`✅ Pi.init() SUCCESS - sandbox: ${info.sandbox}`, "success");
+      addLog("✅ Pi.init() SUCCESS", "success");
     } catch (err) {
       addLog(`❌ Pi.init() FAILED: ${err}`, "error");
     }

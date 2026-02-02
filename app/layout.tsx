@@ -187,8 +187,7 @@ export default async function RootLayout({
       // Initialize Pi SDK
       await window.Pi.init({
         version: '2.0',
-        sandbox: networkInfo.sandbox,
-        appId: 'triumph-synergy'
+        sandbox: networkInfo.sandbox
       });
       console.log('[Pi SDK Auto-Init] ✓ Pi.init() succeeded');
 

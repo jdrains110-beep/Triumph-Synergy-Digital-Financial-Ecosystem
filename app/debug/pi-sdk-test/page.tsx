@@ -39,35 +39,24 @@ export default function PiSdkTestPage() {
   const [piSdkVersion, setPiSdkVersion] = useState<string>("");
   const [rawPiObject, setRawPiObject] = useState<string>("");
 
-  // Domain detection logic (must match layout.tsx and other files)
+  // Use centralized domain detection
   const detectNetwork = (
     hostname: string
   ): { network: string; sandbox: boolean } => {
-    // PINET TESTNET DOMAIN
-    if (hostname === "triumphsynergy1991.pinet.com") {
-      return { network: "testnet", sandbox: true };
-    }
-    // PINET MAINNET DOMAINS
-    if (hostname === "triumphsynergy7386.pinet.com") {
-      return { network: "mainnet", sandbox: false };
-    }
-    if (hostname === "triumphsynergy0576.pinet.com") {
-      return { network: "mainnet", sandbox: false };
-    }
-    // VERCEL MAINNET DOMAIN
-    if (hostname === "triumph-synergy.vercel.app") {
-      return { network: "mainnet", sandbox: false };
-    }
-    // VERCEL TESTNET DOMAIN
-    if (hostname === "triumph-synergy-testnet.vercel.app") {
-      return { network: "testnet", sandbox: true };
-    }
-    // Fallback: localhost
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return { network: "testnet", sandbox: true };
-    }
-    // Default
-    return { network: "mainnet", sandbox: false };
+    // Simulate the domain detection for the given hostname
+    const domains: Record<string, { network: string; sandbox: boolean }> = {
+      "triumphsynergy1991.pinet.com": { network: "testnet", sandbox: true },
+      "triumphsynergy7386.pinet.com": { network: "mainnet", sandbox: false },
+      "triumphsynergy0576.pinet.com": { network: "mainnet", sandbox: false },
+      "triumph-synergy.vercel.app": { network: "mainnet", sandbox: false },
+      "triumph-synergy-testnet.vercel.app": {
+        network: "testnet",
+        sandbox: true,
+      },
+      localhost: { network: "testnet", sandbox: true },
+      "127.0.0.1": { network: "testnet", sandbox: true },
+    };
+    return domains[hostname] || { network: "mainnet", sandbox: false };
   };
 
   // Update test result
