@@ -86,6 +86,9 @@ export function PiSdkDebugPanel() {
         !!(window as any).Pi);
 
     const piSdkLoaded = typeof window !== "undefined" && !!(window as any).Pi;
+    const isProxyDomain =
+      typeof window !== "undefined" &&
+      window.location.hostname.endsWith(".vusercontent.net");
 
     return {
       hostname: config.hostname,

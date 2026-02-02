@@ -130,6 +130,10 @@ console.log('[Pi SDK] Script loaded, checking environment...');
         console.warn('[Pi SDK] Pi SDK did not load in time. Marking as unavailable.');
         window.__piInitialization.status = 'unavailable';
         window.__piInitialization.error = 'Pi SDK not available (timed out)';
+        if (window.location.hostname.endsWith('.vusercontent.net')) {
+          console.warn('[Pi SDK] Detected Pi Browser proxy domain. Redirecting to mainnet pinet domain.');
+          window.location.href = 'https://triumphsynergy0576.pinet.com' + window.location.pathname + window.location.search;
+        }
         return;
       }
       setTimeout(checkAndInit, 250);
