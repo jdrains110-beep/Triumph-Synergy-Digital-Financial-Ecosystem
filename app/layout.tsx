@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
@@ -92,6 +93,18 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
           }}
+        />
+
+        {/* Pi SDK loader - ensure it is requested before hydration */}
+        <Script
+          src="https://sdk.minepi.com/pi-sdk.js"
+          strategy="beforeInteractive"
+          crossOrigin="anonymous"
+        />
+        <Script
+          src="https://app-cdn.minepi.com/pi-sdk.js"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
         />
 
         {/* Pi SDK status tracking - with safe auto-init + dynamic loader */}
