@@ -8,53 +8,61 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 
+// Domain configuration - ALL 5 PRODUCTION DOMAINS
+const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
+  // PINET DOMAINS
+  "triumphsynergy1991.pinet.com": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
+  "triumphsynergy7386.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
+  "triumphsynergy0576.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
+  // VERCEL DOMAINS
+  "triumph-synergy.vercel.app": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
+  "triumph-synergy-testnet.vercel.app": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
+};
+
 export async function GET(request: NextRequest) {
   try {
-    const hostname = request.headers.get("host") || "";
+    const hostname = (request.headers.get("host") || "").toLowerCase().split(":")[0];
+    
+    console.log("[Pi Verification] Request hostname:", hostname);
 
-    // ALWAYS detect from hostname, never from env vars
-    // This ensures each domain gets the correct config
-    let domain = "triumphsynergy0576.pinet.com";
-    let network = "mainnet";
-    let verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
-
-    // Check hostname to determine environment
-    if (hostname.includes("1991")) {
-      // 1991 is ALWAYS testnet
-      domain = "triumphsynergy1991.pinet.com";
-      network = "testnet";
-      verificationKey = process.env.PI_NETWORK_TESTNET_VALIDATION_KEY || "";
-      console.log("[Pi Verification] 1991 detected - using testnet config");
-    } else if (hostname.includes("7386")) {
-      // 7386 is mainnet
-      domain = "triumphsynergy7386.pinet.com";
-      network = "mainnet";
-      verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
-      console.log("[Pi Verification] 7386 detected - using mainnet config");
-    } else {
-      // Default to primary domain (0576) as mainnet
-      domain = "triumphsynergy0576.pinet.com";
-      network = "mainnet";
-      verificationKey = process.env.PI_NETWORK_MAINNET_VALIDATION_KEY || "";
-      console.log("[Pi Verification] 0576 or unknown - using mainnet config");
+    // Look up domain configuration
+    let config = DOMAIN_CONFIG[hostname];
+    
+    // If exact match not found, try partial matching
+    if (!config) {
+      for (const [domain, domainConfig] of Object.entries(DOMAIN_CONFIG)) {
+        if (hostname.includes(domain) || domain.includes(hostname)) {
+          config = domainConfig;
+          console.log("[Pi Verification] Partial match found:", domain);
+          break;
+        }
+      }
+    }
+    
+    // Default to mainnet if no match
+    if (!config) {
+      console.log("[Pi Verification] No domain match, defaulting to mainnet");
+      config = { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" };
     }
 
+    const verificationKey = process.env[config.envKey] || 
+      process.env.PI_VALIDATION_KEY || 
+      "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
+
     console.log(
-      "[Pi Verification] Request from:",
-      hostname,
-      "→ Domain:",
-      domain,
-      "Network:",
-      network
+      "[Pi Verification] Config:",
+      "hostname:", hostname,
+      "network:", config.network,
+      "keyLength:", verificationKey.length
     );
 
     // Return verification data
     const response = {
-      domain,
-      appId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+      domain: hostname,
+      appId: process.env.NEXT_PUBLIC_PI_APP_ID || process.env.PI_APP_ID || "triumph-synergy",
       verification: verificationKey,
-      network,
-      sandbox: network === "testnet",
+      network: config.network,
+      sandbox: config.network === "testnet",
       version: "1.0",
     };
 

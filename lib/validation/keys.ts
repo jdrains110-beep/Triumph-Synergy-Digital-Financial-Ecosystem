@@ -9,7 +9,18 @@ const DEFAULT_VALIDATION_KEY =
   process.env.VALIDATION_KEY ||
   "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
 
-const TESTNET_HOST_HINTS = ["testnet.", "-test.", "sandbox."];
+// TESTNET domains - explicit list
+const TESTNET_DOMAINS = [
+  "triumphsynergy1991.pinet.com",      // PINET TESTNET
+  "triumph-synergy-testnet.vercel.app", // VERCEL TESTNET
+];
+
+// MAINNET domains - explicit list  
+const MAINNET_DOMAINS = [
+  "triumphsynergy0576.pinet.com",       // PINET MAINNET PRIMARY
+  "triumphsynergy7386.pinet.com",       // PINET MAINNET SECONDARY
+  "triumph-synergy.vercel.app",         // VERCEL MAINNET
+];
 
 export const pickValidationMode = (
   request: Request,
@@ -29,8 +40,27 @@ export const pickValidationMode = (
   }
 
   const host = (request.headers.get("host") || url.host || "").toLowerCase();
-  const isTestnetHost = TESTNET_HOST_HINTS.some((hint) => host.includes(hint));
-  return isTestnetHost ? "testnet" : "mainnet";
+  
+  // Check explicit domain lists first
+  if (TESTNET_DOMAINS.some(d => host.includes(d) || host === d)) {
+    console.log("[Validation] Detected TESTNET domain:", host);
+    return "testnet";
+  }
+  
+  if (MAINNET_DOMAINS.some(d => host.includes(d) || host === d)) {
+    console.log("[Validation] Detected MAINNET domain:", host);
+    return "mainnet";
+  }
+  
+  // Fallback: check for testnet hints in hostname
+  if (host.includes("1991") || host.includes("testnet") || host.includes("sandbox")) {
+    console.log("[Validation] Detected testnet hint in host:", host);
+    return "testnet";
+  }
+  
+  // Default to mainnet
+  console.log("[Validation] Defaulting to mainnet for host:", host);
+  return "mainnet";
 };
 
 export const resolveValidationKey = (mode: ValidationMode): string => {
