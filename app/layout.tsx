@@ -108,118 +108,13 @@ export default async function RootLayout({
           type="text/javascript"
         />
 
-        {/* CRITICAL: Auto-initialize Pi SDK immediately after scripts load */}
-        {/* This is what was missing - without this, Pi Browser doesn't recognize the app */}
+        {/* Simple Pi SDK status tracking - NO auto-authentication */}
         <script
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for inline Pi SDK initialization script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Pi SDK tracking
           dangerouslySetInnerHTML={{
             __html: `
-(function() {
-  window.__piInitialization = {
-    status: 'initializing',
-    startTime: Date.now()
-  };
-
-  function detectNetwork(hostname) {
-    // ============================================
-    // EXPLICIT FULL DOMAIN URL MATCHING
-    // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
-    // ============================================
-    
-    // PINET TESTNET DOMAIN
-    if (hostname === 'triumphsynergy1991.pinet.com') {
-      return { network: 'testnet', sandbox: true };
-    }
-    
-    // PINET MAINNET DOMAINS
-    if (hostname === 'triumphsynergy7386.pinet.com') {
-      return { network: 'mainnet', sandbox: false };
-    }
-    
-    if (hostname === 'triumphsynergy0576.pinet.com') {
-      return { network: 'mainnet', sandbox: false };
-    }
-    
-    // VERCEL MAINNET DOMAIN
-    if (hostname === 'triumph-synergy.vercel.app') {
-      return { network: 'mainnet', sandbox: false };
-    }
-    
-    // VERCEL TESTNET DOMAIN (EXPLICIT)
-    if (hostname === 'triumph-synergy-testnet.vercel.app') {
-      return { network: 'testnet', sandbox: true };
-    }
-    
-    // Fallback: Any other vercel.app subdomain = testnet
-    if (hostname.endsWith('.vercel.app')) {
-      return { network: 'testnet', sandbox: true };
-    }
-    
-    // Fallback: localhost = testnet for development
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return { network: 'testnet', sandbox: true };
-    }
-    
-    // Default to mainnet for unknown domains
-    return { network: 'mainnet', sandbox: false };
-  }
-
-  async function initializePi() {
-    const hostname = window.location.hostname;
-    const networkInfo = detectNetwork(hostname);
-    
-    console.log('[Pi SDK Auto-Init] ===== AUTOMATIC INITIALIZATION =====');
-    console.log('[Pi SDK Auto-Init] Domain:', hostname);
-    console.log('[Pi SDK Auto-Init] Network:', networkInfo.network);
-    console.log('[Pi SDK Auto-Init] Sandbox:', networkInfo.sandbox);
-
-    try {
-      // Wait for Pi SDK to load
-      let attempts = 0;
-      while (!window.Pi && attempts < 200) {
-        await new Promise(resolve => setTimeout(resolve, 50));
-        attempts++;
-      }
-
-      if (!window.Pi) throw new Error('window.Pi never loaded');
-      console.log('[Pi SDK Auto-Init] ✓ window.Pi loaded');
-
-      // Initialize Pi SDK
-      await window.Pi.init({
-        version: '2.0',
-        sandbox: networkInfo.sandbox
-      });
-      console.log('[Pi SDK Auto-Init] ✓ Pi.init() succeeded');
-
-      // CRITICAL: Authenticate with payments scope
-      // This is what tells Pi Browser this is a valid payments app
-      const auth = await window.Pi.authenticate(
-        ['payments'],
-        (payment) => console.log('[Pi SDK] Incomplete payment:', payment)
-      );
-      console.log('[Pi SDK Auto-Init] ✓ AUTHENTICATED - User:', auth.user.uid);
-      
-      window.__piInitialization.status = 'ready';
-      window.__piInitialization.authenticated = true;
-      window.__piInitialization.duration = Date.now() - window.__piInitialization.startTime;
-      
-      console.log('[Pi SDK Auto-Init] ===== READY FOR PAYMENTS =====');
-      window.dispatchEvent(new CustomEvent('piReady', { detail: auth }));
-      
-    } catch (error) {
-      console.error('[Pi SDK Auto-Init] ❌ FAILED:', error);
-      window.__piInitialization.status = 'failed';
-      window.__piInitialization.error = error.message;
-      window.dispatchEvent(new CustomEvent('piError', { detail: error }));
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializePi);
-  } else {
-    initializePi();
-  }
-})();
+window.__piInitialization = { status: 'pending' };
+console.log('[Pi SDK] Script loaded, waiting for manual init');
             `,
           }}
         />
@@ -235,8 +130,8 @@ export default async function RootLayout({
           <SessionProvider>
             <LocaleProvider locale={locale}>
               <PiProvider>{children}</PiProvider>
-              {/* Pi SDK Debug Panel - Shows on all pages for testing */}
-              <PiSdkDebugPanel />
+              {/* Debug panel temporarily disabled for testing */}
+              {/* <PiSdkDebugPanel /> */}
             </LocaleProvider>
           </SessionProvider>
         </ThemeProvider>
