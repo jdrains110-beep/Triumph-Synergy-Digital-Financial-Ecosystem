@@ -127,10 +127,8 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   console.log('[Pi SDK] In Pi Browser:', isPiBrowser);
   
   if (!isPiBrowser) {
-    console.log('[Pi SDK] Not in Pi Browser - SDK will not work. Marking as unavailable.');
-    window.__piInitialization.status = 'unavailable';
-    window.__piInitialization.error = 'Not running in Pi Browser';
-    return;
+    console.log('[Pi SDK] Not in Pi Browser - will try to load SDK, but may remain unavailable.');
+    window.__piInitialization.status = 'non-pi-browser';
   }
   
   // Ensure Pi SDK script is loaded (fallback injector)
@@ -154,10 +152,20 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   }
 
   // Wait for Pi SDK to load
+  var tries = 0;
+  var maxTries = 40;
+
   function checkAndInit() {
     if (typeof window.Pi === 'undefined') {
       console.log('[Pi SDK] window.Pi not yet available, waiting...');
       loadPiSdkScript();
+      tries += 1;
+      if (tries >= maxTries) {
+        console.warn('[Pi SDK] Pi SDK did not load in time. Marking as unavailable.');
+        window.__piInitialization.status = 'unavailable';
+        window.__piInitialization.error = 'Pi SDK not available (timed out)';
+        return;
+      }
       setTimeout(checkAndInit, 250);
       return;
     }
