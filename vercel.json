@@ -4,6 +4,16 @@
   "framework": "nextjs",
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
+  "regions": ["iad1"],
+  "alias": [
+    "triumph-synergy.vercel.app",
+    "triumph-synergy-testnet.vercel.app"
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
   "headers": [
     {
       "source": "/",
