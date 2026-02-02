@@ -149,6 +149,10 @@
     {
       "source": "/.well-known/pi-app-verification",
       "destination": "/api/pi-verification"
+    },
+    {
+      "source": "/.well-known/pi-app-verification.json",
+      "destination": "/api/pi-verification"
     }
   ],
   "env": {

@@ -68,8 +68,8 @@ const nextConfig: NextConfig = {
             value: "*",
           },
           {
-            key: "Content-Type",
-            value: "text/plain",
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
           },
         ],
       },
