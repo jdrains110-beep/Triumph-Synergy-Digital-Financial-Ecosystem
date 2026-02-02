@@ -27,19 +27,26 @@ export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAvailable, setIsAvailable] = useState(false);
+  const [isPiBrowser, setIsPiBrowser] = useState(false);
   const [network, setNetwork] = useState<"testnet" | "mainnet">("mainnet");
 
   useEffect(() => {
     const checkAvailability = async () => {
+      // First check if in Pi Browser
+      const inPiBrowser = realPi.isPiBrowser();
+      setIsPiBrowser(inPiBrowser);
+
       const available = await realPi.isAvailable();
       setIsAvailable(available);
       setNetwork(realPi.getNetwork());
 
       if (available) {
         console.log("✓ Pi SDK available on", network);
+      } else if (!inPiBrowser) {
+        console.warn("⚠️ Not in Pi Browser - Pi payments require Pi Browser app");
       } else {
         console.warn(
-          "⚠️ Pi SDK not available - payments disabled. Must open in Pi Browser."
+          "⚠️ Pi SDK not available - payments disabled. Check authentication."
         );
       }
     };
@@ -88,7 +95,9 @@ export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
     ? isProcessing
       ? "Processing..."
       : children || `Pay ${amount} Pi`
-    : "Open in Pi Browser";
+    : isPiBrowser
+      ? "Authenticating..."
+      : "Open in Pi Browser";
 
   return (
     <button
@@ -98,7 +107,9 @@ export const PiPaymentButton: React.FC<PiPaymentButtonProps> = ({
       title={
         isAvailable
           ? undefined
-          : "Must open app in Pi Browser to enable payments"
+          : isPiBrowser
+            ? "Pi SDK is loading or authentication required"
+            : "Must open app in Pi Browser to enable payments"
       }
     >
       {buttonLabel}

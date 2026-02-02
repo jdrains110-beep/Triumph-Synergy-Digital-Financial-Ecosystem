@@ -228,12 +228,33 @@ export const realPi = {
   },
 
   /**
+   * Check if running in Pi Browser
+   */
+  isPiBrowser(): boolean {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      return false;
+    }
+    const ua = navigator.userAgent || "";
+    return (
+      ua.includes("PiBrowser") ||
+      ua.includes("Pi Browser") ||
+      ua.includes("PiNetwork")
+    );
+  },
+
+  /**
    * Check if Pi SDK is available and authenticated
    * Payment buttons should only be enabled when this returns true
    */
   async isAvailable(): Promise<boolean> {
     if (typeof window === "undefined") {
       console.log("[Real Pi] isAvailable: Server-side");
+      return false;
+    }
+
+    // First check if in Pi Browser
+    if (!this.isPiBrowser()) {
+      console.log("[Real Pi] isAvailable: Not in Pi Browser");
       return false;
     }
 

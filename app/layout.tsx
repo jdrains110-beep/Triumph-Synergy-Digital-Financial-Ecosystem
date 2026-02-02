@@ -118,7 +118,21 @@ console.log('[Pi SDK] Script loaded, checking environment...');
 
 // Safely check for Pi Browser and initialize
 (function initPiSdk() {
-  // Wait for DOM and Pi SDK
+  // Check if we're in Pi Browser first
+  var ua = navigator.userAgent || '';
+  var isPiBrowser = ua.indexOf('PiBrowser') !== -1 || ua.indexOf('Pi Browser') !== -1 || ua.indexOf('PiNetwork') !== -1;
+  
+  console.log('[Pi SDK] User-Agent:', ua);
+  console.log('[Pi SDK] In Pi Browser:', isPiBrowser);
+  
+  if (!isPiBrowser) {
+    console.log('[Pi SDK] Not in Pi Browser - SDK will not work. Marking as unavailable.');
+    window.__piInitialization.status = 'unavailable';
+    window.__piInitialization.error = 'Not running in Pi Browser';
+    return;
+  }
+  
+  // Wait for Pi SDK to load
   function checkAndInit() {
     if (typeof window.Pi === 'undefined') {
       console.log('[Pi SDK] window.Pi not yet available, waiting...');
