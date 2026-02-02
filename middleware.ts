@@ -75,8 +75,9 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // CRITICAL: Redirect preview URLs to production pinet domains
-  // But allow explicit testnet domain through
+  // DISABLED: Redirects were causing issues with Pi Browser
+  // Let all domains through, just set headers
+  /*
   if (
     !isAllowedDomain &&
     (hostname.includes("-jeremiah-drains-projects.vercel.app") ||
@@ -84,19 +85,15 @@ export function middleware(request: NextRequest) {
       (hostname.endsWith(".vercel.app") &&
         !hostname.startsWith("triumph-synergy")))
   ) {
-    // Redirect to primary domain with permanent redirect
     const redirectUrl = new URL(request.nextUrl);
     redirectUrl.hostname = "triumphsynergy0576.pinet.com";
     const response = NextResponse.redirect(redirectUrl, 301);
-    // Ensure no caching of redirect to prevent stale preview URLs
-    response.headers.set(
-      "Cache-Control",
-      "no-cache, no-store, must-revalidate"
-    );
+    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
     response.headers.set("Pragma", "no-cache");
     response.headers.set("Expires", "0");
     return response;
   }
+  */
 
   // Create response with modified headers
   const response = NextResponse.next();
@@ -192,8 +189,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder files
+     * - public folder files (html, txt, etc)
+     * - api routes (let them pass through)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|html|txt|xml|json)$).*)",
   ],
 };
