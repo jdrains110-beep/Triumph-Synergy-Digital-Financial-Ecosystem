@@ -181,6 +181,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         await Pi.init({
           version: "2.0",
           sandbox: networkConfig.sandbox,
+          appId: networkConfig.appId,
         });
         setSdkInitialized(true);
       }

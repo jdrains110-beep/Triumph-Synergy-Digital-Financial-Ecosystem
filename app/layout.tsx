@@ -193,11 +193,12 @@ console.log('[Pi SDK] Script loaded, checking environment...');
       sandbox = true;
     }
     
-    console.log('[Pi SDK] Domain: ' + hostname + ', sandbox: ' + sandbox);
+    var appId = '${process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy"}';
+    console.log('[Pi SDK] Domain: ' + hostname + ', sandbox: ' + sandbox + ', appId: ' + appId);
     window.__piInitialization.status = 'initializing';
     
     try {
-      window.Pi.init({ version: '2.0', sandbox: sandbox }).then(function() {
+      window.Pi.init({ version: '2.0', sandbox: sandbox, appId: appId }).then(function() {
         console.log('[Pi SDK] Init completed, authenticating...');
         return window.Pi.authenticate(['username', 'payments'], function(payment) {
           console.log('[Pi SDK] Incomplete payment found:', payment);
