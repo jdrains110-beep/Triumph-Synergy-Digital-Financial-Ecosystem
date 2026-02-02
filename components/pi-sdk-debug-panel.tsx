@@ -82,6 +82,7 @@ export function PiSdkDebugPanel() {
       typeof window !== "undefined" &&
       (navigator.userAgent.includes("PiBrowser") ||
         navigator.userAgent.includes("Pi Network") ||
+        window.location.hostname.endsWith(".vusercontent.net") ||
         !!(window as any).Pi);
 
     const piSdkLoaded = typeof window !== "undefined" && !!(window as any).Pi;

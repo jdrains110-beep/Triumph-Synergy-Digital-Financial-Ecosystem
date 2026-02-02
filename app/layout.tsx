@@ -1,5 +1,4 @@
 import { Analytics } from "@vercel/analytics/next";
-import Script from "next/script";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
@@ -95,19 +94,7 @@ export default async function RootLayout({
           }}
         />
 
-        {/* Pi SDK loader - ensure it is requested before hydration */}
-        <Script
-          src="https://sdk.minepi.com/pi-sdk.js"
-          strategy="beforeInteractive"
-          crossOrigin="anonymous"
-        />
-        <Script
-          src="https://app-cdn.minepi.com/pi-sdk.js"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
-        />
-
-        {/* Pi SDK status tracking - with safe auto-init + dynamic loader */}
+        {/* Pi SDK status tracking - use Pi Browser injected SDK only */}
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Pi SDK tracking
           dangerouslySetInnerHTML={{
@@ -131,52 +118,13 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   }
   
   // Ensure Pi SDK script is loaded (fallback injector)
-  var sdkSources = [
-    'https://sdk.minepi.com/pi-sdk.js',
-    'https://app-cdn.minepi.com/pi-sdk.js'
-  ];
-  var sdkSourceIndex = 0;
-
-  function loadPiSdkScript() {
-    if (window.__piInitialization.sdkLoaded) {
-      return;
-    }
-
-    window.__piInitialization.status = 'loading-sdk';
-
-    var scriptId = 'pi-sdk-script-' + sdkSourceIndex;
-    if (document.getElementById(scriptId)) {
-      return;
-    }
-
-    var src = sdkSources[sdkSourceIndex];
-    var script = document.createElement('script');
-    script.id = scriptId;
-    script.src = src;
-    script.type = 'text/javascript';
-    script.async = true;
-    script.onload = function() {
-      window.__piInitialization.sdkLoaded = true;
-      console.log('[Pi SDK] SDK script loaded from:', src);
-    };
-    script.onerror = function() {
-      console.error('[Pi SDK] SDK script failed to load from:', src);
-      sdkSourceIndex += 1;
-      if (sdkSourceIndex < sdkSources.length) {
-        loadPiSdkScript();
-      }
-    };
-    document.head.appendChild(script);
-  }
-
-  // Wait for Pi SDK to load
+  // Wait for Pi Browser injected SDK to appear
   var tries = 0;
   var maxTries = 40;
 
   function checkAndInit() {
     if (typeof window.Pi === 'undefined') {
       console.log('[Pi SDK] window.Pi not yet available, waiting...');
-      loadPiSdkScript();
       tries += 1;
       if (tries >= maxTries) {
         console.warn('[Pi SDK] Pi SDK did not load in time. Marking as unavailable.');
@@ -241,7 +189,6 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   }
   
   // Start check after short delay to let scripts load
-  loadPiSdkScript();
   setTimeout(checkAndInit, 100);
 })();
             `,
