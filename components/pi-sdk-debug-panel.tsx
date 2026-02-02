@@ -50,6 +50,7 @@ type StatusLog = {
  * - triumph-synergy-testnet.vercel.app (Vercel testnet)
  */
 export function PiSdkDebugPanel() {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [domainInfo, setDomainInfo] = useState<DomainInfo | null>(null);
@@ -57,6 +58,11 @@ export function PiSdkDebugPanel() {
   const [authUser, setAuthUser] = useState<PiAuthUser | null>(null);
   const [logs, setLogs] = useState<StatusLog[]>([]);
   const [testPaymentStatus, setTestPaymentStatus] = useState<string>("");
+
+  // Wait for mount before doing any window access
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Add a log entry
   const addLog = (
@@ -271,6 +277,8 @@ export function PiSdkDebugPanel() {
   // Poll for status updates
   // biome-ignore lint/correctness/useExhaustiveDependencies: Run only once on mount
   useEffect(() => {
+    if (!mounted) return;
+    
     const updateStatus = () => {
       setDomainInfo(detectDomainInfo());
       setInitState(checkInitState());

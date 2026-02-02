@@ -127,15 +127,14 @@ console.log('[Pi SDK] Script loaded, waiting for manual init');
           enableSystem
         >
           <Toaster position="top-center" />
-          <SessionProvider>
-            <LocaleProvider locale={locale}>
-              <PiProvider>{children}</PiProvider>
-              {/* Pi SDK Debug Panel */}
-              <PiSdkDebugPanel />
-            </LocaleProvider>
-          </SessionProvider>
+          <LocaleProvider locale={locale}>
+            <PiProvider>{children}</PiProvider>
+            {/* Pi SDK Debug Panel */}
+            <PiSdkDebugPanel />
+          </LocaleProvider>
         </ThemeProvider>
-        <Analytics />
+        {/* Analytics disabled - may cause issues in Pi Browser */}
+        {/* <Analytics /> */}
       </body>
     </html>
   );

@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Build configuration for Vercel
-  // Setting empty turbopack config to silence migration warning
-  turbopack: {},
+  // Disable Turbopack to use Webpack (fixes pnpm resolution issues)
+  // Setting to false instead of {} to explicitly disable
+  // turbopack: {},
 
   webpack: (config, { isServer }) => {
     return config;
