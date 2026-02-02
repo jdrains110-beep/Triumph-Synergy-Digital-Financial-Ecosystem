@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pi SDK Raw Test</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <style>
+    body {
+      background: #1a1a2e;
+      color: white;
+      font-family: monospace;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 { color: #9d4edd; }
+    #log {
+      background: #0f0f1a;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      min-height: 300px;
+    }
+    .pass { color: #51cf66; }
+    .fail { color: #ff6b6b; }
+    .info { color: #ccc; }
+    .line { padding: 5px 0; border-bottom: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <h1>🔬 Pi SDK Raw HTML Test</h1>
+  <p>No React. No Next.js. Just HTML.</p>
+  <div id="log"><div class="line info">Starting...</div></div>
+
+  <script>
+    const logEl = document.getElementById('log');
+    
+    function log(msg, type) {
+      const div = document.createElement('div');
+      div.className = 'line ' + (type || 'info');
+      div.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+      logEl.appendChild(div);
+    }
+    
+    async function runTest() {
+      log('Page loaded');
+      log('URL: ' + window.location.href);
+      log('Hostname: ' + window.location.hostname);
+      log('UserAgent: ' + navigator.userAgent.substring(0, 50) + '...');
+      
+      const isPi = navigator.userAgent.includes('PiBrowser');
+      log('Pi Browser: ' + (isPi ? 'YES' : 'NO'), isPi ? 'pass' : 'fail');
+      
+      log('Waiting for window.Pi...');
+      
+      let attempts = 0;
+      while (!window.Pi && attempts < 50) {
+        await new Promise(r => setTimeout(r, 200));
+        attempts++;
+      }
+      
+      if (!window.Pi) {
+        log('window.Pi not found after 10s', 'fail');
+        log('Not in Pi Browser or SDK blocked', 'fail');
+        return;
+      }
+      
+      log('window.Pi exists!', 'pass');
+      log('Pi.init: ' + typeof window.Pi.init);
+      log('Pi.authenticate: ' + typeof window.Pi.authenticate);
+      
+      const hostname = window.location.hostname;
+      const sandbox = hostname.includes('testnet') || 
+                      hostname === 'triumphsynergy1991.pinet.com' ||
+                      hostname === 'localhost';
+      
+      log('Calling Pi.init(sandbox=' + sandbox + ')...');
+      
+      try {
+        await window.Pi.init({ version: '2.0', sandbox: sandbox });
+        log('Pi.init() SUCCESS', 'pass');
+      } catch (e) {
+        log('Pi.init() FAILED: ' + (e.message || e), 'fail');
+        return;
+      }
+      
+      log('Calling Pi.authenticate()...');
+      
+      try {
+        const auth = await window.Pi.authenticate(
+          ['username', 'payments'],
+          function(p) { log('Incomplete payment: ' + JSON.stringify(p)); }
+        );
+        log('AUTHENTICATED!', 'pass');
+        log('User: ' + (auth.user ? auth.user.username || auth.user.uid : 'unknown'));
+        log('Token: ' + (auth.accessToken ? 'YES' : 'NO'));
+      } catch (e) {
+        log('AUTHENTICATION FAILED: ' + (e.message || e), 'fail');
+      }
+    }
+    
+    runTest();
+  </script>
+</body>
+</html>
