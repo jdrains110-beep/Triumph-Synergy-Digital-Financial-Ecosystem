@@ -19,8 +19,9 @@ type DiagnosticResult = {
 
 export default function PiDiagnosticPage() {
   const [results, setResults] = useState<DiagnosticResult[]>([]);
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState(true); // Start with running=true
   const [piObject, setPiObject] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
   const hasRun = useRef(false);
 
   const runDiagnostics = async () => {
@@ -300,11 +301,28 @@ export default function PiDiagnosticPage() {
 
   // Auto-run on mount (only once)
   useEffect(() => {
-    if (!hasRun.current) {
-      hasRun.current = true;
-      runDiagnostics();
-    }
+    setMounted(true);
+    // Small delay to ensure client is fully hydrated
+    const timer = setTimeout(() => {
+      if (!hasRun.current) {
+        hasRun.current = true;
+        runDiagnostics();
+      }
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
+
+  // Show loading state until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-xl">Loading Diagnostic Tool...</p>
+        </div>
+      </div>
+    );
+  }
 
   const passCount = results.filter((r) => r.status === "pass").length;
   const failCount = results.filter((r) => r.status === "fail").length;
