@@ -108,13 +108,78 @@ export default async function RootLayout({
           type="text/javascript"
         />
 
-        {/* Simple Pi SDK status tracking - NO auto-authentication */}
+        {/* Simple Pi SDK status tracking - with safe auto-init */}
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Pi SDK tracking
           dangerouslySetInnerHTML={{
             __html: `
-window.__piInitialization = { status: 'pending' };
-console.log('[Pi SDK] Script loaded, waiting for manual init');
+window.__piInitialization = { status: 'pending', authenticated: false };
+console.log('[Pi SDK] Script loaded, checking environment...');
+
+// Safely check for Pi Browser and initialize
+(function initPiSdk() {
+  // Wait for DOM and Pi SDK
+  function checkAndInit() {
+    if (typeof window.Pi === 'undefined') {
+      console.log('[Pi SDK] window.Pi not yet available, waiting...');
+      setTimeout(checkAndInit, 200);
+      return;
+    }
+    
+    console.log('[Pi SDK] window.Pi found! Detecting domain...');
+    
+    // Domain-based network detection
+    var hostname = window.location.hostname.toLowerCase();
+    var sandbox = true; // Default to sandbox for safety
+    
+    // PINET domains
+    if (hostname === 'triumphsynergy1991.pinet.com') {
+      sandbox = true; // TESTNET
+    } else if (hostname === 'triumphsynergy7386.pinet.com' || hostname === 'triumphsynergy0576.pinet.com') {
+      sandbox = false; // MAINNET
+    }
+    // VERCEL domains  
+    else if (hostname === 'triumph-synergy.vercel.app') {
+      sandbox = false; // MAINNET
+    } else if (hostname === 'triumph-synergy-testnet.vercel.app') {
+      sandbox = true; // TESTNET
+    }
+    // localhost = testnet
+    else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      sandbox = true;
+    }
+    
+    console.log('[Pi SDK] Domain: ' + hostname + ', sandbox: ' + sandbox);
+    window.__piInitialization.status = 'initializing';
+    
+    try {
+      window.Pi.init({ version: '2.0', sandbox: sandbox }).then(function() {
+        console.log('[Pi SDK] Init completed, authenticating...');
+        return window.Pi.authenticate(['username', 'payments'], function(payment) {
+          console.log('[Pi SDK] Incomplete payment found:', payment);
+        });
+      }).then(function(auth) {
+        console.log('[Pi SDK] Authenticated!', auth);
+        window.__piInitialization.status = 'ready';
+        window.__piInitialization.authenticated = true;
+        window.__piInitialization.user = auth ? auth.user : null;
+        // Fire event for React components
+        window.dispatchEvent(new CustomEvent('piReady', { detail: auth }));
+      }).catch(function(err) {
+        console.error('[Pi SDK] Init/Auth error:', err);
+        window.__piInitialization.status = 'failed';
+        window.__piInitialization.error = err.message || String(err);
+        window.dispatchEvent(new CustomEvent('piError', { detail: { message: err.message || String(err) }}));
+      });
+    } catch(e) {
+      console.error('[Pi SDK] Exception:', e);
+      window.__piInitialization.status = 'failed';
+    }
+  }
+  
+  // Start check after short delay to let scripts load
+  setTimeout(checkAndInit, 100);
+})();
             `,
           }}
         />
