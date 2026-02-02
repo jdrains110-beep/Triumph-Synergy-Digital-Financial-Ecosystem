@@ -94,21 +94,7 @@ export default async function RootLayout({
           }}
         />
 
-        {/* Load Pi SDK scripts FIRST - BEFORE React initialization */}
-        <script
-          crossOrigin="anonymous"
-          src="https://sdk.minepi.com/pi-sdk.js"
-          type="text/javascript"
-        />
-        <script
-          async
-          crossOrigin="anonymous"
-          defer
-          src="https://app-cdn.minepi.com/pi-sdk.js"
-          type="text/javascript"
-        />
-
-        {/* Simple Pi SDK status tracking - with safe auto-init */}
+        {/* Pi SDK status tracking - with safe auto-init + dynamic loader */}
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Pi SDK tracking
           dangerouslySetInnerHTML={{
