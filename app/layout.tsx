@@ -104,6 +104,13 @@ console.log('[Pi SDK] Script loaded, checking environment...');
 
 // Safely check for Pi Browser and initialize
 (function initPiSdk() {
+  // Force Pi Browser to use the validated pinet domain (proxy domains do not inject SDK)
+  if (window.location.hostname.endsWith('.vusercontent.net')) {
+    console.warn('[Pi SDK] Proxy domain detected. Redirecting to mainnet pinet domain for SDK injection.');
+    window.location.href = 'https://triumphsynergy0576.pinet.com' + window.location.pathname + window.location.search;
+    return;
+  }
+
   // Check if we're in Pi Browser first
   var ua = navigator.userAgent || '';
   var uaLower = ua.toLowerCase();
