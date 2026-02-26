@@ -107,6 +107,43 @@ console.log('[Pi SDK] Script loaded, checking environment...');
 
 // Safely check for Pi Browser and initialize
 (function initPiSdk() {
+  var hostname = window.location.hostname.toLowerCase();
+  var isVercelDomain =
+    hostname === 'triumph-synergy.vercel.app' ||
+    hostname === 'triumph-synergy-testnet.vercel.app';
+
+  if (isVercelDomain) {
+    var bootstrapTries = 0;
+    var bootstrapMaxTries = 20;
+
+    var bootstrapTimer = setInterval(function() {
+      bootstrapTries += 1;
+      console.log('[Pi SDK] Bootstrap:', {
+        hostname: hostname,
+        hasPi: typeof window.Pi !== 'undefined',
+        hasPiNetwork: typeof window.PiNetwork !== 'undefined',
+        attempt: bootstrapTries
+      });
+
+      if (typeof window.Pi !== 'undefined') {
+        try {
+          window.Pi.init({
+            version: '2.0',
+            sandbox: hostname === 'triumph-synergy-testnet.vercel.app',
+            appId: '${process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy"}'
+          });
+          clearInterval(bootstrapTimer);
+        } catch (err) {
+          console.error('[Pi SDK] Bootstrap init error:', err);
+        }
+      }
+
+      if (bootstrapTries >= bootstrapMaxTries) {
+        clearInterval(bootstrapTimer);
+      }
+    }, 500);
+  }
+
   // Check if we're in Pi Browser first
   var ua = navigator.userAgent || '';
   var uaLower = ua.toLowerCase();
