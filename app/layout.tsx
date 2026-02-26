@@ -1,15 +1,12 @@
-import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { LocaleProvider } from "@/components/locale-provider";
-import { PiSdkDebugPanel } from "@/components/pi-sdk-debug-panel";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -94,7 +91,13 @@ export default async function RootLayout({
           }}
         />
 
-        {/* Pi SDK status tracking - use Pi Browser injected SDK only */}
+        <script
+          crossOrigin="anonymous"
+          src="https://sdk.minepi.com/pi-sdk.js"
+          type="text/javascript"
+        />
+
+        {/* Pi SDK status tracking - production-only init */}
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Pi SDK tracking
           dangerouslySetInnerHTML={{
@@ -104,13 +107,6 @@ console.log('[Pi SDK] Script loaded, checking environment...');
 
 // Safely check for Pi Browser and initialize
 (function initPiSdk() {
-  // Force Pi Browser to use the validated pinet domain (proxy domains do not inject SDK)
-  if (window.location.hostname.endsWith('.vusercontent.net')) {
-    console.warn('[Pi SDK] Proxy domain detected. Redirecting to mainnet pinet domain for SDK injection.');
-    window.location.href = 'https://triumphsynergy0576.pinet.com' + window.location.pathname + window.location.search;
-    return;
-  }
-
   // Check if we're in Pi Browser first
   var ua = navigator.userAgent || '';
   var uaLower = ua.toLowerCase();
@@ -120,12 +116,12 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   console.log('[Pi SDK] In Pi Browser:', isPiBrowser);
   
   if (!isPiBrowser) {
-    console.log('[Pi SDK] Not in Pi Browser - will try to load SDK, but may remain unavailable.');
+    console.log('[Pi SDK] Not in Pi Browser - skipping Pi SDK init.');
     window.__piInitialization.status = 'non-pi-browser';
+    return;
   }
-  
-  // Ensure Pi SDK script is loaded (fallback injector)
-  // Wait for Pi Browser injected SDK to appear
+
+  // Wait for Pi SDK to appear
   var tries = 0;
   var maxTries = 40;
 
@@ -137,10 +133,6 @@ console.log('[Pi SDK] Script loaded, checking environment...');
         console.warn('[Pi SDK] Pi SDK did not load in time. Marking as unavailable.');
         window.__piInitialization.status = 'unavailable';
         window.__piInitialization.error = 'Pi SDK not available (timed out)';
-        if (window.location.hostname.endsWith('.vusercontent.net')) {
-          console.warn('[Pi SDK] Detected Pi Browser proxy domain. Redirecting to mainnet pinet domain.');
-          window.location.href = 'https://triumphsynergy0576.pinet.com' + window.location.pathname + window.location.search;
-        }
         return;
       }
       setTimeout(checkAndInit, 250);
@@ -216,8 +208,6 @@ console.log('[Pi SDK] Script loaded, checking environment...');
           <Toaster position="top-center" />
           <LocaleProvider locale={locale}>
             <PiProvider>{children}</PiProvider>
-            {/* Pi SDK Debug Panel */}
-            <PiSdkDebugPanel />
           </LocaleProvider>
         </ThemeProvider>
         {/* Analytics disabled - may cause issues in Pi Browser */}

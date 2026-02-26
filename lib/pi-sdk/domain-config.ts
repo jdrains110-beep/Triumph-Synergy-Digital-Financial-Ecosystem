@@ -144,20 +144,6 @@ export function getNetworkConfig(): NetworkConfig {
     };
   }
 
-  // Pi Browser proxy domains (vusercontent.net) should be treated as mainnet
-  if (hostname.endsWith(".vusercontent.net")) {
-    console.warn(
-      `[Pi Domain Config] Pi Browser proxy domain: ${hostname} - defaulting to mainnet`
-    );
-    return {
-      network: "mainnet",
-      sandbox: false,
-      hostname,
-      appId: PI_APP_ID,
-      description: `Pi Browser proxy domain (${hostname}) - mainnet fallback`,
-    };
-  }
-
   // Completely unknown domain - default to mainnet (safer for production)
   console.warn(
     `[Pi Domain Config] Completely unknown domain: ${hostname} - defaulting to mainnet`

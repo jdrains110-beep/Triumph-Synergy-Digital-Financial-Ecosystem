@@ -141,7 +141,6 @@
   ],
   "outputDirectory": ".next",
   "devCommand": "pnpm dev",
-  "regions": ["iad1"],
   "functions": {
     "app/api/pi/**/*.ts": {
       "maxDuration": 30,

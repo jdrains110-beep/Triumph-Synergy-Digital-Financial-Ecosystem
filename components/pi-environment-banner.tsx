@@ -64,13 +64,6 @@ export function PiEnvironmentBanner() {
                 Open in <strong>Pi Browser app</strong> for real blockchain
                 transactions
               </li>
-              <li>
-                Check{" "}
-                <a className="font-medium underline" href="/debug/pi-sdk">
-                  debug page
-                </a>{" "}
-                to verify environment
-              </li>
             </ul>
           </div>
         </div>
