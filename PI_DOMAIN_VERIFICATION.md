@@ -43,16 +43,6 @@ curl https://triumphsynergy0576.pinet.com/validation-key.txt
 4. Pi Network will fetch: `https://triumphsynergy0576.pinet.com/validation-key.txt`
 5. Wait for verification confirmation
 
-### 3. Check Verification Status
-Visit: https://triumph-synergy.vercel.app/debug/validation-check
-
-This page will show:
-- Current domain (Vercel or Pi Net)
-- Expected validation key
-- Actual validation key served
-- Match status
-- Links to verification URLs
-
 ## 🔧 Implementation Details
 
 ### Dynamic Key Serving
@@ -112,7 +102,7 @@ NEXT_PUBLIC_PI_SANDBOX=false
 ### After Verification Complete
 1. **Testnet**: Open `https://triumph-synergy.vercel.app` in Pi Browser (testnet mode)
 2. **Mainnet**: Open `https://triumphsynergy0576.pinet.com` in Pi Browser (mainnet)
-3. Check detection: `https://triumph-synergy.vercel.app/debug/pi-browser-check`
+3. Confirm Pi Browser recognition on the app homepage after verification.
 
 ### Expected Behavior
 - Pi Browser should recognize the domain

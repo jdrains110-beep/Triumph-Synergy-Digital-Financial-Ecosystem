@@ -146,15 +146,6 @@ export default async function Page() {
           </div>
         </div>
 
-        {/* Debug Link */}
-        <div className="mt-12 text-center">
-          <Link 
-            href="/debug/pi-test" 
-            className="inline-block text-sm text-gray-400 hover:text-gray-300 underline"
-          >
-            Pi Browser Debug Page
-          </Link>
-        </div>
       </main>
 
       {/* Footer */}
@@ -167,7 +158,7 @@ export default async function Page() {
             <div className="flex gap-6">
               <Link href="/legal/terms" className="text-sm text-gray-400 hover:text-gray-300">Terms</Link>
               <Link href="/legal/privacy" className="text-sm text-gray-400 hover:text-gray-300">Privacy</Link>
-              <Link href="/debug/pi-test" className="text-sm text-gray-400 hover:text-gray-300">Support</Link>
+              <Link href="/support" className="text-sm text-gray-400 hover:text-gray-300">Support</Link>
             </div>
           </div>
         </div>

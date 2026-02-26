@@ -82,17 +82,12 @@ Your App Loads
 **Testnet**:
 - Open `https://triumph-synergy-git-testnet-jeremiah-drains-projects.vercel.app` directly in Pi Browser
 
-### Step 2: Check Debug Page
+### Step 2: Confirm Pi Browser Recognition
 
-Navigate to `/debug/pi-test` to verify:
-- `isPiBrowser: true` ✅
-- `hasPiSDK: true` ✅
-- `isAndroid: true` or `isiOS: true` ✅
-
-If you see `false` values, check:
-1. You're in **Pi Browser**, not Edge/Chrome
-2. App URL in Developer Portal matches exactly
-3. Domain is verified in Pi App Studio
+Open the app in Pi Browser and verify:
+- Pi Browser is detected
+- Pi SDK loads
+- Authentication prompts appear
 
 ---
 
@@ -156,6 +151,5 @@ The new homepage includes:
 ## 📞 Support
 
 If issues persist after following this guide:
-1. Check `/debug/pi-test` page output
-2. Review browser console errors
-3. Verify Developer Portal configuration matches exactly
+1. Review browser console errors
+2. Verify Developer Portal configuration matches exactly

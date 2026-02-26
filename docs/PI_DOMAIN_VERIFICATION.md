@@ -82,11 +82,7 @@ After completing verification:
 
 1. Open Pi Browser on your mobile device
 2. Navigate to: https://triumph-synergy.vercel.app
-3. Check the debug page: https://triumph-synergy.vercel.app/debug/pi-browser-check
-4. You should see:
-   - ✅ Pi Browser Detected
-   - ✅ Pi SDK Loaded
-   - ✅ App ID Configured
+3. Confirm Pi Browser detection and SDK initialization on the main app
 
 ### 7. Common Issues
 

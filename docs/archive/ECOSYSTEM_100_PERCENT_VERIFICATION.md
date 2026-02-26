@@ -159,7 +159,6 @@
 - ✅ `/login` - Authentication
 - ✅ `/register` - User registration
 - ✅ `/ecosystem/applications` - App dashboard
-- ✅ `/debug/pi-sdk` - SDK debugging
 - ✅ `/transactions` - Transaction history
 - ✅ `/validation-key.txt` - Key endpoint
 - ✅ 30+ additional API routes

@@ -259,11 +259,6 @@ curl -s "https://triumphsynergy1991.pinet.com/validation-key-testnet.txt"
 curl -s "https://triumph-synergy.vercel.app/validation-key.txt?mode=mainnet"
 ```
 
-**Test Debug Endpoint:**
-```bash
-curl -s "https://triumph-synergy.vercel.app/debug/validation-check"
-```
-
 ### Payment Flow Testing
 
 1. Open Pi Browser or test environment

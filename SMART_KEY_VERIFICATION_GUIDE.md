@@ -62,17 +62,6 @@ After both portals verify the domain:
 - Search for "Triumph Synergy" or visit triumphsynergy0576.pinet.com
 - Should load and recognize Pi Browser ✅
 
-## 🔍 Debug Tools
-
-### Check Current Key
-Visit: https://triumph-synergy.vercel.app/debug/validation-check
-
-This page shows:
-- Current host
-- Which validation key is active
-- Comparison with expected keys
-- Domain type detection
-
 ### Manual Testing
 ```powershell
 # Test default (mainnet)
@@ -158,13 +147,11 @@ Once both portals verify the domain:
 - Complete domain verification first
 - Configure App URL in portal settings
 - Clear Pi Browser cache
-- Check /debug/pi-browser-check for SDK status
 
 ### "Payment buttons not working"
 - Verify domain verification is complete
 - Check App URL is set to Vercel domain
 - Ensure SDK loads successfully (check console)
-- Visit /debug/pi-sdk for SDK diagnostics
 
 ## 📚 Documentation Files
 
@@ -175,5 +162,5 @@ Once both portals verify the domain:
 
 ---
 
-**Need Help?** 
-Check the debug page: https://triumph-synergy.vercel.app/debug/validation-check
+**Need Help?**
+Review the verification URLs above and re-check portal settings.

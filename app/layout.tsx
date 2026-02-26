@@ -110,7 +110,12 @@ console.log('[Pi SDK] Script loaded, checking environment...');
   // Check if we're in Pi Browser first
   var ua = navigator.userAgent || '';
   var uaLower = ua.toLowerCase();
-  var isPiBrowser = uaLower.indexOf('pibrowser') !== -1 || uaLower.indexOf('pi browser') !== -1 || uaLower.indexOf('pinetwork') !== -1;
+  var isPiBrowser =
+    uaLower.indexOf('pibrowser') !== -1 ||
+    uaLower.indexOf('pi browser') !== -1 ||
+    uaLower.indexOf('pinetwork') !== -1 ||
+    typeof window.Pi !== 'undefined' ||
+    typeof window.PiNetwork !== 'undefined';
   
   console.log('[Pi SDK] User-Agent:', ua);
   console.log('[Pi SDK] In Pi Browser:', isPiBrowser);
