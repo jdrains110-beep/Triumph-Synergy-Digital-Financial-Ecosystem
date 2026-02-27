@@ -16,6 +16,7 @@ import {
   isSystemLive,
   verifyProductionReadiness,
 } from "@/lib/system/production-activation";
+import { getPiNodeSummary } from "@/lib/pi-node/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -94,6 +95,7 @@ export async function GET() {
         externalRate: "$314.159 per π",
         miningActive: true,
         paymentsActive: true,
+        nodes: getPiNodeSummary(),
       },
 
       // Timestamps

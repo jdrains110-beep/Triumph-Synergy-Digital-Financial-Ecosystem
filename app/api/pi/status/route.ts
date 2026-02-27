@@ -4,6 +4,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { getPiNodeSummary } from "@/lib/pi-node/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,15 @@ type PiIntegrationStatus = {
     github: boolean;
     stellar: boolean;
     supabase: boolean;
+  };
+
+  // Pi Node Status
+  nodes: {
+    total: number;
+    configured: number;
+    unconfigured: number;
+    ports: number[];
+    rootPublicKey: string;
   };
 
   // Environment
@@ -97,6 +107,8 @@ export async function GET(): Promise<NextResponse<PiIntegrationStatus>> {
       stellar: !!process.env.STELLAR_HORIZON_URL,
       supabase: !!process.env.SUPABASE_URL,
     },
+
+    nodes: getPiNodeSummary(),
 
     environment: {
       production: isProduction,

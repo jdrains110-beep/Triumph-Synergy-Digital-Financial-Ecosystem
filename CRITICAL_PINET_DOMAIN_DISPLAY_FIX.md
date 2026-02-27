@@ -67,7 +67,7 @@ The app MUST show:
 
 1. **Find the component/page showing the app status**
    - Grep for "Server: Running" or "triumph-synergy.vercel.app" in components
-   - Check debug pages, status pages, info displays
+   - Check status pages and info displays
 
 2. **Update it to ONLY show pinet domain**
    - Import and use `APP_CONFIG` from `lib/config/app-domain-config.ts`

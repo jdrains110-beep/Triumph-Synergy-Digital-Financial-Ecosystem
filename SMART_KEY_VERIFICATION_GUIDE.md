@@ -117,8 +117,6 @@ After both portals verify successfully, you can re-enable it in [middleware.ts](
 - [x] Testnet key works with `?mode=testnet`
 - [x] Mainnet key works with `?mode=mainnet`
 - [x] Default serves mainnet key
-- [x] Debug page available
-- [x] Test script available
 - [ ] Verify testnet domain in develop.pi portal
 - [ ] Verify mainnet domain in developers.minepi.com portal
 - [ ] Configure testnet App URL
@@ -157,7 +155,6 @@ Once both portals verify the domain:
 
 - `PI_DOMAIN_VERIFICATION.md` - Original setup guide
 - `MAINNET_DOMAIN_FIX.md` - Mainnet-specific notes
-- `test-validation.ps1` - Automated testing script
 - This file - Complete smart verification guide
 
 ---

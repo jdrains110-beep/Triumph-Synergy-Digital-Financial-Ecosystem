@@ -275,25 +275,6 @@ const payment = await Pi.createPayment({
 
 ---
 
-## Quick Debug Commands
-
-```typescript
-// Check Pi Browser status
-import { detectPiBrowser } from "@/lib/pi-sdk/pi-browser-detector";
-const info = detectPiBrowser();
-console.log(info);
-
-// Check payment support
-import { hasPaymentSupport } from "@/lib/pi-sdk/pi-browser-detector";
-console.log("Has payments?", hasPaymentSupport());
-
-// Log full Pi Browser debug info
-import { logPiBrowserInfo } from "@/lib/pi-sdk/pi-browser-detector";
-logPiBrowserInfo();
-```
-
----
-
 ## Summary
 - **Grade:** A- (92/100)
 - **Critical Fixes:** 3 (1-2 hours)
