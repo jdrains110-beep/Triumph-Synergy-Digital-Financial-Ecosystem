@@ -2,9 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
+  "buildCommand": "pnpm install --no-frozen-lockfile && pnpm build --webpack",
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "regions": ["iad1"],
+  "buildOutputDirectory": ".next",
   "alias": [
     "triumph-synergy.vercel.app",
     "triumph-synergy-testnet.vercel.app"
@@ -139,7 +140,6 @@
       "source": "/validation-key-testnet.txt"
     }
   ],
-  "outputDirectory": ".next",
   "devCommand": "pnpm dev",
   "functions": {
     "app/api/pi/**/*.ts": {
@@ -158,6 +158,7 @@
       "memory": 1024
     }
   },
+  "redirects": [],
   "rewrites": [
     {
       "source": "/.well-known/pi-app-verification",
