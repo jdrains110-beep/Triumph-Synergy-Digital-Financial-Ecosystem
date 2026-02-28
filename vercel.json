@@ -155,7 +155,19 @@
       "memory": 1024
     }
   },
-  "redirects": [],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://triumph-synergy.vercel.app/:path*",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": ".*-jeremiah-drains-projects.vercel.app"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/.well-known/pi-app-verification",

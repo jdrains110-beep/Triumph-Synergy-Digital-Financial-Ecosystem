@@ -75,25 +75,34 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // DISABLED: Redirects were causing issues with Pi Browser
-  // Let all domains through, just set headers
-  /*
-  if (
-    !isAllowedDomain &&
-    (hostname.includes("-jeremiah-drains-projects.vercel.app") ||
+  // ============================================
+  // PREVENT PREVIEW DEPLOYMENTS
+  // Redirect Vercel preview URLs to production
+  // ============================================
+  if (!isAllowedDomain) {
+    // Check if this is a Vercel preview URL
+    if (
+      hostname.includes("-jeremiah-drains-projects.vercel.app") ||
       hostname.includes("-git-") ||
       (hostname.endsWith(".vercel.app") &&
-        !hostname.startsWith("triumph-synergy")))
-  ) {
-    const redirectUrl = new URL(request.nextUrl);
-    redirectUrl.hostname = "triumphsynergy0576.pinet.com";
-    const response = NextResponse.redirect(redirectUrl, 301);
-    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-    response.headers.set("Pragma", "no-cache");
-    response.headers.set("Expires", "0");
-    return response;
+        !hostname.startsWith("triumph-synergy"))
+    ) {
+      console.warn(
+        `[Middleware] PREVIEW URL DETECTED: ${hostname} - Redirecting to production`
+      );
+      
+      const redirectUrl = new URL(request.nextUrl);
+      // Route to appropriate production Vercel domain
+      redirectUrl.hostname = "triumph-synergy.vercel.app";
+      
+      const response = NextResponse.redirect(redirectUrl, 307); // Temporary redirect
+      response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      response.headers.set("Pragma", "no-cache");
+      response.headers.set("Expires", "0");
+      response.headers.set("X-Preview-Redirect", "true");
+      return response;
+    }
   }
-  */
 
   // Create response with modified headers
   const response = NextResponse.next();
