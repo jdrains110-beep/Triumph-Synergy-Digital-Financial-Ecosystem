@@ -6,12 +6,19 @@ import { useEffect, useState } from "react";
  * Main Pi App Studio Dashboard
  * Displays Triumph Synergy payment processing interface
  * This is the primary interface loaded by Pi App Studio
+ * 
+ * UNIQUE IDENTIFIER: This is NOT the Vercel default page
+ * If you see this exact dashboard, the deployment is working correctly
  */
 export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
+  const [hostname, setHostname] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
   }, []);
 
   if (!isMounted) {
@@ -30,7 +37,7 @@ export default function HomePage() {
         fontFamily: "system-ui, -apple-system, sans-serif",
       }}
     >
-      {/* Header */}
+      {/* UNIQUE HEADER - This proves the real app is loaded */}
       <div
         style={{
           backgroundColor: "#2563eb",
@@ -43,10 +50,13 @@ export default function HomePage() {
           <h1
             style={{ margin: "0 0 8px 0", fontSize: "28px", fontWeight: "700" }}
           >
-            ⚡ Triumph Synergy
+            ⚡ TRIUMPH SYNERGY - REAL APP LOADED
           </h1>
           <p style={{ margin: "0", fontSize: "14px", opacity: "0.9" }}>
-            Pi Network Payment Processing Platform
+            ✅ This is the actual Triumph Synergy app (not Vercel default page)
+          </p>
+          <p style={{ margin: "8px 0 0 0", fontSize: "12px", opacity: "0.8" }}>
+            Current Domain: <code>{hostname}</code>
           </p>
         </div>
       </div>
@@ -55,6 +65,27 @@ export default function HomePage() {
       <div
         style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}
       >
+        {/* PROOF OF CONCEPT SECTION */}
+        <div
+          style={{
+            backgroundColor: "#dcfce7",
+            border: "2px solid #22c55e",
+            borderRadius: "8px",
+            padding: "20px",
+            marginBottom: "30px",
+          }}
+        >
+          <h2 style={{ color: "#16a34a", margin: "0 0 10px 0" }}>
+            ✅ DEPLOYMENT SUCCESSFUL
+          </h2>
+          <p style={{ margin: "0", color: "#166534" }}>
+            If you're reading this message, Vercel is correctly serving the Triumph Synergy application.
+          </p>
+          <p style={{ margin: "10px 0 0 0", color: "#166534", fontSize: "14px" }}>
+            <strong>This is NOT the Vercel default page.</strong>
+          </p>
+        </div>
+
         {/* Status Cards Grid */}
         <div
           style={{
