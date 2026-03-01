@@ -111,7 +111,7 @@
     "remark-cjk-friendly-gfm-strikethrough": "^2.0.0",
     "resumable-stream": "^2.0.0",
     "server-only": "^0.0.1",
-    "shiki": "^3.12.2",
+    "shiki": "^4.0.0",
     "sonner": "^2.0.7",
     "streamdown": "^1.3.0",
     "swr": "^2.2.5",
