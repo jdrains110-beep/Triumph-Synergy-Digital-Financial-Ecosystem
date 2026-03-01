@@ -76,32 +76,23 @@ export function middleware(request: NextRequest) {
   }
 
   // ============================================
-  // PREVENT PREVIEW DEPLOYMENTS
-  // Redirect Vercel preview URLs to production
+  // BLOCK PREVIEW DEPLOYMENTS (REDIRECT ONLY)
+  // DO NOT interfere with production domains
   // ============================================
-  if (!isAllowedDomain) {
-    // Check if this is a Vercel preview URL
-    if (
-      hostname.includes("-jeremiah-drains-projects.vercel.app") ||
-      hostname.includes("-git-") ||
-      (hostname.endsWith(".vercel.app") &&
-        !hostname.startsWith("triumph-synergy"))
-    ) {
-      console.warn(
-        `[Middleware] PREVIEW URL DETECTED: ${hostname} - Redirecting to production`
-      );
-      
-      const redirectUrl = new URL(request.nextUrl);
-      // Route to appropriate production Vercel domain
-      redirectUrl.hostname = "triumph-synergy.vercel.app";
-      
-      const response = NextResponse.redirect(redirectUrl, 307); // Temporary redirect
-      response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-      response.headers.set("Pragma", "no-cache");
-      response.headers.set("Expires", "0");
-      response.headers.set("X-Preview-Redirect", "true");
-      return response;
-    }
+  
+  // Only redirect preview URLs to production
+  // Do NOT redirect any production domains
+  if (
+    hostname.includes("-jeremiah-drains-projects.vercel.app") ||
+    hostname.includes("-git-")
+  ) {
+    // This IS a preview URL - redirect to production
+    const redirectUrl = new URL(request.nextUrl);
+    redirectUrl.hostname = "triumph-synergy.vercel.app";
+    
+    const response = NextResponse.redirect(redirectUrl, 307);
+    response.headers.set("X-Preview-Redirect", "true");
+    return response;
   }
 
   // Create response with modified headers
@@ -113,6 +104,25 @@ export function middleware(request: NextRequest) {
     "X-Deployment-Source",
     hostname.includes("pinet.com") ? "pinet" : "vercel"
   );
+
+  // ============================================
+  // PI STUDIO INTEGRATION HEADERS
+  // Identifies this as a Pi Studio synced deployment
+  // ============================================
+  const piStudioSyncedDomains = [
+    "triumph-synergy.vercel.app",
+    "triumph-synergy-testnet.vercel.app",
+    "triumphsynergy0576.pinet.com",
+    "triumphsynergy7386.pinet.com",
+    "triumphsynergy1991.pinet.com",
+  ];
+
+  if (piStudioSyncedDomains.includes(hostname)) {
+    response.headers.set("X-Pi-Studio-Synced", "true");
+    response.headers.set("X-Pi-App-ID", "triumph-synergy");
+    response.headers.set("X-Pi-App-Version", "2.0");
+    response.headers.set("X-Pi-Deployment-Ready", "true");
+  }
 
   // Set Pi Browser detection headers
   response.headers.set("X-Pi-Browser", isPi ? "true" : "false");
