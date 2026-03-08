@@ -19,31 +19,6 @@
         {
           "key": "Cache-Control",
           "value": "no-cache, no-store, must-revalidate, max-age=0"
-        },
-        {
-          "key": "Pragma",
-          "value": "no-cache"
-        },
-        {
-          "key": "Expires",
-          "value": "0"
-        }
-      ]
-    },
-    {
-      "source": "/api/pi/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://sdk.minepi.com"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, X-Pi-App-Id"
         }
       ]
     },
@@ -61,80 +36,29 @@
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/json"
         }
       ]
     },
     {
-      "source": "/(.*)",
+      "source": "/api/pi-verification",
       "headers": [
         {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
         },
         {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
         },
         {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "geolocation=(), microphone=(), camera=()"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://sdk.minepi.com https://app-cdn.minepi.com 'unsafe-inline'; connect-src 'self' https://*.minepi.com https://api.minepi.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';"
-        },
-        {
-          "key": "X-Pi-App-Verification",
-          "value": "triumph-synergy-validated"
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
         }
       ]
-    },
-    {
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/plain"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ],
-      "source": "/validation-key.txt"
-    },
-    {
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/plain"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ],
-      "source": "/validation-key-mainnet.txt"
-    },
-    {
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/plain"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ],
-      "source": "/validation-key-testnet.txt"
     }
   ],
   "devCommand": "pnpm dev",
