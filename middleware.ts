@@ -42,7 +42,6 @@ export function middleware(request: NextRequest) {
   // Pi SDK initialization happens in app/layout.tsx
   return NextResponse.next();
 }
-}
 
 /**
  * Middleware configuration
