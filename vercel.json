@@ -90,6 +90,17 @@
           "value": ".*-jeremiah-drains-projects.vercel.app"
         }
       ]
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://triumph-synergy.vercel.app/:path*",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": ".*-git-.*-jeremiah-drains-projects.vercel.app"
+        }
+      ]
     }
   ],
   "rewrites": [
@@ -121,3 +132,4 @@
     }
   ]
 }
+
