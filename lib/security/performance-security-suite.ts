@@ -20,7 +20,8 @@
  * - Latency Minimization
  */
 
-import { ml_kem768, ml_dsa65 } from "@noble/post-quantum";
+import { ml_kem768 } from "@noble/post-quantum/ml-kem";
+import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";
 
 // ============================================================================
 // Types & Interfaces

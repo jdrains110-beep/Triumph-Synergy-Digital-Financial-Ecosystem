@@ -84,7 +84,7 @@ export {
 // Unified Backbone Interface
 // ============================================================================
 
-import { piNetworkBackbone } from "./pi-network-backbone";
+import { piBackbone } from "./pi-network-backbone";
 import { distributedNodes } from "./distributed-nodes";
 import { dockerProcessing } from "./docker-processing";
 import { computingAggregator } from "./computing-aggregation";
@@ -98,7 +98,7 @@ export class PiBackboneSystem {
   private static instance: PiBackboneSystem;
   
   // Sub-systems
-  readonly network = piNetworkBackbone;
+  readonly network = piBackbone;
   readonly nodes = distributedNodes;
   readonly docker = dockerProcessing;
   readonly aggregator = computingAggregator;
