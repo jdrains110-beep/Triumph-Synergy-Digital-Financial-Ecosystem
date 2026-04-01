@@ -50,9 +50,7 @@ export {
   BirthCertificateBondSystem,
   birthBondSystem,
   type BondStatus,
-  calculateBondValue,
   type RedemptionRequest,
-  type RedemptionStatus,
 } from "./birth-certificate-bonds";
 
 // =============================================================================
