@@ -20,20 +20,18 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.3
+      - name: Setup Yarn
+        run: npm install -g yarn@1.22.22
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: yarn install --frozen-lockfile
         continue-on-error: false
 
       - name: Check Node version
-        run: node --version && npm --version && pnpm --version
+        run: node --version && npm --version && yarn --version
 
       - name: Build project
-        run: pnpm run build 2>&1
+        run: yarn build 2>&1
         env:
           SKIP_ENV_VALIDATION: true
 
