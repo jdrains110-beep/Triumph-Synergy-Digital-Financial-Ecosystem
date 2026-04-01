@@ -11,7 +11,7 @@
 
 // Core systems
 export { 
-  piNetworkBackbone, 
+  piBackbone as piNetworkBackbone, 
   PiNetworkBackbone,
   type NetworkRole,
   type NetworkStatus,

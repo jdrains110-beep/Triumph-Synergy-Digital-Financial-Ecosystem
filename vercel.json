@@ -3,8 +3,8 @@
   "version": 2,
   "framework": "nextjs",
   "regions": ["iad1"],
-  "buildCommand": "npm run build",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "yarn build",
+  "installCommand": "yarn install",
   "alias": [
     "triumph-synergy.vercel.app",
     "triumph-synergy-testnet.vercel.app"

@@ -28,10 +28,10 @@
   "license": "PiOS",
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
-    "vercel-build": "npm install && next build --webpack",
+    "build": "next build",
+    "vercel-build": "next build",
     "start": "next start",
-    "start-server-for-tests": "npm exec next dev --webpack",
+    "start-server-for-tests": "next dev",
     "lint": "npx ultracite@5.3.9 check",
     "format": "npx ultracite@5.3.9 fix",
     "db:generate": "npx drizzle-kit@latest generate",
