@@ -1,0 +1,3 @@
+[submodule "lib/pirc-official"]
+	path = lib/pirc-official
+	url = https://github.com/jdrains110-beep/PiRC.git

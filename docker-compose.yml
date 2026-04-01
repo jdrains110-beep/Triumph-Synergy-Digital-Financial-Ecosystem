@@ -1,0 +1,167 @@
+services:
+  # PostgreSQL Database - Primary Data Store
+  postgres:
+    image: postgres:15-alpine
+    container_name: triumph-postgres
+    environment:
+      POSTGRES_DB: triumph_synergy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_MAX_CONNECTIONS: 1000
+      POSTGRES_SHARED_BUFFERS: 256MB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - triumph-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - Caching & Queue Management
+  redis:
+    image: redis:7-alpine
+    container_name: triumph-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - triumph-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: triumph-app
+    ports:
+      - "3000:3000"
+      # Pi Network Node Ports (Supernode Communication)
+      - "31400:31400"
+      - "31401:31401"
+      - "31402:31402"
+      - "31403:31403"
+      - "31404:31404"
+      - "31405:31405"
+      - "31406:31406"
+      - "31407:31407"
+      - "31408:31408"
+      - "31409:31409"
+      # Stellar Core Ports
+      - "11625:11625"
+      - "11626:11626"
+    environment:
+      - DOMAIN_VALIDATION_KEY=75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc833adeeecdce9240b4cbc10faaed93a3
+      - FRONTEND_URL=https://triumphsynergy0576.pinet.com
+      - BACKEND_URL=https://triumphsynergy0576.pinet.com/api
+      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/triumph_synergy
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SECRET=production-auth-secret-32-chars-minimum-secure-key
+      - NEXTAUTH_SECRET=production-nextauth-secret-32-chars-minimum-secure
+      - NEXTAUTH_URL=https://triumphsynergy0576.pinet.com
+      - SUPABASE_DB_URL="postgres://jdrains30:DariusA35$@Triumph-Synergy:5432/database?pgbouncer=true&connection_limit=1"
+      - NEXT_PUBLIC_SUPABASE_URL=https://triumph-synergy.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyaXVtcGgtc3luZXJneSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjgzNjQ4MDAwLCJleHAiOjE5OTkyMjQwMDB9.production-anon-key-placeholder
+      - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyaXVtcGgtc3luZXJneSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2ODM2NDgwMDAsImV4cCI6MTk5OTIyNDAwMH0.production-service-role-key-placeholder
+      - PI_API_KEY=production-pi-api-key-placeholder
+      - PI_INTERNAL_API_KEY=production-pi-internal-api-key-placeholder
+      - STELLAR_HORIZON_URL=https://horizon.stellar.org
+      # Pi Network Supernode Configuration
+      - PI_SUPERNODE_ADDRESS=GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      - STELLAR_NETWORK_PASSPHRASE=Public Global Stellar Network ; September 2015
+      - PI_NODE_PORTS=31400-31409
+      - PI_SUPERNODE_MODE=true
+      - GITHUB_WEBHOOK_SECRET=production-github-webhook-secret-placeholder
+      - NODE_ENV=production
+      - INTERNAL_PI_MULTIPLIER=1.5
+      - INTERNAL_PI_MIN_VALUE=10.0
+      - EXTERNAL_PI_MIN_VALUE=1.0
+      - DOCKER_BUILD=true
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - triumph-network
+    restart: unless-stopped
+
+  # Smart Contract Processor (Rust-based) - Commented out until Rust toolchain available
+  # contract-processor:
+  #   build:
+  #     context: ./services/contract-processor
+  #     dockerfile: Dockerfile
+  #   container_name: triumph-contract-processor
+  #   environment:
+  #     - REDIS_URL=redis://redis:6379
+  #     - POSTGRES_URL=postgresql://postgres:password@postgres:5432/triumph_synergy
+  #     - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+  #   depends_on:
+  #     - redis
+  #     - postgres
+  #   networks:
+  #     - triumph-network
+  #   restart: unless-stopped
+
+  # Pi Payment Transaction Processor
+  payment-processor:
+    build:
+      context: ./services/payment-processor
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/triumph_synergy
+      - PI_API_KEY=production-pi-api-key-placeholder
+      - PI_INTERNAL_API_KEY=production-pi-internal-api-key-placeholder
+      - STELLAR_HORIZON_URL=https://horizon.stellar.org
+      - WORKER_THREADS=4
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - triumph-network
+    restart: unless-stopped
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: triumph-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - triumph-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  triumph-network:
+    driver: bridge

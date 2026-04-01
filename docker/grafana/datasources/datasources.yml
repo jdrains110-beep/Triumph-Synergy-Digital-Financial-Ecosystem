@@ -1,0 +1,42 @@
+# ==============================================================================
+# Pi Network Grafana Datasources
+# ==============================================================================
+# Central Node: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+# ==============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://pi-prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "5s"
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: "2.45.0"
+    
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: pi-postgres:5432
+    database: triumph_synergy
+    user: postgres
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 100
+      maxIdleConns: 100
+      connMaxLifetime: 14400
+    editable: false
+
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    url: redis://pi-redis:6379
+    editable: false

@@ -1,0 +1,272 @@
+================================================================================
+                    EQUIFAX DATA FURNISHER APPLICATION
+                         Business Information Form
+================================================================================
+
+Date of Application: January 9, 2026
+
+--------------------------------------------------------------------------------
+                         SECTION 1: BUSINESS INFORMATION
+--------------------------------------------------------------------------------
+
+Business Legal Name: Triumph-Synergy Digital Financial Ecosystem
+
+Doing Business As (DBA): Triumph-Synergy
+
+Business Address:
+    Street: 135 Lake Como Dr
+    City: Pomona Park
+    State: FL
+    ZIP Code: 32181
+    County: Putnam
+
+Business Mailing Address (if different):
+    ☒ Same as above
+    Street: ___________________________________
+    City: ___________________________________
+    State: ______  ZIP Code: __________
+
+Business Phone: (___) ___-____  [REQUIRED - FILL IN]
+Business Fax: N/A
+Business Email: ___________________________  [REQUIRED - FILL IN]
+Business Website: https://triumph-synergy.com
+
+Federal Tax ID (EIN): 41-6777102  ✓ REGISTERED
+
+State Tax ID: ___________________________
+
+DUNS Number: ___________________________  [Apply at dnb.com if needed]
+
+--------------------------------------------------------------------------------
+                         SECTION 2: BUSINESS CLASSIFICATION
+--------------------------------------------------------------------------------
+
+Business Type (check one):
+    ☐ Corporation
+    ☐ Limited Liability Company (LLC)
+    ☐ Partnership
+    ☐ Sole Proprietorship
+    ☐ Non-Profit
+    ☐ Government Entity
+    ☐ Other: ___________________________
+
+State of Incorporation/Formation: ___________________________
+
+Date of Incorporation/Formation: ___/___/_____
+
+Years in Business: ___________________________
+
+Industry Type:
+    ☒ Financial Services / FinTech
+    ☐ Banking
+    ☐ Credit Union
+    ☐ Mortgage Lender
+    ☐ Auto Lender
+    ☐ Retail Credit
+    ☐ Other: ___________________________
+
+NAICS Code: 522320 (Financial Transactions Processing)
+
+SIC Code: 6099 (Functions Related to Depository Banking)
+
+--------------------------------------------------------------------------------
+                         SECTION 3: PRINCIPAL/OWNER INFORMATION
+--------------------------------------------------------------------------------
+
+Principal #1 (Primary Contact):
+
+    Full Legal Name: ___________________________  [REQUIRED]
+    Title: Owner / Chief Executive Officer
+    Ownership Percentage: 100%
+    
+    Date of Birth: ___/___/_____  [REQUIRED]
+    Social Security Number: ___-__-____  [REQUIRED]
+    
+    Home Address:
+        Street: 135 Lake Como Dr
+        City: Pomona Park
+        State: FL
+        ZIP Code: 32181
+    
+    Phone: (___) ___-____  [REQUIRED]
+    Email: ___________________________  [REQUIRED]
+
+--------------------------------------------------------------------------------
+                         SECTION 4: DATA FURNISHING DETAILS
+--------------------------------------------------------------------------------
+
+Types of Accounts to be Reported (check all that apply):
+
+    ☒ Revolving Credit (Credit Cards, Lines of Credit)
+    ☒ Installment Loans
+    ☐ Mortgage Loans
+    ☐ Auto Loans
+    ☐ Student Loans
+    ☒ Personal Loans
+    ☒ Business Credit
+    ☐ Utility Accounts
+    ☐ Telecommunications
+    ☐ Collection Accounts
+    ☐ Other: ___________________________
+
+Estimated Number of Accounts to Report:
+    Initial: 1-100
+    Monthly: 1-1,000
+
+Data Submission Frequency:
+    ☒ Monthly
+    ☐ Weekly
+    ☐ Daily
+
+Data Transmission Method (check one):
+    ☒ Secure File Transfer Protocol (SFTP)
+    ☐ Direct Connect
+    ☐ Web Portal
+    ☐ API Integration
+
+Data Format:
+    ☒ Metro 2 Format (CDIA Standard)
+    ☐ Custom Format (requires approval)
+
+--------------------------------------------------------------------------------
+                         SECTION 5: TECHNICAL REQUIREMENTS
+--------------------------------------------------------------------------------
+
+IT Contact for Data Transmission:
+
+    Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+
+Current Technical Capabilities:
+    
+    ☒ Ability to generate Metro 2 formatted files
+    ☒ Secure data transmission capabilities (SFTP/TLS)
+    ☒ Data encryption at rest and in transit
+    ☒ Backup and disaster recovery procedures
+    ☐ SOC 2 Type II Certification (In Progress)
+    ☐ PCI DSS Compliance (If applicable)
+
+Software/System Used for Account Management:
+    Triumph-Synergy Digital Financial Ecosystem (Proprietary)
+
+--------------------------------------------------------------------------------
+                         SECTION 6: COMPLIANCE & LEGAL
+--------------------------------------------------------------------------------
+
+Regulatory Compliance (check all that apply):
+
+    ☒ Fair Credit Reporting Act (FCRA)
+    ☒ Fair and Accurate Credit Transactions Act (FACTA)
+    ☒ Gramm-Leach-Bliley Act (GLBA)
+    ☒ Equal Credit Opportunity Act (ECOA)
+    ☒ Fair Debt Collection Practices Act (FDCPA)
+    ☐ State-specific regulations: ___________________________
+
+Consumer Dispute Resolution:
+    
+    ☒ We have established procedures for handling consumer disputes
+    ☒ We can respond to Automated Consumer Dispute Verification (ACDV)
+    ☒ We maintain records for dispute investigation
+
+Legal/Compliance Contact:
+
+    Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+
+--------------------------------------------------------------------------------
+                         SECTION 7: REFERENCES
+--------------------------------------------------------------------------------
+
+Bank Reference:
+
+    Bank Name: ___________________________
+    Contact Name: ___________________________
+    Phone: (___) ___-____
+    Account Number (last 4): ____
+    Years as Customer: ____
+
+Business Reference #1:
+
+    Company Name: ___________________________
+    Contact Name: ___________________________
+    Phone: (___) ___-____
+    Relationship: ___________________________
+
+Business Reference #2:
+
+    Company Name: ___________________________
+    Contact Name: ___________________________
+    Phone: (___) ___-____
+    Relationship: ___________________________
+
+--------------------------------------------------------------------------------
+                         SECTION 8: CERTIFICATIONS
+--------------------------------------------------------------------------------
+
+By signing below, I certify that:
+
+1. All information provided in this application is true and accurate.
+
+2. I am authorized to submit this application on behalf of the business.
+
+3. The business agrees to comply with all Equifax data furnisher requirements,
+   including but not limited to:
+   - Metro 2 format standards
+   - Fair Credit Reporting Act requirements
+   - Equifax Data Furnisher Agreement terms
+
+4. The business understands that furnishing inaccurate information may result
+   in termination of the data furnisher relationship and potential legal action.
+
+5. The business agrees to participate in testing and validation before
+   commencing live data reporting.
+
+
+Authorized Signature: ___________________________
+
+Printed Name: ___________________________
+
+Title: Owner / Chief Executive Officer
+
+Date: January 9, 2026
+
+
+--------------------------------------------------------------------------------
+                         SUBMISSION INSTRUCTIONS
+--------------------------------------------------------------------------------
+
+Submit completed application to:
+
+    Equifax Data Furnisher Services
+    Email: datafurnisher@equifax.com
+    
+    Or online at:
+    https://www.equifax.com/business/data-furnisher-resources/
+    
+    For questions:
+    Phone: 1-888-202-4025
+    
+Required Attachments:
+    ☐ Copy of Business License
+    ☐ Copy of EIN Confirmation Letter (IRS Form CP 575)
+    ☐ Articles of Incorporation/Organization
+    ☐ Government-issued ID of Principal
+    ☐ Voided Business Check or Bank Letter
+    ☐ W-9 Form (completed)
+
+================================================================================
+                              INTERNAL USE ONLY
+================================================================================
+
+Application Received: ___/___/_____
+Application ID: ___________________________
+Assigned Analyst: ___________________________
+Status: ☐ Pending ☐ Under Review ☐ Approved ☐ Denied
+Furnisher Code Assigned: ___________________________
+Activation Date: ___/___/_____
+
+================================================================================

@@ -1,0 +1,615 @@
+================================================================================
+                   TRANSUNION DATA FURNISHER APPLICATION
+                        Data Contributor Agreement
+================================================================================
+
+Application Date: January 9, 2026
+Application ID: TU-DF-2026-_______________
+
+--------------------------------------------------------------------------------
+                    PART A: COMPANY INFORMATION
+--------------------------------------------------------------------------------
+
+A1. LEGAL ENTITY INFORMATION
+
+Company Legal Name: Triumph-Synergy Digital Financial Ecosystem
+
+Trade Name(s) / DBA(s): Triumph-Synergy
+
+Entity Type:
+    ☐ Corporation (C-Corp)
+    ☐ Corporation (S-Corp)
+    ☐ Limited Liability Company (LLC)
+    ☐ Limited Partnership
+    ☐ Sole Proprietorship
+    ☐ Non-Profit Organization
+    ☐ Government Entity
+    ☐ Other: ___________________________
+
+State/Country of Formation: ___________________________  [REQUIRED]
+
+Date of Formation: ___/___/_____  [REQUIRED]
+
+Federal Tax ID (EIN): 41-6777102  ✓ REGISTERED (Trust)
+
+D-U-N-S Number: ___________________________
+
+LEI (Legal Entity Identifier): ___________________________
+
+
+A2. CONTACT INFORMATION
+
+Primary Business Address:
+    Street Address 1: 135 Lake Como Dr
+    Street Address 2: ___________________________
+    City: Pomona Park
+    State/Province: FL
+    ZIP/Postal Code: 32181
+    Country: United States
+
+Mailing Address (if different from above):
+    ☒ Same as Primary Business Address
+    
+Phone Numbers:
+    Main Business: (___) ___-____  [REQUIRED]
+    Fax: ___________________________
+    Toll-Free: ___________________________
+
+Website: https://triumph-synergy.com
+
+Primary Contact for this Application:
+    Name: ___________________________  [REQUIRED]
+    Title: Owner / CEO
+    Direct Phone: (___) ___-____  [REQUIRED]
+    Mobile: (___) ___-____
+    Email: ___________________________  [REQUIRED]
+
+Secondary/Backup Contact:
+    Name: ___________________________
+    Title: ___________________________
+    Direct Phone: (___) ___-____
+    Email: ___________________________
+
+
+A3. BUSINESS CLASSIFICATION
+
+Primary Industry:
+    ☐ Banking - Commercial Bank
+    ☐ Banking - Savings & Loan
+    ☐ Credit Union
+    ☒ Financial Services - FinTech
+    ☐ Finance Company - Consumer
+    ☐ Finance Company - Commercial
+    ☐ Mortgage Lender
+    ☐ Auto Finance
+    ☐ Retail Credit
+    ☐ Healthcare Finance
+    ☐ Student Lending
+    ☐ Collection Agency
+    ☐ Property Management
+    ☐ Utility Provider
+    ☐ Telecommunications
+    ☐ Insurance
+    ☐ Other: ___________________________
+
+NAICS Code: 522320
+SIC Code: 6099
+
+Brief Business Description (250 words max):
+    Triumph-Synergy is a comprehensive digital financial ecosystem providing
+    financial sovereignty solutions, credit facilitation, and payment 
+    processing services. The platform integrates digital and physical 
+    financial systems to provide users with complete financial freedom,
+    including credit building, debt management, and asset protection services.
+    Triumph-Synergy operates on blockchain technology with full regulatory
+    compliance and is committed to reporting accurate credit data to help
+    consumers build and maintain strong credit profiles.
+
+Number of Years in Business: <1 (Founded 2026)
+
+Total Number of Employees: ___________________________
+
+Annual Revenue (USD):
+    ☐ Less than $500,000
+    ☐ $500,000 - $1,000,000
+    ☐ $1,000,000 - $5,000,000
+    ☐ $5,000,000 - $10,000,000
+    ☐ $10,000,000 - $50,000,000
+    ☐ More than $50,000,000
+
+--------------------------------------------------------------------------------
+                    PART B: OWNERSHIP & CONTROL
+--------------------------------------------------------------------------------
+
+B1. BENEFICIAL OWNERS
+
+List all individuals who own 25% or more of the company:
+
+Owner #1:
+    Full Legal Name: ___________________________  [REQUIRED]
+    Title/Position: Owner / Chief Executive Officer
+    Ownership Percentage: 100%
+    
+    Date of Birth: ___/___/_____  [REQUIRED]
+    Social Security Number: ___-__-____  [REQUIRED]
+    Country of Citizenship: United States
+    
+    Residential Address:
+        Street: 135 Lake Como Dr
+        City: Pomona Park
+        State: FL
+        ZIP: 32181
+        Country: USA
+        
+        Time at Address: ____ years ____ months
+        
+    Previous Address (if less than 2 years at current):
+        Street: ___________________________
+        City: ___________________________
+        State: _____  ZIP: __________
+    
+    Contact:
+        Phone: (___) ___-____  [REQUIRED]
+        Email: ___________________________  [REQUIRED]
+
+    Identification:
+        ID Type: ☐ US Driver's License  ☐ US Passport  ☐ State ID
+        ID Number: ___________________________
+        Issuing State/Country: ___________________________
+        Expiration Date: ___/___/_____
+
+
+B2. CONTROL PERSON
+
+Individual with significant management responsibility:
+
+    ☒ Same as Owner #1 listed above
+    
+    OR
+    
+    Full Legal Name: ___________________________
+    Title: ___________________________
+    (Complete identification section if different from owner)
+
+--------------------------------------------------------------------------------
+                    PART C: DATA FURNISHING PROFILE
+--------------------------------------------------------------------------------
+
+C1. ACCOUNT PORTFOLIO
+
+Types of accounts to be reported (check all that apply):
+
+REVOLVING CREDIT:
+    ☒ Bank Credit Cards
+    ☒ Retail Credit Cards
+    ☒ Lines of Credit
+    ☐ Home Equity Lines of Credit (HELOC)
+    ☐ Charge Cards
+
+INSTALLMENT CREDIT:
+    ☒ Personal Loans - Unsecured
+    ☒ Personal Loans - Secured
+    ☐ Auto Loans - Direct
+    ☐ Auto Loans - Indirect
+    ☐ Mortgage Loans - First Lien
+    ☐ Mortgage Loans - Second Lien
+    ☐ Student Loans - Private
+    ☐ Student Loans - Federal
+    ☒ Business Loans
+
+OTHER:
+    ☐ Lease Agreements
+    ☐ Collection Accounts
+    ☐ Utility/Service Accounts
+    ☐ Rental/Housing Payments
+    ☐ Other: ___________________________
+
+
+C2. VOLUME ESTIMATES
+
+Current Portfolio:
+    Total Number of Accounts: 1-100
+    Total Dollar Value: $___________________________
+    Average Account Balance: $___________________________
+
+Projected Growth (12 months):
+    Accounts: 1,000-10,000
+    Dollar Value: $___________________________
+
+Projected Growth (24 months):
+    Accounts: 10,000-100,000
+    Dollar Value: $___________________________
+
+Geographic Distribution:
+    ☒ National (All 50 states + DC)
+    ☐ Regional: ___________________________
+    ☐ State-specific: ___________________________
+
+
+C3. HISTORICAL DATA
+
+Do you have historical account data to report?
+    ☐ Yes - Number of months: ____
+    ☒ No - Starting fresh
+
+Have you previously furnished data to any credit bureau?
+    ☐ Yes - Bureau(s): ___________________________
+          Furnisher Code(s): ___________________________
+    ☒ No
+
+--------------------------------------------------------------------------------
+                    PART D: TECHNICAL SPECIFICATIONS
+--------------------------------------------------------------------------------
+
+D1. DATA TRANSMISSION
+
+Preferred Transmission Method:
+    ☒ SFTP (Secure File Transfer Protocol)
+    ☐ TransUnion TrueVision Portal
+    ☐ Connect:Direct / NDM
+    ☐ API Integration
+    ☐ Other: ___________________________
+
+Submission Frequency:
+    ☒ Monthly (recommended)
+    ☐ Twice Monthly
+    ☐ Weekly
+    ☐ Daily
+
+Preferred Submission Day (for monthly):
+    Day of Month: 1st  (or ____ )
+
+Data Format:
+    ☒ Metro 2 Format (CDIA Standard) - REQUIRED
+    
+Metro 2 Version: 
+    ☒ Current Version (2018)
+
+
+D2. TECHNICAL CONTACT
+
+IT/Technical Contact for Data Transmission:
+    Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+
+System Administrator (for connectivity setup):
+    Name: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+
+Core System/Software Used:
+    Platform Name: Triumph-Synergy Proprietary Platform
+    Vendor (if third-party): N/A - Custom Built
+    Can generate Metro 2 files: ☒ Yes  ☐ No
+
+
+D3. CONNECTIVITY REQUIREMENTS
+
+Static IP Address(es) for SFTP whitelist:
+    IP #1: ___________________________
+    IP #2: ___________________________
+
+Firewall Contact (if applicable):
+    Name: ___________________________
+    Phone: (___) ___-____
+
+--------------------------------------------------------------------------------
+                    PART E: COMPLIANCE & SECURITY
+--------------------------------------------------------------------------------
+
+E1. REGULATORY COMPLIANCE
+
+Is your organization subject to oversight by any regulatory agency?
+    ☐ Yes - Agency: ___________________________
+    ☒ No / Not Yet (New Business)
+
+Check all compliance frameworks currently in place:
+
+    ☒ Fair Credit Reporting Act (FCRA)
+    ☒ Fair and Accurate Credit Transactions Act (FACTA)
+    ☒ Gramm-Leach-Bliley Act (GLBA) - Privacy
+    ☒ Equal Credit Opportunity Act (ECOA)
+    ☐ Truth in Lending Act (TILA)
+    ☐ Real Estate Settlement Procedures Act (RESPA)
+    ☒ Fair Debt Collection Practices Act (FDCPA)
+    ☐ California Consumer Privacy Act (CCPA)
+    ☐ State-specific: ___________________________
+
+Compliance Officer:
+    Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+
+
+E2. INFORMATION SECURITY
+
+Do you maintain a formal Information Security Program?
+    ☒ Yes  ☐ No  ☐ In Development
+
+Security Certifications (check all that apply):
+    ☐ SOC 1 Type I
+    ☐ SOC 1 Type II
+    ☐ SOC 2 Type I
+    ☐ SOC 2 Type II
+    ☐ ISO 27001
+    ☐ ISO 27002
+    ☐ PCI DSS Level 1
+    ☐ PCI DSS Level 2-4
+    ☐ HITRUST
+    ☐ FedRAMP
+    ☒ None - Will obtain as required
+
+Date of Last Security Assessment: ___/___/_____
+Conducted By: ___________________________
+
+Data Security Measures in Place:
+    ☒ Data encryption at rest
+    ☒ Data encryption in transit (TLS 1.2+)
+    ☒ Multi-factor authentication
+    ☒ Access control / least privilege
+    ☒ Audit logging and monitoring
+    ☒ Incident response plan
+    ☒ Employee security training
+    ☒ Vendor risk management
+    ☐ Penetration testing (annual)
+    ☐ Vulnerability scanning (ongoing)
+
+Cyber Insurance:
+    ☐ Yes - Coverage: $___________________________
+            Carrier: ___________________________
+    ☒ No (Recommend obtaining)
+
+
+E3. CONSUMER DISPUTE HANDLING
+
+Do you have procedures for handling consumer disputes?
+    ☒ Yes  ☐ No  ☐ In Development
+
+ACDV (Automated Consumer Dispute Verification) Capability:
+    ☒ Can process electronic disputes
+    ☐ Manual processing only
+
+Average Response Time for Disputes: 
+    ☒ Within 15 days
+    ☐ Within 30 days
+    ☐ Over 30 days
+
+Dispute Resolution Contact:
+    Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+    
+Consumer Dispute Address:
+    Street: 135 Lake Como Dr
+    City: Pomona Park
+    State: FL
+    ZIP: 32181
+
+--------------------------------------------------------------------------------
+                    PART F: BANKING & REFERENCES
+--------------------------------------------------------------------------------
+
+F1. BANKING RELATIONSHIP
+
+Primary Business Bank:
+    Institution Name: ___________________________  [REQUIRED]
+    Branch Location: ___________________________
+    
+    Account Information (for verification):
+        Account Type: ☐ Business Checking  ☐ Business Savings
+        Account Number (last 4 only): ____
+        Routing Number: ___________________________
+        
+    Banker Contact:
+        Name: ___________________________
+        Phone: (___) ___-____
+    
+    Relationship Length: ____ years
+
+
+F2. PROFESSIONAL REFERENCES
+
+Reference #1:
+    Company Name: ___________________________
+    Contact Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+    Nature of Relationship: ___________________________
+    Years Known: ____
+
+Reference #2:
+    Company Name: ___________________________
+    Contact Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+    Nature of Relationship: ___________________________
+    Years Known: ____
+
+Reference #3 (Optional):
+    Company Name: ___________________________
+    Contact Name: ___________________________
+    Title: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+    Nature of Relationship: ___________________________
+    Years Known: ____
+
+--------------------------------------------------------------------------------
+                    PART G: CERTIFICATIONS & SIGNATURES
+--------------------------------------------------------------------------------
+
+APPLICANT CERTIFICATIONS
+
+By signing below, the undersigned authorized representative certifies and
+agrees as follows:
+
+1. ACCURACY: All information provided in this application is true, complete,
+   and accurate. I understand that providing false information may result in
+   denial of this application and/or termination of any resulting agreement.
+
+2. AUTHORITY: I am duly authorized to submit this application and bind the
+   company to the TransUnion Data Furnisher Agreement.
+
+3. LEGAL COMPLIANCE: The company agrees to comply with all applicable federal
+   and state laws, including without limitation:
+   - Fair Credit Reporting Act (15 U.S.C. § 1681 et seq.)
+   - Fair and Accurate Credit Transactions Act
+   - Gramm-Leach-Bliley Act
+   - All applicable state consumer protection laws
+
+4. DATA ACCURACY: The company agrees to furnish only accurate data that is
+   based on valid, documented account relationships with consumers.
+
+5. DISPUTE HANDLING: The company agrees to investigate consumer disputes
+   and respond within legally required timeframes.
+
+6. METRO 2 COMPLIANCE: The company agrees to submit data in Metro 2 format
+   in accordance with CDIA standards and TransUnion specifications.
+
+7. SECURITY: The company agrees to maintain appropriate security measures
+   to protect consumer data and prevent unauthorized access.
+
+8. TESTING: The company agrees to complete all required testing and
+   certification before commencing production data reporting.
+
+9. UPDATES: The company agrees to notify TransUnion promptly of any material
+   changes to the information provided in this application.
+
+10. TERMINATION: The company understands that TransUnion may terminate the
+    data furnisher relationship for non-compliance or other reasons as
+    specified in the Data Furnisher Agreement.
+
+11. VERIFICATION: The company authorizes TransUnion to verify any information
+    provided in this application through third parties.
+
+
+AUTHORIZED SIGNATURE:
+
+_____________________________________________
+Signature
+
+Printed Name: ___________________________  [REQUIRED]
+
+Title: Owner / Chief Executive Officer
+
+Date: January 9, 2026
+
+
+WITNESS (Optional but recommended):
+
+_____________________________________________
+Witness Signature
+
+Printed Name: ___________________________
+
+Date: ___/___/_____
+
+--------------------------------------------------------------------------------
+                    SUBMISSION CHECKLIST & INSTRUCTIONS
+--------------------------------------------------------------------------------
+
+REQUIRED DOCUMENTS (attach to application):
+
+    ☐ Completed Application (this form) - All sections filled
+    ☐ IRS Form W-9 (Request for Taxpayer Identification Number)
+    ☐ IRS EIN Confirmation Letter (CP 575 or equivalent)
+    ☐ Articles of Incorporation / Articles of Organization
+    ☐ Certificate of Good Standing (from Secretary of State)
+    ☐ Business License (if required in your jurisdiction)
+    ☐ Government-issued photo ID of authorized signer (front & back)
+    ☐ Voided business check OR bank verification letter
+    ☐ Proof of address (utility bill or bank statement)
+    ☐ Sample Metro 2 file (for technical evaluation)
+    ☐ Information Security Policy summary (1-2 pages)
+
+
+SUBMISSION METHODS:
+
+    Email (Preferred):
+        DataFurnisherOnboarding@transunion.com
+        Subject: New Data Furnisher Application - Triumph-Synergy
+    
+    Online Portal:
+        https://www.transunion.com/business/data-furnisher-services
+    
+    Mail:
+        TransUnion LLC
+        Data Furnisher Enrollment
+        555 West Adams Street
+        Chicago, IL 60661
+    
+    Phone Inquiries:
+        1-800-899-7132 (Data Furnisher Services)
+
+
+PROCESSING TIMELINE:
+
+    Application Review: 2-4 weeks
+    Document Verification: 1-2 weeks
+    Technical Setup & Testing: 2-4 weeks
+    Total Estimated Time: 6-10 weeks
+
+
+QUESTIONS?
+
+    Contact TransUnion Data Furnisher Support:
+    Phone: 1-800-899-7132
+    Email: DataFurnisherSupport@transunion.com
+    Hours: Monday-Friday, 8:00 AM - 6:00 PM CT
+
+================================================================================
+                         TRANSUNION INTERNAL USE ONLY
+================================================================================
+
+Date Received: ___/___/_____
+Received By: ___________________________
+Application ID: TU-DF-2026-_______________
+
+Initial Review:
+    ☐ Application Complete
+    ☐ Missing Items: ___________________________
+    ☐ Returned to Applicant: ___/___/_____
+
+Verification Status:
+    ☐ EIN Verified                    Date: ___/___/_____
+    ☐ Business Entity Verified        Date: ___/___/_____
+    ☐ Principal Identity Verified     Date: ___/___/_____
+    ☐ Banking Verified                Date: ___/___/_____
+    ☐ References Contacted            Date: ___/___/_____
+    ☐ Security Assessment Complete    Date: ___/___/_____
+
+Technical Review:
+    ☐ Metro 2 Sample Reviewed         Date: ___/___/_____
+    ☐ Sample Approved                 Date: ___/___/_____
+    ☐ Connectivity Tested             Date: ___/___/_____
+    ☐ Test File Processed             Date: ___/___/_____
+    ☐ Technical Certification         Date: ___/___/_____
+
+Final Decision:
+    ☐ APPROVED
+        Furnisher Code: _______________
+        Effective Date: ___/___/_____
+        Approved By: ___________________________
+    
+    ☐ APPROVED WITH CONDITIONS
+        Conditions: ___________________________
+        
+    ☐ PENDING
+        Additional Requirements: ___________________________
+        
+    ☐ DENIED
+        Reason: ___________________________
+        Appeal Rights Provided: ☐ Yes
+
+Notes:
+_______________________________________________________________
+_______________________________________________________________
+_______________________________________________________________
+
+================================================================================

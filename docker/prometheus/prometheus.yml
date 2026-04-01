@@ -1,0 +1,141 @@
+# ==============================================================================
+# Pi Network Prometheus Configuration
+# ==============================================================================
+# Central Node: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+# ==============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'pi-network-triumph-synergy'
+    central_node: 'GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  # ==========================================================================
+  # Prometheus Self-Monitoring
+  # ==========================================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  # ==========================================================================
+  # Pi Central Node
+  # ==========================================================================
+  - job_name: 'pi-central-node'
+    static_configs:
+      - targets: ['pi-central-node:11626']
+        labels:
+          service: 'central-node'
+          node_type: 'central'
+          priority: 'supreme'
+          public_key: 'GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Pi Triumph App
+  # ==========================================================================
+  - job_name: 'pi-triumph-app'
+    static_configs:
+      - targets: ['pi-triumph-app:3000']
+        labels:
+          service: 'triumph-app'
+          type: 'web'
+    metrics_path: /api/metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Pi Transaction Engine
+  # ==========================================================================
+  - job_name: 'pi-transaction-engine'
+    static_configs:
+      - targets: ['pi-transaction-engine:8080']
+        labels:
+          service: 'transaction-engine'
+          type: 'hyper-transaction'
+          max_tps: '10000000000'
+    metrics_path: /metrics
+    scrape_interval: 5s  # More frequent for transaction monitoring
+
+  # ==========================================================================
+  # Pi Trillion Vault
+  # ==========================================================================
+  - job_name: 'pi-trillion-vault'
+    static_configs:
+      - targets: ['pi-trillion-vault:8081']
+        labels:
+          service: 'trillion-vault'
+          type: 'vault'
+          capacity: 'unlimited'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Pi Smart Contracts
+  # ==========================================================================
+  - job_name: 'pi-smart-contracts'
+    static_configs:
+      - targets: ['pi-smart-contracts:8082']
+        labels:
+          service: 'smart-contracts'
+          type: 'execution-engine'
+          channels: '10000'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Pi SCP Upgrader
+  # ==========================================================================
+  - job_name: 'pi-scp-upgrader'
+    static_configs:
+      - targets: ['pi-scp-upgrader:8083']
+        labels:
+          service: 'scp-upgrader'
+          type: 'protocol-sync'
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ==========================================================================
+  # Infrastructure - PostgreSQL
+  # ==========================================================================
+  - job_name: 'pi-postgres'
+    static_configs:
+      - targets: ['pi-postgres:5432']
+        labels:
+          service: 'postgres'
+          type: 'database'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Infrastructure - Redis
+  # ==========================================================================
+  - job_name: 'pi-redis'
+    static_configs:
+      - targets: ['pi-redis:6379']
+        labels:
+          service: 'redis'
+          type: 'cache'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Load Balancer - Nginx
+  # ==========================================================================
+  - job_name: 'pi-nginx'
+    static_configs:
+      - targets: ['pi-nginx:80']
+        labels:
+          service: 'nginx'
+          type: 'load-balancer'
+    metrics_path: /metrics
+    scrape_interval: 15s

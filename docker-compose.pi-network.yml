@@ -1,0 +1,661 @@
+# ==============================================================================
+# Pi Network Combined Container Orchestration
+# ==============================================================================
+# 
+# TRIUMPH SYNERGY + CENTRAL NODE UNIFIED DEPLOYMENT
+# 
+# Container Groups:
+# - pi-infrastructure: Core databases and caching
+# - pi-central-node: Stellar Core and Pi Network services
+# - pi-triumph-synergy: Main application and services
+# - pi-load-balancer: Nginx and traffic management
+#
+# Central Node: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+# ==============================================================================
+
+name: pi-network-triumph-synergy
+
+x-common-labels: &common-labels
+  labels:
+    org.pinetwork.service: "triumph-synergy"
+    org.pinetwork.central-node: "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+    org.pinetwork.version: "1.0.0"
+    org.pinetwork.maintainer: "jdrains110-beep"
+
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 15s
+  timeout: 10s
+  retries: 5
+  start_period: 30s
+
+x-resource-limits-small: &resource-limits-small
+  deploy:
+    resources:
+      limits:
+        cpus: '1.0'
+        memory: 512M
+      reservations:
+        cpus: '0.25'
+        memory: 128M
+
+x-resource-limits-medium: &resource-limits-medium
+  deploy:
+    resources:
+      limits:
+        cpus: '2.0'
+        memory: 2G
+      reservations:
+        cpus: '0.5'
+        memory: 512M
+
+x-resource-limits-large: &resource-limits-large
+  deploy:
+    resources:
+      limits:
+        cpus: '4.0'
+        memory: 4G
+      reservations:
+        cpus: '1.0'
+        memory: 1G
+
+x-resource-limits-xlarge: &resource-limits-xlarge
+  deploy:
+    resources:
+      limits:
+        cpus: '8.0'
+        memory: 8G
+      reservations:
+        cpus: '2.0'
+        memory: 2G
+
+services:
+  # ============================================================================
+  # PI INFRASTRUCTURE - Core Services
+  # ============================================================================
+
+  pi-postgres:
+    image: postgres:16-alpine
+    container_name: pi-postgres
+    hostname: pi-postgres
+    <<: [*common-labels, *resource-limits-medium]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_MAX_CONNECTIONS: 2000
+      POSTGRES_SHARED_BUFFERS: 512MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1536MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 256MB
+      POSTGRES_CHECKPOINT_COMPLETION_TARGET: 0.9
+      POSTGRES_WAL_BUFFERS: 16MB
+      POSTGRES_DEFAULT_STATISTICS_TARGET: 100
+      POSTGRES_RANDOM_PAGE_COST: 1.1
+      POSTGRES_EFFECTIVE_IO_CONCURRENCY: 200
+      POSTGRES_MIN_WAL_SIZE: 1GB
+      POSTGRES_MAX_WAL_SIZE: 4GB
+    ports:
+      - "5432:5432"
+    volumes:
+      - pi_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      pi-network:
+        aliases:
+          - postgres
+          - database
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-triumph_synergy}"]
+
+  pi-redis-cluster:
+    image: redis:7-alpine
+    container_name: pi-redis
+    hostname: pi-redis
+    <<: [*common-labels, *resource-limits-medium]
+    ports:
+      - "6379:6379"
+    volumes:
+      - pi_redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      pi-network:
+        aliases:
+          - redis
+          - cache
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 4gb
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --maxclients 100000
+      --hz 10
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "redis-cli", "ping"]
+
+  # ============================================================================
+  # PI CENTRAL NODE - Stellar Core Integration
+  # ============================================================================
+
+  pi-central-node:
+    build:
+      context: .
+      dockerfile: docker/central-node/Dockerfile
+    container_name: pi-central-node
+    hostname: pi-central-node
+    <<: [*common-labels, *resource-limits-xlarge]
+    environment:
+      # Central Node Identity
+      CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      NODE_TYPE: central
+      NODE_PRIORITY: supreme
+      
+      # Stellar Core
+      STELLAR_NETWORK_PASSPHRASE: ${STELLAR_NETWORK_PASSPHRASE:-Pi Network}
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.mainnet.minepi.com}
+      STELLAR_CORE_HTTP_PORT: 11626
+      STELLAR_CORE_PEER_PORT: 11625
+      
+      # Pi Network
+      PI_NETWORK_TYPE: mainnet
+      PI_API_URL: https://api.minepi.com
+      PI_SDK_VERSION: 2.0
+      
+      # Node Ports
+      PI_NODE_PORT_START: 31400
+      PI_NODE_PORT_END: 31409
+      
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@pi-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      REDIS_URL: redis://pi-redis:6379
+      
+      # Performance
+      MAX_CONCURRENT_CONNECTIONS: 100000
+      TRANSACTION_POOL_SIZE: 1000000
+      MAX_TPS: 10000000000
+      SHARD_COUNT: 1024
+      PARALLEL_CHANNELS: 10000
+      
+      # SCP Configuration
+      SCP_AUTO_UPGRADE: true
+      SCP_SYNC_INTERVAL_MS: 30000
+      SCP_VERSION_CHECK_INTERVAL_MS: 60000
+    ports:
+      # Stellar Core
+      - "11625:11625"   # Peer port
+      - "11626:11626"   # HTTP port
+      # Pi Node Ports
+      - "31400:31400"
+      - "31401:31401"
+      - "31402:31402"
+      - "31403:31403"
+      - "31404:31404"
+      - "31405:31405"
+      - "31406:31406"
+      - "31407:31407"
+      - "31408:31408"
+      - "31409:31409"
+    volumes:
+      - pi_central_node_data:/app/data
+      - pi_stellar_core_data:/opt/stellar/data
+      - ./lib/pi-transaction:/app/lib/pi-transaction:ro
+      - ./lib/stellar:/app/lib/stellar:ro
+    networks:
+      pi-network:
+        aliases:
+          - central-node
+          - stellar-core
+          - scp-node
+    depends_on:
+      pi-postgres:
+        condition: service_healthy
+      pi-redis-cluster:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "curl", "-f", "http://localhost:11626/info"]
+
+  # ============================================================================
+  # PI TRIUMPH SYNERGY - Main Application
+  # ============================================================================
+
+  pi-triumph-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+        - DOCKER_BUILD=true
+    container_name: pi-triumph-app
+    hostname: pi-triumph-app
+    <<: [*common-labels, *resource-limits-large]
+    environment:
+      # Domain & URLs
+      DOMAIN_VALIDATION_KEY: ${DOMAIN_VALIDATION_KEY}
+      FRONTEND_URL: ${FRONTEND_URL:-https://triumphsynergy0576.pinet.com}
+      BACKEND_URL: ${BACKEND_URL:-https://triumphsynergy0576.pinet.com/api}
+      NEXTAUTH_URL: ${FRONTEND_URL:-https://triumphsynergy0576.pinet.com}
+      
+      # Database
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@pi-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      REDIS_URL: redis://pi-redis:6379
+      
+      # Authentication
+      AUTH_SECRET: ${AUTH_SECRET}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      
+      # Supabase
+      SUPABASE_DB_URL: ${SUPABASE_DB_URL}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      
+      # Pi Network
+      PI_API_KEY: ${PI_API_KEY}
+      PI_INTERNAL_API_KEY: ${PI_INTERNAL_API_KEY}
+      PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      PI_SUPERNODE_MODE: true
+      PI_NODE_PORTS: 31400-31409
+      
+      # Stellar
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.mainnet.minepi.com}
+      STELLAR_NETWORK_PASSPHRASE: ${STELLAR_NETWORK_PASSPHRASE:-Pi Network}
+      
+      # Central Node Connection
+      CENTRAL_NODE_URL: http://pi-central-node:11626
+      CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      
+      # Business Logic
+      INTERNAL_PI_MULTIPLIER: ${INTERNAL_PI_MULTIPLIER:-1.5}
+      INTERNAL_PI_MIN_VALUE: ${INTERNAL_PI_MIN_VALUE:-10.0}
+      EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
+      
+      # Runtime
+      NODE_ENV: production
+      DOCKER_BUILD: true
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
+    ports:
+      - "3000:3000"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - pi_triumph_app_data:/app/data
+    networks:
+      pi-network:
+        aliases:
+          - triumph-app
+          - app
+          - web
+    depends_on:
+      pi-postgres:
+        condition: service_healthy
+      pi-redis-cluster:
+        condition: service_healthy
+      pi-central-node:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+
+  # ============================================================================
+  # PI HYPER-TRANSACTION ENGINE
+  # ============================================================================
+
+  pi-transaction-engine:
+    build:
+      context: .
+      dockerfile: docker/transaction-engine/Dockerfile
+    container_name: pi-transaction-engine
+    hostname: pi-transaction-engine
+    <<: [*common-labels, *resource-limits-xlarge]
+    environment:
+      ENGINE_MODE: hyper
+      MAX_TPS: 10000000000
+      SHARD_COUNT: 1024
+      PARALLEL_CHANNELS: 10000
+      ANTI_CONGESTION_THRESHOLD: 0.7
+      AUTO_SCALE_MULTIPLIER: 10
+      CONFIRMATION_BLOCKS: 0
+      ZERO_CONGESTION: true
+      
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@pi-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      REDIS_URL: redis://pi-redis:6379
+      
+      # Central Node
+      CENTRAL_NODE_URL: http://pi-central-node:11626
+      CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+    volumes:
+      - pi_transaction_data:/app/data
+      - ./lib/pi-transaction:/app/lib/pi-transaction:ro
+    networks:
+      pi-network:
+        aliases:
+          - transaction-engine
+          - hyper-engine
+    depends_on:
+      pi-postgres:
+        condition: service_healthy
+      pi-redis-cluster:
+        condition: service_healthy
+      pi-central-node:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+
+  # ============================================================================
+  # PI TRILLION VAULT
+  # ============================================================================
+
+  pi-trillion-vault:
+    build:
+      context: .
+      dockerfile: docker/vault/Dockerfile
+    container_name: pi-trillion-vault
+    hostname: pi-trillion-vault
+    <<: [*common-labels, *resource-limits-large]
+    environment:
+      VAULT_MODE: trillion
+      MAX_CAPACITY: unlimited
+      QUANTUM_ENCRYPTION: true
+      MULTI_SIG_MAX: 10
+      REAL_TIME_AUDIT: true
+      
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@pi-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      REDIS_URL: redis://pi-redis:6379
+      
+      # Central Node
+      CENTRAL_NODE_URL: http://pi-central-node:11626
+      CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+    volumes:
+      - pi_vault_data:/app/data
+      - ./lib/pi-transaction:/app/lib/pi-transaction:ro
+    networks:
+      pi-network:
+        aliases:
+          - trillion-vault
+          - vault
+    depends_on:
+      pi-central-node:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+
+  # ============================================================================
+  # PI SMART CONTRACT ENGINE
+  # ============================================================================
+
+  pi-smart-contracts:
+    build:
+      context: .
+      dockerfile: docker/smart-contracts/Dockerfile
+    container_name: pi-smart-contracts
+    hostname: pi-smart-contracts
+    <<: [*common-labels, *resource-limits-xlarge]
+    environment:
+      EXECUTION_CHANNELS: 10000
+      MAX_CONTRACT_SIZE_MB: 100
+      GAS_LIMIT: unlimited
+      CHECKPOINT_ENABLED: true
+      AUTO_RESUME: true
+      INTERRUPTION_PROTECTION: true
+      
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@pi-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      REDIS_URL: redis://pi-redis:6379
+      
+      # Central Node
+      CENTRAL_NODE_URL: http://pi-central-node:11626
+      CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+    volumes:
+      - pi_contracts_data:/app/data
+      - ./lib/pi-transaction:/app/lib/pi-transaction:ro
+    networks:
+      pi-network:
+        aliases:
+          - smart-contracts
+          - contracts
+    depends_on:
+      pi-central-node:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+
+  # ============================================================================
+  # PI SCP UPGRADE SERVICE
+  # ============================================================================
+
+  pi-scp-upgrader:
+    build:
+      context: .
+      dockerfile: docker/scp-upgrader/Dockerfile
+    container_name: pi-scp-upgrader
+    hostname: pi-scp-upgrader
+    <<: [*common-labels, *resource-limits-medium]
+    environment:
+      AUTO_UPGRADE: true
+      ZERO_DOWNTIME: true
+      ROLLBACK_ON_FAILURE: true
+      VERSION_CHECK_INTERVAL_MS: 60000
+      PARAMETER_SYNC_INTERVAL_MS: 30000
+      VALIDATOR_SYNC_INTERVAL_MS: 300000
+      
+      # Pi Network Horizon
+      PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
+      PI_TESTNET_HORIZON: https://api.testnet.minepi.com
+      NETWORK_TYPE: mainnet
+      
+      # Central Node
+      CENTRAL_NODE_URL: http://pi-central-node:11626
+      CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+    volumes:
+      - pi_scp_data:/app/data
+      - ./lib/pi-transaction:/app/lib/pi-transaction:ro
+    networks:
+      pi-network:
+        aliases:
+          - scp-upgrader
+          - protocol-sync
+    depends_on:
+      pi-central-node:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+
+  # ============================================================================
+  # PI PAYMENT PROCESSOR
+  # ============================================================================
+
+  pi-payment-processor:
+    build:
+      context: ./services/payment-processor
+      dockerfile: Dockerfile
+    container_name: pi-payment-processor
+    hostname: pi-payment-processor
+    <<: [*common-labels, *resource-limits-medium]
+    environment:
+      REDIS_URL: redis://pi-redis:6379
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@pi-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      PI_API_KEY: ${PI_API_KEY}
+      PI_INTERNAL_API_KEY: ${PI_INTERNAL_API_KEY}
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.mainnet.minepi.com}
+      WORKER_THREADS: 8
+      CENTRAL_NODE_URL: http://pi-central-node:11626
+    networks:
+      pi-network:
+        aliases:
+          - payment-processor
+          - payments
+    depends_on:
+      pi-redis-cluster:
+        condition: service_healthy
+      pi-postgres:
+        condition: service_healthy
+      pi-central-node:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ============================================================================
+  # PI LOAD BALANCER
+  # ============================================================================
+
+  pi-nginx:
+    image: nginx:alpine
+    container_name: pi-nginx
+    hostname: pi-nginx
+    <<: [*common-labels, *resource-limits-medium]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      pi-network:
+        aliases:
+          - nginx
+          - load-balancer
+          - gateway
+    depends_on:
+      pi-triumph-app:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "nginx", "-t"]
+
+  # ============================================================================
+  # PI MONITORING & METRICS
+  # ============================================================================
+
+  pi-prometheus:
+    image: prom/prometheus:latest
+    container_name: pi-prometheus
+    hostname: pi-prometheus
+    <<: [*common-labels, *resource-limits-small]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - pi_prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      pi-network:
+        aliases:
+          - prometheus
+          - metrics
+    restart: unless-stopped
+
+  pi-grafana:
+    image: grafana/grafana:latest
+    container_name: pi-grafana
+    hostname: pi-grafana
+    <<: [*common-labels, *resource-limits-small]
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - pi_grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      pi-network:
+        aliases:
+          - grafana
+          - dashboards
+    depends_on:
+      - pi-prometheus
+    restart: unless-stopped
+
+# ==============================================================================
+# VOLUMES
+# ==============================================================================
+
+volumes:
+  pi_postgres_data:
+    name: pi_postgres_data
+    labels:
+      org.pinetwork.volume: "postgres"
+  pi_redis_data:
+    name: pi_redis_data
+    labels:
+      org.pinetwork.volume: "redis"
+  pi_central_node_data:
+    name: pi_central_node_data
+    labels:
+      org.pinetwork.volume: "central-node"
+  pi_stellar_core_data:
+    name: pi_stellar_core_data
+    labels:
+      org.pinetwork.volume: "stellar-core"
+  pi_triumph_app_data:
+    name: pi_triumph_app_data
+    labels:
+      org.pinetwork.volume: "triumph-app"
+  pi_transaction_data:
+    name: pi_transaction_data
+    labels:
+      org.pinetwork.volume: "transaction-engine"
+  pi_vault_data:
+    name: pi_vault_data
+    labels:
+      org.pinetwork.volume: "vault"
+  pi_contracts_data:
+    name: pi_contracts_data
+    labels:
+      org.pinetwork.volume: "smart-contracts"
+  pi_scp_data:
+    name: pi_scp_data
+    labels:
+      org.pinetwork.volume: "scp-upgrader"
+  pi_prometheus_data:
+    name: pi_prometheus_data
+    labels:
+      org.pinetwork.volume: "prometheus"
+  pi_grafana_data:
+    name: pi_grafana_data
+    labels:
+      org.pinetwork.volume: "grafana"
+
+# ==============================================================================
+# NETWORKS
+# ==============================================================================
+
+networks:
+  pi-network:
+    name: pi-network
+    driver: bridge
+    labels:
+      org.pinetwork.network: "main"
+      org.pinetwork.description: "Pi Network Triumph Synergy Infrastructure"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
