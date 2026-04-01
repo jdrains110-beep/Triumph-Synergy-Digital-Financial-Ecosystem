@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Triumph Synergy: Advanced Quantum Financial System (QFS) Platform powered by Pi Network. Features Pi SDK 2.0 integration, 90% Pi payments, Stellar settlement, quantum-resistant security, NESARA/GESARA compliance, and immortal infrastructure.",
   "private": true,
+  "packageManager": "yarn@1.22.22",
   "keywords": [
     "pi-network",
     "pi-sdk",
