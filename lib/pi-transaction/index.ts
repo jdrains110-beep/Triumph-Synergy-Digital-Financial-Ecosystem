@@ -37,7 +37,7 @@ export {
   PiTrillionVaultManager,
   piTrillionVaultManager,
   getTrillionVaultManager,
-  initializeTrillionVaultManager,
+  initializeTrillionVault,
   TRILLION_VAULT_CONFIG,
   type VaultType,
   type VaultStatus,
@@ -92,7 +92,7 @@ export {
 // =============================================================================
 
 import { initializeHyperTransactionEngine, piHyperTransactionEngine } from './pi-hyper-transaction-engine';
-import { initializeTrillionVaultManager, piTrillionVaultManager } from './pi-trillion-vault';
+import { initializeTrillionVault, piTrillionVaultManager } from './pi-trillion-vault';
 import { initializeSmartContractEngine, piSmartContractEngine } from './pi-smart-contracts';
 import { initializeSCPAutoUpgrade, piSCPAutoUpgradeManager, type NetworkType } from './pi-scp-auto-upgrade';
 
@@ -140,7 +140,7 @@ export async function initializePiTransactionSystem(
   }
 
   if (enableTrillionVault) {
-    initPromises.push(initializeTrillionVaultManager(networkType));
+    initPromises.push(initializeTrillionVault(networkType));
   }
 
   if (enableSmartContracts) {

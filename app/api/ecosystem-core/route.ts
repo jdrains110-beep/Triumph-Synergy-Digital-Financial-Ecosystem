@@ -9,8 +9,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import {
   getEcosystemStatus,
-  dockerAutoUpgradeManager,
-  gitHubCodifier,
+  dockerAutoUpgrade,
+  githubCodifier,
   physicalDigitalBridge,
   connectionOverflowHub,
   immutableEcosystem,
