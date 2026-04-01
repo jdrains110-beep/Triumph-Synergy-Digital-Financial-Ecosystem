@@ -20,8 +20,9 @@
  * - Latency Minimization
  */
 
-import { ml_kem768 } from "@noble/post-quantum/ml-kem";
-import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";
+import { EventEmitter } from "events";
+import { ml_kem768 } from "@noble/post-quantum/ml-kem.js";
+import { ml_dsa65 } from "@noble/post-quantum/ml-dsa.js";
 
 // ============================================================================
 // Types & Interfaces

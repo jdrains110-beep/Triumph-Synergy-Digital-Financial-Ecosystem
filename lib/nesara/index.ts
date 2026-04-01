@@ -46,6 +46,7 @@ export {
 // BIRTH CERTIFICATE BONDS
 // =============================================================================
 export {
+  calculateBondValue,
   type BirthCertificateBond,
   BirthCertificateBondSystem,
   birthBondSystem,

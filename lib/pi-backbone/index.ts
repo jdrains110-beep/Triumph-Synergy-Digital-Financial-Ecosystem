@@ -11,7 +11,6 @@
 
 // Core systems
 export { 
-  piBackbone as piNetworkBackbone, 
   PiNetworkBackbone,
   type NetworkRole,
   type NetworkStatus,
@@ -84,7 +83,7 @@ export {
 // Unified Backbone Interface
 // ============================================================================
 
-import { piBackbone } from "./pi-network-backbone";
+import { piBackbone as piNetworkBackboneImpl } from "./pi-network-backbone";
 import { distributedNodes } from "./distributed-nodes";
 import { dockerProcessing } from "./docker-processing";
 import { computingAggregator } from "./computing-aggregation";
@@ -98,7 +97,7 @@ export class PiBackboneSystem {
   private static instance: PiBackboneSystem;
   
   // Sub-systems
-  readonly network = piBackbone;
+  readonly network = piNetworkBackboneImpl;
   readonly nodes = distributedNodes;
   readonly docker = dockerProcessing;
   readonly aggregator = computingAggregator;
@@ -403,3 +402,6 @@ export class PiBackboneSystem {
 
 // Export singleton
 export const piBackbone = PiBackboneSystem.getInstance();
+
+// Alias for backward compatibility
+export const piNetworkBackbone = piBackbone;

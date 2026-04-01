@@ -94,7 +94,7 @@ export type RedemptionRequest = {
  * Calculate bond value based on year of birth
  * Values are estimates based on NESARA interpretations
  */
-function calculateBondValue(yearOfBirth: number): {
+export function calculateBondValue(yearOfBirth: number): {
   originalValue: number;
   accruedInterest: number;
   totalValue: number;

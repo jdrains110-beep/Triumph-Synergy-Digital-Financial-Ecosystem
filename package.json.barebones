@@ -1,0 +1,21 @@
+{
+  "name": "triumph-synergy",
+  "version": "1.0.0",
+  "description": "Triumph Synergy",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev"
+  },
+  "dependencies": {
+    "next": "^16.1.7",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/node": "^25.0.3"
+  }
+}
