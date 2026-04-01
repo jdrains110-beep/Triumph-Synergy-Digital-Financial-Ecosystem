@@ -26,8 +26,7 @@ permissions:
     deployments: write
 
 env:
-    NODE_VERSION: "20"
-    YARN_VERSION: "1.22.22"
+    NODE_VERSION: "24"
 
 jobs:
     # ============================================================================
