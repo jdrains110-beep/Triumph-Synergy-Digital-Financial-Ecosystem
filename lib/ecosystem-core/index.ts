@@ -345,8 +345,28 @@ export async function initializeEcosystem(): Promise<void> {
  * Internal Pi Rate:
  * - Protected by oracle consensus (15+ required)
  * - Maximum 5% change per update
- * - Blockchain anchored
  */
+
+// =============================================================================
+// RPC BRIDGE - BlockChain & External World Bridge
+// =============================================================================
+// Unified interface for Pi Network blockchain, Horizon data layer,
+// and external world connectivity
+
+export {
+  RPCBridge,
+  initializeRPCBridge,
+  getRPCBridge,
+  rpcBridge,
+} from "@/lib/api/rpc-bridge";
+
+export type {
+  RPCBridgeConfig,
+  BridgeRequest,
+  BridgeResponse,
+  BlockchainTransaction,
+  HorizonData,
+} from "@/lib/api/rpc-bridge";
 
 // =============================================================================
 // Role Hierarchy Reference
