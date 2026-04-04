@@ -369,6 +369,84 @@ export type {
 } from "@/lib/api/rpc-bridge";
 
 // =============================================================================
+// ACCOUNT FUSION SYSTEM - One Account Per Person
+// =============================================================================
+// Prevents duplicate/stolen accounts through biometric binding and KYC
+
+export {
+  AccountFusionSystem,
+  accountFusionSystem,
+} from "@/lib/identity/account-fusion";
+
+export type {
+  BiometricSignature,
+  IdDocumentVerification,
+  PersonalIdentity,
+  TriumphAccount,
+  RegisteredDevice,
+  DuplicateDetection,
+  BiometricType,
+  IdDocumentType,
+  VerificationStatus,
+} from "@/lib/identity/account-fusion";
+
+// =============================================================================
+// NETWORK MONITORING SYSTEM - Real-time Fraud Detection
+// =============================================================================
+// Monitors stolen Pi, account manipulation, suspicious patterns
+
+export {
+  NetworkMonitor,
+  networkMonitor,
+} from "@/lib/network/network-monitor";
+
+export type {
+  NetworkThreat,
+  TransactionAnomalyDetection,
+  AccountAnomalyMetrics,
+  NetworkSnapshot,
+} from "@/lib/network/network-monitor";
+
+// =============================================================================
+// PI ORIGIN TRACKING - Internal vs External Pi Segregation
+// =============================================================================
+// Differentiates mined (internal, priority) from CEX-bought (external)
+
+export {
+  PiOriginTracker,
+  piOriginTracker,
+} from "@/lib/tokens/pi-origin-tracking";
+
+export type {
+  PiUnit,
+  PiPool,
+  PiOriginAudit,
+  PiOrigin,
+  InternalPiSource,
+  ExternalPiSource,
+} from "@/lib/tokens/pi-origin-tracking";
+
+// =============================================================================
+// SELF-CONTAINED PI NETWORK FRAMEWORK
+// =============================================================================
+// Complete Pi Network embedded within Triumph-Synergy
+
+export {
+  SelfContainedPiNetwork,
+  selfContainedPiNetwork,
+} from "@/lib/pi-network/self-contained-pi";
+
+export type {
+  BlockchainBlock,
+  MiningReward,
+  PiNetworkState,
+  SmartContractCode,
+  NodeRole,
+  ConsensusAlgorithm,
+  TransactionStatus,
+} from "@/lib/pi-network/self-contained-pi";
+
+// =============================================================================
 // Role Hierarchy Reference
 // =============================================================================
 
