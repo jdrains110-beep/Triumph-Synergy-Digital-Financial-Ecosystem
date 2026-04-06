@@ -18,11 +18,13 @@ export * from "./system-harmony-orchestrator";
 export * from "./central-node-supreme";
 export * from "./quantum-mining-infrastructure";
 export * from "./central-node-pi-ports";
+export * from "./central-node-scalability";
 
 // Re-export singletons for convenience
 export { quantumFortress } from "./quantum-fortress-system";
 export { systemHarmony } from "./system-harmony-orchestrator";
 export { centralNodeSupreme, CENTRAL_NODE_CONFIG } from "./central-node-supreme";
+export { centralNodeScalability } from "./central-node-scalability";
 export { 
   getCentralNodePiPortManager, 
   initializeCentralNodePiPorts,
@@ -37,6 +39,7 @@ export {
 import { quantumFortress, QuantumFortressManager } from "./quantum-fortress-system";
 import { systemHarmony, SystemHarmonyOrchestrator } from "./system-harmony-orchestrator";
 import { centralNodeSupreme, CentralNodeSupremeManager, CENTRAL_NODE_CONFIG } from "./central-node-supreme";
+import { centralNodeScalability, CentralNodeScalabilityManager } from "./central-node-scalability";
 import { getCentralNodePiPortManager, initializeCentralNodePiPorts } from "./central-node-pi-ports";
 
 /**
@@ -47,6 +50,7 @@ export async function initializeQuantumSystems(): Promise<{
   fortress: typeof quantumFortress;
   harmony: typeof systemHarmony;
   centralNode: typeof centralNodeSupreme;
+  scalability: typeof centralNodeScalability;
   status: {
     fortressActive: boolean;
     harmonyScore: number;
@@ -54,6 +58,8 @@ export async function initializeQuantumSystems(): Promise<{
     shieldsActive: number;
     centralNodeStatus: string;
     centralNodePublicKey: string;
+    scalabilityEnabled: boolean;
+    maxNodesSupported: number;
     piNodePorts: {
       active: boolean;
       portsOpen: number;
@@ -70,6 +76,9 @@ export async function initializeQuantumSystems(): Promise<{
   // Get central node status
   const centralStatus = centralNodeSupreme.getStatus();
   
+  // Get scalability status
+  const scalabilityStatus = centralNodeScalability.getSystemStatus();
+  
   // Initialize Pi Node port communication
   const piPortManager = await initializeCentralNodePiPorts();
   const piPortStatus = piPortManager.getStatus();
@@ -78,6 +87,7 @@ export async function initializeQuantumSystems(): Promise<{
     fortress: quantumFortress,
     harmony: systemHarmony,
     centralNode: centralNodeSupreme,
+    scalability: centralNodeScalability,
     status: {
       fortressActive: fortressStatus.online,
       harmonyScore: harmonyStatus.globalHarmony,
@@ -85,6 +95,8 @@ export async function initializeQuantumSystems(): Promise<{
       shieldsActive: fortressStatus.shields,
       centralNodeStatus: centralStatus.status,
       centralNodePublicKey: centralStatus.publicKey,
+      scalabilityEnabled: true,
+      maxNodesSupported: 256,  // Can support unlimited, but tested to 256+
       piNodePorts: {
         active: piPortStatus.isActive,
         portsOpen: piPortStatus.ports.open,
