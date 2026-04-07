@@ -670,61 +670,121 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
   }
   
   // ==========================================================================
-  // Network Fetch Operations (Simulated)
+  // Network Fetch Operations (Live Horizon API)
   // ==========================================================================
-  
+
+  private getHorizonUrl(): string {
+    // Prefer env override, else pick by network type
+    return process.env.STELLAR_HORIZON_URL
+      || (this.networkType === 'mainnet'
+        ? SCP_UPGRADE_CONFIG.piMainnetHorizon
+        : SCP_UPGRADE_CONFIG.piTestnetHorizon);
+  }
+
+  private async horizonGet(path: string): Promise<unknown> {
+    const base = this.getHorizonUrl();
+    const url = `${base}${path}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`Horizon ${res.status}: ${res.statusText}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   private async fetchNetworkVersion(): Promise<SCPVersion> {
-    // In production, this would fetch from Pi Network Horizon API
-    const horizon = this.networkType === 'mainnet' 
-      ? SCP_UPGRADE_CONFIG.piMainnetHorizon 
-      : SCP_UPGRADE_CONFIG.piTestnetHorizon;
-    
-    // Simulated response - in production would do actual HTTP request
-    return {
-      protocolVersion: 21,              // Current Pi Network protocol version
-      coreVersion: 'stellar-core 20.2.0',
-      horizonVersion: 'horizon 2.29.0',
-      ledgerVersion: 21,
-      networkPassphrase: this.networkType === 'mainnet' 
-        ? 'Pi Network'
-        : 'Pi Network Testnet',
-      historyLatestLedger: 50000000 + Math.floor(Date.now() / 5000), // Simulated growing ledger
-      historyElderLedger: 1,
-    };
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const root = (await this.horizonGet('/')) as any;
+      const ledger = (await this.horizonGet(`/ledgers?order=desc&limit=1`)) as any;
+      const latest = ledger?._embedded?.records?.[0] ?? {};
+      return {
+        protocolVersion: root?.current_protocol_version ?? latest?.protocol_version ?? 21,
+        coreVersion: root?.core_version ?? 'stellar-core unknown',
+        horizonVersion: root?.horizon_version ?? 'horizon unknown',
+        ledgerVersion: latest?.protocol_version ?? 21,
+        networkPassphrase: root?.network_passphrase ?? (this.networkType === 'mainnet' ? 'Pi Network' : 'Pi Network Testnet'),
+        historyLatestLedger: root?.history_latest_ledger ?? latest?.sequence ?? 0,
+        historyElderLedger: root?.history_elder_ledger ?? 1,
+      };
+    } catch (err) {
+      console.warn(`[SCP] Horizon fetch failed, using cached/defaults:`, (err as Error).message);
+      return {
+        protocolVersion: this.currentVersion?.protocolVersion ?? 21,
+        coreVersion: this.currentVersion?.coreVersion ?? 'stellar-core 20.2.0 (fallback)',
+        horizonVersion: this.currentVersion?.horizonVersion ?? 'horizon unknown (fallback)',
+        ledgerVersion: this.currentVersion?.ledgerVersion ?? 21,
+        networkPassphrase: this.networkType === 'mainnet' ? 'Pi Network' : 'Pi Network Testnet',
+        historyLatestLedger: this.currentVersion?.historyLatestLedger ?? 0,
+        historyElderLedger: 1,
+      };
+    }
   }
-  
+
   private async fetchNetworkParameters(): Promise<SCPParameters> {
-    // Simulated Pi Network parameters
-    return {
-      baseFee: 100,                     // 0.00001 Pi base fee
-      baseReserve: BigInt(5000000),     // 0.5 Pi reserve
-      maxTxSetSize: 1000,
-      ledgerCloseTime: 5,               // 5 seconds
-      nominalCloseTime: 5,
-      lowThreshold: 1,
-      medThreshold: 2,
-      highThreshold: 3,
-      networkId: this.networkType === 'mainnet' 
-        ? 'mainnet-pi' 
-        : 'testnet-pi',
-      passphrase: this.networkType === 'mainnet' 
-        ? 'Pi Network'
-        : 'Pi Network Testnet',
-    };
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ledger = (await this.horizonGet(`/ledgers?order=desc&limit=1`)) as any;
+      const rec = ledger?._embedded?.records?.[0] ?? {};
+      return {
+        baseFee: rec?.base_fee_in_stroops ?? 100,
+        baseReserve: BigInt(rec?.base_reserve_in_stroops ?? 5000000),
+        maxTxSetSize: rec?.max_tx_set_size ?? 1000,
+        ledgerCloseTime: 5,
+        nominalCloseTime: 5,
+        lowThreshold: 1,
+        medThreshold: 2,
+        highThreshold: 3,
+        networkId: this.networkType === 'mainnet' ? 'mainnet-pi' : 'testnet-pi',
+        passphrase: this.networkType === 'mainnet' ? 'Pi Network' : 'Pi Network Testnet',
+      };
+    } catch (err) {
+      console.warn(`[SCP] Parameter fetch failed, using defaults:`, (err as Error).message);
+      return {
+        baseFee: 100,
+        baseReserve: BigInt(5000000),
+        maxTxSetSize: 1000,
+        ledgerCloseTime: 5,
+        nominalCloseTime: 5,
+        lowThreshold: 1,
+        medThreshold: 2,
+        highThreshold: 3,
+        networkId: this.networkType === 'mainnet' ? 'mainnet-pi' : 'testnet-pi',
+        passphrase: this.networkType === 'mainnet' ? 'Pi Network' : 'Pi Network Testnet',
+      };
+    }
   }
-  
+
   private async fetchValidators(): Promise<ValidatorSet> {
-    // Simulated Pi Network validators
+    // Query the central node account from Horizon to verify it's live on-chain
+    let centralNodeActive = false;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const acct = (await this.horizonGet(`/accounts/${this.centralNodeKey}`)) as any;
+      centralNodeActive = !!acct?.id;
+      if (centralNodeActive) {
+        console.log(`[SCP] Central node ${this.centralNodeKey.slice(0, 8)}... verified on-chain (seq=${acct.sequence})`);
+      }
+    } catch {
+      console.warn(`[SCP] Central node account not found or unreachable on Horizon`);
+    }
+
     const validators: Validator[] = [
       {
         id: 'pi-validator-1',
         publicKey: this.centralNodeKey,
         name: 'Central Node Supreme',
         organization: 'Triumph Synergy',
-        active: true,
-        voting: true,
+        active: centralNodeActive,
+        voting: centralNodeActive,
         historyLatestLedger: this.metrics.currentLedger,
-        trustLevel: 'full',
+        trustLevel: centralNodeActive ? 'full' : 'disconnected',
       },
       {
         id: 'pi-core-validator-1',
@@ -749,7 +809,7 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
         homeDomain: 'minepi.com',
       },
     ];
-    
+
     return {
       validators,
       quorumSet: {

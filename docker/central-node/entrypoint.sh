@@ -23,13 +23,13 @@ echo ""
 
 # Wait for dependencies
 echo "Waiting for PostgreSQL..."
-until pg_isready -h "${POSTGRES_HOST:-pi-postgres}" -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-postgres}"; do
+until pg_isready -h "${POSTGRES_HOST:-triumph-postgres}" -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-postgres}"; do
     sleep 2
 done
 echo "PostgreSQL is ready"
 
 echo "Waiting for Redis..."
-until redis-cli -h "${REDIS_HOST:-pi-redis}" -p "${REDIS_PORT:-6379}" ping > /dev/null 2>&1; do
+until redis-cli -h "${REDIS_HOST:-triumph-redis}" -p "${REDIS_PORT:-6379}" ping > /dev/null 2>&1; do
     sleep 2
 done
 echo "Redis is ready"

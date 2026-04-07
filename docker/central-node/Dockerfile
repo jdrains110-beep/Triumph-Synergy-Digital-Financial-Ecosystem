@@ -23,45 +23,40 @@ RUN apk add --no-cache \
     openssl \
     ca-certificates \
     postgresql-client \
+    redis \
     python3 \
     make \
     g++ \
     git
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
-
 # ==============================================================================
 # Dependencies Stage
-# ==============================================================================
-
-FROM base AS deps
-WORKDIR /app
-
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-
-# ==============================================================================
-# Builder Stage
 # ==============================================================================
 
 FROM base AS builder
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY docker/package.microservice.json ./package.json
+RUN npm install
+
 COPY lib/pi-transaction ./lib/pi-transaction
 COPY lib/stellar ./lib/stellar
-COPY tsconfig.json ./
+COPY docker/central-node/bootstrap.ts ./docker/central-node/bootstrap.ts
+COPY tsconfig.docker.json ./tsconfig.json
 
-# Build TypeScript
-RUN pnpm add -D typescript @types/node
-RUN npx tsc --project tsconfig.json --outDir ./dist || true
+# Bundle the bootstrap entry (includes HTTP health server + full system init)
+RUN npx esbuild docker/central-node/bootstrap.ts \
+      --bundle --platform=node --target=node20 --format=cjs \
+      --external:events --outfile=dist/central-node.js
 
 # ==============================================================================
 # Runner Stage
 # ==============================================================================
 
-FROM base AS runner
+# Remove deps-only stage (not used; python, make, g++ are build-time only)
+FROM node:20-alpine AS runner
+RUN apk add --no-cache curl tini
+
 WORKDIR /app
 
 # Labels
@@ -80,12 +75,6 @@ RUN mkdir -p /app/data /opt/stellar/data && \
 
 # Copy built application
 COPY --from=builder --chown=centralnode:pinetwork /app/dist ./dist
-COPY --from=builder --chown=centralnode:pinetwork /app/node_modules ./node_modules
-COPY --from=builder --chown=centralnode:pinetwork /app/lib ./lib
-
-# Copy startup script
-COPY docker/central-node/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 # Environment
 ENV NODE_ENV=production
@@ -109,4 +98,4 @@ HEALTHCHECK --interval=15s --timeout=10s --retries=5 --start-period=30s \
     CMD curl -f http://localhost:11626/info || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["/entrypoint.sh"]
+CMD ["node", "dist/central-node.js"]

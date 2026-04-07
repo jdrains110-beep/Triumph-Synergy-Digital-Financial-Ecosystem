@@ -1,61 +1,60 @@
 # Multi-stage build for optimized production image
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 
 # Install minimal runtime helpers early
-RUN apk add --no-cache curl tini
+RUN apk add --no-cache curl tini wget && corepack enable
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
-
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod=false
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --network-timeout 600000
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set environment for build
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_OPTIONS="--enable-source-maps --max-old-space-size=2048"
-ENV RUN_MIGRATIONS false
-ENV DOCKER_BUILD true
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=1536"
+ENV RUN_MIGRATIONS=false
+ENV DOCKER_BUILD=true
 
-# Build application
-RUN pnpm build
+# Build application — fail hard if standalone output is missing
+RUN yarn build && \
+    test -s .next/standalone/server.js || \
+    (echo "FATAL: .next/standalone/server.js missing or empty — build failed" && exit 1)
 
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
 # Copy built application
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -qO- http://localhost:3000/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=40s \
+    CMD wget -qO- http://localhost:3000/api/health || exit 1
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "server.js"]

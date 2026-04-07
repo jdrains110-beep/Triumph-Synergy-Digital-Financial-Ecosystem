@@ -11,22 +11,21 @@
 FROM node:20-alpine AS base
 
 RUN apk add --no-cache curl tini bash
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Dependencies
-FROM base AS deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-
-# Builder
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+COPY docker/package.microservice.json ./package.json
+RUN npm install
+
 COPY lib/pi-transaction ./lib/pi-transaction
-COPY tsconfig.json ./
-RUN pnpm add -D typescript @types/node
-RUN npx tsc --project tsconfig.json --outDir ./dist || true
+COPY docker/smart-contracts/bootstrap.ts ./docker/smart-contracts/bootstrap.ts
+COPY tsconfig.docker.json ./tsconfig.json
+
+RUN npx esbuild docker/smart-contracts/bootstrap.ts \
+      --bundle --platform=node --target=node20 --format=cjs \
+      --external:events --outfile=dist/smart-contracts.js
 
 # Runner
 FROM base AS runner
@@ -41,8 +40,6 @@ RUN mkdir -p /app/data /app/data/contracts /app/data/checkpoints && \
     chown -R contracts:pinetwork /app
 
 COPY --from=builder --chown=contracts:pinetwork /app/dist ./dist
-COPY --from=builder --chown=contracts:pinetwork /app/node_modules ./node_modules
-COPY --from=builder --chown=contracts:pinetwork /app/lib ./lib
 
 ENV NODE_ENV=production
 ENV EXECUTION_CHANNELS=10000
@@ -60,4 +57,4 @@ HEALTHCHECK --interval=15s --timeout=10s --retries=5 \
     CMD curl -f http://localhost:8082/health || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "dist/lib/pi-transaction/pi-smart-contracts.js"]
+CMD ["node", "dist/smart-contracts.js"]

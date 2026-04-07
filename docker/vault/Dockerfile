@@ -10,22 +10,21 @@
 FROM node:20-alpine AS base
 
 RUN apk add --no-cache curl tini bash openssl
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Dependencies
-FROM base AS deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-
-# Builder
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+COPY docker/package.microservice.json ./package.json
+RUN npm install
+
 COPY lib/pi-transaction ./lib/pi-transaction
-COPY tsconfig.json ./
-RUN pnpm add -D typescript @types/node
-RUN npx tsc --project tsconfig.json --outDir ./dist || true
+COPY docker/vault/bootstrap.ts ./docker/vault/bootstrap.ts
+COPY tsconfig.docker.json ./tsconfig.json
+
+RUN npx esbuild docker/vault/bootstrap.ts \
+      --bundle --platform=node --target=node20 --format=cjs \
+      --external:events --outfile=dist/vault.js
 
 # Runner
 FROM base AS runner
@@ -40,8 +39,6 @@ RUN mkdir -p /app/data /app/data/vaults /app/data/audit && \
     chown -R vault:pinetwork /app
 
 COPY --from=builder --chown=vault:pinetwork /app/dist ./dist
-COPY --from=builder --chown=vault:pinetwork /app/node_modules ./node_modules
-COPY --from=builder --chown=vault:pinetwork /app/lib ./lib
 
 ENV NODE_ENV=production
 ENV VAULT_MODE=trillion
@@ -58,4 +55,4 @@ HEALTHCHECK --interval=15s --timeout=10s --retries=5 \
     CMD curl -f http://localhost:8081/health || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "dist/lib/pi-transaction/pi-trillion-vault.js"]
+CMD ["node", "dist/vault.js"]

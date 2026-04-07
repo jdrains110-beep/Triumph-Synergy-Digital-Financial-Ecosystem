@@ -1,4 +1,5 @@
 import cluster from "node:cluster";
+import http from "node:http";
 import os from "node:os";
 import postgres from "postgres";
 import { createClient } from "redis";
@@ -278,8 +279,17 @@ class PaymentProcessor {
 
 // Cluster mode for multiple CPU cores
 if (cluster.isPrimary && process.env.NODE_ENV === "production") {
-  const numCPUs = os.cpus().length;
+  const numCPUs = Math.min(os.cpus().length, Number(process.env.WORKER_THREADS) || 4);
   console.log(`🎯 Master process starting ${numCPUs} workers`);
+
+  // Health check HTTP server on master
+  const healthServer = http.createServer((_req, res) => {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "healthy", workers: numCPUs, uptime: process.uptime() }));
+  });
+  healthServer.listen(8084, "0.0.0.0", () => {
+    console.log("🩺 Health endpoint listening on :8084");
+  });
 
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
@@ -294,6 +304,16 @@ if (cluster.isPrimary && process.env.NODE_ENV === "production") {
   const processor = new PaymentProcessor();
 
   processor.initialize().then(() => {
+    // If running in single-process mode (not production cluster), also start health server
+    if (!cluster.isWorker) {
+      const healthServer = http.createServer((_req, res) => {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "healthy", uptime: process.uptime() }));
+      });
+      healthServer.listen(8084, "0.0.0.0", () => {
+        console.log("🩺 Health endpoint listening on :8084");
+      });
+    }
     processor.startProcessing().catch(console.error);
   });
 
