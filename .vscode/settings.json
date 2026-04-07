@@ -36,6 +36,20 @@
   },
   "editor.codeActions.triggerOnFocusChange": false,
   "files.autoSave": "off",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/out": true,
+    "**/.git": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/out": true,
+    "**/coverage": true
+  },
   "files.watcherExclude": {
     "**/node_modules/**": true,
     "**/dist/**": true,
