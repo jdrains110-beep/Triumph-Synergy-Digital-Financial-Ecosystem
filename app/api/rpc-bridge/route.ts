@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getRPCBridge, type BridgeRequest } from "@/lib/api/rpc-bridge";
+import { rateLimitByIP, isAllowedRPCMethod } from "@/lib/security/api-guard";
 
 /**
  * Request body structure
@@ -34,12 +35,6 @@ export async function GET(request: NextRequest) {
         status: "healthy",
         service: "rpc-bridge",
         timestamp: new Date().toISOString(),
-        bridges: {
-          piMainnet: process.env.NEXT_PUBLIC_PI_RPC_MAINNET,
-          piTestnet: process.env.NEXT_PUBLIC_PI_RPC_TESTNET,
-          horizon: process.env.NEXT_PUBLIC_HORIZON_ENDPOINT,
-          external: process.env.NEXT_PUBLIC_EXTERNAL_API_ENDPOINT,
-        },
       },
       { status: 200 }
     );
@@ -87,6 +82,12 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 120 RPC calls per minute per IP
+    const rl = rateLimitByIP(request, "rpc-bridge", 120, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = (await request.json()) as RPCBridgeRequestBody;
 
     // Validate request
@@ -94,13 +95,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Missing required fields: network, method",
-          example: {
-            network: "pi-mainnet",
-            method: "eth_chainId",
-            params: {},
-          },
         },
         { status: 400 }
+      );
+    }
+
+    // Validate RPC method against whitelist
+    if (!isAllowedRPCMethod(body.method)) {
+      return NextResponse.json(
+        { error: "Method not allowed" },
+        { status: 403 }
       );
     }
 

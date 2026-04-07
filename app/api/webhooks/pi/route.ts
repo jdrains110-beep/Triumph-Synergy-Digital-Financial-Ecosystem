@@ -139,12 +139,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const signature = request.headers.get("x-pi-signature") || "";
     const webhookSecret = process.env.PI_WEBHOOK_SECRET || "";
 
-    // Verify signature if secret is configured
+    // Always require signature verification in production
+    if (!webhookSecret && process.env.NODE_ENV === "production") {
+      console.error("PI_WEBHOOK_SECRET is not configured");
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
+
     if (
       webhookSecret &&
       !verifyWebhookSignature(payload, signature, webhookSecret)
     ) {
-      console.error("❌ Invalid webhook signature");
+      console.error("Invalid webhook signature");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 

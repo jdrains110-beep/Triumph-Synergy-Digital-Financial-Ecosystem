@@ -1,6 +1,7 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import crypto from "crypto";
 
 import { auth } from "@/app/(auth)/auth";
 
@@ -46,12 +47,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
-    // Get filename from formData since Blob doesn't have name property
-    const filename = (formData.get("file") as File).name;
+    // Generate safe filename — never use user-supplied name directly
+    const originalName = (formData.get("file") as File).name;
+    const ext = originalName.split(".").pop()?.replace(/[^a-zA-Z0-9]/g, "") || "bin";
+    const safeName = `${crypto.randomUUID()}.${ext}`;
     const fileBuffer = await file.arrayBuffer();
 
     try {
-      const data = await put(`${filename}`, fileBuffer, {
+      const data = await put(safeName, fileBuffer, {
         access: "public",
       });
 

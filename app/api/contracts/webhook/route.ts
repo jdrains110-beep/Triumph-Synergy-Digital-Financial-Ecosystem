@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const hmac = createHmac("sha256", secret);
     const digest = `sha256=${hmac.update(body).digest("hex")}`;
 
-    if (signature !== digest && process.env.NODE_ENV === "production") {
+    if (signature !== digest) {
       console.error("Invalid webhook signature");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }

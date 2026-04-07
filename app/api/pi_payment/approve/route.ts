@@ -1,29 +1,28 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimitByIP, isValidId, safeErrorResponse } from "@/lib/security/api-guard";
 
 // Pi Network API Configuration
 const PI_API_KEY = process.env.PI_API_KEY || "";
-const PI_APP_ID = process.env.PI_APP_ID || "";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { paymentId, amount, memo, metadata, user, isAdmin } = body;
+    // Rate limit: 30 approvals per minute per IP
+    const rl = rateLimitByIP(req, "pi-payment-approve", 30, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
 
-    if (!paymentId) {
+    const body = await req.json();
+    const { paymentId, amount } = body;
+
+    if (!isValidId(paymentId)) {
       return NextResponse.json(
         { error: "Payment ID required" },
         { status: 400 }
       );
     }
 
-    console.log("[Pi Payment API] Approving payment:", {
-      paymentId,
-      amount,
-      memo,
-      user,
-      isAdmin,
-      metadata,
-    });
+    console.log("[Pi Payment API] Approving payment:", paymentId);
 
     // Verify payment exists and is valid
     const verifyResponse = await fetch(
@@ -66,14 +65,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Admin override logic
-    if (isAdmin && metadata?.adminOverride) {
-      console.log(
-        "[Pi Payment API] Admin override applied for payment:",
-        paymentId
-      );
-    }
-
     // Approve the payment
     const approveResponse = await fetch(
       `https://api.minepi.com/v2/payments/${paymentId}/approve`,
@@ -97,7 +88,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Payment approval failed",
-          details: await approveResponse.text(),
         },
         { status: 400 }
       );
@@ -118,7 +108,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );

@@ -1,30 +1,28 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimitByIP, isValidId, safeErrorResponse } from "@/lib/security/api-guard";
 
 // Pi Network API Configuration
 const PI_API_KEY = process.env.PI_API_KEY || "";
-const PI_APP_ID = process.env.PI_APP_ID || "";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { paymentId, txid, amount, memo, metadata, user, isAdmin } = body;
+    // Rate limit: 30 completions per minute per IP
+    const rl = rateLimitByIP(req, "pi-payment-complete", 30, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
 
-    if (!paymentId || !txid) {
+    const body = await req.json();
+    const { paymentId, txid } = body;
+
+    if (!isValidId(paymentId) || !isValidId(txid)) {
       return NextResponse.json(
         { error: "Payment ID and transaction ID required" },
         { status: 400 }
       );
     }
 
-    console.log("[Pi Payment API] Completing payment:", {
-      paymentId,
-      txid,
-      amount,
-      memo,
-      user,
-      isAdmin,
-      metadata,
-    });
+    console.log("[Pi Payment API] Completing payment:", paymentId);
 
     // Verify transaction exists on Pi Network
     const verifyResponse = await fetch(
@@ -67,14 +65,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Admin override logic
-    if (isAdmin && metadata?.adminOverride) {
-      console.log(
-        "[Pi Payment API] Admin override applied for completion:",
-        paymentId
-      );
-    }
-
     // Complete the payment
     const completeResponse = await fetch(
       `https://api.minepi.com/v2/payments/${paymentId}/complete`,
@@ -99,7 +89,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Payment completion failed",
-          details: await completeResponse.text(),
         },
         { status: 400 }
       );

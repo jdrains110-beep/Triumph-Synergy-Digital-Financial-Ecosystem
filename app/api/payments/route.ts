@@ -7,6 +7,7 @@ import ApplePayProcessor from "@/lib/payments/apple-pay-secondary";
 import PiNetworkPaymentProcessor from "@/lib/payments/pi-network-primary";
 import UnifiedPaymentRouter from "@/lib/payments/unified-routing";
 import { piSdkVerifier } from "@/lib/pi-sdk/pi-sdk-verifier";
+import { rateLimitByIP } from "@/lib/security/api-guard";
 
 // Initialize payment processors
 const router = new UnifiedPaymentRouter();
@@ -42,6 +43,15 @@ const appleProcessor = new ApplePayProcessor();
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 20 payments per minute per IP
+    const rl = rateLimitByIP(request, "payments", 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     // Parse request
     const body = (await request.json()) as Record<string, unknown>;
 
