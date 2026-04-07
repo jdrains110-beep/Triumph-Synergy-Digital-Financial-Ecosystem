@@ -3,7 +3,7 @@
   "version": 2,
   "framework": "nextjs",
   "regions": ["iad1"],
-  "buildCommand": "yarn build",
+  "buildCommand": "NODE_OPTIONS='--max-old-space-size=4096' yarn build",
   "installCommand": "yarn install",
   "alias": [
     "triumph-synergy.vercel.app",

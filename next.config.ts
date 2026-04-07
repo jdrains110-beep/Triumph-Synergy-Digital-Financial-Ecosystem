@@ -1,14 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Disable Turbopack to use Webpack (fixes pnpm resolution issues)
-  // Setting to false instead of {} to explicitly disable
-  // turbopack: {},
-
-  webpack: (config, { isServer }) => {
-    return config;
-  },
-
   // Enable type checking during build to catch real errors
   typescript: {
     // Ignore build errors for now - will be fixed in next release
