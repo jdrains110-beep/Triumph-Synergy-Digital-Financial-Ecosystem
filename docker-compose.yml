@@ -55,6 +55,7 @@ services:
     container_name: triumph-postgres
     <<: *common
     mem_limit: 256m
+    mem_reservation: 128m
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
       POSTGRES_USER: postgres

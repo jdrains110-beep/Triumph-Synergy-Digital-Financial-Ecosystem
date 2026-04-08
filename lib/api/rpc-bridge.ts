@@ -20,6 +20,8 @@
  * └─────────────────────────────────────────┘
  */
 
+import { cacheGet, cacheSet } from "@/lib/redis";
+
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
@@ -82,7 +84,8 @@ export interface HorizonData {
 
 export class RPCBridge {
   private config: RPCBridgeConfig;
-  private cache: Map<string, { data: any; timestamp: number }> = new Map();
+  /** In-process fallback cache (used when Redis is unavailable) */
+  private localCache: Map<string, { data: any; timestamp: number }> = new Map();
   private requestIdCounter = 0;
 
   constructor(config: Partial<RPCBridgeConfig> = {}) {
@@ -106,20 +109,34 @@ export class RPCBridge {
     const startTime = Date.now();
     const cacheKey = this.generateCacheKey(bridgeRequest);
 
-    // Check cache
-    if (this.config.enableCaching && this.cache.has(cacheKey)) {
-      const cached = this.cache.get(cacheKey)!;
-      if (Date.now() - cached.timestamp < this.config.cacheTTL) {
+    // Check cache — try Redis first, fall back to local Map
+    if (this.config.enableCaching) {
+      const redisHit = await cacheGet<any>(cacheKey);
+      if (redisHit !== null) {
         return {
           success: true,
           network: bridgeRequest.network,
           method: bridgeRequest.method,
-          data: cached.data,
+          data: redisHit,
           timestamp: Date.now(),
           cached: true,
         };
       }
-      this.cache.delete(cacheKey);
+      // Local fallback
+      if (this.localCache.has(cacheKey)) {
+        const cached = this.localCache.get(cacheKey)!;
+        if (Date.now() - cached.timestamp < this.config.cacheTTL) {
+          return {
+            success: true,
+            network: bridgeRequest.network,
+            method: bridgeRequest.method,
+            data: cached.data,
+            timestamp: Date.now(),
+            cached: true,
+          };
+        }
+        this.localCache.delete(cacheKey);
+      }
     }
 
     try {
@@ -156,9 +173,11 @@ export class RPCBridge {
           throw new Error(`Unknown network: ${bridgeRequest.network}`);
       }
 
-      // Cache successful result
+      // Cache successful result — write to Redis and local fallback
       if (this.config.enableCaching) {
-        this.cache.set(cacheKey, { data: result, timestamp: Date.now() });
+        const ttlSeconds = Math.ceil(this.config.cacheTTL / 1000);
+        await cacheSet(cacheKey, result, ttlSeconds);
+        this.localCache.set(cacheKey, { data: result, timestamp: Date.now() });
       }
 
       return {
