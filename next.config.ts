@@ -80,7 +80,7 @@ const nextConfig: NextConfig = {
           // },
           // {
           //   key: "Cross-Origin-Embedder-Policy",
-          //   key: "require-corp",
+          //   value: "require-corp",
           // },
         ],
       },

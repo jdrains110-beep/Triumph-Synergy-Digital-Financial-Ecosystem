@@ -34,7 +34,6 @@ export {
 export {
   type QFSAccount,
   type QFSAccountType,
-  type QFSCurrency,
   type QFSLedgerEntry,
   type QFSTransaction,
   type QFSTransactionType,

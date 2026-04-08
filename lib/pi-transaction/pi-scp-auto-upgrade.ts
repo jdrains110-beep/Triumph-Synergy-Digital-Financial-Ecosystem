@@ -784,7 +784,7 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
         active: centralNodeActive,
         voting: centralNodeActive,
         historyLatestLedger: this.metrics.currentLedger,
-        trustLevel: centralNodeActive ? 'full' : 'disconnected',
+        trustLevel: centralNodeActive ? 'full' : 'none',
       },
       {
         id: 'pi-core-validator-1',

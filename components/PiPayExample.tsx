@@ -1,3 +1,5 @@
+"use client";
+
 // Example usage of PiPaymentButton for Pi Network payments
 import { PiPaymentButton } from "./PiPaymentButton";
 

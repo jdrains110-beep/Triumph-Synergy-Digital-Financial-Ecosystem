@@ -1158,6 +1158,15 @@ class LiveAuctionManager extends EventEmitter {
   }
   
   /**
+   * Get all active auctions
+   */
+  getActiveAuctions(): Auction[] {
+    return Array.from(this.auctions.values())
+      .filter(a => a.status === "active" || a.status === "ending-soon")
+      .sort((a, b) => a.endTime.getTime() - b.endTime.getTime());
+  }
+  
+  /**
    * Get ending soon auctions
    */
   getEndingSoon(minutes: number = 30): Auction[] {

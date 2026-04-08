@@ -24,9 +24,7 @@ export {
   type TransactionStatus,
   type TransactionPriority,
   type TransactionType,
-  type PiTransaction,
-  type TransactionResult,
-  type BatchResult,
+  type Transaction,
   type EngineMetrics,
 } from './pi-hyper-transaction-engine';
 
@@ -41,10 +39,10 @@ export {
   TRILLION_VAULT_CONFIG,
   type VaultType,
   type VaultStatus,
-  type PiVault,
+  type Vault,
   type VaultSignatory,
   type VaultTransaction,
-  type VaultAuditEntry,
+  type VaultAuditRecord,
   type VaultMetrics,
 } from './pi-trillion-vault';
 
@@ -136,15 +134,15 @@ export async function initializePiTransactionSystem(
   const initPromises: Promise<unknown>[] = [];
 
   if (enableHyperTransactions) {
-    initPromises.push(initializeHyperTransactionEngine(networkType));
+    initPromises.push(initializeHyperTransactionEngine());
   }
 
   if (enableTrillionVault) {
-    initPromises.push(initializeTrillionVault(networkType));
+    initPromises.push(initializeTrillionVault());
   }
 
   if (enableSmartContracts) {
-    initPromises.push(initializeSmartContractEngine(networkType));
+    initPromises.push(initializeSmartContractEngine());
   }
 
   if (enableSCPAutoUpgrade) {

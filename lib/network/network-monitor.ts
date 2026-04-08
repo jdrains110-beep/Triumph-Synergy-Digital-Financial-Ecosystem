@@ -162,7 +162,7 @@ export class NetworkMonitor {
             balance: currentBalance,
           },
           detectedAt: Date.now(),
-          status: "detecting",
+          status: "detected",
           affectedPiAmount: parseFloat(currentBalance),
         };
         this.threats.set(threat.id, threat);
@@ -189,7 +189,7 @@ export class NetworkMonitor {
             timeWindow: "24 hours",
           },
           detectedAt: Date.now(),
-          status: "detecting",
+          status: "detected",
         };
         this.threats.set(threat.id, threat);
         return threat;
@@ -228,7 +228,7 @@ export class NetworkMonitor {
       previousDevices[previousDevices.length - 1].geolocation
     ) {
       const distance = this.calculateDistance(
-        previousDevices[previousDevices.length - 1].geolocation,
+        previousDevices[previousDevices.length - 1].geolocation!,
         newDevice.geolocation
       );
       const timeDiff = 1; // Assuming 1 hour has passed
@@ -260,7 +260,7 @@ export class NetworkMonitor {
           previousDeviceCount: previousDevices.length,
         },
         detectedAt: Date.now(),
-        status: "detecting",
+        status: "detected",
       };
       this.threats.set(threat.id, threat);
       return threat;
@@ -378,7 +378,7 @@ export class NetworkMonitor {
           recentAttempts: recentAttempts.length,
         },
         detectedAt: Date.now(),
-        status: "detecting",
+        status: "detected",
       };
       this.threats.set(threat.id, threat);
       return threat;

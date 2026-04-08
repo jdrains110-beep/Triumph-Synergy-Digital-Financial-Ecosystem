@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const account = qfs.createAccount(userId, name, country, accountType);
+        const account = await qfs.createAccount({
+          type: (accountType || "individual") as any,
+          holder: { id: userId, name, countryCode: country || "US" },
+        });
         
         return NextResponse.json({
           success: true,
@@ -47,12 +50,12 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const isValid = qfs.verifyAccount(accountId);
+        const result = await qfs.verifyAccount(accountId, 1);
         
         return NextResponse.json({
           success: true,
           accountId,
-          isValid,
+          isValid: !!result,
           verifiedAt: new Date().toISOString(),
         });
       }
@@ -67,15 +70,14 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const transaction = qfs.processTransaction(
-          fromAccountId,
-          toAccountId,
+        const transaction = await qfs.processTransaction({
+          type: (type || "transfer") as any,
+          fromAccount: fromAccountId,
+          toAccount: toAccountId,
           amount,
-          currency || "QFS-USD",
-          type || "transfer",
-          description,
-          metadata
-        );
+          memo: description,
+          category: currency,
+        });
         
         return NextResponse.json({
           success: true,
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const transaction = qfs.processProsperityPayment(accountId, amount, program);
+        const transaction = await qfs.processProsperityPayment(accountId, amount);
         
         return NextResponse.json({
           success: true,
@@ -113,11 +115,10 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const transaction = qfs.processDebtSettlement(
+        const transaction = await qfs.processDebtSettlement(
           accountId,
           debtAmount,
-          creditorId,
-          debtType
+          debtType || "general"
         );
         
         return NextResponse.json({
@@ -175,11 +176,10 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const transaction = qfs.processTaxRefund(
+        const transaction = await qfs.processTaxRefund(
           accountId,
           refundAmount,
-          taxYear,
-          refundType
+          taxYear?.toString() || new Date().getFullYear().toString()
         );
         
         return NextResponse.json({
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const transactions = qfs.getAccountTransactions(accountId, limit);
+        const transactions = qfs.getAccountTransactions(accountId);
         
         return NextResponse.json({
           success: true,
@@ -235,14 +235,11 @@ export async function POST(request: NextRequest) {
       }
 
       case "get-ledger": {
-        const { limit } = params;
-        
-        const entries = qfs.getLedger(limit);
+        const entries = qfs.getLedgerStats();
         
         return NextResponse.json({
           success: true,
           ledger: entries,
-          count: entries.length,
         });
       }
 

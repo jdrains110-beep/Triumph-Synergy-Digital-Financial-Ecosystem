@@ -19,9 +19,7 @@ export {
   type TokenTransaction,
   type ActivityReward,
   type StakingPool,
-  type StakingPosition,
   type LiquidityPool,
-  type LoyaltyProgramConfig,
 } from "./token-reward-system";
 
 // Live Auction System
@@ -35,9 +33,7 @@ export {
   type Auction,
   type Bid,
   type AuctionRoom,
-  type AuctionMessage,
   type AutoBidConfig,
-  type AuctionLiveStream,
 } from "./live-auction-system";
 
 // Activity Engagement
@@ -96,7 +92,7 @@ export function initializeUser(userId: string): {
   const walletId = `user-${userId}`;
   
   // Create wallet
-  const wallet = tokenRewardSystem.createWallet(walletId, "individual");
+  const wallet = tokenRewardSystem.createWallet({ ownerId: walletId, ownerType: "individual" });
   
   // Welcome bonus
   const welcomeReward = tokenRewardSystem.rewardActivity({
@@ -119,13 +115,13 @@ export function initializeUser(userId: string): {
  */
 export function getUserEngagementProfile(userId: string, walletId: string): {
   wallet: ReturnType<typeof tokenRewardSystem.getWallet>;
-  balances: ReturnType<typeof tokenRewardSystem.getBalances>;
+  balances: ReturnType<typeof tokenRewardSystem.getAllBalances>;
   engagement: ReturnType<typeof activityEngagement.getUserSummary>;
   streak: ReturnType<typeof activityEngagement.getStreak>;
 } {
   return {
     wallet: tokenRewardSystem.getWallet(walletId),
-    balances: tokenRewardSystem.getBalances(walletId),
+    balances: tokenRewardSystem.getAllBalances(walletId),
     engagement: activityEngagement.getUserSummary(userId),
     streak: activityEngagement.getStreak(userId),
   };

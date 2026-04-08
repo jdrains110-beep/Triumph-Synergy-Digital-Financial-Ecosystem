@@ -54,7 +54,7 @@ export async function GET(request: Request) {
             { status: 400 }
           );
         }
-        const balances = tokenRewardSystem.getBalances(walletId);
+        const balances = tokenRewardSystem.getAllBalances(walletId);
         return NextResponse.json({ balances });
       }
 
@@ -77,7 +77,7 @@ export async function GET(request: Request) {
             { status: 400 }
           );
         }
-        const positions = tokenRewardSystem.getStakingPositions(walletId);
+        const positions = tokenRewardSystem.getStakingPool(walletId as any);
         return NextResponse.json({ positions });
       }
 
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        const wallet = tokenRewardSystem.createWallet(walletId, type);
+        const wallet = tokenRewardSystem.createWallet({ ownerId: walletId, ownerType: type });
         return NextResponse.json({ success: true, wallet });
       }
 
@@ -207,7 +207,7 @@ export async function POST(request: Request) {
           toWalletId,
           tokenType,
           amount,
-          memo,
+          description: memo || 'Transfer',
         });
         return NextResponse.json({ success: true, transaction: tx });
       }
@@ -224,7 +224,6 @@ export async function POST(request: Request) {
           walletId,
           tokenType,
           amount,
-          lockDays,
         });
         return NextResponse.json({ success: true, position });
       }
@@ -252,7 +251,7 @@ export async function POST(request: Request) {
         const result = tokenRewardSystem.swapToPi({
           walletId,
           tokenType,
-          tokenAmount,
+          amount: tokenAmount,
         });
         return NextResponse.json({ success: true, ...result });
       }
@@ -266,10 +265,10 @@ export async function POST(request: Request) {
           );
         }
         const result = tokenRewardSystem.addLiquidity({
-          walletId,
           tokenType,
           tokenAmount,
           piAmount,
+          providerId: walletId,
         });
         return NextResponse.json({ success: true, lpTokens: result });
       }

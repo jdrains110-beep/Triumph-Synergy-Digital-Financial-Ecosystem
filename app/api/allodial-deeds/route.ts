@@ -1,7 +1,9 @@
 /**
  * Allodial Deeds API Route
  *
- * Handles deed creation, allodial conversion, and blockchain registration
+ * Handles deed creation, allodial conversion, blockchain registration,
+ * tokenization (PT-721 NFT binding to Pi blockchain), and Docker node
+ * connectivity for live on-chain verification.
  */
 
 import { type NextRequest, NextResponse } from "next/server";
@@ -11,7 +13,10 @@ import {
   initiateAllodialConversion,
   registerDeedOnBlockchain,
   transferDeed,
+  verifyHeadquartersAllodialStatus,
 } from "@/lib/allodial-deeds/allodial-deeds-platform";
+import { allodialDeedsConnector } from "@/lib/blockchain/allodial-deeds-connector";
+import { dockerNodeBridge } from "@/lib/blockchain/docker-node-bridge";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -59,6 +64,87 @@ export async function GET(request: NextRequest) {
             "NFT Minting & Issuance",
           ],
         });
+
+      // ================================================================
+      // TOKENIZATION & DOCKER NODE INTEGRATION
+      // ================================================================
+
+      case "connectivity": {
+        const connectivity = await allodialDeedsConnector.getConnectivityStatus();
+        return NextResponse.json({ success: true, ...connectivity });
+      }
+
+      case "ready": {
+        const readiness = await allodialDeedsConnector.isReadyForOperations();
+        return NextResponse.json({ success: true, ...readiness });
+      }
+
+      case "stats": {
+        const connectorStats = await allodialDeedsConnector.getStats();
+        return NextResponse.json({ success: true, ...connectorStats });
+      }
+
+      case "mappings": {
+        const mappings = allodialDeedsConnector.getAllMappings();
+        return NextResponse.json({ success: true, mappings, total: mappings.length });
+      }
+
+      case "mapping": {
+        const mappingDeedId = searchParams.get("deed") || deedId;
+        if (!mappingDeedId) {
+          return NextResponse.json(
+            { success: false, error: "deed or deedId parameter required" },
+            { status: 400 }
+          );
+        }
+        const tokenId = allodialDeedsConnector.getTokenForDeed(mappingDeedId);
+        return NextResponse.json({
+          success: true,
+          deedId: mappingDeedId,
+          tokenId,
+          isTokenized: tokenId !== null,
+        });
+      }
+
+      case "transfers": {
+        const transferDeedId = searchParams.get("deed") || deedId;
+        if (!transferDeedId) {
+          return NextResponse.json(
+            { success: false, error: "deed or deedId parameter required" },
+            { status: 400 }
+          );
+        }
+        const transferHistory = allodialDeedsConnector.getTransferHistory(transferDeedId);
+        return NextResponse.json({
+          success: true,
+          deedId: transferDeedId,
+          transfers: transferHistory,
+          total: transferHistory.length,
+        });
+      }
+
+      case "headquarters": {
+        const hqDeed = allodialDeedsPlatform.getHeadquartersDeed();
+        const hqStatus = verifyHeadquartersAllodialStatus();
+        const hqTokenId = allodialDeedsConnector.getTokenForDeed(hqDeed.id);
+        return NextResponse.json({
+          success: true,
+          headquarters: hqStatus,
+          deed: hqDeed,
+          tokenId: hqTokenId,
+          isTokenized: hqTokenId !== null,
+        });
+      }
+
+      case "platform-stats": {
+        const platformStats = await allodialDeedsPlatform.getPlatformStats();
+        return NextResponse.json({ success: true, ...platformStats });
+      }
+
+      case "node-health": {
+        const health = await dockerNodeBridge.getHealth();
+        return NextResponse.json({ success: true, ...health });
+      }
 
       default:
         return NextResponse.json({
@@ -176,6 +262,101 @@ export async function POST(request: NextRequest) {
           body.document
         );
         return NextResponse.json({ success: true, document: doc });
+      }
+
+      // ================================================================
+      // TOKENIZATION & DOCKER NODE INTEGRATION
+      // ================================================================
+
+      case "tokenize": {
+        const { deedId: tokenDeedId, ownerWalletAddress, signerSecret, piValueType } = body;
+        if (!tokenDeedId || !ownerWalletAddress) {
+          return NextResponse.json(
+            { success: false, error: "deedId and ownerWalletAddress required" },
+            { status: 400 }
+          );
+        }
+        const tokenResult = await allodialDeedsConnector.tokenizeDeed(tokenDeedId, {
+          ownerWalletAddress,
+          signerSecret,
+          piValueType,
+          checkNodeHealth: true,
+        });
+        return NextResponse.json({
+          success: tokenResult.status !== "failed",
+          ...tokenResult,
+        });
+      }
+
+      case "tokenize-hq": {
+        const { ownerWalletAddress: hqWallet, signerSecret: hqSecret } = body;
+        if (!hqWallet) {
+          return NextResponse.json(
+            { success: false, error: "ownerWalletAddress required" },
+            { status: 400 }
+          );
+        }
+        const hqResult = await allodialDeedsConnector.tokenizeHeadquarters({
+          ownerWalletAddress: hqWallet,
+          signerSecret: hqSecret,
+        });
+        return NextResponse.json({
+          success: hqResult.status !== "failed",
+          ...hqResult,
+        });
+      }
+
+      case "batch-tokenize": {
+        const { deedIds, ownerWalletAddress: batchWallet, signerSecret: batchSecret, piValueType: batchPiType } = body;
+        if (!deedIds || !Array.isArray(deedIds) || !batchWallet) {
+          return NextResponse.json(
+            { success: false, error: "deedIds (array) and ownerWalletAddress required" },
+            { status: 400 }
+          );
+        }
+        const batchResult = await allodialDeedsConnector.batchTokenizeDeeds(
+          deedIds,
+          { ownerWalletAddress: batchWallet, signerSecret: batchSecret, piValueType: batchPiType }
+        );
+        return NextResponse.json({ success: true, ...batchResult });
+      }
+
+      case "verify-tokenization": {
+        if (!body.deedId) {
+          return NextResponse.json(
+            { success: false, error: "deedId required" },
+            { status: 400 }
+          );
+        }
+        const verifyResult = await allodialDeedsConnector.verifyDeed(body.deedId);
+        return NextResponse.json({ success: true, ...verifyResult });
+      }
+
+      case "transfer-onchain": {
+        const { deedId: xferDeedId, transfer: xferData, signerSecret: xferSecret } = body;
+        if (!xferDeedId || !xferData || !xferSecret) {
+          return NextResponse.json(
+            { success: false, error: "deedId, transfer, and signerSecret required" },
+            { status: 400 }
+          );
+        }
+        const xferResult = await allodialDeedsConnector.recordTransferOnChain(
+          xferDeedId,
+          xferData,
+          xferSecret
+        );
+        return NextResponse.json({
+          ...xferResult,
+        });
+      }
+
+      case "connect-node": {
+        const bridgeConnected = await dockerNodeBridge.connect();
+        return NextResponse.json({
+          success: true,
+          connected: bridgeConnected,
+          mode: dockerNodeBridge.getMode(),
+        });
       }
 
       default:

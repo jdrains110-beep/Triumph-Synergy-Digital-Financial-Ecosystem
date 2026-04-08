@@ -42,14 +42,14 @@ export async function GET(request: NextRequest) {
       case "docker":
         return NextResponse.json({
           success: true,
-          data: dockerAutoUpgradeManager.getStatistics(),
+          data: dockerAutoUpgrade.getUpgradeStats(),
           system: "Docker Auto-Upgrade",
         });
         
       case "codifier":
         return NextResponse.json({
           success: true,
-          data: gitHubCodifier.getStatistics(),
+          data: githubCodifier.getStatistics(),
           system: "GitHub Codifier (RBAC)",
         });
         
@@ -143,10 +143,10 @@ export async function POST(request: NextRequest) {
       case "docker":
         switch (action) {
           case "check-upgrades":
-            result = await dockerAutoUpgradeManager.checkForUpgrades();
+            result = await dockerAutoUpgrade.checkForUpgrades();
             break;
           case "approve-upgrade":
-            result = dockerAutoUpgradeManager.approveUpgrade(
+            result = dockerAutoUpgrade.approveUpgrade(
               params.upgradeId,
               params.approverId,
               params.level
@@ -163,26 +163,26 @@ export async function POST(request: NextRequest) {
       case "codifier":
         switch (action) {
           case "register-user":
-            result = gitHubCodifier.registerUser(
-              params.userId,
-              params.email,
-              params.name,
-              params.role,
-              params.piWallet
-            );
+            result = githubCodifier.registerUser({
+              registrarId: params.userId,
+              username: params.name,
+              email: params.email,
+              role: params.role,
+              publicKey: params.piWallet,
+            });
             break;
           case "promote-user":
-            result = gitHubCodifier.promoteUser(
+            result = githubCodifier.promoteUser(
               params.userId,
               params.newRole,
               params.promoterId
             );
             break;
           case "submit-change":
-            result = gitHubCodifier.submitCodeChange(params);
+            result = githubCodifier.submitCodeChange(params);
             break;
           case "review-change":
-            result = gitHubCodifier.reviewCodeChange(
+            result = githubCodifier.reviewCodeChange(
               params.changeId,
               params.reviewerId,
               params.approved,
@@ -190,9 +190,10 @@ export async function POST(request: NextRequest) {
             );
             break;
           case "owner-override":
-            result = await gitHubCodifier.ownerOverride(
-              params.targetId,
+            result = await githubCodifier.ownerOverride(
               userId,
+              "code-change",
+              params.targetId,
               params.decision,
               params.reason
             );
@@ -213,8 +214,7 @@ export async function POST(request: NextRequest) {
           case "tokenize-asset":
             result = physicalDigitalBridge.tokenizeAsset(
               params.assetId,
-              params.standard,
-              params.metadata
+              params.standard
             );
             break;
           case "register-device":

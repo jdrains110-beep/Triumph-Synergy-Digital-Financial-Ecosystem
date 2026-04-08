@@ -16,8 +16,10 @@ import {
   piSCPAutoUpgradeManager,
   initializePiTransactionSystem,
   getPiTransactionSystemStatus,
-  type PiTransaction,
+  type Transaction,
 } from '@/lib/pi-transaction';
+
+type TransactionInput = Omit<Transaction, 'id' | 'status' | 'createdAt'>;
 
 // =============================================================================
 // System Status Endpoint
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           metrics: piTrillionVaultManager.getMetrics(),
-          centralVault: piTrillionVaultManager.getCentralVault(),
+          centralVault: piTrillionVaultManager.getStatus(),
         });
 
       case 'contract-metrics':
@@ -119,13 +121,13 @@ export async function POST(request: NextRequest) {
       // ---------------------------------------------------------------------
       case 'submit-transaction':
         const txResult = await piHyperTransactionEngine.submitTransaction({
-          from: data.from,
-          to: data.to,
-          amount: BigInt(data.amount),
           type: data.type || 'transfer',
+          sender: data.from,
+          receiver: data.to,
+          senderPublicKey: data.sourceAccount || data.from,
+          amount: BigInt(data.amount),
           priority: data.priority || 'normal',
           memo: data.memo,
-          sourceAccount: data.sourceAccount || data.from,
         });
         return NextResponse.json({
           success: true,
@@ -136,15 +138,15 @@ export async function POST(request: NextRequest) {
         });
 
       case 'submit-batch':
-        const transactions: Omit<PiTransaction, 'id' | 'status' | 'createdAt'>[] = 
+        const transactions: TransactionInput[] = 
           data.transactions.map((tx: { from: string; to: string; amount: string; type?: string; priority?: string; memo?: string }) => ({
-            from: tx.from,
-            to: tx.to,
-            amount: BigInt(tx.amount),
             type: tx.type || 'transfer',
+            sender: tx.from,
+            receiver: tx.to,
+            senderPublicKey: tx.from,
+            amount: BigInt(tx.amount),
             priority: tx.priority || 'normal',
             memo: tx.memo,
-            sourceAccount: tx.from,
           }));
         const batchResult = await piHyperTransactionEngine.submitBatch(transactions);
         return NextResponse.json({
@@ -172,53 +174,52 @@ export async function POST(request: NextRequest) {
       // Vault Operations
       // ---------------------------------------------------------------------
       case 'create-vault':
-        const vault = await piTrillionVaultManager.createVault(data.ownerId, {
+        const vault = await piTrillionVaultManager.createVault({
+          ownerId: data.ownerId,
+          ownerPublicKey: data.ownerId,
           name: data.name,
           type: data.type,
-          multiSig: data.multiSig,
           requiredSignatures: data.requiredSignatures,
         });
         return NextResponse.json({
           success: true,
           vault: {
             ...vault,
-            balance: vault.balance.toString(),
-            maxCapacity: vault.maxCapacity.toString(),
+            balance: vault.balance.total.toString(),
             totalDeposited: vault.totalDeposited.toString(),
             totalWithdrawn: vault.totalWithdrawn.toString(),
           },
         });
 
       case 'deposit':
-        const depositResult = await piTrillionVaultManager.deposit(
-          data.vaultId,
-          BigInt(data.amount),
-          data.fromAccount,
-          data.memo
-        );
+        const depositResult = await piTrillionVaultManager.deposit({
+          vaultId: data.vaultId,
+          amount: BigInt(data.amount),
+          initiator: data.fromAccount,
+          memo: data.memo,
+        });
         return NextResponse.json({
           success: true,
           transaction: {
             ...depositResult,
             amount: depositResult.amount.toString(),
-            balanceAfter: depositResult.balanceAfter.toString(),
+            postBalance: depositResult.postBalance.toString(),
           },
         });
 
       case 'withdraw':
-        const withdrawResult = await piTrillionVaultManager.withdraw(
-          data.vaultId,
-          BigInt(data.amount),
-          data.toAccount,
-          data.authorizedBy,
-          data.memo
-        );
+        const withdrawResult = await piTrillionVaultManager.withdraw({
+          vaultId: data.vaultId,
+          amount: BigInt(data.amount),
+          initiator: data.authorizedBy || data.toAccount,
+          toAddress: data.toAccount,
+        });
         return NextResponse.json({
           success: true,
           transaction: {
             ...withdrawResult,
             amount: withdrawResult.amount.toString(),
-            balanceAfter: withdrawResult.balanceAfter.toString(),
+            postBalance: withdrawResult.postBalance.toString(),
           },
         });
 
@@ -228,19 +229,18 @@ export async function POST(request: NextRequest) {
           success: true,
           vault: vaultInfo ? {
             ...vaultInfo,
-            balance: vaultInfo.balance.toString(),
-            maxCapacity: vaultInfo.maxCapacity.toString(),
+            balance: vaultInfo.balance.total.toString(),
             totalDeposited: vaultInfo.totalDeposited.toString(),
             totalWithdrawn: vaultInfo.totalWithdrawn.toString(),
           } : null,
         });
 
       case 'vault-balance':
-        const balance = piTrillionVaultManager.getVaultBalance(data.vaultId);
+        const vaultForBalance = piTrillionVaultManager.getVault(data.vaultId);
         return NextResponse.json({
           success: true,
           vaultId: data.vaultId,
-          balance: balance.toString(),
+          balance: vaultForBalance ? vaultForBalance.balance.total.toString() : '0',
         });
 
       // ---------------------------------------------------------------------
@@ -249,35 +249,40 @@ export async function POST(request: NextRequest) {
       case 'deploy-contract':
         const contract = await piSmartContractEngine.deployContract({
           name: data.name,
-          code: data.code,
-          abi: data.abi || [],
+          bytecode: data.code || data.bytecode || '',
           owner: data.owner,
+          ownerPublicKey: data.ownerPublicKey || data.owner,
           type: data.type || 'custom',
-          gasLimit: data.gasLimit,
-          state: data.initialState,
+          methods: data.abi || data.methods || [],
+          initialState: data.initialState,
         });
         return NextResponse.json({
           success: true,
           contract: {
-            ...contract,
-            gasLimit: contract.gasLimit.toString(),
+            id: contract.id,
+            address: contract.address,
+            type: contract.type,
+            status: contract.status,
+            owner: contract.owner,
           },
         });
 
       case 'execute-contract':
         const execution = await piSmartContractEngine.executeContract({
-          contractId: data.contractId,
+          contractAddress: data.contractId || data.contractAddress,
           method: data.method,
-          params: data.params,
+          args: data.params || data.args || [],
           caller: data.caller,
+          callerPublicKey: data.callerPublicKey || data.caller,
           gasLimit: data.gasLimit ? BigInt(data.gasLimit) : undefined,
         });
         return NextResponse.json({
           success: true,
           execution: {
-            ...execution,
+            id: execution.id,
+            contractId: execution.contractId,
+            status: execution.status,
             gasUsed: execution.gasUsed.toString(),
-            gasLimit: execution.gasLimit.toString(),
           },
         });
 
@@ -286,8 +291,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           contract: contractInfo ? {
-            ...contractInfo,
-            gasLimit: contractInfo.gasLimit.toString(),
+            id: contractInfo.id,
+            address: contractInfo.address,
+            type: contractInfo.type,
+            status: contractInfo.status,
+            owner: contractInfo.owner,
           } : null,
         });
 

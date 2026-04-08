@@ -28,7 +28,11 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const bond = birthBondSystem.searchBond(name, dateOfBirth, ssn, stateOfBirth);
+        const bond = await birthBondSystem.searchBond({
+          socialSecurityNumber: ssn,
+          stateOfIssue: stateOfBirth,
+          dateOfBirth: new Date(dateOfBirth),
+        });
         
         return NextResponse.json({
           success: true,
@@ -47,14 +51,13 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const bond = birthBondSystem.registerBond(
-          name,
-          dateOfBirth,
-          placeOfBirth,
-          birthCertificateNumber,
-          ssn,
-          stateOfBirth
-        );
+        const bond = await birthBondSystem.registerBond({
+          ownerId: name,
+          certificateNumber: birthCertificateNumber,
+          stateOfIssue: stateOfBirth || "Unknown",
+          dateOfBirth: new Date(dateOfBirth),
+          registrationDate: new Date(),
+        });
         
         return NextResponse.json({
           success: true,
@@ -73,14 +76,7 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const bond = birthBondSystem.verifyBond(bondId);
-        
-        if (!bond) {
-          return NextResponse.json(
-            { error: "Bond not found or verification failed" },
-            { status: 404 }
-          );
-        }
+        const bond = await birthBondSystem.verifyBond(bondId);
         
         return NextResponse.json({
           success: true,
@@ -99,14 +95,11 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const redemption = birthBondSystem.submitRedemptionRequest(
+        const redemption = await birthBondSystem.submitRedemptionRequest({
           bondId,
-          claimantId,
-          requestedAmount,
-          bankAccountNumber,
-          bankRoutingNumber,
-          notes
-        );
+          paymentMethod: "qfs-account",
+          destinationAccount: bankAccountNumber || claimantId,
+        });
         
         return NextResponse.json({
           success: true,
@@ -125,10 +118,8 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const redemption = birthBondSystem.approveRedemption(
-          redemptionId,
-          approvedAmount,
-          notes
+        const redemption = await birthBondSystem.approveRedemption(
+          redemptionId
         );
         
         return NextResponse.json({
@@ -148,7 +139,7 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const result = birthBondSystem.processRedemption(redemptionId, qfsAccountId);
+        const result = await birthBondSystem.processRedemption(redemptionId, qfsAccountId);
         
         return NextResponse.json({
           success: true,
@@ -192,7 +183,7 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        const redemption = birthBondSystem.getRedemption(redemptionId);
+        const redemption = birthBondSystem.getRedemptionRequest(redemptionId);
         
         if (!redemption) {
           return NextResponse.json(
@@ -222,8 +213,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           birthYear,
-          estimatedValue: value,
-          formattedValue: `$${value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+          estimatedValue: value.totalValue,
+          formattedValue: `$${value.totalValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
           methodology: "Base value ($630K-$2M based on year) + compound interest at 5% annually",
         });
       }
@@ -287,8 +278,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       birthYear: parseInt(birthYear),
-      estimatedValue: value,
-      formattedValue: `$${value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      estimatedValue: value.totalValue,
+      formattedValue: `$${value.totalValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
     });
   }
 

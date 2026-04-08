@@ -128,6 +128,7 @@ export interface ScalabilityMetrics {
   failoverEventsTriggered: number;
   autoRecoveriesCompleted: number;
   uptimePercent: number;
+  commandBacklog: number;
 }
 
 // ============================================================================
@@ -158,6 +159,7 @@ class CentralNodeScalabilityManager extends EventEmitter {
     failoverEventsTriggered: 0,
     autoRecoveriesCompleted: 0,
     uptimePercent: 100,
+    commandBacklog: 0,
   };
   
   // Intervals
@@ -276,7 +278,8 @@ class CentralNodeScalabilityManager extends EventEmitter {
     const cluster = this.clusters.get(node.cluster || clusterName || `${node.region}-cluster`);
     if (cluster && !cluster.nodes.find(n => n.id === node.id)) {
       cluster.nodes.push(node);
-      this.updateClusterMetrics(cluster);
+      cluster.totalCapacity = cluster.nodes.reduce((sum, n) => sum + n.maxCapacity, 0);
+      cluster.usedCapacity = cluster.nodes.reduce((sum, n) => sum + n.currentLoad, 0);
     }
   }
   
@@ -444,14 +447,14 @@ class CentralNodeScalabilityManager extends EventEmitter {
     const healthyNodes = cluster.nodes.filter(n => n.health === "healthy" && n.id !== failedNode.id);
     
     for (const batch of this.commandQueue) {
-      if (batch.status === "processing" && batch.targetNodes.includes(failedNode.id)) {
+      if (batch.status === "processing" && Array.isArray(batch.targetNodes) && batch.targetNodes.includes(failedNode.id)) {
         // Redistribute to healthiest node in cluster
         const bestNode = healthyNodes.sort((a, b) => 
           (a.currentLoad / a.maxCapacity) - (b.currentLoad / b.maxCapacity)
         )[0];
         
         if (bestNode) {
-          batch.targetNodes = batch.targetNodes.filter(id => id !== failedNode.id);
+          batch.targetNodes = batch.targetNodes.filter((id: string) => id !== failedNode.id);
           batch.targetNodes.push(bestNode.id);
         }
       }

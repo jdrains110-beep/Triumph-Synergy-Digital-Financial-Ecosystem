@@ -272,29 +272,29 @@ class ComputingAggregator extends EventEmitter {
       sourceId: nodeId,
       power: {
         cpuCores: node.specs.cpuCores,
-        cpuFrequency: node.specs.cpuSpeed,
+        cpuFrequency: node.specs.cpuFrequency,
         cpuEfficiency: 0.85,
         ramGB: node.specs.ramGB,
         storageGB: node.specs.storageGB,
         gpuTflops: node.specs.gpuVRAM ? node.specs.gpuVRAM * 0.5 : 0,
-        networkBandwidth: node.specs.bandwidth / 1000,
+        networkBandwidth: node.specs.networkMbps / 1000,
       },
       computeScore: this.calculateComputeScore(node),
       storageScore: this.calculateStorageScore(node),
       networkScore: this.calculateNetworkScore(node),
       overallScore: 0,
       availability: node.performance.uptime,
-      reliability: 1 - (node.contribution.tasksFailed / Math.max(1, node.contribution.tasksCompleted + node.contribution.tasksFailed)),
+      reliability: 1 - (node.performance.tasksFailed / Math.max(1, node.performance.tasksCompleted + node.performance.tasksFailed)),
       utilization: {
-        cpu: node.performance.cpuUsage,
-        memory: node.performance.memoryUsage,
+        cpu: node.performance.currentLoad / 100,
+        memory: 1 - (node.performance.availableRAM / node.specs.ramGB),
         storage: 1 - (node.performance.availableStorage / node.specs.storageGB),
         network: 0.3,
       },
       contribution: {
-        tasksCompleted: node.contribution.tasksCompleted,
-        computeHours: node.contribution.computeHoursProvided,
-        dataProcessed: node.contribution.storageProvided,
+        tasksCompleted: node.contribution.tasksProcessed,
+        computeHours: node.contribution.totalComputeHours,
+        dataProcessed: node.contribution.totalStorageGB,
         rewardsEarned: node.contribution.rewardsEarned,
       },
     };
@@ -459,10 +459,10 @@ class ComputingAggregator extends EventEmitter {
     let score = 0;
     
     // Bandwidth (max 700)
-    score += Math.min(700, node.specs.bandwidth / 100);
+    score += Math.min(700, node.specs.networkMbps / 100);
     
     // Latency (max 300)
-    const latencyScore = Math.max(0, 300 - node.network.latency * 3);
+    const latencyScore = Math.max(0, 300 - node.network.inboundBandwidth * 3);
     score += latencyScore;
     
     return Math.min(1000, score);

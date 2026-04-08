@@ -591,7 +591,7 @@ impl PiEscrow {
 
     // Mark as quantum-resistant DEX contract
     contract.tags.push("quantum-resistant", "pi-dex", "decentralized-exchange");
-    contract.auditStatus = "verified";
+    contract.auditStatus = "passed";
     contract.securityScore = 100;
 
     return contract;

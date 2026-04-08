@@ -144,7 +144,7 @@ function parseEnvNodes(): { nodes: PiNode[]; supernodes: PiSuperNode[] } {
         ports: normalizePorts(node.ports),
         role: node.role ?? "peer",
         status: "configured" as const,
-        capabilities: node.capabilities || getDefaultCapabilities(node.role || "peer"),
+        capabilities: { ...getDefaultCapabilities(node.role || "peer"), ...(node.capabilities || {}) },
       }));
 
     const supernodes = (result.data.supernodes || []).map((sn) => ({
@@ -152,7 +152,7 @@ function parseEnvNodes(): { nodes: PiNode[]; supernodes: PiSuperNode[] } {
       ports: normalizePorts(sn.ports),
       role: "supernode" as const,
       status: "configured" as const,
-      capabilities: sn.capabilities || getDefaultCapabilities("supernode"),
+      capabilities: { ...getDefaultCapabilities("supernode"), ...(sn.capabilities || {}) },
       delegators: sn.delegators || 0,
       rewardRate: sn.rewardRate || 0,
       slashingHistory: [],
@@ -245,7 +245,7 @@ export function registerPiNode(input: unknown): {
     region: node.region,
     status: "configured",
     lastSeen: new Date().toISOString(),
-    capabilities: node.capabilities || getDefaultCapabilities(node.role || "peer"),
+    capabilities: { ...getDefaultCapabilities(node.role || "peer"), ...(node.capabilities || {}) },
     version: node.version || "1.0.0",
   };
 
@@ -280,7 +280,7 @@ export function registerSuperNode(input: unknown): {
     region: sn.region,
     status: "configured",
     lastSeen: new Date().toISOString(),
-    capabilities: sn.capabilities || getDefaultCapabilities("supernode"),
+    capabilities: { ...getDefaultCapabilities("supernode"), ...(sn.capabilities || {}) },
     version: sn.version || "2.0.0",
     stakingAmount: sn.stakingAmount,
     delegators: sn.delegators || 0,

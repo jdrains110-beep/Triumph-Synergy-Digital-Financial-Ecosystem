@@ -628,7 +628,7 @@ export class PiFastTrackKYBService {
       return {
         piUid,
         username: kyc?.username || `user_${piUid.substring(0, 8)}`,
-        role: piUid === config.signatories[0] ? 'OWNER' : 'SIGNATORY' as const,
+        role: (piUid === config.signatories[0] ? 'OWNER' : 'SIGNATORY') as 'OWNER' | 'SIGNATORY',
         weight: 1,
         canInitiate: true,
         canApprove: true,

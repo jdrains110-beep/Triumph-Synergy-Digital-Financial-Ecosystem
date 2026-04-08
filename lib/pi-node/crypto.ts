@@ -12,7 +12,7 @@ export function verifyPiNodeSignature(params: {
     const messageBytes = new TextEncoder().encode(message);
     const signatureBytes = Buffer.from(signature, "base64");
 
-    return keypair.verify(messageBytes, signatureBytes);
+    return keypair.verify(Buffer.from(messageBytes), signatureBytes);
   } catch (error) {
     console.error("Pi node signature verification failed:", error);
     return false;

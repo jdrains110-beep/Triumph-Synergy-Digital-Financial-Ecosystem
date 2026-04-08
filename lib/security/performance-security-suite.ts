@@ -589,7 +589,7 @@ class SuperiorSecurityManager extends EventEmitter {
       const dsaKeys = ml_dsa65.keygen();
 
       // Encapsulate a shared secret using the public key
-      const { ciphertext, sharedSecret } = ml_kem768.encapsulate(kemKeys.publicKey);
+      const { cipherText, sharedSecret } = ml_kem768.encapsulate(kemKeys.publicKey);
 
       // Use the shared secret to derive an AES key (hybrid encryption)
       const aesKey = sharedSecret.slice(0, 32); // First 32 bytes for AES-256

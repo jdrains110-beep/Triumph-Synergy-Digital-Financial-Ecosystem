@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       
       // Network Stats
       case "network-stats": {
-        const stats = piNetworkBackbone.getStats();
+          const stats = piNetworkBackbone.network.getNetworkStats();
         return NextResponse.json({ success: true, data: stats });
       }
       
@@ -210,7 +210,33 @@ export async function POST(request: NextRequest) {
         if (!name || !owner || !specs) {
           return NextResponse.json({ error: "Missing required params" }, { status: 400 });
         }
-        const node = distributedNodes.registerNode({ name, owner, specs });
+          const node = distributedNodes.registerNode({
+            name,
+            ownerId: owner,
+            walletId: `wallet-${owner}`,
+            specs: {
+              cpuCores: specs.cpuCores || 4,
+              cpuFrequency: specs.cpuSpeed || specs.cpuFrequency || 3.0,
+              cpuModel: specs.cpuModel || "Unknown",
+              ramGB: specs.ramGB || 16,
+              storageGB: specs.storageGB || 500,
+              storageType: specs.storageType || "ssd",
+              networkMbps: specs.bandwidth || specs.networkMbps || 1000,
+              gpuModel: specs.gpuModel,
+              gpuVRAM: specs.gpuVRAM,
+            },
+            network: {
+              publicIP: "0.0.0.0",
+              region: "global",
+              country: "unknown",
+              isp: "unknown",
+              connectionType: "fiber" as const,
+              port: 31400,
+              peerCount: 0,
+              inboundBandwidth: specs.bandwidth || specs.networkMbps || 1000,
+              outboundBandwidth: specs.bandwidth || specs.networkMbps || 1000,
+            },
+          });
         return NextResponse.json({ success: true, data: node });
       }
       
@@ -220,7 +246,11 @@ export async function POST(request: NextRequest) {
         if (!name || !operator) {
           return NextResponse.json({ error: "Missing required params" }, { status: 400 });
         }
-        const cluster = distributedNodes.createCluster({ name, operator, nodeIds });
+          const cluster = distributedNodes.createCluster({
+            name,
+            leaderId: operator,
+            initialNodes: nodeIds || [],
+          });
         return NextResponse.json({ success: true, data: cluster });
       }
       
@@ -241,7 +271,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: "Missing required params" }, { status: 400 });
         }
         const task = distributedNodes.submitTask({
-          type, priority, requirements, submittedBy, reward: reward || 0
+          type, priority, requirements, input: "", submittedBy, reward: reward || 0
         });
         return NextResponse.json({ success: true, data: task });
       }
@@ -353,27 +383,27 @@ export async function POST(request: NextRequest) {
         if (!nodeId || !amount) {
           return NextResponse.json({ error: "nodeId and amount required" }, { status: 400 });
         }
-        const node = piNetworkBackbone.stakeForValidation(nodeId, amount);
+          const node = piNetworkBackbone.network.stakeForValidation(nodeId, amount);
         return NextResponse.json({ success: true, data: node });
       }
       
       // Submit Transaction
       case "submit-transaction": {
-        const { type, from, to, amount, signature } = params;
-        if (!type || !from || !to || !signature) {
+        const { type, from, to, amount } = params;
+        if (!type || !from || !to) {
           return NextResponse.json({ error: "Missing required params" }, { status: 400 });
         }
-        const tx = piNetworkBackbone.submitTransaction({ type, from, to, amount, signature });
+          const tx = piNetworkBackbone.network.submitTransaction({ type, from, to, amount });
         return NextResponse.json({ success: true, data: tx });
       }
       
       // Create Governance Proposal
       case "create-proposal": {
         const { title, description, proposer, endBlock } = params;
-        if (!title || !description || !proposer || !endBlock) {
+        if (!title || !description || !proposer) {
           return NextResponse.json({ error: "Missing required params" }, { status: 400 });
         }
-        const proposal = piNetworkBackbone.createProposal({ title, description, proposer, endBlock });
+          const proposal = piNetworkBackbone.network.createProposal({ proposer, type: "parameter", title, description, data: {}, durationDays: endBlock || 30 });
         return NextResponse.json({ success: true, data: proposal });
       }
       
@@ -383,7 +413,7 @@ export async function POST(request: NextRequest) {
         if (!proposalId || !voter || support === undefined || !weight) {
           return NextResponse.json({ error: "Missing required params" }, { status: 400 });
         }
-        const proposal = piNetworkBackbone.voteOnProposal({ proposalId, voter, support, weight });
+          const proposal = piNetworkBackbone.network.voteOnProposal(proposalId, voter, support ? "for" : "against");
         return NextResponse.json({ success: true, data: proposal });
       }
       

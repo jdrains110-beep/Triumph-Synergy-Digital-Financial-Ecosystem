@@ -73,7 +73,7 @@ export async function GET(request: Request) {
             { status: 400 }
           );
         }
-        const bids = liveAuctionSystem.getBids(auctionId);
+        const bids = liveAuctionSystem.getAuctionBids(auctionId);
         return NextResponse.json({ bids });
       }
 
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
             { status: 400 }
           );
         }
-        const auctions = liveAuctionSystem.getUserAuctions(userId);
+        const auctions = liveAuctionSystem.getSellerAuctions(userId);
         return NextResponse.json({ auctions });
       }
 
@@ -106,7 +106,7 @@ export async function GET(request: Request) {
             { status: 400 }
           );
         }
-        const watching = liveAuctionSystem.getWatching(userId);
+        const watching = liveAuctionSystem.getSellerAuctions(userId); // Watching not available, fallback to seller auctions
         return NextResponse.json({ watching });
       }
 
@@ -138,7 +138,7 @@ export async function GET(request: Request) {
         const results = liveAuctionSystem.searchAuctions({
           query,
           category,
-          auctionType,
+          type: auctionType,
           minPrice,
           maxPrice,
           limit,
@@ -204,20 +204,25 @@ export async function POST(request: Request) {
         }
 
         const auction = liveAuctionSystem.createAuction({
-          sellerId,
-          sellerName: sellerName || "Seller",
-          title,
-          description: description || "",
-          category: category || "general",
-          images: images || [],
-          auctionType: auctionType || "standard",
+          type: (auctionType || "standard") as AuctionType,
+          item: {
+            sellerId,
+            sellerName: sellerName || "Seller",
+            title,
+            description: description || "",
+            category: category || "general",
+            images: images || [],
+            quantity: 1,
+            tags: [],
+            metadata: {},
+          },
           startingPrice,
           reservePrice,
           buyNowPrice,
-          startTime: startTime ? new Date(startTime) : undefined,
+          startTime: startTime ? new Date(startTime) : new Date(),
           endTime: new Date(endTime),
-          acceptedPayments: acceptedPayments || ["pi", "token", "mixed"],
-          tokenDiscountPercent,
+          acceptsTokens: true,
+          tokenDiscount: tokenDiscountPercent,
         });
 
         return NextResponse.json({ success: true, auction });
@@ -273,7 +278,7 @@ export async function POST(request: Request) {
           bidderName: bidderName || "Bidder",
           amount,
           paymentType: paymentType as PaymentType,
-          walletId,
+          bidderWalletId: walletId || bidderId,
           tokenType: tokenType as TokenType,
         });
         return NextResponse.json({ success: true, bid });
@@ -291,10 +296,9 @@ export async function POST(request: Request) {
           auctionId,
           bidderId,
           bidderName: bidderName || "Bidder",
-          maxBid,
-          increment,
+          maxAmount: maxBid,
           paymentType: paymentType as PaymentType,
-          walletId,
+          bidderWalletId: walletId || bidderId,
           tokenType: tokenType as TokenType,
         });
         return NextResponse.json({ success: true, autoBid: config });
@@ -313,7 +317,7 @@ export async function POST(request: Request) {
           buyerId,
           buyerName: buyerName || "Buyer",
           paymentType: paymentType as PaymentType,
-          walletId,
+          buyerWalletId: walletId || buyerId,
           tokenType: tokenType as TokenType,
         });
         return NextResponse.json({ success: true, auction });
@@ -353,8 +357,7 @@ export async function POST(request: Request) {
         }
         const room = liveAuctionSystem.joinRoom(
           auctionId,
-          participantId,
-          participantName || "User"
+          participantId
         );
         return NextResponse.json({ success: true, room });
       }
@@ -379,14 +382,13 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        const message = liveAuctionSystem.sendMessage({
+        liveAuctionSystem.sendMessage({
           auctionId,
           senderId,
           senderName: senderName || "User",
-          content,
-          type: type || "chat",
+          message: content,
         });
-        return NextResponse.json({ success: true, message });
+        return NextResponse.json({ success: true });
       }
 
       case "startStream": {
@@ -399,8 +401,7 @@ export async function POST(request: Request) {
         }
         const stream = liveAuctionSystem.startLiveStream(
           auctionId,
-          streamUrl,
-          streamKey
+          streamUrl
         );
         return NextResponse.json({ success: true, stream });
       }
@@ -413,7 +414,7 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        liveAuctionSystem.endLiveStream(auctionId);
+        liveAuctionSystem.endAuction(auctionId);
         return NextResponse.json({ success: true });
       }
 

@@ -319,7 +319,7 @@ export class PiWalletProvisioningService {
     const signatories = config.signatories.map((piUid, index) => ({
       piUid,
       username: `signatory_${piUid.substring(0, 8)}`,
-      role: index === 0 ? 'OWNER' : 'SIGNATORY' as const,
+      role: (index === 0 ? 'OWNER' : 'SIGNATORY') as 'OWNER' | 'SIGNATORY',
       weight: 1,
       canInitiate: true,
       canApprove: true,

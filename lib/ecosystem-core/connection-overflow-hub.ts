@@ -1026,7 +1026,7 @@ class ConnectionOverflowHub extends EventEmitter {
     bridges: { total: number; active: number; messagesRelayed: number };
     routes: { total: number; active: number };
     pools: { total: number; ready: number; exhausted: number };
-    globalMetrics: typeof this.globalMetrics;
+    globalMetrics: ConnectionOverflowHub["globalMetrics"];
   } {
     const endpointsByNetwork: Record<string, number> = {};
     const endpointsByStatus: Record<string, number> = {};

@@ -235,7 +235,7 @@ class BusinessInteractionManager extends EventEmitter {
   }): Business {
     // Create business wallet
     const businessWalletId = `biz-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    tokenRewardSystem.createWallet(businessWalletId, "business");
+    tokenRewardSystem.createWallet({ ownerId: businessWalletId, ownerType: "business" });
     
     const id = `business-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     
@@ -331,7 +331,7 @@ class BusinessInteractionManager extends EventEmitter {
     // Create employee wallet if not exists
     const employeeWalletId = `emp-${params.userId}-${params.businessId}`;
     try {
-      tokenRewardSystem.createWallet(employeeWalletId, "individual");
+      tokenRewardSystem.createWallet({ ownerId: employeeWalletId, ownerType: "individual" });
     } catch {
       // Wallet already exists
     }
@@ -362,7 +362,7 @@ class BusinessInteractionManager extends EventEmitter {
     // Welcome bonus
     const welcomeBonus = tokenRewardSystem.rewardEmployee({
       employeeWalletId,
-      employerWalletId: business.walletId,
+      businessWalletId: business.walletId,
       tokenType: "WORK",
       amount: 100,
       reason: "Welcome bonus",
@@ -396,7 +396,7 @@ class BusinessInteractionManager extends EventEmitter {
     // Transfer tokens from business to employee
     const tx = tokenRewardSystem.rewardEmployee({
       employeeWalletId: employee.walletId,
-      employerWalletId: business.walletId,
+      businessWalletId: business.walletId,
       tokenType,
       amount: params.amount,
       reason: params.reason,
@@ -444,7 +444,7 @@ class BusinessInteractionManager extends EventEmitter {
       
       const tx = tokenRewardSystem.rewardEmployee({
         employeeWalletId: employee.walletId,
-        employerWalletId: business.walletId,
+        businessWalletId: business.walletId,
         tokenType: "WORK",
         amount: employee.monthlyAllowance,
         reason: "Monthly allowance",

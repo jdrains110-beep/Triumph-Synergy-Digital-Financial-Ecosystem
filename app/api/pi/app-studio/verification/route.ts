@@ -40,7 +40,7 @@ async function verifyDomainAccessibility(domain: string): Promise<{
         "User-Agent": "Pi-App-Verification/1.0",
         Accept: "application/json",
       },
-      timeout: 10000,
+      signal: AbortSignal.timeout(10000),
     });
 
     const responseTime = Date.now() - startTime;
@@ -71,7 +71,7 @@ async function verifyPiSdkInjection(domain: string): Promise<{
       headers: {
         "User-Agent": "Pi-App-Verification/1.0",
       },
-      timeout: 15000,
+      signal: AbortSignal.timeout(15000),
     });
 
     const html = await response.text();
@@ -149,13 +149,13 @@ export async function GET(request: NextRequest) {
 
   // If current deployment is not accessible/configured, add warning
   if (!currentDomainAccessible.accessible) {
-    verification.issues.push(
+    (verification.issues as string[]).push(
       `Current domain (${hostname}) not accessible: ${currentDomainAccessible.error}`
     );
   }
 
   if (!currentSdkInjected.injected) {
-    verification.issues.push(
+    (verification.issues as string[]).push(
       `Pi SDK not injected on current domain (${hostname})`
     );
   }
@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
       const sdkInjected = await verifyPiSdkInjection(domain);
 
       if (!accessible.accessible) {
-        verification.warnings.push(`Mainnet PINET domain ${domain} unreachable`);
+        (verification.warnings as string[]).push(`Mainnet PINET domain ${domain} unreachable`);
       }
 
       (verification.allDomains as Record<string, unknown>).mainnet =
@@ -198,7 +198,7 @@ export async function GET(request: NextRequest) {
     );
 
     if (!mainnetVercelAccessible.accessible) {
-      verification.issues.push(
+      (verification.issues as string[]).push(
         `Vercel mainnet domain unreachable: ${mainnetVercelAccessible.error}`
       );
     }
@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
     hostname === PRODUCTION_DOMAINS.mainnet.vercel &&
     currentNetwork !== "mainnet"
   ) {
-    verification.issues.push(
+    (verification.issues as string[]).push(
       `FALSE SETUP: Vercel mainnet domain not recognized as mainnet. Detected as: ${currentNetwork}`
     );
   }
@@ -257,7 +257,7 @@ export async function GET(request: NextRequest) {
     hostname === PRODUCTION_DOMAINS.mainnet.vercel &&
     !currentSdkInjected.injected
   ) {
-    verification.issues.push(
+    (verification.issues as string[]).push(
       `FALSE SETUP: Vercel mainnet not displaying Pi SDK initialization`
     );
   }
