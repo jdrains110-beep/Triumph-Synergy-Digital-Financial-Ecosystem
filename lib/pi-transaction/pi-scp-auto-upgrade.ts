@@ -241,14 +241,7 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
       return;
     }
     
-    console.log("╔════════════════════════════════════════════════════════════════╗");
-    console.log("║       PI SCP AUTO-UPGRADE SYSTEM - INITIALIZING               ║");
-    console.log("╠════════════════════════════════════════════════════════════════╣");
-    console.log(`║  Network: ${networkType.toUpperCase().padEnd(52)}║`);
-    console.log("║  Auto-Upgrade: ENABLED                                         ║");
-    console.log("║  Zero-Downtime: GUARANTEED                                     ║");
-    console.log("║  Rollback Protection: ACTIVE                                   ║");
-    console.log("╚════════════════════════════════════════════════════════════════╝");
+    console.info("[PiSCPAutoUpgrade] Initializing — network=%s", networkType);
     
     this.isRunning = true;
     this.startedAt = new Date();
@@ -264,10 +257,7 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
     this.startValidatorSync();
     this.startHealthChecking();
     
-    console.log("✓ Pi SCP Auto-Upgrade System: ONLINE");
-    console.log(`  ├─ Protocol Version: ${this.currentVersion?.protocolVersion || 'Unknown'}`);
-    console.log(`  ├─ Current Ledger: ${this.currentVersion?.historyLatestLedger || 'Unknown'}`);
-    console.log("  └─ Sync Status: ACTIVE");
+    console.info("[PiSCPAutoUpgrade] Online — protocol=%s ledger=%s", this.currentVersion?.protocolVersion ?? "Unknown", this.currentVersion?.historyLatestLedger ?? "Unknown");
     
     this.emit("scp-started", {
       startedAt: this.startedAt,
@@ -512,8 +502,20 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
   }
   
   private async applyProtocolChanges(newVersion: SCPVersion): Promise<void> {
-    // Apply protocol-specific changes
-    // In production, this would update actual protocol handlers
+    // Update internal version state immediately so subsequent reads reflect
+    // the new protocol before the full upgrade pipeline completes.
+    this.currentVersion = {
+      ...this.currentVersion,
+      ...newVersion,
+    } as SCPVersion;
+
+    // Refresh metrics to match the incoming ledger/version numbers.
+    this.metrics.currentProtocolVersion = newVersion.protocolVersion;
+    this.metrics.currentLedger = newVersion.historyLatestLedger;
+
+    console.info(
+      `[SCP] applyProtocolChanges — version=${newVersion.protocolVersion} ledger=${newVersion.historyLatestLedger} passphrase="${newVersion.networkPassphrase}"`
+    );
   }
   
   private async resyncConsensus(): Promise<void> {

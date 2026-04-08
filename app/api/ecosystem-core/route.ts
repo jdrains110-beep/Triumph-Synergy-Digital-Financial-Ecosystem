@@ -164,18 +164,18 @@ export async function POST(request: NextRequest) {
         switch (action) {
           case "register-user":
             result = githubCodifier.registerUser({
-              registrarId: params.userId,
+              registrarId: userId,
               username: params.name,
               email: params.email,
               role: params.role,
-              publicKey: params.piWallet,
+              publicKey: params.piWallet ?? "",
             });
             break;
           case "promote-user":
             result = githubCodifier.promoteUser(
+              params.promoterId,
               params.userId,
-              params.newRole,
-              params.promoterId
+              params.newRole
             );
             break;
           case "submit-change":
@@ -190,9 +190,9 @@ export async function POST(request: NextRequest) {
             );
             break;
           case "owner-override":
-            result = await githubCodifier.ownerOverride(
+            result = githubCodifier.ownerOverride(
               userId,
-              "code-change",
+              params.targetType,
               params.targetId,
               params.decision,
               params.reason

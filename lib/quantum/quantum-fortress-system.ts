@@ -287,10 +287,7 @@ class QuantumFortressManager extends EventEmitter {
   // ==========================================================================
   
   private bootQuantumFortress(): void {
-    console.log("╔════════════════════════════════════════════════════════════╗");
-    console.log("║     QUANTUM FORTRESS SYSTEM (QFS) - INITIALIZING          ║");
-    console.log("║     TRIUMPH-SYNERGY SUPERIOR QUANTUM INFRASTRUCTURE       ║");
-    console.log("╚════════════════════════════════════════════════════════════╝");
+    console.info("[QuantumFortress] Initializing");
     
     // Phase 1: Deploy quantum nodes
     this.deployQuantumNodes();
@@ -321,7 +318,7 @@ class QuantumFortressManager extends EventEmitter {
       message: "Quantum Fortress is now online. It cannot be turned off or stopped."
     });
     
-    console.log("✓ QUANTUM FORTRESS ONLINE - IMMORTAL MODE ACTIVATED");
+    console.info("[QuantumFortress] Online (immortal mode)");
   }
   
   private deployQuantumNodes(): void {

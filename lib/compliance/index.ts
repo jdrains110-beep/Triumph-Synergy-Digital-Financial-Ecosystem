@@ -15,6 +15,39 @@ export {
   EnergyEfficiencyComplianceService,
 };
 
+// ─── Internal interface types ─────────────────────────────────────────────────
+// These describe the subset of methods that ComplianceOrchestrator needs from
+// each service.  Using explicit interfaces removes the need for `as any` casts
+// throughout the class, while still allowing typed fallback stubs in catch blocks.
+
+interface MicaOrchestration {
+  auditComplianceStatus?: () => Promise<object>;
+  getCoveredJurisdictions?: () => string[];
+}
+
+interface Iso20022Orchestration {
+  validateFrameworkCompliance?: () => object;
+}
+
+interface KycAmlOrchestration {
+  runAMLScreening?: (scope: string) => Promise<object>;
+  getScreeningStatus?: () => object;
+}
+
+interface GdprOrchestration {
+  auditDataProtectionCompliance?: () => object;
+  getComplianceStatus?: () => object;
+}
+
+interface EnergyOrchestration {
+  calculateAnnualCarbonFootprint?: () => {
+    totalEmissions: number;
+    offsetPurchased: number;
+    netEmissions: number;
+  };
+  verifyOffsetCompliance?: () => Promise<object>;
+}
+
 /**
  * Triumph Synergy Comprehensive Compliance Suite
  *
@@ -27,49 +60,59 @@ export {
  */
 
 export class ComplianceOrchestrator {
-  private readonly mica: MICAComplianceService;
-  private readonly iso20022: ISO20022ComplianceService;
-  private readonly kycaml: KYCAMLComplianceService;
-  private readonly gdpr: GDPRComplianceService;
-  private readonly energy: EnergyEfficiencyComplianceService;
+  private readonly mica: MicaOrchestration;
+  private readonly iso20022: Iso20022Orchestration;
+  private readonly kycaml: KycAmlOrchestration;
+  private readonly gdpr: GdprOrchestration;
+  private readonly energy: EnergyOrchestration;
 
   constructor() {
+    // MICA requires external blockchain and AML services; attempt to instantiate,
+    // but fall back to a typed noop implementation if unavailable at build time.
+    // Both constructor params are typed `any` inside mica-compliance.ts, so
+    // passing null is safe — real runtime deps are injected by the Pi SDK.
     try {
-      // MICA requires external blockchain and AML services; attempt to instantiate,
-      // but fall back to noop implementations if unavailable during static builds.
-      // Bypass strict constructor signature check during build-time
-      // by invoking as any — real args will be supplied at runtime.
-      this.mica = new (MICAComplianceService as any)();
-    } catch (_e) {
-      // Provide lightweight noop fallback to avoid build-time errors
-      // while preserving runtime behavior when real services are available.
+      this.mica = new MICAComplianceService(
+        null,
+        null
+      ) as unknown as MicaOrchestration;
+    } catch {
       this.mica = {
         auditComplianceStatus: async () => ({}),
-      } as any;
+        getCoveredJurisdictions: () => [],
+      };
     }
 
     try {
-      this.iso20022 = new ISO20022ComplianceService();
-    } catch (_e) {
-      // Fallback stub
-      this.iso20022 = { validateFrameworkCompliance: () => ({}) } as any;
+      this.iso20022 =
+        new ISO20022ComplianceService() as unknown as Iso20022Orchestration;
+    } catch {
+      this.iso20022 = { validateFrameworkCompliance: () => ({}) };
     }
 
     try {
-      this.kycaml = new KYCAMLComplianceService();
-    } catch (_e) {
-      this.kycaml = { runAMLScreening: async () => ({}) } as any;
+      this.kycaml =
+        new KYCAMLComplianceService() as unknown as KycAmlOrchestration;
+    } catch {
+      this.kycaml = {
+        runAMLScreening: async () => ({}),
+        getScreeningStatus: () => ({}),
+      };
     }
 
     try {
-      this.gdpr = new GDPRComplianceService();
-    } catch (_e) {
-      this.gdpr = { auditDataProtectionCompliance: () => ({}) } as any;
+      this.gdpr = new GDPRComplianceService() as unknown as GdprOrchestration;
+    } catch {
+      this.gdpr = {
+        auditDataProtectionCompliance: () => ({}),
+        getComplianceStatus: () => ({}),
+      };
     }
 
     try {
-      this.energy = new EnergyEfficiencyComplianceService();
-    } catch (_e) {
+      this.energy =
+        new EnergyEfficiencyComplianceService() as unknown as EnergyOrchestration;
+    } catch {
       this.energy = {
         calculateAnnualCarbonFootprint: () => ({
           totalEmissions: 0,
@@ -77,7 +120,7 @@ export class ComplianceOrchestrator {
           netEmissions: 0,
         }),
         verifyOffsetCompliance: async () => ({}),
-      } as any;
+      };
     }
   }
 
@@ -88,15 +131,13 @@ export class ComplianceOrchestrator {
     return {
       timestamp: new Date().toISOString(),
       auditResults: {
-        mica: await ((this.mica as any).auditComplianceStatus?.() || {}),
-        iso20022: (this.iso20022 as any).validateFrameworkCompliance?.(),
-        kycaml: await ((this.kycaml as any).runAMLScreening?.("BATCH") || {}),
-        gdpr: (this.gdpr as any).auditDataProtectionCompliance?.(),
+        mica: await (this.mica.auditComplianceStatus?.() ?? {}),
+        iso20022: this.iso20022.validateFrameworkCompliance?.(),
+        kycaml: await (this.kycaml.runAMLScreening?.("BATCH") ?? {}),
+        gdpr: this.gdpr.auditDataProtectionCompliance?.(),
         energy: {
-          footprint:
-            (this.energy as any).calculateAnnualCarbonFootprint?.() || {},
-          offsets: await ((this.energy as any).verifyOffsetCompliance?.() ||
-            {}),
+          footprint: this.energy.calculateAnnualCarbonFootprint?.() ?? {},
+          offsets: await (this.energy.verifyOffsetCompliance?.() ?? {}),
         },
       },
       overallComplianceStatus: "FULLY_COMPLIANT",
@@ -108,17 +149,15 @@ export class ComplianceOrchestrator {
    * Get compliance dashboard
    */
   getComplianceDashboard() {
+    const footprint = this.energy.calculateAnnualCarbonFootprint?.() ?? {
+      netEmissions: 0,
+    };
     return {
-      jurisdictions: (this.mica as any).getCoveredJurisdictions?.() || [],
+      jurisdictions: this.mica.getCoveredJurisdictions?.() ?? [],
       messagingStandard: "ISO 20022",
-      kycAMLStatus: (this.kycaml as any).getScreeningStatus?.() || {},
-      gdprCompliance: (this.gdpr as any).getComplianceStatus?.() || {},
-      carbonNeutral:
-        (
-          (this.energy as any).calculateAnnualCarbonFootprint?.() || {
-            netEmissions: 0,
-          }
-        ).netEmissions === 0,
+      kycAMLStatus: this.kycaml.getScreeningStatus?.() ?? {},
+      gdprCompliance: this.gdpr.getComplianceStatus?.() ?? {},
+      carbonNeutral: footprint.netEmissions === 0,
       lastAudit: new Date().toISOString(),
       nextAudit: this.getNextAuditDate(),
       certifications: [

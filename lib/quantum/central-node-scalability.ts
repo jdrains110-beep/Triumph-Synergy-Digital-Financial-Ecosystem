@@ -192,15 +192,7 @@ class CentralNodeScalabilityManager extends EventEmitter {
   // ==========================================================================
   
   private initialize(): void {
-    console.log("╔════════════════════════════════════════════════════════════════╗");
-    console.log("║   CENTRAL NODE SCALABILITY SYSTEM - 64+ NODES SUPPORT          ║");
-    console.log("║                                                                ║");
-    console.log("║   Mode: SUPERIOR CONSISTENCY                                   ║");
-    console.log("║   Max Nodes: UNLIMITED                                         ║");
-    console.log("║   Failover: AUTOMATIC                                          ║");
-    console.log("║   Load Balancing: ENABLED                                      ║");
-    console.log("║   Health Monitoring: ENABLED                                   ║");
-    console.log("╚════════════════════════════════════════════════════════════════╝");
+    console.info("[CentralNodeScalability] Initializing — mode=SUPERIOR_CONSISTENCY failover=AUTO");
     
     this.startHealthMonitoring();
     this.startConsistencyChecking();
@@ -278,9 +270,13 @@ class CentralNodeScalabilityManager extends EventEmitter {
     const cluster = this.clusters.get(node.cluster || clusterName || `${node.region}-cluster`);
     if (cluster && !cluster.nodes.find(n => n.id === node.id)) {
       cluster.nodes.push(node);
-      cluster.totalCapacity = cluster.nodes.reduce((sum, n) => sum + n.maxCapacity, 0);
-      cluster.usedCapacity = cluster.nodes.reduce((sum, n) => sum + n.currentLoad, 0);
+      this.refreshClusterCapacity(cluster);
     }
+  }
+
+  private refreshClusterCapacity(cluster: NodeCluster): void {
+    cluster.totalCapacity = cluster.nodes.reduce((sum, n) => sum + n.maxCapacity, 0);
+    cluster.usedCapacity = cluster.nodes.reduce((sum, n) => sum + n.currentLoad, 0);
   }
   
   private createCluster(clusterData: {
@@ -454,8 +450,10 @@ class CentralNodeScalabilityManager extends EventEmitter {
         )[0];
         
         if (bestNode) {
-          batch.targetNodes = batch.targetNodes.filter((id: string) => id !== failedNode.id);
-          batch.targetNodes.push(bestNode.id);
+          if (Array.isArray(batch.targetNodes)) {
+            batch.targetNodes = batch.targetNodes.filter((id: string) => id !== failedNode.id);
+            batch.targetNodes.push(bestNode.id);
+          }
         }
       }
     }

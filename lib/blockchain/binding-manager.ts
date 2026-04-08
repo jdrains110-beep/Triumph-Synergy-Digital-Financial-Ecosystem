@@ -164,7 +164,7 @@ export class BlockchainBindingManager extends EventEmitter {
       type: businessType,
       industry: params.industry,
       ownerId: params.ownerUserId,
-      ownerWalletId: `corp-${params.ownerUserId}`,
+      ownerWalletId: `owner-wallet-${params.ownerUserId}`,
       description: params.description,
     });
 

@@ -184,11 +184,11 @@ export class PiBackboneSystem {
     return {
       network: {
         chainId: 0,
-        status: "running",
+        status: "active",
         nodeCount: networkStats.totalNodes,
         blockCount: 0,
         transactionCount: 0,
-        validatorCount: networkStats.nodesByRole?.validator || 0,
+        validatorCount: networkStats.nodesByRole?.validator ?? 0,
       },
       nodes: {
         totalNodes: nodeStats.totalNodes,
@@ -244,7 +244,7 @@ export class PiBackboneSystem {
       role: "validator",
       region: "global",
       version: "1.0.0",
-      capabilities: ["compute", "storage"],
+      capabilities: [],
       computePower: params.specs.cpuCores * params.specs.cpuSpeed,
       storage: params.specs.storageGB,
       bandwidth: params.specs.bandwidth,
@@ -252,9 +252,9 @@ export class PiBackboneSystem {
     
     // Register in compute network
     const computeNode = this.nodes.registerNode({
-      name: params.name,
       ownerId: params.owner,
-      walletId: `wallet-${params.publicKey.substring(0, 8)}`,
+      walletId: "",
+      name: params.name,
       specs: {
         cpuCores: params.specs.cpuCores,
         cpuFrequency: params.specs.cpuSpeed,
@@ -262,17 +262,17 @@ export class PiBackboneSystem {
         ramGB: params.specs.ramGB,
         storageGB: params.specs.storageGB,
         storageType: params.specs.storageType,
-        networkMbps: params.specs.bandwidth,
         gpuModel: params.specs.gpuModel,
         gpuVRAM: params.specs.gpuVRAM,
+        networkMbps: params.specs.bandwidth,
       },
       network: {
         publicIP: "0.0.0.0",
         region: "global",
-        country: "unknown",
-        isp: "unknown",
+        country: "US",
+        isp: "",
         connectionType: "fiber",
-        port: 31400,
+        port: 7777,
         peerCount: 0,
         inboundBandwidth: params.specs.bandwidth,
         outboundBandwidth: params.specs.bandwidth,

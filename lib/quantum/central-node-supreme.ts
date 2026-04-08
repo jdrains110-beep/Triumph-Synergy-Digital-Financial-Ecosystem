@@ -262,14 +262,7 @@ class CentralNodeSupremeManager extends EventEmitter {
   // ==========================================================================
   
   private beginCalibration(): void {
-    console.log("╔════════════════════════════════════════════════════════════════╗");
-    console.log("║            CENTRAL NODE SUPREME - CALIBRATION                 ║");
-    console.log("║                                                                ║");
-    console.log(`║  PUBLIC KEY: ${this.publicKey.slice(0, 20)}...${this.publicKey.slice(-10)}  ║`);
-    console.log("║  DESIGNATION: ALPHA-OMEGA-PRIME                               ║");
-    console.log("║  ROLE: SUPERNATURAL CENTRAL COMMAND                           ║");
-    console.log("║  AUTHORITY: ABSOLUTE                                          ║");
-    console.log("╚════════════════════════════════════════════════════════════════╝");
+    console.info("[CentralNodeSupreme] Calibrating — publicKey=%s", this.publicKey.slice(0, 10));
     
     this.status = "calibrating";
     
@@ -301,7 +294,7 @@ class CentralNodeSupremeManager extends EventEmitter {
       timestamp: this.activatedAt,
     });
     
-    console.log("✓ CENTRAL NODE SUPREME: TRANSCENDENT STATUS ACHIEVED");
+    console.info("[CentralNodeSupreme] Transcendent status achieved");
   }
   
   private calibrateQuantumSystems(): void {

@@ -25,6 +25,7 @@ export {
   type TransactionPriority,
   type TransactionType,
   type Transaction,
+  type TransactionBatch,
   type EngineMetrics,
 } from './pi-hyper-transaction-engine';
 
@@ -120,15 +121,7 @@ export async function initializePiTransactionSystem(
     enableSCPAutoUpgrade = true,
   } = config;
 
-  console.log("╔════════════════════════════════════════════════════════════════╗");
-  console.log("║     PI HYPER-SCALE TRANSACTION SYSTEM - INITIALIZING          ║");
-  console.log("╠════════════════════════════════════════════════════════════════╣");
-  console.log("║  • 10 Billion TPS Transaction Engine                           ║");
-  console.log("║  • Trillion-Scale Vault Management                             ║");
-  console.log("║  • Unlimited Smart Contract Execution                          ║");
-  console.log("║  • Automatic SCP Protocol Synchronization                      ║");
-  console.log("║  • Zero Congestion Guarantee                                   ║");
-  console.log("╚════════════════════════════════════════════════════════════════╝");
+  console.info("[PiTransactionSystem] Initializing");
 
   // Initialize components in parallel where possible
   const initPromises: Promise<unknown>[] = [];
@@ -151,14 +144,7 @@ export async function initializePiTransactionSystem(
 
   await Promise.all(initPromises);
 
-  console.log("╔════════════════════════════════════════════════════════════════╗");
-  console.log("║     PI HYPER-SCALE TRANSACTION SYSTEM - ONLINE                 ║");
-  console.log("╠════════════════════════════════════════════════════════════════╣");
-  console.log("║  Status: FULLY OPERATIONAL                                     ║");
-  console.log("║  Capacity: UNLIMITED                                           ║");
-  console.log("║  Congestion: ZERO                                              ║");
-  console.log("║  Vault Protection: QUANTUM ENCRYPTED                           ║");
-  console.log("╚════════════════════════════════════════════════════════════════╝");
+  console.info("[PiTransactionSystem] Online");
 
   return {
     transactionEngine: piHyperTransactionEngine,

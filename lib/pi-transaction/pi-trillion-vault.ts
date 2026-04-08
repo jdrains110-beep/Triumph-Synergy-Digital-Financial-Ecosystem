@@ -305,13 +305,7 @@ export class PiTrillionVaultManager extends EventEmitter {
       return;
     }
     
-    console.log("╔════════════════════════════════════════════════════════════════╗");
-    console.log("║      PI TRILLION VAULT MANAGER - INITIALIZING                 ║");
-    console.log("╠════════════════════════════════════════════════════════════════╣");
-    console.log("║  Capacity: UNLIMITED (Trillions)                              ║");
-    console.log("║  Security: Quantum + Central Node                             ║");
-    console.log("║  Multi-Sig: Up to 10 signatories                              ║");
-    console.log("╚════════════════════════════════════════════════════════════════╝");
+    console.info("[PiTrillionVaultManager] Initializing");
     
     this.isRunning = true;
     this.startedAt = new Date();
@@ -326,7 +320,7 @@ export class PiTrillionVaultManager extends EventEmitter {
       this.startAutoRebalancing();
     }
     
-    console.log("✓ Pi Trillion Vault Manager: ONLINE");
+    console.info("[PiTrillionVaultManager] Online");
     
     this.emit("vault-manager-started", {
       startedAt: this.startedAt,

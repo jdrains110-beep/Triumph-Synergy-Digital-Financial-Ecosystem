@@ -352,12 +352,7 @@ class SuperiorSecurityManager extends EventEmitter {
   }
   
   private startSecuritySystems(): void {
-    console.log("╔════════════════════════════════════════════════════════════╗");
-    console.log("║          SUPERIOR SECURITY SUITE - ACTIVATING              ║");
-    console.log("║          Security Level: SUPREME                           ║");
-    console.log("║          Zero-Trust: ENABLED                               ║");
-    console.log("║          Quantum-Resistant: ACTIVE                         ║");
-    console.log("╚════════════════════════════════════════════════════════════╝");
+    console.info("[SecuritySuite] Activating — level=%s quantumResistant=%s", this.config.level, this.config.encryption.quantumResistant);
     
     // Real-time monitoring
     this.monitoringInterval = setInterval(() => {
@@ -923,12 +918,7 @@ class SuperiorPerformanceManager extends EventEmitter {
   }
   
   private startPerformanceSystems(): void {
-    console.log("╔════════════════════════════════════════════════════════════╗");
-    console.log("║         SUPERIOR PERFORMANCE SUITE - ACTIVATING            ║");
-    console.log("║         Performance Grade: A+                              ║");
-    console.log("║         Caching: PREDICTIVE                                ║");
-    console.log("║         Load Balancing: ADAPTIVE                           ║");
-    console.log("╚════════════════════════════════════════════════════════════╝");
+    console.info("[PerformanceSuite] Activating — grade=%s", this.config.grade);
     
     // Optimization loop
     this.optimizationInterval = setInterval(() => {

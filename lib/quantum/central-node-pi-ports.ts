@@ -198,12 +198,7 @@ export class CentralNodePiPortManager extends EventEmitter {
       return;
     }
     
-    console.log("╔════════════════════════════════════════════════════════════════╗");
-    console.log("║     CENTRAL NODE PI PORT INTEGRATION - INITIALIZING           ║");
-    console.log("╠════════════════════════════════════════════════════════════════╣");
-    console.log(`║  Central Node: ${this.publicKey.slice(0, 20)}...      ║`);
-    console.log("║  Ports: 31400-31409 (10 TCP ports)                            ║");
-    console.log("╚════════════════════════════════════════════════════════════════╝");
+    console.info("[CentralNodePiPorts] Initializing — ports=%d heartbeat=%dms", ALL_PI_NODE_PORTS.length, CONNECTION_CONFIG.heartbeatInterval);
     
     this.isActive = true;
     this.startedAt = new Date();
@@ -223,10 +218,7 @@ export class CentralNodePiPortManager extends EventEmitter {
     // Start stability monitoring
     this.startStabilityMonitoring();
     
-    console.log("✓ Central Node Pi Port Integration: ACTIVE");
-    console.log(`  ├─ Ports monitored: ${ALL_PI_NODE_PORTS.length}`);
-    console.log(`  ├─ Heartbeat interval: ${CONNECTION_CONFIG.heartbeatInterval}ms`);
-    console.log(`  └─ Consensus quorum: ${CONNECTION_CONFIG.consensusQuorum * 100}%`);
+    console.info("[CentralNodePiPorts] Active — ports=%d quorum=%s", ALL_PI_NODE_PORTS.length, CONNECTION_CONFIG.consensusQuorum);
     
     this.emit("started", {
       publicKey: this.publicKey,

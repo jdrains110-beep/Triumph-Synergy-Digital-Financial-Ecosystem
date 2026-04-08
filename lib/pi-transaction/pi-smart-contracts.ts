@@ -322,14 +322,7 @@ export class PiSmartContractEngine extends EventEmitter {
       return;
     }
     
-    console.log("╔════════════════════════════════════════════════════════════════╗");
-    console.log("║      PI SMART CONTRACT ENGINE - INITIALIZING                  ║");
-    console.log("╠════════════════════════════════════════════════════════════════╣");
-    console.log("║  Max Contract Size: 100 MB                                    ║");
-    console.log("║  Parallel Channels: 10,000                                    ║");
-    console.log("║  Concurrent Contracts: 1,000,000                              ║");
-    console.log("║  Interruption Protection: ACTIVE                              ║");
-    console.log("╚════════════════════════════════════════════════════════════════╝");
+    console.info("[PiSmartContractEngine] Initializing");
     
     this.isRunning = true;
     this.startedAt = new Date();
@@ -340,10 +333,7 @@ export class PiSmartContractEngine extends EventEmitter {
     // Start checkpoint system
     this.startCheckpointSystem();
     
-    console.log("✓ Pi Smart Contract Engine: ONLINE");
-    console.log("  ├─ Zero interference: GUARANTEED");
-    console.log("  ├─ Auto-resume: ENABLED");
-    console.log("  └─ Unlimited execution: ACTIVE");
+    console.info("[PiSmartContractEngine] Online");
     
     this.emit("engine-started", {
       startedAt: this.startedAt,

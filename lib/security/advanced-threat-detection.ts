@@ -559,12 +559,7 @@ class AdvancedThreatDetectionSystem extends EventEmitter {
   }
   
   private startMonitoring(): void {
-    console.log("╔════════════════════════════════════════════════════════════╗");
-    console.log("║      ADVANCED THREAT DETECTION SYSTEM - ACTIVATING         ║");
-    console.log("║      AI Classifier: ENABLED                                ║");
-    console.log("║      Behavioral Analysis: ACTIVE                           ║");
-    console.log("║      Intelligence Database: LOADED                         ║");
-    console.log("╚════════════════════════════════════════════════════════════╝");
+    console.info("[AdvancedThreatDetection] Activating — aiClassifier=ENABLED behaviourAnalysis=ACTIVE");
     
     this.monitoringInterval = setInterval(() => {
       this.metrics.lastScan = new Date();

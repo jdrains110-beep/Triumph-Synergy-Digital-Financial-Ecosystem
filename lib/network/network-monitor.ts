@@ -227,8 +227,9 @@ export class NetworkMonitor {
       newDevice.geolocation &&
       previousDevices[previousDevices.length - 1].geolocation
     ) {
+      const prevGeo = previousDevices[previousDevices.length - 1].geolocation!;
       const distance = this.calculateDistance(
-        previousDevices[previousDevices.length - 1].geolocation!,
+        prevGeo,
         newDevice.geolocation
       );
       const timeDiff = 1; // Assuming 1 hour has passed

@@ -332,14 +332,7 @@ export class PiHyperTransactionEngine extends EventEmitter {
       return;
     }
     
-    console.log("╔════════════════════════════════════════════════════════════════╗");
-    console.log("║     PI HYPER-TRANSACTION ENGINE - INITIALIZING                ║");
-    console.log("╠════════════════════════════════════════════════════════════════╣");
-    console.log(`║  Max TPS: ${HYPER_ENGINE_CONFIG.maxTransactionsPerSecond.toLocaleString().padEnd(20)}                   ║`);
-    console.log(`║  Shards: ${HYPER_ENGINE_CONFIG.shardCount.toString().padEnd(21)}                   ║`);
-    console.log(`║  Channels: ${HYPER_ENGINE_CONFIG.parallelChannels.toLocaleString().padEnd(19)}                   ║`);
-    console.log("║  Congestion: ZERO TOLERANCE                                   ║");
-    console.log("╚════════════════════════════════════════════════════════════════╝");
+    console.info("[PiHyperTransactionEngine] Initializing — shards=%d channels=%d maxTps=%d", HYPER_ENGINE_CONFIG.shardCount, HYPER_ENGINE_CONFIG.parallelChannels, HYPER_ENGINE_CONFIG.maxTransactionsPerSecond);
     
     this.isRunning = true;
     this.startedAt = new Date();
@@ -354,10 +347,7 @@ export class PiHyperTransactionEngine extends EventEmitter {
     // Start anti-congestion monitoring
     this.startAntiCongestionMonitoring();
     
-    console.log("✓ Pi Hyper-Transaction Engine: ONLINE");
-    console.log("  ├─ Infinite scalability: ACTIVE");
-    console.log("  ├─ Zero congestion: ENFORCED");
-    console.log("  └─ Instant finality: ENABLED");
+    console.info("[PiHyperTransactionEngine] Online — instantFinality=%s", HYPER_ENGINE_CONFIG.instantFinality);
     
     this.emit("engine-started", {
       startedAt: this.startedAt,
@@ -391,7 +381,7 @@ export class PiHyperTransactionEngine extends EventEmitter {
       this.antiCongestionInterval = null;
     }
     
-    console.log("Pi Hyper-Transaction Engine: STOPPED");
+    console.info("[PiHyperTransactionEngine] Stopped");
     this.emit("engine-stopped", { stoppedAt: new Date() });
   }
   

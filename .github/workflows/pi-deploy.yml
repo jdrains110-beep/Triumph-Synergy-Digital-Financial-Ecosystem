@@ -27,6 +27,7 @@ permissions:
 
 env:
     NODE_VERSION: "24"
+    YARN_VERSION: "1.22.22"
 
 jobs:
     # ============================================================================
@@ -116,16 +117,37 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
-            - name: Run Security Audit
+            - name: Run Security Audit (enforce high severity)
               run: |
-                  echo "🔒 Running security audit..."
-                  yarn audit || echo "⚠️ Audit found issues (using overrides)"
-                  echo "✅ Security audit complete"
+                  echo "🔒 Running enforced security audit (--audit-level=high)..."
+                  # Fail the build if any HIGH or CRITICAL vulnerability is found.
+                  npm audit --audit-level=high
+                  echo "✅ No high/critical vulnerabilities found"
 
             - name: Check for Sensitive Data
               run: |
                   echo "🔍 Scanning for exposed secrets..."
                   ! grep -r "PI_API_KEY\s*=" --include="*.ts" --include="*.tsx" --include="*.js" . 2>/dev/null | grep -v "process.env" | grep -v ".example" | grep -v "node_modules" || echo "✅ No exposed secrets"
+
+            - name: OWASP dependency check (critical CVEs)
+              run: |
+                  echo "🛡️ Checking for critical CVEs via npm audit --json..."
+                  AUDIT_OUTPUT=$(npm audit --json 2>/dev/null || true)
+                  CRITICAL=$(echo "$AUDIT_OUTPUT" | node -e "
+                    let data=''; process.stdin.on('data',d=>data+=d);
+                    process.stdin.on('end',()=>{
+                      try {
+                        const j=JSON.parse(data);
+                        const n=(j.metadata?.vulnerabilities?.critical||0)+(j.metadata?.vulnerabilities?.high||0);
+                        console.log(n);
+                      } catch { console.log(0); }
+                    });
+                  " 2>/dev/null || echo "0")
+                  if [ "$CRITICAL" -gt "0" ]; then
+                    echo "❌ Found $CRITICAL high/critical CVEs — blocking deployment"
+                    exit 1
+                  fi
+                  echo "✅ OWASP check passed — 0 critical/high CVEs"
 
     # ============================================================================
     # PHASE 3: Build Application

@@ -74,15 +74,7 @@ export function initializeSecuritySystems(): {
     systems: string[];
   };
 } {
-  console.log("╔════════════════════════════════════════════════════════════╗");
-  console.log("║           UNIFIED SECURITY SYSTEMS INITIALIZATION          ║");
-  console.log("║  Superior Security Suite ........... ACTIVE                ║");
-  console.log("║  Superior Performance Suite ........ ACTIVE                ║");
-  console.log("║  Advanced Threat Detection ......... ACTIVE                ║");
-  console.log("║  Zero-Trust Architecture ........... ENABLED               ║");
-  console.log("║  Quantum-Resistant Encryption ...... ENABLED               ║");
-  console.log("║  AI-Powered Detection .............. ENABLED               ║");
-  console.log("╚════════════════════════════════════════════════════════════╝");
+  console.info("[Security] Initializing — systems=SecuritySuite,PerformanceSuite,ThreatDetection,ZeroTrust,PostQuantum,AI");
   
   return {
     security: superiorSecurity,
