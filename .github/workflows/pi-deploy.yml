@@ -119,9 +119,10 @@ jobs:
 
             - name: Run Security Audit (enforce high severity)
               run: |
-                  echo "🔒 Running enforced security audit (--audit-level=high)..."
-                  # Fail the build if any HIGH or CRITICAL vulnerability is found.
-                  npm audit --audit-level=high
+                  echo "🔒 Running enforced security audit (--level high)..."
+                  # Project uses Yarn (yarn.lock); yarn audit exits non-zero on any finding.
+                  # --level high means only high/critical vulnerabilities fail the build.
+                  yarn audit --level high
                   echo "✅ No high/critical vulnerabilities found"
 
             - name: Check for Sensitive Data
@@ -131,16 +132,22 @@ jobs:
 
             - name: OWASP dependency check (critical CVEs)
               run: |
-                  echo "🛡️ Checking for critical CVEs via npm audit --json..."
-                  AUDIT_OUTPUT=$(npm audit --json 2>/dev/null || true)
-                  CRITICAL=$(echo "$AUDIT_OUTPUT" | node -e "
+                  echo "🛡️ Checking for critical CVEs via yarn audit --json..."
+                  # yarn audit --json emits one JSON object per line; sum high+critical counts.
+                  CRITICAL=$(yarn audit --json 2>/dev/null | node -e "
                     let data=''; process.stdin.on('data',d=>data+=d);
                     process.stdin.on('end',()=>{
-                      try {
-                        const j=JSON.parse(data);
-                        const n=(j.metadata?.vulnerabilities?.critical||0)+(j.metadata?.vulnerabilities?.high||0);
-                        console.log(n);
-                      } catch { console.log(0); }
+                      let total=0;
+                      data.split('\n').forEach(line=>{
+                        if(!line.trim()) return;
+                        try {
+                          const j=JSON.parse(line);
+                          if(j.type==='auditSummary'){
+                            total+=(j.data?.vulnerabilities?.high||0)+(j.data?.vulnerabilities?.critical||0);
+                          }
+                        } catch {}
+                      });
+                      console.log(total);
                     });
                   " 2>/dev/null || echo "0")
                   if [ "$CRITICAL" -gt "0" ]; then
