@@ -250,23 +250,26 @@ class Models:
             times   = arr2[:, 3]
             elapsed = max(times[-1] - times[0], 1.0)
             ledger_rate = (seqs[-1] - seqs[0]) / elapsed  # seqs/sec
-            # Ideal ~0.2 seqs/sec → 100 pts
-            lr_score = min(100.0, (ledger_rate / 0.2) * 100.0)
+            # Ideal ~0.2 seqs/sec → 100 pts; clamp 0-100
+            lr_score = min(100.0, max(0.0, (ledger_rate / 0.2) * 100.0))
         else:
             lr_score = 50.0
 
         # Retention score — reuse RSI signal as proxy for holder engagement
         sent = self.sentiment()
         rsi  = sent.get("rsi", 50.0)
-        # RSI 40-60 = neutral utility zone (not pump/dump)
-        retention = 100.0 - abs(rsi - 50.0) * 2.0   # peak at RSI=50
+        # Guard zero-activity edge case: both gains and losses = 0 → RSI undefined
+        # In that case default to neutral (50) so retention = 100
+        if abs(rsi) < 0.1:
+            rsi = 50.0
+        # RSI 40-60 = neutral utility zone (peak at RSI=50, penalise extremes)
+        retention = max(0.0, 100.0 - abs(rsi - 50.0) * 2.0)
 
-        # Weighted harmonic mean (weights: tx 40%, fee 20%, lr 20%, retention 20%)
+        # Weighted arithmetic mean (tx 40%, fee 20%, lr 20%, retention 20%)
+        # Arithmetic mean is robust to near-zero or temporarily negative signals
         w = [0.40, 0.20, 0.20, 0.20]
         s = [tx_score, fee_score, lr_score, retention]
-        # avoid division by zero
-        denom = sum(w[i] / max(s[i], 0.001) for i in range(4))
-        utility_score = round(1.0 / denom, 2)
+        utility_score = round(sum(w[i] * s[i] for i in range(4)), 2)
 
         speculative_ratio = round(max(0.0, 1.0 - utility_score / 100.0), 4)
         utility_ratio     = round(utility_score / 100.0, 4)
