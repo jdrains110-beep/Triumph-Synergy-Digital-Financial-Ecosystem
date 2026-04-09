@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     "mode" in body &&
     (body as { mode: unknown }).mode === "historical"
   ) {
-    const { cases } = body as { cases: Case[] };
+    const { cases } = body as unknown as { cases: Case[] };
     if (!Array.isArray(cases) || cases.length === 0) {
       return NextResponse.json(
         { error: "Provide a non-empty 'cases' array for historical analysis." },

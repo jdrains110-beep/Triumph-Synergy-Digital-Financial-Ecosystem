@@ -92,7 +92,7 @@
     "@vercel/blob": "^2.3.3",
     "@vercel/functions": "^2.0.0",
     "ai": "6.0.5",
-    "axios": "^1.13.5",
+    "axios": "^1.15.0",
     "bcrypt-ts": "^8.0.0",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
@@ -183,6 +183,8 @@
     "vite": ">=8.0.5",
     "lodash-es": ">=4.18.0",
     "esbuild": ">=0.25.0",
-    "undici": ">=6.24.0"
+    "undici": ">=6.24.0",
+    "axios": ">=1.15.0",
+    "**/axios": ">=1.15.0"
   }
 }

@@ -407,7 +407,7 @@ export class RPCBridge {
    * Clear cache
    */
   clearCache(): void {
-    this.cache.clear();
+    this.localCache.clear();
   }
 
   /**
@@ -415,8 +415,8 @@ export class RPCBridge {
    */
   getCacheStats(): { size: number; keys: string[] } {
     return {
-      size: this.cache.size,
-      keys: Array.from(this.cache.keys()),
+      size: this.localCache.size,
+      keys: Array.from(this.localCache.keys()),
     };
   }
 
