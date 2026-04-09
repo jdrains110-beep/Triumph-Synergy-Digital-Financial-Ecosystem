@@ -218,10 +218,30 @@ const server = http.createServer(async (req, res) => {
       network: NETWORK, referencePrice, openBids: bids.length, openAsks: asks.length, totalTrades }));
 
   } else if (url === "/metrics") {
-    res.writeHead(200);
-    res.end(safeStringify({ uptime_s: process.uptime(), total_trades: totalTrades,
-      open_bids: bids.length, open_asks: asks.length,
-      reference_price_usd: referencePrice, memory: process.memoryUsage() }));
+    const mem = process.memoryUsage();
+    const lines = [
+      `# HELP process_uptime_seconds Service uptime in seconds`,
+      `# TYPE process_uptime_seconds gauge`,
+      `process_uptime_seconds{service="dex",network="${NETWORK}"} ${process.uptime().toFixed(3)}`,
+      `# HELP nodejs_heap_used_bytes Node.js heap used bytes`,
+      `# TYPE nodejs_heap_used_bytes gauge`,
+      `nodejs_heap_used_bytes{service="dex"} ${mem.heapUsed}`,
+      `# HELP dex_trades_total Total trades executed`,
+      `# TYPE dex_trades_total counter`,
+      `dex_trades_total{network="${NETWORK}"} ${totalTrades}`,
+      `# HELP dex_open_orders Current open orders in orderbook`,
+      `# TYPE dex_open_orders gauge`,
+      `dex_open_orders{side="bid",network="${NETWORK}"} ${bids.length}`,
+      `dex_open_orders{side="ask",network="${NETWORK}"} ${asks.length}`,
+      `# HELP dex_reference_price_usd Current Pi reference price USD`,
+      `# TYPE dex_reference_price_usd gauge`,
+      `dex_reference_price_usd{network="${NETWORK}"} ${referencePrice ?? 0}`,
+      `# HELP dex_active_requests Current in-flight HTTP requests`,
+      `# TYPE dex_active_requests gauge`,
+      `dex_active_requests ${activeRequests}`,
+    ].join("\n");
+    res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+    res.end(lines + "\n");
 
   } else if (url === "/api/dex/orderbook") {
     res.writeHead(200);

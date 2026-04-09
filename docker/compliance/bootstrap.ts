@@ -198,9 +198,29 @@ const server = http.createServer(async (req, res) => {
       network: NETWORK, screened, flagged, blocked }));
 
   } else if (url === "/metrics") {
-    res.writeHead(200);
-    res.end(safeStringify({ uptime_s: process.uptime(), screened, flagged, blocked,
-      active_requests: activeRequests, memory: process.memoryUsage() }));
+    const mem = process.memoryUsage();
+    const lines = [
+      `# HELP process_uptime_seconds Service uptime in seconds`,
+      `# TYPE process_uptime_seconds gauge`,
+      `process_uptime_seconds{service="compliance",network="${NETWORK}"} ${process.uptime().toFixed(3)}`,
+      `# HELP nodejs_heap_used_bytes Node.js heap used bytes`,
+      `# TYPE nodejs_heap_used_bytes gauge`,
+      `nodejs_heap_used_bytes{service="compliance"} ${mem.heapUsed}`,
+      `# HELP compliance_screened_total Total addresses screened`,
+      `# TYPE compliance_screened_total counter`,
+      `compliance_screened_total{network="${NETWORK}"} ${screened}`,
+      `# HELP compliance_flagged_total Addresses flagged for review`,
+      `# TYPE compliance_flagged_total counter`,
+      `compliance_flagged_total{network="${NETWORK}"} ${flagged}`,
+      `# HELP compliance_blocked_total Addresses blocked`,
+      `# TYPE compliance_blocked_total counter`,
+      `compliance_blocked_total{network="${NETWORK}"} ${blocked}`,
+      `# HELP compliance_active_requests Current in-flight HTTP requests`,
+      `# TYPE compliance_active_requests gauge`,
+      `compliance_active_requests ${activeRequests}`,
+    ].join("\n");
+    res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+    res.end(lines + "\n");
 
   } else if (url === "/api/compliance/screen" && req.method === "POST") {
     const body = await readBody(req) as ScreeningInput;

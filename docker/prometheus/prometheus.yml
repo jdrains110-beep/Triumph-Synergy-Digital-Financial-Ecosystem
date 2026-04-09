@@ -105,11 +105,11 @@ scrape_configs:
     scrape_interval: 30s
 
   # ==========================================================================
-  # Infrastructure - PostgreSQL
+  # Infrastructure - PostgreSQL (via postgres_exporter sidecar)
   # ==========================================================================
   - job_name: 'pi-postgres'
     static_configs:
-      - targets: ['triumph-postgres:5432']
+      - targets: ['triumph-postgres-exporter:9187']
         labels:
           service: 'postgres'
           type: 'database'
@@ -117,26 +117,14 @@ scrape_configs:
     scrape_interval: 15s
 
   # ==========================================================================
-  # Infrastructure - Redis
+  # Infrastructure - Redis (via redis_exporter sidecar)
   # ==========================================================================
   - job_name: 'pi-redis'
     static_configs:
-      - targets: ['triumph-redis:6379']
+      - targets: ['triumph-redis-exporter:9121']
         labels:
           service: 'redis'
           type: 'cache'
-    metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Load Balancer - Nginx
-  # ==========================================================================
-  - job_name: 'pi-nginx'
-    static_configs:
-      - targets: ['triumph-nginx:80']
-        labels:
-          service: 'nginx'
-          type: 'load-balancer'
     metrics_path: /metrics
     scrape_interval: 15s
   # ==========================================================================

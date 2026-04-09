@@ -163,10 +163,26 @@ const server = http.createServer((req, res) => {
       network: NETWORK, totalPolls, failedPolls }));
 
   } else if (url === "/metrics") {
-    res.writeHead(200);
-    res.end(safeStringify({ uptime_s: process.uptime(), total_polls: totalPolls,
-      failed_polls: failedPolls, active_requests: activeRequests,
-      memory: process.memoryUsage() }));
+    const mem = process.memoryUsage();
+    const lines = [
+      `# HELP process_uptime_seconds Service uptime in seconds`,
+      `# TYPE process_uptime_seconds gauge`,
+      `process_uptime_seconds{service="market-data",network="${NETWORK}"} ${process.uptime().toFixed(3)}`,
+      `# HELP nodejs_heap_used_bytes Node.js heap used bytes`,
+      `# TYPE nodejs_heap_used_bytes gauge`,
+      `nodejs_heap_used_bytes{service="market-data"} ${mem.heapUsed}`,
+      `# HELP market_data_polls_total Total Horizon ledger polls`,
+      `# TYPE market_data_polls_total counter`,
+      `market_data_polls_total{network="${NETWORK}"} ${totalPolls}`,
+      `# HELP market_data_polls_failed_total Failed Horizon polls`,
+      `# TYPE market_data_polls_failed_total counter`,
+      `market_data_polls_failed_total{network="${NETWORK}"} ${failedPolls}`,
+      `# HELP market_data_active_requests Current in-flight HTTP requests`,
+      `# TYPE market_data_active_requests gauge`,
+      `market_data_active_requests ${activeRequests}`,
+    ].join("\n");
+    res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+    res.end(lines + "\n");
 
   } else if (url === "/api/market") {
     if (!latestSnapshot) { res.writeHead(503); res.end('{"error":"no data yet"}'); return; }

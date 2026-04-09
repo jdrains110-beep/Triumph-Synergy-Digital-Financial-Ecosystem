@@ -23,6 +23,12 @@ import type {
 // EXAMPLE: E-COMMERCE APPLICATION
 // =============================================================================
 
+const IS_SANDBOX = process.env.NEXT_PUBLIC_PI_SANDBOX === "true" || process.env.PI_NETWORK_MODE === "testnet";
+const PI_API_KEY = process.env.PI_API_KEY ||
+  (process.env.PI_NETWORK_MODE === "testnet"
+    ? process.env.PI_TESTNET_API_KEY
+    : process.env.PI_MAINNET_API_KEY) || "";
+
 export class ECommerceAppIntegration implements ApplicationIntegration {
   readonly appId = "ecommerce-app";
   readonly name = "Pi E-Commerce Store";
@@ -31,9 +37,9 @@ export class ECommerceAppIntegration implements ApplicationIntegration {
   constructor() {
     this.piPayments = createPiPayments({
       appId: this.appId,
-      apiKey: process.env.NEXT_PUBLIC_PI_API_KEY || "",
-      apiSecret: process.env.PI_API_SECRET || "",
-      sandbox: true,
+      apiKey: PI_API_KEY,
+      apiSecret: process.env.PI_API_SECRET || PI_API_KEY,
+      sandbox: IS_SANDBOX,
       completeCallback: async (paymentId: string, txid: string) => {
         console.log(`[E-Commerce] Payment completed: ${txid}`);
         // Handle order fulfillment
@@ -109,10 +115,10 @@ export const eCommerceApp: RegisteredApplication = {
   paymentConfig: {
     appId: "ecommerce-app",
     callbackUrl: "https://triumphsynergy.app/api/ecommerce/pi-callback",
-    sandbox: true,
+    sandbox: IS_SANDBOX,
   },
   categories: ["commerce", "retail"],
-  enabled: false,
+  enabled: true,
   createdAt: new Date(),
   updatedAt: new Date(),
   features: [
@@ -136,9 +142,9 @@ export class MarketplaceAppIntegration implements ApplicationIntegration {
   constructor() {
     this.piPayments = createPiPayments({
       appId: this.appId,
-      apiKey: process.env.NEXT_PUBLIC_PI_API_KEY || "",
-      apiSecret: process.env.PI_API_SECRET || "",
-      sandbox: true,
+      apiKey: PI_API_KEY,
+      apiSecret: process.env.PI_API_SECRET || PI_API_KEY,
+      sandbox: IS_SANDBOX,
     });
   }
 
@@ -204,10 +210,10 @@ export const marketplaceApp: RegisteredApplication = {
   paymentConfig: {
     appId: "marketplace-app",
     callbackUrl: "https://triumphsynergy.app/api/marketplace/pi-callback",
-    sandbox: true,
+    sandbox: IS_SANDBOX,
   },
   categories: ["marketplace", "p2p"],
-  enabled: false,
+  enabled: true,
   createdAt: new Date(),
   updatedAt: new Date(),
   features: [
@@ -231,9 +237,9 @@ export class GamingAppIntegration implements ApplicationIntegration {
   constructor() {
     this.piPayments = createPiPayments({
       appId: this.appId,
-      apiKey: process.env.NEXT_PUBLIC_PI_API_KEY || "",
-      apiSecret: process.env.PI_API_SECRET || "",
-      sandbox: true,
+      apiKey: PI_API_KEY,
+      apiSecret: process.env.PI_API_SECRET || PI_API_KEY,
+      sandbox: IS_SANDBOX,
     });
   }
 
@@ -300,10 +306,10 @@ export const gamingApp: RegisteredApplication = {
   paymentConfig: {
     appId: "gaming-app",
     callbackUrl: "https://triumphsynergy.app/api/gaming/pi-callback",
-    sandbox: true,
+    sandbox: IS_SANDBOX,
   },
   categories: ["gaming", "entertainment"],
-  enabled: false,
+  enabled: true,
   createdAt: new Date(),
   updatedAt: new Date(),
   features: ["Game Titles", "Leaderboards", "In-Game Purchases", "Pi Rewards"],

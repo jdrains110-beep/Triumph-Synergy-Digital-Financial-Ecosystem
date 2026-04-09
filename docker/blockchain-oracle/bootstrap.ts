@@ -227,10 +227,29 @@ const server = http.createServer((req, res) => {
       network: NETWORK, ledgersReceived, txsReceived, reconnects }));
 
   } else if (url === "/metrics") {
-    res.writeHead(200);
-    res.end(safeStringify({ uptime_s: process.uptime(), ledgers_received: ledgersReceived,
-      txs_received: txsReceived, reconnects, active_requests: activeRequests,
-      memory: process.memoryUsage() }));
+    const mem = process.memoryUsage();
+    const lines = [
+      `# HELP process_uptime_seconds Service uptime in seconds`,
+      `# TYPE process_uptime_seconds gauge`,
+      `process_uptime_seconds{service="blockchain-oracle",network="${NETWORK}"} ${process.uptime().toFixed(3)}`,
+      `# HELP nodejs_heap_used_bytes Node.js heap used bytes`,
+      `# TYPE nodejs_heap_used_bytes gauge`,
+      `nodejs_heap_used_bytes{service="blockchain-oracle"} ${mem.heapUsed}`,
+      `# HELP oracle_ledgers_received_total Pi ledgers received`,
+      `# TYPE oracle_ledgers_received_total counter`,
+      `oracle_ledgers_received_total{network="${NETWORK}"} ${ledgersReceived}`,
+      `# HELP oracle_txs_received_total Pi transactions received`,
+      `# TYPE oracle_txs_received_total counter`,
+      `oracle_txs_received_total{network="${NETWORK}"} ${txsReceived}`,
+      `# HELP oracle_reconnects_total SSE stream reconnect count`,
+      `# TYPE oracle_reconnects_total counter`,
+      `oracle_reconnects_total ${reconnects}`,
+      `# HELP oracle_active_requests Current in-flight HTTP requests`,
+      `# TYPE oracle_active_requests gauge`,
+      `oracle_active_requests ${activeRequests}`,
+    ].join("\n");
+    res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+    res.end(lines + "\n");
 
   } else if (url === "/api/events" && pool) {
     const raw = req.url ?? "";

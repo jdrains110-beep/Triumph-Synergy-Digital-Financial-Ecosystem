@@ -25,8 +25,23 @@ const server = http.createServer((req, res) => {
     res.writeHead(ready ? 200 : 503);
     res.end(safeStringify({ service: "trillion-vault", status: ready ? "healthy" : "starting", network: networkType, activeRequests, details: status }));
   } else if (req.url === "/metrics") {
-    res.writeHead(200);
-    res.end(safeStringify({ active_requests: activeRequests, ready, uptime_s: process.uptime(), memory: process.memoryUsage() }));
+    const mem = process.memoryUsage();
+    const lines = [
+      `# HELP process_uptime_seconds Service uptime in seconds`,
+      `# TYPE process_uptime_seconds gauge`,
+      `process_uptime_seconds{service="vault"} ${process.uptime().toFixed(3)}`,
+      `# HELP nodejs_heap_used_bytes Node.js heap used bytes`,
+      `# TYPE nodejs_heap_used_bytes gauge`,
+      `nodejs_heap_used_bytes{service="vault"} ${mem.heapUsed}`,
+      `# HELP service_active_requests Current in-flight HTTP requests`,
+      `# TYPE service_active_requests gauge`,
+      `service_active_requests{service="vault"} ${activeRequests}`,
+      `# HELP service_ready Service readiness`,
+      `# TYPE service_ready gauge`,
+      `service_ready{service="vault"} ${ready ? 1 : 0}`,
+    ].join("\n");
+    res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+    res.end(lines + "\n");
   } else {
     res.writeHead(404); res.end('{"error":"not found"}');
   }
