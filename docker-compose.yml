@@ -508,6 +508,40 @@ services:
       start_period: 25s
 
   # ========================================================================
+  # TOKENIZATION ENGINE — Pi domain + allodial deed tokenization
+  # ========================================================================
+
+  tokenization-engine:
+    build:
+      context: .
+      dockerfile: docker/tokenization-engine/Dockerfile
+    container_name: triumph-tokenization-engine
+    <<: *common
+    mem_limit: 256m
+    environment:
+      <<: [*db-env, *pi-env]
+      NODE_OPTIONS: "--max-old-space-size=192"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      TOKENIZATION_HMAC_KEY: ${TOKENIZATION_HMAC_KEY:-triumph-tokenization-fortress-2026}
+    expose:
+      - "8089"
+    networks:
+      - triumph-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      compliance:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8089/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 25s
+
+  # ========================================================================
   # PROMETHEUS — Metrics collection
   # ========================================================================
 
@@ -622,6 +656,8 @@ services:
 # ==========================================================================
 
 volumes:
+  triumph_tokenization_data:
+    name: triumph_tokenization_data
   triumph_pg_data:
     name: triumph_pg_data
   triumph_redis_data:

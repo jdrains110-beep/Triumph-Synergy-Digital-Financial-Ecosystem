@@ -171,6 +171,19 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
+  # Tokenization Engine — Pi domain + allodial deed tokenization
+  # ==========================================================================
+  - job_name: 'triumph-tokenization-engine'
+    static_configs:
+      - targets: ['triumph-tokenization-engine:8089']
+        labels:
+          service: 'tokenization-engine'
+          type: 'pi-domain-allodial-deed'
+          token_standards: 'PI-721,PI-20,PI-1155'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
   # Payment Processor
   # ==========================================================================
   - job_name: 'triumph-payment-processor'
