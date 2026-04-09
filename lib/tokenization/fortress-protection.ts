@@ -223,11 +223,41 @@ function layer15_kycVerification(ownerUsername: string): FortressLayer {
     verified ? `Pi KYC verified: @${ownerUsername}` : "Username too short — KYC unverifiable");
 }
 
-function layer16_regulatoryCompliance(assetType: "domain" | "deed"): FortressLayer {
-  // Both domains and deeds comply under Pi ecosystem rules + UCC § 1-308
-  return layer(16, "Regulatory Compliance Ruleset",
-    "Verify asset meets Pi Ecosystem Developer Terms + UCC § 1-308 reservations",
-    "PASS", `assetType=${assetType} — compliant under Pi Developer Terms`);
+async function layer16_regulatoryCompliance(assetType: "domain" | "deed"): Promise<FortressLayer> {
+  // Utility-Gated: Pi's thesis is that utility creates sustained value.
+  // Tokenization only passes when the Pi Network Utility Value Index confirms
+  // the network has sufficient real on-chain activity to back the asset.
+  const MIN_UTILITY_SCORE = 25; // minimum acceptable utility score (0-100)
+  const mlUrl = process.env.ML_ENGINE_URL ?? "http://triumph-ml-engine:8090";
+
+  try {
+    const res = await fetch(`${mlUrl}/api/ml/utility-index`, {
+      signal: AbortSignal.timeout(4_000),
+    });
+    if (res.ok) {
+      const data = await res.json() as {
+        utilityScore: number;
+        utilityRatio: number;
+        speculativeRatio: number;
+        trend: string;
+        sustained: boolean;
+        piThesis: string;
+      };
+      const passes = data.utilityScore >= MIN_UTILITY_SCORE;
+      const status: FortressLayerStatus = passes ? "PASS" : "WARN";
+      return layer(16, "Utility-Gated Regulatory Compliance",
+        `Pi Network utility must back asset (score ≥ ${MIN_UTILITY_SCORE}) — UCC § 1-308 + Pi Developer Terms`,
+        status,
+        `utilityScore=${data.utilityScore}/100 trend=${data.trend} sustained=${data.sustained} `
+        + `assetType=${assetType} utilityRatio=${(data.utilityRatio * 100).toFixed(1)}%`);
+    }
+  } catch {
+    // ML engine unreachable — fall back to static compliance check
+  }
+  // Fallback: static compliance (both asset types comply under Pi Developer Terms)
+  return layer(16, "Regulatory Compliance Ruleset (fallback)",
+    "ML utility gate unavailable — applying static Pi Developer Terms compliance",
+    "PASS", `assetType=${assetType} — compliant under Pi Developer Terms [fallback]`);
 }
 
 function layer17_disputeLock(tokenId: string): FortressLayer {
@@ -340,7 +370,7 @@ export async function runFortressProtection(input: FortressInput): Promise<Fortr
     layer13_crossChainVerification(input.piLedger, input.stellarLedger),
     layer14_amlScreening(input.ownerAddress),
     layer15_kycVerification(input.ownerUsername),
-    layer16_regulatoryCompliance(input.assetType),
+    await layer16_regulatoryCompliance(input.assetType),
     layer17_disputeLock(input.tokenId),
     layer18_notarizationAnchor(input.legalDescription ?? input.domain),
     layer19_quantumResistantHash(input.payload),

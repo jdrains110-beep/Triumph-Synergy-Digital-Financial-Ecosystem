@@ -60,6 +60,9 @@ data_pts_gauge      = Gauge("ml_training_data_points",   "Points in anomaly roll
 ledger_gauge        = Gauge("ml_pi_ledger_sequence",     "Latest Pi ledger sequence")
 pi_price_gauge      = Gauge("ml_pi_price_usd",           "Pi price USD from live feed")
 retrain_cycle_gauge = Gauge("ml_retrain_cycle",          "Current retrain cycle number")
+utility_score_gauge = Gauge("ml_utility_score",          "Pi Network Utility Value Index (0-100)")
+speculative_gauge   = Gauge("ml_speculative_ratio",      "Speculative ratio of Pi price (0.0-1.0)")
+sustain_gauge       = Gauge("ml_sustainability_score",   "Sustained Value Analysis score (0-100)")
 
 anomaly_hist = Histogram("ml_anomaly_score_distribution", "Anomaly score 0-100",
     buckets=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
@@ -202,6 +205,156 @@ class Models:
             self._fraud_fi = {}
 
         print(f"[ml-engine] ✓ Models bootstrapped  anomaly={len(anomaly_buf)}pts  fraud={len(fraud_buf)}pts  price={len(price_buf)}pts")
+
+    # ── Model 5: Utility Value Index ──────────────────────────────────────────
+
+    def utility_index(self) -> dict:
+        """
+        Pi Network Utility Value Index — measures real on-chain utility vs
+        speculative demand.  Pi's thesis: utility creates sustained value.
+
+        Components:
+          - tx_volume_score   : normalised transaction throughput (0-100)
+          - fee_burn_score    : Pi fee burn rate relative to baseline (0-100)
+          - ledger_rate_score : ledger advancement health (0-100)
+          - retention_score   : rolling RSI-derived retention signal (0-100)
+
+        UtilityScore = weighted harmonic mean of components.
+        SpeculativeRatio = 1 - (utilityScore / 100)  — proportion of price
+                           not explained by on-chain activity.
+        """
+        # --- collect raw signals from price_buf ----------------------------
+        if len(price_buf) >= 5:
+            arr = np.array(list(price_buf)[-60:])
+            fees  = arr[:, 1]
+            txcts = arr[:, 2]
+        else:
+            fees  = np.array([float(live["base_fee"])])
+            txcts = np.array([float(live["tx_count"])])
+
+        # Transaction volume score — normalise against a healthy Pi baseline
+        #   ~1 500 tx/ledger considered full utilisation
+        avg_tx   = float(np.mean(txcts))
+        tx_score = min(100.0, (avg_tx / 1500.0) * 100.0)
+
+        # Fee burn score — higher base fee signals network demand
+        #   Baseline: 100 stroops.  Cap at 200 stroops = 100 pts
+        avg_fee   = float(np.mean(fees))
+        fee_score = min(100.0, ((avg_fee - 100.0) / 100.0) * 100.0 + 50.0)
+        fee_score = max(0.0, fee_score)
+
+        # Ledger rate score — healthy Pi advances ~1 ledger / 5 s
+        if len(price_buf) >= 2:
+            arr2    = np.array(list(price_buf)[-10:])
+            seqs    = arr2[:, 0]
+            times   = arr2[:, 3]
+            elapsed = max(times[-1] - times[0], 1.0)
+            ledger_rate = (seqs[-1] - seqs[0]) / elapsed  # seqs/sec
+            # Ideal ~0.2 seqs/sec → 100 pts
+            lr_score = min(100.0, (ledger_rate / 0.2) * 100.0)
+        else:
+            lr_score = 50.0
+
+        # Retention score — reuse RSI signal as proxy for holder engagement
+        sent = self.sentiment()
+        rsi  = sent.get("rsi", 50.0)
+        # RSI 40-60 = neutral utility zone (not pump/dump)
+        retention = 100.0 - abs(rsi - 50.0) * 2.0   # peak at RSI=50
+
+        # Weighted harmonic mean (weights: tx 40%, fee 20%, lr 20%, retention 20%)
+        w = [0.40, 0.20, 0.20, 0.20]
+        s = [tx_score, fee_score, lr_score, retention]
+        # avoid division by zero
+        denom = sum(w[i] / max(s[i], 0.001) for i in range(4))
+        utility_score = round(1.0 / denom, 2)
+
+        speculative_ratio = round(max(0.0, 1.0 - utility_score / 100.0), 4)
+        utility_ratio     = round(utility_score / 100.0, 4)
+
+        trend = (
+            "EXPANDING"   if utility_score >= 65 else
+            "STABLE"      if utility_score >= 40 else
+            "CONTRACTING"
+        )
+        sustained = utility_score >= 50
+
+        return {
+            "utilityScore":      round(utility_score, 2),
+            "speculativeRatio":  speculative_ratio,
+            "utilityRatio":      utility_ratio,
+            "sustained":         sustained,
+            "trend":             trend,
+            "piThesis":          "Utility creates value that can be sustained",
+            "components": {
+                "txVolumeScore":   round(tx_score,   2),
+                "feeBurnScore":    round(fee_score,  2),
+                "ledgerRateScore": round(lr_score,   2),
+                "retentionScore":  round(retention,  2),
+            },
+            "live": {
+                "avgTxPerLedger": round(avg_tx, 1),
+                "avgBaseFee":     round(avg_fee, 1),
+                "ledgerSeq":      live["ledger"],
+                "piPriceUsd":     live["pi_price_usd"],
+            },
+            "model": "UtilityValueIndex-v1",
+            "basedOnPoints": len(price_buf),
+        }
+
+    # ── Model 6: Sustained Value Analysis ────────────────────────────────────
+
+    def sustained_value(self) -> dict:
+        """
+        Combines price prediction + utility index + sentiment into a single
+        Sustained Value Analysis.  Answers: 'Is Pi's current price backed by
+        real utility, or is it speculative?'
+        """
+        ui   = self.utility_index()
+        pr   = self.predict_price()
+        sent = self.sentiment()
+
+        price_usd     = live["pi_price_usd"]
+        predicted_usd = pr.get("predictedPiUsd", price_usd)
+        utility_ratio = ui["utilityRatio"]
+
+        # Utility-backed price = what Pi *should* be worth from pure utility
+        utility_backed_price = round(predicted_usd * utility_ratio, 4)
+        speculative_premium  = round(max(0.0, predicted_usd - utility_backed_price), 4)
+
+        # Confidence that current price is sustainable
+        sustainability_score = round(
+            (ui["utilityScore"] * 0.5) +
+            (sent["rsi"] * 0.3 / 100.0 * 100.0) +  # rsi normalised
+            (min(1.0, pr.get("confidence", 0.5)) * 20.0),
+            2,
+        )
+
+        rating = (
+            "STRONGLY_SUSTAINABLE" if sustainability_score >= 80 else
+            "SUSTAINABLE"          if sustainability_score >= 60 else
+            "MODERATELY_SUSTAINABLE" if sustainability_score >= 40 else
+            "SPECULATIVE"
+        )
+
+        return {
+            "sustainabilityScore":   round(sustainability_score, 2),
+            "rating":                rating,
+            "utilityBackedPriceUsd": utility_backed_price,
+            "speculativePremiumUsd": speculative_premium,
+            "currentPriceUsd":       price_usd,
+            "predictedPriceUsd":     predicted_usd,
+            "utilityScore":          ui["utilityScore"],
+            "speculativeRatio":      ui["speculativeRatio"],
+            "sentiment":             sent["sentiment"],
+            "priceTrend":            pr.get("trend", "NEUTRAL"),
+            "piThesis":              "Pi Network utility creates value that can be sustained",
+            "components": {
+                "utilityIndex":    ui,
+                "pricePrediction": pr,
+                "marketSentiment": sent,
+            },
+            "model": "SustainedValueAnalysis-v1",
+        }
 
     # ── Feature engineering ───────────────────────────────────────────────────
 
@@ -533,6 +686,8 @@ def health() -> dict:
             "fraud":     "GradientBoostingClassifier(n=100, depth=4)",
             "price":     "Ridge(alpha=1.0)",
             "sentiment": "RSI-14",
+            "utility":   "UtilityValueIndex-v1",
+            "sustained": "SustainedValueAnalysis-v1",
         },
         "trainingPoints": {
             "anomaly": len(anomaly_buf),
@@ -591,6 +746,25 @@ def sentiment() -> dict:
     return models.sentiment()
 
 
+@app.get("/api/ml/utility-index")
+def utility_index() -> dict:
+    """Pi Network Utility Value Index — real on-chain utility vs speculation."""
+    result = models.utility_index()
+    utility_score_gauge.set(result["utilityScore"])
+    speculative_gauge.set(result["speculativeRatio"])
+    return result
+
+
+@app.get("/api/ml/sustained-value")
+def sustained_value() -> dict:
+    """Sustained Value Analysis — is Pi's price backed by real utility?"""
+    result = models.sustained_value()
+    sustain_gauge.set(result["sustainabilityScore"])
+    utility_score_gauge.set(result["utilityScore"])
+    speculative_gauge.set(result["speculativeRatio"])
+    return result
+
+
 @app.get("/api/ml/stats")
 def stats() -> dict:
     return {
@@ -616,6 +790,16 @@ def stats() -> dict:
             "sentiment": {
                 "type": "RSI-14",
                 "dataPoints": len(price_buf),
+            },
+            "utility": {
+                "type": "UtilityValueIndex-v1",
+                "components": ["txVolumeScore", "feeBurnScore", "ledgerRateScore", "retentionScore"],
+                "dataPoints": len(price_buf),
+            },
+            "sustained": {
+                "type": "SustainedValueAnalysis-v1",
+                "inputs": ["utilityIndex", "pricePredictor", "sentiment"],
+                "piThesis": "Utility creates value that can be sustained",
             },
         },
         "training": {
