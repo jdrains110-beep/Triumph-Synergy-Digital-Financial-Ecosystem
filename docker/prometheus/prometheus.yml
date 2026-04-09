@@ -171,6 +171,19 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
+  # ML Engine — IsolationForest, GradientBoosting, Ridge, RSI
+  # ==========================================================================
+  - job_name: 'triumph-ml-engine'
+    static_configs:
+      - targets: ['triumph-ml-engine:8090']
+        labels:
+          service: 'ml-engine'
+          type: 'machine-learning'
+          models: 'IsolationForest,GradientBoosting,Ridge,RSI-14'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
   # Tokenization Engine — Pi domain + allodial deed tokenization
   # ==========================================================================
   - job_name: 'triumph-tokenization-engine'

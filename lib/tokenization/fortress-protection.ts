@@ -253,19 +253,49 @@ function layer19_quantumResistantHash(payload: string): FortressLayer {
     "PASS", `sha3-512=${qHash.slice(0, 16)}…`);
 }
 
-function layer20_neuralAnomalyScore(
+async function layer20_neuralAnomalyScore(
   valuationPi: string,
   ownerAddress: string,
-): FortressLayer {
-  // Statistical baseline deviation: flag if valuation is abnormally high
+  txVelocity = 1.0,
+  ledgerDelta = 0.0,
+): Promise<FortressLayer> {
   const val = parseFloat(valuationPi) || 0;
-  // Baseline: domains < 1M Pi, deeds < 100M Pi
+  const mlUrl = process.env.ML_ENGINE_URL ?? "http://triumph-ml-engine:8090";
+  try {
+    const res = await fetch(`${mlUrl}/api/ml/anomaly`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        valuationPi: val,
+        ownerAddress,
+        txVelocity,
+        ledgerDelta,
+      }),
+      signal: AbortSignal.timeout(4_000),
+    });
+    if (res.ok) {
+      const data = await res.json() as {
+        anomalyScore: number;
+        isAnomalous: boolean;
+        confidence: number;
+        model: string;
+      };
+      const status: FortressLayerStatus = data.isAnomalous ? "WARN" : "PASS";
+      return layer(20, "ML Neural Anomaly Detection",
+        `IsolationForest real-time anomaly scoring via ${data.model}`,
+        status,
+        `anomalyScore=${data.anomalyScore}/100 confidence=${data.confidence}% isAnomalous=${data.isAnomalous}`);
+    }
+  } catch {
+    // ML engine unavailable — degrade gracefully to heuristic
+  }
+  // Fallback heuristic when ML engine is unreachable
   const anomalous = val > 100_000_000;
-  const score = anomalous ? 85 : Math.min(100, Math.floor(Math.random() * 15) + 5);
-  return layer(20, "Neural Anomaly Detection",
-    "Statistical baseline check — flag abnormal valuations or patterns",
+  const score = anomalous ? 85 : Math.min(30, Math.floor(Math.random() * 10) + 2);
+  return layer(20, "Neural Anomaly Detection (fallback heuristic)",
+    "ML engine unavailable — applying threshold heuristic",
     anomalous ? "WARN" : "PASS",
-    `anomalyScore=${score}/100 valuation=${val} Pi`);
+    `anomalyScore=${score}/100 valuation=${val} Pi [fallback]`);
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -290,7 +320,7 @@ export interface FortressInput {
   sigCount?: number;
 }
 
-export function runFortressProtection(input: FortressInput): FortressProtectionResult {
+export async function runFortressProtection(input: FortressInput): Promise<FortressProtectionResult> {
   const nonce = input.nonce ?? randomNonce();
   const events = [`mint:${input.tokenId}`, `owner:${input.ownerAddress}`];
 
@@ -314,7 +344,7 @@ export function runFortressProtection(input: FortressInput): FortressProtectionR
     layer17_disputeLock(input.tokenId),
     layer18_notarizationAnchor(input.legalDescription ?? input.domain),
     layer19_quantumResistantHash(input.payload),
-    layer20_neuralAnomalyScore(input.valuationPi, input.ownerAddress),
+    await layer20_neuralAnomalyScore(input.valuationPi, input.ownerAddress),
   ];
 
   // Layer 21 — final fortress hash = SHA-256 of all 20 layer hashes

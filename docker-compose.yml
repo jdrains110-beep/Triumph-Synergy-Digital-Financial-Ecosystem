@@ -508,6 +508,37 @@ services:
       start_period: 25s
 
   # ========================================================================
+  # ML ENGINE — IsolationForest anomaly, GBM fraud, Ridge price, RSI sentiment
+  # ========================================================================
+
+  ml-engine:
+    build:
+      context: docker/ml-engine
+    container_name: triumph-ml-engine
+    <<: *common
+    mem_limit: 512m
+    mem_reservation: 256m
+    environment:
+      <<: [*db-env, *pi-env]
+      PORT: "8090"
+      PYTHONUNBUFFERED: "1"
+    expose:
+      - "8090"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      market-data:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  # ========================================================================
   # TOKENIZATION ENGINE — Pi domain + allodial deed tokenization
   # ========================================================================
 
@@ -523,6 +554,7 @@ services:
       NODE_OPTIONS: "--max-old-space-size=192"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       TOKENIZATION_HMAC_KEY: ${TOKENIZATION_HMAC_KEY:-triumph-tokenization-fortress-2026}
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
     expose:
       - "8089"
     networks:
@@ -533,6 +565,8 @@ services:
       redis:
         condition: service_healthy
       compliance:
+        condition: service_healthy
+      ml-engine:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8089/health"]
