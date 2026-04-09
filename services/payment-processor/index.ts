@@ -282,13 +282,34 @@ if (cluster.isPrimary && process.env.NODE_ENV === "production") {
   const numCPUs = Math.min(os.cpus().length, Number(process.env.WORKER_THREADS) || 4);
   console.log(`🎯 Master process starting ${numCPUs} workers`);
 
-  // Health check HTTP server on master
-  const healthServer = http.createServer((_req, res) => {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "healthy", workers: numCPUs, uptime: process.uptime() }));
+  // Health + Prometheus metrics server on master
+  const healthServer = http.createServer((req, res) => {
+    const url = req.url?.split('?')[0];
+    if (url === '/metrics') {
+      const mem = process.memoryUsage();
+      const lines = [
+        '# HELP triumph_payment_processor_workers Active worker count',
+        '# TYPE triumph_payment_processor_workers gauge',
+        `triumph_payment_processor_workers ${numCPUs}`,
+        '# HELP process_uptime_seconds Process uptime',
+        '# TYPE process_uptime_seconds counter',
+        `process_uptime_seconds ${process.uptime().toFixed(3)}`,
+        '# HELP process_resident_memory_bytes RSS memory',
+        '# TYPE process_resident_memory_bytes gauge',
+        `process_resident_memory_bytes ${mem.rss}`,
+        '# HELP process_heap_bytes Heap used',
+        '# TYPE process_heap_bytes gauge',
+        `process_heap_bytes ${mem.heapUsed}`,
+      ];
+      res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4; charset=utf-8' });
+      res.end(lines.join('\n') + '\n');
+    } else {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'healthy', workers: numCPUs, uptime: process.uptime() }));
+    }
   });
   healthServer.listen(8084, "0.0.0.0", () => {
-    console.log("🩺 Health endpoint listening on :8084");
+    console.log("🩺 Health+metrics endpoint listening on :8084");
   });
 
   for (let i = 0; i < numCPUs; i++) {
@@ -304,14 +325,28 @@ if (cluster.isPrimary && process.env.NODE_ENV === "production") {
   const processor = new PaymentProcessor();
 
   processor.initialize().then(() => {
-    // If running in single-process mode (not production cluster), also start health server
+    // Single-process mode health + metrics
     if (!cluster.isWorker) {
-      const healthServer = http.createServer((_req, res) => {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ status: "healthy", uptime: process.uptime() }));
+      const healthServer = http.createServer((req, res) => {
+        const url = req.url?.split('?')[0];
+        if (url === '/metrics') {
+          const lines = [
+            '# HELP triumph_payment_processor_uptime_seconds Process uptime',
+            '# TYPE triumph_payment_processor_uptime_seconds counter',
+            `triumph_payment_processor_uptime_seconds ${process.uptime().toFixed(3)}`,
+            '# HELP process_resident_memory_bytes Resident memory',
+            '# TYPE process_resident_memory_bytes gauge',
+            `process_resident_memory_bytes ${process.memoryUsage().rss}`,
+          ];
+          res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4; charset=utf-8' });
+          res.end(lines.join('\n') + '\n');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'healthy', uptime: process.uptime() }));
+        }
       });
       healthServer.listen(8084, "0.0.0.0", () => {
-        console.log("🩺 Health endpoint listening on :8084");
+        console.log("🩺 Health+metrics endpoint listening on :8084");
       });
     }
     processor.startProcessing().catch(console.error);

@@ -28,7 +28,7 @@ scrape_configs:
     metrics_path: /metrics
 
   # ==========================================================================
-  # Pi Central Node
+  # Pi Central Node — HTTP health/metrics server on :11626
   # ==========================================================================
   - job_name: 'pi-central-node'
     static_configs:
@@ -39,19 +39,14 @@ scrape_configs:
           priority: 'supreme'
           public_key: 'GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V'
     metrics_path: /metrics
-    scrape_interval: 10s
+    scrape_interval: 15s
 
   # ==========================================================================
-  # Pi Triumph App
+  # Pi Triumph App — health check only (no Prometheus metrics endpoint)
   # ==========================================================================
-  - job_name: 'pi-triumph-app'
-    static_configs:
-      - targets: ['triumph-app:3000']
-        labels:
-          service: 'triumph-app'
-          type: 'web'
-    metrics_path: /api/metrics
-    scrape_interval: 15s
+  # NOTE: triumph-app is a Next.js app — no native /metrics. Monitored via
+  # nginx access logs and process-level metrics from the node exporter.
+  # Removed to prevent false-positive "down" alerts.
 
   # ==========================================================================
   # Pi Transaction Engine

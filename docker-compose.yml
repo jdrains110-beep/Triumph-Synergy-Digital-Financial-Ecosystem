@@ -569,7 +569,7 @@ services:
   # REDIS EXPORTER — exposes redis metrics for Prometheus
   # ========================================================================
   redis-exporter:
-    image: oliver006/redis_exporter:latest
+    image: oliver006/redis_exporter:alpine
     container_name: triumph-redis-exporter
     <<: *common
     mem_limit: 32m

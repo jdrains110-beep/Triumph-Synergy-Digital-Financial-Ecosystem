@@ -201,15 +201,32 @@ const server = http.createServer((req, res) => {
     res.writeHead(systemReady ? 200 : 503);
     res.end(safeStringify(payload, 2));
   } else if (url === "/metrics") {
-    res.writeHead(200);
-    res.end(safeStringify({
-      active_requests: activeRequests,
-      max_concurrent: MAX_CONCURRENT,
-      tracked_ips: ipHits.size,
-      system_ready: systemReady,
-      uptime_s: process.uptime(),
-      memory: process.memoryUsage(),
-    }));
+    const mem = process.memoryUsage();
+    const lines = [
+      "# HELP triumph_central_node_active_requests Current in-flight requests",
+      "# TYPE triumph_central_node_active_requests gauge",
+      `triumph_central_node_active_requests ${activeRequests}`,
+      "# HELP triumph_central_node_max_concurrent Configured concurrency limit",
+      "# TYPE triumph_central_node_max_concurrent gauge",
+      `triumph_central_node_max_concurrent ${MAX_CONCURRENT}`,
+      "# HELP triumph_central_node_tracked_ips Distinct IPs seen in rate-limit window",
+      "# TYPE triumph_central_node_tracked_ips gauge",
+      `triumph_central_node_tracked_ips ${ipHits.size}`,
+      "# HELP triumph_central_node_ready Whether the node finished initializing",
+      "# TYPE triumph_central_node_ready gauge",
+      `triumph_central_node_ready ${systemReady ? 1 : 0}`,
+      "# HELP process_uptime_seconds Process uptime in seconds",
+      "# TYPE process_uptime_seconds counter",
+      `process_uptime_seconds ${process.uptime().toFixed(3)}`,
+      "# HELP process_resident_memory_bytes RSS memory in bytes",
+      "# TYPE process_resident_memory_bytes gauge",
+      `process_resident_memory_bytes ${mem.rss}`,
+      "# HELP process_heap_bytes Heap used in bytes",
+      "# TYPE process_heap_bytes gauge",
+      `process_heap_bytes ${mem.heapUsed}`,
+    ];
+    res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+    res.end(lines.join("\n") + "\n");
   } else {
     res.writeHead(404);
     res.end('{"error":"not found"}');
