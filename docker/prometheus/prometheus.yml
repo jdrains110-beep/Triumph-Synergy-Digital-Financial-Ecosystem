@@ -32,7 +32,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-central-node'
     static_configs:
-      - targets: ['pi-central-node:11626']
+      - targets: ['triumph-central-node:11626']
         labels:
           service: 'central-node'
           node_type: 'central'
@@ -46,7 +46,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-triumph-app'
     static_configs:
-      - targets: ['pi-triumph-app:3000']
+      - targets: ['triumph-app:3000']
         labels:
           service: 'triumph-app'
           type: 'web'
@@ -58,7 +58,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-transaction-engine'
     static_configs:
-      - targets: ['pi-transaction-engine:8080']
+      - targets: ['triumph-transaction-engine:8080']
         labels:
           service: 'transaction-engine'
           type: 'hyper-transaction'
@@ -71,7 +71,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-trillion-vault'
     static_configs:
-      - targets: ['pi-trillion-vault:8081']
+      - targets: ['triumph-vault:8081']
         labels:
           service: 'trillion-vault'
           type: 'vault'
@@ -84,7 +84,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-smart-contracts'
     static_configs:
-      - targets: ['pi-smart-contracts:8082']
+      - targets: ['triumph-smart-contracts:8082']
         labels:
           service: 'smart-contracts'
           type: 'execution-engine'
@@ -97,7 +97,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-scp-upgrader'
     static_configs:
-      - targets: ['pi-scp-upgrader:8083']
+      - targets: ['triumph-scp-upgrader:8083']
         labels:
           service: 'scp-upgrader'
           type: 'protocol-sync'
@@ -109,7 +109,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-postgres'
     static_configs:
-      - targets: ['pi-postgres:5432']
+      - targets: ['triumph-postgres:5432']
         labels:
           service: 'postgres'
           type: 'database'
@@ -121,7 +121,7 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-redis'
     static_configs:
-      - targets: ['pi-redis:6379']
+      - targets: ['triumph-redis:6379']
         labels:
           service: 'redis'
           type: 'cache'
@@ -133,9 +133,68 @@ scrape_configs:
   # ==========================================================================
   - job_name: 'pi-nginx'
     static_configs:
-      - targets: ['pi-nginx:80']
+      - targets: ['triumph-nginx:80']
         labels:
           service: 'nginx'
           type: 'load-balancer'
     metrics_path: /metrics
     scrape_interval: 15s
+  # ==========================================================================
+  # Market Data Service
+  # ==========================================================================
+  - job_name: 'triumph-market-data'
+    static_configs:
+      - targets: ['triumph-market-data:8085']
+        labels:
+          service: 'market-data'
+          type: 'data-relay'
+    metrics_path: /metrics
+    scrape_interval: 5s
+
+  # ==========================================================================
+  # Blockchain Oracle
+  # ==========================================================================
+  - job_name: 'triumph-blockchain-oracle'
+    static_configs:
+      - targets: ['triumph-blockchain-oracle:8086']
+        labels:
+          service: 'blockchain-oracle'
+          type: 'event-stream'
+    metrics_path: /metrics
+    scrape_interval: 5s
+
+  # ==========================================================================
+  # Compliance Engine
+  # ==========================================================================
+  - job_name: 'triumph-compliance'
+    static_configs:
+      - targets: ['triumph-compliance:8087']
+        labels:
+          service: 'compliance'
+          type: 'kyc-aml'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # DEX Engine
+  # ==========================================================================
+  - job_name: 'triumph-dex'
+    static_configs:
+      - targets: ['triumph-dex:8088']
+        labels:
+          service: 'dex'
+          type: 'exchange'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Payment Processor
+  # ==========================================================================
+  - job_name: 'triumph-payment-processor'
+    static_configs:
+      - targets: ['triumph-payment-processor:8084']
+        labels:
+          service: 'payment-processor'
+          type: 'queue'
+    metrics_path: /metrics
+    scrape_interval: 10s

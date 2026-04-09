@@ -21,14 +21,40 @@ export type PiPaymentPayload = {
 export class PiSdkVerifier {
   private readonly piApiKey: string;
   private readonly apiSecret: string;
+  private readonly networkMode: string;
+  private readonly piApiUrl: string;
 
   constructor() {
-    this.piApiKey = process.env.PI_API_KEY || "";
-    this.apiSecret = process.env.PI_API_SECRET || "";
+    this.networkMode = process.env.PI_NETWORK_MODE ?? "mainnet";
+
+    // Select the right key for the active network; fall back to generic PI_API_KEY
+    if (this.networkMode === "testnet") {
+      this.piApiKey =
+        process.env.PI_TESTNET_API_KEY ??
+        process.env.PI_API_KEY ??
+        "";
+      this.piApiUrl =
+        process.env.PI_API_URL ?? "https://api.testnet.minepi.com";
+    } else {
+      this.piApiKey =
+        process.env.PI_MAINNET_API_KEY ??
+        process.env.PI_API_KEY ??
+        "";
+      this.piApiUrl =
+        process.env.PI_API_URL ?? "https://api.minepi.com";
+    }
+
+    // API secret for HMAC signing — falls back to the API key itself
+    this.apiSecret =
+      process.env.PI_API_SECRET ?? this.piApiKey;
 
     if (!this.piApiKey) {
       console.warn(
-        "[PiSdkVerifier] PI_API_KEY not set - verification may fail"
+        `[PiSdkVerifier] PI_API_KEY not set for ${this.networkMode} - verification may fail`
+      );
+    } else {
+      console.log(
+        `[PiSdkVerifier] Initialized for ${this.networkMode} — key: ${this.piApiKey.slice(0, 8)}...`
       );
     }
   }
@@ -106,10 +132,10 @@ export class PiSdkVerifier {
       // In production environment:
       if (process.env.NODE_ENV === "production" && this.piApiKey) {
         const response = await fetch(
-          `https://api.minepi.com/v2/payments/${transactionId}`,
+          `${this.piApiUrl}/v2/payments/${transactionId}`,
           {
             headers: {
-              Authorization: `Bearer ${this.piApiKey}`,
+              Authorization: `Key ${this.piApiKey}`,
             },
           }
         );

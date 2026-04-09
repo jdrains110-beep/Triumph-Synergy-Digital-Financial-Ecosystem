@@ -10,7 +10,7 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://pi-prometheus:9090
+    url: http://triumph-prometheus:9090
     isDefault: true
     editable: false
     jsonData:
@@ -23,7 +23,7 @@ datasources:
   - name: PostgreSQL
     type: postgres
     access: proxy
-    url: pi-postgres:5432
+    url: triumph-postgres:5432
     database: triumph_synergy
     user: postgres
     secureJsonData:

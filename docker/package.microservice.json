@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@stellar/stellar-sdk": "^13.1.0"
+    "@stellar/stellar-sdk": "^13.1.0",
+    "redis": "^5.10.0",
+    "pg": "^8.13.0"
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
