@@ -4,15 +4,13 @@ WORKDIR /app
 
 RUN apk add --no-cache curl tini
 
-# Install dependencies
-COPY package.json tsconfig.json ./
-RUN npm install
+# Install production dependencies only
+COPY package.json ./
+RUN npm install --omit=dev
 
-# Copy source
-COPY . .
-
-# Build TypeScript
-RUN npm run build && npm prune --omit=dev
+# Copy pre-compiled dist and source
+COPY dist/ ./dist/
+COPY index.ts ./
 
 # Set memory limit
 ENV NODE_ENV=production

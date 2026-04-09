@@ -38,5 +38,5 @@ datasources:
   - name: Redis
     type: redis-datasource
     access: proxy
-    url: redis://pi-redis:6379
+    url: redis://triumph-redis:6379
     editable: false
