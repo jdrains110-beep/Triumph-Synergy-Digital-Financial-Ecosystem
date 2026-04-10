@@ -440,7 +440,8 @@ services:
     environment:
       <<: [*db-env, *pi-env]
       MARKET_POLL_MS: 5000
-      # KEY FIX: market data reads live Pi ledger via bridge connector
+      # KEY FIX: market data reads live Pi ledger via bridge connector + Pi price from ML engine
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
       NODE_OPTIONS: "--max-old-space-size=96"

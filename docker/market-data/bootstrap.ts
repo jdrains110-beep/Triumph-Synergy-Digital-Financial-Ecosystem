@@ -25,6 +25,8 @@ const DB_URL      = process.env.DATABASE_URL         ?? process.env.POSTGRES_URL
 const POLL_MS     = parseInt(process.env.MARKET_POLL_MS ?? "5000", 10);
 const NETWORK     = process.env.PI_NETWORK_MODE ?? "mainnet";
 const PI_API_KEY  = process.env.PI_API_KEY ?? "";
+const ML_ENGINE_URL = process.env.ML_ENGINE_URL ?? "http://triumph-ml-engine:8090";
+const PI_BRIDGE_URL = process.env.PI_BRIDGE_URL ?? "http://triumph-pi-bridge-connector:8092";
 
 const horizonHeaders = (): Record<string, string> => ({
   Accept: "application/json",
@@ -34,11 +36,43 @@ const horizonHeaders = (): Record<string, string> => ({
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let latestSnapshot: Record<string, unknown> | null = null;
+let piPriceUsd: number | null = null;        // from ML engine
+let latestBridgeLedger: Record<string, unknown> | null = null; // from pi-bridge
 let totalPolls = 0;
 let failedPolls = 0;
 let ready = false;
 let shuttingDown = false;
 let activeRequests = 0;
+
+// ─── ML Engine price feed ─────────────────────────────────────────────────────
+
+async function refreshPiPrice() {
+  try {
+    const res = await fetch(`${ML_ENGINE_URL}/health`, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
+      const data = await res.json() as Record<string, unknown>;
+      if (typeof data.piPriceUsd === "number" && data.piPriceUsd > 0) {
+        piPriceUsd = data.piPriceUsd as number;
+        await redis.set("market:pi:price_usd", piPriceUsd.toString(), { EX: 120 }).catch(() => {});
+      }
+    }
+  } catch { /* non-blocking */ }
+}
+
+async function refreshBridgeLedger() {
+  try {
+    const res = await fetch(`${PI_BRIDGE_URL}/pi-node/status`, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
+      latestBridgeLedger = await res.json() as Record<string, unknown>;
+    }
+  } catch { /* non-blocking */ }
+}
 
 // ─── Redis ────────────────────────────────────────────────────────────────────
 
@@ -109,14 +143,27 @@ async function poll() {
       fee_p95:       fees?.fee_charged?.p95     != null ? Number(fees.fee_charged.p95) / 1e7 : null,
       fee_p99:       fees?.fee_charged?.p99     != null ? Number(fees.fee_charged.p99) / 1e7 : null,
       captured_at: new Date().toISOString(),
+      // Pi price from ML engine (Ridge model)
+      pi_price_usd: piPriceUsd,
+      // Live bridge ledger pass-through
+      bridge_ledger_seq:    latestBridgeLedger ? (latestBridgeLedger as any).latest_ledger_seq : null,
+      bridge_network:       latestBridgeLedger ? (latestBridgeLedger as any).network_passphrase : null,
+      bridge_sync_lag_s:    latestBridgeLedger ? (latestBridgeLedger as any).sync_lag_seconds : null,
     };
 
     latestSnapshot = snapshot;
 
-    // Push to Redis
+    // Push to Redis (with price)
     const ttl = Math.ceil(POLL_MS / 1000) * 2;
-    await redis.set("market:pi:latest", JSON.stringify(snapshot), { EX: ttl }).catch(() => {});
-    await redis.publish("market:pi:ledger", JSON.stringify(snapshot)).catch(() => {});
+    const msg = JSON.stringify(snapshot);
+    await redis.set("market:pi:latest", msg, { EX: ttl }).catch(() => {});
+    await redis.publish("market:pi:ledger", msg).catch(() => {});
+    // Dedicated price channel for DEX + credit engine
+    if (piPriceUsd) {
+      const priceMsg = JSON.stringify({ pi_price_usd: piPriceUsd, source: "ml-engine", ts: snapshot.captured_at });
+      await redis.set("dex:pi:price_usd", piPriceUsd.toString(), { EX: 120 }).catch(() => {});
+      await redis.publish("dex:pi:price", priceMsg).catch(() => {});
+    }
 
     // Persist to Postgres
     if (pool && snapshot.ledger_seq) {
@@ -184,6 +231,16 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
     res.end(lines + "\n");
 
+  } else if (url === "/api/market/price") {
+    res.writeHead(piPriceUsd ? 200 : 503);
+    res.end(safeStringify({
+      pi_price_usd:  piPriceUsd,
+      source:        "ml-engine-ridge",
+      bridge_ledger: latestBridgeLedger ? (latestBridgeLedger as any).latest_ledger_seq : null,
+      network:       NETWORK,
+      ts:            new Date().toISOString(),
+    }));
+
   } else if (url === "/api/market") {
     if (!latestSnapshot) { res.writeHead(503); res.end('{"error":"no data yet"}'); return; }
     res.writeHead(200);
@@ -213,10 +270,15 @@ server.listen(PORT, "0.0.0.0", () =>
 async function start() {
   await redis.connect().catch((e: Error) => console.error("[redis] connect:", e.message));
   await ensureTable();
+  // Fetch Pi price + bridge status before first poll
+  await Promise.all([refreshPiPrice(), refreshBridgeLedger()]);
   await poll(); // immediate first poll
   ready = true;
   setInterval(poll, POLL_MS);
-  console.log(`✅ Market Data ONLINE — polling ${HORIZON_URL} every ${POLL_MS}ms`);
+  // Refresh price every 30s, bridge ledger every 10s
+  setInterval(refreshPiPrice, 30_000);
+  setInterval(refreshBridgeLedger, 10_000);
+  console.log(`✅ Market Data ONLINE — polling ${HORIZON_URL} every ${POLL_MS}ms | Pi price: $${piPriceUsd} | Bridge: ${PI_BRIDGE_URL}`);
 }
 
 start().catch(err => { console.error("❌ Market Data failed:", err); process.exit(1); });

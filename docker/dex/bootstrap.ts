@@ -323,7 +323,28 @@ async function start() {
     refreshPriceFromHorizon().catch(() => {});
   }).catch(() => {});
 
-  // Initial price fetch
+  // Subscribe to market-data ML price feed — Pi/USD price published every 30s
+  await redisSub.subscribe("dex:pi:price", (msg) => {
+    try {
+      const data = JSON.parse(msg) as Record<string, unknown>;
+      if (typeof data.pi_price_usd === "number" && (data.pi_price_usd as number) > 0) {
+        referencePrice = data.pi_price_usd as number;
+        console.log(`[dex] 💰 Pi price updated from market-data: $${referencePrice}`);
+      }
+    } catch {}
+  }).catch(() => {});
+
+  // Seed referencePrice from Redis key on startup (populated by market-data service)
+  const storedPrice = await redis.get("dex:pi:price_usd").catch(() => null);
+  if (storedPrice) {
+    const p = parseFloat(storedPrice);
+    if (p > 0) {
+      referencePrice = p;
+      console.log(`[dex] 💰 Pi price seeded from Redis: $${p}`);
+    }
+  }
+
+  // Initial price fetch from Horizon (may return null on testnet — Redis feed above is primary)
   await refreshPriceFromHorizon();
 
   // Periodic price refresh
