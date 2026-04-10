@@ -41,3 +41,8 @@ vitest.config.ts
 LICENSE*
 docs/
 tmp.*
+
+# Python microservices — not needed in Next.js build context
+docker/
+infrastructure/
+scripts/

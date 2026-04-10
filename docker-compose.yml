@@ -315,6 +315,10 @@ services:
     environment:
       <<: [*db-env, *pi-env]
       EXECUTION_CHANNELS: 10000
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=192"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     volumes:
@@ -444,7 +448,11 @@ services:
       # KEY FIX: market data reads live Pi ledger via bridge connector + Pi price from ML engine
       ML_ENGINE_URL: http://triumph-ml-engine:8090
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
@@ -478,7 +486,11 @@ services:
       CONTRACTS_URL: http://triumph-smart-contracts:8082
       # KEY FIX: oracle reads live Pi ledger events via bridge connector
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=144"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
@@ -542,6 +554,10 @@ services:
     mem_limit: 256m
     environment:
       <<: [*db-env, *pi-env]
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=192"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
@@ -575,6 +591,10 @@ services:
       <<: [*db-env, *pi-env]
       PORT: "8090"
       PYTHONUNBUFFERED: "1"
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
     expose:
       - "8090"
     networks:
@@ -607,6 +627,10 @@ services:
       <<: [*db-env, *pi-env]
       PORT: "8091"
       ML_ENGINE_URL: http://triumph-ml-engine:8090
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
       CREDIT_SANDBOX: "true"
       # Wire live bureau keys in production:
       # BUREAU_API_KEY_EQUIFAX:    ${BUREAU_API_KEY_EQUIFAX}
@@ -649,9 +673,12 @@ services:
       CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
       REDIS_URL: redis://triumph-redis:6379
       REFRESH_INTERVAL_S: "15"
-      UTILITY_FLOOR_USD: "1.00"
-      KYC_PREMIUM_PCT: "0.25"
-      PIONEER_PREMIUM_PCT: "0.10"
+      # CANONICAL Pi Dual-Value Constants — from lib/pios/pios-integration.ts
+      PI_INTERNAL_RATE: "314159.0"       # $314,159/Pi — sovereign/mined (1000x)
+      PI_EXTERNAL_RATE: "314.159"        # $314.159/Pi — market/traded
+      PI_INTERNAL_MULTIPLIER: "1000.0"   # 1000x multiplier
+      KYC_PREMIUM_PCT: "0.05"
+      PIONEER_PREMIUM_PCT: "0.03"
     expose:
       - "8093"
     networks:

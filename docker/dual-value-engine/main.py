@@ -54,11 +54,13 @@ REDIS_URL        = os.getenv("REDIS_URL",        "redis://triumph-redis:6379")
 PORT             = int(os.getenv("PORT", "8093"))
 REFRESH_INTERVAL = float(os.getenv("REFRESH_INTERVAL_S", "15"))
 
-# Internal value constants
-UTILITY_FLOOR_USD    = float(os.getenv("UTILITY_FLOOR_USD", "1.00"))   # 1 Pi ≥ $1 internal floor
-KYC_PREMIUM_PCT      = float(os.getenv("KYC_PREMIUM_PCT", "0.25"))     # 25% premium for KYC
-PIONEER_PREMIUM_PCT  = float(os.getenv("PIONEER_PREMIUM_PCT", "0.10")) # 10% for long-term holder
-MAX_INTERNAL_USD     = float(os.getenv("MAX_INTERNAL_USD", "1000.00")) # cap
+# CANONICAL Pi Dual-Value constants — source: lib/pios/pios-integration.ts
+# Internally mined/contributed Pi is 1000x more valuable than external market Pi
+PI_INTERNAL_RATE       = float(os.getenv("PI_INTERNAL_RATE",       "314159.0"))  # $314,159/Pi — sovereign/mined
+PI_EXTERNAL_RATE       = float(os.getenv("PI_EXTERNAL_RATE",       "314.159"))   # $314.159/Pi — market/traded
+PI_INTERNAL_MULTIPLIER = float(os.getenv("PI_INTERNAL_MULTIPLIER", "1000.0"))    # 1000x internal:external
+KYC_PREMIUM_PCT        = float(os.getenv("KYC_PREMIUM_PCT",        "0.05"))      # 5% KYC bonus on sovereign base
+PIONEER_PREMIUM_PCT    = float(os.getenv("PIONEER_PREMIUM_PCT",    "0.03"))      # 3% long-term holder bonus
 
 HQ_ADDRESS = os.getenv(
     "PI_SUPERNODE_ADDRESS",
@@ -93,9 +95,9 @@ state: dict[str, Any] = {
     "bridge_ledger_seq":     0,
     "bridge_network":        "Pi Network",
 
-    # Computed dual values
-    "internal_value_usd":    0.0,
-    "external_value_usd":    314.159,
+    # Computed dual values — canonical Pi rates from lib/pios/pios-integration.ts
+    "internal_value_usd":    314159.0,   # PI_INTERNAL_RATE: sovereign/mined (1000x)
+    "external_value_usd":    314.159,    # PI_EXTERNAL_RATE: market/traded
     "spread_ratio":          1.0,
     "spread_label":          "EQUILIBRIUM",
     "arbitrage_signal":      "HOLD",
@@ -122,48 +124,32 @@ def _client() -> httpx.AsyncClient:
 # ── Internal Value Calculator ──────────────────────────────────────────────────
 
 def _compute_internal_value(
-    utility_index: float,           # 0–100 ML utility score
-    ledger_seq: int,                # Pi network maturity proxy
-    tx_rate: float,                 # transactions per ledger (activity)
-    protocol_version: int,          # higher = more mature
     is_kyc: bool = True,
     wallet_age_days: int = 365,
     hq_multiplier: float = 1.0,
 ) -> dict[str, float]:
     """
-    Compute the INTERNAL (intrinsic / mined) value of 1 Pi in USD.
+    Compute the INTERNAL (sovereign / mined) value of 1 Pi in USD.
 
-    Formula:
-      base     = UTILITY_FLOOR_USD  (absolute minimum: $1.00)
-      utility  = base * (utility_index / 100) * 3.0   (utility premium up to 3x)
-      maturity = log10(max(ledger_seq, 1)) / 10        (network maturity 0–1)
-      activity = min(tx_rate / 100, 1.0) * 0.5        (tx activity bonus up to 0.5x)
-      protocol = (protocol_version / 20) * 0.20       (protocol maturity bonus)
-      kyc_mult = 1 + KYC_PREMIUM_PCT if is_kyc else 1.0
-      tenure   = min(wallet_age_days / 730, 1.0) * PIONEER_PREMIUM_PCT
+    Anchored to the canonical constant from lib/pios/pios-integration.ts:
+      PI_INTERNAL_RATE = $314,159 per Pi  (1000x the external market rate of $314.159)
+
+    Bonuses applied on top of the canonical base:
+      kyc_bonus    = PI_INTERNAL_RATE * KYC_PREMIUM_PCT        if is_kyc
+      tenure_bonus = PI_INTERNAL_RATE * min(age/730, 1.0) * PIONEER_PREMIUM_PCT
     """
-    import math
-
-    base      = UTILITY_FLOOR_USD
-    utility_p = base * (utility_index / 100.0) * 3.0
-    maturity  = math.log10(max(ledger_seq, 10)) / 10.0
-    activity  = min(tx_rate / 100.0, 1.0) * 0.5
-    protocol  = (min(protocol_version, 20) / 20.0) * 0.20
-    kyc_mult  = 1.0 + KYC_PREMIUM_PCT if is_kyc else 1.0
-    tenure    = min(wallet_age_days / 730.0, 1.0) * PIONEER_PREMIUM_PCT
-
-    raw_internal = (base + utility_p + maturity + activity + protocol) * kyc_mult * (1 + tenure)
-    internal = min(raw_internal * hq_multiplier, MAX_INTERNAL_USD)
+    kyc_bonus    = PI_INTERNAL_RATE * KYC_PREMIUM_PCT if is_kyc else 0.0
+    tenure_ratio = min(wallet_age_days / 730.0, 1.0)
+    tenure_bonus = PI_INTERNAL_RATE * tenure_ratio * PIONEER_PREMIUM_PCT
+    internal     = (PI_INTERNAL_RATE + kyc_bonus + tenure_bonus) * hq_multiplier
 
     return {
-        "base_floor":        round(base,      4),
-        "utility_premium":   round(utility_p, 4),
-        "maturity_bonus":    round(maturity,  4),
-        "activity_bonus":    round(activity,  4),
-        "protocol_bonus":    round(protocol,  4),
-        "kyc_multiplier":    round(kyc_mult,  4),
-        "tenure_bonus":      round(tenure,    4),
-        "internal_value_usd":round(internal,  4),
+        "canonical_base":    round(PI_INTERNAL_RATE,       4),
+        "multiplier":        round(PI_INTERNAL_MULTIPLIER, 1),
+        "kyc_bonus":         round(kyc_bonus,    4),
+        "tenure_bonus":      round(tenure_bonus, 4),
+        "hq_multiplier":     round(hq_multiplier, 4),
+        "internal_value_usd":round(internal,     4),
     }
 
 
@@ -238,13 +224,9 @@ async def _refresh() -> None:
 
     # Compute internal value
     internal_components = _compute_internal_value(
-        utility_index    = state["utility_index"] or 60.0,
-        ledger_seq       = state["bridge_ledger_seq"] or state["network_ledger_seq"] or 8_000_000,
-        tx_rate          = state["network_tx_rate"] or 50.0,
-        protocol_version = state["protocol_version"] or 20,
-        is_kyc           = True,
-        wallet_age_days  = 730,
-        hq_multiplier    = 1.10,  # HQ entity 10% sovereign premium
+        is_kyc          = True,
+        wallet_age_days = 730,
+        hq_multiplier   = 1.10,  # HQ entity 10% sovereign premium
     )
     internal_usd = internal_components["internal_value_usd"]
 
@@ -496,13 +478,9 @@ async def assess_address(address: str, wallet_age_days: int = 365, is_kyc: bool 
 
     # Compute internal value for this specific address
     components = _compute_internal_value(
-        utility_index    = state["utility_index"] or 60.0,
-        ledger_seq       = state["bridge_ledger_seq"] or 8_000_000,
-        tx_rate          = max(float(tx_count), 10.0),
-        protocol_version = state["protocol_version"] or 20,
-        is_kyc           = is_kyc,
-        wallet_age_days  = wallet_age_days,
-        hq_multiplier    = 1.0,
+        is_kyc          = is_kyc,
+        wallet_age_days = wallet_age_days,
+        hq_multiplier   = 1.0,
     )
 
     external = state["external_value_usd"]
@@ -544,13 +522,9 @@ async def assess_address(address: str, wallet_age_days: int = 365, is_kyc: bool 
 async def hq_dual_value():
     """Triumph Synergy HQ dual-value assessment — Jeremiah Joel Drains, Supreme Authority."""
     components = _compute_internal_value(
-        utility_index    = state["utility_index"] or 85.0,
-        ledger_seq       = state["bridge_ledger_seq"] or 8_000_000,
-        tx_rate          = 100.0,
-        protocol_version = state["protocol_version"] or 20,
-        is_kyc           = True,
-        wallet_age_days  = 730,
-        hq_multiplier    = 1.20,  # 20% HQ sovereign premium
+        is_kyc          = True,
+        wallet_age_days = 730,
+        hq_multiplier   = 1.20,  # 20% HQ sovereign premium
     )
 
     external = state["external_value_usd"]
