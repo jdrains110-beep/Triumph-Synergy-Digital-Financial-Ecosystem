@@ -197,6 +197,19 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
+  # Dual-Value Engine — Pi internal (mined) vs external (market) value
+  # ==========================================================================
+  - job_name: 'triumph-dual-value-engine'
+    static_configs:
+      - targets: ['triumph-dual-value-engine:8093']
+        labels:
+          service: 'dual-value-engine'
+          type: 'pi-valuation'
+          dimensions: 'internal-mined,external-market'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
   # Credit Engine — PiCredit Score + Bureau Integration
   # ==========================================================================
   - job_name: 'triumph-credit-engine'

@@ -214,6 +214,7 @@ services:
       INTERNAL_PI_MULTIPLIER: ${INTERNAL_PI_MULTIPLIER:-1.5}
       INTERNAL_PI_MIN_VALUE: ${INTERNAL_PI_MIN_VALUE:-10.0}
       EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -630,6 +631,48 @@ services:
       start_period: 30s
 
   # ========================================================================
+  # DUAL-VALUE ENGINE — Pi Internal (mined) vs External (market) value
+  # ========================================================================
+
+  dual-value-engine:
+    build:
+      context: docker/dual-value-engine
+    container_name: triumph-dual-value-engine
+    <<: *common
+    mem_limit: 256m
+    mem_reservation: 96m
+    environment:
+      PORT: "8093"
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      MARKET_DATA_URL: http://triumph-market-data:8085
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      REDIS_URL: redis://triumph-redis:6379
+      REFRESH_INTERVAL_S: "15"
+      UTILITY_FLOOR_USD: "1.00"
+      KYC_PREMIUM_PCT: "0.25"
+      PIONEER_PREMIUM_PCT: "0.10"
+    expose:
+      - "8093"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      ml-engine:
+        condition: service_healthy
+      market-data:
+        condition: service_healthy
+      pi-bridge-connector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8093/health')"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
   # TOKENIZATION ENGINE — Pi domain + allodial deed tokenization
   # ========================================================================
 
@@ -647,6 +690,7 @@ services:
       TOKENIZATION_HMAC_KEY: ${TOKENIZATION_HMAC_KEY:-triumph-tokenization-fortress-2026}
       ML_ENGINE_URL: http://triumph-ml-engine:8090
       CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
     expose:
       - "8089"
     networks:
