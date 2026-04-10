@@ -539,6 +539,45 @@ services:
       start_period: 45s
 
   # ========================================================================
+  # CREDIT ENGINE — PiCredit Score™ + Bureau Integration
+  # Equifax | Experian | TransUnion | FICO | VantageScore
+  # ========================================================================
+
+  credit-engine:
+    build:
+      context: docker/credit-engine
+    container_name: triumph-credit-engine
+    <<: *common
+    mem_limit: 256m
+    mem_reservation: 128m
+    environment:
+      <<: [*db-env, *pi-env]
+      PORT: "8091"
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      CREDIT_SANDBOX: "true"
+      # Wire live bureau keys in production:
+      # BUREAU_API_KEY_EQUIFAX:    ${BUREAU_API_KEY_EQUIFAX}
+      # BUREAU_API_KEY_EXPERIAN:   ${BUREAU_API_KEY_EXPERIAN}
+      # BUREAU_API_KEY_TRANSUNION: ${BUREAU_API_KEY_TRANSUNION}
+      # BUREAU_API_KEY_FICO:       ${BUREAU_API_KEY_FICO}
+      # BUREAU_API_KEY_VANTAGE:    ${BUREAU_API_KEY_VANTAGE}
+    expose:
+      - "8091"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      ml-engine:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8091/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
   # TOKENIZATION ENGINE — Pi domain + allodial deed tokenization
   # ========================================================================
 
@@ -555,6 +594,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       TOKENIZATION_HMAC_KEY: ${TOKENIZATION_HMAC_KEY:-triumph-tokenization-fortress-2026}
       ML_ENGINE_URL: http://triumph-ml-engine:8090
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
     expose:
       - "8089"
     networks:
@@ -564,7 +604,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      compliance:
+      credit-engine:
         condition: service_healthy
       ml-engine:
         condition: service_healthy

@@ -184,6 +184,19 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
+  # Credit Engine — PiCredit Score + Bureau Integration
+  # ==========================================================================
+  - job_name: 'triumph-credit-engine'
+    static_configs:
+      - targets: ['triumph-credit-engine:8091']
+        labels:
+          service: 'credit-engine'
+          type: 'credit-scoring'
+          bureaus: 'equifax,experian,transunion,fico,vantagescore'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
   # Tokenization Engine — Pi domain + allodial deed tokenization
   # ==========================================================================
   - job_name: 'triumph-tokenization-engine'
