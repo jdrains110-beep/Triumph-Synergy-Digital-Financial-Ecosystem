@@ -17,10 +17,32 @@ const startedAt = new Date().toISOString();
 let systemReady = false;
 let shuttingDown = false;
 
-// Horizon URL for live blockchain queries
-const HORIZON_URL = process.env.STELLAR_HORIZON_URL
-  || (networkType === "mainnet" ? "https://api.mainnet.minepi.com" : "https://api.testnet.minepi.com");
+// Horizon URL — prefer local Pi node via pi-bridge-connector over external internet
+// Priority: PI_BRIDGE_URL (new) > PI_INTERNAL_HORIZON_URL > PI_NODE via bridge > external fallback
+const PI_NODE_HOST     = process.env.PI_NODE_HOST;
+const PI_NODE_API_PORT = process.env.PI_NODE_API_PORT || "8000";
+const PI_BRIDGE_URL    = process.env.PI_BRIDGE_URL; // e.g. http://triumph-pi-bridge-connector:8092
+const PI_INTERNAL_HORIZON = process.env.PI_INTERNAL_HORIZON_URL;
+
+// Resolve the Horizon endpoint — local Pi node always preferred for lowest latency
+function resolveHorizonUrl(): string {
+  // 1. Direct local Pi node Horizon (fastest — same pi-bridge Docker network)
+  if (PI_NODE_HOST && PI_NODE_HOST !== "host.docker.internal") {
+    return `http://${PI_NODE_HOST}:${PI_NODE_API_PORT}`;
+  }
+  // 2. Pi bridge relay (goes through connector to Pi node)
+  if (PI_INTERNAL_HORIZON) return PI_INTERNAL_HORIZON;
+  // 3. Configured fallback
+  if (process.env.STELLAR_HORIZON_URL) return process.env.STELLAR_HORIZON_URL;
+  // 4. External Pi Horizon (last resort — external internet)
+  return networkType === "mainnet"
+    ? "https://api.mainnet.minepi.com"
+    : "https://api.testnet.minepi.com";
+}
+const HORIZON_URL = resolveHorizonUrl();
 const CENTRAL_KEY = process.env.CENTRAL_NODE_PUBLIC_KEY || "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";
+
+console.log(`[Central Node] Horizon URL: ${HORIZON_URL} (PI_NODE_HOST=${PI_NODE_HOST ?? "unset"})`);
 
 // Cached blockchain state (refreshed periodically)
 let chainAccount: { sequence: string; balances: unknown[]; lastChecked: string } | null = null;
@@ -195,6 +217,9 @@ const server = http.createServer((req, res) => {
         },
         pi_node_host: process.env.PI_NODE_HOST || "host.docker.internal",
         pi_node_port: process.env.PI_NODE_PORT || 31402,
+        pi_bridge_url: PI_BRIDGE_URL || `http://triumph-pi-bridge-connector:8092`,
+        pi_bridge_active: !!(PI_NODE_HOST && PI_NODE_HOST !== "host.docker.internal"),
+        horizon_resolves_local: HORIZON_URL.startsWith("http://"),
         backpressure: { activeRequests, maxConcurrent: MAX_CONCURRENT },
       },
     };

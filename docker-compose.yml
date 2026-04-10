@@ -105,6 +105,41 @@ services:
       start_period: 10s
 
   # ========================================================================
+  # PI BRIDGE CONNECTOR — Central Node ↔ Pi Node (testnet2) live link
+  # Polls testnet2:8000 (Horizon) every 5s, publishes to Redis, routes txs
+  # ========================================================================
+
+  pi-bridge-connector:
+    build:
+      context: docker/pi-bridge-connector
+    container_name: triumph-pi-bridge-connector
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    environment:
+      <<: [*db-env, *pi-env]
+      PORT: "8092"
+      PI_NODE_HOST: ${PI_NODE_CONTAINER:-testnet2}
+      PI_NODE_API_PORT: ${PI_NODE_API_PORT:-8000}
+      PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31402}
+      POLL_INTERVAL_S: "5"
+      CENTRAL_NODE_URL: http://triumph-central-node:11626
+    expose:
+      - "8092"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ========================================================================
   # PI CENTRAL NODE — Stellar Core Integration
   # ========================================================================
 
@@ -122,6 +157,10 @@ services:
       STELLAR_CORE_HTTP_PORT: 11626
       STELLAR_CORE_PEER_PORT: 11625
       PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
+      # KEY FIX: use local Pi node Horizon — same pi-bridge Docker network
+      STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      PI_INTERNAL_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       SCP_AUTO_UPGRADE: "true"
       SCP_SYNC_INTERVAL_MS: 30000
       NODE_OPTIONS: "--max-old-space-size=384"
@@ -140,6 +179,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      pi-bridge-connector:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11626/info"]
@@ -308,8 +349,11 @@ services:
       ROLLBACK_ON_FAILURE: "true"
       VERSION_CHECK_INTERVAL_MS: 60000
       PARAMETER_SYNC_INTERVAL_MS: 30000
+      # KEY FIX: use local Pi node for SCP data instead of external internet
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
       PI_TESTNET_HORIZON: https://api.testnet.minepi.com
+      PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       NODE_OPTIONS: "--max-old-space-size=96"
     volumes:
@@ -396,10 +440,14 @@ services:
     environment:
       <<: [*db-env, *pi-env]
       MARKET_POLL_MS: 5000
+      # KEY FIX: market data reads live Pi ledger via bridge connector
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
       - triumph-net
+      - pi-bridge
     depends_on:
       postgres:
         condition: service_healthy
@@ -426,6 +474,9 @@ services:
     environment:
       <<: [*db-env, *pi-env]
       CONTRACTS_URL: http://triumph-smart-contracts:8082
+      # KEY FIX: oracle reads live Pi ledger events via bridge connector
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
       NODE_OPTIONS: "--max-old-space-size=144"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:

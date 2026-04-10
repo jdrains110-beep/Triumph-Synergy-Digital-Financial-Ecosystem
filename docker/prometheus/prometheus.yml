@@ -184,6 +184,19 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
+  # Pi Bridge Connector — Central Node <-> Pi Node (testnet2) live bridge
+  # ==========================================================================
+  - job_name: 'triumph-pi-bridge-connector'
+    static_configs:
+      - targets: ['triumph-pi-bridge-connector:8092']
+        labels:
+          service: 'pi-bridge-connector'
+          type: 'node-bridge'
+          role: 'central-pi-node-sync'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
   # Credit Engine — PiCredit Score + Bureau Integration
   # ==========================================================================
   - job_name: 'triumph-credit-engine'
