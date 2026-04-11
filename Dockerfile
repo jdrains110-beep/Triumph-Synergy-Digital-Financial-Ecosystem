@@ -14,8 +14,10 @@ COPY package.json yarn.lock ./
 # BuildKit cache mount — yarn packages are cached in a Docker volume.
 # First build downloads packages; all subsequent builds reuse the cache
 # even when yarn.lock changes.  Never re-downloads unless new packages added.
+# NOTE: do NOT use --ignore-optional — lightningcss ships its musl binary
+# as an optional dep and Tailwind CSS/Turbopack needs it on Alpine.
 RUN --mount=type=cache,id=triumph-yarn-cache,target=/usr/local/share/.cache/yarn \
-    yarn install --frozen-lockfile --ignore-optional --network-timeout 30000 \
+    yarn install --frozen-lockfile --network-timeout 30000 \
     --cache-folder /usr/local/share/.cache/yarn
 
 # Rebuild the source code only when needed

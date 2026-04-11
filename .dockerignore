@@ -42,7 +42,11 @@ LICENSE*
 docs/
 tmp.*
 
-# Python microservices — not needed in Next.js build context
-docker/
+# Infra configs not needed in containers
+docker/grafana/
+docker/nginx/
+docker/postgres/
+docker/prometheus/
+docker/redis/
 infrastructure/
 scripts/
