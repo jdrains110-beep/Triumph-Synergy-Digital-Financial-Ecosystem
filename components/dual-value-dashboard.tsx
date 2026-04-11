@@ -89,6 +89,8 @@ type Report = {
     signal: string;
     premium_usd: number;
     premium_pct: number;
+    internal_value_usd: number;
+    external_value_usd: number;
   };
   thesis: string;
   generated_at: number;

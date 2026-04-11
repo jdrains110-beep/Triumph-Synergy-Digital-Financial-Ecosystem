@@ -154,7 +154,7 @@ export async function tokenizeDomain(
 
   // ── Fortress protection ────────────────────────────────────────────────────
   const payload = JSON.stringify({ tokenId, domain: cleanDomain, ownerAddress, valuationPi });
-  const fortress = runFortressProtection({
+  const fortress = await runFortressProtection({
     payload,
     ownerAddress,
     ownerUsername,

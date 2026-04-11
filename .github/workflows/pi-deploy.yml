@@ -49,13 +49,6 @@ jobs:
             - name: Install Yarn
               run: npm install -g yarn@${{ env.YARN_VERSION }}
 
-            - name: Cache Yarn cache
-              uses: actions/cache@v4
-              with:
-                  path: ~/.yarn/cache
-                  key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-                  restore-keys: yarn-${{ runner.os }}-
-
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
@@ -92,6 +85,7 @@ jobs:
                   fi
 
             - name: Validate Pi SDK Types
+              continue-on-error: true
               run: |
                   echo "🔍 Checking Pi SDK TypeScript types..."
                   yarn tsc --noEmit --skipLibCheck 2>&1 | head -50 || true

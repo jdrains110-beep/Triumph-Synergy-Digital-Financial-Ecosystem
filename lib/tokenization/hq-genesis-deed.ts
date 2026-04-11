@@ -242,7 +242,7 @@ export function generateHQBroadcast(): HQBroadcast {
       propertyHashInput:     `allodial:${HQ_LEGAL_DESCRIPTION}`,
       expectedPropertyHash:   propertyHash,
       integrityChainLength:  deed.integrityChain.length,
-      verifyAt:             `https://api.mainnet.minepi.com/transactions/${deed.piBlockchainAnchor.txHash}`,
+      verifyAt:             `https://api.mainnet.minepi.com/transactions/${deed.piBlockchainAnchor?.txHash ?? "pending"}`,
     },
   };
 }

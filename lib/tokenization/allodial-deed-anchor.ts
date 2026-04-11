@@ -168,7 +168,7 @@ export async function tokenizeDeed(
     valuationPi,
   });
 
-  const fortress = runFortressProtection({
+  const fortress = await runFortressProtection({
     payload,
     ownerAddress: owner.piAddress,
     ownerUsername: owner.piUsername,
