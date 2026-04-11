@@ -206,6 +206,36 @@ scrape_configs:
           service: 'dual-value-engine'
           type: 'pi-valuation'
           dimensions: 'internal-mined,external-market'
+          pi_internal_rate: '314159'
+          pi_external_rate: '314.159'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Cloud Memory Platform — LZ4 compressed cross-service unified memory
+  # ==========================================================================
+  - job_name: 'triumph-cloud-memory'
+    static_configs:
+      - targets: ['triumph-cloud-memory:8095']
+        labels:
+          service: 'cloud-memory'
+          type: 'compressed-memory-platform'
+          compression: 'LZ4'
+          namespaces: '22'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Quantum Shield Engine — NIST FIPS 203/204/205 post-quantum cryptography
+  # ==========================================================================
+  - job_name: 'triumph-quantum-shield'
+    static_configs:
+      - targets: ['triumph-quantum-shield:8094']
+        labels:
+          service: 'quantum-shield'
+          type: 'post-quantum-cryptography'
+          algorithms: 'Kyber-1024,Dilithium-5,SPHINCS+-SHAKE-256f,AES-256-GCM'
+          nist_standards: 'FIPS-203,FIPS-204,FIPS-205'
     metrics_path: /metrics
     scrape_interval: 15s
 
