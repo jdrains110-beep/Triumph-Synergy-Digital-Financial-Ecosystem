@@ -683,7 +683,7 @@ services:
       PI_INTERNAL_MULTIPLIER: "1000.0"
       PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
       # Service mesh URLs for full ecosystem audit
-      APP_URL: http://triumph-app:3000
+      APP_URL: http://triumph-nginx:80
       MARKET_DATA_URL: http://triumph-market-data:8085
       BLOCKCHAIN_ORACLE_URL: http://triumph-blockchain-oracle:8086
       COMPLIANCE_URL: http://triumph-compliance:8087

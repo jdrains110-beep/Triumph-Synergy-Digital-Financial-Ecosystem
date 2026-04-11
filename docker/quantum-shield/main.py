@@ -235,7 +235,9 @@ async def _audit_services() -> dict[str, Any]:
     async with httpx.AsyncClient(timeout=4.0) as c:
         for name, url in SERVICES.items():
             try:
-                r = await c.get(f"{url}/health")
+                # The Next.js app publishes health at /api/health, not /health.
+                health_path = "/api/health" if name == "app" else "/health"
+                r = await c.get(f"{url}{health_path}")
                 up = r.status_code == 200
                 data = r.json() if up else {}
                 results[name] = {
