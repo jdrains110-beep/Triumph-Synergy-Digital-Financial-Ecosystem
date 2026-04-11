@@ -97,7 +97,7 @@ export interface AllodialDeedToken {
   /** Current sovereign owner */
   owner: SovereignOwner;
   /** Previous owners (immutable chain) */
-  ownershipChain: OwnershipLink[];
+  ownershipChain?: OwnershipLink[];
   /** Token standard — PI-721 */
   standard: TokenStandard;
   /** Network */
@@ -117,8 +117,24 @@ export interface AllodialDeedToken {
   /** Pi blockchain anchor */
   piBlockchainAnchor: PiBlockchainAnchor | null;
   /** ISO timestamp of deed creation */
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+  /** ISO timestamp of minting */
+  mintedAt?: string;
+  /** Expiration (null = never expires, e.g. allodial deeds) */
+  expiresAt?: string | null;
+  /** Deterministic nonce */
+  nonce?: string;
+  /** Title type — e.g. ALLODIAL_ABSOLUTE */
+  titleType?: string;
+  /** Top-level encumbrances list (empty = free & clear) */
+  encumbrances?: string[];
+  /** SHA-256 of full integrity chain */
+  integrityHash?: string;
+  /** Pi blockchain broadcast tx hash */
+  blockchainTxHash?: string;
+  /** Last verification timestamp */
+  lastVerifiedAt?: string;
 }
 
 export interface PropertyRecord {
@@ -137,7 +153,7 @@ export interface PropertyRecord {
     | "industrial"
     | "vacant-land"
     | "mineral-rights";
-  coordinates: { latitude: number; longitude: number } | null;
+  coordinates: { lat: number; lng: number } | null;
   apn: string | null; // Assessor Parcel Number
   lotNumber: string | null;
   subdivision: string | null;
@@ -147,7 +163,7 @@ export interface SovereignOwner {
   piAddress: string;
   piUsername: string;
   legalName: string;
-  ownerType: "private-citizen" | "trust" | "family-estate" | "corporation";
+  ownerType: "private-citizen" | "individual" | "trust" | "family-estate" | "corporation";
   /** True = allodial title, absolute sovereign ownership */
   isAllodial: boolean;
   encumbrances: string[]; // empty = free & clear
@@ -171,17 +187,29 @@ export interface IntegrityLink {
 
 export interface StellarAnchor {
   ledgerSequence: number;
-  transactionHash: string;
-  fee: string;
-  consensusAt: string;
-  networkPassphrase: string;
+  transactionHash?: string;
+  txHash?: string;
+  fee?: string;
+  consensusAt?: string;
+  confirmedAt?: string;
+  networkPassphrase?: string;
+  memoHash?: string;
+  network?: string;
+  operationType?: string;
+  assetCode?: string;
 }
 
 export interface PiBlockchainAnchor {
-  ledgerSequence: number;
-  transactionHash: string;
-  piApiConfirmed: boolean;
-  confirmedAt: string;
+  ledgerSequence?: number;
+  ledger?: number;
+  transactionHash?: string;
+  txHash?: string;
+  piApiConfirmed?: boolean;
+  confirmedAt?: string;
+  network?: string;
+  memoType?: string;
+  memoValue?: string;
+  fee?: number;
 }
 
 // ─── 21-Layer Fortress Protection ─────────────────────────────────────────────

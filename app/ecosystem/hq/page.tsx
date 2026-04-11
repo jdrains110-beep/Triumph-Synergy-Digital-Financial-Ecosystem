@@ -95,7 +95,7 @@ export default function HQDeedPage() {
             ["Street Address", property.streetAddress],
             ["City / State",   `${property.city}, ${property.state} ${property.postalCode}`],
             ["County",         property.county],
-            ["Coordinates",    `${property.coordinates.lat}, ${property.coordinates.lng}`],
+            ["Coordinates",    property.coordinates ? `${property.coordinates.lat}, ${property.coordinates.lng}` : "—"],
             ["Property Type",  property.propertyType],
             ["APN",            property.apn],
           ].map(([label, val]) => (
@@ -120,11 +120,11 @@ export default function HQDeedPage() {
         <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           {[
             ["Deed Number",    deed.deedNumber],
-            ["Title Type",     deed.titleType],
+            ["Title Type",     deed.titleType ?? "—"],
             ["Token Standard", deed.standard],
             ["Network",        deed.network],
             ["Recorded Date",  recorded],
-            ["Encumbrances",   deed.encumbrances.length === 0 ? "NONE" : deed.encumbrances.join(", ")],
+            ["Encumbrances",   !deed.encumbrances || deed.encumbrances.length === 0 ? "NONE" : deed.encumbrances.join(", ")],
             ["Status",         deed.status],
             ["Valuation (Pi)", `${deed.valuationPi} π`],
           ].map(([label, val]) => (
@@ -144,12 +144,12 @@ export default function HQDeedPage() {
         </div>
         <div className="space-y-2 text-xs">
           {[
-            ["Network",      deed.piBlockchainAnchor.network],
-            ["Ledger",       String(deed.piBlockchainAnchor.ledger)],
-            ["Pi Tx Hash",   deed.piBlockchainAnchor.txHash],
-            ["Stellar Hash", deed.stellarAnchor.txHash],
-            ["Asset Code",   deed.stellarAnchor.assetCode],
-            ["Integrity",    deed.integrityHash],
+            ["Network",      deed.piBlockchainAnchor?.network ?? "—"],
+            ["Ledger",       String(deed.piBlockchainAnchor?.ledger ?? "—")],
+            ["Pi Tx Hash",   deed.piBlockchainAnchor?.txHash ?? "—"],
+            ["Stellar Hash", deed.stellarAnchor?.txHash ?? "—"],
+            ["Asset Code",   deed.stellarAnchor?.assetCode ?? "—"],
+            ["Integrity",    deed.integrityHash ?? "—"],
           ].map(([label, val]) => (
             <div key={label} className="flex flex-col sm:flex-row sm:gap-3">
               <span className="w-28 shrink-0 text-muted-foreground uppercase text-[10px] tracking-wide">{label}</span>

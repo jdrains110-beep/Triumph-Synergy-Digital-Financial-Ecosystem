@@ -84,7 +84,7 @@ const anchorLink: IntegrityLink = makeIntegrityLink(
     network: HQ_NETWORK,
     domain: HQ_DOMAIN,
   },
-  genesisLink.hash,
+  genesisLink.linkHash,
 );
 
 /**
