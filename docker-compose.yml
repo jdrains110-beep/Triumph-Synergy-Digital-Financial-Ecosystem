@@ -851,6 +851,7 @@ services:
       - "9090:9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
       - triumph_prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"

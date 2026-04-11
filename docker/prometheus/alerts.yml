@@ -1,0 +1,49 @@
+groups:
+  - name: triumph-synergy-availability
+    rules:
+      - alert: TriumphServiceDown
+        expr: up{job=~"triumph-.*|pi-.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service down: {{ $labels.job }}"
+          description: "Prometheus cannot scrape {{ $labels.instance }} for job {{ $labels.job }}."
+
+      - alert: PrometheusTargetScrapeLatencyHigh
+        expr: max_over_time(scrape_duration_seconds{job=~"triumph-.*|pi-.*"}[5m]) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High scrape latency: {{ $labels.job }}"
+          description: "Scrape duration for {{ $labels.instance }} exceeded 3s over the last 5m."
+
+  - name: triumph-synergy-congestion
+    rules:
+      - alert: PrometheusIngestionSpike
+        expr: rate(prometheus_tsdb_head_samples_appended_total[5m]) > 20000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High metrics ingestion rate"
+          description: "Prometheus sample ingestion rate is above 20k samples/sec for 10m."
+
+      - alert: RedisExporterUnavailable
+        expr: up{job="pi-redis"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis exporter unavailable"
+          description: "Redis exporter target is down; cache visibility is lost."
+
+      - alert: PostgresExporterUnavailable
+        expr: up{job="pi-postgres"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Postgres exporter unavailable"
+          description: "Postgres exporter target is down; DB visibility is lost."

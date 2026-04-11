@@ -16,7 +16,8 @@ alerting:
     - static_configs:
         - targets: []
 
-rule_files: []
+rule_files:
+  - /etc/prometheus/alerts.yml
 
 scrape_configs:
   # ==========================================================================
