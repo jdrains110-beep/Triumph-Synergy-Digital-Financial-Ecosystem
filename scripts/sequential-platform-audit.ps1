@@ -74,6 +74,27 @@ foreach ($c in $checks) {
         $bodyOneLine = $bodyOneLine.Substring(0, 160) + "..."
       }
       $summary = $bodyOneLine
+
+      if ($ok -and $c.Name -in @("pi-bridge-live", "quantum-shield", "dual-value-engine")) {
+        try {
+          $json = $probe.Body | ConvertFrom-Json
+          if ($c.Name -eq "pi-bridge-live" -and $json.reachable -ne $true) {
+            $ok = $false
+            $summary = "reachable=false last_error=$($json.last_error)"
+          }
+          if ($c.Name -eq "quantum-shield" -and $json.services_healthy -lt $json.services_monitored) {
+            $ok = $false
+            $summary = "services_healthy=$($json.services_healthy)/$($json.services_monitored)"
+          }
+          if ($c.Name -eq "dual-value-engine" -and ($json.ml_reachable -ne $true -or $json.market_reachable -ne $true -or $json.bridge_reachable -ne $true)) {
+            $ok = $false
+            $summary = "dependency_reachability ml=$($json.ml_reachable) market=$($json.market_reachable) bridge=$($json.bridge_reachable)"
+          }
+        } catch {
+          $ok = $false
+          $summary = "semantic_parse_failed"
+        }
+      }
     } elseif ($c.Protocol -eq "container-health") {
       $container = $c.Url
       $status = docker inspect -f "{{.State.Status}}" $container 2>$null
