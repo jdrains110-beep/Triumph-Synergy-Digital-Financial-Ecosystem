@@ -47,3 +47,21 @@ groups:
         annotations:
           summary: "Postgres exporter unavailable"
           description: "Postgres exporter target is down; DB visibility is lost."
+
+      - alert: HorizonGuardianRecoveryDetected
+        expr: increase(triumph_horizon_guardian_recoveries_total[10m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Horizon guardian performed a recovery"
+          description: "The horizon-guardian restarted or attempted to restart Horizon inside testnet2 within the last 10 minutes."
+
+      - alert: HorizonGuardianRecoveryStorm
+        expr: increase(triumph_horizon_guardian_recoveries_total[10m]) >= 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Repeated Horizon recoveries detected"
+          description: "The horizon-guardian has performed 3 or more recovery attempts in the last 10 minutes, indicating unstable Pi Horizon availability."

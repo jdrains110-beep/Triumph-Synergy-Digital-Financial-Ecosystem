@@ -317,6 +317,9 @@ services:
       EXECUTION_CHANNELS: 10000
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      CENTRAL_NODE_URL: http://triumph-central-node:11626
+      CONTRACTS_URL: http://triumph-smart-contracts:8082
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
@@ -920,6 +923,35 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+
+  # ========================================================================
+  # HORIZON GUARDIAN — keeps testnet2 Horizon process alive for Pi bridge
+  # ========================================================================
+  horizon-guardian:
+    build:
+      context: docker/horizon-guardian
+    container_name: triumph-horizon-guardian
+    <<: *common
+    mem_limit: 64m
+    mem_reservation: 16m
+    environment:
+      TARGET_CONTAINER: testnet2
+      TARGET_PROCESS: horizon
+      TARGET_URL: http://localhost:8000/
+      GUARD_INTERVAL_S: "20"
+      METRICS_PORT: "9911"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9911"
+    networks:
+      - triumph-net
+    healthcheck:
+      test: ["CMD", "sh", "-c", "test -S /var/run/docker.sock"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   grafana:
     image: grafana/grafana:latest

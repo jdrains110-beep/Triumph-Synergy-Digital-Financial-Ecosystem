@@ -198,6 +198,19 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
+  # Horizon Guardian — auto-recovers Pi Horizon inside testnet2
+  # ==========================================================================
+  - job_name: 'triumph-horizon-guardian'
+    static_configs:
+      - targets: ['triumph-horizon-guardian:9911']
+        labels:
+          service: 'horizon-guardian'
+          type: 'recovery-watchdog'
+          role: 'pi-horizon-self-heal'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
   # Dual-Value Engine — Pi internal (mined) vs external (market) value
   # ==========================================================================
   - job_name: 'triumph-dual-value-engine'

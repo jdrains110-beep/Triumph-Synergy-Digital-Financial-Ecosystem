@@ -23,6 +23,7 @@ const PI_NODE_HOST     = process.env.PI_NODE_HOST;
 const PI_NODE_API_PORT = process.env.PI_NODE_API_PORT || "8000";
 const PI_BRIDGE_URL    = process.env.PI_BRIDGE_URL; // e.g. http://triumph-pi-bridge-connector:8092
 const PI_INTERNAL_HORIZON = process.env.PI_INTERNAL_HORIZON_URL;
+const CONTRACTS_URL    = process.env.CONTRACTS_URL || "http://triumph-smart-contracts:8082";
 
 // Resolve the Horizon endpoint — local Pi node always preferred for lowest latency
 function resolveHorizonUrl(): string {
@@ -43,6 +44,32 @@ const HORIZON_URL = resolveHorizonUrl();
 const CENTRAL_KEY = process.env.CENTRAL_NODE_PUBLIC_KEY || "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";
 
 console.log(`[Central Node] Horizon URL: ${HORIZON_URL} (PI_NODE_HOST=${PI_NODE_HOST ?? "unset"})`);
+
+function supernodeTopology() {
+  return {
+    mode: "mutual-supernode-support",
+    primary_role: "central-node",
+    secondary_role: "pi-desktop-pi-node",
+    central_node_public_key: CENTRAL_KEY,
+    pi_desktop_node: {
+      host: PI_NODE_HOST || "host.docker.internal",
+      api_port: Number(PI_NODE_API_PORT),
+      peer_port: Number(process.env.PI_NODE_PORT || 31402),
+      bridge_url: PI_BRIDGE_URL || "http://triumph-pi-bridge-connector:8092",
+    },
+    smart_contract_platform: {
+      url: CONTRACTS_URL,
+      rpc_status_endpoint: `${CONTRACTS_URL}/rpc/supernode/status`,
+      rpc_submit_endpoint: `${CONTRACTS_URL}/rpc/submit`,
+    },
+    consensus: {
+      protocol: "Stellar SCP",
+      horizon_url: HORIZON_URL,
+      network_passphrase: process.env.STELLAR_NETWORK_PASSPHRASE || "Pi Network",
+      local_horizon_preferred: HORIZON_URL.startsWith("http://"),
+    },
+  };
+}
 
 // Cached blockchain state (refreshed periodically)
 let chainAccount: { sequence: string; balances: unknown[]; lastChecked: string } | null = null;
@@ -220,11 +247,24 @@ const server = http.createServer((req, res) => {
         pi_bridge_url: PI_BRIDGE_URL || `http://triumph-pi-bridge-connector:8092`,
         pi_bridge_active: !!(PI_NODE_HOST && PI_NODE_HOST !== "host.docker.internal"),
         horizon_resolves_local: HORIZON_URL.startsWith("http://"),
+        supernode_topology: supernodeTopology(),
         backpressure: { activeRequests, maxConcurrent: MAX_CONCURRENT },
       },
     };
     res.writeHead(systemReady ? 200 : 503);
     res.end(safeStringify(payload, 2));
+  } else if (url === "/supernode/status") {
+    res.writeHead(systemReady ? 200 : 503);
+    res.end(safeStringify({
+      status: systemReady ? "healthy" : "starting",
+      network: networkType,
+      topology: supernodeTopology(),
+      blockchain: {
+        connected: chainAccount !== null,
+        latest_ledger: chainLedger,
+        chain_error: chainError,
+      },
+    }, 2));
   } else if (url === "/metrics") {
     const mem = process.memoryUsage();
     const lines = [
