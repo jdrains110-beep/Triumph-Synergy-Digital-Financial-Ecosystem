@@ -65,3 +65,30 @@ groups:
         annotations:
           summary: "Repeated Horizon recoveries detected"
           description: "The horizon-guardian has performed 3 or more recovery attempts in the last 10 minutes, indicating unstable Pi Horizon availability."
+
+      - alert: CloudMemorySyncFailure
+        expr: increase(mem_sync_runs_total{target=~"s3|apple_webdav|sync",status="error"}[15m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cloud memory sync target failure"
+          description: "Cloud/offline memory sync reported at least one error in the last 15 minutes."
+
+      - alert: CloudMemorySyncStale
+        expr: (time() - max(mem_sync_last_success_epoch_seconds{target="local"})) > 1800
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Cloud memory local snapshot stale"
+          description: "No successful local memory snapshot sync for over 30 minutes."
+
+      - alert: QuantumBackboneDisconnected
+        expr: quantum_backbone_connected{job="triumph-quantum-shield"} == 0
+        for: 45s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Quantum motherboard backbone disconnected"
+          description: "Quantum backbone connection has been down for more than 45 seconds on {{ $labels.instance }}."

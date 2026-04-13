@@ -44,6 +44,19 @@ HORIZON         = os.getenv("STELLAR_HORIZON_URL", "https://api.mainnet.minepi.c
 NETWORK         = os.getenv("PI_NETWORK_MODE",     "mainnet")
 PORT            = int(os.getenv("PORT",            "8091"))
 SANDBOX_MODE    = os.getenv("CREDIT_SANDBOX",      "true").lower() == "true"
+CREDIT_GOV_MODE = os.getenv("CREDIT_GOVERNANCE_MODE", "nesara_gesara").strip().lower()
+FOUNDER_NAME = os.getenv("TRIUMPH_FOUNDER_NAME", "Jeremiah Joel Drains")
+FOUNDER_ORG = os.getenv("TRIUMPH_FOUNDATION_ORG", "Triumph-Synergy")
+FOUNDER_AUTHORITY = os.getenv("TRIUMPH_FOUNDER_AUTHORITY", "owner-approved")
+FOUNDER_ADDRESS = os.getenv("TRIUMPH_FOUNDER_ADDRESS", "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
+GLOBAL_PROVIDERS = [
+    item.strip().lower()
+    for item in os.getenv("GLOBAL_CREDIT_PROVIDERS", "equifax,experian,transunion,fico,vantagescore").split(",")
+    if item.strip()
+]
+
+if CREDIT_GOV_MODE not in {"nesara", "gesara", "nesara_gesara"}:
+    CREDIT_GOV_MODE = "nesara_gesara"
 
 # Bureau API keys (wire in production)
 EFX_KEY    = os.getenv("BUREAU_API_KEY_EQUIFAX",     "sandbox")
@@ -253,6 +266,52 @@ def _sandbox_bureau_report(bureau: str, pi_address: str, pi_credit_score: int) -
         "integrationStatus": "SANDBOX — wire BUREAU_API_KEY_{} for live data".format(bureau.upper()),
     }
 
+
+def _governance_declaration() -> dict[str, str]:
+    if CREDIT_GOV_MODE == "nesara":
+        mode_label = "NESARA"
+    elif CREDIT_GOV_MODE == "gesara":
+        mode_label = "GESARA"
+    else:
+        mode_label = "NESARA/GESARA"
+    return {
+        "mode": mode_label,
+        "rule": "Governance mode influences score policy interpretation and report declaration fields.",
+    }
+
+
+def _weighted_composite(bureau_scores: dict[str, int]) -> int:
+    # FICO carries higher weighting while still incorporating all global providers.
+    weights = {
+        "fico": 0.40,
+        "equifax": 0.15,
+        "experian": 0.15,
+        "transunion": 0.15,
+        "vantagescore": 0.15,
+    }
+    weighted_total = 0.0
+    used_weight = 0.0
+    for provider, score in bureau_scores.items():
+        weight = weights.get(provider, 0.0)
+        weighted_total += float(score) * weight
+        used_weight += weight
+    if used_weight <= 0:
+        return int(round(float(np.mean(list(bureau_scores.values())))))
+    return int(round(weighted_total / used_weight))
+
+
+def _founder_profile_for(pi_address: str) -> dict[str, Any] | None:
+    if pi_address != FOUNDER_ADDRESS:
+        return None
+    return {
+        "founder": FOUNDER_NAME,
+        "organization": FOUNDER_ORG,
+        "authorityModel": FOUNDER_AUTHORITY,
+        "financialFreedomProfile": "enabled",
+        "fastLaneAutomation": True,
+        "legalCompliance": "required",
+    }
+
 async def _live_bureau_report(bureau: str, pi_address: str, pi_score: int) -> dict:
     """Future: real bureau API call.  Returns sandbox until key is configured."""
     # In production: call bureau's OAuth2 REST API using the relevant key.
@@ -334,6 +393,19 @@ def health() -> dict:
         "bureaus":      list(BUREAU_META.keys()),
         "scoresIssued": len(_score_cache),
         "mlEngineUrl":  ML_ENGINE_URL,
+        "poweredBy": {
+            "piNetwork": True,
+            "stellarSCP": True,
+            "horizon": HORIZON,
+        },
+        "governance": _governance_declaration(),
+        "globalProviders": GLOBAL_PROVIDERS,
+        "founderProfile": {
+            "name": FOUNDER_NAME,
+            "organization": FOUNDER_ORG,
+            "authorityModel": FOUNDER_AUTHORITY,
+            "legalCompliance": "required",
+        },
         "piThesis":     "Utility creates value that can be sustained — and creditworthy",
     }
 
@@ -389,6 +461,8 @@ async def compute_credit_score(req: CreditScoreReq) -> dict:
         result["piThesis"]        = "Pi Network utility creates sustained credit-worthiness"
         result["scoredAt"]        = datetime.now(timezone.utc).isoformat()
         result["model"]           = "PiCreditScore-v1"
+        result["governance"]      = _governance_declaration()
+        result["globalProviders"] = GLOBAL_PROVIDERS
 
         # Cache score
         with _score_lock:
@@ -435,29 +509,47 @@ async def credit_report(pi_address: str) -> dict:
             bureau_reports[bureau] = await _live_bureau_report(bureau, pi_address, pi_score)
             bureau_sync_total.labels(bureau=bureau).inc()
 
-        # Aggregate — composite score = mean of all bureau scores
-        bureau_scores  = [b["score"] for b in bureau_reports.values()]
-        composite      = round(float(np.mean(bureau_scores)))
+        # Aggregate — weighted composite with FICO priority and full-provider inclusion.
+        bureau_scores_map = {provider: report["score"] for provider, report in bureau_reports.items()}
+        bureau_scores = list(bureau_scores_map.values())
+        composite = _weighted_composite(bureau_scores_map)
+        global_avg = int(round(float(np.mean(bureau_scores))))
+        superiority_gap = pi_score - global_avg
+        superiority_status = (
+            "SUPERIOR" if superiority_gap >= 20 else
+            "PARITY" if superiority_gap >= 0 else
+            "DEVELOPING"
+        )
 
         return {
             "piAddress":       pi_address,
             "piCreditScore":   pi_score,
             "compositeScore":  composite,
+            "globalAverageScore": global_avg,
             "tier":            cached["tier"],
             "riskRating":      cached["riskRating"],
             "creditCapacityPi": cached["creditCapacityPi"],
             "bureauReports":   bureau_reports,
             "bureauCount":     len(bureau_reports),
+            "globalProviders": GLOBAL_PROVIDERS,
             "scoreComponents": cached["scoreComponents"],
             "piLedger":        live["ledger"],
             "piPriceUsd":      live["pi_price_usd"],
             "reportDate":      datetime.now(timezone.utc).isoformat(),
             "model":           "PiCreditScore-v1 + Bureau Aggregation",
+            "governance":      _governance_declaration(),
+            "competitiveEdge": {
+                "superiorityGap": superiority_gap,
+                "status": superiority_status,
+                "basis": "PiCredit score vs global bureau average",
+            },
+            "founderProfile": _founder_profile_for(pi_address),
             "piThesis":        "Utility creates value that can be sustained — creditworthiness backed by on-chain activity",
             "declaration": (
                 "This credit report is derived from Pi Network on-chain data and "
                 "mapped to global bureau standards.  All five major credit bureaus "
-                "are integrated through the Triumph Synergy Credit Engine."
+                "are integrated through the Triumph Synergy Credit Engine with FICO-priority weighting "
+                "and NESARA/GESARA policy governance mode."
             ),
         }
 
@@ -492,6 +584,8 @@ def list_bureaus() -> dict:
         "bureaus":      list(BUREAU_META.values()),
         "count":        len(BUREAUS),
         "sandboxMode":  SANDBOX_MODE,
+        "globalProviders": GLOBAL_PROVIDERS,
+        "governance": _governance_declaration(),
         "integration":  "All major credit platforms integrated within Triumph Synergy ecosystem",
         "piThesis":     "Utility creates value that can be sustained — and creditworthy",
         "activationHint": "Wire BUREAU_API_KEY_{BUREAU_NAME} env vars for live bureau calls",

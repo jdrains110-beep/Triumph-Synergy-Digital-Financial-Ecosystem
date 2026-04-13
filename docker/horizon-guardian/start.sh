@@ -7,8 +7,13 @@ METRICS_PORT="${METRICS_PORT:-9911}"
 mkdir -p "$METRICS_DIR"
 : > "$METRICS_DIR/metrics"
 
-busybox httpd -f -p "$METRICS_PORT" -h "$METRICS_DIR" &
-HTTPD_PID=$!
+if busybox --list | grep -qx "httpd"; then
+  busybox httpd -f -p "$METRICS_PORT" -h "$METRICS_DIR" &
+  HTTPD_PID=$!
+else
+  python3 /app/metrics-server.py &
+  HTTPD_PID=$!
+fi
 
 cleanup() {
   kill "$HTTPD_PID" 2>/dev/null || true

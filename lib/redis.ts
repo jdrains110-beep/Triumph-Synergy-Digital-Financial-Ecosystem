@@ -21,7 +21,12 @@ declare global {
 }
 
 function buildClient(): RedisClientType {
-  const client = createClient({ url: REDIS_URL }) as RedisClientType;
+  const client = createClient({
+    url: REDIS_URL,
+    socket: {
+      reconnectStrategy: (retries: number) => Math.min(retries * 500, 5000),
+    },
+  }) as RedisClientType;
 
   client.on("error", (err: Error) => {
     // Don't crash the process — log and continue with in-memory fallback

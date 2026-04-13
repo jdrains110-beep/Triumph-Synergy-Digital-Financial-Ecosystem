@@ -30,12 +30,15 @@ Networks: triumph-net
 
 import asyncio
 import base64
+import datetime
 import hashlib
 import json
 import logging
 import os
+from pathlib import Path
 import time
 from typing import Any
+from urllib.parse import quote
 
 import lz4.frame
 import redis.asyncio as aioredis
@@ -44,6 +47,16 @@ from fastapi.responses import PlainTextResponse
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
+
+try:
+    import boto3
+except Exception:  # pragma: no cover
+    boto3 = None
+
+try:
+    import requests
+except Exception:  # pragma: no cover
+    requests = None
 
 # ── Config ──────────────────────────────────────────────────────────────────────
 
@@ -54,6 +67,27 @@ HOT_TTL           = int(os.getenv("HOT_TTL_S",       "300"))    # 5 min hot tier
 WARM_TTL          = int(os.getenv("WARM_TTL_S",      "3600"))   # 1 hour warm tier
 COLD_TTL          = int(os.getenv("COLD_TTL_S",      "86400"))  # 24 hour cold tier
 COMPRESSION_LEVEL = int(os.getenv("LZ4_LEVEL",       "9"))      # max compression
+
+# Sync targets: local docker memory, S3-compatible cloud, Apple WebDAV bridge.
+BACKUP_LOCAL_DIR      = os.getenv("BACKUP_LOCAL_DIR", "/backup/local")
+BACKUP_OFFLINE_DIR    = os.getenv("BACKUP_OFFLINE_DIR", "/backup/offline")
+BACKUP_SCHEDULE_S     = int(os.getenv("BACKUP_SCHEDULE_S", "900"))
+AUTO_SYNC_ENABLED     = os.getenv("AUTO_SYNC_ENABLED", "true").lower() == "true"
+
+S3_ENABLED            = os.getenv("CLOUD_MEMORY_S3_ENABLED", "false").lower() == "true"
+S3_BUCKET             = os.getenv("CLOUD_MEMORY_S3_BUCKET", "")
+S3_PREFIX             = os.getenv("CLOUD_MEMORY_S3_PREFIX", "triumph-cloud-memory")
+S3_REGION             = os.getenv("CLOUD_MEMORY_S3_REGION", "us-east-1")
+S3_ENDPOINT_URL       = os.getenv("CLOUD_MEMORY_S3_ENDPOINT", "")
+S3_KEY_ID             = os.getenv("CLOUD_MEMORY_S3_ACCESS_KEY_ID", "")
+S3_SECRET             = os.getenv("CLOUD_MEMORY_S3_SECRET_ACCESS_KEY", "")
+
+APPLE_WEBDAV_ENABLED  = os.getenv("APPLE_CLOUD_WEBDAV_ENABLED", "false").lower() == "true"
+APPLE_WEBDAV_BASE_URL = os.getenv("APPLE_CLOUD_WEBDAV_BASE_URL", "")
+APPLE_WEBDAV_USERNAME = os.getenv("APPLE_CLOUD_WEBDAV_USERNAME", "")
+APPLE_WEBDAV_PASSWORD = os.getenv("APPLE_CLOUD_WEBDAV_PASSWORD", "")
+APPLE_WEBDAV_PATH     = os.getenv("APPLE_CLOUD_WEBDAV_PATH", "/triumph-cloud-memory")
+SYNC_HTTP_TIMEOUT_S   = int(os.getenv("SYNC_HTTP_TIMEOUT_S", "20"))
 
 # All platform namespaces
 NAMESPACES = [
@@ -81,6 +115,11 @@ compression_ratio    = Gauge("mem_compression_ratio",         "Average compressi
 keys_gauge           = Gauge("mem_keys_total",                "Total keys in memory store")
 write_latency        = Histogram("mem_write_latency_seconds", "Write operation latency")
 read_latency         = Histogram("mem_read_latency_seconds",  "Read operation latency")
+sync_runs_total      = Counter("mem_sync_runs_total",         "Snapshot sync attempts by target and status", ["target", "status"])
+sync_last_attempt    = Gauge("mem_sync_last_attempt_epoch_seconds", "Last sync attempt epoch seconds", ["target"])
+sync_last_success    = Gauge("mem_sync_last_success_epoch_seconds", "Last successful sync epoch seconds", ["target"])
+sync_snapshot_bytes  = Gauge("mem_sync_snapshot_bytes",       "Last snapshot compressed bytes")
+sync_integrity_failures = Counter("mem_sync_integrity_failures_total", "Snapshot integrity failures")
 
 # ── State ───────────────────────────────────────────────────────────────────────
 
@@ -94,6 +133,13 @@ stats: dict[str, Any] = {
     "total_dedup":            0,
     "total_broadcasts":       0,
     "started_at":             time.time(),
+}
+
+sync_state: dict[str, Any] = {
+    "in_progress": False,
+    "last_trigger": None,
+    "last_result": None,
+    "last_error": None,
 }
 
 app = FastAPI(title="Triumph Cloud Memory Platform", version="2.0.0")
@@ -252,6 +298,187 @@ async def _read(namespace: str, key: str) -> Any | None:
     return _deserialize(raw)
 
 
+def _sync_file_name() -> str:
+    ts = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    return f"snapshot-{ts}.json"
+
+
+async def _build_snapshot_payload() -> dict[str, Any]:
+    if not _redis:
+        raise HTTPException(503, "Redis not connected")
+
+    snap: dict[str, dict[str, Any]] = {}
+    for ns in NAMESPACES:
+        keys = await _redis.smembers(_ns_index_key(ns))
+        snap[ns] = {}
+        for key in keys:
+            val = await _read(ns, key)
+            if val is not None:
+                snap[ns][key] = val
+
+    raw = json.dumps(snap, separators=(",", ":")).encode()
+    compressed = _compress(raw)
+    encoded = base64.b64encode(compressed).decode()
+    encoded_hash = hashlib.sha256(encoded.encode()).hexdigest()
+
+    return {
+        "snapshot_b64": encoded,
+        "snapshot_sha256": encoded_hash,
+        "raw_bytes": len(raw),
+        "compressed_bytes": len(compressed),
+        "ratio": round(len(raw) / max(len(compressed), 1), 3),
+        "namespaces": len(snap),
+        "total_keys": sum(len(v) for v in snap.values()),
+        "created_at": time.time(),
+    }
+
+
+def _verify_payload_integrity(payload: dict[str, Any]) -> None:
+    snapshot_b64 = payload["snapshot_b64"]
+    expected_hash = payload.get("snapshot_sha256", "")
+    current_hash = hashlib.sha256(snapshot_b64.encode()).hexdigest()
+    if expected_hash and current_hash != expected_hash:
+        sync_integrity_failures.inc()
+        raise RuntimeError("snapshot SHA256 mismatch")
+
+    compressed = base64.b64decode(snapshot_b64)
+    raw = _decompress(compressed)
+    _ = json.loads(raw)
+
+
+def _write_snapshot_file(directory: str, file_name: str, payload: dict[str, Any]) -> str:
+    Path(directory).mkdir(parents=True, exist_ok=True)
+    path = Path(directory) / file_name
+    path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
+    current = Path(directory) / "current.json"
+    current.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
+    return str(path)
+
+
+def _sync_to_s3(file_name: str, payload: dict[str, Any]) -> dict[str, Any]:
+    if not S3_ENABLED:
+        return {"target": "s3", "status": "disabled"}
+    if boto3 is None:
+        return {"target": "s3", "status": "error", "error": "boto3 not installed"}
+    if not S3_BUCKET:
+        return {"target": "s3", "status": "error", "error": "CLOUD_MEMORY_S3_BUCKET missing"}
+
+    client = boto3.client(
+        "s3",
+        region_name=S3_REGION,
+        endpoint_url=S3_ENDPOINT_URL or None,
+        aws_access_key_id=S3_KEY_ID or None,
+        aws_secret_access_key=S3_SECRET or None,
+    )
+    key = f"{S3_PREFIX.rstrip('/')}/{file_name}"
+    body = json.dumps(payload, separators=(",", ":")).encode()
+    client.put_object(
+        Bucket=S3_BUCKET,
+        Key=key,
+        Body=body,
+        ContentType="application/json",
+        ServerSideEncryption="AES256",
+    )
+    return {"target": "s3", "status": "ok", "bucket": S3_BUCKET, "key": key}
+
+
+def _sync_to_apple_webdav(file_name: str, payload: dict[str, Any]) -> dict[str, Any]:
+    if not APPLE_WEBDAV_ENABLED:
+        return {"target": "apple_webdav", "status": "disabled"}
+    if requests is None:
+        return {"target": "apple_webdav", "status": "error", "error": "requests not installed"}
+    if not APPLE_WEBDAV_BASE_URL:
+        return {"target": "apple_webdav", "status": "error", "error": "APPLE_CLOUD_WEBDAV_BASE_URL missing"}
+    if not APPLE_WEBDAV_USERNAME or not APPLE_WEBDAV_PASSWORD:
+        return {"target": "apple_webdav", "status": "error", "error": "APPLE_CLOUD_WEBDAV credentials missing"}
+
+    base = APPLE_WEBDAV_BASE_URL.rstrip("/")
+    folder = APPLE_WEBDAV_PATH.strip("/")
+    folder_url = f"{base}/{folder}" if folder else base
+    requests.request(
+        "MKCOL",
+        folder_url,
+        auth=(APPLE_WEBDAV_USERNAME, APPLE_WEBDAV_PASSWORD),
+        timeout=SYNC_HTTP_TIMEOUT_S,
+    )
+
+    file_url = f"{folder_url}/{quote(file_name)}"
+    response = requests.put(
+        file_url,
+        data=json.dumps(payload, separators=(",", ":")).encode(),
+        auth=(APPLE_WEBDAV_USERNAME, APPLE_WEBDAV_PASSWORD),
+        headers={"Content-Type": "application/json"},
+        timeout=SYNC_HTTP_TIMEOUT_S,
+    )
+    if response.status_code >= 300:
+        raise RuntimeError(f"WebDAV upload failed with status {response.status_code}")
+    return {"target": "apple_webdav", "status": "ok", "url": file_url}
+
+
+def _track_sync(target: str, status: str) -> None:
+    now = time.time()
+    sync_last_attempt.labels(target=target).set(now)
+    sync_runs_total.labels(target=target, status=status).inc()
+    if status == "ok":
+        sync_last_success.labels(target=target).set(now)
+
+
+async def _run_sync(trigger: str) -> dict[str, Any]:
+    if sync_state["in_progress"]:
+        return {"status": "skipped", "reason": "sync already in progress"}
+
+    sync_state["in_progress"] = True
+    sync_state["last_trigger"] = trigger
+    try:
+        payload = await _build_snapshot_payload()
+        _verify_payload_integrity(payload)
+        sync_snapshot_bytes.set(payload["compressed_bytes"])
+
+        file_name = _sync_file_name()
+        local_path = await asyncio.to_thread(_write_snapshot_file, BACKUP_LOCAL_DIR, file_name, payload)
+        offline_path = await asyncio.to_thread(_write_snapshot_file, BACKUP_OFFLINE_DIR, file_name, payload)
+        _track_sync("local", "ok")
+        _track_sync("offline", "ok")
+
+        s3_result = await asyncio.to_thread(_sync_to_s3, file_name, payload)
+        _track_sync("s3", "ok" if s3_result.get("status") == "ok" else ("disabled" if s3_result.get("status") == "disabled" else "error"))
+
+        apple_result = await asyncio.to_thread(_sync_to_apple_webdav, file_name, payload)
+        _track_sync(
+            "apple_webdav",
+            "ok" if apple_result.get("status") == "ok" else ("disabled" if apple_result.get("status") == "disabled" else "error"),
+        )
+
+        result = {
+            "status": "ok",
+            "trigger": trigger,
+            "snapshot": {
+                "file": file_name,
+                "sha256": payload["snapshot_sha256"],
+                "raw_bytes": payload["raw_bytes"],
+                "compressed_bytes": payload["compressed_bytes"],
+                "ratio": payload["ratio"],
+                "total_keys": payload["total_keys"],
+            },
+            "targets": {
+                "local": {"status": "ok", "path": local_path},
+                "offline": {"status": "ok", "path": offline_path},
+                "s3": s3_result,
+                "apple_webdav": apple_result,
+            },
+            "at": time.time(),
+        }
+        sync_state["last_result"] = result
+        sync_state["last_error"] = None
+        return result
+    except Exception as e:
+        sync_state["last_error"] = str(e)
+        _track_sync("sync", "error")
+        raise
+    finally:
+        sync_state["in_progress"] = False
+
+
 # ── Routes ──────────────────────────────────────────────────────────────────────
 
 @app.get("/health")
@@ -286,6 +513,13 @@ async def health():
         "savings_pct":         round((1 - comp / max(raw, 1)) * 100, 1),
         "broadcasts":          stats["total_broadcasts"],
         "namespaces":          NAMESPACES,
+        "sync": {
+            "auto_enabled": AUTO_SYNC_ENABLED,
+            "schedule_seconds": BACKUP_SCHEDULE_S,
+            "in_progress": sync_state["in_progress"],
+            "last_trigger": sync_state["last_trigger"],
+            "last_error": sync_state["last_error"],
+        },
         "uptime_seconds":      round(time.time() - stats["started_at"], 1),
     }
 
@@ -426,31 +660,36 @@ async def memory_stats():
 @app.get("/mem/snapshot")
 async def snapshot():
     """Export a compressed snapshot of all current namespace data."""
-    if not _redis:
-        raise HTTPException(503, "Redis not connected")
+    return await _build_snapshot_payload()
 
-    snap: dict[str, dict] = {}
-    for ns in NAMESPACES:
-        keys = await _redis.smembers(_ns_index_key(ns))
-        snap[ns] = {}
-        for key in keys:
-            val = await _read(ns, key)
-            if val is not None:
-                snap[ns][key] = val
 
-    raw     = json.dumps(snap, separators=(",", ":")).encode()
-    compressed = _compress(raw)
-    encoded = base64.b64encode(compressed).decode()
-
+@app.get("/mem/sync/status")
+async def sync_status():
+    """Return latest cloud/offline sync result and schedule settings."""
     return {
-        "snapshot_b64":    encoded,
-        "raw_bytes":       len(raw),
-        "compressed_bytes":len(compressed),
-        "ratio":           round(len(raw) / max(len(compressed), 1), 3),
-        "namespaces":      len(snap),
-        "total_keys":      sum(len(v) for v in snap.values()),
-        "created_at":      time.time(),
+        "auto_enabled": AUTO_SYNC_ENABLED,
+        "schedule_seconds": BACKUP_SCHEDULE_S,
+        "in_progress": sync_state["in_progress"],
+        "last_trigger": sync_state["last_trigger"],
+        "last_result": sync_state["last_result"],
+        "last_error": sync_state["last_error"],
+        "targets": {
+            "local": BACKUP_LOCAL_DIR,
+            "offline": BACKUP_OFFLINE_DIR,
+            "s3_enabled": S3_ENABLED,
+            "apple_webdav_enabled": APPLE_WEBDAV_ENABLED,
+        },
     }
+
+
+@app.post("/mem/sync/run")
+async def sync_run(body: dict | None = None):
+    """Generate snapshot, verify integrity, and sync across configured memory targets."""
+    trigger = (body or {}).get("trigger", "manual")
+    result = await _run_sync(trigger=trigger)
+    if result.get("status") == "skipped":
+        return result
+    return result
 
 
 @app.post("/mem/restore")
@@ -535,6 +774,7 @@ async def _background_loop() -> None:
         log.warning(f"[cloud-memory] Redis unavailable: {e}")
 
     asyncio.create_task(_seed_canonical_values())
+    last_sync_at = 0.0
 
     # Periodic stats update
     while True:
@@ -548,8 +788,12 @@ async def _background_loop() -> None:
                     if cursor == 0:
                         break
                 keys_gauge.set(count)
+
+            if AUTO_SYNC_ENABLED and (time.time() - last_sync_at) >= BACKUP_SCHEDULE_S:
+                await _run_sync(trigger="scheduled")
+                last_sync_at = time.time()
         except Exception:
-            pass
+            log.exception("[cloud-memory] background loop iteration failed")
         await asyncio.sleep(30)
 
 

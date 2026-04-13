@@ -571,6 +571,8 @@ class SuperiorSecurityManager extends EventEmitter {
     algorithm: string;
     keyId: string;
     publicKey: string;
+    cipherText: string;
+    secretKey: string;
     signature: string;
   }> {
     this.metrics.encryptionOperations++;
@@ -621,6 +623,8 @@ class SuperiorSecurityManager extends EventEmitter {
         algorithm: 'ML-KEM-768+AES-256-GCM+ML-DSA-65',
         keyId,
         publicKey: Buffer.from(kemKeys.publicKey).toString('base64'),
+        cipherText: Buffer.from(cipherText).toString('base64'),
+        secretKey: Buffer.from(kemKeys.secretKey).toString('base64'),
         signature: Buffer.from(signature).toString('base64'),
       };
     } catch (error) {
@@ -634,43 +638,40 @@ class SuperiorSecurityManager extends EventEmitter {
         algorithm: 'FALLBACK-AES-256',
         keyId,
         publicKey: '',
+        cipherText: '',
+        secretKey: '',
         signature: '',
       };
     }
   }
   
   /**
-   * Decrypt data
+   * Decrypt data using KEM decapsulation to recover the shared secret
    */
-  async decrypt(encryptedData: string, keyId: string, secretKey?: Uint8Array): Promise<string> {
+  async decrypt(encryptedData: string, keyId: string, secretKey?: Uint8Array, cipherText?: Uint8Array): Promise<string> {
     this.metrics.encryptionOperations++;
 
     try {
-      // For quantum-resistant decryption, we need the secret key
-      // In a real implementation, this would be retrieved from secure key storage
-      if (!secretKey) {
-        // Fallback: try to decrypt as base64 (for backward compatibility)
+      // For quantum-resistant decryption, we need both the KEM secret key and ciphertext
+      if (!secretKey || !cipherText) {
+        // Fallback: try to decrypt as base64 (for backward compatibility / fallback-encrypted data)
         try {
           return Buffer.from(encryptedData, "base64").toString("utf8");
         } catch {
-          throw new Error("Secret key required for quantum-resistant decryption");
+          throw new Error("KEM secretKey and cipherText required for quantum-resistant decryption");
         }
       }
 
-      // Parse the encrypted data (this is a simplified implementation)
-      // In production, you'd need proper key management and ciphertext parsing
-      const encryptedBytes = Buffer.from(encryptedData, 'base64');
+      // Decapsulate: use the KEM secret key + ciphertext to recover the shared secret
+      const { sharedSecret } = ml_kem768.decapsulate(cipherText, secretKey);
+      const aesKey = sharedSecret.slice(0, 32);
 
-      // Extract IV (first 12 bytes) and encrypted data
+      // Parse the encrypted data: first 12 bytes = IV, rest = AES-GCM ciphertext
+      const encryptedBytes = Buffer.from(encryptedData, 'base64');
       const iv = encryptedBytes.slice(0, 12);
       const encrypted = encryptedBytes.slice(12);
 
-      // For demonstration, generate a shared secret (in reality, use stored keys)
-      const kemKeys = ml_kem768.keygen();
-      const { sharedSecret } = ml_kem768.encapsulate(kemKeys.publicKey);
-      const aesKey = sharedSecret.slice(0, 32);
-
-      // Decrypt using AES-GCM
+      // Decrypt using AES-GCM with the decapsulated shared secret
       const cryptoKey = await crypto.subtle.importKey(
         'raw',
         aesKey,
@@ -696,14 +697,20 @@ class SuperiorSecurityManager extends EventEmitter {
   }
   
   /**
-   * Rotate encryption keys
+   * Rotate encryption keys — generate fresh ML-KEM-768 + ML-DSA-65 keypairs
    */
   private rotateEncryptionKeys(): void {
     this.metrics.keyRotations++;
     
+    // Generate fresh post-quantum keypairs
+    const kemKeys = ml_kem768.keygen();
+    const dsaKeys = ml_dsa65.keygen();
+    
     this.emit("keys-rotated", {
       timestamp: new Date(),
       algorithm: this.config.encryption.algorithm,
+      kemPublicKeyLength: kemKeys.publicKey.length,
+      dsaPublicKeyLength: dsaKeys.publicKey.length,
     });
   }
   

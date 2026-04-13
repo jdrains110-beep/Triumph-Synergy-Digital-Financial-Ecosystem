@@ -55,7 +55,12 @@ let activeRequests = 0;
 
 // ─── Redis ────────────────────────────────────────────────────────────────────
 
-const redis    = createClient({ url: REDIS_URL });
+const redis    = createClient({
+  url: REDIS_URL,
+  socket: {
+    reconnectStrategy: (retries: number) => Math.min(retries * 500, 5000),
+  },
+});
 const redisSub = redis.duplicate();
 redis.on("error",    (e: Error) => console.error("[redis]",    e.message));
 redisSub.on("error", (e: Error) => console.error("[redisSub]", e.message));

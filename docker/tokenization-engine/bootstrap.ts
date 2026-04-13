@@ -72,7 +72,12 @@ function prometheusText(): string {
 
 // ─── Redis client ─────────────────────────────────────────────────────────────
 
-const redis = createClient({ url: REDIS_URL });
+const redis = createClient({
+  url: REDIS_URL,
+  socket: {
+    reconnectStrategy: (retries: number) => Math.min(retries * 500, 5000),
+  },
+});
 redis.on("error", (e) => console.error("[redis]", e.message));
 redis.connect().catch(e => console.error("[redis connect]", e.message));
 

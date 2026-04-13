@@ -28,11 +28,29 @@ type RegistryStatus = {
   applications: string[];
 };
 
+type BackboneSnapshot = {
+  status: {
+    connected: boolean;
+    active_route: string | null;
+    route_candidates: string[];
+    last_failover: number | null;
+    session_key_rotated_at: number | null;
+  };
+  metrics: {
+    connected: number;
+    reconnects: number;
+    failovers: number;
+  };
+  refreshedAt: string;
+};
+
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [summary, setSummary] = useState<RegistryStatus | null>(null);
+  const [backbone, setBackbone] = useState<BackboneSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [backboneError, setBackboneError] = useState<string | null>(null);
 
   const fetchApplications = useCallback(async () => {
     try {
@@ -58,9 +76,33 @@ export default function ApplicationsPage() {
     }
   }, []);
 
+  const fetchBackbone = useCallback(async () => {
+    try {
+      setBackboneError(null);
+      const response = await fetch("/api/quantum/backbone");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch motherboard backbone telemetry");
+      }
+
+      const payload = await response.json();
+      setBackbone(payload.data as BackboneSnapshot);
+    } catch (err) {
+      setBackboneError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load motherboard backbone telemetry"
+      );
+    }
+  }, []);
+
   useEffect(() => {
     fetchApplications();
-  }, [fetchApplications]);
+    fetchBackbone();
+
+    const timer = window.setInterval(fetchBackbone, 5000);
+    return () => window.clearInterval(timer);
+  }, [fetchApplications, fetchBackbone]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-8">
@@ -105,6 +147,74 @@ export default function ApplicationsPage() {
             </Card>
           </div>
         )}
+
+        {/* Motherboard Backbone Panel */}
+        <Card className="mb-8 border-sky-200 bg-sky-50/70 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-sky-900 text-xl">
+                Quantum Motherboard Backbone
+              </h2>
+              <p className="text-sky-800 text-sm">
+                Live route, failover, and reconnect telemetry from quantum-shield
+              </p>
+            </div>
+            <span
+              className={`rounded-full px-3 py-1 font-semibold text-xs ${
+                backbone?.status.connected
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {backbone?.status.connected ? "CONNECTED" : "DISCONNECTED"}
+            </span>
+          </div>
+
+          {backboneError && (
+            <p className="mb-3 text-red-700 text-sm">{backboneError}</p>
+          )}
+
+          {backbone && (
+            <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
+              <div className="rounded border border-sky-200 bg-white p-3">
+                <p className="font-semibold text-gray-900">Active Route</p>
+                <p className="break-all text-gray-700">
+                  {backbone.status.active_route ?? "None"}
+                </p>
+              </div>
+              <div className="rounded border border-sky-200 bg-white p-3">
+                <p className="font-semibold text-gray-900">Reconnects / Failovers</p>
+                <p className="text-gray-700">
+                  {backbone.metrics.reconnects} / {backbone.metrics.failovers}
+                </p>
+              </div>
+              <div className="rounded border border-sky-200 bg-white p-3 md:col-span-2">
+                <p className="font-semibold text-gray-900">Route Candidates</p>
+                <p className="break-all text-gray-700">
+                  {backbone.status.route_candidates.join(" | ")}
+                </p>
+              </div>
+              <div className="rounded border border-sky-200 bg-white p-3">
+                <p className="font-semibold text-gray-900">Last Failover</p>
+                <p className="text-gray-700">
+                  {backbone.status.last_failover
+                    ? new Date(backbone.status.last_failover * 1000).toLocaleString()
+                    : "No failover yet"}
+                </p>
+              </div>
+              <div className="rounded border border-sky-200 bg-white p-3">
+                <p className="font-semibold text-gray-900">Last Session Reseed</p>
+                <p className="text-gray-700">
+                  {backbone.status.session_key_rotated_at
+                    ? new Date(
+                        backbone.status.session_key_rotated_at * 1000
+                      ).toLocaleString()
+                    : "Not available"}
+                </p>
+              </div>
+            </div>
+          )}
+        </Card>
 
         {/* Refresh Button */}
         <div className="mb-6 flex justify-between">

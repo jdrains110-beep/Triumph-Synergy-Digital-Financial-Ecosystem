@@ -208,6 +208,20 @@ scrape_configs:
           type: 'recovery-watchdog'
           role: 'pi-horizon-self-heal'
     metrics_path: /metrics
+    fallback_scrape_protocol: PrometheusText0.0.4
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Cloud Memory Platform — unified memory layer and cloud/offline sync
+  # ==========================================================================
+  - job_name: 'triumph-cloud-memory'
+    static_configs:
+      - targets: ['triumph-cloud-memory:8095']
+        labels:
+          service: 'cloud-memory'
+          type: 'memory-fabric'
+          role: 'online-offline-sync'
+    metrics_path: /metrics
     scrape_interval: 15s
 
   # ==========================================================================
@@ -222,20 +236,6 @@ scrape_configs:
           dimensions: 'internal-mined,external-market'
           pi_internal_rate: '314159'
           pi_external_rate: '314.159'
-    metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Cloud Memory Platform — LZ4 compressed cross-service unified memory
-  # ==========================================================================
-  - job_name: 'triumph-cloud-memory'
-    static_configs:
-      - targets: ['triumph-cloud-memory:8095']
-        labels:
-          service: 'cloud-memory'
-          type: 'compressed-memory-platform'
-          compression: 'LZ4'
-          namespaces: '22'
     metrics_path: /metrics
     scrape_interval: 15s
 
