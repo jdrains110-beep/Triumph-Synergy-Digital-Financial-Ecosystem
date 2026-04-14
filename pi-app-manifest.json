@@ -151,6 +151,54 @@
     "terms_of_service": "/legal/terms"
   },
 
+  "platform_bridge": {
+    "enabled": true,
+    "version": "2.0.0",
+    "primary_domain": "https://triumphsynergy0576.pinet.com",
+    "description": "Superior platform bridge connecting Pi Desktop and Pi App Studio to Docker Desktop ecosystem",
+    "discovery": "/api/pi/platform",
+    "handshake": "/api/pi/platform/handshake",
+    "relay": "/api/pi/platform/relay",
+    "docker_health": "/api/pi/platform/docker",
+    "events": "/api/pi/platform/events",
+    "supported_platforms": ["pi-desktop", "pi-app-studio", "pi-browser", "web"],
+    "docker_desktop": {
+      "integrated": true,
+      "services": 29,
+      "networks": ["triumph-net", "pi-bridge"],
+      "pi_node_bridge": true,
+      "real_time_events": true
+    },
+    "capabilities": [
+      "blockchain_query",
+      "transaction_submission",
+      "smart_contracts",
+      "dex_trading",
+      "payment_processing",
+      "quantum_security",
+      "ai_ml_engine",
+      "compliance_kyc_aml",
+      "real_time_monitoring",
+      "pi_node_direct_access"
+    ],
+    "relay_actions": [
+      "query_ledger",
+      "query_account",
+      "submit_tx",
+      "service_health",
+      "docker_status",
+      "horizon_query",
+      "dex_orderbook",
+      "smart_contract_invoke",
+      "payment_create",
+      "fee_stats",
+      "scp_status",
+      "bridge_status",
+      "quantum_status",
+      "ml_predict"
+    ]
+  },
+
   "features": {
     "payments": {
       "pi_payments": true,
@@ -245,7 +293,9 @@
 
   "metadata": {
     "created": "2025-01-01T00:00:00Z",
-    "updated": "2026-01-13T00:00:00Z",
-    "schema_version": "1.0"
+    "updated": "2026-04-13T00:00:00Z",
+    "schema_version": "1.0",
+    "platform_bridge_version": "2.0.0",
+    "docker_desktop_integration": true
   }
 }

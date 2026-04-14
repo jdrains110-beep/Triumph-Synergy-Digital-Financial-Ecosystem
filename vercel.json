@@ -46,6 +46,31 @@
       ]
     },
     {
+      "source": "/api/pi/platform/:path*",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Pi-App-Studio, X-Pi-Platform, X-Pi-Session"
+        },
+        {
+          "key": "X-Pi-Docker-Ecosystem",
+          "value": "true"
+        },
+        {
+          "key": "X-Pi-Platform-Version",
+          "value": "2.0.0"
+        }
+      ]
+    },
+    {
       "source": "/api/pi-verification",
       "headers": [
         {
@@ -65,6 +90,14 @@
   ],
   "devCommand": "pnpm dev",
   "functions": {
+    "app/api/pi/platform/events/*.ts": {
+      "maxDuration": 300,
+      "memory": 1024
+    },
+    "app/api/pi/platform/**/*.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
     "app/api/pi/**/*.ts": {
       "maxDuration": 30,
       "memory": 1024
