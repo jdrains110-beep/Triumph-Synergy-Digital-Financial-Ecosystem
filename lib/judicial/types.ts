@@ -20,15 +20,23 @@ export type ChargeCategory =
   | "ADMINISTRATIVE";
 
 export type ViolationType =
-  | "CHARGE_STACKING"        // Multiple charges for single act
-  | "RAILROADING"            // Pursuing case without sufficient evidence
-  | "IMPROPER_REPRESENTATION"// Attorney failed duty of care
-  | "PROCEDURAL_ABUSE"       // Misuse of process to coerce
-  | "EVIDENCE_SUPPRESSION"   // Brady/Giglio violations
-  | "SELECTIVE_PROSECUTION"  // Targeting based on protected class
-  | "VINDICTIVE_PROSECUTION" // Charges filed in retaliation
-  | "MULTIPLICITY"           // Charging same offense multiple counts
-  | "DUPLICITY"              // Multiple offenses in one count (vagueness);
+  | "CHARGE_STACKING"            // Multiple charges for single act
+  | "RAILROADING"                // Pursuing case without sufficient evidence
+  | "IMPROPER_REPRESENTATION"    // Attorney failed duty of care
+  | "PROCEDURAL_ABUSE"           // Misuse of process to coerce
+  | "EVIDENCE_SUPPRESSION"       // Brady/Giglio violations
+  | "SELECTIVE_PROSECUTION"      // Targeting based on protected class
+  | "VINDICTIVE_PROSECUTION"     // Charges filed in retaliation
+  | "MULTIPLICITY"               // Charging same offense multiple counts
+  | "DUPLICITY"                  // Multiple offenses in one count (vagueness)
+  | "FABRICATED_EVIDENCE"        // Unauthenticated evidence with broken chain of custody
+  | "CHAIN_OF_CUSTODY_VIOLATION" // Evidence chain of custody compromised
+  | "JUDICIAL_MISCONDUCT"        // Judge bias, ex parte communications, procedural abuse
+  | "PROSECUTOR_MISCONDUCT"      // Prosecutorial overreach beyond charging decisions
+  | "SHERIFF_MISCONDUCT"         // Law enforcement misconduct (illegal search, false reports)
+  | "PUBLIC_DEFENDER_COLLUSION"   // Public defender rubber-stamping / zero investigation
+  | "WITNESS_TAMPERING"          // Witness intimidation or incentivized testimony
+  | "COERCED_TESTIMONY";         // Testimony obtained through threats/duress
 
 export type EvidenceType =
   | "PHYSICAL"

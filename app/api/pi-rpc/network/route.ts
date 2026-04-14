@@ -1,6 +1,6 @@
 /**
  * Pi Network Info API
- * Get network information and status
+ * Get network information and status via Stellar Horizon REST API
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -13,21 +13,28 @@ export async function GET(request: NextRequest) {
 
     const client = getPiRPCClient(network);
 
-    const [networkInfo, blockNumber, gasPrice, version] = await Promise.all([
+    const [rootInfo, networkInfo, feeStats] = await Promise.allSettled([
+      client.getRootInfo(),
       client.getNetworkInfo(),
-      client.getBlockNumber(),
-      client.getGasPrice(),
-      client.getVersion(),
+      client.getFeeStats(),
     ]);
+
+    const root = rootInfo.status === 'fulfilled' ? rootInfo.value : {};
+    const netInfo = networkInfo.status === 'fulfilled' ? networkInfo.value : {};
+    const fees = feeStats.status === 'fulfilled' ? feeStats.value : {};
 
     return NextResponse.json({
       success: true,
       network: client.getNetwork(),
       info: {
-        ...networkInfo,
-        blockNumber,
-        gasPrice,
-        version,
+        ...netInfo,
+        blockNumber: root.history_latest_ledger?.toString() ?? '0',
+        protocolVersion: root.current_protocol_version,
+        coreVersion: root.core_version,
+        horizonVersion: root.horizon_version,
+        networkPassphrase: root.network_passphrase,
+        gasPrice: fees.last_ledger_base_fee ?? '100000',
+        feeStats: fees,
         rpcEndpoint: client.config.endpoint,
       },
     });
