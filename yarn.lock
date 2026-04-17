@@ -1986,6 +1986,13 @@
     tslib "2.8.1"
     ws "^8.18.2"
 
+"@supabase/ssr@^0.10.2":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/@supabase/ssr/-/ssr-0.10.2.tgz#55f4675eef530eaee4a2c9c5ec6a6f01802fe1f7"
+  integrity sha512-JFbchN63CXLFHJRNT7udec4/RoD9PmXkSGko3QSO6vUuqGBtSzdmxR7FPfQNr7SuFd65I7Xv46q66ALjEN1cgQ==
+  dependencies:
+    cookie "^1.0.2"
+
 "@supabase/storage-js@2.101.1":
   version "2.101.1"
   resolved "https://registry.yarnpkg.com/@supabase/storage-js/-/storage-js-2.101.1.tgz#c077a105c2621f520e860fb992501b0b19106ae3"
@@ -3056,6 +3063,11 @@ convert-source-map@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-2.0.0.tgz#4b560f649fc4e918dd0ab75cf4961e8bc882d82a"
   integrity sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==
+
+cookie@^1.0.2:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/cookie/-/cookie-1.1.1.tgz#3bb9bdfc82369db9c2f69c93c9c3ceb310c88b3c"
+  integrity sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==
 
 cose-base@^1.0.0:
   version "1.0.3"

@@ -1,18 +1,19 @@
 /**
  * middleware.ts
- * Minimal Edge Middleware - Only blocks preview deployments
- * All other logic handled by app/layout.tsx Pi SDK initialization
+ * Edge Middleware — Supabase session refresh + preview blocking + security headers
  * 
- * Goal: Eliminate interference with Pi Studio integration
+ * Supabase SSR integration: refreshes auth tokens on every request so
+ * server components always see a fresh session.
  */
 
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { createMiddlewareSupabase } from "@/lib/supabase";
 
 /**
- * Main middleware function - MINIMAL, NO INTERFERENCE
+ * Main middleware function
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const hostname = request.nextUrl.hostname.toLowerCase();
 
   // PRODUCTION DOMAINS - Let them pass through unmodified
@@ -38,8 +39,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, 307);
   }
 
-  // All production domains: pass through with security headers
+  // Create response and refresh Supabase auth session
   const response = NextResponse.next();
+
+  try {
+    const supabase = createMiddlewareSupabase(request, response);
+    // Refresh the session — this updates cookies so the server always has a
+    // valid token.  We intentionally ignore the return value; if there is no
+    // active session the call is a harmless no-op.
+    await supabase.auth.getUser();
+  } catch {
+    // Supabase not configured or unreachable — continue without session refresh
+  }
+
+  // Security headers
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-XSS-Protection", "1; mode=block");

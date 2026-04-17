@@ -39,6 +39,11 @@ x-common: &common
 x-db-env: &db-env
   POSTGRES_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
   REDIS_URL: redis://triumph-redis:6379
+  # Supabase keys (set in .env or secrets manager for production)
+  NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://your-project.supabase.co}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-your-anon-key}
+  SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-your-service-role-key}
+  SUPABASE_DB_URL: ${SUPABASE_DB_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}}
 
 x-pi-env: &pi-env
   PI_NETWORK_MODE: ${PI_NETWORK_MODE:-mainnet}
@@ -228,6 +233,7 @@ services:
       NODE_ENV: production
       DOCKER_BUILD: "true"
       AUTH_SECRET: ${AUTH_SECRET:-triumph-synergy-auth-secret-32chars-minimum-key}
+      AUTH_TRUST_HOST: "true"
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-triumph-synergy-nextauth-secret-32chars-min}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
