@@ -5,9 +5,13 @@
  * This is the SINGLE SOURCE OF TRUTH for all Pi ecosystem connections.
  *
  * Organizations tracked:
- *   - pi-apps (56 repos) — Official Pi Network developer platform
- *   - minepi  (3 repos)  — Pi Network core organization
- *   - stellar (4 repos)  — Upstream Stellar foundation (Pi's base layer)
+ *   - pi-apps      (56 repos) — Official Pi Network developer platform
+ *   - minepi       (3 repos)  — Pi Network core organization
+ *   - stellar      (4 repos)  — Upstream Stellar foundation (Pi's base layer)
+ *   - PiNetwork    (1 repo)   — Official PiRC standards (PiRC1 + PiRC2)
+ *   - Pi-Defi-world(10 repos) — PiRC-compliant DeFi ecosystem (ZyraDex, ACBU, Pi Oracle)
+ *   - KOSASIH      (25 repos) — Community Pi ecosystem (smart contracts, DeFi, AI, stablecoins)
+ *   - Independent  (3 repos)  — Smart contracts, multisig escrow, contract generation
  *
  * Fork owner: jdrains110-beep
  * Triumph Synergy Quantum Ecosystem — Superior integration layer
@@ -959,6 +963,690 @@ export const PI_ECOSYSTEM_REGISTRY: PiRepoEntry[] = [
     language: "Python",
     description: "KVM-based remote management (Pi hardware integration)",
     integrationPoints: ["Remote Pi Node management"],
+    localBindings: [],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TIER: CORE — PiRC Standards (Pi Requests for Comment)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    upstream: "PiNetwork/PiRC",
+    fork: "jdrains110-beep/PiRC",
+    tier: "core",
+    status: "fully-integrated",
+    stars: 25,
+    language: "Markdown",
+    description:
+      "Official Pi Requests for Comment — PiRC1 (Token Design) & PiRC2 (Subscription Service Standard)",
+    integrationPoints: [
+      "PiRC1 token ecosystem design spec",
+      "PiRC1 participation & allocation models",
+      "PiRC1 TGE state management",
+      "PiRC2 subscription lifecycle",
+      "PiRC2 service management & query methods",
+      "PiRC2 admin methods",
+      "PiRC2 data types & error codes",
+    ],
+    localBindings: [
+      "lib/pirc-official/ (git submodule)",
+      "lib/pirc/index.ts",
+      "lib/pirc/protocol-sync.ts",
+      "types/pirc.ts",
+      "app/api/pi/pirc/route.ts",
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TIER: PLATFORM — Pi-Defi-world (PiRC-compliant DeFi ecosystem)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    upstream: "Pi-Defi-world/Zyradex-frontend",
+    fork: "jdrains110-beep/Zyradex-frontend",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 5,
+    language: "TypeScript",
+    description:
+      "ZyraDex — PiRC-compliant DeFi protocol on Pi Network (swap, liquidity, portfolio tracking)",
+    integrationPoints: [
+      "PiRC-compliant DeFi patterns",
+      "Pi DEX swap/liquidity architecture",
+      "Pi SDK authentication flow",
+      "Wallet import via stellar-sdk",
+      "Admin JWT auth pattern",
+    ],
+    localBindings: [
+      "lib/pirc/index.ts",
+      "lib/smart-contracts/contract-registry.ts",
+    ],
+  },
+  {
+    upstream: "Pi-Defi-world/pirc-smart-contracts-explainer",
+    fork: "jdrains110-beep/pirc-smart-contracts-explainer",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 4,
+    language: "Markdown",
+    description:
+      "PiRC Smart Contracts reference — ZyraDex features: Send/Receive, Swap, Trade, Invest, Borrow & Lend",
+    integrationPoints: [
+      "PiRC smart contract specification",
+      "DeFi primitives on Pi (swap, lend, stake)",
+      "Token economics patterns",
+    ],
+    localBindings: [
+      "lib/smart-contracts/smart-contract-hub.ts",
+      "lib/smart-contracts/contract-registry.ts",
+    ],
+  },
+  {
+    upstream: "Pi-Defi-world/acbu-smart-contract",
+    fork: "jdrains110-beep/acbu-smart-contract",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 0,
+    language: "Rust",
+    description: "ACBU smart contracts — Rust-based Pi Network contract implementations",
+    integrationPoints: [
+      "Rust smart contract patterns for Pi/Stellar",
+      "Soroban contract deployment",
+      "On-chain logic reference",
+    ],
+    localBindings: [
+      "lib/smart-contracts/smart-contract-hub.ts",
+      "docker/smart-contracts/",
+    ],
+  },
+  {
+    upstream: "Pi-Defi-world/acbu-frontend",
+    fork: "jdrains110-beep/acbu-frontend",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 0,
+    language: "TypeScript",
+    description: "ACBU frontend — Pi DeFi application UI (39 forks, active community)",
+    integrationPoints: [
+      "Pi DeFi UI patterns",
+      "Wallet integration flow",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "Pi-Defi-world/acbu-backend",
+    fork: "jdrains110-beep/acbu-backend",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 0,
+    language: "TypeScript",
+    description: "ACBU backend — Pi DeFi API server (26 forks, active community)",
+    integrationPoints: [
+      "Pi DeFi API architecture",
+      "Transaction processing patterns",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "Pi-Defi-world/pi-oracle",
+    fork: "jdrains110-beep/pi-oracle",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 0,
+    language: "TypeScript",
+    description: "Pi Oracle — on-chain price feed / data oracle for Pi Network",
+    integrationPoints: [
+      "Pi price oracle integration",
+      "On-chain data feed patterns",
+    ],
+    localBindings: [
+      "lib/pi-transaction/pi-smart-contracts.ts",
+      "docker/blockchain-oracle/",
+    ],
+  },
+  {
+    upstream: "Pi-Defi-world/USDP-TEST",
+    fork: "jdrains110-beep/USDP-TEST",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 0,
+    language: "TypeScript",
+    description: "USDP stablecoin test implementation on Pi Network",
+    integrationPoints: [
+      "Pi stablecoin (USDP) patterns",
+      "Token issuance on Pi testnet",
+    ],
+    localBindings: [
+      "lib/pi-transaction/pi-smart-contracts.ts",
+    ],
+  },
+  {
+    upstream: "Pi-Defi-world/passphrase-converter-js-typescript",
+    fork: "jdrains110-beep/passphrase-converter-js-typescript",
+    tier: "platform",
+    status: "forked-pending",
+    stars: 0,
+    language: "JavaScript",
+    description: "Passphrase/mnemonic to keypair converter for Pi/Stellar wallets",
+    integrationPoints: [
+      "Wallet key derivation",
+      "Mnemonic passphrase handling",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "Pi-Defi-world/zyrachain-frontend-website",
+    fork: "jdrains110-beep/zyrachain-frontend-website",
+    tier: "platform",
+    status: "monitored",
+    stars: 0,
+    language: "TypeScript",
+    description: "ZyraChain marketing/docs website for Pi DeFi ecosystem",
+    integrationPoints: ["Pi DeFi ecosystem documentation"],
+    localBindings: [],
+  },
+  {
+    upstream: "Pi-Defi-world/ACBU-DOCUMENTATION",
+    fork: "jdrains110-beep/ACBU-DOCUMENTATION",
+    tier: "platform",
+    status: "monitored",
+    stars: 0,
+    language: "Markdown",
+    description: "ACBU protocol documentation — Pi DeFi architecture reference",
+    integrationPoints: ["Pi DeFi protocol documentation"],
+    localBindings: [],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TIER: COMMUNITY — KOSASIH Pi Network Ecosystem (smart contracts, DeFi, AI)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    upstream: "KOSASIH/pi-nexus-autonomous-banking-network",
+    fork: "jdrains110-beep/pi-nexus-autonomous-banking-network",
+    tier: "community",
+    status: "forked-pending",
+    stars: 515,
+    language: "Python",
+    description:
+      "Decentralized AI-driven autonomous banking on Pi Network (highest-starred Pi community project)",
+    integrationPoints: [
+      "Autonomous banking patterns",
+      "AI-driven transaction routing",
+      "Cross-bank Pi integration",
+      "DeFi 2.0 primitives",
+    ],
+    localBindings: [
+      "lib/smart-contracts/contract-orchestrator.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/eulers-shield",
+    fork: "jdrains110-beep/eulers-shield",
+    tier: "community",
+    status: "forked-pending",
+    stars: 230,
+    language: "Python",
+    description:
+      "AI-powered financial stabilization system for Pi Coin — blockchain + ML + cybersecurity",
+    integrationPoints: [
+      "Pi Coin value stabilization algorithms",
+      "ML-based price prediction",
+      "Cybersecurity audit patterns",
+    ],
+    localBindings: [
+      "lib/pi-transaction/pi-smart-contracts.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/pi-supernode",
+    fork: "jdrains110-beep/pi-node",
+    tier: "community",
+    status: "forked-pending",
+    stars: 154,
+    language: "Python",
+    description:
+      "Enterprise-grade Pi supernode — cross-chain bridge, real-time explorer, production monitoring",
+    integrationPoints: [
+      "Supernode architecture",
+      "Cross-chain bridge patterns",
+      "Production monitoring",
+    ],
+    localBindings: [
+      "docker-compose.yml (pi-central-node)",
+      "lib/stellar/scp-auto-update.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/quantum-pi-network",
+    fork: "jdrains110-beep/quantum-pi-network",
+    tier: "community",
+    status: "forked-pending",
+    stars: 154,
+    language: "Python",
+    description:
+      "Quantum Pi mainnet project — post-quantum cryptography for Pi blockchain",
+    integrationPoints: [
+      "Quantum-resistant cryptography",
+      "Pi blockchain extension protocols",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/stable-pi-core",
+    fork: "jdrains110-beep/stable-pi-core",
+    tier: "community",
+    status: "forked-pending",
+    stars: 114,
+    language: "Python",
+    description:
+      "Stable-Pi-Core — quantum AI, IoT, edge computing, AR/VR for payments on Pi Network",
+    integrationPoints: [
+      "Stable payment protocols",
+      "IoT device integration",
+      "Edge computing patterns",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/nPinA-pi-network",
+    fork: "jdrains110-beep/nPinA-pi-network",
+    tier: "community",
+    status: "forked-pending",
+    stars: 88,
+    language: "Python",
+    description: "Neural Pi Network Architecture — AI-augmented Pi node networking",
+    integrationPoints: [
+      "Neural network Pi node optimization",
+      "AI-driven consensus enhancement",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/PiConsensus",
+    fork: "jdrains110-beep/PiConsensus",
+    tier: "community",
+    status: "forked-pending",
+    stars: 68,
+    language: "Python",
+    description:
+      "Decentralized AI-Powered Quantum-Resistant Stable Coin Ecosystem on Pi",
+    integrationPoints: [
+      "Consensus algorithm enhancements",
+      "Stable coin mechanisms",
+      "Quantum-resistant primitives",
+    ],
+    localBindings: [
+      "lib/smart-contracts/contract-registry.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/super-pi",
+    fork: "jdrains110-beep/super-pi",
+    tier: "community",
+    status: "forked-pending",
+    stars: 66,
+    language: "C++",
+    description:
+      "Super Pi — sovereign Layer 2 blockchain with Shariah-compliant stablecoin ($SPI) and governance token ($SUPi)",
+    integrationPoints: [
+      "Layer 2 blockchain architecture",
+      "Stablecoin pegging mechanism",
+      "Governance token model",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/PiEcosystemHub",
+    fork: "jdrains110-beep/PiEcosystemHub",
+    tier: "community",
+    status: "forked-pending",
+    stars: 62,
+    language: "JavaScript",
+    description:
+      "Comprehensive Pi dApp integration platform — interoperability & community governance",
+    integrationPoints: [
+      "dApp integration patterns",
+      "Pi ecosystem interoperability",
+      "Community governance",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/nexus-revoluter",
+    fork: "jdrains110-beep/nexus-revoluter",
+    tier: "community",
+    status: "forked-pending",
+    stars: 60,
+    language: "Python",
+    description:
+      "Blockchain node with smart contract execution, wallet, and consensus algorithms for Pi",
+    integrationPoints: [
+      "Smart contract execution engine",
+      "Decentralized wallet management",
+      "Pi-specific consensus",
+      "REST API for Pi transactions",
+    ],
+    localBindings: [
+      "lib/smart-contracts/smart-contract-hub.ts",
+      "lib/pi-transaction/pi-smart-contracts.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/PiDualTx",
+    fork: "jdrains110-beep/PiDualTx",
+    tier: "community",
+    status: "forked-pending",
+    stars: 54,
+    language: "Python",
+    description:
+      "Dual Value System DApp for Pi Network — internal ($314,159/Pi) vs external value transactions",
+    integrationPoints: [
+      "Dual value transaction model",
+      "Pi pricing mechanisms",
+    ],
+    localBindings: [
+      "components/dual-value-dashboard.tsx",
+      "components/sustained-value-dashboard.tsx",
+    ],
+  },
+  {
+    upstream: "KOSASIH/pipfs-hub",
+    fork: "jdrains110-beep/pipfs-hub",
+    tier: "community",
+    status: "forked-pending",
+    stars: 50,
+    language: "Python",
+    description: "IPFS + Pi Network file management hub — decentralized storage integration",
+    integrationPoints: [
+      "IPFS file pinning on Pi",
+      "Decentralized storage patterns",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/stellar-pi-coin-sdk",
+    fork: "jdrains110-beep/stellar-pi-coin-sdk",
+    tier: "community",
+    status: "forked-pending",
+    stars: 44,
+    language: "Rust",
+    description:
+      "Hyper-Tech SDK for Pi Coin on Stellar — Soroban smart contracts, AI-verified origins, quantum-resistant crypto",
+    integrationPoints: [
+      "Soroban smart contract SDK",
+      "Pi Coin Stellar integration",
+      "Quantum-resistant crypto primitives",
+    ],
+    localBindings: [
+      "lib/stellar/stellar-pi-coin-sdk.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/matrix-pichain",
+    fork: "jdrains110-beep/matrix-pichain",
+    tier: "community",
+    status: "forked-pending",
+    stars: 32,
+    language: "Python",
+    description: "Matrix PiChain — revolutionary stablecoin ecosystem for global finance on Pi",
+    integrationPoints: [
+      "Stablecoin ecosystem patterns",
+      "Global finance Pi integration",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/PiFinance-Core",
+    fork: "jdrains110-beep/PiFinance-Core",
+    tier: "community",
+    status: "forked-pending",
+    stars: 31,
+    language: "JavaScript",
+    description:
+      "PiFinance stablecoin platform — mint/burn, liquidity, savings & loans, P2P lending",
+    integrationPoints: [
+      "Stablecoin mint/burn mechanism",
+      "Liquidity pool management",
+      "P2P lending smart contracts",
+      "Price oracle integration",
+    ],
+    localBindings: [
+      "lib/smart-contracts/contract-registry.ts",
+      "lib/pi-transaction/pi-smart-contracts.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/Hyper-Q",
+    fork: "jdrains110-beep/Hyper-Q",
+    tier: "community",
+    status: "forked-pending",
+    stars: 29,
+    language: "Markdown",
+    description:
+      "World's First Quantum-Ready Smart Contract Protocol for Pi Network",
+    integrationPoints: [
+      "Quantum-ready smart contract architecture",
+      "Post-quantum cryptography for Pi",
+    ],
+    localBindings: [
+      "lib/smart-contracts/smart-contract-hub.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/PiRC",
+    fork: "jdrains110-beep/PiRC",
+    tier: "community",
+    status: "fully-integrated",
+    stars: 29,
+    language: "Python",
+    description:
+      "KOSASIH's PiRC fork — enhanced PiRC implementation with Python tooling (shared fork with PiNetwork/PiRC)",
+    integrationPoints: [
+      "PiRC standard extensions",
+      "Python PiRC tooling",
+    ],
+    localBindings: [
+      "lib/pirc-official/ (submodule)",
+      "lib/pirc/index.ts",
+      "types/pirc.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/DAE-Core",
+    fork: "jdrains110-beep/DAE-Core",
+    tier: "community",
+    status: "forked-pending",
+    stars: 28,
+    language: "JavaScript",
+    description:
+      "Decentralized Autonomous Economy framework — smart contracts, identity, tokenized incentives on Pi",
+    integrationPoints: [
+      "DAO governance smart contracts",
+      "Decentralized identity verification",
+      "Cross-chain interoperability protocols",
+      "Tokenized incentive mechanisms",
+    ],
+    localBindings: [
+      "lib/smart-contracts/contract-orchestrator.ts",
+      "lib/smart-contracts/contract-registry.ts",
+    ],
+  },
+  {
+    upstream: "KOSASIH/NeuralMesh-Pi-Network",
+    fork: "jdrains110-beep/NeuralMesh-Pi-Network",
+    tier: "community",
+    status: "forked-pending",
+    stars: 23,
+    language: "Python",
+    description: "Next-gen Pi network with neural mesh optimization and AI-driven routing",
+    integrationPoints: [
+      "Neural mesh network topology",
+      "AI node optimization",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/pi-block-explorer",
+    fork: "jdrains110-beep/pi-block-explorer",
+    tier: "community",
+    status: "forked-pending",
+    stars: 22,
+    language: "Python",
+    description: "Pi Block Explorer — user-friendly blockchain browsing interface",
+    integrationPoints: [
+      "Block explorer UI patterns",
+      "Transaction data visualization",
+    ],
+    localBindings: [
+      "components/PiRPCExplorer.tsx",
+    ],
+  },
+  {
+    upstream: "KOSASIH/pi-velocity-core",
+    fork: "jdrains110-beep/pi-velocity-core",
+    tier: "community",
+    status: "forked-pending",
+    stars: 20,
+    language: "Python",
+    description: "High-speed transaction processing system for Pi Network",
+    integrationPoints: [
+      "High-throughput transaction processing",
+      "Pi transaction optimization",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/pi-coin-hyper-stablecoin",
+    fork: "jdrains110-beep/pi-coin-hyper-stablecoin",
+    tier: "community",
+    status: "forked-pending",
+    stars: 19,
+    language: "Circom",
+    description: "Hyper-Tech Stablecoin on Stellar Soroban — zero-knowledge proofs for Pi Coin",
+    integrationPoints: [
+      "Soroban stablecoin contracts",
+      "ZK-proof integration",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/ultimate-pi-sdk",
+    fork: "jdrains110-beep/ultimate-pi-sdk",
+    tier: "community",
+    status: "forked-pending",
+    stars: 16,
+    language: "Rust",
+    description: "Ultimate hyper-tech SDK for Pi math and Pi Coin stablecoin — Soroban rs-sdk fork",
+    integrationPoints: [
+      "Rust Soroban SDK for Pi",
+      "Stablecoin pricing logic",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/energonexus-monorepo",
+    fork: "jdrains110-beep/energonexus-monorepo",
+    tier: "community",
+    status: "forked-pending",
+    stars: 14,
+    language: "Python",
+    description: "Decentralized energy trading platform connecting Pi Nodes — green mining",
+    integrationPoints: [
+      "Energy-optimized Pi Node operation",
+      "Green mining incentives",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/PiX-Pay-Integration",
+    fork: "jdrains110-beep/PiX-Pay-Integration",
+    tier: "community",
+    status: "forked-pending",
+    stars: 13,
+    language: "JavaScript",
+    description: "Pi Coin × Twitter (X) integration — wallet & micro-payment features",
+    integrationPoints: [
+      "Social media Pi payment integration",
+      "Micro-payment patterns",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/PiNexus-Banking-Nexus",
+    fork: "jdrains110-beep/PiNexus-Banking-Nexus",
+    tier: "community",
+    status: "forked-pending",
+    stars: 7,
+    language: "TypeScript",
+    description:
+      "Ultimate Decentralized AGI-Powered Ecosystem — DeFi 2.0, RWA tokenization, neural mining",
+    integrationPoints: [
+      "AGI-powered DeFi 2.0",
+      "Real-world asset tokenization",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "KOSASIH/global-harmony-nexus-core",
+    fork: "jdrains110-beep/global-harmony-nexus-core",
+    tier: "community",
+    status: "forked-pending",
+    stars: 17,
+    language: "Python",
+    description: "DAO framework on Pi — global harmony governance system",
+    integrationPoints: [
+      "DAO governance on Pi",
+      "Multi-sig governance patterns",
+    ],
+    localBindings: [],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TIER: COMMUNITY — Independent Pi Smart Contract repos
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    upstream: "derekgeisler/Pi-Network---Consensus-Smart-Contracts-Merkle-Roots",
+    fork: "jdrains110-beep/Pi-Network---Consensus-Smart-Contracts-Merkle-Roots",
+    tier: "community",
+    status: "forked-pending",
+    stars: 1,
+    language: "Python",
+    description:
+      "Advanced Pi Coin with consensus, smart contracts (TokenSwap, Staking), Merkle trees, and digital signatures",
+    integrationPoints: [
+      "Merkle tree transaction verification",
+      "TokenSwap & Staking contract patterns",
+      "PoW consensus reference implementation",
+      "Digital signature authentication",
+    ],
+    localBindings: [
+      "lib/smart-contracts/smart-contract-hub.ts",
+    ],
+  },
+  {
+    upstream: "FireflyLaboratories/TrustedThirdParty",
+    fork: "jdrains110-beep/TrustedThirdParty",
+    tier: "community",
+    status: "forked-pending",
+    stars: 0,
+    language: "TypeScript",
+    description: "2-of-3 multisig escrow on Pi v23 testnet — trusted third party protocol",
+    integrationPoints: [
+      "Multisig escrow patterns",
+      "Pi testnet v23 transaction signing",
+    ],
+    localBindings: [],
+  },
+  {
+    upstream: "suisui0223/Pi-GLM",
+    fork: "jdrains110-beep/Pi-GLM",
+    tier: "community",
+    status: "forked-pending",
+    stars: 0,
+    language: "Python",
+    description: "Pi blockchain smart contract maker — automated contract generation",
+    integrationPoints: [
+      "Smart contract generation tooling",
+      "Pi contract templates",
+    ],
     localBindings: [],
   },
 ];
