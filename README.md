@@ -13,6 +13,7 @@
 [![PiOS](https://img.shields.io/badge/License-PiOS-purple?style=flat-square)](LICENSE-PIOS)
 [![Quantum Resistant](https://img.shields.io/badge/Quantum-Resistant-FF6B35?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![Pi DEX SDK](https://img.shields.io/badge/Pi%20DEX-SDK-FF4081?style=flat-square)](https://github.com/kosasih/pidexsdk)
+[![Supabase](https://img.shields.io/badge/Supabase-RLS%20%2B%20Realtime-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
@@ -43,6 +44,9 @@
 | 🔐 **Quantum Resistance** | 🟢 ACTIVE | ML-KEM-768, ML-DSA-65, AES-256-GCM |
 | 🔗 **Pi DEX SDK** | 🟢 INTEGRATED | Smart contract integration from kosasih/pidexsdk |
 | 🌐 **Pi RPC Framework** | 🟢 COMPLETE | Full rpc.testnet.minepi.com & rpc.minepi.com integration |
+| 🟢 **Supabase Platform** | 🟢 LIVE | RLS on all tables, Realtime, Storage, Quantum Audit |
+| 📋 **Quantum Audit Ledger** | 🟢 IMMUTABLE | Append-only quantum operation log in Supabase |
+| 🗄️ **Supabase Storage** | 🟢 ACTIVE | 4 secured buckets (documents, contracts, quantum-keys, avatars) |
 
 ---
 
@@ -115,6 +119,102 @@ curl -X POST https://triumph-synergy.vercel.app/api/smart-contracts \
 - ✅ **Integration**: Smart contract deployment
 - ✅ **Validation**: Quantum resistance verification
 - ✅ **Sync**: Automatic updates from GitHub
+
+---
+
+## 🟢 Supabase Platform — Full-Stack Backend
+
+**LIVE on Supabase** — Row Level Security, Realtime subscriptions, Storage, and Quantum Audit Ledger.
+
+### Database (12 Tables, RLS Enforced)
+
+| Table | RLS | Purpose |
+|-------|-----|--------|
+| `User` | ✅ | User accounts (own-row access) |
+| `Chat` | ✅ | Chat sessions (owner + public visibility) |
+| `Message` | ✅ | Legacy messages (via owning chat) |
+| `Message_v2` | ✅ | Messages with parts/attachments (via owning chat) |
+| `Vote` / `Vote_v2` | ✅ | Message votes (via owning chat) |
+| `Document` | ✅ | User documents (owner only) |
+| `Suggestion` | ✅ | AI suggestions (owner only) |
+| `Stream` | ✅ | Active streams (via owning chat) |
+| `quantum_audit_log` | ✅ | Immutable quantum operation ledger |
+| `quantum_vault_secrets` | ✅ | Quantum-encrypted key storage |
+
+> **Service-role bypass**: The `service_role` key automatically bypasses RLS for server-side operations.
+
+### Quantum Audit Ledger
+
+Every quantum-shield operation (signatures, KEM, encryption) is recorded in an **immutable, append-only** `quantum_audit_log` table for compliance, forensics, and quantum-readiness attestation.
+
+```sql
+-- Fields: id, timestamp, operation, algorithm, actor_id, input_hash, output_hash,
+--         metadata (JSONB), ip_address, service, success, error_message
+-- Algorithms: CRYSTALS-Kyber-1024, CRYSTALS-Dilithium-5, AES-256-GCM, SHA3-512
+```
+
+### Quantum Vault Secrets
+
+Stores quantum-encrypted secrets (Kyber-wrapped AES keys, Dilithium-signed certs) with automatic key rotation.
+
+```sql
+-- Fields: id, owner_id, label, algorithm, encrypted_key (bytea), nonce, public_key,
+--         key_type (session|signing|encryption|master), expires_at, revoked
+```
+
+### RPC Functions (Server-Side PL/pgSQL)
+
+| Function | Purpose |
+|----------|--------|
+| `get_user_chat_stats(user_id)` | Total chats, messages, last active |
+| `search_messages(query, limit)` | Full-text search with GIN index + ts_rank |
+| `quantum_audit_summary(hours)` | Grouped quantum ops (successes/failures) |
+| `rotate_quantum_keys()` | Auto-revoke expired keys (service_role only) |
+
+### Realtime Subscriptions
+
+5 tables published to `supabase_realtime`:
+- `Chat` — live chat session updates
+- `Message_v2` — real-time message streaming
+- `quantum_audit_log` — live quantum operation feed
+- `quantum_vault_secrets` — key lifecycle events
+- `Database` — system metadata
+
+### Storage (4 Buckets)
+
+| Bucket | Access | Limit | Purpose |
+|--------|--------|-------|--------|
+| `documents` | Private | 50 MB | User documents |
+| `contracts` | Private | 10 MB | Smart contract artifacts |
+| `quantum-keys` | Private | 1 MB | Quantum key material |
+| `avatars` | Public | 5 MB | User profile images |
+
+### Supabase Auth Integration
+
+- OAuth providers (Google, GitHub, Pi Network)
+- Magic link sign-in
+- MFA/TOTP enrollment & verification
+- `syncUserToSupabase()` bridges NextAuth ↔ Supabase Auth
+- JWT session refresh in middleware on every request
+
+### Supabase API Endpoints
+
+```
+POST /api/quantum/audit           - Log quantum operation
+GET  /api/quantum/audit?actor_id=  - Query audit entries
+POST /api/supabase/setup-storage   - Initialize storage buckets
+GET  /api/auth/callback            - OAuth/magic-link callback
+```
+
+### Supabase Client Architecture
+
+```typescript
+// lib/supabase.ts — SSR-ready clients via @supabase/ssr
+createBrowserSupabase()    // Client components
+createServerSupabase()     // Server components / Route Handlers
+createMiddlewareSupabase() // Edge middleware
+getSupabaseAdmin()         // Service-role (bypasses RLS)
+```
 
 ---
 
@@ -713,7 +813,8 @@ Official PiNetwork/PiRC integration for enhanced Pi ecosystem connectivity.
 |-----------|------------|
 | Framework | Next.js 16+ React 19 |
 | Language | TypeScript 5.9+ |
-| Database | PostgreSQL + Drizzle ORM |
+| Database | PostgreSQL + Drizzle ORM + **Supabase** (RLS, Realtime, Storage) |
+| Backend Platform | **Supabase** (Auth, RPC, Realtime, Storage, Quantum Audit) |
 | Cache | Redis |
 | Blockchain | Stellar SDK + Pi Network |
 | Security | Quantum-Resistant Encryption |
@@ -873,10 +974,16 @@ STELLAR_PAYMENT_ACCOUNT=Gxxxxxxxx
 STELLAR_PAYMENT_SECRET=Sxxxxxxxx
 ```
 
-### Database
+### Database & Supabase
 ```bash
 POSTGRES_URL=postgresql://user:pass@host:5432/db
 REDIS_URL=redis://localhost:6379
+
+# Supabase (Required)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
 ```
 
 ---
@@ -912,10 +1019,20 @@ REDIS_URL=redis://localhost:6379
 ### Quantum & Security APIs
 - `GET /api/quantum-fortress?operation=status` — Quantum fortress status
 - `POST /api/quantum-fortress` — Quantum operations (validate-token, encrypt, decrypt)
+- `POST /api/quantum/audit` — Log quantum operation to immutable audit ledger
+- `GET /api/quantum/audit?actor_id=...` — Query quantum audit entries
 - `GET /api/central-node?operation=status` — Central node status
 - `GET /api/security?operation=unified` — Security suite status
 - `POST /api/threat-detection` — Threat scanning
 - `POST /api/smart-contracts` — Smart contract operations (integrate-pi-dex, connect-pi-dex-sdk)
+
+### Supabase APIs
+- `POST /api/supabase/setup-storage` — Initialize storage buckets
+- `GET /api/auth/callback` — OAuth / magic-link callback
+- `RPC get_user_chat_stats(user_id)` — User chat statistics
+- `RPC search_messages(query, limit)` — Full-text message search
+- `RPC quantum_audit_summary(hours)` — Quantum ops summary
+- `RPC rotate_quantum_keys()` — Auto-revoke expired keys
 
 ### Pi Payment APIs
 - `POST /api/pi/approve` — Approve Pi payment
@@ -1009,6 +1126,13 @@ REDIS_URL=redis://localhost:6379
 | Self-Contained Pi Network | ✅ ACTIVE (blockchain, PBFT, mining, contracts) |
 | Monitoring Dashboard | ✅ ACTIVE (unified REST API) |
 | **Central Node Scalability** | **✅ ACTIVE (64+ nodes, 99.8% consistency)** |
+| **Supabase Platform** | **✅ LIVE (12 tables, RLS enforced, Realtime, 4 storage buckets)** |
+| **Quantum Audit Ledger** | **✅ IMMUTABLE (append-only, per-operation logging)** |
+| **Quantum Vault Secrets** | **✅ ACTIVE (Kyber-wrapped keys, auto-rotation)** |
+| **Supabase RPC Functions** | **✅ 4 ACTIVE (chat stats, FTS, audit summary, key rotation)** |
+| **Supabase Realtime** | **✅ 5 TABLES (Chat, Message_v2, quantum_audit_log, quantum_vault_secrets)** |
+| **Supabase Storage** | **✅ 4 BUCKETS (documents, contracts, quantum-keys, avatars)** |
+| **Supabase Auth** | **✅ ACTIVE (OAuth, magic link, MFA/TOTP, NextAuth sync)** |
 | Node.js Requirement | ✅ 24.0.0+ (synchronized across all platforms) |
 | Package Manager | ✅ Yarn 1.22.22 (npm compatibility maintained) |
 | Max Concurrent Commands | ✅ 1,000 (per Central Node) |
@@ -1062,6 +1186,13 @@ REDIS_URL=redis://localhost:6379
 - ✅ **SCP Auto-Upgrade** — Automatic Pi Network protocol sync
 - ✅ **Docker Orchestration** — 11 unified Pi Network containers
 - ✅ **Container Actions** — PowerShell & Bash management scripts
+- ✅ **Supabase Full-Stack Platform** — 12 tables with RLS, Realtime, Storage, Quantum Audit
+- ✅ **Quantum Audit Ledger** — Immutable append-only log of every quantum operation
+- ✅ **Quantum Vault Secrets** — Kyber-wrapped key storage with auto-rotation
+- ✅ **Supabase RPC Functions** — Chat stats, full-text search, audit summary, key rotation
+- ✅ **Supabase Realtime** — Live subscriptions on Chat, Messages, Quantum Audit
+- ✅ **Supabase Storage** — 4 secured buckets for documents, contracts, keys, avatars
+- ✅ **Supabase Auth** — OAuth, magic link, MFA/TOTP, NextAuth bridge
 - ✅ **0 Security Vulnerabilities** — All issues resolved
 
 ---
@@ -1091,6 +1222,8 @@ See also: [Apache License](LICENSE)
 **Pi DEX SDK:** `github.com/kosasih/pidexsdk` ✅ INTEGRATED
 
 **Pi RPC Framework:** `rpc.testnet.minepi.com • rpc.minepi.com` ✅ COMPLETE
+
+**Supabase:** `RLS • Realtime • Storage • Quantum Audit` ✅ LIVE
 
 **🚫 Non-Quantum Tokens: AUTOMATICALLY DENIED**
 
