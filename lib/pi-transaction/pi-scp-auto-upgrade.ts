@@ -676,8 +676,9 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
   // ==========================================================================
 
   private getHorizonUrl(): string {
-    // Prefer env override, else pick by network type
-    return process.env.STELLAR_HORIZON_URL
+    // Prefer local Pi node Horizon (fastest, no external dependency), then env override, then public API
+    return process.env.PI_LOCAL_HORIZON
+      || process.env.STELLAR_HORIZON_URL
       || (this.networkType === 'mainnet'
         ? SCP_UPGRADE_CONFIG.piMainnetHorizon
         : SCP_UPGRADE_CONFIG.piTestnetHorizon);
