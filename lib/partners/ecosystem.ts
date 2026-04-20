@@ -292,69 +292,21 @@ export const partnerEcosystemConfig = {
 };
 
 export const apiIntegrationConfig = {
-  // External API integrations
+  // External API integrations — Pi-sovereign ecosystem only
   integrations: {
-    // Payment gateways
-    stripe: {
-      enabled: true,
-      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
-      secretKey: process.env.STRIPE_SECRET_KEY,
-      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
-      features: ["payments", "subscriptions", "connect", "radar"],
-    },
-
-    // Shipping carriers
+    // Shipping carriers (logistics only — no payment data)
     shippo: {
       enabled: true,
       apiKey: process.env.SHIPPO_API_KEY,
       features: ["rates", "labels", "tracking", "returns"],
     },
 
-    // Marketing automation
-    sendgrid: {
-      enabled: true,
-      apiKey: process.env.SENDGRID_API_KEY,
-      features: ["transactional", "marketing", "templates"],
-    },
-
-    // CRM
-    salesforce: {
-      enabled: true,
-      clientId: process.env.SALESFORCE_CLIENT_ID,
-      clientSecret: process.env.SALESFORCE_CLIENT_SECRET,
-      features: ["contacts", "accounts", "opportunities", "cases"],
-    },
-
-    // Analytics
-    segment: {
-      enabled: true,
-      writeKey: process.env.SEGMENT_WRITE_KEY,
-      features: ["tracking", "identify", "page", "group"],
-    },
-
-    // Social media
-    facebook: {
-      enabled: true,
-      appId: process.env.FACEBOOK_APP_ID,
-      appSecret: process.env.FACEBOOK_APP_SECRET,
-      features: ["login", "pages", "ads", "insights"],
-    },
-
-    // Customer support
-    zendesk: {
-      enabled: true,
-      subdomain: process.env.ZENDESK_SUBDOMAIN,
-      username: process.env.ZENDESK_USERNAME,
-      token: process.env.ZENDESK_TOKEN,
-      features: ["tickets", "users", "organizations", "help-center"],
-    },
-
-    // Blockchain & Crypto
+    // Blockchain & Crypto — sovereign payment layer
     stellar: {
       enabled: true,
       horizonUrl:
-        process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org",
-      networkPassphrase: "Public Global Stellar Network ; September 2015",
+        process.env.STELLAR_HORIZON_URL || "http://localhost:31401",
+      networkPassphrase: "Pi Testnet",
       features: ["payments", "assets", "offers", "effects"],
     },
 

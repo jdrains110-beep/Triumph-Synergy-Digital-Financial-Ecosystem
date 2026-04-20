@@ -1,6 +1,8 @@
 // lib/payments/unified-routing.ts
-// Unified Payment Routing Configuration
-// Routes all payments through Pi (PRIMARY) → Apple Pay (SECONDARY) → Legacy (TERTIARY)
+// Unified Payment Routing Configuration — Sovereign Pi Ecosystem
+// ALL payments route through Pi Network first.
+// Apple Pay is the only secondary method and CONVERTS TO PI on settlement.
+// No Web2 processors (Stripe, PayPal, Square, etc.) are permitted.
 
 import ApplePayProcessor from "./apple-pay-secondary";
 import PiNetworkPaymentProcessor from "./pi-network-primary";
@@ -21,9 +23,9 @@ export type PaymentRoute = {
 };
 
 /**
- * Unified Payment Routing System
- * Automatically routes payments to the best available processor
- * Pri Priority: Pi Network (95%) → Apple Pay (5%) → Stripe/PayPal (fallback)
+ * Unified Payment Routing System — Sovereign Pi Ecosystem
+ * Pi Network is the sole payment rail. Apple Pay is a convenience on-ramp
+ * that converts immediately to Pi. No fiat processors are in the routing chain.
  */
 export class UnifiedPaymentRouter {
   private readonly piProcessor: PiNetworkPaymentProcessor;
@@ -42,65 +44,36 @@ export class UnifiedPaymentRouter {
    * Initialize payment methods with routing priorities
    */
   private initializeMethods(): void {
-    // PRIMARY: Pi Network
+    // PRIMARY: Pi Network — all transactions route here
     this.paymentMethods.set("pi_network", {
       id: "pi_network",
       name: "Pi Network",
       type: "crypto",
-      priority: 1, // Highest priority
+      priority: 1,
       enabled: true,
-      targetAdoption: 0.95, // Target 95% of transactions
+      targetAdoption: 1.0, // 100% of sovereign transactions
     });
 
-    // SECONDARY: Apple Pay
+    // SECONDARY: Apple Pay — convenience on-ramp, settles as Pi
     this.paymentMethods.set("apple_pay", {
       id: "apple_pay",
-      name: "Apple Pay",
+      name: "Apple Pay (→ Pi)",
       type: "wallet",
       priority: 2,
       enabled: true,
-      targetAdoption: 0.05, // Target 5% of transactions
+      targetAdoption: 0.05, // Convenience layer only
     });
 
-    // TERTIARY: Legacy payment methods (fallback only)
-    this.paymentMethods.set("stripe", {
-      id: "stripe",
-      name: "Credit Card (Stripe)",
-      type: "card",
-      priority: 3,
-      enabled: !!process.env.STRIPE_API_KEY,
-      targetAdoption: 0.001,
-    });
-
-    this.paymentMethods.set("paypal", {
-      id: "paypal",
-      name: "PayPal",
-      type: "bank",
-      priority: 4,
-      enabled: !!process.env.PAYPAL_API_KEY,
-      targetAdoption: 0.001,
-    });
-
-    // Initialize routes in priority order
+    // Initialize routes — no Web2 fallbacks
     this.routes = [
       {
         method: this.paymentMethods.get("pi_network")!,
         processor: "pi_network",
-        fallback: ["apple_pay", "stripe"],
+        fallback: ["apple_pay"],
       },
       {
         method: this.paymentMethods.get("apple_pay")!,
         processor: "apple_pay",
-        fallback: ["stripe", "paypal"],
-      },
-      {
-        method: this.paymentMethods.get("stripe")!,
-        processor: "stripe",
-        fallback: ["paypal"],
-      },
-      {
-        method: this.paymentMethods.get("paypal")!,
-        processor: "paypal",
         fallback: [],
       },
     ];
@@ -166,16 +139,11 @@ export class UnifiedPaymentRouter {
         case "apple_pay":
           return await this.routeApplePayment(paymentData);
 
-        case "stripe":
-        case "paypal":
-          // Legacy methods - route through Apple Pay processor as backup
-          return await this.routeLegacyPayment(method, paymentData);
-
         default:
           return {
             success: false,
             processor: method,
-            error: `Unknown payment method: ${method}`,
+            error: `Unknown payment method: '${method}'. This ecosystem only accepts Pi Network and Apple Pay (→ Pi).`,
           };
       }
     } catch (error) {
@@ -222,7 +190,7 @@ export class UnifiedPaymentRouter {
   }
 
   /**
-   * Route Apple Pay payment
+   * Route Apple Pay payment — converts to Pi on settlement
    * @private
    */
   private async routeApplePayment(
@@ -245,31 +213,6 @@ export class UnifiedPaymentRouter {
       processor: "apple_pay",
       paymentId: result.paymentId,
       error: result.error,
-    };
-  }
-
-  /**
-   * Route legacy payment method
-   * @private
-   */
-  private async routeLegacyPayment(
-    method: string,
-    _paymentData: Record<string, unknown>
-  ): Promise<{
-    success: boolean;
-    processor: string;
-    paymentId?: string;
-    error?: string;
-  }> {
-    // Legacy methods should fall back to Apple Pay or Stripe directly
-    console.warn(
-      `Legacy payment method ${method} - consider migrating to Pi or Apple Pay`
-    );
-
-    return {
-      success: false,
-      processor: method,
-      error: `Legacy payment method ${method} requires migration. Please use Pi Network or Apple Pay instead.`,
     };
   }
 
