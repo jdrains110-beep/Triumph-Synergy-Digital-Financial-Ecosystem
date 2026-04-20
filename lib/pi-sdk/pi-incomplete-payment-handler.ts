@@ -106,13 +106,11 @@ export async function handleIncompletePaymentFound(
 
   storeIncompletePayment(incompletePayment);
 
-  // Log to analytics
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("event", "incomplete_payment_detected", {
-      payment_id: payment.identifier,
-      amount: payment.amount,
-    });
-  }
+  // Log via sovereign Pi telemetry only — no Web2 analytics trackers
+  console.log("[Pi Telemetry] incomplete_payment_detected", {
+    payment_id: payment.identifier,
+    amount: payment.amount,
+  });
 }
 
 /**

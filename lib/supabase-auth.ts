@@ -7,14 +7,14 @@
  *   - NextAuth remains the primary session manager (JWT-based, already wired)
  *   - Supabase Auth is used for:
  *       • Row Level Security (JWT → auth.uid() in Postgres)
- *       • Magic-link / OTP passwordless login (future)
- *       • OAuth providers (Google, GitHub, Pi Wallet)
+ *       • Magic-link / OTP passwordless login
+ *       • Pi Wallet identity sync
  *       • MFA / TOTP enforcement for admin sessions
  *       • User management dashboard via Supabase Studio
  *
- * When a user logs in through NextAuth we mirror the session to Supabase
- * so that all Supabase calls (Storage, Realtime, RPC) carry a valid JWT
- * and RLS policies fire correctly.
+ * NOTE: Web2 OAuth providers (Google, GitHub, Discord, Twitter) are NOT
+ * supported in this sovereign ecosystem. Authentication is via Pi identity
+ * or ephemeral guest sessions only.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -124,22 +124,11 @@ export async function supabaseSignIn(
   return data;
 }
 
-// ── Sign in with OAuth (Google, GitHub, etc.) ─────────────────────────────────
-
-export async function supabaseOAuthSignIn(
-  supabase: SupabaseClient,
-  provider: "google" | "github" | "discord" | "twitter",
-) {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/auth/callback`,
-    },
-  });
-
-  if (error) throw error;
-  return data;
-}
+// ── Sign in with Pi Wallet identity (sovereign replacement for OAuth) ───────────────
+// Pi wallet-based sign-in is handled via the NextAuth "wallet" Credentials
+// provider in app/(auth)/auth.ts which calls Web3Auth.verifyPiAuth().
+// This function is intentionally removed — Web2 OAuth (Google, GitHub,
+// Discord, Twitter) is not permitted in the sovereign Pi ecosystem.
 
 // ── Sign in with Magic Link / OTP ─────────────────────────────────────────────
 

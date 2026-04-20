@@ -69,6 +69,64 @@ export const {
 } = NextAuth({
   ...authConfig,
   providers: [
+    // =========================================================
+    // PRIMARY: Pi Network wallet identity (sovereign Web3 auth)
+    // Verified via Pi Platform API accessToken or
+    // Stellar challenge-response signature.
+    // =========================================================
+    Credentials({
+      id: "wallet",
+      credentials: {},
+      async authorize({ accessToken, publicKey, challenge, signature, network }: any) {
+        try {
+          let session;
+          if (accessToken) {
+            // Pi Browser flow — verify via Pi Platform API
+            session = await Web3Auth.verifyPiAuth(accessToken, network || "testnet");
+          } else if (publicKey && challenge && signature) {
+            // Direct Stellar wallet flow — challenge-response
+            session = Web3Auth.verifyChallenge(publicKey, challenge, signature, network || "testnet");
+          } else {
+            return null;
+          }
+          return {
+            id: session.uid || session.publicKey,
+            email: null,
+            type: "wallet" as const,
+            publicKey: session.publicKey,
+            did: `did:pi:${session.publicKey}`,
+          };
+        } catch (error) {
+          console.error("Wallet auth error:", error);
+          return null;
+        }
+      },
+    }),
+    // =========================================================
+    // GUEST: Ephemeral sovereign session (no identity required)
+    // =========================================================
+    Credentials({
+      id: "guest",
+      credentials: {},
+      async authorize() {
+        try {
+          const [guestUser] = await createGuestUser();
+          return { ...guestUser, type: "guest" };
+        } catch (error) {
+          console.error("Guest auth error:", error);
+          return {
+            id: "guest-" + Date.now(),
+            email: "guest@local",
+            type: "guest",
+          };
+        }
+      },
+    }),
+    // =========================================================
+    // LEGACY FALLBACK: Email + password (only for users who
+    // registered before the sovereign migration).
+    // New registrations should use Pi wallet.
+    // =========================================================
     Credentials({
       credentials: {},
       async authorize({ email, password }: any) {
@@ -96,52 +154,6 @@ export const {
           return { ...user, type: "regular" };
         } catch (error) {
           console.error("Auth credentials error:", error);
-          return null;
-        }
-      },
-    }),
-    Credentials({
-      id: "guest",
-      credentials: {},
-      async authorize() {
-        try {
-          const [guestUser] = await createGuestUser();
-          return { ...guestUser, type: "guest" };
-        } catch (error) {
-          console.error("Guest auth error:", error);
-          // Return a minimal guest user even if database is unavailable
-          return {
-            id: "guest-" + Date.now(),
-            email: "guest@local",
-            type: "guest",
-          };
-        }
-      },
-    }),
-    Credentials({
-      id: "wallet",
-      credentials: {},
-      async authorize({ accessToken, publicKey, challenge, signature, network }: any) {
-        try {
-          let session;
-          if (accessToken) {
-            // Pi Browser flow — verify via Pi Platform API
-            session = await Web3Auth.verifyPiAuth(accessToken, network || "testnet");
-          } else if (publicKey && challenge && signature) {
-            // Direct Stellar wallet flow — challenge-response
-            session = Web3Auth.verifyChallenge(publicKey, challenge, signature, network || "testnet");
-          } else {
-            return null;
-          }
-          return {
-            id: session.uid || session.publicKey,
-            email: null,
-            type: "wallet" as const,
-            publicKey: session.publicKey,
-            did: `did:pi:${session.publicKey}`,
-          };
-        } catch (error) {
-          console.error("Wallet auth error:", error);
           return null;
         }
       },

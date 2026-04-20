@@ -101,22 +101,15 @@ export const ecommerceConfig = {
     },
   },
 
-  // Payment processing
+  // Payment processing — sovereign Pi ecosystem only
   payments: {
     gateways: [
-      "stripe",
-      "paypal",
-      "square",
-      "adyen",
-      "checkout-com",
       "pi-network",
       "stellar",
     ],
 
     methods: [
-      "credit-card",
-      "debit-card",
-      "bank-transfer",
+      "pi-wallet",
       "digital-wallet",
       "crypto",
       "buy-now-pay-later",
@@ -252,27 +245,17 @@ export const crmConfig = {
     },
   },
 
-  // Marketing automation
+  // Marketing — sovereign Pi ecosystem communications only
   marketing: {
     platforms: {
-      email: {
-        provider: "sendgrid",
-        features: ["templates", "ab-testing", "personalization", "analytics"],
-      },
-
-      sms: {
-        provider: "twilio",
-        features: ["campaigns", "two-way", "mms", "shortcodes"],
-      },
-
       push: {
-        provider: "firebase",
+        provider: "pi_network",
         features: ["rich", "location-based", "behavioral"],
       },
 
       social: {
-        platforms: ["facebook", "instagram", "twitter", "tiktok", "linkedin"],
-        features: ["posting", "ads", "listening", "engagement"],
+        platforms: ["pi-community"],
+        features: ["posting", "engagement"],
       },
     },
 

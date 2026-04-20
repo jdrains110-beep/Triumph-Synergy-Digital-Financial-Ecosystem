@@ -11,10 +11,14 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: "avatar.vercel.sh",
+        // Pi Network ecosystem CDN only
+        hostname: "*.minepi.com",
+      },
+      {
+        hostname: "localhost",
       },
     ],
-    unoptimized: process.env.VERCEL === "1",
+    unoptimized: process.env.DOCKER_BUILD === "true",
     minimumCacheTTL: 31_536_000,
   },
 

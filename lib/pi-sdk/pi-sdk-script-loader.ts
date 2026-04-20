@@ -38,12 +38,10 @@ export async function loadPiSDKScript(): Promise<boolean> {
     return loadPromise;
   }
 
-  // Try multiple CDN sources - but only if not in Pi Browser
+  // Pi-sovereign CDN sources only — no third-party CDNs (unpkg, jsdelivr)
   const cdnUrls = [
-    "https://sdk.minepi.com/pi-sdk.js", // primary
-    "https://app-cdn.minepi.com/pi-sdk.js", // Pi CDN fallback
-    "https://cdn.jsdelivr.net/npm/@pi-network/sdk@2.0/dist/pi-sdk.js", // jsdelivr
-    "https://unpkg.com/@pi-network/sdk@2.0/dist/pi-sdk.js", // unpkg
+    "https://sdk.minepi.com/pi-sdk.js",        // primary (Pi Network official)
+    "https://app-cdn.minepi.com/pi-sdk.js",    // Pi CDN fallback
   ];
 
   loadPromise = (async () => {

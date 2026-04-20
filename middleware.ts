@@ -19,26 +19,24 @@ import { createMiddlewareSupabase } from "@/lib/supabase";
 export async function middleware(request: NextRequest) {
   const hostname = request.nextUrl.hostname.toLowerCase();
 
-  // PRODUCTION DOMAINS - Let them pass through unmodified
+  // PRODUCTION DOMAINS
   const PRODUCTION_DOMAINS = [
     "triumphsynergy1991.pinet.com", // PINET TESTNET
     "triumphsynergy7386.pinet.com", // PINET MAINNET
     "triumphsynergy0576.pinet.com", // PINET PRIMARY
-    "triumph-synergy.vercel.app", // VERCEL MAINNET
-    "triumph-synergy-testnet.vercel.app", // VERCEL TESTNET
     "localhost",
     "127.0.0.1",
   ];
 
-  // BLOCK preview deployments - redirect to production
+  // BLOCK non-sovereign preview deployments
   if (
+    hostname.includes(".vercel.app") ||
     hostname.includes("-jeremiah-drains-projects.vercel.app") ||
-    hostname.includes("-git-") ||
-    (hostname.includes(".vercel.app") &&
-      !PRODUCTION_DOMAINS.includes(hostname))
+    hostname.includes("-git-")
   ) {
+    // Redirect to sovereign Pi Network domain
     const redirectUrl = new URL(request.nextUrl);
-    redirectUrl.hostname = "triumph-synergy.vercel.app";
+    redirectUrl.hostname = "triumphsynergy1991.pinet.com";
     return NextResponse.redirect(redirectUrl, 307);
   }
 
@@ -69,10 +67,10 @@ export async function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://sdk.minepi.com",
+      "script-src 'self' 'unsafe-inline' https://sdk.minepi.com https://app-cdn.minepi.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://avatar.vercel.sh https://*.minepi.com",
-      "connect-src 'self' https://api.minepi.com https://*.supabase.co wss://*.supabase.co",
+      "img-src 'self' data: blob: https://*.minepi.com",
+      "connect-src 'self' https://api.minepi.com https://*.minepi.com https://*.supabase.co wss://*.supabase.co",
       "frame-src 'self' https://sdk.minepi.com",
       "font-src 'self'",
       "object-src 'none'",

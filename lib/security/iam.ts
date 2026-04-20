@@ -27,42 +27,18 @@ export const iamConfig = {
         enabled: true,
         providers: [
           {
-            name: "google",
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            scopes: ["email", "profile"],
-          },
-          {
-            name: "github",
-            clientId: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            scopes: ["user:email", "read:user"],
-          },
-          {
-            name: "microsoft",
-            clientId: process.env.MICROSOFT_CLIENT_ID,
-            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-            scopes: ["openid", "email", "profile"],
-          },
-          {
-            name: "apple",
-            clientId: process.env.APPLE_CLIENT_ID,
-            teamId: process.env.APPLE_TEAM_ID,
-            keyId: process.env.APPLE_KEY_ID,
-            privateKey: process.env.APPLE_PRIVATE_KEY,
+            // Pi Network is the SOLE sovereign identity provider
+            name: "pi_network",
+            clientId: process.env.PI_APP_ID,
+            scopes: ["payments", "username", "identity"],
           },
         ],
       },
 
       saml: {
-        enabled: true,
-        providers: ["okta", "auth0", "azure-ad"],
-
-        config: {
-          entryPoint: process.env.SAML_ENTRY_POINT,
-          issuer: "triumph-synergy",
-          cert: process.env.SAML_CERT,
-        },
+        enabled: false, // Web2 SAML providers (Okta, Auth0, Azure AD) disabled
+        providers: [],
+        config: {},
       },
 
       biometric: {
@@ -93,8 +69,8 @@ export const iamConfig = {
         },
 
         sms: {
-          enabled: true,
-          provider: "twilio",
+          enabled: false, // Twilio SMS disabled — Pi in-app messaging used instead
+          provider: "pi_network",
           template: "Your Triumph Synergy code is: {code}",
         },
 

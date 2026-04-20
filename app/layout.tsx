@@ -11,7 +11,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.vercel.app"
+    process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy1991.pinet.com"
   ),
   title: "Triumph Synergy - Pi App Studio",
   description:
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Triumph Synergy - Pi App Studio",
     description: "Advanced payment routing with compliance automation",
     url:
-      process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.vercel.app",
+      process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy1991.pinet.com",
     siteName: "Triumph Synergy",
     type: "website",
   },

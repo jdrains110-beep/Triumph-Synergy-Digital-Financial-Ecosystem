@@ -339,43 +339,19 @@ export const cdpConfig = {
     },
   },
 
-  // Data integration
+  // Data integration — sovereign Pi ecosystem sources only
   integrations: {
     sources: [
-      // CRM systems
-      { type: "crm", systems: ["salesforce", "hubspot", "dynamics"] },
+      // Pi Network on-chain data
+      { type: "blockchain", systems: ["pi-network", "stellar-horizon"] },
 
-      // Marketing platforms
-      { type: "marketing", systems: ["marketo", "mailchimp", "braze"] },
-
-      // E-commerce
-      { type: "ecommerce", systems: ["shopify", "magento", "woocommerce"] },
-
-      // Analytics
-      {
-        type: "analytics",
-        systems: ["google-analytics", "mixpanel", "amplitude"],
-      },
-
-      // Support
-      { type: "support", systems: ["zendesk", "intercom", "freshdesk"] },
-
-      // Social
-      { type: "social", systems: ["facebook", "instagram", "twitter"] },
+      // Sovereign commerce
+      { type: "ecommerce", systems: ["triumph-synergy"] },
     ],
 
     destinations: [
-      // Ad platforms
-      {
-        type: "advertising",
-        platforms: ["google-ads", "facebook-ads", "linkedin-ads"],
-      },
-
-      // Marketing clouds
-      { type: "marketing", platforms: ["salesforce-mc", "adobe-mc"] },
-
-      // Warehouses
-      { type: "warehouse", platforms: ["bigquery", "snowflake", "redshift"] },
+      // Sovereign data warehouse (self-hosted)
+      { type: "warehouse", platforms: ["postgres", "supabase"] },
     ],
   },
 };
