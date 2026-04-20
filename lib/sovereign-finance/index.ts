@@ -43,3 +43,21 @@ export {
   type BridgeConfig,
   type BridgeTransaction,
 } from "./interoperability-bridge";
+
+// Sovereign Citizen Engine — Pi KYC → Queen/King auto-elevation
+export {
+  SovereignCitizenEngine,
+  SOVEREIGN_TITLE_MALE,
+  SOVEREIGN_TITLE_FEMALE,
+  SOVEREIGN_TITLE_NEUTRAL,
+  SOVEREIGNTY_MULTIPLIER,
+  SOVEREIGN_PI_RATE,
+  SOVEREIGN_PROSPERITY_BASE,
+  type SovereignTitle,
+  type SovereignTier,
+  type OwnershipClass,
+  type SovereignIdentity,
+  type SovereignRights,
+  type SovereignBenefits,
+  type SovereignOwnership,
+} from "./sovereign-citizen-engine";

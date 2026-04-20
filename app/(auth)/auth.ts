@@ -5,6 +5,11 @@ import Credentials from "next-auth/providers/credentials";
 import { DUMMY_PASSWORD } from "@/lib/constants";
 import { createGuestUser, getUser } from "@/lib/db/queries";
 import { Web3Auth } from "@/lib/web3/web3-auth";
+import {
+  SovereignCitizenEngine,
+  type SovereignTitle,
+  type SovereignTier,
+} from "@/lib/sovereign-finance";
 import { authConfig } from "./auth.config";
 
 export type UserType = "guest" | "regular" | "wallet";
@@ -18,6 +23,14 @@ declare module "next-auth" {
       publicKey?: string;
       /** DID string (Web3 sessions) */
       did?: string;
+      /** Sovereign citizen status — auto-granted on Pi KYC */
+      isSovereign?: boolean;
+      /** Sovereign title: King, Queen, or Sovereign */
+      sovereignTitle?: SovereignTitle;
+      /** Sovereign tier based on Pi engagement */
+      sovereignTier?: SovereignTier;
+      /** Full styled sovereign name */
+      sovereignName?: string;
     } & DefaultSession["user"];
   }
 
@@ -28,6 +41,10 @@ declare module "next-auth" {
     type: UserType;
     publicKey?: string;
     did?: string;
+    isSovereign?: boolean;
+    sovereignTitle?: SovereignTitle;
+    sovereignTier?: SovereignTier;
+    sovereignName?: string;
   }
 }
 
@@ -37,6 +54,10 @@ declare module "next-auth/jwt" {
     type: UserType;
     publicKey?: string;
     did?: string;
+    isSovereign?: boolean;
+    sovereignTitle?: SovereignTitle;
+    sovereignTier?: SovereignTier;
+    sovereignName?: string;
   }
 }
 
@@ -133,6 +154,30 @@ export const {
         token.type = user.type;
         if (user.publicKey) token.publicKey = user.publicKey;
         if (user.did) token.did = user.did;
+
+        // Auto-detect sovereign status for wallet users (Pi KYC'd)
+        if (user.type === "wallet" && user.publicKey) {
+          try {
+            const engine = SovereignCitizenEngine.getInstance();
+            const identity = engine.getByWallet(user.publicKey);
+            if (identity && identity.status === "active") {
+              token.isSovereign = true;
+              token.sovereignTitle = identity.title;
+              token.sovereignTier = identity.tier;
+              token.sovereignName = identity.sovereignName;
+            }
+          } catch {
+            // Non-blocking — sovereign lookup failure doesn't break auth
+          }
+        }
+
+        // Also carry through if user object already has sovereign fields
+        if (user.isSovereign) {
+          token.isSovereign = user.isSovereign;
+          if (user.sovereignTitle) token.sovereignTitle = user.sovereignTitle;
+          if (user.sovereignTier) token.sovereignTier = user.sovereignTier;
+          if (user.sovereignName) token.sovereignName = user.sovereignName;
+        }
       }
 
       return token;
@@ -143,6 +188,14 @@ export const {
         session.user.type = token.type;
         if (token.publicKey) session.user.publicKey = token.publicKey;
         if (token.did) session.user.did = token.did;
+
+        // Expose sovereign status in session
+        if (token.isSovereign) {
+          session.user.isSovereign = token.isSovereign;
+          session.user.sovereignTitle = token.sovereignTitle;
+          session.user.sovereignTier = token.sovereignTier;
+          session.user.sovereignName = token.sovereignName;
+        }
       }
 
       return session;

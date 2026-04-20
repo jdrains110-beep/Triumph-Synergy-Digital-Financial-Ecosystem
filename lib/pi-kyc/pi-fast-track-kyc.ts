@@ -1,6 +1,7 @@
 // lib/pi-kyc/pi-fast-track-kyc.ts
 // Pi Network Fast-Track KYC System - Superior Design
 // Leverages Pi Network's existing verification for accelerated KYC
+// On KYC success: auto-elevates to Superior Sovereign Citizen (Queen/King)
 
 import {
   PiKYCUser,
@@ -13,6 +14,7 @@ import {
   PiRiskProfile,
   KYCApplicationStatus,
 } from './types';
+import { SovereignCitizenEngine } from '@/lib/sovereign-finance/sovereign-citizen-engine';
 
 /**
  * Pi Network Fast-Track KYC Service
@@ -361,6 +363,28 @@ export class PiFastTrackKYCService {
         walletResult.walletAddress!
       );
       this.verifiedUsers.set(application.piUid, verifiedUser);
+
+      // ================================================================
+      // AUTO-ELEVATE: KYC success → Superior Sovereign Citizen (Queen/King)
+      // No paperwork. No waiting. Pi KYC = Immediate Sovereignty.
+      // ================================================================
+      try {
+        const sovereignEngine = SovereignCitizenEngine.getInstance();
+        sovereignEngine.elevateOnKycSuccess({
+          piUid: application.piUid,
+          piWalletAddress: walletResult.walletAddress!,
+          legalName: verifiedUser.username,
+          firstName: verifiedUser.username.split('_')[1] || verifiedUser.username,
+          lastName: 'Pioneer',
+          piKycLevel: application.targetLevel,
+          miningDurationDays: factors.piMiningDurationDays,
+          isNodeOperator: false,
+          isContributor: factors.piContributorStatus,
+        });
+      } catch (elevationError) {
+        // Sovereignty elevation is non-blocking — KYC still succeeds
+        console.error('Sovereign elevation error (non-blocking):', elevationError);
+      }
 
       // Mark completed
       application.status = 'COMPLETED';
