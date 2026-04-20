@@ -695,6 +695,15 @@ services:
       CREDIT_SANDBOX: "true"
       CREDIT_GOVERNANCE_MODE: ${CREDIT_GOVERNANCE_MODE:-nesara_gesara}
       GLOBAL_CREDIT_PROVIDERS: ${GLOBAL_CREDIT_PROVIDERS:-equifax,experian,transunion,fico,vantagescore}
+      # ── Founder Sovereign Identity ─────────────────────────────────────
+      TRIUMPH_FOUNDER_NAME: "Jeremiah Joel Drains"
+      TRIUMPH_FOUNDATION_ORG: "Triumph-Synergy Digital Financial Ecosystem"
+      TRIUMPH_FOUNDER_AUTHORITY: "owner-approved"
+      TRIUMPH_FOUNDER_ADDRESS: "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+      TRIUMPH_FOUNDER_TITLE: "Sovereign Owner and Creator"
+      TRIUMPH_FOUNDER_SOVEREIGN_STATUS: "NESARA_GESARA_COMPLIANT"
+      # Prefer local Horizon for all credit ledger tracking
+      PI_LOCAL_HORIZON: http://testnet2:8000
       # Wire live bureau keys in production:
       # BUREAU_API_KEY_EQUIFAX:    ${BUREAU_API_KEY_EQUIFAX}
       # BUREAU_API_KEY_EXPERIAN:   ${BUREAU_API_KEY_EXPERIAN}

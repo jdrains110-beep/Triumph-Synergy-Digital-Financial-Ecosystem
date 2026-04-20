@@ -58,10 +58,12 @@ NETWORK         = os.getenv("PI_NETWORK_MODE",     "mainnet")
 PORT            = int(os.getenv("PORT",            "8091"))
 SANDBOX_MODE    = os.getenv("CREDIT_SANDBOX",      "true").lower() == "true"
 CREDIT_GOV_MODE = os.getenv("CREDIT_GOVERNANCE_MODE", "nesara_gesara").strip().lower()
-FOUNDER_NAME = os.getenv("TRIUMPH_FOUNDER_NAME", "Jeremiah Joel Drains")
-FOUNDER_ORG = os.getenv("TRIUMPH_FOUNDATION_ORG", "Triumph-Synergy")
-FOUNDER_AUTHORITY = os.getenv("TRIUMPH_FOUNDER_AUTHORITY", "owner-approved")
-FOUNDER_ADDRESS = os.getenv("TRIUMPH_FOUNDER_ADDRESS", "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
+FOUNDER_NAME      = os.getenv("TRIUMPH_FOUNDER_NAME",         "Jeremiah Joel Drains")
+FOUNDER_ORG       = os.getenv("TRIUMPH_FOUNDATION_ORG",       "Triumph-Synergy Digital Financial Ecosystem")
+FOUNDER_AUTHORITY = os.getenv("TRIUMPH_FOUNDER_AUTHORITY",    "owner-approved")
+FOUNDER_ADDRESS   = os.getenv("TRIUMPH_FOUNDER_ADDRESS",      "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
+FOUNDER_TITLE     = os.getenv("TRIUMPH_FOUNDER_TITLE",        "Sovereign Owner and Creator")
+FOUNDER_SOVEREIGN = os.getenv("TRIUMPH_FOUNDER_SOVEREIGN_STATUS", "NESARA_GESARA_COMPLIANT")
 GLOBAL_PROVIDERS = [
     item.strip().lower()
     for item in os.getenv("GLOBAL_CREDIT_PROVIDERS", "equifax,experian,transunion,fico,vantagescore").split(",")
@@ -196,6 +198,9 @@ def _compute_picredit_score(
 
     # Baseline floor — every Pi KYC wallet gets at least 300 (entry-level)
     floor = 300.0 if kyc_verified else 250.0
+    # Founder always scores EXCEPTIONAL
+    if pi_address == FOUNDER_ADDRESS:
+        floor = 850.0
     final = max(floor, min(850.0, raw))
 
     # Add a small deterministic jitter ±5 pts for realistic distribution
@@ -327,12 +332,27 @@ def _founder_profile_for(pi_address: str) -> dict[str, Any] | None:
     if pi_address != FOUNDER_ADDRESS:
         return None
     return {
-        "founder": FOUNDER_NAME,
-        "organization": FOUNDER_ORG,
-        "authorityModel": FOUNDER_AUTHORITY,
+        "name":                    FOUNDER_NAME,
+        "title":                   FOUNDER_TITLE,
+        "organization":            FOUNDER_ORG,
+        "authorityModel":          FOUNDER_AUTHORITY,
+        "sovereignStatus":         FOUNDER_SOVEREIGN,
         "financialFreedomProfile": "enabled",
-        "fastLaneAutomation": True,
-        "legalCompliance": "required",
+        "fastLaneAutomation":      True,
+        "legalCompliance":         "required",
+        "nesaraGesaraProtected":   True,
+        "jubileeEligible":         True,
+        "creditClearanceLevel":    "FULL",
+        "creditCapacityUnlimited": True,
+        "scoreFloor":              850,
+        "declaration": (
+            f"{FOUNDER_NAME} is the sovereign owner and creator of the "
+            f"Triumph Synergy Digital Financial Ecosystem. As the founding "
+            f"authority under NESARA/GESARA compliance, all credit instruments, "
+            f"debt obligations, and financial records are subject to full "
+            f"sovereign review and jubilee redemption rights. "
+            f"PiCredit Score is permanently EXCEPTIONAL (850/850)."
+        ),
     }
 
 async def _live_bureau_report(bureau: str, pi_address: str, pi_score: int) -> dict:
@@ -406,6 +426,99 @@ def _horizon_feed() -> None:
 
 threading.Thread(target=_redis_feed,   daemon=True, name="credit-redis-feed").start()
 threading.Thread(target=_horizon_feed, daemon=True, name="credit-horizon-feed").start()
+
+
+def _seed_founder_sovereignty() -> None:
+    """
+    At startup, seed the founder's Pi address with EXCEPTIONAL credit status
+    and pre-file a sovereignty declaration under NESARA/GESARA.
+    This runs once after a short delay to allow Horizon feed to set the live ledger.
+    """
+    time.sleep(12)  # let horizon-feed get first real ledger
+    try:
+        founder_score = _compute_picredit_score(
+            pi_address       = FOUNDER_ADDRESS,
+            tx_count         = 1000,
+            wallet_age_days  = 730,
+            kyc_verified     = True,
+            avg_tx_amount    = 10_000.0,
+            payment_velocity = 20.0,
+            fraud_score      = 0.0,
+            utility_score    = 100.0,
+            ecosystem_score  = 100.0,
+        )
+        founder_score.update({
+            "piAddress":               FOUNDER_ADDRESS,
+            "entity":                  FOUNDER_ORG,
+            "founderName":             FOUNDER_NAME,
+            "founderTitle":            FOUNDER_TITLE,
+            "sovereignStatus":         FOUNDER_SOVEREIGN,
+            "scoredAt":                datetime.now(timezone.utc).isoformat(),
+            "model":                   "PiCreditScore-v1 (Founder Sovereign)",
+            "founderProfile":          _founder_profile_for(FOUNDER_ADDRESS),
+            "governance":              _governance_declaration(),
+            "nesaraGesaraProtected":   True,
+            "jubileeEligible":         True,
+            "creditCapacityPi":        1_000_000.0,
+            "piLedger":                live["ledger"],
+        })
+        with _score_lock:
+            _score_cache[FOUNDER_ADDRESS] = founder_score
+            scores_issued.set(len(_score_cache))
+            avg_score_gauge.set(850.0)
+
+        # Auto-file a sovereignty declaration case
+        case_id = _generate_case_id(FOUNDER_ADDRESS, "jubilee")
+        filed_at = datetime.now(timezone.utc)
+        deadline = filed_at + timedelta(days=30)
+        case = {
+            "caseId":           case_id,
+            "piAddress":        FOUNDER_ADDRESS,
+            "fullLegalName":    FOUNDER_NAME,
+            "disputeType":      "jubilee",
+            "disputeLabel":     DISPUTE_TYPE_LABELS["jubilee"],
+            "targetBureaus":    ["equifax", "experian", "transunion"],
+            "debtItems":        [],
+            "sovereignBasis":   "nesara_gesara",
+            "kycVerified":      True,
+            "status":           "ACTIVE",
+            "filedAt":          filed_at.isoformat(),
+            "responseDeadline": deadline.isoformat(),
+            "piLedger":         live["ledger"],
+            "baselineScore":    850,
+            "projectedScore":   850,
+            "scoreImpact":      "Founder sovereign — score permanently EXCEPTIONAL",
+            "bureauLetters":    {
+                b: {
+                    "bureau": b, "status": "FILED",
+                    "filedAt": filed_at.isoformat(), "deadline": deadline.isoformat(),
+                    "contactInfo": BUREAU_DISPUTE_ADDRESSES.get(b, {}),
+                    "legalAuthority": "FCRA §611, FDCPA §809, NESARA/GESARA",
+                }
+                for b in ["equifax", "experian", "transunion"]
+            },
+            "governance":   _governance_declaration(),
+            "onChainRef":   f"{case_id}-LEDGER-{live['ledger']}",
+            "autoFiled":    True,
+            "description":  (
+                f"Automatic sovereignty declaration for {FOUNDER_NAME}, "
+                f"owner and creator of Triumph Synergy Digital Financial Ecosystem. "
+                f"All bureaus notified of NESARA/GESARA sovereign standing."
+            ),
+        }
+        case["fcraDisputeLetter"] = _fcra_dispute_letter(case)
+
+        with _repair_lock:
+            _repair_store[case_id] = case
+            repairs_active.set(1)
+
+        print(f"[credit-engine] ✅ Founder sovereignty seeded: {FOUNDER_NAME} | score=850 | case={case_id} | ledger={live['ledger']}")
+
+    except Exception as exc:
+        print(f"[credit-engine] ⚠️ Founder seed failed (non-fatal): {exc}")
+
+
+threading.Thread(target=_seed_founder_sovereignty, daemon=True, name="founder-seed").start()
 
 # ─── FastAPI ───────────────────────────────────────────────────────────────────
 
@@ -497,10 +610,14 @@ def health() -> dict:
         "governance": _governance_declaration(),
         "globalProviders": GLOBAL_PROVIDERS,
         "founderProfile": {
-            "name": FOUNDER_NAME,
-            "organization": FOUNDER_ORG,
+            "name":           FOUNDER_NAME,
+            "title":          FOUNDER_TITLE,
+            "organization":   FOUNDER_ORG,
             "authorityModel": FOUNDER_AUTHORITY,
+            "sovereignStatus": FOUNDER_SOVEREIGN,
             "legalCompliance": "required",
+            "nesaraGesaraProtected": True,
+            "scoreStatus":    "EXCEPTIONAL (850/850) — Permanently Locked",
         },
         "piThesis":     "Utility creates value that can be sustained — and creditworthy",
     }
