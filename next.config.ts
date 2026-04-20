@@ -66,12 +66,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Allow all routes to be accessible through pinet proxy
+        // Allow all routes to be accessible through Pi Browser & known domains
         source: "/:path*",
         headers: [
           {
             key: "Access-Control-Allow-Origin",
-            value: "*",
+            value: process.env.NODE_ENV === "production"
+              ? "https://triumphsynergy0576.pinet.com"
+              : "*",
           },
           // Remove restrictive COOP/COEP headers that interfere with Pi Browser
           // {

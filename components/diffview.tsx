@@ -67,10 +67,12 @@ export const DiffView = ({ oldContent, newContent }: DiffEditorProps) => {
       );
 
       const oldContainer = document.createElement("div");
-      oldContainer.innerHTML = oldHtmlContent;
+      // Sanitize HTML to prevent XSS before DOM insertion
+      const { sanitize } = await import("dompurify");
+      oldContainer.innerHTML = sanitize(oldHtmlContent);
 
       const newContainer = document.createElement("div");
-      newContainer.innerHTML = newHtmlContent;
+      newContainer.innerHTML = sanitize(newHtmlContent);
 
       const oldDoc = parser.parse(oldContainer);
       const newDoc = parser.parse(newContainer);

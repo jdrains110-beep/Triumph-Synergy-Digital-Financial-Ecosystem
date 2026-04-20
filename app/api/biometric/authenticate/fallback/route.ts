@@ -2,8 +2,9 @@ import crypto from "crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSecureStorage } from "@/lib/biometric/secure-storage";
 
-// Simple JWT token generation (in production, use proper JWT library)
-function generateToken(payload: any, secret = "biometric-secret"): string {
+// Simple JWT token generation — uses AUTH_SECRET from environment
+function generateToken(payload: any, secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET): string {
+  if (!secret) throw new Error("AUTH_SECRET environment variable is required");
   const header = Buffer.from(
     JSON.stringify({ alg: "HS256", typ: "JWT" })
   ).toString("base64url");

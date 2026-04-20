@@ -8,7 +8,12 @@ import { signIn } from "./auth";
 
 const authFormSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z
+    .string()
+    .min(12, "Password must be at least 12 characters")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter")
+    .regex(/[0-9]/, "Password must contain a number")
+    .regex(/[^a-zA-Z0-9]/, "Password must contain a special character"),
 });
 
 export type LoginActionState = {

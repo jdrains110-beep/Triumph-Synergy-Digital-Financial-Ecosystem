@@ -4,7 +4,128 @@
  */
 
 import crypto from "crypto";
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { auth } from "@/app/(auth)/auth";
+
+// ============================================================================
+// AUTHENTICATED ROUTE GUARD
+// ============================================================================
+
+/**
+ * Require authenticated session for a route handler.
+ * Returns 401 if no valid session. Otherwise calls the handler with session.
+ */
+export async function requireAuth(
+  request: NextRequest,
+  handler: (request: NextRequest, session: any) => Promise<NextResponse>
+): Promise<NextResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    return handler(request, session);
+  } catch {
+    return NextResponse.json(
+      { error: "Authentication failed" },
+      { status: 401 }
+    );
+  }
+}
+
+// ============================================================================
+// CSRF PROTECTION
+// ============================================================================
+
+const ALLOWED_ORIGINS = new Set([
+  "https://triumphsynergy0576.pinet.com",
+  "https://triumphsynergy7386.pinet.com",
+  "https://triumphsynergy1991.pinet.com",
+  "https://triumph-synergy.vercel.app",
+  "https://triumph-synergy-testnet.vercel.app",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+]);
+
+/**
+ * Verify request origin for CSRF protection on state-changing methods.
+ * Returns true if request is safe (GET/HEAD/OPTIONS or valid origin).
+ */
+export function verifyCsrf(request: NextRequest): boolean {
+  const method = request.method.toUpperCase();
+  // Safe methods don't need CSRF checks
+  if (method === "GET" || method === "HEAD" || method === "OPTIONS") {
+    return true;
+  }
+
+  const origin = request.headers.get("origin");
+  const referer = request.headers.get("referer");
+
+  // Allow requests with no origin (same-origin in older browsers, server-to-server)
+  if (!origin && !referer) return true;
+
+  if (origin && ALLOWED_ORIGINS.has(origin)) return true;
+
+  // Check referer as fallback
+  if (referer) {
+    try {
+      const refOrigin = new URL(referer).origin;
+      if (ALLOWED_ORIGINS.has(refOrigin)) return true;
+    } catch {
+      // Invalid referer URL
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Combined guard: rate-limit + CSRF + auth for sensitive routes.
+ * Returns a 4xx response on failure, or calls the handler with session.
+ */
+export async function secureRoute(
+  request: NextRequest,
+  handler: (request: NextRequest, session: any) => Promise<NextResponse>,
+  options: {
+    rateLimit?: { max: number; windowMs: number; endpoint: string };
+    requireAuth?: boolean;
+    requireCsrf?: boolean;
+  } = {}
+): Promise<NextResponse> {
+  const { rateLimit: rl, requireAuth: needAuth = true, requireCsrf: needCsrf = true } = options;
+
+  // CSRF check
+  if (needCsrf && !verifyCsrf(request)) {
+    return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+  }
+
+  // Rate limiting
+  if (rl) {
+    const { allowed, remaining } = rateLimitByIP(request, rl.endpoint, rl.max, rl.windowMs);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(rl.windowMs / 1000)),
+            "X-RateLimit-Remaining": String(remaining),
+          },
+        }
+      );
+    }
+  }
+
+  // Auth check
+  if (needAuth) {
+    return requireAuth(request, handler);
+  }
+
+  return handler(request, null);
+}
 
 // ============================================================================
 // RATE LIMITING (in-memory, per-instance)

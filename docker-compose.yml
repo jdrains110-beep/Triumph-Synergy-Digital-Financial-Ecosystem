@@ -40,23 +40,23 @@ x-common: &common
     org.triumph.legal.compliance.required: "true"
 
 x-db-env: &db-env
-  POSTGRES_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+  POSTGRES_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
   REDIS_URL: redis://triumph-redis:6379
   # Supabase keys (set in .env or secrets manager for production)
   NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://your-project.supabase.co}
   NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-your-anon-key}
   SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-your-service-role-key}
-  SUPABASE_DB_URL: ${SUPABASE_DB_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}}
+  SUPABASE_DB_URL: ${SUPABASE_DB_URL:-postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}}
 
 x-pi-env: &pi-env
   PI_NETWORK_MODE: ${PI_NETWORK_MODE:-mainnet}
   # Active key resolves to mainnet or testnet depending on PI_NETWORK_MODE
-  PI_API_KEY: ${PI_API_KEY:-lqss4cexoo16mfufdxertniodaaexh90gbwnx87tfzovd0h76nqgcqrv7owyf68k}
-  PI_INTERNAL_API_KEY: ${PI_INTERNAL_API_KEY:-lqss4cexoo16mfufdxertniodaaexh90gbwnx87tfzovd0h76nqgcqrv7owyf68k}
+  PI_API_KEY: ${PI_API_KEY:?PI_API_KEY required}
+  PI_INTERNAL_API_KEY: ${PI_INTERNAL_API_KEY:?PI_INTERNAL_API_KEY required}
   # Both keys embedded so network-aware services can select the right one at runtime
-  PI_MAINNET_API_KEY: ${PI_MAINNET_API_KEY:-lqss4cexoo16mfufdxertniodaaexh90gbwnx87tfzovd0h76nqgcqrv7owyf68k}
-  PI_TESTNET_API_KEY: ${PI_TESTNET_API_KEY:-h6fssskhcxjvl21r3qvxu6qnmnaan5mf6hzup0ay97xusxoflv7a1ayx3wxiohcr}
-  PI_API_SECRET: ${PI_API_SECRET:-lqss4cexoo16mfufdxertniodaaexh90gbwnx87tfzovd0h76nqgcqrv7owyf68k}
+  PI_MAINNET_API_KEY: ${PI_MAINNET_API_KEY:?PI_MAINNET_API_KEY required}
+  PI_TESTNET_API_KEY: ${PI_TESTNET_API_KEY:?PI_TESTNET_API_KEY required}
+  PI_API_SECRET: ${PI_API_SECRET:?PI_API_SECRET required}
   PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
   NEXT_PUBLIC_PI_APP_ID: ${NEXT_PUBLIC_PI_APP_ID:-triumph-synergy}
   NEXT_PUBLIC_PI_SANDBOX: ${NEXT_PUBLIC_PI_SANDBOX:-false}
@@ -88,7 +88,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-triumph_secure_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
     # Internal only — no host port exposure
     expose:
       - "5432"
@@ -191,7 +191,7 @@ services:
       SCP_AUTO_UPGRADE: "true"
       SCP_SYNC_INTERVAL_MS: 30000
       NODE_OPTIONS: "--max-old-space-size=384"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     # Internal only — no host port exposure
     expose:
       - "11625"
@@ -235,9 +235,9 @@ services:
       <<: [*db-env, *pi-env]
       NODE_ENV: production
       DOCKER_BUILD: "true"
-      AUTH_SECRET: ${AUTH_SECRET:-triumph-synergy-auth-secret-32chars-minimum-key}
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET required}
       AUTH_TRUST_HOST: "true"
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-triumph-synergy-nextauth-secret-32chars-min}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET required}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       BACKEND_URL: ${BACKEND_URL:-http://localhost:3000/api}
@@ -281,7 +281,7 @@ services:
       <<: [*db-env, *pi-env]
       ENGINE_MODE: hyper
       NODE_OPTIONS: "--max-old-space-size=96"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     volumes:
       - triumph_tx_data:/app/data
     networks:
@@ -319,7 +319,7 @@ services:
       VAULT_MODE: trillion
       QUANTUM_ENCRYPTION: "true"
       NODE_OPTIONS: "--max-old-space-size=96"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     volumes:
       - triumph_vault_data:/app/data
     networks:
@@ -360,7 +360,7 @@ services:
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=96"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     volumes:
       - triumph_contracts_data:/app/data
     networks:
@@ -505,7 +505,7 @@ services:
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=64"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
       - triumph-net
       - pi-bridge
@@ -546,7 +546,7 @@ services:
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=64"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
       - triumph-net
       - pi-bridge
@@ -582,7 +582,7 @@ services:
       AML_THRESHOLD_PI: ${AML_THRESHOLD_PI:-10000}
       BLOCKED_ADDRESSES: ${BLOCKED_ADDRESSES:-}
       NODE_OPTIONS: "--max-old-space-size=64"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
       - triumph-net
     depends_on:
@@ -617,7 +617,7 @@ services:
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=96"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     networks:
       - triumph-net
     depends_on:
@@ -790,7 +790,7 @@ services:
     mem_limit: 256m
     mem_reservation: 96m
     cpus: 0.2
-    user: "0:0"
+    user: "1000:1000"
     environment:
       PORT: "8095"
       REDIS_URL: redis://triumph-redis:6379
@@ -941,7 +941,7 @@ services:
     environment:
       <<: [*db-env, *pi-env]
       NODE_OPTIONS: "--max-old-space-size=96"
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       TOKENIZATION_HMAC_KEY: ${TOKENIZATION_HMAC_KEY:-triumph-tokenization-fortress-2026}
       ML_ENGINE_URL: http://triumph-ml-engine:8090
       CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
@@ -1015,7 +1015,7 @@ services:
     mem_reservation: 16m
     cpus: 0.1
     environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:${POSTGRES_PASSWORD:-triumph_secure_2026}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}?sslmode=disable"
     expose:
       - "9187"
     networks:
@@ -1133,8 +1133,8 @@ services:
     ports:
       - "3001:3000"
     environment:
-      GF_SECURITY_ADMIN_USER:     ${GRAFANA_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-triumph_grafana_2026}
+      GF_SECURITY_ADMIN_USER:     ${GRAFANA_USER:?GRAFANA_USER required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD required}
       GF_SERVER_ROOT_URL:         "%(protocol)s://%(domain)s:%(http_port)s/"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
     volumes:

@@ -10,12 +10,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { secureRoute, safeErrorResponse } from "@/lib/security/api-guard";
 
 // ============================================================================
 // GET - Central Node Status
 // ============================================================================
 
 export async function GET(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
     const { centralNodeSupreme, getCentralNodeStatus, CENTRAL_NODE_CONFIG } = await import("@/lib/quantum");
     
@@ -63,6 +65,7 @@ export async function GET(request: NextRequest) {
       message: "Central Node Supreme remains TRANSCENDENT",
     });
   }
+  }, { requireAuth: true, requireCsrf: false });
 }
 
 // ============================================================================
@@ -84,8 +87,9 @@ interface CentralNodeCommand {
 }
 
 export async function POST(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
-    const body = await request.json() as CentralNodeCommand;
+    const body = await req.json() as CentralNodeCommand;
     const { action } = body;
     
     const { centralNodeSupreme, getCentralNodeStatus, CENTRAL_NODE_CONFIG } = await import("@/lib/quantum");
@@ -276,4 +280,5 @@ export async function POST(request: NextRequest) {
       message: "Central Node Supreme remains TRANSCENDENT despite error",
     });
   }
+  }, { requireAuth: true, requireCsrf: true, rateLimit: { max: 20, windowMs: 60_000, endpoint: "central-node-post" } });
 }

@@ -5,6 +5,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { secureRoute, safeErrorResponse } from "@/lib/security/api-guard";
 import {
   addBankingPartner,
   bankingPartnersPlatform,
@@ -15,7 +16,8 @@ import {
 } from "@/lib/banking/banking-partners-platform";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  return secureRoute(request, async (req, _session) => {
+  const { searchParams } = new URL(req.url);
   const action = searchParams.get("action");
   const partnerId = searchParams.get("partnerId");
   const accountId = searchParams.get("accountId");
@@ -99,16 +101,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: safeErrorResponse(error),
       },
       { status: 500 }
     );
   }
+  }, { requireAuth: true, requireCsrf: false });
 }
 
 export async function POST(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { action } = body;
 
     switch (action) {
@@ -226,9 +230,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: safeErrorResponse(error),
       },
       { status: 500 }
     );
   }
+  }, { requireAuth: true, requireCsrf: true, rateLimit: { max: 30, windowMs: 60_000, endpoint: "banking-post" } });
 }

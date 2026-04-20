@@ -3,27 +3,29 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { transactionProcessor } from "@/lib/pi-sdk/transaction-processor";
+import { secureRoute, safeErrorResponse } from "@/lib/security/api-guard";
 
 /**
  * POST /api/transactions/request-approval
  * Request server approval for a transaction
  */
 export async function POST(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
-    const pathname = request.nextUrl.pathname;
+    const pathname = req.nextUrl.pathname;
 
     // Route: /api/transactions/request-approval
     if (pathname.includes("request-approval")) {
-      return handleApprovalRequest(request);
+      return handleApprovalRequest(req);
     }
 
     // Route: /api/transactions/process
     if (pathname.includes("process")) {
-      return handleProcessTransaction(request);
+      return handleProcessTransaction(req);
     }
 
     // Route: /api/transactions (default - request approval)
-    return handleApprovalRequest(request);
+    return handleApprovalRequest(req);
   } catch (error) {
     console.error("[TRANSACTIONS] Unexpected error:", error);
 
@@ -35,6 +37,7 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+  }, { requireAuth: true, requireCsrf: true, rateLimit: { max: 20, windowMs: 60_000, endpoint: "transactions" } });
 }
 
 /**

@@ -61,6 +61,26 @@ export async function middleware(request: NextRequest) {
   response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload"
+  );
+  response.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://sdk.minepi.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://avatar.vercel.sh https://*.minepi.com",
+      "connect-src 'self' https://api.minepi.com https://*.supabase.co wss://*.supabase.co",
+      "frame-src 'self' https://sdk.minepi.com",
+      "font-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+    ].join("; ")
+  );
 
   // Web3 protocol headers — identify this as a Web3-native application
   response.headers.set("X-Web3-Protocol", "triumph-synergy/1.0");

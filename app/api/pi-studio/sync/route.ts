@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
   // Add CORS headers for Pi Studio
   const headers = new Headers({
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": origin || "*",
+    "Access-Control-Allow-Origin": origin || "https://triumphsynergy0576.pinet.com",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "X-Pi-Studio-Sync": isSynced ? "true" : "false",

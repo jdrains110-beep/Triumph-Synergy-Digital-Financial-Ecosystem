@@ -2,12 +2,18 @@ import { NextResponse } from "next/server";
 
 export type ValidationMode = "mainnet" | "testnet";
 
-// Default fallback key keeps existing verification working if env vars are missing.
+// Validation key MUST be provided via environment variable — fail closed.
 const DEFAULT_VALIDATION_KEY =
   process.env.DEFAULT_VALIDATION_KEY ||
   process.env.PI_VALIDATION_KEY ||
-  process.env.VALIDATION_KEY ||
-  "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
+  process.env.VALIDATION_KEY;
+
+if (!DEFAULT_VALIDATION_KEY && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "CRITICAL: DEFAULT_VALIDATION_KEY, PI_VALIDATION_KEY, or VALIDATION_KEY " +
+    "must be set in environment. Refusing to start with no validation key."
+  );
+}
 
 // TESTNET domains - explicit list
 const TESTNET_DOMAINS = [

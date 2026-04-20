@@ -10,7 +10,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { 
+import { secureRoute, safeErrorResponse } from "@/lib/security/api-guard";
+import {
   piBackbone,
   piNetworkBackbone,
   distributedNodes,
@@ -23,7 +24,8 @@ import {
 // ============================================================================
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  return secureRoute(request, async (req, _session) => {
+  const { searchParams } = new URL(req.url);
   const action = searchParams.get("action") || "status";
   
   try {
@@ -172,10 +174,11 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: safeErrorResponse(error) },
       { status: 500 }
     );
   }
+  }, { requireAuth: true, requireCsrf: false });
 }
 
 // ============================================================================
@@ -183,8 +186,9 @@ export async function GET(request: NextRequest) {
 // ============================================================================
 
 export async function POST(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { action, ...params } = body;
     
     switch (action) {
@@ -422,10 +426,11 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: safeErrorResponse(error) },
       { status: 500 }
     );
   }
+  }, { requireAuth: true, requireCsrf: true, rateLimit: { max: 30, windowMs: 60_000, endpoint: "backbone-post" } });
 }
 
 // ============================================================================
@@ -433,8 +438,9 @@ export async function POST(request: NextRequest) {
 // ============================================================================
 
 export async function PUT(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { action, ...params } = body;
     
     switch (action) {
@@ -533,10 +539,11 @@ export async function PUT(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: safeErrorResponse(error) },
       { status: 500 }
     );
   }
+  }, { requireAuth: true, requireCsrf: true });
 }
 
 // ============================================================================
@@ -544,7 +551,8 @@ export async function PUT(request: NextRequest) {
 // ============================================================================
 
 export async function DELETE(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  return secureRoute(request, async (req, _session) => {
+  const { searchParams } = new URL(req.url);
   const action = searchParams.get("action");
   
   try {
@@ -596,8 +604,9 @@ export async function DELETE(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: safeErrorResponse(error) },
       { status: 500 }
     );
   }
+  }, { requireAuth: true, requireCsrf: true });
 }

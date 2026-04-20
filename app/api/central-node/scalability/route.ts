@@ -11,11 +11,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { secureRoute, safeErrorResponse } from "@/lib/security/api-guard";
 
 export async function GET(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
     const { centralNodeScalability } = await import("@/lib/quantum");
-    const searchParams = request.nextUrl.searchParams;
+    const searchParams = req.nextUrl.searchParams;
     const action = searchParams.get("action");
     
     switch (action) {
@@ -183,14 +185,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: "Internal server error",
-      message: error instanceof Error ? error.message : "Unknown error",
     }, { status: 500 });
   }
+  }, { requireAuth: true, requireCsrf: false });
 }
 
 export async function POST(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
-    const body = await request.json() as any;
+    const body = await req.json() as any;
     const { action } = body;
     const { centralNodeScalability } = await import("@/lib/quantum");
     
@@ -328,14 +331,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: "Internal server error",
-      message: error instanceof Error ? error.message : "Unknown error",
     }, { status: 500 });
   }
+  }, { requireAuth: true, requireCsrf: true, rateLimit: { max: 30, windowMs: 60_000, endpoint: "scalability-post" } });
 }
 
 export async function PUT(request: NextRequest) {
+  return secureRoute(request, async (req, _session) => {
   try {
-    const body = await request.json() as any;
+    const body = await req.json() as any;
     const { action } = body;
     const { centralNodeScalability } = await import("@/lib/quantum");
     
@@ -372,4 +376,5 @@ export async function PUT(request: NextRequest) {
       error: "Internal server error",
     }, { status: 500 });
   }
+  }, { requireAuth: true, requireCsrf: true });
 }
