@@ -78,6 +78,23 @@ export async function POST(request: NextRequest) {
         data = await proxyGet("/api/credit/hq-deed-score");
         break;
 
+      // ── NESARA/GESARA Sovereign Credit Repair ──────────────────────────
+      case "nesara-file":
+        // File a sovereign credit repair/cancel/clear/jubilee case
+        data = await proxyPost("/api/credit/nesara/file", params);
+        break;
+
+      case "nesara-cases":
+        data = await proxyPost("/api/credit/nesara/cases", {});
+        break;
+
+      case "nesara-resolve":
+        data = await proxyPost(
+          `/api/credit/nesara/resolve/${encodeURIComponent(String(params.caseId ?? ""))}`,
+          { outcome: params.outcome ?? "resolved" },
+        );
+        break;
+
       default:
         return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
     }
@@ -93,11 +110,24 @@ export async function GET(request: NextRequest) {
   const action = request.nextUrl.searchParams.get("action") ?? "health";
   try {
     let data: unknown;
-    if (action === "health")   data = await proxyGet("/health");
-    else if (action === "bureaus")  data = await proxyGet("/api/credit/bureaus");
-    else if (action === "universe") data = await proxyGet("/api/credit/universe");
-    else if (action === "hq-score") data = await proxyGet("/api/credit/hq-deed-score");
-    else return NextResponse.json({ success: false, error: "Unknown action" }, { status: 400 });
+    if (action === "health")          data = await proxyGet("/health");
+    else if (action === "bureaus")     data = await proxyGet("/api/credit/bureaus");
+    else if (action === "universe")    data = await proxyGet("/api/credit/universe");
+    else if (action === "hq-score")    data = await proxyGet("/api/credit/hq-deed-score");
+    else if (action === "nesara-cases") data = await proxyGet("/api/credit/nesara/cases");
+    else if (action === "nesara-case") {
+      const caseId = request.nextUrl.searchParams.get("caseId") ?? "";
+      if (!caseId) return NextResponse.json({ success: false, error: "caseId required" }, { status: 400 });
+      data = await proxyGet(`/api/credit/nesara/case/${encodeURIComponent(caseId)}`);
+    } else if (action === "nesara-letter") {
+      const caseId = request.nextUrl.searchParams.get("caseId") ?? "";
+      if (!caseId) return NextResponse.json({ success: false, error: "caseId required" }, { status: 400 });
+      data = await proxyGet(`/api/credit/nesara/letter/${encodeURIComponent(caseId)}`);
+    } else if (action === "nesara-certificate") {
+      const caseId = request.nextUrl.searchParams.get("caseId") ?? "";
+      if (!caseId) return NextResponse.json({ success: false, error: "caseId required" }, { status: 400 });
+      data = await proxyGet(`/api/credit/nesara/certificate/${encodeURIComponent(caseId)}`);
+    } else return NextResponse.json({ success: false, error: "Unknown action" }, { status: 400 });
 
     return NextResponse.json({ success: true, data });
   } catch (err) {
