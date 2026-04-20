@@ -38,17 +38,43 @@ export const PI_TESTNET = {
 // ---------------------------------------------------------------------------
 // Minimal fetch helper (works in Node and Edge runtimes)
 // ---------------------------------------------------------------------------
+/**
+ * Horizon URL fallback chain — tried in order until one succeeds.
+ * Supports any network environment: broadband, WiFi, LTE, CGNAT mobile hotspot, VPN.
+ *   1. STELLAR_HORIZON_URL env var (set by operator for the active environment)
+ *   2. localhost:31401 — host-mapped Pi Node port (dev / all local networks)
+ *   3. testnet2:8000   — Docker-internal pi-bridge network
+ *   4. Public Pi Testnet API — outbound HTTPS, always reachable regardless of NAT/CGNAT
+ */
+const HORIZON_FALLBACK_URLS: string[] = [
+  process.env.STELLAR_HORIZON_URL?.replace(/\/$/, "") ?? "",
+  "http://localhost:31401",
+  "http://testnet2:8000",
+  "https://api.testnet.minepi.com",
+  PI_TESTNET.HORIZON_URL,
+].filter((url, idx, arr) => url !== "" && arr.indexOf(url) === idx);
+
 async function horizonFetch(path: string): Promise<any> {
-  const base =
-    process.env.STELLAR_HORIZON_URL?.replace(/\/$/, "") ??
-    PI_TESTNET.HORIZON_URL;
-  const url = `${base}${path}`;
-  const res = await fetch(url, {
-    headers: { Accept: "application/json" },
-    next: { revalidate: 5 },  // Next.js: cache 5 s
-  } as RequestInit);
-  if (!res.ok) throw new Error(`Horizon ${res.status}: ${url}`);
-  return res.json();
+  let lastError: unknown;
+  for (const base of HORIZON_FALLBACK_URLS) {
+    const url = `${base}${path}`;
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json" },
+        // 30s timeout for slow/mobile connections (AbortSignal.timeout available in Node 18+)
+        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
+          ? (AbortSignal as any).timeout(30_000)
+          : undefined,
+        next: { revalidate: 5 },  // Next.js: cache 5 s
+      } as RequestInit);
+      if (!res.ok) throw new Error(`Horizon ${res.status}: ${url}`);
+      return res.json();
+    } catch (err) {
+      lastError = err;
+      // Try next URL in the fallback chain
+    }
+  }
+  throw lastError;
 }
 
 // ---------------------------------------------------------------------------

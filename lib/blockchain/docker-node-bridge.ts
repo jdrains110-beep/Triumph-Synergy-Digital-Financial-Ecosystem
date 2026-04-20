@@ -91,12 +91,18 @@ export interface DockerNodeBridgeConfig {
   peerPort: number;
   /** Health check interval in ms (default: 30000) */
   healthCheckInterval: number;
-  /** Connection timeout in ms (default: 10000) */
+  /** Connection timeout in ms (default: 30000 — extended for mobile/slow connections) */
   connectionTimeout: number;
-  /** Max retry attempts for failed requests (default: 3) */
+  /** Max retry attempts for failed requests (default: 5) */
   maxRetries: number;
   /** Whether to auto-reconnect on failure (default: true) */
   autoReconnect: boolean;
+  /**
+   * Ordered list of Horizon base URLs tried in sequence on failure.
+   * Enables graceful degradation: local node → localhost port → public Pi testnet API.
+   * Supports any network type: broadband, LTE, CGNAT mobile hotspot, VPN.
+   */
+  horizonFallbackUrls: string[];
 }
 
 // ============================================================================
@@ -109,9 +115,20 @@ const DEFAULT_CONFIG: DockerNodeBridgeConfig = {
   corePort: 11626,
   peerPort: Number.parseInt(process.env.PI_NODE_PORT || "31402", 10),
   healthCheckInterval: 30_000,
-  connectionTimeout: 10_000,
-  maxRetries: 3,
+  // 30s timeout — accommodates high-latency mobile hotspot, LTE, and CGNAT connections
+  connectionTimeout: 30_000,
+  // 5 retries with exponential backoff covers intermittent mobile network drops
+  maxRetries: 5,
   autoReconnect: true,
+  // Fallback chain: Docker-internal → localhost mapped port → public Pi Testnet API.
+  // Ensures connectivity on any network type (broadband, WiFi, LTE, CGNAT, VPN).
+  horizonFallbackUrls: [
+    process.env.STELLAR_HORIZON_URL ||
+      `http://${process.env.PI_NODE_HOST || "localhost"}:${process.env.PI_NODE_API_PORT || "31401"}`,
+    "http://localhost:31401",
+    "http://testnet2:8000",
+    "https://api.testnet.minepi.com",
+  ].filter((url, idx, arr) => arr.indexOf(url) === idx), // deduplicate
 };
 
 export class DockerNodeBridge extends EventEmitter {
@@ -606,8 +623,30 @@ export class DockerNodeBridge extends EventEmitter {
     return `http://${host}:${this.config.corePort}${path}`;
   }
 
+  /**
+   * Fetch from Horizon with multi-URL fallback chain.
+   * Tries each URL in `horizonFallbackUrls` before giving up.
+   * This ensures the service works on any network type:
+   * broadband, WiFi, LTE, CGNAT mobile hotspot, or VPN.
+   */
   private async fetchHorizon<T>(path: string): Promise<T> {
-    return this.fetchWithRetry<T>(this.buildHorizonUrl(path));
+    const primary = this.buildHorizonUrl(path);
+    // Build ordered candidate list: primary URL first, then fallbacks (skip duplicates)
+    const candidates = [primary, ...this.config.horizonFallbackUrls
+      .map((base) => `${base.replace(/\/$/, "")}${path}`)
+      .filter((url) => url !== primary),
+    ];
+
+    let lastError: unknown;
+    for (const url of candidates) {
+      try {
+        return await this.fetchWithRetry<T>(url);
+      } catch (err) {
+        lastError = err;
+        // Continue to next fallback
+      }
+    }
+    throw lastError;
   }
 
   private async fetchCore<T>(path: string): Promise<T> {
@@ -632,10 +671,10 @@ export class DockerNodeBridge extends EventEmitter {
       return (await response.json()) as T;
     } catch (error) {
       if (attempt < this.config.maxRetries) {
-        // Exponential backoff: 1s, 2s, 4s...
-        await new Promise((r) =>
-          setTimeout(r, Math.pow(2, attempt - 1) * 1000)
-        );
+        // Exponential backoff with jitter: handles intermittent mobile/LTE drops
+        const baseDelay = Math.pow(2, attempt - 1) * 1000;
+        const jitter = Math.random() * 500;
+        await new Promise((r) => setTimeout(r, baseDelay + jitter));
         return this.fetchWithRetry<T>(url, attempt + 1);
       }
       throw error;
