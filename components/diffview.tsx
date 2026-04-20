@@ -12,6 +12,7 @@ import { EditorView } from "prosemirror-view";
 import { useEffect, useRef } from "react";
 import { renderToString } from "react-dom/server";
 import { Streamdown } from "streamdown";
+import DOMPurify from "dompurify";
 
 import { DiffType, diffEditor } from "@/lib/editor/diff";
 
@@ -68,11 +69,10 @@ export const DiffView = ({ oldContent, newContent }: DiffEditorProps) => {
 
       const oldContainer = document.createElement("div");
       // Sanitize HTML to prevent XSS before DOM insertion
-      const { sanitize } = await import("dompurify");
-      oldContainer.innerHTML = sanitize(oldHtmlContent);
+      oldContainer.innerHTML = DOMPurify.sanitize(oldHtmlContent);
 
       const newContainer = document.createElement("div");
-      newContainer.innerHTML = sanitize(newHtmlContent);
+      newContainer.innerHTML = DOMPurify.sanitize(newHtmlContent);
 
       const oldDoc = parser.parse(oldContainer);
       const newDoc = parser.parse(newContainer);

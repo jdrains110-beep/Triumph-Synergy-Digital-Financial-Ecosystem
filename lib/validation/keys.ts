@@ -2,18 +2,12 @@ import { NextResponse } from "next/server";
 
 export type ValidationMode = "mainnet" | "testnet";
 
-// Validation key MUST be provided via environment variable — fail closed.
-const DEFAULT_VALIDATION_KEY =
+// Validation key resolved lazily so module can be imported at build time.
+const getDefaultValidationKey = () =>
   process.env.DEFAULT_VALIDATION_KEY ||
   process.env.PI_VALIDATION_KEY ||
-  process.env.VALIDATION_KEY;
-
-if (!DEFAULT_VALIDATION_KEY && process.env.NODE_ENV === "production") {
-  throw new Error(
-    "CRITICAL: DEFAULT_VALIDATION_KEY, PI_VALIDATION_KEY, or VALIDATION_KEY " +
-    "must be set in environment. Refusing to start with no validation key."
-  );
-}
+  process.env.VALIDATION_KEY ||
+  "";
 
 // TESTNET domains - explicit list
 const TESTNET_DOMAINS = [
@@ -70,20 +64,30 @@ export const pickValidationMode = (
 };
 
 export const resolveValidationKey = (mode: ValidationMode): string => {
+  const fallback = getDefaultValidationKey();
   const mainnet =
     process.env.PI_NETWORK_MAINNET_VALIDATION_KEY ||
     process.env.MAINNET_VALIDATION_KEY ||
     process.env.PI_VALIDATION_KEY ||
     process.env.VALIDATION_KEY ||
-    DEFAULT_VALIDATION_KEY;
+    fallback;
   const testnet =
     process.env.PI_NETWORK_TESTNET_VALIDATION_KEY ||
     process.env.TESTNET_VALIDATION_KEY ||
     process.env.PI_VALIDATION_KEY ||
     process.env.VALIDATION_KEY ||
-    DEFAULT_VALIDATION_KEY;
+    fallback;
 
-  return mode === "testnet" ? testnet : mainnet;
+  const key = mode === "testnet" ? testnet : mainnet;
+
+  if (!key && process.env.NODE_ENV === "production") {
+    throw new Error(
+      "CRITICAL: No validation key configured. Set DEFAULT_VALIDATION_KEY, " +
+      "PI_VALIDATION_KEY, or VALIDATION_KEY in the environment."
+    );
+  }
+
+  return key;
 };
 
 export const buildValidationResponse = (key: string) =>
