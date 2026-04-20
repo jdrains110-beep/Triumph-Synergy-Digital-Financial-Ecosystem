@@ -1,6 +1,6 @@
 # Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
-﻿"""
+"""
 Triumph Synergy Network Sentinel
 ═════════════════════════════════════════════════════════════════════════
 Monitors external connectivity, detects network transitions (Starlink,

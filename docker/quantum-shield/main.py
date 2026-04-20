@@ -1,6 +1,6 @@
 # Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
-﻿"""
+"""
 Triumph Synergy Quantum Shield Engine
 ======================================
 Post-quantum cryptographic resistance layer for the entire ecosystem.

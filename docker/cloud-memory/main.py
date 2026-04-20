@@ -1,6 +1,6 @@
 # Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
-﻿"""
+"""
 Triumph Synergy Cloud Memory Platform
 =======================================
 A superior unified memory layer for all 22+ ecosystem services.

@@ -1,6 +1,6 @@
 # Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
-﻿"""
+"""
 Triumph Synergy Health Governor
 ──────────────────────────────────────────────────────────────────────
 Watchdog that monitors all Triumph containers via the Docker API socket
