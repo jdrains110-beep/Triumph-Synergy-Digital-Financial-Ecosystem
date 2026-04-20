@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/pi-app-manifest.json",
-  "name": "Triumph Synergy - Quantum Financial System",
+  "name": "Triumph Synergy - Sovereign Quantum Financial Ecosystem",
   "short_name": "Triumph QFS",
-  "description": "The Most Advanced Quantum Financial System (QFS) Platform powered by Pi Network. Features Pi SDK 2.0 integration, 90% Pi payments, Fast-Track KYC/KYB, Multi-Sig business wallets, quantum-resistant security, NESARA/GESARA compliance, and immortal infrastructure. Pi Network is our primary payment backbone.",
+  "description": "The Sovereign Quantum Financial Ecosystem powered by Pi Network — the rival and superior to USD. Real-world utility across 20+ sectors (banking, real estate, commerce, delivery, travel, education, entertainment, healthcare, and more) created through Triumph Synergy for Pi Network. Every financial system on Earth attaches to Pi to survive and maintain. Features Universal Integration Gateway, Pi SDK 2.0, interoperability bridges (SWIFT, ACH, FedWire, Ethereum, Bitcoin), quantum-resistant security, NESARA/GESARA compliance, and immortal infrastructure.",
   "version": "2.0.0",
   "pi_sdk_version": "2.0",
   
@@ -30,7 +30,7 @@
     "rating": "E",
     "languages": ["en", "es", "fr", "de", "zh", "ja", "ko", "pt", "ru", "ar"],
     "countries": "all",
-    "tags": ["qfs", "quantum", "payments", "kyc", "multi-sig", "stellar", "enterprise"]
+    "tags": ["qfs", "quantum", "payments", "kyc", "multi-sig", "stellar", "enterprise", "sovereign-gateway", "reserve-currency", "real-world-utility", "interoperability-bridge"]
   },
 
   "pi_network_focus": {

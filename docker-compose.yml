@@ -30,7 +30,10 @@ x-common: &common
     org.triumph.blockchain.powered-by: "Pi Network"
     org.triumph.consensus.protocol: "Stellar SCP"
     org.triumph.horizon.layer: "enabled"
-    org.triumph.ecosystem.class: "supernatural-financial"
+    org.triumph.ecosystem.class: "sovereign-quantum-financial"
+    org.triumph.positioning: "rival-and-superior-to-usd"
+    org.triumph.real-world-utility: "20-plus-sectors"
+    org.triumph.gateway: "universal-integration-gateway"
     org.triumph.owner.name: "Jeremiah Joel Drains"
     org.triumph.owner.organization: "Triumph-Synergy"
     org.triumph.governance.final-authority: "owner-approved"
@@ -831,6 +834,49 @@ services:
       timeout: 10s
       retries: 4
       start_period: 25s
+
+  # ========================================================================
+  # SOVEREIGN GATEWAY — Universal Integration Gateway
+  # The single entry point ALL external systems (banks, governments,
+  # exchanges, SWIFT, ACH, FedWire, Ethereum, Bitcoin) MUST connect
+  # through to access Pi Network liquidity and the Triumph Synergy
+  # ecosystem.  Pi is the base settlement layer; USD is derivative.
+  # ========================================================================
+
+  sovereign-gateway:
+    build:
+      context: docker/sovereign-gateway
+    container_name: triumph-sovereign-gateway
+    <<: *common
+    mem_limit: 192m
+    mem_reservation: 96m
+    cpus: 0.3
+    environment:
+      PORT: "8097"
+      REDIS_URL: redis://triumph-redis:6379
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      PAYMENT_URL: http://triumph-payment-processor:8084
+      CENTRAL_NODE_URL: http://triumph-central-node:11626
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+    expose:
+      - "8097"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      dual-value-engine:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8097/health')"]
+      interval: 20s
+      timeout: 10s
+      retries: 4
+      start_period: 15s
 
   # ========================================================================
   # DUAL-VALUE ENGINE — Pi Internal (mined) vs External (market) value
