@@ -4,15 +4,20 @@ import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { DUMMY_PASSWORD } from "@/lib/constants";
 import { createGuestUser, getUser } from "@/lib/db/queries";
+import { Web3Auth } from "@/lib/web3/web3-auth";
 import { authConfig } from "./auth.config";
 
-export type UserType = "guest" | "regular";
+export type UserType = "guest" | "regular" | "wallet";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
       type: UserType;
+      /** Stellar / Pi public key (Web3 sessions) */
+      publicKey?: string;
+      /** DID string (Web3 sessions) */
+      did?: string;
     } & DefaultSession["user"];
   }
 
@@ -21,6 +26,8 @@ declare module "next-auth" {
     id?: string;
     email?: string | null;
     type: UserType;
+    publicKey?: string;
+    did?: string;
   }
 }
 
@@ -28,6 +35,8 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
     type: UserType;
+    publicKey?: string;
+    did?: string;
   }
 }
 
@@ -88,12 +97,42 @@ export const {
         }
       },
     }),
+    Credentials({
+      id: "wallet",
+      credentials: {},
+      async authorize({ accessToken, publicKey, challenge, signature, network }: any) {
+        try {
+          let session;
+          if (accessToken) {
+            // Pi Browser flow — verify via Pi Platform API
+            session = await Web3Auth.verifyPiAuth(accessToken, network || "testnet");
+          } else if (publicKey && challenge && signature) {
+            // Direct Stellar wallet flow — challenge-response
+            session = Web3Auth.verifyChallenge(publicKey, challenge, signature, network || "testnet");
+          } else {
+            return null;
+          }
+          return {
+            id: session.uid || session.publicKey,
+            email: null,
+            type: "wallet" as const,
+            publicKey: session.publicKey,
+            did: `did:pi:${session.publicKey}`,
+          };
+        } catch (error) {
+          console.error("Wallet auth error:", error);
+          return null;
+        }
+      },
+    }),
   ],
   callbacks: {
     jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;
         token.type = user.type;
+        if (user.publicKey) token.publicKey = user.publicKey;
+        if (user.did) token.did = user.did;
       }
 
       return token;
@@ -102,6 +141,8 @@ export const {
       if (session.user) {
         session.user.id = token.id;
         session.user.type = token.type;
+        if (token.publicKey) session.user.publicKey = token.publicKey;
+        if (token.did) session.user.did = token.did;
       }
 
       return session;

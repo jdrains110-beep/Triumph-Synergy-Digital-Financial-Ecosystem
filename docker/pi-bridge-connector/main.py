@@ -1,4 +1,6 @@
-"""
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+﻿"""
 Pi Bridge Connector — triumph-synergy
 =====================================
 Bridges triumph-central-node ↔ testnet2 Pi node (Horizon + stellar-core)
@@ -11,6 +13,12 @@ Bridges triumph-central-node ↔ testnet2 Pi node (Horizon + stellar-core)
 Port: 8092
 Networks: triumph-net, pi-bridge
 """
+
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+
 
 import asyncio
 import json

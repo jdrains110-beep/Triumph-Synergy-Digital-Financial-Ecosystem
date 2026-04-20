@@ -5,6 +5,7 @@ import { LocaleProvider } from "@/components/locale-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { PiProvider } from "@/lib/pi-sdk/pi-provider";
+import { Web3Provider } from "@/lib/web3";
 
 import "./globals.css";
 
@@ -226,7 +227,9 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
         >
           <Toaster position="top-center" />
           <LocaleProvider locale={locale}>
-            <PiProvider>{children}</PiProvider>
+            <PiProvider>
+              <Web3Provider>{children}</Web3Provider>
+            </PiProvider>
           </LocaleProvider>
         </ThemeProvider>
         {/* Analytics disabled - may cause issues in Pi Browser */}

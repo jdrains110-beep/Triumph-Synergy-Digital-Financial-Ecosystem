@@ -14,6 +14,12 @@
  *   GET  /api/compliance/history     — recent screenings from DB
  */
 
+// Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+// License: PiOS
+// Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+// License: PiOS
+
+
 import http from "node:http";
 import { createClient } from "redis";
 import { Pool } from "pg";

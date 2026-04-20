@@ -1,4 +1,6 @@
-"""
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+﻿"""
 Triumph Synergy ML Engine
 =========================
 Real machine-learning models powered by live Pi Network data flowing
@@ -20,6 +22,12 @@ Data feed
 
 Port: 8090
 """
+
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+
 
 import os, time, math, json, threading, hashlib
 from datetime import datetime, timezone

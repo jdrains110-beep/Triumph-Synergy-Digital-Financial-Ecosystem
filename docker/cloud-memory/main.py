@@ -1,4 +1,6 @@
-"""
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+﻿"""
 Triumph Synergy Cloud Memory Platform
 =======================================
 A superior unified memory layer for all 22+ ecosystem services.
@@ -27,6 +29,12 @@ ENDPOINTS:
 Port: 8095
 Networks: triumph-net
 """
+
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+
 
 import asyncio
 import base64

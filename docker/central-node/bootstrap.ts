@@ -8,6 +8,9 @@
  *   - Connection cap to protect the Node.js event loop
  *   - Graceful 503 when the system is still booting or overloaded
  */
+// Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+// License: PiOS
+
 import http from "node:http";
 import { initializePiTransactionSystem, getPiTransactionSystemStatus, shutdownPiTransactionSystem } from "../../lib/pi-transaction/index";
 

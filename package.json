@@ -22,11 +22,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/jdrains110-beep/triumph-synergy.git"
+    "url": "https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem.git"
   },
   "homepage": "https://triumph-synergy.vercel.app",
-  "author": "jdrains110-beep",
-  "license": "PiOS",
+  "author": {
+    "name": "Jeremiah Drains",
+    "url": "https://github.com/jdrains110-beep"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "copyright": "Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

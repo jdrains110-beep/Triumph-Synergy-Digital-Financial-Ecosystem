@@ -1,7 +1,10 @@
 /**
  * middleware.ts
- * Edge Middleware — Supabase session refresh + preview blocking + security headers
- * 
+ * Edge Middleware — Web3 session support + Supabase refresh + security headers
+ *
+ * Web3 Integration: Propagates wallet identity headers (X-Wallet-PublicKey,
+ * X-Wallet-DID) from authenticated clients to downstream API routes.
+ *
  * Supabase SSR integration: refreshes auth tokens on every request so
  * server components always see a fresh session.
  */
@@ -58,6 +61,19 @@ export async function middleware(request: NextRequest) {
   response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+
+  // Web3 protocol headers — identify this as a Web3-native application
+  response.headers.set("X-Web3-Protocol", "triumph-synergy/1.0");
+  response.headers.set("X-Chain", "pi-network");
+
+  // Propagate wallet identity from client to API routes
+  const walletKey = request.headers.get("x-wallet-publickey");
+  if (walletKey) {
+    response.headers.set("X-Wallet-PublicKey", walletKey);
+    const did = request.headers.get("x-wallet-did") || `did:pi:${walletKey}`;
+    response.headers.set("X-Wallet-DID", did);
+  }
+
   return response;
 }
 

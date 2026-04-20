@@ -1,4 +1,6 @@
-"""
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+﻿"""
 Triumph Synergy Quantum Shield Engine
 ======================================
 Post-quantum cryptographic resistance layer for the entire ecosystem.
@@ -28,6 +30,12 @@ CAPABILITIES:
 Port: 8094
 Networks: triumph-net
 """
+
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+
 
 import asyncio
 import base64

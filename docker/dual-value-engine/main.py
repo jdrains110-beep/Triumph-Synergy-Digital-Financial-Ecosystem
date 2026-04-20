@@ -1,4 +1,6 @@
-"""
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+﻿"""
 Pi Dual-Value Engine — triumph-synergy
 =======================================
 Separates Pi Network's two distinct value dimensions:
@@ -28,6 +30,12 @@ Separates Pi Network's two distinct value dimensions:
 Port: 8093
 Networks: triumph-net
 """
+
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+
 
 import asyncio
 import json

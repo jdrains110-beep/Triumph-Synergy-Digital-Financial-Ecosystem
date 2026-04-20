@@ -1,6 +1,9 @@
 /**
  * SCP Auto-Upgrade Bootstrap — HTTP health server on :8083 with backpressure
  */
+// Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+// License: PiOS
+
 import http from "node:http";
 import { PiSCPAutoUpgradeManager } from "../../lib/pi-transaction/pi-scp-auto-upgrade";
 

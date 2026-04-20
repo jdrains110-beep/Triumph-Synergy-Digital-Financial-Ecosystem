@@ -1,4 +1,6 @@
-"""
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+﻿"""
 Triumph Synergy Network Sentinel
 ═════════════════════════════════════════════════════════════════════════
 Monitors external connectivity, detects network transitions (Starlink,
@@ -16,6 +18,12 @@ Features:
 
 Port: 9913
 """
+
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+
 
 import http.client
 import json

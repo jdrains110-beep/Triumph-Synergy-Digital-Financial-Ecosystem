@@ -1,6 +1,9 @@
 /**
  * Smart Contracts Bootstrap — HTTP health server on :8082 with backpressure
  */
+// Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+// License: PiOS
+
 import http from "node:http";
 import { PiSmartContractEngine } from "../../lib/pi-transaction/pi-smart-contracts";
 

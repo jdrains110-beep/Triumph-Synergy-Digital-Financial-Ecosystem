@@ -1,13 +1,45 @@
-Copyright 2024 Vercel, Inc.
+Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+This software and all associated documentation, microservices, smart contracts,
+and infrastructure code (the "Software") are the exclusive intellectual property
+of Jeremiah Drains, operating as Triumph Synergy.
 
-    http://www.apache.org/licenses/LICENSE-2.0
+LICENSING
+=========
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+The Software is dual-licensed:
+
+1. PiOS License (see LICENSE-PIOS)
+   For use within the Pi Network ecosystem. Permits derivative works solely for
+   developing, using, and marketing applications on the official Pi Network.
+
+2. Proprietary License
+   All other uses require explicit written permission from the copyright holder.
+
+INTELLECTUAL PROPERTY NOTICE
+=============================
+
+Triumph Synergy, the Triumph Synergy logo, and all associated service names
+(Quantum Shield, Dual-Value Engine, Triumph Vault, Pi Bridge Connector, etc.)
+are trademarks of Jeremiah Drains / Triumph Synergy.
+
+Pi, Pi Network, and the Pi logo are trademarks of the Pi Community Company.
+
+NO WARRANTY
+===========
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+---
+
+This project was originally bootstrapped from the Vercel AI Chatbot template
+(Apache 2.0). All original Vercel template code has been substantially modified
+or replaced. The Triumph Synergy ecosystem, all microservices, Web3 infrastructure,
+quantum cryptography layer, and Pi Network integrations are original works by
+Jeremiah Drains and are NOT covered by the Apache 2.0 license.

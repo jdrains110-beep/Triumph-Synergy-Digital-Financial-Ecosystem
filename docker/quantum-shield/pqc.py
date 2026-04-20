@@ -8,6 +8,9 @@ This module provides two classes that mirror the liboqs-python API:
   KeyEncapsulation(alg)  — KEM (Kyber/ML-KEM)
   Signature(alg)         — Digital signatures (Dilithium/SPHINCS+)
 """
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# License: PiOS
+
 
 import ctypes
 import ctypes.util

@@ -135,9 +135,9 @@ services:
       context: docker/pi-bridge-connector
     container_name: triumph-pi-bridge-connector
     <<: *common
-    mem_limit: 96m
-    mem_reservation: 48m
-    cpus: 0.25
+    mem_limit: 192m
+    mem_reservation: 96m
+    cpus: 0.3
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8092"
@@ -640,9 +640,9 @@ services:
       context: docker/ml-engine
     container_name: triumph-ml-engine
     <<: *common
-    mem_limit: 192m
-    mem_reservation: 96m
-    cpus: 0.4
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.5
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8090"
@@ -725,9 +725,9 @@ services:
       context: docker/quantum-shield
     container_name: triumph-quantum-shield
     <<: *common
-    mem_limit: 96m
-    mem_reservation: 48m
-    cpus: 0.25
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.35
     environment:
       PORT: "8094"
       REDIS_URL: redis://triumph-redis:6379
@@ -784,8 +784,8 @@ services:
       context: docker/cloud-memory
     container_name: triumph-cloud-memory
     <<: *common
-    mem_limit: 96m
-    mem_reservation: 48m
+    mem_limit: 256m
+    mem_reservation: 96m
     cpus: 0.2
     user: "0:0"
     environment:
@@ -1019,8 +1019,8 @@ services:
       context: docker/horizon-guardian
     container_name: triumph-horizon-guardian
     <<: *common
-    mem_limit: 64m
-    mem_reservation: 16m
+    mem_limit: 128m
+    mem_reservation: 32m
     cpus: 0.15
     environment:
       TARGET_CONTAINER: testnet2
@@ -1116,9 +1116,9 @@ services:
       context: docker/health-governor
     container_name: triumph-health-governor
     <<: *common
-    mem_limit: 48m
-    mem_reservation: 16m
-    cpus: 0.1
+    mem_limit: 64m
+    mem_reservation: 24m
+    cpus: 0.15
     environment:
       GOVERNOR_INTERVAL_S: "30"
       MEMORY_WARN_PCT: "80"
@@ -1126,6 +1126,10 @@ services:
       METRICS_PORT: "9912"
       CONTAINER_PREFIX: "triumph-"
       PROTECTED_CONTAINERS: "triumph-postgres,triumph-redis"
+      HEALTH_FAIL_THRESHOLD: "3"
+      RESTART_BACKOFF_BASE_S: "60"
+      RESTART_BACKOFF_MAX_S: "600"
+      HEALTH_PROBE_TIMEOUT_S: "5"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
