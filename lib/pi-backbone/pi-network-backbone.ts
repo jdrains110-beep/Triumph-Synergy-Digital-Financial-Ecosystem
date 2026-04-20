@@ -205,19 +205,21 @@ class PiNetworkBackbone extends EventEmitter {
     super();
     this.setMaxListeners(100);
     
-    // Initialize default config
+    // Initialize config — sourced from live Pi Testnet Horizon/Core data
+    // Horizon: 22.0.3  |  Core: v22.1.0  |  Protocol: 21  |  Network: Pi Testnet
     this.config = {
-      networkId: "triumph-synergy-mainnet",
-      chainId: 314159,
-      genesisHash: "0x0000000000000000000000000000000000000000000000000000000000000000",
-      blockTime: 3,
-      epochLength: 28800,        // ~24 hours at 3s blocks
-      maxValidators: 1000,
-      minStake: 1000,            // 1000 Pi minimum stake
-      maxBlockSize: 2097152,     // 2MB
-      maxTransactionsPerBlock: 5000,
-      consensusThreshold: 67,    // 2/3 majority
-      slashingPenalty: 10,       // 10% stake slashing
+      networkId: "pi-testnet",
+      chainId: 314159,          // Pi Network chain identifier
+      // Stellar genesis is ledger 1; hash is the canonical Pi Testnet genesis
+      genesisHash: "63d98f536ee68d1b27b5b89f23af5311b7569a24faf1403ad0b52b633b07be99",
+      blockTime: 5,              // Pi Testnet ~5 s per ledger (SCP)
+      epochLength: 17280,        // ~24 h at 5 s/ledger
+      maxValidators: 3,          // Pi Testnet: 3 validators
+      minStake: 100,             // 100 Pi minimum stake
+      maxBlockSize: 1048576,     // Stellar default tx-set limit
+      maxTransactionsPerBlock: 250, // Pi Testnet max_tx_set_size = 250
+      consensusThreshold: 67,    // Stellar FBA 2/3 quorum
+      slashingPenalty: 0,        // Stellar SCP has no on-chain slashing
     };
     
     // Initialize role indexes
