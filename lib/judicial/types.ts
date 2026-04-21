@@ -177,3 +177,85 @@ export interface JudicialAnalysisReport {
   summary: string;
   recommendedActions: string[];
 }
+
+// ─── Good Ole Boy / Systemic Corruption Detection ─────────────────────────────
+
+/**
+ * GoodOleBoyFlagType — each flag represents a specific observable pattern of
+ * systemic corruption, network bias, or above-the-law conduct.
+ */
+export type GoodOleBoyFlagType =
+  | "REPEAT_OFFICER_PROSECUTOR_PAIR"   // Same cop + DA duo appears across multiple cases
+  | "WORD_VS_WORD_NO_EVIDENCE"         // Officer testimony is the ONLY evidence, zero corroboration
+  | "RUBBER_STAMP_CHARGES"             // 100% of officer-initiated charges filed without deviation
+  | "ZERO_DISMISSED_CHARGES"           // Prosecutor has NEVER dropped a charge for this officer
+  | "SELECTIVE_DEFENDANT_PROFILE"      // Defendants share protected characteristics (race, class, etc.)
+  | "ABOVE_THE_LAW_OFFICER"            // Officer has prior misconduct flags yet keeps filing cases
+  | "PROSECUTOR_CONVICTION_OBSESSION"  // Prosecutor never offers plea bargains or drops charges
+  | "JUDICIAL_RUBBER_STAMP"            // Judge has never suppressed evidence from this prosecutor
+  | "RETALIATION_PATTERN"              // Charges spiked chronologically after defendant complained
+  | "COORDINATED_WITNESS_TESTIMONY"    // Multiple officers give near-identical testimony in separate cases
+  | "EVIDENCE_DESERT"                  // Cases proceed with zero physical/documentary/digital evidence
+  | "STACKED_REPEAT_OFFENDER";         // Same defendant targeted repeatedly by same actor network
+
+export interface GoodOleBoyFlag {
+  flagId: string;
+  flagType: GoodOleBoyFlagType;
+  severity: RiskLevel;
+  caseIds: string[];                   // All cases contributing to this flag
+  description: string;
+  officerIds: string[];
+  prosecutorIds: string[];
+  judgeIds: string[];
+  statisticalBasis: string;            // e.g. "9 of 11 cases share officer P-007 + DA P-012"
+  recommendedAction: string;
+  detectedAt: string;                  // ISO date
+}
+
+/**
+ * ActorCorruptionProfile — accumulated bias/misconduct score for a single
+ * judge, prosecutor, officer, or public defender extracted from case history.
+ */
+export interface ActorCorruptionProfile {
+  actorId: string;
+  actorName: string;
+  actorRole: CaseParty["role"];
+  jurisdiction: string;
+  caseCount: number;
+  violationCount: number;
+  wordVsWordCases: number;             // Cases where their testimony = only evidence
+  dismissalRate: number;               // 0.0–1.0: how often charges are dismissed
+  corruptionScore: number;             // 0–100 composite
+  flags: GoodOleBoyFlag[];
+  riskLevel: RiskLevel;
+  firstSeen: string;                   // ISO date of earliest case in review window
+  lastSeen: string;                    // ISO date of most recent case
+  recommendedActions: string[];
+}
+
+/**
+ * HistoricalReviewReport — produced by auditHistoricalCases().
+ * Covers all cases in a date range, surfacing systemic patterns invisible
+ * when cases are reviewed in isolation ("good ole boy" network detection).
+ */
+export interface HistoricalReviewReport {
+  reportId: string;
+  generatedAt: string;
+  jurisdictionName: string;
+  reviewWindowStart: string;           // ISO date — earliest case included
+  reviewWindowEnd: string;             // ISO date — latest case included (today)
+  yearsBack: number;                   // 1–5
+  totalCasesReviewed: number;
+  casesWithViolations: number;
+  casesRecommendedDismissal: number;
+  goodOleBoyFlags: GoodOleBoyFlag[];
+  actorProfiles: ActorCorruptionProfile[];
+  highRiskActors: ActorCorruptionProfile[];    // Filtered: corruptionScore >= 60
+  criticalActors: ActorCorruptionProfile[];    // Filtered: corruptionScore >= 80
+  systemicRiskLevel: RiskLevel;
+  individualReports: JudicialAnalysisReport[];
+  summary: string;
+  publicInterestAlerts: string[];             // Plain-English alerts for citizens
+  evidenceDesertCases: string[];              // Case IDs that had zero physical evidence
+  wordVsWordCases: string[];                  // Case IDs that were purely he-said/she-said
+}

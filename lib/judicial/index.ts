@@ -8,6 +8,7 @@
 import type {
   Case,
   JudicialAnalysisReport,
+  HistoricalReviewReport,
   RiskLevel,
   ChargeViolation,
 } from "./types";
@@ -15,11 +16,14 @@ import { ChargeValidator } from "./charge-validator";
 import { CaseFactAnalyzer } from "./case-fact-analyzer";
 import { RepresentationAuditor } from "./representation-auditor";
 import { TransparencyLedger } from "./transparency-ledger";
+import { HistoricalReviewEngine } from "./historical-review-engine";
 
 export { ChargeValidator } from "./charge-validator";
 export { CaseFactAnalyzer } from "./case-fact-analyzer";
 export { RepresentationAuditor } from "./representation-auditor";
 export { TransparencyLedger } from "./transparency-ledger";
+export { GoodOleBoyDetector } from "./good-ole-boy-detector";
+export { HistoricalReviewEngine } from "./historical-review-engine";
 export type * from "./types";
 
 // ─── Orchestrator ─────────────────────────────────────────────────────────────
@@ -110,72 +114,20 @@ export class JudicialAnalysisSystem {
   // ── Historical case batch re-analysis ────────────────────────────────────
 
   /**
-   * Re-analyse a set of historical cases to surface systemic issues
-   * (patterns of prosecutorial misconduct, attorney failures, etc.)
+   * Full 1–5-year historical review with systemic Good Ole Boy network
+   * detection, actor corruption profiles, and public interest alerts.
+   *
+   * @param cases          — All cases to analyse (pre-fetched by caller).
+   * @param jurisdiction   — Human-readable jurisdiction name.
+   * @param yearsBack      — 1–5 years back from April 21, 2026.
    */
-  auditHistoricalCases(cases: Case[]): {
-    totalCases: number;
-    casesWithViolations: number;
-    casesRecommendedForDismissal: number;
-    mostCommonViolation: string;
-    attorneys: ReturnType<RepresentationAuditor["detectSystemicFailures"]>[];
-    reports: JudicialAnalysisReport[];
-  } {
-    const reports: JudicialAnalysisReport[] = cases.map((c) =>
-      this.analyzeCase(c)
-    );
-
-    const casesWithViolations = reports.filter(
-      (r) => r.chargeViolations.length > 0
-    ).length;
-
-    const casesRecommendedForDismissal = reports.filter(
-      (r) => r.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL"
-    ).length;
-
-    // Tally violation types
-    const violationCounts: Record<string, number> = {};
-    for (const report of reports) {
-      for (const v of report.chargeViolations) {
-        violationCounts[v.violationType] =
-          (violationCounts[v.violationType] ?? 0) + 1;
-      }
-    }
-    const mostCommonViolation =
-      Object.entries(violationCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-      "NONE";
-
-    // Attorney pattern analysis
-    const attorneyMap = new Map<
-      string,
-      { party: import("./types").CaseParty; audits: import("./types").RepresentationAudit[] }
-    >();
-
-    for (const report of reports) {
-      if (!report.representationAudit) continue;
-      const id = report.representationAudit.attorneyId;
-      const caseObj = cases.find((c) => c.id === report.caseId)!;
-      const party = caseObj.parties.find((p) => p.id === id);
-      if (!party) continue;
-
-      const entry = attorneyMap.get(id) ?? { party, audits: [] };
-      entry.audits.push(report.representationAudit);
-      attorneyMap.set(id, entry);
-    }
-
-    const auditor = this.representationAuditor;
-    const attorneys = [...attorneyMap.values()].map(({ party, audits }) =>
-      auditor.detectSystemicFailures(party, audits)
-    );
-
-    return {
-      totalCases: cases.length,
-      casesWithViolations,
-      casesRecommendedForDismissal,
-      mostCommonViolation,
-      attorneys,
-      reports,
-    };
+  auditHistoricalCases(
+    cases: Case[],
+    jurisdiction = "Unknown Jurisdiction",
+    yearsBack: 1 | 2 | 3 | 4 | 5 = 5
+  ): HistoricalReviewReport {
+    const engine = new HistoricalReviewEngine();
+    return engine.review(cases, jurisdiction, yearsBack);
   }
 
   // ─── Private helpers ──────────────────────────────────────────────────────

@@ -59,14 +59,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Fallback to local engine
-    const { cases } = body as unknown as { cases: Case[] };
+    const {
+      cases,
+      jurisdiction = "Unknown Jurisdiction",
+      yearsBack = 5,
+    } = body as unknown as {
+      cases: Case[];
+      jurisdiction?: string;
+      yearsBack?: number;
+    };
     if (!Array.isArray(cases) || cases.length === 0) {
       return NextResponse.json(
         { error: "Provide a non-empty 'cases' array for historical analysis." },
         { status: 400 }
       );
     }
-    const result = system.auditHistoricalCases(cases);
+    // Clamp yearsBack to 1–5
+    const clampedYears = (
+      [1, 2, 3, 4, 5].includes(yearsBack) ? yearsBack : 5
+    ) as 1 | 2 | 3 | 4 | 5;
+    const result = system.auditHistoricalCases(cases, jurisdiction, clampedYears);
     return NextResponse.json(result, { status: 200 });
   }
 

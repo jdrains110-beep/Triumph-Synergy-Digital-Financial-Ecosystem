@@ -8,6 +8,9 @@ import type {
   JudicialAnalysisReport,
   ChargeViolation,
   RiskLevel,
+  GoodOleBoyFlag,
+  ActorCorruptionProfile,
+  HistoricalReviewReport,
 } from "@/lib/judicial/types";
 
 // ─── Demo scaffold case (Florida) ──────────────────────────────────────────────
@@ -366,12 +369,18 @@ export default function JudicialDashboard() {
           <button className={tabStyle("analyze")} onClick={() => setTab("analyze")}>
             ⚖️ Case Analysis
           </button>
+          <button className={tabStyle("history")} onClick={() => setTab("history")}>
+            🔍 Historical Review
+          </button>
         </div>
 
         {/* Florida Monitor Tab */}
         {tab === "monitor" && (
           <FloridaMonitorPanel data={floridaData} />
         )}
+
+        {/* Historical Review Tab */}
+        {tab === "history" && <HistoricalReviewPanel />}
 
         {/* Case Analysis Tab */}
         {tab === "analyze" && (
