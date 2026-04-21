@@ -22,6 +22,12 @@ export default async function Page() {
             </div>
             <nav className="flex items-center gap-4">
               <Link 
+                href="/real-estate" 
+                className="rounded-lg bg-gradient-to-r from-yellow-500/20 to-purple-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-300 hover:bg-yellow-500/30 transition-colors"
+              >
+                🏛️ Real Estate
+              </Link>
+              <Link 
                 href="/ecosystem/applications" 
                 className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors"
               >
