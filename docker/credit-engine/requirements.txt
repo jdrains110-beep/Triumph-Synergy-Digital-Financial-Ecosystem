@@ -4,3 +4,4 @@ numpy>=1.26.0
 redis>=5.0.0
 prometheus-client>=0.20.0
 httpx>=0.27.0
+stellar-sdk>=13.0.0

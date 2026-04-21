@@ -80,6 +80,34 @@ TU_KEY     = os.getenv("BUREAU_API_KEY_TRANSUNION",  "sandbox")
 FICO_KEY   = os.getenv("BUREAU_API_KEY_FICO",        "sandbox")
 VS_KEY     = os.getenv("BUREAU_API_KEY_VANTAGE",     "sandbox")
 
+# Equifax OAuth2 developer credentials (https://developer.equifax.com)
+EFX_CLIENT_ID     = os.getenv("EQUIFAX_CLIENT_ID",     "")
+EFX_CLIENT_SECRET = os.getenv("EQUIFAX_CLIENT_SECRET", "")
+EFX_SANDBOX       = os.getenv("EQUIFAX_SANDBOX",       "true").lower() == "true"
+
+# Experian Connect credentials (https://developer.experian.com)
+EXP_CLIENT_ID     = os.getenv("EXPERIAN_CLIENT_ID",     "")
+EXP_CLIENT_SECRET = os.getenv("EXPERIAN_CLIENT_SECRET", "")
+EXP_SANDBOX       = os.getenv("EXPERIAN_SANDBOX",       "true").lower() == "true"
+
+# TransUnion TruVision credentials (https://developer.transunion.com)
+TU_CLIENT_ID      = os.getenv("TRANSUNION_CLIENT_ID",     "")
+TU_CLIENT_SECRET  = os.getenv("TRANSUNION_CLIENT_SECRET", "")
+TU_SANDBOX        = os.getenv("TRANSUNION_SANDBOX",       "true").lower() == "true"
+
+# FICO Score Open Access — delivered via bureau partner APIs
+FICO_CLIENT_ID     = os.getenv("FICO_CLIENT_ID",     "")
+FICO_CLIENT_SECRET = os.getenv("FICO_CLIENT_SECRET", "")
+
+# VantageScore — via bureau data partners
+VS_CLIENT_ID      = os.getenv("VANTAGESCORE_CLIENT_ID",     "")
+VS_CLIENT_SECRET  = os.getenv("VANTAGESCORE_CLIENT_SECRET", "")
+
+# On-chain anchoring — Stellar/Pi testnet keypair (fund via testnet friendbot)
+# Generate with: stellar_sdk.Keypair.random() and fund at https://friendbot.testnet2.minepi.com
+ANCHOR_SECRET_SEED = os.getenv("ONCHAIN_ANCHOR_SEED", "")  # SR... Stellar secret seed
+ANCHOR_ENABLED     = bool(ANCHOR_SECRET_SEED and ANCHOR_SECRET_SEED.startswith("S"))
+
 # ─── Prometheus ────────────────────────────────────────────────────────────────
 
 score_req_total    = Counter("credit_score_requests_total",      "PiCredit score requests")
@@ -355,11 +383,202 @@ def _founder_profile_for(pi_address: str) -> dict[str, Any] | None:
         ),
     }
 
+# ─── On-Chain Anchoring ───────────────────────────────────────────────────────
+
+# In-memory log of all on-chain anchor transactions
+_anchor_log: list[dict] = []
+_anchor_lock = threading.Lock()
+
+def _anchor_to_chain(memo_text: str, ref_id: str, pi_address: str) -> dict | None:
+    """
+    Write a SHA-256 hash of credit event data to the Pi testnet blockchain
+    as a transaction memo. This creates an immutable, timestamped, publicly
+    verifiable record on the actual Pi Network ledger.
+
+    Returns the anchor record dict, or None if anchoring is disabled/failed.
+
+    To enable:
+      1. Generate a keypair: python3 -c "from stellar_sdk import Keypair; k=Keypair.random(); print(k.secret, k.public_key)"
+      2. Fund it:            curl https://friendbot.testnet2.minepi.com?addr=<PUBLIC_KEY>
+      3. Set env var:        ONCHAIN_ANCHOR_SEED=S...
+    """
+    if not ANCHOR_ENABLED:
+        return None
+    try:
+        from stellar_sdk import (
+            Keypair, Server, TransactionBuilder, Network, TextMemo
+        )
+        # Hash the memo text so it fits in 28 bytes
+        content_hash = hashlib.sha256(memo_text.encode()).hexdigest()[:28]
+        horizon_url = HORIZON.rstrip("/")
+        # Use testnet network passphrase for Pi testnet2
+        network_passphrase = (
+            "Pi Testnet"
+            if "testnet" in horizon_url or "testnet" in NETWORK
+            else Network.PUBLIC_NETWORK_PASSPHRASE
+        )
+        keypair   = Keypair.from_secret(ANCHOR_SECRET_SEED)
+        server    = Server(horizon_url=horizon_url)
+        account   = server.load_account(keypair.public_key)
+        tx = (
+            TransactionBuilder(
+                source_account    = account,
+                network_passphrase= network_passphrase,
+                base_fee          = max(live.get("base_fee", 100), 100),
+            )
+            .append_manage_data_op(
+                data_name  = f"tsng:{ref_id[:20]}",
+                data_value = content_hash.encode(),
+            )
+            .set_timeout(30)
+            .build()
+        )
+        tx.sign(keypair)
+        response = server.submit_transaction(tx)
+        ledger   = int(response.get("ledger", live["ledger"]))
+        record = {
+            "refId":        ref_id,
+            "piAddress":    pi_address,
+            "contentHash":  content_hash,
+            "txHash":       response.get("hash", ""),
+            "ledger":       ledger,
+            "horizonLink":  f"{horizon_url}/transactions/{response.get('hash', '')}",
+            "anchoredAt":   datetime.now(timezone.utc).isoformat(),
+            "memo":         memo_text[:80],
+        }
+        with _anchor_lock:
+            _anchor_log.append(record)
+        print(f"[credit-engine] ⛓  On-chain anchor: ref={ref_id} ledger={ledger} hash={content_hash}")
+        return record
+    except Exception as exc:
+        print(f"[credit-engine] ⚠️  Anchor failed (non-fatal): {exc}")
+        return None
+
+
+# ─── Bureau OAuth2 Token Cache ─────────────────────────────────────────────────
+
+_bureau_tokens: dict[str, dict] = {}
+_token_lock = threading.Lock()
+
+async def _get_oauth_token(client_id: str, client_secret: str, token_url: str, scope: str = "") -> str | None:
+    """Fetch and cache an OAuth2 client-credentials bearer token."""
+    cache_key = f"{client_id}:{token_url}"
+    now = time.time()
+    with _token_lock:
+        cached = _bureau_tokens.get(cache_key)
+        if cached and cached["expires_at"] > now + 30:
+            return cached["token"]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            data: dict = {"grant_type": "client_credentials", "client_id": client_id, "client_secret": client_secret}
+            if scope:
+                data["scope"] = scope
+            resp = await client.post(token_url, data=data)
+            resp.raise_for_status()
+            j = resp.json()
+            token = j["access_token"]
+            expires_in = int(j.get("expires_in", 3600))
+            with _token_lock:
+                _bureau_tokens[cache_key] = {"token": token, "expires_at": now + expires_in}
+            return token
+    except Exception as exc:
+        print(f"[credit-engine] OAuth2 token fetch failed {token_url}: {exc}")
+        return None
+
+
 async def _live_bureau_report(bureau: str, pi_address: str, pi_score: int) -> dict:
-    """Future: real bureau API call.  Returns sandbox until key is configured."""
-    # In production: call bureau's OAuth2 REST API using the relevant key.
-    # For now all bureaus return sandbox data.
-    return _sandbox_bureau_report(bureau, pi_address, pi_score)
+    """
+    Real bureau API call when credentials are configured; falls back to sandbox.
+
+    Bureau API registry:
+      Equifax:    https://api.sandbox.equifax.com  (OAuth2 — EQUIFAX_CLIENT_ID/SECRET)
+      Experian:   https://sandbox.experian.com     (OAuth2 — EXPERIAN_CLIENT_ID/SECRET)
+      TransUnion: https://api.transunion.com       (OAuth2 — TRANSUNION_CLIENT_ID/SECRET)
+      FICO:       Delivered via bureau partner APIs (uses Equifax/Experian endpoint)
+      VantageScore: Via bureau data partners
+
+    Sign up:
+      Equifax   → https://developer.equifax.com/apis
+      Experian  → https://developer.experian.com
+      TransUnion→ https://developer.transunion.com
+    """
+    base = _sandbox_bureau_report(bureau, pi_address, pi_score)
+
+    try:
+        if bureau == "equifax" and EFX_CLIENT_ID and EFX_KEY not in ("sandbox", ""):
+            token_url = (
+                "https://api.sandbox.equifax.com/v2/oauth/token"
+                if EFX_SANDBOX else
+                "https://api.equifax.com/v2/oauth/token"
+            )
+            api_base = "https://api.sandbox.equifax.com" if EFX_SANDBOX else "https://api.equifax.com"
+            token = await _get_oauth_token(EFX_CLIENT_ID, EFX_CLIENT_SECRET, token_url,
+                                           "https://api.equifax.com/business/consumer-credit/v1")
+            if token:
+                async with httpx.AsyncClient(timeout=12.0) as client:
+                    resp = await client.post(
+                        f"{api_base}/business/consumer-credit/v1/equifax-reports/consumer-credit-report",
+                        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                        json={
+                            "consumers": {"name": [{"identifier": "current", "firstName": "PI", "lastName": pi_address[:8]}]},
+                            "customerReferenceIdentifier": ref_id if (ref_id := pi_address[:20]) else pi_address[:20],
+                        },
+                    )
+                    if resp.is_success:
+                        d = resp.json()
+                        score_val = int(d.get("creditScore", {}).get("value", pi_score))
+                        base.update({"score": score_val, "sandboxMode": False,
+                                     "integrationStatus": "LIVE — Equifax InterConnect",
+                                     "rawResponse": d})
+
+        elif bureau == "experian" and EXP_CLIENT_ID and EXP_KEY not in ("sandbox", ""):
+            token_url = (
+                "https://sandbox.experian.com/oauth2/v1/token"
+                if EXP_SANDBOX else
+                "https://us-api.experian.com/oauth2/v1/token"
+            )
+            api_base = "https://sandbox.experian.com" if EXP_SANDBOX else "https://us-api.experian.com"
+            token = await _get_oauth_token(EXP_CLIENT_ID, EXP_CLIENT_SECRET, token_url)
+            if token:
+                async with httpx.AsyncClient(timeout=12.0) as client:
+                    resp = await client.post(
+                        f"{api_base}/consumerservices/credit-profile/v2/credit-report",
+                        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                        json={"subcode": EXP_CLIENT_ID, "referenceId": pi_address[:20]},
+                    )
+                    if resp.is_success:
+                        d = resp.json()
+                        score_val = int(d.get("creditProfile", {}).get("riskModel", [{}])[0].get("score", pi_score))
+                        base.update({"score": score_val, "sandboxMode": False,
+                                     "integrationStatus": "LIVE — Experian Connect",
+                                     "rawResponse": d})
+
+        elif bureau == "transunion" and TU_CLIENT_ID and TU_KEY not in ("sandbox", ""):
+            token_url = (
+                "https://api-sandbox.transunion.com/oauth2/token"
+                if TU_SANDBOX else
+                "https://api.transunion.com/oauth2/token"
+            )
+            api_base = "https://api-sandbox.transunion.com" if TU_SANDBOX else "https://api.transunion.com"
+            token = await _get_oauth_token(TU_CLIENT_ID, TU_CLIENT_SECRET, token_url)
+            if token:
+                async with httpx.AsyncClient(timeout=12.0) as client:
+                    resp = await client.post(
+                        f"{api_base}/credit-report/v1",
+                        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                        json={"subject": {"subjectIdentifier": pi_address[:20]}},
+                    )
+                    if resp.is_success:
+                        d = resp.json()
+                        score_val = int(d.get("creditScore", {}).get("results", [{}])[0].get("score", pi_score))
+                        base.update({"score": score_val, "sandboxMode": False,
+                                     "integrationStatus": "LIVE — TransUnion TruVision",
+                                     "rawResponse": d})
+
+    except Exception as exc:
+        print(f"[credit-engine] Bureau {bureau} live call error (using sandbox): {exc}")
+
+    return base
 
 # ─── Background feed threads ───────────────────────────────────────────────────
 
@@ -734,7 +953,7 @@ async def credit_report(pi_address: str) -> dict:
             "DEVELOPING"
         )
 
-        return {
+        report = {
             "piAddress":       pi_address,
             "piCreditScore":   pi_score,
             "compositeScore":  composite,
@@ -766,6 +985,17 @@ async def credit_report(pi_address: str) -> dict:
             ),
         }
 
+        # ⛓  Anchor the credit report hash to the Pi blockchain (non-blocking)
+        report_ref = f"CR-{pi_address[:12]}-{live['ledger']}"
+        anchor_memo = f"PiCredit report {pi_address[:16]} score={pi_score} ledger={live['ledger']}"
+        threading.Thread(
+            target=_anchor_to_chain,
+            args=(anchor_memo, report_ref, pi_address),
+            daemon=True,
+        ).start()
+
+        return report
+
     except Exception as exc:
         errors_total.inc()
         raise HTTPException(status_code=500, detail=str(exc))
@@ -790,6 +1020,41 @@ async def bureau_sync(req: BureauSyncReq) -> dict:
         "report":       report,
         "syncedAt":     datetime.now(timezone.utc).isoformat(),
     }
+
+@app.get("/api/credit/anchors")
+def list_anchors(pi_address: str = "") -> dict:
+    """
+    List all on-chain anchor records written to the Pi blockchain.
+    Pass ?pi_address=... to filter by address.
+
+    Each record contains:
+      - txHash: the actual Stellar transaction hash on Pi testnet
+      - ledger: the Pi ledger sequence number when recorded
+      - contentHash: SHA-256 of the credit event data (verifiable)
+      - horizonLink: direct URL to view the transaction on Pi Horizon
+
+    When ONCHAIN_ANCHOR_SEED is not configured, returns status and setup instructions.
+    """
+    with _anchor_lock:
+        records = list(_anchor_log)
+    if pi_address:
+        records = [r for r in records if r.get("piAddress") == pi_address]
+    return {
+        "anchorEnabled":   ANCHOR_ENABLED,
+        "totalAnchors":    len(records),
+        "records":         records,
+        "horizonBase":     HORIZON.rstrip("/"),
+        "network":         NETWORK,
+        "activationSteps": (
+            None if ANCHOR_ENABLED else [
+                "1. Generate keypair: python3 -c \"from stellar_sdk import Keypair; k=Keypair.random(); print(k.secret, k.public_key)\"",
+                "2. Fund it on testnet: curl https://friendbot.testnet2.minepi.com?addr=<PUBLIC_KEY>",
+                "3. Set env var in docker-compose: ONCHAIN_ANCHOR_SEED=S...",
+                "4. Restart credit-engine: docker restart triumph-credit-engine",
+            ]
+        ),
+    }
+
 
 @app.get("/api/credit/bureaus")
 def list_bureaus() -> dict:
@@ -1066,6 +1331,14 @@ async def nesara_file_repair(req: NesaraRepairReq) -> dict:
             "unverifiable negative credit item."
         ),
     }
+
+    # ⛓  Anchor NESARA case to Pi blockchain asynchronously
+    anchor_memo = f"TSNG-NESARA {req.disputeType.upper()} {req.piAddress[:16]} case={case_id[:24]}"
+    threading.Thread(
+        target=_anchor_to_chain,
+        args=(anchor_memo, case_id, req.piAddress),
+        daemon=True,
+    ).start()
 
 
 @app.get("/api/credit/nesara/case/{case_id}")
