@@ -295,7 +295,7 @@ export async function fetchAndDecrypt(
 
   if (error) throw error;
 
-  const ciphertext = (data as Record<string, string>)[column];
+  const ciphertext = (data as unknown as Record<string, string>)[column];
 
   // 2. Quantum-decrypt
   const plaintext = await quantumDecrypt(ciphertext, nonce, keyId);

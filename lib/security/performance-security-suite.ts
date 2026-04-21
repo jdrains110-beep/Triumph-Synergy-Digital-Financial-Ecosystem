@@ -663,7 +663,8 @@ class SuperiorSecurityManager extends EventEmitter {
       }
 
       // Decapsulate: use the KEM secret key + ciphertext to recover the shared secret
-      const { sharedSecret } = ml_kem768.decapsulate(cipherText, secretKey);
+      const decapsulated = ml_kem768.decapsulate(cipherText, secretKey);
+      const sharedSecret = (decapsulated as unknown as { sharedSecret: Uint8Array }).sharedSecret ?? (decapsulated as unknown as Uint8Array);
       const aesKey = sharedSecret.slice(0, 32);
 
       // Parse the encrypted data: first 12 bytes = IV, rest = AES-GCM ciphertext

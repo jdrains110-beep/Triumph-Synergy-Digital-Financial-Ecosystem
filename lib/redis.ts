@@ -25,7 +25,7 @@ function buildClient(): RedisClientType {
     url: REDIS_URL,
     socket: {
       reconnectStrategy: (retries: number) => Math.min(retries * 500, 5000),
-      pingInterval: 120_000, // keep-alive every 2 min (Redis timeout is 5 min)
+      keepAlive: true, // keep-alive socket (Redis timeout prevention)
     },
   }) as RedisClientType;
 

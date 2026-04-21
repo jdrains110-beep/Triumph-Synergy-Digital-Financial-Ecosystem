@@ -24,6 +24,14 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
   },
 
   /*
+   * For users with a Pi wallet linked
+   */
+  wallet: {
+    maxMessagesPerDay: 200,
+    availableChatModelIds: ["chat-model", "chat-model-reasoning"],
+  },
+
+  /*
    * TODO: For users with an account and a paid membership
    */
 };

@@ -74,7 +74,7 @@ export class DecentralizedStorage {
           "Content-Type": mimeType,
           "x-upsert": "true",
         },
-        body: data,
+        body: data instanceof Uint8Array ? data.buffer as ArrayBuffer : data,
       }
     );
 

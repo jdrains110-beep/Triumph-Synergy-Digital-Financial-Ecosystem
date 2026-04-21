@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const admin = getSupabaseAdmin();
     await logQuantumAudit(admin, {
       ...body,
-      ip_address: request.headers.get("x-forwarded-for") ?? request.ip ?? undefined,
+      ip_address: request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? undefined,
     });
 
     return NextResponse.json({ ok: true });
