@@ -270,9 +270,332 @@ function ServiceHealth({ health }: { health: Record<string, unknown> | null }) {
   );
 }
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
+// ─── Good Ole Boy Flag Card ───────────────────────────────────────────────
 
-type Tab = "monitor" | "analyze" | "report";
+function GobFlagCard({ flag }: { flag: GoodOleBoyFlag }) {
+  const typeLabel = flag.flagType.replace(/_/g, " ");
+  const borderColor = {
+    CRITICAL: "border-red-400 bg-red-50",
+    HIGH: "border-orange-400 bg-orange-50",
+    MODERATE: "border-yellow-400 bg-yellow-50",
+    LOW: "border-gray-300 bg-white",
+  }[flag.severity];
+  return (
+    <div className={`border-l-4 rounded-lg p-4 mb-3 ${borderColor}`}>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="font-bold text-sm text-gray-900">{typeLabel}</span>
+        <RiskBadge level={flag.severity} />
+        <span className="text-xs text-gray-400 ml-auto">{flag.caseIds.length} case(s)</span>
+      </div>
+      <p className="text-sm text-gray-800 mb-2">{flag.description}</p>
+      <p className="text-xs text-gray-500 italic mb-2">
+        <span className="font-semibold">Statistical basis:</span> {flag.statisticalBasis}
+      </p>
+      <div className="bg-white border border-blue-200 rounded p-2 text-xs text-blue-900">
+        <span className="font-semibold">Action required: </span>{flag.recommendedAction}
+      </div>
+    </div>
+  );
+}
+
+// ─── Actor Corruption Profile Card ──────────────────────────────────────
+
+function ActorProfileCard({ profile }: { profile: ActorCorruptionProfile }) {
+  const barColor = {
+    CRITICAL: "bg-red-600",
+    HIGH: "bg-orange-500",
+    MODERATE: "bg-yellow-500",
+    LOW: "bg-green-500",
+  }[profile.riskLevel];
+  return (
+    <div className="border rounded-xl p-4 bg-white shadow-sm mb-3">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <span className="font-bold text-gray-900">{profile.actorName}</span>
+          <span className="ml-2 text-xs text-gray-500">{profile.actorRole} • {profile.jurisdiction}</span>
+        </div>
+        <RiskBadge level={profile.riskLevel} />
+      </div>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex-1 bg-gray-200 rounded-full h-3">
+          <div
+            className={`h-3 rounded-full transition-all duration-500 ${barColor}`}
+            style={{ width: `${profile.corruptionScore}%` }}
+          />
+        </div>
+        <span className="text-sm font-bold text-gray-700">{profile.corruptionScore}/100</span>
+      </div>
+      <div className="grid grid-cols-4 gap-2 text-center text-xs mb-3">
+        <div className="bg-gray-50 rounded p-2"><div className="font-bold text-gray-800">{profile.caseCount}</div><div className="text-gray-500">Cases</div></div>
+        <div className="bg-red-50 rounded p-2"><div className="font-bold text-red-700">{profile.violationCount}</div><div className="text-gray-500">Violations</div></div>
+        <div className="bg-orange-50 rounded p-2"><div className="font-bold text-orange-700">{profile.wordVsWordCases}</div><div className="text-gray-500">Word vs. Word</div></div>
+        <div className="bg-blue-50 rounded p-2"><div className="font-bold text-blue-700">{Math.round(profile.dismissalRate * 100)}%</div><div className="text-gray-500">Dismissal Rate</div></div>
+      </div>
+      {profile.recommendedActions.length > 0 && (
+        <div className="space-y-1">
+          {profile.recommendedActions.map((a, i) => (
+            <div key={i} className="text-xs bg-yellow-50 border border-yellow-200 rounded px-2 py-1 text-yellow-900">⚠️ {a}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Historical Review Panel ───────────────────────────────────────────
+
+const DEMO_HISTORICAL_CASES: Case[] = [
+  {
+    id: "HIS-2023-001", caseNumber: "2023-CF-00245", title: "State v. Marcus Williams",
+    jurisdiction: "Florida — 4th Judicial Circuit", court: "Duval County Circuit Court",
+    filedAt: "2023-03-12T00:00:00Z", status: "CLOSED",
+    narrative: "On or about March 8, 2023, Officer Johnson reported that the defendant was observed in suspicious circumstances near a convenience store. The defendant is a brazen predator who clearly had intent to rob. No camera footage was obtained.",
+    charges: [{ id: "H1C1", statute: "F.S. § 812.013(2)(c)", description: "Robbery", category: "FELONY", maxSentenceYears: 15, filedAt: "2023-03-12T00:00:00Z", relatedActId: "H1A1", elements: ["force", "taking", "property of another"], supportingEvidenceIds: [] }],
+    evidence: [{ id: "H1E1", type: "TESTIMONIAL", description: "Officer Johnson testimony", submittedBy: "PROSECUTION", submittedAt: "2023-03-12T00:00:00Z", authenticated: true, chainOfCustodyIntact: true, exculpatoryFlag: false }],
+    parties: [
+      { role: "DEFENDANT", id: "D-WIL", name: "Marcus Williams" },
+      { role: "PROSECUTOR", id: "P-DAV", name: "Rebecca Davis", barNumber: "FL-BAR-55512", jurisdiction: "4th Circuit" },
+      { role: "WITNESS", id: "O-JOH", name: "Officer T. Johnson", jurisdiction: "Jacksonville PD" },
+      { role: "JUDGE", id: "J-HAR", name: "Hon. K. Harrison", jurisdiction: "4th Judicial Circuit" },
+    ],
+    precedentCases: [],
+  },
+  {
+    id: "HIS-2023-002", caseNumber: "2023-CF-00389", title: "State v. Darnell Brown",
+    jurisdiction: "Florida — 4th Judicial Circuit", court: "Duval County Circuit Court",
+    filedAt: "2023-07-19T00:00:00Z", status: "FLAGGED",
+    narrative: "On or about July 15, 2023, Officer Johnson observed the defendant in suspicious circumstances near a convenience store. The defendant is a cold-blooded menace to society with no remorse. No camera footage was available.",
+    charges: [
+      { id: "H2C1", statute: "F.S. § 812.013(2)(c)", description: "Robbery", category: "FELONY", maxSentenceYears: 15, filedAt: "2023-07-19T00:00:00Z", relatedActId: "H2A1", elements: ["force", "taking", "property of another"], supportingEvidenceIds: [] },
+      { id: "H2C2", statute: "F.S. § 784.021(1)(a)", description: "Aggravated Assault", category: "FELONY", maxSentenceYears: 5, filedAt: "2023-07-19T00:00:00Z", relatedActId: "H2A1", elements: ["intent", "threat", "deadly weapon"], supportingEvidenceIds: [] },
+    ],
+    evidence: [{ id: "H2E1", type: "TESTIMONIAL", description: "Officer Johnson testimony", submittedBy: "PROSECUTION", submittedAt: "2023-07-19T00:00:00Z", authenticated: true, chainOfCustodyIntact: true, exculpatoryFlag: false }],
+    parties: [
+      { role: "DEFENDANT", id: "D-BRN", name: "Darnell Brown" },
+      { role: "PROSECUTOR", id: "P-DAV", name: "Rebecca Davis", barNumber: "FL-BAR-55512", jurisdiction: "4th Circuit" },
+      { role: "WITNESS", id: "O-JOH", name: "Officer T. Johnson", jurisdiction: "Jacksonville PD" },
+      { role: "JUDGE", id: "J-HAR", name: "Hon. K. Harrison", jurisdiction: "4th Judicial Circuit" },
+    ],
+    precedentCases: [],
+  },
+  {
+    id: "HIS-2024-003", caseNumber: "2024-CF-00112", title: "State v. Anthony Reed",
+    jurisdiction: "Florida — 4th Judicial Circuit", court: "Duval County Circuit Court",
+    filedAt: "2024-02-08T00:00:00Z", status: "FILED",
+    narrative: "On or about February 5, 2024, Officer Johnson witnessed the defendant near a convenience store in suspicious circumstances. The defendant is clearly guilty of predatory behavior and a vicious criminal. Bodycam was malfunctioning at the time.",
+    charges: [
+      { id: "H3C1", statute: "F.S. § 812.013(2)(c)", description: "Robbery", category: "FELONY", maxSentenceYears: 15, filedAt: "2024-02-08T00:00:00Z", relatedActId: "H3A1", elements: ["force", "taking", "property of another"], supportingEvidenceIds: [] },
+      { id: "H3C2", statute: "F.S. § 812.013(2)(c)", description: "Robbery (second count)", category: "FELONY", maxSentenceYears: 15, filedAt: "2024-02-08T00:00:00Z", relatedActId: "H3A1", elements: ["force", "taking", "property of another"], supportingEvidenceIds: [] },
+    ],
+    evidence: [],
+    parties: [
+      { role: "DEFENDANT", id: "D-REED", name: "Anthony Reed" },
+      { role: "PROSECUTOR", id: "P-DAV", name: "Rebecca Davis", barNumber: "FL-BAR-55512", jurisdiction: "4th Circuit" },
+      { role: "WITNESS", id: "O-JOH", name: "Officer T. Johnson", jurisdiction: "Jacksonville PD" },
+      { role: "JUDGE", id: "J-HAR", name: "Hon. K. Harrison", jurisdiction: "4th Judicial Circuit" },
+    ],
+    precedentCases: [],
+  },
+  {
+    id: "HIS-2025-004", caseNumber: "2025-CF-00076", title: "State v. Kevin Price",
+    jurisdiction: "Florida — 4th Judicial Circuit", court: "Duval County Circuit Court",
+    filedAt: "2025-01-22T00:00:00Z", status: "UNDER_REVIEW",
+    narrative: "On or about January 19, 2025, Officer Johnson stated that defendant Kevin Price was observed near a convenience store acting in obviously suspicious ways. Price is undeniably a repeat threat to this neighborhood. Dashcam footage was unavailable.",
+    charges: [{ id: "H4C1", statute: "F.S. § 843.01", description: "Resisting Officer with Violence", category: "FELONY", maxSentenceYears: 5, filedAt: "2025-01-22T00:00:00Z", relatedActId: "H4A1", elements: ["knowingly", "resists", "officer", "with violence"], supportingEvidenceIds: [] }],
+    evidence: [{ id: "H4E1", type: "TESTIMONIAL", description: "Officer Johnson sworn statement", submittedBy: "PROSECUTION", submittedAt: "2025-01-22T00:00:00Z", authenticated: true, chainOfCustodyIntact: true, exculpatoryFlag: false }],
+    parties: [
+      { role: "DEFENDANT", id: "D-PRC", name: "Kevin Price" },
+      { role: "PROSECUTOR", id: "P-DAV", name: "Rebecca Davis", barNumber: "FL-BAR-55512", jurisdiction: "4th Circuit" },
+      { role: "WITNESS", id: "O-JOH", name: "Officer T. Johnson", jurisdiction: "Jacksonville PD" },
+      { role: "JUDGE", id: "J-HAR", name: "Hon. K. Harrison", jurisdiction: "4th Judicial Circuit" },
+    ],
+    precedentCases: [],
+  },
+];
+
+function HistoricalReviewPanel() {
+  const [yearsBack, setYearsBack] = React.useState<1 | 2 | 3 | 4 | 5>(5);
+  const [jurisdiction, setJurisdiction] = React.useState("Florida — 4th Judicial Circuit");
+  const [loading, setLoading] = React.useState(false);
+  const [result, setResult] = React.useState<HistoricalReviewReport | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const [activeSection, setActiveSection] = React.useState<"alerts" | "flags" | "actors" | "cases">("alerts");
+
+  async function runReview() {
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch("/api/judicial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "historical", cases: DEMO_HISTORICAL_CASES, jurisdiction, yearsBack }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setResult(await res.json());
+    } catch (e) { setError((e as Error).message); }
+    finally { setLoading(false); }
+  }
+
+  const systemicColors: Record<string, string> = {
+    CRITICAL: "bg-red-700", HIGH: "bg-orange-600", MODERATE: "bg-yellow-600", LOW: "bg-green-700",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl border p-5 shadow-sm">
+        <h2 className="text-lg font-bold text-gray-900 mb-1">🔍 Historical Judicial Review — Good Ole Boy Detector</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Audit every case from the past 1–5 years in a jurisdiction. Cross-references all cases to expose
+          recurring officer-prosecutor networks, word-vs-word prosecutions, evidence deserts, rubber-stamp
+          charging, and judicial bias patterns invisible when cases are reviewed one-by-one.
+        </p>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Jurisdiction</label>
+            <input type="text" value={jurisdiction} onChange={(e) => setJurisdiction(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Years to review (1–5)</label>
+            <div className="flex gap-2">
+              {([1, 2, 3, 4, 5] as const).map((y) => (
+                <button key={y} onClick={() => setYearsBack(y)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${
+                    yearsBack === y ? "bg-blue-700 text-white border-blue-700" : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100"
+                  }`}
+                >{y}y</button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs text-amber-800 mb-4">
+          <span className="font-bold">⚠️ Demo Mode:</span> 4 sample cases from Florida 4th Judicial Circuit (2023–2025) demonstrating Officer T. Johnson + Prosecutor Rebecca Davis recurring pattern across all cases with zero physical evidence.
+        </div>
+        <button onClick={runReview} disabled={loading}
+          className="w-full bg-red-700 text-white py-3 rounded-lg font-bold text-sm hover:bg-red-800 disabled:opacity-50 transition">
+          {loading ? "Scanning case history…" : `🔎 Run ${yearsBack}-Year Judicial Corruption Audit`}
+        </button>
+      </div>
+
+      {error && <div className="bg-red-50 border border-red-300 text-red-800 rounded p-4 text-sm">{error}</div>}
+
+      {result && (
+        <div className="space-y-4">
+          <div className={`rounded-xl p-5 text-white ${systemicColors[result.systemicRiskLevel] ?? "bg-gray-600"}`}>
+            <div className="flex items-center gap-4">
+              <span className="text-4xl">
+                {result.systemicRiskLevel === "CRITICAL" ? "🚨" : result.systemicRiskLevel === "HIGH" ? "⚠️" : result.systemicRiskLevel === "MODERATE" ? "🔔" : "✅"}
+              </span>
+              <div className="flex-1">
+                <p className="font-bold text-lg">Systemic Risk: {result.systemicRiskLevel}</p>
+                <p className="text-sm opacity-90">{result.summary}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-5 gap-3">
+            {[
+              { label: "Cases Reviewed", value: result.totalCasesReviewed, color: "text-blue-700" },
+              { label: "With Violations", value: result.casesWithViolations, color: "text-orange-700" },
+              { label: "Dismissal Rec.", value: result.casesRecommendedDismissal, color: "text-red-700" },
+              { label: "GOB Flags", value: result.goodOleBoyFlags.length, color: "text-purple-700" },
+              { label: "Critical Actors", value: result.criticalActors.length, color: "text-red-700" },
+            ].map((s) => (
+              <div key={s.label} className="bg-white rounded-xl border p-3 text-center shadow-sm">
+                <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+                <div className="text-xs text-gray-500 mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            {(["alerts", "flags", "actors", "cases"] as const).map((s) => (
+              <button key={s} onClick={() => setActiveSection(s)}
+                className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                  activeSection === s ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}>
+                {s === "alerts" && `📢 Public Alerts (${result.publicInterestAlerts.length})`}
+                {s === "flags" && `🚩 GOB Flags (${result.goodOleBoyFlags.length})`}
+                {s === "actors" && `👤 Actor Profiles (${result.actorProfiles.length})`}
+                {s === "cases" && `⚖️ Case Reports (${result.individualReports.length})`}
+              </button>
+            ))}
+          </div>
+
+          {activeSection === "alerts" && (
+            <div className="space-y-3">
+              {result.publicInterestAlerts.length === 0
+                ? <div className="bg-green-50 border border-green-300 rounded-lg p-4 text-green-800 text-sm">No public interest alerts generated.</div>
+                : result.publicInterestAlerts.map((alert, i) => (
+                    <div key={i} className="bg-white border rounded-xl p-4 shadow-sm text-sm text-gray-800">{alert}</div>
+                  ))
+              }
+            </div>
+          )}
+          {activeSection === "flags" && (
+            <div>
+              {result.goodOleBoyFlags.length === 0
+                ? <div className="bg-green-50 border border-green-300 rounded-lg p-4 text-green-800 text-sm">No systemic patterns detected.</div>
+                : result.goodOleBoyFlags.map((flag, i) => <GobFlagCard key={i} flag={flag} />)
+              }
+            </div>
+          )}
+          {activeSection === "actors" && (
+            <div>
+              {result.actorProfiles.length === 0
+                ? <div className="bg-gray-50 border rounded-lg p-4 text-gray-600 text-sm">No actor profiles generated.</div>
+                : result.actorProfiles.map((profile, i) => <ActorProfileCard key={i} profile={profile} />)
+              }
+            </div>
+          )}
+          {activeSection === "cases" && (
+            <div className="space-y-3">
+              {result.individualReports.map((r, i) => (
+                <div key={i} className="bg-white border rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-sm text-gray-900">{r.caseId}</span>
+                    <div className="flex items-center gap-2">
+                      <RiskBadge level={r.riskLevel} />
+                      <span className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                        r.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL" ? "bg-red-100 text-red-800"
+                        : r.overallVerdict === "VIOLATIONS_FOUND" ? "bg-orange-100 text-orange-800"
+                        : "bg-green-100 text-green-800"
+                      }`}>{r.overallVerdict.replace(/_/g, " ")}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600">{r.summary}</p>
+                  {r.chargeViolations.length > 0 && (
+                    <p className="text-xs text-orange-700 mt-1 font-semibold">
+                      {r.chargeViolations.length} violation(s): {r.chargeViolations.map((v) => v.violationType.replace(/_/g, " ")).join(" | ")}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(result.wordVsWordCases.length > 0 || result.evidenceDesertCases.length > 0) && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-orange-50 border border-orange-300 rounded-xl p-4">
+                <p className="font-bold text-orange-800 text-sm mb-1">🗣️ Word vs. Word Cases ({result.wordVsWordCases.length})</p>
+                <p className="text-xs text-orange-700 mb-2">Officer testimony was the ONLY prosecution evidence — zero objective corroboration.</p>
+                {result.wordVsWordCases.map((id) => <span key={id} className="block text-xs font-mono text-orange-800">{id}</span>)}
+              </div>
+              <div className="bg-red-50 border border-red-300 rounded-xl p-4">
+                <p className="font-bold text-red-800 text-sm mb-1">🏜️ Evidence Desert Cases ({result.evidenceDesertCases.length})</p>
+                <p className="text-xs text-red-700 mb-2">Zero authenticated physical, documentary, or digital evidence of any kind.</p>
+                {result.evidenceDesertCases.map((id) => <span key={id} className="block text-xs font-mono text-red-800">{id}</span>)}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Dashboard ─────────────────────────────────────────────────────────
+
+type Tab = "monitor" | "analyze" | "history";
 
 export default function JudicialDashboard() {
   const [tab, setTab] = useState<Tab>("monitor");
