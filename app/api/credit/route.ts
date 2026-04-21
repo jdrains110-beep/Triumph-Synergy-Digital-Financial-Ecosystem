@@ -5,6 +5,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/security/api-guard";
 import {
   type CreditBureau,
   creditBureauEngine,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/credit-reporting/credit-bureau-integration";
 
 export async function POST(request: NextRequest) {
+  return requireAuth(request, async (request, _session) => {
   try {
     const body = await request.json();
     const { action } = body;
@@ -224,6 +226,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  return requireAuth(request, async (request, _session) => {
   const searchParams = request.nextUrl.searchParams;
   const disputeId = searchParams.get("disputeId");
 
@@ -258,5 +261,6 @@ export async function GET(request: NextRequest) {
       description: "Report Pi Network transactions to build credit history",
       scoreImpact: "Up to +20 points from verified Pi activity",
     },
+  });
   });
 }

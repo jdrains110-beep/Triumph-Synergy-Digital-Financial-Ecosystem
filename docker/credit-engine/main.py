@@ -36,6 +36,7 @@ from typing import Any, Literal
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, field_validator
 import redis as redis_lib
@@ -62,6 +63,8 @@ FOUNDER_NAME      = os.getenv("TRIUMPH_FOUNDER_NAME",         "Jeremiah Joel Dra
 FOUNDER_ORG       = os.getenv("TRIUMPH_FOUNDATION_ORG",       "Triumph-Synergy Digital Financial Ecosystem")
 FOUNDER_AUTHORITY = os.getenv("TRIUMPH_FOUNDER_AUTHORITY",    "owner-approved")
 FOUNDER_ADDRESS   = os.getenv("TRIUMPH_FOUNDER_ADDRESS",      "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
+# Payment wallet — all Pi fee receipts go here (mainnet + testnet)
+PAYMENT_WALLET    = os.getenv("PAYMENT_WALLET_ADDRESS",        "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF")
 FOUNDER_TITLE     = os.getenv("TRIUMPH_FOUNDER_TITLE",        "Sovereign Owner and Creator")
 FOUNDER_SOVEREIGN = os.getenv("TRIUMPH_FOUNDER_SOVEREIGN_STATUS", "NESARA_GESARA_COMPLIANT")
 GLOBAL_PROVIDERS = [
@@ -745,6 +748,27 @@ app = FastAPI(
     title="Triumph Synergy Credit Engine",
     description="Superior PiCredit Score™ system — digital-physical bridge connecting Pi Network to Equifax, Experian, TransUnion, FICO, VantageScore",
     version="1.0.0",
+)
+
+_CORS_ORIGINS = [
+    o.strip() for o in
+    os.getenv("CORS_ALLOWED_ORIGINS",
+              "https://triumphsynergy0576.pinet.com,"
+              "https://triumphsynergy7386.pinet.com,"
+              "https://triumphsynergy1991.pinet.com,"
+              "https://triumph-synergy.vercel.app,"
+              "https://triumph-synergy-testnet.vercel.app,"
+              "http://localhost:3000,"
+              "http://127.0.0.1:3000").split(",")
+    if o.strip()
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization", "X-Pi-Address"],
 )
 
 # ─── Request bodies ────────────────────────────────────────────────────────────
@@ -2011,6 +2035,8 @@ async def fcra_superior_dispute(req: FcraDisputeReq) -> dict:
         "anchored":          req.anchored,
         "piLedger":          live["ledger"],
         "onChainRef":        case["onChainRef"],
+        "paymentWallet":     PAYMENT_WALLET,
+        "disputeFee":        {"amount": 1.0, "currency": "Pi", "recipient": PAYMENT_WALLET},
         "legislativeStack":  "EO 14178 + EO 14331 + EO 14233 + H.R.3633 + H.R.1919 + CFPB deactivation + IRS DeFi rules",
         "superiorityFactors": [
             "CFPB enforcement suspended — bureaus cannot defer to agency protection",

@@ -18,7 +18,8 @@ import { makeIntegrityLink } from "./types";
 
 // ─── HQ Constants ─────────────────────────────────────────────────────────────
 
-export const HQ_PI_ADDRESS    = "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";
+export const HQ_PI_ADDRESS        = "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"; // Central/Pi Node address
+export const PAYMENT_WALLET_ADDRESS = "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF"; // Mainnet & Testnet payment wallet
 export const HQ_PI_USERNAME   = "triumph-synergy";
 export const HQ_DOMAIN        = "triumph-synergy.pi";
 export const HQ_NETWORK       = "mainnet" as const;
