@@ -176,6 +176,7 @@ export interface JudicialAnalysisReport {
   overallVerdict: "PROCEEDING_PROPER" | "VIOLATIONS_FOUND" | "CASE_RECOMMENDED_FOR_DISMISSAL";
   summary: string;
   recommendedActions: string[];
+  loopholeSummary?: LoopholeSummary;  // Populated when loophole detection is run
 }
 
 // ─── Good Ole Boy / Systemic Corruption Detection ─────────────────────────────
@@ -258,4 +259,69 @@ export interface HistoricalReviewReport {
   publicInterestAlerts: string[];             // Plain-English alerts for citizens
   evidenceDesertCases: string[];              // Case IDs that had zero physical evidence
   wordVsWordCases: string[];                  // Case IDs that were purely he-said/she-said
+  loopholeReports: LoopholeReport[];          // Loopholes detected across all cases
+}
+
+// ─── Loophole Detection ───────────────────────────────────────────────────────
+
+/**
+ * LoopholeCategory:
+ *   DEFENSE  — exploitable by the defense to dismiss charges, exclude evidence,
+ *              or win on appeal.
+ *   PROSECUTION — exploitable by a biased prosecution to unfairly harm the
+ *                 defendant (abuse of procedural technicalities, overcharging tricks,
+ *                 evidence laundering, etc.)
+ */
+export type LoopholeCategory = "DEFENSE" | "PROSECUTION";
+
+export type LoopholeType =
+  // ── Defense-side loopholes (defendant's escape routes) ────────────────────
+  | "SPEEDY_TRIAL_VIOLATION"        // Clock expired — 6th Amendment / state rule
+  | "STATUTE_OF_LIMITATIONS"        // Charge filed after statutory deadline
+  | "FRUIT_OF_POISONOUS_TREE"       // Evidence obtained from illegal search/seizure
+  | "MIRANDA_VIOLATION"             // Statements taken without Miranda warnings
+  | "CHAIN_OF_CUSTODY_BREAK"        // Evidence chain broken — inadmissible
+  | "EXCULPATORY_SUPPRESSION"       // Brady violation: prosecution hid evidence
+  | "DOUBLE_JEOPARDY"               // Defendant already tried for same offence
+  | "VAGUENESS_CHALLENGE"           // Statute too vague to give fair notice
+  | "ENTRAPMENT"                    // Government induced the alleged crime
+  | "VINDICTIVE_PROSECUTION_CLAIM"  // Charges filed in retaliation for protected act
+  | "SELECTIVE_PROSECUTION_EQUAL_PROTECTION" // Equal Protection clause violation
+  | "INEFFECTIVE_COUNSEL_STRICKLAND"  // Strickland standard met — new trial right
+  | "PLEA_COERCION"                 // Guilty plea was involuntary / coerced
+  | "INSUFFICIENT_EVIDENCE_JML"     // Judgment as a matter of law — no rational jury
+  | "MULTIPLICITY_CHALLENGE"        // Double punishment for single act
+  // ── Prosecution-side loopholes (abuses prosecutors exploit) ───────────────
+  | "OVERCHARGE_TO_COERCE_PLEA"     // Stack charges to pressure plea to lesser count
+  | "DELAYED_CHARGING"              // Delay filing to keep defendant in limbo
+  | "EVIDENCE_LAUNDERING"           // Illegal evidence re-obtained through "clean" source
+  | "GRAND_JURY_OVERREACH"          // Grand jury used as discovery tool beyond its mandate
+  | "MATERIAL_WITNESS_DETENTION"    // Detaining witness as leverage
+  | "FORFEITURE_PRESSURE"           // Asset forfeiture before conviction to starve defense
+  | "BAIL_PUNISHMENT"               // Excessive bail used as pre-trial jailing mechanism
+  | "SUPERSEDING_INDICTMENT_ABUSE"; // Re-indicting after failed trial to circumvent acquittal
+
+export interface LoopholeReport {
+  loopholeId: string;
+  caseId: string;
+  loopholeType: LoopholeType;
+  category: LoopholeCategory;
+  severity: RiskLevel;
+  title: string;
+  description: string;
+  legalAuthority: string;           // Case law, statute, or constitutional provision
+  howToExploit: string;             // Defense: motions to file; Prosecution: how they abuse it
+  remedy: string;                   // What the court/legislature should do
+  detectedAt: string;               // ISO timestamp
+  automaticDismissalEligible: boolean; // True if this alone warrants dismissal
+}
+
+export interface LoopholeSummary {
+  caseId: string;
+  totalLoopholes: number;
+  defenseLoopholes: LoopholeReport[];   // Routes the defense can exploit to win
+  prosecutionLoopholes: LoopholeReport[]; // Abuses the prosecution is committing
+  automaticDismissalEligible: boolean;    // Any single loophole warrants dismissal
+  strongestDefenseMove: string;           // Plain-English best action for defendant
+  overallRisk: RiskLevel;
 }

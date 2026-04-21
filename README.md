@@ -81,34 +81,90 @@ GET  /api/credit/fcra/score-delta/{addr}   — Score recovery estimate (+up to 9
 
 > *"The courtroom is no longer a black box."*
 
-The **Triumph Synergy Superior Judicial Platform** is a real-time courtroom monitoring and legal transparency system that exposes judicial misconduct, charge stacking, evidence manipulation, and representation failures — anchored immutably to the Pi blockchain.
+The **Triumph Synergy Superior Judicial Platform** is a real-time courtroom monitoring, loophole detection, and systemic-corruption analysis system that exposes judicial misconduct, charge stacking, evidence manipulation, Good Ole Boy networks, and representation failures — anchored immutably to the Pi blockchain.
 
-### What It Does
+### Core Modules
 
 | Module | Function |
 |--------|----------|
 | **Charge Validator** | Detects charge stacking, double jeopardy, statute mismatch, and evidence-to-charge misalignment |
-| **Case Fact Analyzer** | Scores prosecution narrative bias, inflammatory language, and fact-to-evidence ratio |
-| **Representation Auditor** | Flags ineffective assistance of counsel, conflict of interest, and Brady violations |
-| **Transparency Ledger** | Immutable append-only audit trail of every courtroom action, anchored on-chain |
-| **Judicial Monitor** | Real-time risk scoring per case — LOW / MEDIUM / HIGH / CRITICAL |
+| **Case Fact Analyzer** | Scores prosecution narrative bias, inflammatory language, and fact-to-evidence ratio (0–100) |
+| **Representation Auditor** | Flags ineffective assistance of counsel (Strickland standard), conflict of interest, and Brady violations |
+| **Transparency Ledger** | Immutable SHA-256 hash-chained audit trail of every courtroom action — nothing can be hidden |
+| **Good Ole Boy Detector** | 9-algorithm systemic corruption scanner across multi-year case history |
+| **Historical Review Engine** | 1–5-year sliding window case batch analysis with cross-actor correlation |
+| **Loophole Detector** | 23-type two-sided loophole scanner: 15 defense escape routes + 8 prosecution abuse patterns |
 
-### Analysis Report Fields
+### Good Ole Boy Detector — 9 Detection Algorithms
+
+| Algorithm | What It Catches |
+|-----------|----------------|
+| `REPEAT_OFFICER_PROSECUTOR_PAIR` | Same cop + DA duo appears across multiple cases — coordinated targeting |
+| `WORD_VS_WORD_NO_EVIDENCE` | Officer testimony is the ONLY evidence — zero physical, digital, or documentary corroboration |
+| `RUBBER_STAMP_CHARGES` | 100% of officer-initiated charges filed without deviation — prosecutor never independent |
+| `ZERO_DISMISSED_CHARGES` | Prosecutor has NEVER dropped a charge for this officer — impossible if reviewing objectively |
+| `EVIDENCE_DESERT` | Cases proceed with zero authenticated physical, documentary, or digital evidence |
+| `ABOVE_THE_LAW_OFFICER` | Officer has prior misconduct flags yet keeps filing cases — zero accountability |
+| `PROSECUTOR_CONVICTION_OBSESSION` | Prosecutor never offers plea bargains or drops charges — conviction factory mentality |
+| `JUDICIAL_RUBBER_STAMP` | Judge has never suppressed evidence from this prosecutor — ex parte collusion pattern |
+| `COORDINATED_WITNESS_TESTIMONY` | Multiple officers give near-identical testimony in separate cases — scripted narratives |
+
+### Loophole Detector — 23 Loophole Types
+
+**Defense-side loopholes** (escape routes for the defendant):
+
+| Loophole | Legal Authority | Auto-Dismiss? |
+|----------|----------------|---------------|
+| Speedy Trial Violation | U.S. Const. amend. VI; Fla. R. Crim. P. 3.191; Barker v. Wingo | ✅ Yes |
+| Statute of Limitations Expired | Fla. Stat. § 775.15; 18 U.S.C. § 3282; Stogner v. California | ✅ Yes |
+| Fruit of the Poisonous Tree | Mapp v. Ohio; Wong Sun v. United States; U.S. Const. amend. IV | Partial |
+| Miranda Violation | Miranda v. Arizona; Dickerson v. United States | No |
+| Chain of Custody Break | Fed. R. Evid. 901; U.S. v. Lott | No |
+| Brady / Exculpatory Suppression | Brady v. Maryland; Giglio v. United States; Strickler v. Greene | ✅ Yes |
+| Double Jeopardy | U.S. Const. amend. V; Blockburger v. United States | ✅ Yes |
+| Insufficient Evidence (JML) | Jackson v. Virginia; Fla. R. Crim. P. 3.380; Fed. R. Crim. P. 29 | ✅ Yes |
+| Multiplicity Challenge | Blockburger v. United States; Ball v. United States; Fla. Stat. § 775.021 | No |
+| Vindictive Prosecution | Blackledge v. Perry; North Carolina v. Pearce | No |
+| Ineffective Counsel (Strickland) | Gideon v. Wainwright; Strickland v. Washington | No |
+
+**Prosecution-side loopholes** (systemic abuses prosecutors exploit):
+
+| Loophole | What It Exposes |
+|----------|----------------|
+| Overcharge to Coerce Plea | 30+ year exposure from minor conduct — terrorizing defendants into guilty pleas |
+| Delayed Charging | Keeping defendant in legal limbo for 365+ days to drain resources and force plea |
+| Bail as Punishment | Setting cash bail on misdemeanors with no flight risk — jailing the poor, not the dangerous |
+| Asset Forfeiture Pressure | RICO seizure before conviction to starve the defense of legal fees (Luis v. United States) |
+| Superseding Indictment Abuse | Enhanced charges filed after appeal — punishing defendants who win on appeal |
+
+### Analysis Report
 
 Every submitted case returns a `JudicialAnalysisReport` containing:
 - **`chargeViolations[]`** — Each overcharge, stacking violation, or unsupported charge with statute citation
 - **`factScore`** — Prosecution narrative credibility score (0–100)
-- **`representationAudit`** — Defense counsel performance assessment
-- **`riskLevel`** — `LOW | MEDIUM | HIGH | CRITICAL`
-- **`transparencyLedger`** — Full immutable event log
-- **`recommendations[]`** — Specific legal remedies and motions to file
+- **`representationAudit`** — Defense counsel performance under Strickland standard
+- **`loopholeSummary`** — All 23-type loophole scan results, strongest defense move, auto-dismiss eligibility
+- **`riskLevel`** — `LOW | MODERATE | HIGH | CRITICAL`
+- **`transparencyEvents`** — Full SHA-256 hash-chained immutable event log
+- **`recommendedActions[]`** — Specific motions to file, legal remedies, appeal grounds
+
+### Historical Review Report
+
+Batch analysis via `auditHistoricalCases()` returns a `HistoricalReviewReport` containing:
+- **`goodOleBoyFlags[]`** — Cross-case systemic corruption flags (9 algorithms)
+- **`actorProfiles[]`** — Corruption score (0–100) per judge, prosecutor, officer, public defender
+- **`loopholeReports[]`** — All loopholes detected across every case in the review window
+- **`publicInterestAlerts[]`** — Plain-English citizen-readable alerts about dismissal-eligible cases
+- **`evidenceDesertCases[]`** — Case IDs where prosecution had zero authenticated evidence
+- **`wordVsWordCases[]`** — Case IDs where officer testimony was the ONLY prosecution evidence
 
 ### API Endpoints
 
 ```
-POST /api/judicial           — Analyze a single case (returns full JudicialAnalysisReport)
-POST /api/judicial           — Batch analyze { cases: Case[], mode: "historical" }
-GET  /api/judicial?caseId=   — Retrieve stored analysis by case ID
+POST /api/judicial                       — Analyze a single case (returns JudicialAnalysisReport)
+POST /api/judicial { mode: "historical", cases: [], jurisdiction, yearsBack }
+                                          — Full historical corruption audit (returns HistoricalReviewReport)
+GET  /api/judicial?caseId=               — Retrieve stored analysis by case ID
 ```
 
 ### Supported Jurisdictions
@@ -116,28 +172,25 @@ GET  /api/judicial?caseId=   — Retrieve stored analysis by case ID
 - Federal statutes (18 U.S.C. §§ 1343, 1962 RICO, 1956 money laundering)
 - Extensible to all 50 states
 
-### Example: Florida Charge Stacking Detection
+### Demo: Florida 4th Circuit — Officer T. Johnson + Prosecutor Rebecca Davis
 
-```json
-{
-  "caseNumber": "2026-CF-00001",
-  "charges": [
-    { "statute": "F.S. § 817.034(4)(a)1", "description": "Communications Fraud >$50K" },
-    { "statute": "F.S. § 817.034(4)(a)2", "description": "Communications Fraud >$20K" },
-    { "statute": "F.S. § 812.014(2)(b)",  "description": "Grand Theft >$20K" },
-    { "statute": "F.S. § 895.03(3)",       "description": "RICO — Pattern of Racketeering" }
-  ]
-}
 ```
-**Result:** Charge stacking violation flagged — single $5,000 transfer charged as 4 felonies totaling 90 years maximum. Risk level: **CRITICAL**.
+4 cases (2023–2025), same officer, same prosecutor, same judge
+→ Zero physical evidence across ALL cases
+→ Officer testimony = ONLY prosecution evidence every time
+→ GOB Flags: WORD_VS_WORD_NO_EVIDENCE, EVIDENCE_DESERT, REPEAT_OFFICER_PROSECUTOR_PAIR
+→ Actor Profile: Rebecca Davis — Corruption Score 74/100 — HIGH RISK
+→ Loopholes: INSUFFICIENT_EVIDENCE_JML (auto-dismiss), MULTIPLICITY_CHALLENGE
+→ 3 of 4 cases recommended for dismissal
+```
 
 ### Live Dashboard
 
 Navigate to `/judicial` in the Pi Browser or web app to access the real-time courtroom monitoring dashboard:
-- Submit any case for instant analysis
-- View charge violation breakdowns
-- See the immutable transparency ledger
-- Download full judicial analysis reports
+- **Florida Monitor tab** — Live microservice status, circuit map, anti-railroading protections
+- **Case Analysis tab** — Submit any case for instant analysis including full loophole scan
+- **Historical Review tab** — Run 1–5 year corruption audits with GOB detection, actor profiles, and loophole breakdown
+- Download full judicial analysis reports in JSON
 
 ### Microservice
 

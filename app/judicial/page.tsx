@@ -11,6 +11,8 @@ import type {
   GoodOleBoyFlag,
   ActorCorruptionProfile,
   HistoricalReviewReport,
+  LoopholeSummary,
+  LoopholeReport,
 } from "@/lib/judicial/types";
 
 // ─── Demo scaffold case (Florida) ──────────────────────────────────────────────
@@ -257,6 +259,104 @@ function FloridaMonitorPanel({ data }: { data: FloridaMonitorData | null; }) {
   );
 }
 
+// ─── Loophole Panel ──────────────────────────────────────────────────────────
+
+function LoopholeCard({ lh }: { lh: LoopholeReport }) {
+  const isDefense = lh.category === "DEFENSE";
+  const borderColor = {
+    CRITICAL: isDefense ? "border-green-600 bg-green-50" : "border-red-500 bg-red-50",
+    HIGH: isDefense ? "border-emerald-500 bg-emerald-50" : "border-orange-400 bg-orange-50",
+    MODERATE: isDefense ? "border-teal-400 bg-teal-50" : "border-yellow-400 bg-yellow-50",
+    LOW: "border-gray-300 bg-white",
+  }[lh.severity];
+  return (
+    <div className={`border-l-4 rounded-lg p-4 mb-3 ${borderColor}`}>
+      <div className="flex items-start gap-2 mb-1">
+        <span className="text-lg">{isDefense ? "🛡️" : "⚠️"}</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-bold text-sm text-gray-900">{lh.title}</span>
+            <RiskBadge level={lh.severity} />
+            {lh.automaticDismissalEligible && (
+              <span className="bg-red-700 text-white text-xs px-2 py-0.5 rounded font-bold animate-pulse">AUTO-DISMISS ELIGIBLE</span>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mt-0.5">{lh.loopholeType.replace(/_/g, " ")} &mdash; {lh.category} LOOPHOLE</p>
+        </div>
+      </div>
+      <p className="text-sm text-gray-800 mb-2">{lh.description}</p>
+      <p className="text-xs text-gray-500 italic mb-2">
+        <span className="font-semibold">Legal Authority: </span>{lh.legalAuthority}
+      </p>
+      <div className="bg-white border border-blue-200 rounded p-3 text-xs text-blue-900 mb-2">
+        <span className="font-bold">ACTION: </span>{lh.howToExploit}
+      </div>
+      <div className="bg-gray-50 border border-gray-200 rounded p-2 text-xs text-gray-700">
+        <span className="font-semibold">Remedy: </span>{lh.remedy}
+      </div>
+    </div>
+  );
+}
+
+function LoopholePanel({ summary }: { summary: LoopholeSummary }) {
+  const [side, setSide] = React.useState<"defense" | "prosecution">("defense");
+  return (
+    <div className="bg-white rounded-xl border shadow-sm p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-gray-900">⚖️ Loophole Detection ({summary.totalLoopholes} found)</h2>
+        {summary.automaticDismissalEligible && (
+          <span className="bg-red-700 text-white text-xs px-3 py-1 rounded-full font-bold animate-pulse">
+            🚨 AUTOMATIC DISMISSAL ELIGIBLE
+          </span>
+        )}
+      </div>
+
+      {/* Strongest move */}
+      <div className="bg-emerald-50 border border-emerald-300 rounded-lg p-3 mb-4">
+        <p className="text-xs font-bold text-emerald-800 mb-1">💡 STRONGEST DEFENSE MOVE</p>
+        <p className="text-sm text-emerald-900">{summary.strongestDefenseMove}</p>
+      </div>
+
+      {/* Side toggle */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setSide("defense")}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+            side === "defense" ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          🛡️ Defense Loopholes ({summary.defenseLoopholes.length})
+        </button>
+        <button
+          onClick={() => setSide("prosecution")}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+            side === "prosecution" ? "bg-red-700 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          ⚠️ Prosecution Abuses ({summary.prosecutionLoopholes.length})
+        </button>
+      </div>
+
+      {side === "defense" && (
+        <div>
+          {summary.defenseLoopholes.length === 0
+            ? <div className="bg-gray-50 border rounded p-4 text-gray-500 text-sm">No defense loopholes detected for this case.</div>
+            : summary.defenseLoopholes.map((lh, i) => <LoopholeCard key={i} lh={lh} />)
+          }
+        </div>
+      )}
+      {side === "prosecution" && (
+        <div>
+          {summary.prosecutionLoopholes.length === 0
+            ? <div className="bg-gray-50 border rounded p-4 text-gray-500 text-sm">No prosecution abuse patterns detected.</div>
+            : summary.prosecutionLoopholes.map((lh, i) => <LoopholeCard key={i} lh={lh} />)
+          }
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Service health indicator ─────────────────────────────────────────────────
 
 function ServiceHealth({ health }: { health: Record<string, unknown> | null }) {
@@ -419,7 +519,7 @@ function HistoricalReviewPanel() {
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<HistoricalReviewReport | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [activeSection, setActiveSection] = React.useState<"alerts" | "flags" | "actors" | "cases">("alerts");
+  const [activeSection, setActiveSection] = React.useState<"alerts" | "flags" | "actors" | "cases" | "loopholes">("alerts");
 
   async function runReview() {
     setLoading(true); setError(null);
@@ -508,7 +608,7 @@ function HistoricalReviewPanel() {
           </div>
 
           <div className="flex gap-2">
-            {(["alerts", "flags", "actors", "cases"] as const).map((s) => (
+            {(["alerts", "flags", "actors", "cases", "loopholes"] as const).map((s) => (
               <button key={s} onClick={() => setActiveSection(s)}
                 className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
                   activeSection === s ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -517,6 +617,7 @@ function HistoricalReviewPanel() {
                 {s === "flags" && `🚩 GOB Flags (${result.goodOleBoyFlags.length})`}
                 {s === "actors" && `👤 Actor Profiles (${result.actorProfiles.length})`}
                 {s === "cases" && `⚖️ Case Reports (${result.individualReports.length})`}
+                {s === "loopholes" && `🔓 Loopholes (${result.loopholeReports.length})`}
               </button>
             ))}
           </div>
@@ -570,6 +671,15 @@ function HistoricalReviewPanel() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {activeSection === "loopholes" && (
+            <div className="space-y-3">
+              {result.loopholeReports.length === 0
+                ? <div className="bg-green-50 border border-green-300 rounded-lg p-4 text-green-800 text-sm">No loopholes detected across any reviewed case.</div>
+                : result.loopholeReports.map((lh, i) => <LoopholeCard key={i} lh={lh} />)
+              }
             </div>
           )}
 
@@ -917,6 +1027,11 @@ export default function JudicialDashboard() {
                       {report.representationAudit.recommendedRemedy}
                     </div>
                   </div>
+                )}
+
+                {/* Loophole Detection */}
+                {report.loopholeSummary && (
+                  <LoopholePanel summary={report.loopholeSummary} />
                 )}
 
                 {/* Recommended Actions */}

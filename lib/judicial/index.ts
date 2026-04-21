@@ -17,6 +17,7 @@ import { CaseFactAnalyzer } from "./case-fact-analyzer";
 import { RepresentationAuditor } from "./representation-auditor";
 import { TransparencyLedger } from "./transparency-ledger";
 import { HistoricalReviewEngine } from "./historical-review-engine";
+import { LoopholeDetector } from "./loophole-detector";
 
 export { ChargeValidator } from "./charge-validator";
 export { CaseFactAnalyzer } from "./case-fact-analyzer";
@@ -24,6 +25,7 @@ export { RepresentationAuditor } from "./representation-auditor";
 export { TransparencyLedger } from "./transparency-ledger";
 export { GoodOleBoyDetector } from "./good-ole-boy-detector";
 export { HistoricalReviewEngine } from "./historical-review-engine";
+export { LoopholeDetector } from "./loophole-detector";
 export type * from "./types";
 
 // ─── Orchestrator ─────────────────────────────────────────────────────────────
@@ -32,6 +34,7 @@ export class JudicialAnalysisSystem {
   private readonly chargeValidator = new ChargeValidator();
   private readonly factAnalyzer = new CaseFactAnalyzer();
   private readonly representationAuditor = new RepresentationAuditor();
+  private readonly loopholeDetector = new LoopholeDetector();
   readonly ledger = new TransparencyLedger(); // public: callers can subscribe
 
   // ── Single case analysis ──────────────────────────────────────────────────
@@ -96,6 +99,9 @@ export class JudicialAnalysisSystem {
     const transparencyEvents = this.ledger.getEventsByCase(caseData.id);
     const reportId = `RPT-${caseData.id}-${Date.now()}`;
 
+    // 9 — Loophole detection
+    const loopholeSummary = this.loopholeDetector.detect(caseData);
+
     return {
       reportId,
       caseId: caseData.id,
@@ -108,6 +114,7 @@ export class JudicialAnalysisSystem {
       overallVerdict,
       summary: this.buildSummary(caseData, riskLevel, chargeViolations, factScore),
       recommendedActions,
+      loopholeSummary,
     };
   }
 

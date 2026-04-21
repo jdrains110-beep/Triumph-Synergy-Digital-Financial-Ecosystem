@@ -20,6 +20,7 @@ import type {
 } from "./types";
 import { JudicialAnalysisSystem } from "./index";
 import { GoodOleBoyDetector } from "./good-ole-boy-detector";
+import { LoopholeDetector } from "./loophole-detector";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ function riskFromScore(score: number): RiskLevel {
 export class HistoricalReviewEngine {
   private readonly systemEngine = new JudicialAnalysisSystem();
   private readonly gobDetector = new GoodOleBoyDetector();
+  private readonly loopholeDetector = new LoopholeDetector();
 
   /**
    * Run a full historical review.
@@ -147,6 +149,12 @@ export class HistoricalReviewEngine {
       systemicRiskLevel
     );
 
+    // ── Run loophole detection across all window cases ───────────────────────
+    const loopholeReports = windowCases.flatMap((c) => {
+      const summary = this.loopholeDetector.detect(c);
+      return [...summary.defenseLoopholes, ...summary.prosecutionLoopholes];
+    });
+
     return {
       reportId: reportId(),
       generatedAt: isoNow(),
@@ -167,6 +175,7 @@ export class HistoricalReviewEngine {
       publicInterestAlerts,
       evidenceDesertCases,
       wordVsWordCases,
+      loopholeReports,
     };
   }
 
