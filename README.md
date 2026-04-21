@@ -77,6 +77,74 @@ GET  /api/credit/fcra/score-delta/{addr}   — Score recovery estimate (+up to 9
 
 ---
 
+## 🏛️ Superior Judicial Platform
+
+> *"The courtroom is no longer a black box."*
+
+The **Triumph Synergy Superior Judicial Platform** is a real-time courtroom monitoring and legal transparency system that exposes judicial misconduct, charge stacking, evidence manipulation, and representation failures — anchored immutably to the Pi blockchain.
+
+### What It Does
+
+| Module | Function |
+|--------|----------|
+| **Charge Validator** | Detects charge stacking, double jeopardy, statute mismatch, and evidence-to-charge misalignment |
+| **Case Fact Analyzer** | Scores prosecution narrative bias, inflammatory language, and fact-to-evidence ratio |
+| **Representation Auditor** | Flags ineffective assistance of counsel, conflict of interest, and Brady violations |
+| **Transparency Ledger** | Immutable append-only audit trail of every courtroom action, anchored on-chain |
+| **Judicial Monitor** | Real-time risk scoring per case — LOW / MEDIUM / HIGH / CRITICAL |
+
+### Analysis Report Fields
+
+Every submitted case returns a `JudicialAnalysisReport` containing:
+- **`chargeViolations[]`** — Each overcharge, stacking violation, or unsupported charge with statute citation
+- **`factScore`** — Prosecution narrative credibility score (0–100)
+- **`representationAudit`** — Defense counsel performance assessment
+- **`riskLevel`** — `LOW | MEDIUM | HIGH | CRITICAL`
+- **`transparencyLedger`** — Full immutable event log
+- **`recommendations[]`** — Specific legal remedies and motions to file
+
+### API Endpoints
+
+```
+POST /api/judicial           — Analyze a single case (returns full JudicialAnalysisReport)
+POST /api/judicial           — Batch analyze { cases: Case[], mode: "historical" }
+GET  /api/judicial?caseId=   — Retrieve stored analysis by case ID
+```
+
+### Supported Jurisdictions
+- **Florida** — Full Florida Statutes coverage (F.S. §§ 817, 812, 895, 784, 893, etc.)
+- Federal statutes (18 U.S.C. §§ 1343, 1962 RICO, 1956 money laundering)
+- Extensible to all 50 states
+
+### Example: Florida Charge Stacking Detection
+
+```json
+{
+  "caseNumber": "2026-CF-00001",
+  "charges": [
+    { "statute": "F.S. § 817.034(4)(a)1", "description": "Communications Fraud >$50K" },
+    { "statute": "F.S. § 817.034(4)(a)2", "description": "Communications Fraud >$20K" },
+    { "statute": "F.S. § 812.014(2)(b)",  "description": "Grand Theft >$20K" },
+    { "statute": "F.S. § 895.03(3)",       "description": "RICO — Pattern of Racketeering" }
+  ]
+}
+```
+**Result:** Charge stacking violation flagged — single $5,000 transfer charged as 4 felonies totaling 90 years maximum. Risk level: **CRITICAL**.
+
+### Live Dashboard
+
+Navigate to `/judicial` in the Pi Browser or web app to access the real-time courtroom monitoring dashboard:
+- Submit any case for instant analysis
+- View charge violation breakdowns
+- See the immutable transparency ledger
+- Download full judicial analysis reports
+
+### Microservice
+
+The judicial engine runs as a standalone Docker microservice (`triumph-judicial-monitor`, port `8096`) with automatic fallback to the embedded local engine if the container is unavailable.
+
+---
+
 ## 🌍 Why Pi Network + Triumph Synergy > USD
 
 **Pi Network** is not just a cryptocurrency — it is the **sovereign global reserve currency** with real-world utility created through **Triumph Synergy**. Every link, every financial system, every institution in this world will have to **attach to us** to be able to survive or maintain.
@@ -122,6 +190,7 @@ GET  /api/credit/fcra/score-delta/{addr}   — Score recovery estimate (+up to 9
 | 📊 **PiCredit Score™** | 🟢 LIVE | 0–850 FICO-compatible score from Pi on-chain activity |
 | ⚖️ **FCRA §611 Engine** | 🟢 ARMED | Superior dispute letters citing Trump EOs + legislation |
 | 💳 **Bureau Integration** | 🟢 ACTIVE | Equifax, Experian, TransUnion, FICO, VantageScore |
+| 🏛️ **Superior Judicial Platform** | 🟢 SOVEREIGN | Florida courtroom monitoring, charge validation, transparency ledger |
 
 ---
 
