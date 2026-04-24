@@ -1,0 +1,14 @@
+{
+  "name": "triumph-synergy-microservice",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@stellar/stellar-sdk": "^13.1.0",
+    "redis": "^5.10.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "@types/node": "^20.10.0"
+  }
+}

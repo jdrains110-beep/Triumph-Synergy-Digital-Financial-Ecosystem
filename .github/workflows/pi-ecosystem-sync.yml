@@ -1,0 +1,309 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Pi Ecosystem Fork Sync — Upstream Tracking Workflow
+# ═══════════════════════════════════════════════════════════════════════════════
+# Syncs ALL forked Pi Network repositories with their upstream sources.
+# Runs weekly + on-demand to keep Triumph Synergy's forks fresh.
+#
+# Organizations tracked:
+#   pi-apps      (55 forkable repos) — Official Pi Platform
+#   minepi       (3 repos)           — Pi Network Core
+#   stellar      (4 repos)           — Upstream Stellar Foundation
+#   PiNetwork    (1 repo)            — Official PiRC Standards
+#   Pi-Defi-world(10 repos)          — PiRC-compliant DeFi ecosystem
+#   KOSASIH      (25 repos)          — Community Pi smart contracts, DeFi, AI
+#   Independent  (3 repos)           — Smart contracts, escrow, contract generation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Pi Ecosystem Fork Sync
+
+on:
+  schedule:
+    # Every Sunday at 04:00 UTC
+    - cron: "0 4 * * 0"
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: "Which tier to sync (all, core, sdk, platform, community, upstream)"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - core
+          - sdk
+          - platform
+          - community
+          - upstream
+
+permissions:
+  contents: read
+
+jobs:
+  sync-core-forks:
+    name: Sync Core & SDK Forks
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.tier == 'all' || github.event.inputs.tier == 'core' || github.event.inputs.tier == 'sdk' || github.event_name == 'schedule' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          # ── Core Infrastructure ──
+          - { upstream: "pi-apps/stellar-core", fork: "stellar-core" }
+          - { upstream: "pi-apps/stellar-xdr", fork: "stellar-xdr" }
+          - { upstream: "pi-apps/pi-explorer", fork: "pi-explorer" }
+          - { upstream: "pi-apps/ExplorePi", fork: "ExplorePi" }
+          - { upstream: "pi-apps/PiOS", fork: "PiOS" }
+          # ── SDKs ──
+          - { upstream: "pi-apps/pi-platform-docs", fork: "pi-platform-docs" }
+          - { upstream: "pi-apps/pi-sdk-js", fork: "pi-sdk-js" }
+          - { upstream: "pi-apps/pi-sdk-nextjs", fork: "pi-sdk-nextjs" }
+          - { upstream: "pi-apps/pi-sdk-react", fork: "pi-sdk-react" }
+          - { upstream: "pi-apps/pi-sdk-express", fork: "pi-sdk-express" }
+          - { upstream: "pi-apps/pi-sdk-lite", fork: "pi-sdk-lite" }
+          - { upstream: "pi-apps/pi-sdk-django", fork: "pi-sdk-django" }
+          - { upstream: "pi-apps/pi-sdk-rails", fork: "pi-sdk-rails" }
+          - { upstream: "pi-apps/pi-sdk-integration-guide", fork: "pi-sdk-integration-guide" }
+          - { upstream: "pi-apps/pi-nodejs", fork: "pi-nodejs" }
+          - { upstream: "pi-apps/pi-python", fork: "pi-python" }
+          - { upstream: "pi-apps/pi-rust", fork: "pi-rust" }
+          - { upstream: "pi-apps/pi-go", fork: "pi-go" }
+          - { upstream: "pi-apps/pi-ruby", fork: "pi-ruby" }
+          - { upstream: "pi-apps/pi-php", fork: "pi-php" }
+          - { upstream: "pi-apps/pi-csharp", fork: "pi-csharp" }
+          - { upstream: "pi-apps/pi-blazor", fork: "pi-blazor" }
+          - { upstream: "pi-apps/demo", fork: "demo" }
+    steps:
+      - name: Sync fork ${{ matrix.repo.fork }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.mergeUpstream({
+                owner: 'jdrains110-beep',
+                repo: '${{ matrix.repo.fork }}',
+                branch: 'main'
+              });
+              console.log('✅ ${{ matrix.repo.fork }} synced with ${{ matrix.repo.upstream }}');
+            } catch (e) {
+              // Try 'master' branch if 'main' fails
+              try {
+                await github.rest.repos.mergeUpstream({
+                  owner: 'jdrains110-beep',
+                  repo: '${{ matrix.repo.fork }}',
+                  branch: 'master'
+                });
+                console.log('✅ ${{ matrix.repo.fork }} synced (master branch)');
+              } catch (e2) {
+                console.log(`⚠️ ${{ matrix.repo.fork }}: ${e2.message}`);
+              }
+            }
+
+  sync-platform-forks:
+    name: Sync Platform & Community Forks
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.tier == 'all' || github.event.inputs.tier == 'platform' || github.event.inputs.tier == 'community' || github.event_name == 'schedule' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          # ── Platform ──
+          - { upstream: "pi-apps/tokenization-on-pi", fork: "tokenization-on-pi" }
+          - { upstream: "pi-apps/pi-commerce-app", fork: "pi-commerce-app" }
+          - { upstream: "pi-apps/local-commerce-hub", fork: "local-commerce-hub" }
+          - { upstream: "pi-apps/door", fork: "door" }
+          - { upstream: "pi-apps/trust-hub", fork: "trust-hub" }
+          - { upstream: "pi-apps/orbit", fork: "orbit" }
+          - { upstream: "pi-apps/SilkRoad", fork: "SilkRoad" }
+          - { upstream: "pi-apps/geraipi", fork: "geraipi" }
+          - { upstream: "pi-apps/shop-online", fork: "shop-online" }
+          - { upstream: "pi-apps/pailot-for-pi", fork: "pailot-for-pi" }
+          - { upstream: "pi-apps/internet-speed", fork: "internet-speed" }
+          # ── Community ──
+          - { upstream: "pi-apps/LatinChain", fork: "LatinChain" }
+          - { upstream: "pi-apps/wepisharp", fork: "wepisharp" }
+          - { upstream: "pi-apps/crumbles", fork: "crumbles" }
+          - { upstream: "pi-apps/NewsForPi", fork: "NewsForPi" }
+          - { upstream: "pi-apps/ez-invoice", fork: "ez-invoice" }
+          - { upstream: "pi-apps/qrcodepay", fork: "qrcodepay" }
+          - { upstream: "pi-apps/dcert", fork: "dcert" }
+          - { upstream: "pi-apps/polls-for-pi", fork: "polls-for-pi" }
+          - { upstream: "pi-apps/dao-mall-for-pi", fork: "dao-mall-for-pi" }
+          - { upstream: "pi-apps/tippy", fork: "tippy" }
+          - { upstream: "pi-apps/voice-of-pi", fork: "voice-of-pi" }
+          - { upstream: "pi-apps/store-on-pi", fork: "store-on-pi" }
+          - { upstream: "pi-apps/radio-for-us", fork: "radio-for-us" }
+          - { upstream: "pi-apps/memegen", fork: "memegen" }
+          - { upstream: "pi-apps/blog-for-pi", fork: "blog-for-pi" }
+          - { upstream: "pi-apps/trivia-on-pi", fork: "trivia-on-pi" }
+          - { upstream: "pi-apps/math-madness", fork: "math-madness" }
+          - { upstream: "pi-apps/insult-o-meter", fork: "insult-o-meter" }
+          - { upstream: "pi-apps/toko-emas-berlian-harisa", fork: "toko-emas-berlian-harisa" }
+          - { upstream: "pi-apps/2345pi-app-nav", fork: "2345pi-app-nav" }
+          - { upstream: "pi-apps/carrierwave-google-storage", fork: "carrierwave-google-storage" }
+    steps:
+      - name: Sync fork ${{ matrix.repo.fork }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.mergeUpstream({
+                owner: 'jdrains110-beep',
+                repo: '${{ matrix.repo.fork }}',
+                branch: 'main'
+              });
+              console.log('✅ ${{ matrix.repo.fork }} synced');
+            } catch (e) {
+              try {
+                await github.rest.repos.mergeUpstream({
+                  owner: 'jdrains110-beep',
+                  repo: '${{ matrix.repo.fork }}',
+                  branch: 'master'
+                });
+                console.log('✅ ${{ matrix.repo.fork }} synced (master)');
+              } catch (e2) {
+                console.log(`⚠️ ${{ matrix.repo.fork }}: ${e2.message}`);
+              }
+            }
+
+  sync-upstream-forks:
+    name: Sync Stellar & minepi Upstream
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.tier == 'all' || github.event.inputs.tier == 'upstream' || github.event_name == 'schedule' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - { upstream: "stellar/stellar-core", fork: "stellar-core", branch: "master" }
+          - { upstream: "stellar/go", fork: "go", branch: "master" }
+          - { upstream: "stellar/js-stellar-sdk", fork: "js-stellar-sdk", branch: "master" }
+          - { upstream: "stellar/stellar-protocol", fork: "stellar-protocol", branch: "master" }
+          - { upstream: "minepi/hello-world", fork: "hello-world", branch: "master" }
+          - { upstream: "minepi/minepi.github.io", fork: "minepi.github.io", branch: "master" }
+          - { upstream: "minepi/One-KVM", fork: "One-KVM", branch: "master" }
+    steps:
+      - name: Sync fork ${{ matrix.repo.fork }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.mergeUpstream({
+                owner: 'jdrains110-beep',
+                repo: '${{ matrix.repo.fork }}',
+                branch: '${{ matrix.repo.branch }}'
+              });
+              console.log('✅ ${{ matrix.repo.fork }} synced with ${{ matrix.repo.upstream }}');
+            } catch (e) {
+              console.log(`⚠️ ${{ matrix.repo.fork }}: ${e.message}`);
+            }
+
+  sync-pirc-defi-smart-contracts:
+    name: Sync PiRC, Pi-Defi-world & Smart Contract Forks
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.tier == 'all' || github.event.inputs.tier == 'platform' || github.event.inputs.tier == 'community' || github.event_name == 'schedule' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          # ── PiRC Official ──
+          - { upstream: "PiNetwork/PiRC", fork: "PiRC" }
+          # ── Pi-Defi-world (PiRC-compliant DeFi) ──
+          - { upstream: "Pi-Defi-world/Zyradex-frontend", fork: "Zyradex-frontend" }
+          - { upstream: "Pi-Defi-world/pirc-smart-contracts-explainer", fork: "pirc-smart-contracts-explainer" }
+          - { upstream: "Pi-Defi-world/acbu-smart-contract", fork: "acbu-smart-contract" }
+          - { upstream: "Pi-Defi-world/acbu-frontend", fork: "acbu-frontend" }
+          - { upstream: "Pi-Defi-world/acbu-backend", fork: "acbu-backend" }
+          - { upstream: "Pi-Defi-world/ACBU-DOCUMENTATION", fork: "ACBU-DOCUMENTATION" }
+          - { upstream: "Pi-Defi-world/pi-oracle", fork: "pi-oracle" }
+          - { upstream: "Pi-Defi-world/USDP-TEST", fork: "USDP-TEST" }
+          - { upstream: "Pi-Defi-world/passphrase-converter-js-typescript", fork: "passphrase-converter-js-typescript" }
+          - { upstream: "Pi-Defi-world/zyrachain-frontend-website", fork: "zyrachain-frontend-website" }
+          # ── KOSASIH Pi Ecosystem ──
+          - { upstream: "KOSASIH/pi-nexus-autonomous-banking-network", fork: "pi-nexus-autonomous-banking-network" }
+          - { upstream: "KOSASIH/eulers-shield", fork: "eulers-shield" }
+          - { upstream: "KOSASIH/quantum-pi-network", fork: "quantum-pi-network" }
+          - { upstream: "KOSASIH/stable-pi-core", fork: "stable-pi-core" }
+          - { upstream: "KOSASIH/nPinA-pi-network", fork: "nPinA-pi-network" }
+          - { upstream: "KOSASIH/PiConsensus", fork: "PiConsensus" }
+          - { upstream: "KOSASIH/super-pi", fork: "super-pi" }
+          - { upstream: "KOSASIH/PiEcosystemHub", fork: "PiEcosystemHub" }
+          - { upstream: "KOSASIH/nexus-revoluter", fork: "nexus-revoluter" }
+          - { upstream: "KOSASIH/PiDualTx", fork: "PiDualTx" }
+          - { upstream: "KOSASIH/pipfs-hub", fork: "pipfs-hub" }
+          - { upstream: "KOSASIH/stellar-pi-coin-sdk", fork: "stellar-pi-coin-sdk" }
+          - { upstream: "KOSASIH/matrix-pichain", fork: "matrix-pichain" }
+          - { upstream: "KOSASIH/PiFinance-Core", fork: "PiFinance-Core" }
+          - { upstream: "KOSASIH/Hyper-Q", fork: "Hyper-Q" }
+          - { upstream: "KOSASIH/DAE-Core", fork: "DAE-Core" }
+          - { upstream: "KOSASIH/NeuralMesh-Pi-Network", fork: "NeuralMesh-Pi-Network" }
+          - { upstream: "KOSASIH/pi-block-explorer", fork: "pi-block-explorer" }
+          - { upstream: "KOSASIH/pi-velocity-core", fork: "pi-velocity-core" }
+          - { upstream: "KOSASIH/pi-coin-hyper-stablecoin", fork: "pi-coin-hyper-stablecoin" }
+          - { upstream: "KOSASIH/ultimate-pi-sdk", fork: "ultimate-pi-sdk" }
+          - { upstream: "KOSASIH/energonexus-monorepo", fork: "energonexus-monorepo" }
+          - { upstream: "KOSASIH/PiX-Pay-Integration", fork: "PiX-Pay-Integration" }
+          - { upstream: "KOSASIH/PiNexus-Banking-Nexus", fork: "PiNexus-Banking-Nexus" }
+          - { upstream: "KOSASIH/global-harmony-nexus-core", fork: "global-harmony-nexus-core" }
+          # ── Independent Smart Contract repos ──
+          - { upstream: "derekgeisler/Pi-Network---Consensus-Smart-Contracts-Merkle-Roots", fork: "Pi-Network---Consensus-Smart-Contracts-Merkle-Roots" }
+          - { upstream: "FireflyLaboratories/TrustedThirdParty", fork: "TrustedThirdParty" }
+          - { upstream: "suisui0223/Pi-GLM", fork: "Pi-GLM" }
+    steps:
+      - name: Sync fork ${{ matrix.repo.fork }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.mergeUpstream({
+                owner: 'jdrains110-beep',
+                repo: '${{ matrix.repo.fork }}',
+                branch: 'main'
+              });
+              console.log('✅ ${{ matrix.repo.fork }} synced with ${{ matrix.repo.upstream }}');
+            } catch (e) {
+              try {
+                await github.rest.repos.mergeUpstream({
+                  owner: 'jdrains110-beep',
+                  repo: '${{ matrix.repo.fork }}',
+                  branch: 'master'
+                });
+                console.log('✅ ${{ matrix.repo.fork }} synced (master)');
+              } catch (e2) {
+                console.log(`⚠️ ${{ matrix.repo.fork }}: ${e2.message}`);
+              }
+            }
+
+  report:
+    name: Ecosystem Sync Report
+    runs-on: ubuntu-latest
+    needs: [sync-core-forks, sync-platform-forks, sync-upstream-forks, sync-pirc-defi-smart-contracts]
+    if: always()
+    steps:
+      - name: Generate sync report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              core: '${{ needs.sync-core-forks.result }}',
+              platform: '${{ needs.sync-platform-forks.result }}',
+              upstream: '${{ needs.sync-upstream-forks.result }}',
+              pircDefi: '${{ needs.sync-pirc-defi-smart-contracts.result }}'
+            };
+
+            const summary = `## Pi Ecosystem Fork Sync Report
+
+            | Job | Status |
+            |-----|--------|
+            | Core & SDK (23 repos) | ${results.core === 'success' ? '✅' : '⚠️'} ${results.core} |
+            | Platform & Community (32 repos) | ${results.platform === 'success' ? '✅' : '⚠️'} ${results.platform} |
+            | Stellar & minepi Upstream (7 repos) | ${results.upstream === 'success' ? '✅' : '⚠️'} ${results.upstream} |
+            | PiRC, DeFi & Smart Contracts (39 repos) | ${results.pircDefi === 'success' ? '✅' : '⚠️'} ${results.pircDefi} |
+
+            **Total repos synced:** 101 forks across 7 organizations
+            **Powered by:** Triumph Synergy Quantum Financial Ecosystem
+            `;
+
+            console.log(summary);

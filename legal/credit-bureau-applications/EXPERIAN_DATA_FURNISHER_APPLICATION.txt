@@ -1,0 +1,391 @@
+================================================================================
+                    EXPERIAN DATA FURNISHER APPLICATION
+                    New Data Contributor Enrollment Form
+================================================================================
+
+Date of Application: January 9, 2026
+Application Type: ☒ New Enrollment  ☐ Update Existing Account
+
+--------------------------------------------------------------------------------
+                    SECTION 1: ORGANIZATION INFORMATION
+--------------------------------------------------------------------------------
+
+Legal Entity Name: Triumph-Synergy Digital Financial Ecosystem
+
+Trade Name/DBA: Triumph-Synergy
+
+Headquarters Address:
+    Street Address: 135 Lake Como Dr
+    City: Pomona Park
+    State: Florida
+    ZIP Code: 32181
+    Country: United States
+
+Corporate Address (if different):
+    ☒ Same as Headquarters
+    
+Mailing Address for Correspondence:
+    ☒ Same as Headquarters
+
+Primary Contact Information:
+    Contact Name: ___________________________  [REQUIRED]
+    Title: Owner / CEO
+    Direct Phone: (___) ___-____  [REQUIRED]
+    Email: ___________________________  [REQUIRED]
+
+Alternate Contact Information:
+    Contact Name: ___________________________
+    Title: ___________________________
+    Direct Phone: (___) ___-____
+    Email: ___________________________
+
+Federal Employer ID (EIN): 41-6777102  ✓ REGISTERED (Trust)
+
+DUNS Number: ___________________________
+
+--------------------------------------------------------------------------------
+                    SECTION 2: BUSINESS PROFILE
+--------------------------------------------------------------------------------
+
+Organization Type:
+    ☐ Bank
+    ☐ Credit Union
+    ☐ Finance Company
+    ☒ FinTech / Digital Financial Services
+    ☐ Mortgage Company
+    ☐ Retail Credit Grantor
+    ☐ Collection Agency
+    ☐ Utility Company
+    ☐ Telecommunications
+    ☐ Property Management
+    ☐ Other: ___________________________
+
+Primary Business Activity:
+    Digital Financial Ecosystem - Credit Facilitation, Payment Processing,
+    Financial Sovereignty Solutions
+
+Year Business Established: 2026
+
+State of Incorporation: ___________________________  [REQUIRED]
+
+Number of Employees:
+    ☐ 1-10
+    ☐ 11-50
+    ☐ 51-200
+    ☐ 201-500
+    ☐ 500+
+
+Annual Revenue:
+    ☐ Under $1 Million
+    ☐ $1M - $10M
+    ☐ $10M - $50M
+    ☐ $50M - $100M
+    ☐ Over $100M
+
+--------------------------------------------------------------------------------
+                    SECTION 3: PRINCIPAL/OWNERSHIP INFORMATION
+--------------------------------------------------------------------------------
+
+List all individuals with 25% or more ownership:
+
+Owner/Principal #1:
+    Full Legal Name: ___________________________  [REQUIRED]
+    Title: Owner / Chief Executive Officer
+    Ownership %: 100%
+    Date of Birth: ___/___/_____  [REQUIRED]
+    SSN: ___-__-____  [REQUIRED]
+    
+    Residential Address:
+        Street: 135 Lake Como Dr
+        City: Pomona Park
+        State: FL
+        ZIP: 32181
+    
+    Phone: (___) ___-____  [REQUIRED]
+    Email: ___________________________  [REQUIRED]
+    
+    Government ID Type: ☐ Driver's License  ☐ Passport  ☐ State ID
+    ID Number: ___________________________
+    ID State/Country: ___________________________
+    ID Expiration: ___/___/_____
+
+--------------------------------------------------------------------------------
+                    SECTION 4: ACCOUNT TYPES & VOLUME
+--------------------------------------------------------------------------------
+
+What types of accounts will you report? (Check all that apply)
+
+Revolving Accounts:
+    ☒ Credit Cards
+    ☒ Lines of Credit
+    ☐ Home Equity Lines
+    ☐ Charge Cards
+
+Installment Accounts:
+    ☒ Personal Loans
+    ☒ Business Loans
+    ☐ Auto Loans
+    ☐ Student Loans
+    ☐ Mortgage Loans
+
+Other Account Types:
+    ☐ Collection Accounts
+    ☐ Utility Accounts
+    ☐ Rent/Lease Payments
+    ☐ Other: ___________________________
+
+Estimated Monthly Reporting Volume:
+
+    Current Accounts: 1-100
+    Expected Growth (12 months): 1,000-10,000
+    Expected Growth (24 months): 10,000-100,000
+
+Geographic Coverage:
+    ☒ National (All 50 States)
+    ☐ Regional - States: ___________________________
+    ☐ Single State: ___________________________
+
+--------------------------------------------------------------------------------
+                    SECTION 5: DATA SUBMISSION SPECIFICATIONS
+--------------------------------------------------------------------------------
+
+Preferred Submission Method:
+    ☒ SFTP (Secure File Transfer Protocol)
+    ☐ Connect:Direct
+    ☐ Experian Web Portal
+    ☐ API (Experian Developer API)
+
+Submission Frequency:
+    ☒ Monthly
+    ☐ Semi-Monthly
+    ☐ Weekly
+    ☐ Daily
+
+Data Format:
+    ☒ Metro 2 (Standard CDIA Format)
+    ☐ Legacy Metro Format
+    ☐ Custom (Requires Approval)
+
+Technical Contact:
+    Name: ___________________________
+    Phone: (___) ___-____
+    Email: ___________________________
+
+System/Software for Data Generation:
+    Triumph-Synergy Proprietary Financial Ecosystem Platform
+
+Testing Environment Ready: ☒ Yes  ☐ No  ☐ In Development
+
+--------------------------------------------------------------------------------
+                    SECTION 6: SECURITY & COMPLIANCE
+--------------------------------------------------------------------------------
+
+Information Security:
+
+    Do you have a formal Information Security Program?
+        ☒ Yes  ☐ No  ☐ In Development
+    
+    Do you perform annual security assessments?
+        ☒ Yes  ☐ No
+    
+    Do you have cyber liability insurance?
+        ☐ Yes  ☒ No (Recommend obtaining)
+        If yes, coverage amount: $___________________________
+
+Security Certifications (check all that apply):
+    ☐ SOC 1 Type II
+    ☐ SOC 2 Type II
+    ☐ ISO 27001
+    ☐ PCI DSS
+    ☐ Other: ___________________________
+    ☒ None currently - Will obtain as required
+
+Data Protection:
+    ☒ Encryption at rest (AES-256 or equivalent)
+    ☒ Encryption in transit (TLS 1.2+)
+    ☒ Access controls and authentication
+    ☒ Audit logging
+    ☒ Incident response plan
+
+Compliance Certifications:
+    ☒ FCRA Compliant
+    ☒ FACTA Compliant
+    ☒ GLBA Compliant
+    ☐ CCPA Compliant
+    ☐ State-specific: ___________________________
+
+--------------------------------------------------------------------------------
+                    SECTION 7: CONSUMER DISPUTE HANDLING
+--------------------------------------------------------------------------------
+
+Dispute Resolution Process:
+
+    Do you have an established dispute resolution process?
+        ☒ Yes  ☐ No  ☐ In Development
+    
+    Can you respond to ACDV (Automated Consumer Dispute Verification)?
+        ☒ Yes  ☐ No
+    
+    Average dispute response time:
+        ☐ 1-5 days
+        ☒ 6-15 days
+        ☐ 16-30 days
+    
+    Dispute Contact:
+        Name: ___________________________
+        Phone: (___) ___-____
+        Email: ___________________________
+        
+    Dispute Mailing Address:
+        Street: 135 Lake Como Dr
+        City: Pomona Park
+        State: FL
+        ZIP: 32181
+
+--------------------------------------------------------------------------------
+                    SECTION 8: BANKING INFORMATION
+--------------------------------------------------------------------------------
+
+Primary Business Bank:
+    Bank Name: ___________________________  [REQUIRED]
+    Branch Address: ___________________________
+    Account Type: ☐ Checking  ☐ Savings
+    Account Number (last 4): ____  [For verification only]
+    Routing Number: ___________________________
+    Years as Customer: ____
+
+--------------------------------------------------------------------------------
+                    SECTION 9: REFERENCES
+--------------------------------------------------------------------------------
+
+Professional Reference #1:
+    Company: ___________________________
+    Contact: ___________________________
+    Phone: (___) ___-____
+    Relationship: ___________________________
+    Years Known: ____
+
+Professional Reference #2:
+    Company: ___________________________
+    Contact: ___________________________
+    Phone: (___) ___-____
+    Relationship: ___________________________
+    Years Known: ____
+
+Trade Reference (if applicable):
+    Company: ___________________________
+    Contact: ___________________________
+    Phone: (___) ___-____
+    Account Type: ___________________________
+
+--------------------------------------------------------------------------------
+                    SECTION 10: AGREEMENTS & CERTIFICATIONS
+--------------------------------------------------------------------------------
+
+By signing this application, the undersigned certifies that:
+
+☒ All information provided is true, complete, and accurate to the best of
+  my knowledge.
+
+☒ I am authorized to bind the organization to the Experian Data Furnisher
+  Agreement and related policies.
+
+☒ The organization agrees to comply with all applicable laws and regulations,
+  including but not limited to:
+  - Fair Credit Reporting Act (FCRA)
+  - Fair and Accurate Credit Transactions Act (FACTA)
+  - Gramm-Leach-Bliley Act (GLBA)
+  - All state consumer protection laws
+
+☒ The organization agrees to furnish data in compliance with Experian's
+  Metro 2 formatting requirements.
+
+☒ The organization understands that furnishing inaccurate or incomplete
+  data may result in termination of the data furnisher relationship.
+
+☒ The organization agrees to maintain adequate records to support all
+  reported information and respond to consumer disputes within required
+  timeframes.
+
+☒ The organization agrees to participate in testing and certification
+  before commencing production data reporting.
+
+☒ The organization authorizes Experian to verify the information provided
+  in this application.
+
+
+Authorized Signature: ___________________________________________
+
+Print Name: ___________________________  [REQUIRED]
+
+Title: Owner / Chief Executive Officer
+
+Date: January 9, 2026
+
+
+Witness Signature (if required): ___________________________
+
+Print Name: ___________________________
+
+Date: ___/___/_____
+
+
+--------------------------------------------------------------------------------
+                    SUBMISSION INSTRUCTIONS
+--------------------------------------------------------------------------------
+
+Submit completed application package to:
+
+    Experian Data Furnisher Enrollment
+    Email: DataFurnisherEnrollment@experian.com
+    
+    Online Portal:
+    https://www.experian.com/consumer-information/data-furnisher-services
+    
+    Phone Inquiries:
+    1-800-831-5614 (Data Furnisher Services)
+
+Required Documentation Checklist:
+
+    ☐ Completed Application Form (this document)
+    ☐ W-9 Form (Request for Taxpayer Identification)
+    ☐ Copy of EIN Confirmation Letter (IRS CP 575)
+    ☐ Articles of Incorporation / Articles of Organization
+    ☐ Business License (if applicable)
+    ☐ Government-issued photo ID of authorized signer
+    ☐ Voided business check OR bank verification letter
+    ☐ Certificate of Good Standing (from state of formation)
+    ☐ Sample Metro 2 file (for technical review)
+
+Processing Time: 4-8 weeks from receipt of complete application
+
+================================================================================
+                         FOR EXPERIAN USE ONLY
+================================================================================
+
+Application Received: ___/___/_____
+Received By: ___________________________
+Application ID: EXP-DF-_______________
+
+Document Verification:
+    ☐ EIN Verified
+    ☐ Business Entity Verified  
+    ☐ Principal Identity Verified
+    ☐ Bank Account Verified
+    ☐ References Checked
+
+Technical Review:
+    ☐ Metro 2 Sample Approved
+    ☐ Connectivity Test Passed
+    ☐ Security Assessment Complete
+
+Final Decision:
+    ☐ Approved - Furnisher Code: _______________
+    ☐ Approved with Conditions: _______________
+    ☐ Pending Additional Information
+    ☐ Denied - Reason: _______________
+
+Activation Date: ___/___/_____
+Analyst: ___________________________
+
+================================================================================

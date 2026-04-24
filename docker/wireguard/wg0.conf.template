@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════════════
+# WireGuard Configuration Template for Triumph Synergy
+# ═══════════════════════════════════════════════════════════════════════
+#
+# Replace the values below with your VPN provider's WireGuard config.
+# 
+# Recommended providers (all support WireGuard):
+#   • Mullvad (https://mullvad.net) — privacy-focused, no account needed
+#   • IVPN (https://ivpn.net)      — audited, no-log
+#   • Self-hosted                   — run your own on a VPS for fixed IP
+#
+# After filling in, rename this file to wg0.conf
+# ═══════════════════════════════════════════════════════════════════════
+
+[Interface]
+# Your WireGuard private key (from your VPN provider)
+PrivateKey = YOUR_PRIVATE_KEY_HERE
+
+# The IP address assigned to you by the VPN provider
+Address = 10.x.x.x/32
+
+# DNS servers (Cloudflare + Google fallback)
+DNS = 1.1.1.1, 8.8.8.8
+
+[Peer]
+# VPN server's public key
+PublicKey = SERVER_PUBLIC_KEY_HERE
+
+# Route all traffic through the tunnel
+AllowedIPs = 0.0.0.0/0
+
+# VPN server endpoint (replace with provider's server)
+Endpoint = vpn-server.example.com:51820
+
+# Keep connection alive (important for Starlink satellite handoffs)
+PersistentKeepalive = 25

@@ -1,0 +1,231 @@
+================================================================================
+                    IRS FORM SS-4 - APPLICATION FOR EIN
+                    Employer Identification Number Application
+================================================================================
+
+Instructions: Complete this form to apply for an EIN at https://www.irs.gov/ein
+You can apply online and receive your EIN immediately.
+
+--------------------------------------------------------------------------------
+                         ENTITY INFORMATION
+--------------------------------------------------------------------------------
+
+Line 1 - Legal Name of Entity:
+    Triumph-Synergy Digital Financial Ecosystem
+
+Line 2 - Trade Name (DBA), if different:
+    Triumph-Synergy
+
+Line 3 - Executor, Administrator, Trustee, "Care of" Name:
+    ___________________________  [YOUR LEGAL NAME]
+
+Line 4a - Mailing Address (Street, Room, Suite No.):
+    135 Lake Como Dr
+
+Line 4b - City, State, ZIP:
+    Pomona Park, FL 32181
+
+Line 5a - Street Address (if different from mailing):
+    ☒ Same as Line 4a
+
+Line 5b - City, State, ZIP:
+    ☒ Same as Line 4b
+
+Line 6 - County and State where principal business is located:
+    Putnam County, Florida
+
+Line 7a - Name of Responsible Party:
+    ___________________________  [YOUR LEGAL NAME - REQUIRED]
+
+Line 7b - SSN, ITIN, or EIN of Responsible Party:
+    ___-__-____  [YOUR SSN - REQUIRED]
+
+--------------------------------------------------------------------------------
+                         ENTITY TYPE
+--------------------------------------------------------------------------------
+
+Line 8a - Type of Entity (check one):
+
+    ☐ Sole Proprietor (SSN) ___-__-____
+    ☐ Partnership
+    ☐ Corporation (enter form number to be filed): ___________
+    ☐ Personal Service Corporation
+    ☐ Church or church-controlled organization
+    ☐ Other nonprofit organization (specify): ___________
+    ☐ Other (specify): ___________
+    
+    ☐ Limited Liability Company (LLC)
+        Number of LLC members: ____
+        If organized in the United States, enter state: ___________
+        
+        Was the LLC organized in the United States?
+            ☐ Yes    ☐ No
+        
+        If "No," enter the name of the foreign country: ___________
+
+Line 8b - If a corporation, enter the state or foreign country:
+    ___________________________
+
+Line 8c - Did you receive the IRS Letter 147C previously?
+    ☐ Yes    ☒ No
+
+--------------------------------------------------------------------------------
+                         REASON FOR APPLYING
+--------------------------------------------------------------------------------
+
+Line 9a - Reason for Applying (check only one):
+
+    ☒ Started new business (specify type): Digital Financial Services / FinTech
+    ☐ Hired employees (Enter date wages or annuities first paid): ___/___/_____
+    ☐ Compliance with IRS withholding regulations
+    ☐ Created a pension plan (specify type): ___________
+    ☐ Banking purpose (specify purpose): ___________
+    ☐ Changed type of organization (specify new type): ___________
+    ☐ Purchased going business
+    ☐ Created a trust (specify type): ___________
+    ☐ Other (specify): ___________
+
+Line 9b - If you started a new business, enter starting date:
+    01/09/2026
+
+--------------------------------------------------------------------------------
+                         BUSINESS INFORMATION
+--------------------------------------------------------------------------------
+
+Line 10 - Date business started or acquired (MMDDYYYY):
+    01/09/2026
+
+Line 11 - Closing month of accounting year:
+    ☒ December (most common)
+    ☐ Other: ___________
+
+Line 12 - Highest number of employees expected in the next 12 months:
+    
+    Agricultural: ____
+    Household: ____
+    Other: ____
+    
+    (Enter "0" if none)
+
+Line 13 - First date wages or annuities were paid (MMDDYYYY):
+    Not applicable / ___/___/_____
+
+Line 14 - Check one box that best describes principal activity:
+
+    ☐ Construction
+    ☐ Real estate
+    ☐ Rental & leasing
+    ☐ Manufacturing
+    ☐ Transportation & warehousing
+    ☒ Finance & insurance
+    ☐ Health care & social assistance
+    ☐ Accommodation & food service
+    ☐ Wholesale - agent/broker
+    ☐ Wholesale - other
+    ☐ Retail
+    ☐ Other (specify): ___________
+
+Line 15 - Describe the principal product/service provided:
+    Digital financial ecosystem services, credit facilitation, payment
+    processing, financial sovereignty solutions, and blockchain-based
+    financial management.
+
+Line 16a - Has the applicant ever applied for an EIN before?
+    ☐ Yes    ☒ No
+
+Line 16b - If "Yes," enter previous EIN:
+    ___-_______
+
+Line 16c - If "Yes," was the previous EIN issued to a different entity?
+    ☐ Yes    ☐ No
+
+--------------------------------------------------------------------------------
+                         THIRD PARTY DESIGNEE
+--------------------------------------------------------------------------------
+
+Line 17 - Third Party Designee:
+
+    Do you want to authorize someone to receive the EIN and answer questions?
+        ☐ Yes    ☒ No
+    
+    If "Yes":
+        Designee's Name: ___________________________
+        Designee's Phone: (___) ___-____
+        Designee's Fax: (___) ___-____
+        Address: ___________________________
+
+--------------------------------------------------------------------------------
+                         SIGNATURE
+--------------------------------------------------------------------------------
+
+Under penalties of perjury, I declare that I have examined this application,
+and to the best of my knowledge and belief, it is true, correct, and complete.
+
+Signature: ___________________________
+
+Name (Print): ___________________________  [YOUR LEGAL NAME]
+
+Title: Owner
+
+Date: January 9, 2026
+
+Telephone Number: (___) ___-____  [REQUIRED]
+
+Fax Number: ___________________________
+
+================================================================================
+                         APPLICATION INSTRUCTIONS
+================================================================================
+
+ONLINE APPLICATION (Fastest - Immediate EIN):
+    1. Go to https://www.irs.gov/businesses/small-businesses-self-employed/
+       apply-for-an-employer-identification-number-ein-online
+    2. Complete the online form
+    3. Receive your EIN immediately upon completion
+    4. Print the confirmation letter (CP 575)
+    
+    Hours: Monday-Friday, 7:00 AM - 10:00 PM Eastern Time
+
+BY PHONE (International applicants only):
+    Call: 267-941-1099 (Not toll-free)
+    Hours: 6:00 AM - 11:00 PM Eastern Time
+
+BY FAX:
+    Fax completed Form SS-4 to: (855) 641-6935
+    Expect response in 4 business days
+
+BY MAIL:
+    Internal Revenue Service
+    Attn: EIN Operation
+    Cincinnati, OH 45999
+    Expect response in 4-5 weeks
+
+================================================================================
+                    AFTER YOU RECEIVE YOUR EIN
+================================================================================
+
+IMMEDIATE NEXT STEPS:
+
+1. ☐ Save your EIN Confirmation Letter (CP 575) - You'll need this for:
+       - Credit bureau applications
+       - Bank account opening
+       - Business licenses
+       - All official business filings
+
+2. ☐ Update the credit bureau applications with your new EIN
+
+3. ☐ Open a business bank account with your EIN
+
+4. ☐ Apply for state/local business licenses if required
+
+5. ☐ File IRS Form W-9 for any clients/partners who need it
+
+================================================================================
+
+Your EIN Once Received: ___-_______
+
+Date Received: ___/___/_____
+
+Confirmation Number: ___________________________
+
+================================================================================

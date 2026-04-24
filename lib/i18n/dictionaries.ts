@@ -1,0 +1,17 @@
+import en from "./locales/en";
+import es from "./locales/es";
+import fr from "./locales/fr";
+import hi from "./locales/hi";
+import pt from "./locales/pt";
+import zh from "./locales/zh";
+
+type Dictionary = Record<string, string>;
+
+const dictionaries: Record<string, Dictionary> = { en, es, fr, pt, hi, zh };
+
+export const getDictionary = (locale: string): Dictionary => {
+  if (locale in dictionaries) {
+    return dictionaries[locale];
+  }
+  return dictionaries.en;
+};

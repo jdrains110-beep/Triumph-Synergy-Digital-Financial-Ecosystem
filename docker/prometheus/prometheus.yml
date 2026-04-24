@@ -1,0 +1,292 @@
+# ==============================================================================
+# Pi Network Prometheus Configuration
+# ==============================================================================
+# Central Node: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+# ==============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'pi-network-triumph-synergy'
+    central_node: 'GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  # ==========================================================================
+  # Prometheus Self-Monitoring
+  # ==========================================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  # ==========================================================================
+  # Pi Central Node — HTTP health/metrics server on :11626
+  # ==========================================================================
+  - job_name: 'pi-central-node'
+    static_configs:
+      - targets: ['triumph-central-node:11626']
+        labels:
+          service: 'central-node'
+          node_type: 'central'
+          priority: 'supreme'
+          public_key: 'GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Pi Triumph App — health check only (no Prometheus metrics endpoint)
+  # ==========================================================================
+  # NOTE: triumph-app is a Next.js app — no native /metrics. Monitored via
+  # nginx access logs and process-level metrics from the node exporter.
+  # Removed to prevent false-positive "down" alerts.
+
+  # ==========================================================================
+  # Pi Transaction Engine
+  # ==========================================================================
+  - job_name: 'pi-transaction-engine'
+    static_configs:
+      - targets: ['triumph-transaction-engine:8080']
+        labels:
+          service: 'transaction-engine'
+          type: 'hyper-transaction'
+          max_tps: '10000000000'
+    metrics_path: /metrics
+    scrape_interval: 5s  # More frequent for transaction monitoring
+
+  # ==========================================================================
+  # Pi Trillion Vault
+  # ==========================================================================
+  - job_name: 'pi-trillion-vault'
+    static_configs:
+      - targets: ['triumph-vault:8081']
+        labels:
+          service: 'trillion-vault'
+          type: 'vault'
+          capacity: 'unlimited'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Pi Smart Contracts
+  # ==========================================================================
+  - job_name: 'pi-smart-contracts'
+    static_configs:
+      - targets: ['triumph-smart-contracts:8082']
+        labels:
+          service: 'smart-contracts'
+          type: 'execution-engine'
+          channels: '10000'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Pi SCP Upgrader
+  # ==========================================================================
+  - job_name: 'pi-scp-upgrader'
+    static_configs:
+      - targets: ['triumph-scp-upgrader:8083']
+        labels:
+          service: 'scp-upgrader'
+          type: 'protocol-sync'
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ==========================================================================
+  # Infrastructure - PostgreSQL (via postgres_exporter sidecar)
+  # ==========================================================================
+  - job_name: 'pi-postgres'
+    static_configs:
+      - targets: ['triumph-postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          type: 'database'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Infrastructure - Redis (via redis_exporter sidecar)
+  # ==========================================================================
+  - job_name: 'pi-redis'
+    static_configs:
+      - targets: ['triumph-redis-exporter:9121']
+        labels:
+          service: 'redis'
+          type: 'cache'
+    metrics_path: /metrics
+    scrape_interval: 15s
+  # ==========================================================================
+  # Market Data Service
+  # ==========================================================================
+  - job_name: 'triumph-market-data'
+    static_configs:
+      - targets: ['triumph-market-data:8085']
+        labels:
+          service: 'market-data'
+          type: 'data-relay'
+    metrics_path: /metrics
+    scrape_interval: 5s
+
+  # ==========================================================================
+  # Blockchain Oracle
+  # ==========================================================================
+  - job_name: 'triumph-blockchain-oracle'
+    static_configs:
+      - targets: ['triumph-blockchain-oracle:8086']
+        labels:
+          service: 'blockchain-oracle'
+          type: 'event-stream'
+    metrics_path: /metrics
+    scrape_interval: 5s
+
+  # ==========================================================================
+  # Compliance Engine
+  # ==========================================================================
+  - job_name: 'triumph-compliance'
+    static_configs:
+      - targets: ['triumph-compliance:8087']
+        labels:
+          service: 'compliance'
+          type: 'kyc-aml'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # DEX Engine
+  # ==========================================================================
+  - job_name: 'triumph-dex'
+    static_configs:
+      - targets: ['triumph-dex:8088']
+        labels:
+          service: 'dex'
+          type: 'exchange'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # ML Engine — IsolationForest, GradientBoosting, Ridge, RSI
+  # ==========================================================================
+  - job_name: 'triumph-ml-engine'
+    static_configs:
+      - targets: ['triumph-ml-engine:8090']
+        labels:
+          service: 'ml-engine'
+          type: 'machine-learning'
+          models: 'IsolationForest,GradientBoosting,Ridge,RSI-14'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Pi Bridge Connector — Central Node <-> Pi Node (testnet2) live bridge
+  # ==========================================================================
+  - job_name: 'triumph-pi-bridge-connector'
+    static_configs:
+      - targets: ['triumph-pi-bridge-connector:8092']
+        labels:
+          service: 'pi-bridge-connector'
+          type: 'node-bridge'
+          role: 'central-pi-node-sync'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Horizon Guardian — auto-recovers Pi Horizon inside testnet2
+  # ==========================================================================
+  - job_name: 'triumph-horizon-guardian'
+    static_configs:
+      - targets: ['triumph-horizon-guardian:9911']
+        labels:
+          service: 'horizon-guardian'
+          type: 'recovery-watchdog'
+          role: 'pi-horizon-self-heal'
+    metrics_path: /metrics
+    fallback_scrape_protocol: PrometheusText0.0.4
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Cloud Memory Platform — unified memory layer and cloud/offline sync
+  # ==========================================================================
+  - job_name: 'triumph-cloud-memory'
+    static_configs:
+      - targets: ['triumph-cloud-memory:8095']
+        labels:
+          service: 'cloud-memory'
+          type: 'memory-fabric'
+          role: 'online-offline-sync'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Dual-Value Engine — Pi internal (mined) vs external (market) value
+  # ==========================================================================
+  - job_name: 'triumph-dual-value-engine'
+    static_configs:
+      - targets: ['triumph-dual-value-engine:8093']
+        labels:
+          service: 'dual-value-engine'
+          type: 'pi-valuation'
+          dimensions: 'internal-mined,external-market'
+          pi_internal_rate: '314159'
+          pi_external_rate: '314.159'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Quantum Shield Engine — NIST FIPS 203/204/205 post-quantum cryptography
+  # ==========================================================================
+  - job_name: 'triumph-quantum-shield'
+    static_configs:
+      - targets: ['triumph-quantum-shield:8094']
+        labels:
+          service: 'quantum-shield'
+          type: 'post-quantum-cryptography'
+          algorithms: 'Kyber-1024,Dilithium-5,SPHINCS+-SHAKE-256f,AES-256-GCM'
+          nist_standards: 'FIPS-203,FIPS-204,FIPS-205'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Credit Engine — PiCredit Score + Bureau Integration
+  # ==========================================================================
+  - job_name: 'triumph-credit-engine'
+    static_configs:
+      - targets: ['triumph-credit-engine:8091']
+        labels:
+          service: 'credit-engine'
+          type: 'credit-scoring'
+          bureaus: 'equifax,experian,transunion,fico,vantagescore'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Tokenization Engine — Pi domain + allodial deed tokenization
+  # ==========================================================================
+  - job_name: 'triumph-tokenization-engine'
+    static_configs:
+      - targets: ['triumph-tokenization-engine:8089']
+        labels:
+          service: 'tokenization-engine'
+          type: 'pi-domain-allodial-deed'
+          token_standards: 'PI-721,PI-20,PI-1155'
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ==========================================================================
+  # Payment Processor
+  # ==========================================================================
+  - job_name: 'triumph-payment-processor'
+    static_configs:
+      - targets: ['triumph-payment-processor:8084']
+        labels:
+          service: 'payment-processor'
+          type: 'queue'
+    metrics_path: /metrics
+    scrape_interval: 10s

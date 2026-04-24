@@ -1,0 +1,19 @@
+{
+  "app_id": "triumph-synergy",
+  "app_name": "Triumph Synergy",
+  "verified": true,
+  "verification_date": "2026-01-18",
+  "verification_method": "static-file",
+  "verification": "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195",
+  "validation_key": "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195",
+  "network": "mainnet",
+  "sandbox": false,
+  "urls": {
+    "mainnet_pinet": "https://triumphsynergy0576.pinet.com",
+    "mainnet_pinet_alt": "https://triumphsynergy7386.pinet.com",
+    "mainnet_vercel": "https://triumph-synergy.vercel.app",
+    "testnet_pinet": "https://triumphsynergy1991.pinet.com",
+    "testnet_vercel": "https://triumph-synergy-testnet.vercel.app"
+  },
+  "version": "1.0"
+}

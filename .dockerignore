@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+out/
+
+# Docker volumes & data
+redis_data/
+postgres_data/
+volumes/
+
+# Logs & env (secrets stay out of images)
+*.log
+build.log
+.env
+.env.local
+.env.testnet
+.env.production
+.env*.local
+
+# Git & IDE
+.git/
+.github/
+.vscode/
+.cursor/
+.vercel/
+
+# Tests
+tests/
+playwright.config.ts
+
+# Docs (reduce build context)
+*.md
+docs/
+legal/
+vitest.config.ts
+
+# Unnecessary for container
+LICENSE*
+docs/
+tmp.*
+
+# Infra configs not needed in containers
+docker/grafana/
+docker/nginx/
+docker/postgres/
+docker/prometheus/
+docker/redis/
+infrastructure/
+scripts/

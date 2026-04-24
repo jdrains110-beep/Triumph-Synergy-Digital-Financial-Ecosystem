@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# TRIUMPH SYNERGY — Encrypted Tunnel Override (WireGuard / Cloudflare WARP)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# PURPOSE: Adds a WireGuard sidecar that gives the entire ecosystem a
+# persistent encrypted tunnel with a stable public IP — essential for:
+#
+#   • Starlink: variable IPs, LEO satellite handoffs every 15s
+#   • Mobile hotspot: CGNAT blocks inbound Pi peer connections
+#   • Any ISP: encrypted tunnel prevents traffic inspection/throttling
+#
+# USAGE:
+#   docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d
+#
+# PREREQUISITES:
+#   1. Create docker/wireguard/wg0.conf with your VPN provider's config
+#      (Mullvad, IVPN, or self-hosted WireGuard server)
+#   2. Or use Cloudflare WARP (free tier, no config needed — see warp service)
+#
+# NOTE: You only need ONE of these. Comment out the one you don't use.
+# ═══════════════════════════════════════════════════════════════════════════
+
+services:
+  # ── Option A: WireGuard VPN Tunnel ────────────────────────────────────
+  # Use this with Mullvad, IVPN, or a self-hosted WireGuard server
+  # Gives you a FIXED public IP regardless of ISP changes
+  wireguard:
+    image: linuxserver/wireguard:latest
+    container_name: triumph-wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./docker/wireguard:/config
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    mem_limit: 32m
+    mem_reservation: 16m
+    cpus: 0.1
+    ports:
+      - "51820:51820/udp"
+    networks:
+      - triumph-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wg show wg0 | grep -q 'latest handshake'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Option B: Cloudflare WARP (Zero-config encrypted tunnel) ──────────
+  # Free tier, no account needed, encrypted tunnel with Cloudflare edge
+  # Good for: encrypting all traffic, bypassing ISP throttling
+  # Does NOT give a fixed public IP (use WireGuard for that)
+  #
+  # cloudflare-warp:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: triumph-cloudflare-warp
+  #   command: tunnel --no-autoupdate
+  #   mem_limit: 48m
+  #   mem_reservation: 16m
+  #   cpus: 0.1
+  #   networks:
+  #     - triumph-net
+  #   restart: unless-stopped
+
+networks:
+  triumph-net:
+    external: true
