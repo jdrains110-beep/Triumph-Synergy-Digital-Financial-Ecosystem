@@ -1,5 +1,6 @@
 param(
-  [string]$ContainerName = "testnet2"
+  [string]$ContainerName = "testnet2",
+  [string]$OutputFolder = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,14 +10,36 @@ function Safe-Name([string]$pathValue) {
 }
 
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$outBase = Join-Path $env:USERPROFILE "Desktop\PI-MIGRATION\windows-$env:COMPUTERNAME-$stamp"
+$resolvedOutput = $OutputFolder.Trim()
+if ([string]::IsNullOrWhiteSpace($resolvedOutput)) {
+  $outBase = Join-Path $env:USERPROFILE "Desktop\PI-MIGRATION\windows-$env:COMPUTERNAME-$stamp"
+} else {
+  $outBase = Join-Path $resolvedOutput "windows-$env:COMPUTERNAME-$stamp"
+}
 New-Item -ItemType Directory -Path $outBase -Force | Out-Null
+
+# Ensure Docker engine is reachable before writing snapshot data.
+try {
+  docker version | Out-Null
+} catch {
+  throw "Docker engine is not reachable. Start Docker Desktop and retry."
+}
+
+# Ensure target container exists.
+$containerId = (docker ps -a --filter "name=^${ContainerName}$" --format "{{.ID}}" | Select-Object -First 1)
+if ([string]::IsNullOrWhiteSpace($containerId)) {
+  throw "Container '$ContainerName' was not found. Verify Pi Desktop node container name and retry."
+}
 
 $inspectRaw = docker inspect $ContainerName
 $inspectRaw | Out-File (Join-Path $outBase "inspect.json") -Encoding ascii
 $inspect = $inspectRaw | ConvertFrom-Json
 $wasRunning = [bool]$inspect[0].State.Running
 $mounts = $inspect[0].Mounts
+
+if (-not $mounts -or $mounts.Count -eq 0) {
+  throw "No Docker mounts found for '$ContainerName'. Aborting to avoid incomplete snapshot."
+}
 
 if ($wasRunning) {
   Write-Host "Stopping container $ContainerName..."
@@ -26,6 +49,10 @@ if ($wasRunning) {
 "container,type,name,destination,source,archive" | Out-File (Join-Path $outBase "manifest.csv") -Encoding ascii
 
 foreach ($m in $mounts) {
+  if ([string]::IsNullOrWhiteSpace($m.Source) -or -not (Test-Path $m.Source)) {
+    throw "Mount source path is missing or inaccessible for destination '$($m.Destination)': '$($m.Source)'"
+  }
+
   $safe = Safe-Name $m.Destination
   $archive = "$safe.tgz"
   $archivePath = Join-Path $outBase $archive
@@ -51,6 +78,11 @@ $filesForHash = Get-ChildItem -Path $outBase -File | Where-Object { $_.Name -mat
 foreach ($f in $filesForHash) {
   $h = (Get-FileHash -Algorithm SHA256 -Path $f.FullName).Hash.ToLower()
   "$h  $($f.Name)" | Add-Content $hashFile
+}
+
+$archiveCount = (Get-ChildItem -Path $outBase -Filter *.tgz -File | Measure-Object).Count
+if ($archiveCount -lt 1) {
+  throw "No archive files were created. Snapshot is incomplete."
 }
 
 if ($wasRunning) {

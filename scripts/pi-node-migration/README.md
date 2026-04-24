@@ -29,6 +29,12 @@ Important rules:
 powershell -ExecutionPolicy Bypass -File .\scripts\pi-node-migration\export-windows.ps1 -ContainerName testnet2
 ```
 
+Or with positional args (container + output folder):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\pi-node-migration\export-windows.ps1 testnet2 C:\path\to\output-folder
+```
+
 Output is created in:
 
 ```text
