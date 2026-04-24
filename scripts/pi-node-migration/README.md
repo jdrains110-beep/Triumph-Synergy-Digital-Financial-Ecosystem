@@ -2,6 +2,14 @@
 
 This folder contains safe scripts to export and restore Pi node Docker-mounted data.
 
+Completeness model for Pi Desktop node transfer:
+
+- Exports every mount listed by `docker inspect <container>.Mounts`.
+- Stores `inspect.json` so mount inventory is auditable.
+- Writes `manifest.csv` with mount metadata and archive mapping.
+- Writes `SHA256SUMS.txt` for archive integrity verification.
+- Includes Pi Desktop `user-preferences` when present.
+
 Important rules:
 
 - Do not merge databases from different machines.
@@ -51,10 +59,16 @@ Copy the whole source snapshot folders to target macOS.
 4. Run restore script from repo root:
 
 ```bash
-bash ./scripts/pi-node-migration/restore-macos.sh /absolute/path/to/snapshot-folder testnet2
+bash ./scripts/pi-node-migration/restore-macos.sh /absolute/path/to/snapshot-folder testnet2 true
 ```
 
+Third argument:
+
+- `true`: restore Pi Desktop `user-preferences` to macOS app-data path (with backup).
+- `false`: skip preference restore.
+
 The script aborts if any destination path from `manifest.csv` does not match a target container mount.
+If `SHA256SUMS.txt` exists, restore verifies checksums before extraction.
 
 ## 5) Verify after restore
 
@@ -63,3 +77,7 @@ The script aborts if any destination path from `manifest.csv` does not match a t
 - `docker logs --tail 200 testnet2`
 
 Then confirm ledger advances in Pi Desktop.
+
+## Why this covers Horizon and node data
+
+Pi Desktop node services (stellar-core, Horizon, PostgreSQL, history and related runtime data) are inside the Docker container mounts. Exporting all mounts from `docker inspect` captures the full persisted node state used by Pi Desktop for that container.
