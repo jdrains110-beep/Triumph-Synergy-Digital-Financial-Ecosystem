@@ -9,6 +9,7 @@ Completeness model for Pi Desktop node transfer:
 - Writes `manifest.csv` with mount metadata and archive mapping.
 - Writes `SHA256SUMS.txt` for archive integrity verification.
 - Includes Pi Desktop `user-preferences` when present.
+- Fails the export if archiving errors occur (prevents partial/false-success snapshots).
 
 Important rules:
 
