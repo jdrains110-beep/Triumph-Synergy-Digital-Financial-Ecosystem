@@ -20,9 +20,13 @@ class PaymentProcessor {
   private readonly workersCount: number;
   private readonly batchSize = 1000;
   private readonly processingInterval = 100; // ms
+  private readonly requirePqSignature: boolean;
+  private readonly quantumShieldUrl: string;
 
   constructor() {
     this.workersCount = Number(process.env.WORKER_THREADS) || os.cpus().length;
+    this.requirePqSignature = (process.env.PAYMENT_REQUIRE_PQ_SIGNATURE ?? "true").toLowerCase() === "true";
+    this.quantumShieldUrl = (process.env.QUANTUM_SHIELD_URL ?? "http://triumph-quantum-shield:8094").replace(/\/$/, "");
 
     this.redis = createClient({
       url: process.env.REDIS_URL || "redis://localhost:6379",
@@ -69,10 +73,68 @@ class PaymentProcessor {
     `;
   }
 
+  private canonicalize(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map((entry) => this.canonicalize(entry));
+    if (value && typeof value === "object") {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => [k, this.canonicalize(v)]),
+      );
+    }
+    return value;
+  }
+
+  private async enforceQuantumSignature(payment: Omit<PiPayment, "created_at" | "status">): Promise<void> {
+    if (!this.requirePqSignature) return;
+
+    const metadata = payment.metadata ?? {};
+    const signature = (metadata.quantum_signature as string | undefined)?.trim() ?? "";
+    const publicKey = (metadata.quantum_public_key as string | undefined)?.trim() ?? "";
+
+    if (!signature || !publicKey) {
+      throw new Error("Missing post-quantum payment signature metadata");
+    }
+
+    const metadataForPayload = { ...(metadata as Record<string, unknown>) };
+    delete metadataForPayload.quantum_signature;
+    delete metadataForPayload.quantum_public_key;
+
+    const payload = JSON.stringify(this.canonicalize({
+      payment_id: payment.payment_id,
+      user_id: payment.user_id,
+      amount: payment.amount,
+      metadata: metadataForPayload,
+    }));
+
+    const verifyRes = await fetch(`${this.quantumShieldUrl}/quantum/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        payload,
+        encoding: "utf8",
+        signature,
+        public_key: publicKey,
+      }),
+      signal: AbortSignal.timeout(6_000),
+    }) as Response;
+
+    if (!verifyRes.ok) {
+      throw new Error(`Quantum verifier unavailable (${verifyRes.status})`);
+    }
+
+    const verifyBody = await verifyRes.json() as { valid?: boolean };
+    if (!verifyBody.valid) {
+      throw new Error("Invalid post-quantum payment signature");
+    }
+  }
+
   /**
    * Queue payment for processing
    */
   async queuePayment(payment: Omit<PiPayment, "created_at" | "status">) {
+    await this.enforceQuantumSignature(payment);
+
     const paymentData: PiPayment = {
       ...payment,
       status: "pending",

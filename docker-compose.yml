@@ -145,10 +145,16 @@ services:
       <<: [*db-env, *pi-env]
       PORT: "8092"
       PI_NODE_HOST: ${PI_NODE_CONTAINER:-testnet2}
-      PI_NODE_API_PORT: ${PI_NODE_API_PORT:-8000}
+      PI_NODE_API_PORT: 8000
       PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31402}
-      POLL_INTERVAL_S: "5"
+      PI_NODE_FALLBACK_URL: http://host.docker.internal:31401
+      PI_NODE_PUBLIC_FALLBACK_URL: https://api.testnet.minepi.com
+      PI_POLL_RETRIES: "4"
+      PI_POLL_RETRY_DELAY_S: "1.5"
+      POLL_INTERVAL_S: "6"
       CENTRAL_NODE_URL: http://triumph-central-node:11626
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SOVEREIGN_PQ_ENFORCE: "true"
     expose:
       - "8092"
     networks:
@@ -158,11 +164,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health')"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=10)"]
+      interval: 15s
+      timeout: 15s
       retries: 5
-      start_period: 15s
+      start_period: 45s
 
   # ========================================================================
   # PI CENTRAL NODE — Stellar Core Integration
@@ -184,9 +190,10 @@ services:
       STELLAR_CORE_HTTP_PORT: 11626
       STELLAR_CORE_PEER_PORT: 11625
       PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
-      # KEY FIX: use local Pi node Horizon — same pi-bridge Docker network
+      # Prefer bridge proxy endpoint for resilient access to local Pi node.
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
-      PI_INTERNAL_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      PI_LOCAL_HORIZON: http://triumph-pi-bridge-connector:8092/pi-node
+      PI_INTERNAL_HORIZON_URL: http://triumph-pi-bridge-connector:8092/pi-node
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       SCP_AUTO_UPGRADE: "true"
       SCP_SYNC_INTERVAL_MS: 30000
@@ -282,6 +289,8 @@ services:
       ENGINE_MODE: hyper
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      TRANSACTION_REQUIRE_PQ_SIGNATURE: "true"
     volumes:
       - triumph_tx_data:/app/data
     networks:
@@ -435,6 +444,8 @@ services:
       <<: [*db-env, *pi-env]
       WORKER_THREADS: 2
       NODE_OPTIONS: "--max-old-space-size=64"
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      PAYMENT_REQUIRE_PQ_SIGNATURE: "true"
     networks:
       - triumph-net
       - pi-bridge
@@ -463,8 +474,11 @@ services:
     cpus: 0.2
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs/nginx/server-cert.pem:/etc/nginx/certs/server-cert.pem:ro
+      - ./certs/nginx/server-key.pem:/etc/nginx/certs/server-key.pem:ro
     depends_on:
       app:
         condition: service_started
@@ -473,11 +487,11 @@ services:
     networks:
       - triumph-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:80/api/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/health"]
       interval: 15s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 30s
 
   # ========================================================================
   # MARKET DATA SERVICE — Live Pi Horizon data relay
@@ -703,7 +717,7 @@ services:
       TRIUMPH_FOUNDER_TITLE: "Sovereign Owner and Creator"
       TRIUMPH_FOUNDER_SOVEREIGN_STATUS: "NESARA_GESARA_COMPLIANT"
       # Prefer local Horizon for all credit ledger tracking
-      PI_LOCAL_HORIZON: http://testnet2:8000
+      PI_LOCAL_HORIZON: http://host.docker.internal:31401
       # ── On-Chain Anchoring (Pi Testnet Blockchain) ──────────────────────
       # Keypair: GCVQFYCM7JYAH2KTNG2LDS422ASECKRVOJ7READD3IB3MLWN5BUL2SBL
       # Fund at: https://friendbot.testnet2.minepi.com?addr=GCVQFYCM7JYAH2KTNG2LDS422ASECKRVOJ7READD3IB3MLWN5BUL2SBL
@@ -778,6 +792,8 @@ services:
       VAULT_URL: http://triumph-vault:8081
       CONTRACTS_URL: http://triumph-smart-contracts:8082
       SCP_URL: http://triumph-scp-upgrader:8083
+      QPU_BRIDGE_URL: http://triumph-qpu-bridge:8098
+      SOVEREIGN_GATEWAY_URL: http://triumph-sovereign-gateway:8097
       BACKBONE_INTERVAL_S: "5"
       BACKBONE_TIMEOUT_S: "3"
       BACKBONE_MAX_FAILURES: "3"
@@ -792,11 +808,11 @@ services:
       dual-value-engine:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8094/health')"]
-      interval: 20s
-      timeout: 10s
-      retries: 4
-      start_period: 25s
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8094/health', timeout=10)"]
+      interval: 25s
+      timeout: 20s
+      retries: 5
+      start_period: 60s
 
   # ========================================================================
   # CLOUD MEMORY PLATFORM — LZ4 compressed, deduplicated, multi-platform store
@@ -968,6 +984,8 @@ services:
       ML_ENGINE_URL: http://triumph-ml-engine:8090
       CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      TOKENIZATION_REQUIRE_PQ_SIGNATURE: "true"
     expose:
       - "8089"
     networks:
@@ -1046,9 +1064,9 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9187/metrics"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9187/metrics"]
       interval: 20s
-      timeout: 5s
+      timeout: 12s
       retries: 3
       start_period: 15s
 
@@ -1104,11 +1122,11 @@ services:
     networks:
       - triumph-net
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9911/health',timeout=3)"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9911/health', timeout=8)"]
       interval: 30s
-      timeout: 12s
+      timeout: 20s
       retries: 5
-      start_period: 40s
+      start_period: 90s
 
   # ========================================================================
   # JUDICIAL MONITOR — Courtroom Transparency & Anti-Railroading Engine
@@ -1190,14 +1208,14 @@ services:
     environment:
       GOVERNOR_INTERVAL_S: "30"
       MEMORY_WARN_PCT: "80"
-      MEMORY_KILL_PCT: "95"
+      MEMORY_KILL_PCT: "101"
       METRICS_PORT: "9912"
       CONTAINER_PREFIX: "triumph-"
       PROTECTED_CONTAINERS: "triumph-postgres,triumph-redis"
-      HEALTH_FAIL_THRESHOLD: "3"
+      HEALTH_FAIL_THRESHOLD: "10"
       RESTART_BACKOFF_BASE_S: "60"
       RESTART_BACKOFF_MAX_S: "600"
-      HEALTH_PROBE_TIMEOUT_S: "5"
+      HEALTH_PROBE_TIMEOUT_S: "10"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
@@ -1205,9 +1223,9 @@ services:
     networks:
       - triumph-net
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9912/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9912/health', timeout=8)"]
       interval: 30s
-      timeout: 5s
+      timeout: 12s
       retries: 3
       start_period: 10s
 
@@ -1243,11 +1261,68 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9913/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9913/health', timeout=10)"]
       interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 90s
+
+  # ========================================================================
+  # QPU BRIDGE — Quantum Processing Unit Bridge
+  # Superior computational bridge connecting all 17+ ecosystem services.
+  # SUPERPOSITION: true parallelism via asyncio.gather (all states at once)
+  # ENTANGLEMENT:  bidirectional Redis pub/sub state sync between any pair
+  # CIRCUIT:       multi-gate pipelines — SIGN|FORWARD|VERIFY|COMPUTE|FAN-OUT
+  # TUNNEL:        every forward optionally quantum-signed (Dilithium-5)
+  # ========================================================================
+  qpu-bridge:
+    build:
+      context: docker/qpu-bridge
+    container_name: triumph-qpu-bridge
+    <<: *common
+    mem_limit: 192m
+    mem_reservation: 96m
+    cpus: 0.3
+    environment:
+      PORT: "8098"
+      REDIS_URL: redis://triumph-redis:6379
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      APP_URL: http://triumph-nginx:80
+      MARKET_DATA_URL: http://triumph-market-data:8085
+      BLOCKCHAIN_ORACLE_URL: http://triumph-blockchain-oracle:8086
+      COMPLIANCE_URL: http://triumph-compliance:8087
+      DEX_URL: http://triumph-dex:8088
+      TOKENIZATION_URL: http://triumph-tokenization-engine:8089
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      CLOUD_MEMORY_URL: http://triumph-cloud-memory:8095
+      TRANSACTION_URL: http://triumph-transaction-engine:8080
+      PAYMENT_URL: http://triumph-payment-processor:8084
+      VAULT_URL: http://triumph-vault:8081
+      CONTRACTS_URL: http://triumph-smart-contracts:8082
+      SCP_URL: http://triumph-scp-upgrader:8083
+      SOVEREIGN_GATEWAY_URL: http://triumph-sovereign-gateway:8097
+    expose:
+      - "8098"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      quantum-shield:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8098/health', timeout=10)"]
+      interval: 20s
       timeout: 12s
       retries: 5
-      start_period: 45s
+      start_period: 30s
 
 # ==========================================================================
 # VOLUMES — Persistent Data

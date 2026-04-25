@@ -21,9 +21,9 @@ COPY package.json yarn.lock ./
 RUN --mount=type=cache,id=triumph-yarn-cache,target=/usr/local/share/.cache/yarn \
     yarn cache clean --cache-folder /usr/local/share/.cache/yarn 2>/dev/null || true && \
     yarn install --frozen-lockfile \
-        --network-timeout 600000 \
-        --network-concurrency 1 \
-        --cache-folder /usr/local/share/.cache/yarn
+    --network-timeout 600000 \
+    --network-concurrency 1 \
+    --cache-folder /usr/local/share/.cache/yarn
 
 # Rebuild the source code only when needed
 FROM base AS builder

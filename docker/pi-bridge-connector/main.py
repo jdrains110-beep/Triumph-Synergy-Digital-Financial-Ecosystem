@@ -29,7 +29,7 @@ from typing import Any
 
 import redis.asyncio as aioredis
 import httpx
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.responses import PlainTextResponse
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -43,10 +43,17 @@ PI_NODE_PEER_PORT= int(os.getenv("PI_NODE_PEER_PORT", "31402"))
 STELLAR_CORE_PORT= int(os.getenv("STELLAR_CORE_PORT", "1570"))
 
 HORIZON_URL      = f"http://{PI_NODE_HOST}:{PI_NODE_API_PORT}"
+HORIZON_FALLBACK_URL = os.getenv("PI_NODE_FALLBACK_URL", "http://host.docker.internal:31401")
+HORIZON_PUBLIC_FALLBACK_URL = os.getenv("PI_NODE_PUBLIC_FALLBACK_URL", "https://api.testnet.minepi.com")
 CENTRAL_NODE_URL = os.getenv("CENTRAL_NODE_URL", "http://triumph-central-node:11626")
 REDIS_URL        = os.getenv("REDIS_URL",        "redis://triumph-redis:6379")
 POLL_INTERVAL    = float(os.getenv("POLL_INTERVAL_S", "5"))
+POLL_RETRIES     = int(os.getenv("PI_POLL_RETRIES", "2"))
+POLL_RETRY_DELAY = float(os.getenv("PI_POLL_RETRY_DELAY_S", "0.75"))
+PI_HTTP_TIMEOUT  = float(os.getenv("PI_HTTP_TIMEOUT_S", "8"))
 PORT             = int(os.getenv("PORT", "8092"))
+QUANTUM_SHIELD_URL = os.getenv("QUANTUM_SHIELD_URL", "http://triumph-quantum-shield:8094").rstrip("/")
+SOVEREIGN_PQ_ENFORCE = os.getenv("SOVEREIGN_PQ_ENFORCE", "true").lower() == "true"
 
 CENTRAL_NODE_KEY = os.getenv(
     "CENTRAL_NODE_PUBLIC_KEY",
@@ -62,8 +69,12 @@ pi_ledger_gauge        = Gauge("pi_bridge_ledger_sequence", "Latest ledger from 
 pi_sync_lag_gauge      = Gauge("pi_bridge_sync_lag_seconds", "Seconds since last successful Pi node poll")
 pi_txs_submitted       = Counter("pi_bridge_transactions_submitted_total", "Transactions submitted through Pi node")
 pi_txs_failed          = Counter("pi_bridge_transactions_failed_total", "Transaction submission failures")
+pi_pq_verified         = Counter("pi_bridge_pq_verified_total", "Valid post-quantum signatures accepted")
+pi_pq_rejected         = Counter("pi_bridge_pq_rejected_total", "Rejected post-quantum signature checks")
+pi_polls_total         = Counter("pi_bridge_polls_total", "Successful Pi node polls")
 pi_poll_errors         = Counter("pi_bridge_poll_errors_total", "Pi node poll errors")
 pi_redis_publishes     = Counter("pi_bridge_redis_publishes_total", "Redis pub/sub publishes")
+pi_ledger_height       = Gauge("pi_bridge_ledger_height", "Latest confirmed ledger sequence from Pi node")
 bridge_poll_duration   = Histogram("pi_bridge_poll_duration_seconds", "Time for a Pi node poll cycle")
 central_sync_gauge     = Gauge("pi_bridge_central_node_reachable", "1 if central node is reachable")
 
@@ -77,6 +88,7 @@ state: dict[str, Any] = {
     "latest_ledger_hash":    "",
     "latest_ledger_closed":  "",
     "horizon_version":       "",
+    "active_horizon_url":    HORIZON_URL,
     "core_version":          "",
     "network_passphrase":    "",
     "ingest_latest_ledger":  0,
@@ -95,73 +107,154 @@ redis_client: aioredis.Redis | None = None
 # ── Horizon helpers ────────────────────────────────────────────────────────────
 
 def _client() -> httpx.AsyncClient:
-    return httpx.AsyncClient(timeout=8.0, follow_redirects=True)
+    # Disable keep-alive reuse to avoid stale socket disconnects from Horizon.
+    limits = httpx.Limits(max_connections=20, max_keepalive_connections=0)
+    return httpx.AsyncClient(
+        timeout=PI_HTTP_TIMEOUT,
+        follow_redirects=True,
+        limits=limits,
+        headers={"Connection": "close"},
+    )
+
+
+def _horizon_candidates() -> list[str]:
+    candidates = [HORIZON_URL]
+    for url in (HORIZON_FALLBACK_URL, HORIZON_PUBLIC_FALLBACK_URL):
+        fb = (url or "").strip().rstrip("/")
+        if fb and fb not in candidates:
+            candidates.append(fb)
+    return candidates
+
+
+def _canonical_payload(payload: dict[str, Any]) -> str:
+    # Canonical serialization ensures all clients sign the same exact bytes.
+    return json.dumps(payload, separators=(",", ":"), sort_keys=True)
+
+
+async def _verify_quantum_signature(payload: dict[str, Any], signature: str, public_key: str) -> bool:
+    body = {
+        "payload": _canonical_payload(payload),
+        "encoding": "utf8",
+        "signature": signature,
+        "public_key": public_key,
+    }
+    async with _client() as c:
+        resp = await c.post(f"{QUANTUM_SHIELD_URL}/quantum/verify", json=body)
+        resp.raise_for_status()
+        return bool(resp.json().get("valid", False))
+
+
+async def _enforce_pq_signature(request: Request, payload: dict[str, Any]) -> None:
+    if not SOVEREIGN_PQ_ENFORCE:
+        return
+
+    signature = (request.headers.get("x-quantum-signature") or "").strip()
+    public_key = (request.headers.get("x-quantum-public-key") or "").strip()
+    if not signature or not public_key:
+        pi_pq_rejected.inc()
+        raise HTTPException(401, "Missing required post-quantum signature headers")
+
+    try:
+        valid = await _verify_quantum_signature(payload, signature, public_key)
+    except Exception as e:
+        pi_pq_rejected.inc()
+        raise HTTPException(503, f"Quantum verifier unavailable: {e}") from e
+
+    if not valid:
+        pi_pq_rejected.inc()
+        raise HTTPException(403, "Invalid post-quantum signature")
+
+    pi_pq_verified.inc()
+
+
+async def _fetch_horizon_snapshot(c: httpx.AsyncClient, base_url: str) -> tuple[dict[str, Any], dict[str, Any] | None, list[dict[str, Any]]]:
+    # Ledger endpoint is the hard liveness signal; root/transactions are soft signals.
+    ledger_r = await c.get(f"{base_url}/ledgers?order=desc&limit=1")
+    ledger_r.raise_for_status()
+    records = ledger_r.json().get("_embedded", {}).get("records", [])
+    ledger = records[0] if records else None
+
+    root: dict[str, Any] = {}
+    try:
+        root_r = await c.get(f"{base_url}/")
+        if root_r.status_code == 200:
+            root = root_r.json()
+    except Exception:
+        root = {}
+
+    tx_records: list[dict[str, Any]] = []
+    try:
+        tx_r = await c.get(f"{base_url}/transactions?order=desc&limit=10")
+        if tx_r.status_code == 200:
+            tx_records = tx_r.json().get("_embedded", {}).get("records", [])
+    except Exception:
+        # Transactions are non-critical for liveness; don't fail the whole poll.
+        tx_records = []
+
+    return root, ledger, tx_records
 
 
 async def _poll_pi_node() -> None:
     """Fetch latest ledger + recent transactions from the local Pi node Horizon."""
     with bridge_poll_duration.time():
-        async with _client() as c:
-            try:
-                r = await c.get(f"{HORIZON_URL}/")
-                r.raise_for_status()
-                root = r.json()
+        last_error: Exception | None = None
+        for base in _horizon_candidates():
+            for attempt in range(POLL_RETRIES + 1):
+                try:
+                    async with _client() as c:
+                        root, ledger, tx_records = await _fetch_horizon_snapshot(c, base)
 
-                # Latest ledger
-                lr = await c.get(f"{HORIZON_URL}/ledgers?order=desc&limit=1")
-                lr.raise_for_status()
-                records = lr.json().get("_embedded", {}).get("records", [])
-                ledger = records[0] if records else None
+                        old_seq = state["latest_ledger_seq"]
+                        new_seq = int(ledger.get("sequence", 0)) if ledger else 0
 
-                # Recent transactions (last 10)
-                tx_r = await c.get(f"{HORIZON_URL}/transactions?order=desc&limit=10")
-                tx_records: list[dict] = []
-                if tx_r.status_code == 200:
-                    tx_records = tx_r.json().get("_embedded", {}).get("records", [])
+                        state.update({
+                            "pi_node_reachable":    True,
+                            "active_horizon_url":   base,
+                            "horizon_version":      root.get("horizon_version", state["horizon_version"]),
+                            "core_version":         root.get("core_version", state["core_version"]),
+                            "network_passphrase":   root.get("network_passphrase", state["network_passphrase"]),
+                            "ingest_latest_ledger": root.get("ingest_latest_ledger", state["ingest_latest_ledger"]),
+                            "protocol_version":     root.get("current_protocol_version", state["protocol_version"]),
+                            "latest_ledger":        ledger,
+                            "latest_ledger_seq":    new_seq,
+                            "latest_ledger_hash":   ledger.get("hash", "") if ledger else "",
+                            "latest_ledger_closed": ledger.get("closed_at", "") if ledger else "",
+                            "last_polled":          time.time(),
+                            "last_error":           None,
+                            "poll_count":           state["poll_count"] + 1,
+                            "last_transactions":    tx_records[:10],
+                        })
+                        pi_ledger_gauge.set(new_seq)
+                        pi_ledger_height.set(new_seq)
+                        pi_polls_total.inc()
+                        pi_sync_lag_gauge.set(0)
 
-                old_seq = state["latest_ledger_seq"]
-                new_seq = int(ledger.get("sequence", 0)) if ledger else 0
+                        # Publish to Redis if ledger advanced
+                        if new_seq > old_seq and redis_client:
+                            msg = json.dumps({
+                                "type":       "ledger_closed",
+                                "sequence":   new_seq,
+                                "hash":       state["latest_ledger_hash"],
+                                "closed_at":  state["latest_ledger_closed"],
+                                "network":    state["network_passphrase"],
+                                "source":     "pi-bridge-connector",
+                            })
+                            await redis_client.publish("pi:ledger", msg)
+                            await redis_client.set("pi:latest_ledger", msg, ex=60)
+                            pi_redis_publishes.inc()
+                            log.info(f"[bridge] Ledger advanced: {old_seq} → {new_seq}")
 
-                state.update({
-                    "pi_node_reachable":    True,
-                    "horizon_version":      root.get("horizon_version", ""),
-                    "core_version":         root.get("core_version", ""),
-                    "network_passphrase":   root.get("network_passphrase", ""),
-                    "ingest_latest_ledger": root.get("ingest_latest_ledger", 0),
-                    "protocol_version":     root.get("current_protocol_version", 0),
-                    "latest_ledger":        ledger,
-                    "latest_ledger_seq":    new_seq,
-                    "latest_ledger_hash":   ledger.get("hash", "") if ledger else "",
-                    "latest_ledger_closed": ledger.get("closed_at", "") if ledger else "",
-                    "last_polled":          time.time(),
-                    "last_error":           None,
-                    "poll_count":           state["poll_count"] + 1,
-                    "last_transactions":    tx_records[:10],
-                })
-                pi_ledger_gauge.set(new_seq)
-                pi_sync_lag_gauge.set(0)
+                        return
+                except Exception as e:
+                    last_error = e
+                    if attempt < POLL_RETRIES:
+                        await asyncio.sleep(POLL_RETRY_DELAY * (attempt + 1))
 
-                # Publish to Redis if ledger advanced
-                if new_seq > old_seq and redis_client:
-                    msg = json.dumps({
-                        "type":       "ledger_closed",
-                        "sequence":   new_seq,
-                        "hash":       state["latest_ledger_hash"],
-                        "closed_at":  state["latest_ledger_closed"],
-                        "network":    state["network_passphrase"],
-                        "source":     "pi-bridge-connector",
-                    })
-                    await redis_client.publish("pi:ledger", msg)
-                    await redis_client.set("pi:latest_ledger", msg, ex=60)
-                    pi_redis_publishes.inc()
-                    log.info(f"[bridge] Ledger advanced: {old_seq} → {new_seq}")
-
-            except Exception as e:
-                state["pi_node_reachable"] = False
-                state["last_error"] = str(e)
-                pi_poll_errors.inc()
-                pi_sync_lag_gauge.set(time.time() - state["last_polled"] if state["last_polled"] else 0)
-                log.warning(f"[bridge] Pi node poll failed: {e}")
+        state["pi_node_reachable"] = False
+        state["last_error"] = str(last_error) if last_error else "unknown poll error"
+        pi_poll_errors.inc()
+        pi_sync_lag_gauge.set(time.time() - state["last_polled"] if state["last_polled"] else 0)
+        log.warning(f"[bridge] Pi node poll failed on all candidates { _horizon_candidates() }: {state['last_error']}")
 
 
 async def _poll_central_node() -> None:
@@ -214,6 +307,7 @@ async def health():
         "network":              state["network_passphrase"],
         "uptime_seconds":       round(time.time() - state["started_at"], 1),
         "pi_node_url":          HORIZON_URL,
+        "active_horizon_url":   state["active_horizon_url"],
         "central_node_url":     CENTRAL_NODE_URL,
     }
 
@@ -230,6 +324,7 @@ async def pi_node_status():
     return {
         "reachable":            state["pi_node_reachable"],
         "horizon_url":          HORIZON_URL,
+        "active_horizon_url":   state["active_horizon_url"],
         "horizon_version":      state["horizon_version"],
         "core_version":         state["core_version"],
         "network_passphrase":   state["network_passphrase"],
@@ -300,12 +395,14 @@ async def pi_node_account_transactions(address: str, limit: int = 20):
 
 
 @app.post("/pi-node/submit")
-async def submit_transaction(payload: dict = Body(...)):
+async def submit_transaction(request: Request, payload: dict = Body(...)):
     """
     Submit a signed XDR transaction through the local Pi node Horizon.
     Body: { "tx": "<XDR base64>" }
     This is the KEY integration point — all ecosystem transactions route through here.
     """
+    await _enforce_pq_signature(request, payload)
+
     tx_xdr = payload.get("tx") or payload.get("transaction") or payload.get("xdr")
     if not tx_xdr:
         raise HTTPException(400, "Body must include 'tx' (XDR base64)")
