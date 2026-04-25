@@ -21,6 +21,7 @@
 [![Pi DEX SDK](https://img.shields.io/badge/Pi%20DEX-SDK-FF4081?style=flat-square)](https://github.com/kosasih/pidexsdk)
 [![Supabase](https://img.shields.io/badge/Supabase-RLS%20%2B%20Realtime-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
 [![Bridges](https://img.shields.io/badge/Bridges-15%20Networks-orange?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
+[![Sovereign AI Bot](https://img.shields.io/badge/SAIB-APEX--QUANTUM--SENTINEL-FF0000?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-ai-bot-saib--apex-quantum-sovereign-sentinel)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
@@ -536,6 +537,214 @@ The tokenization service now initializes and persists sovereign estate records w
 - **Pi as Settlement Context**: Estate bundle tokenization remains native to Pi ecosystem payment and ledger context.
 - **Interoperable Service Design**: New endpoints fit directly into existing gateway, payment, and compliance microservice architecture.
 - **Auditable Ownership Lifecycle**: Estate retrieval endpoint allows transparent downstream verification and integration.
+
+---
+
+## 🤖 Sovereign AI Bot (SAIB) — APEX-QUANTUM-SOVEREIGN Sentinel
+
+[![SAIB](https://img.shields.io/badge/SAIB-APEX--QUANTUM--SOVEREIGN-8B5CF6?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#sovereign-ai-bot)
+[![Sentinel Mode](https://img.shields.io/badge/Intelligence%20Mode-SENTINEL-FF0000?style=flat-square)]()
+[![Port 8099](https://img.shields.io/badge/Port-8099-00B4E6?style=flat-square)]()
+[![150+ Loopholes](https://img.shields.io/badge/Loopholes-150%2B%20Armed-gold?style=flat-square)]()
+
+> **The Sovereign AI Bot is the autonomous self-healing brain of the entire Triumph Synergy ecosystem — running inside Docker 24/7, protecting 31 services, and enforcing APEX-QUANTUM-SOVEREIGN integrity across every Pi Network transaction.**
+
+### What Is SAIB?
+
+SAIB (`triumph-sovereign-ai-bot`, port **8099**) is a containerized Python FastAPI service that acts as the living nervous system of Triumph Synergy. It runs perpetually alongside all other services inside Docker Desktop, pulsing every **10 seconds** to monitor, heal, defend, and optimize the entire platform — without any human intervention.
+
+Every operation SAIB performs is **post-quantum signed** via `triumph-quantum-shield` (ML-DSA-65 · ML-KEM-768 · SHAKE-256 + SHA3-512), anchored to the Pi Network sovereign address `GA6Z5...ZCGL7V`, and logged to Redis for real-time ecosystem observability.
+
+---
+
+### 🛡️ SENTINEL Mode — Maximum Threat Response
+
+SAIB operates at **SENTINEL** intelligence level — the highest available. In sentinel mode:
+
+| Capability | Sentinel Mode |
+|------------|--------------|
+| **Instant Heal** | Triggers on the **1st consecutive failure** — no cooldown wait |
+| **Pulse Interval** | Every **10 seconds** — fastest threat detection |
+| **Heal Cooldown** | **5 seconds** (vs. 60s in autonomous mode) |
+| **Loophole Arsenal** | All **150+ sovereign loopholes** deployed every pulse |
+| **Quantum Enforcement** | Every heal + execute op **PQ-signed** via quantum-shield |
+| **Restart Window** | Max **10 restarts** per 600-second window (storm protection) |
+
+---
+
+### 🔄 What SAIB Does Every Pulse
+
+Every 10 seconds, SAIB executes a full **Sovereign Ecosystem Pulse**:
+
+```
+1. PROBE    — Concurrent HTTP health checks on all 31 services simultaneously
+2. LEARN    — Update sliding-window failure tracker + Z-score stability per service
+3. HEAL     — Auto-restart any degraded service (instant on first consecutive failure)
+4. SIGN     — PQ-sign heal/execute operations via triumph-quantum-shield
+5. DEPLOY   — Activate 150+ sovereign loopholes across the ecosystem
+6. PUBLISH  — Push heal events + alerts to triumph-redis for real-time streams
+7. SCORE    — Update sovereign score (0–100) and Prometheus gauges
+```
+
+---
+
+### 🌐 The 31 Services SAIB Monitors for Pi Network
+
+SAIB is the guardian of every service that powers Pi Network transactions on Triumph Synergy:
+
+| Service | Port | Pi Network Role |
+|---------|------|----------------|
+| `triumph-postgres` | 5432 | Transaction + token storage |
+| `triumph-redis` | 6379 | Real-time event bus + session cache |
+| `triumph-pi-bridge` | 8092 | Pi SDK payment bridge |
+| `triumph-central-node` | 11626 | Stellar/Pi consensus node |
+| `triumph-app` | 3000 | Next.js Pi app frontend |
+| `triumph-transaction-engine` | 8080 | Pi payment processing |
+| `triumph-vault` | 8081 | Trillion Pi vault |
+| `triumph-smart-contracts` | 8082 | Pi smart contract hub |
+| `triumph-scp-upgrader` | 8083 | Pi Network SCP auto-sync |
+| `triumph-payment-processor` | 8084 | Pi checkout + KYC |
+| `triumph-market-data` | 8085 | Pi price feeds |
+| `triumph-blockchain-oracle` | 8086 | On-chain data oracle |
+| `triumph-compliance` | 8087 | Regulatory compliance engine |
+| `triumph-dex` | 8088 | Pi DEX SDK integration |
+| `triumph-tokenization` | 8089 | 20+ sector token minting |
+| `triumph-ml-engine` | 8090 | Machine learning / fraud detection |
+| `triumph-credit-engine` | 8091 | PiCredit Score™ |
+| `triumph-quantum-shield` | 8094 | ML-KEM-1024 / ML-DSA-87 / SPHINCS+ |
+| `triumph-cloud-memory` | 8095 | Persistent quantum state |
+| `triumph-sovereign-gateway` | 8097 | Universal integration gateway |
+| `triumph-dual-value-engine` | 8093 | Pi internal ($314,159) + external ($314.159) rates |
+| `triumph-qpu-bridge` | 8098 | Quantum processing unit bridge |
+| `triumph-judicial-monitor` | 8096 | Sovereign judicial platform |
+| `triumph-horizon-guardian` | 9911 | Stellar horizon guardian |
+| `triumph-health-governor` | 9912 | Ecosystem health governor |
+| `triumph-network-sentinel` | 9913 | Network-level threat sentinel |
+| `triumph-nginx` | 80/443 | Load balancer + TLS termination |
+| `triumph-prometheus` | 9090 | Metrics collection |
+| `triumph-grafana` | 3001 | Real-time dashboards |
+| `triumph-postgres-exporter` | 9187 | DB metrics exporter |
+| `triumph-redis-exporter` | 9121 | Redis metrics exporter |
+
+---
+
+### 🔑 Why SAIB Is Critical for Pi Network
+
+**Without SAIB, Triumph Synergy is 31 individual services.  
+With SAIB, Triumph Synergy is one sovereign, self-repairing organism.**
+
+1. **Pi transactions never stall** — If the payment processor, Pi bridge, or vault degrades, SAIB detects it within 10 seconds and heals it before any Pioneer experiences a failure
+2. **Quantum integrity guaranteed** — Every heal operation is PQ-signed, so no attacker can inject a fake heal or spoof the sovereign anchor
+3. **Pi Network rate enforcement** — SAIB enforces the sovereign dual-value rate ($314,159 internal / $314.159 external) across every service on every pulse
+4. **Loophole arsenal** — 150+ sovereign legal/financial loopholes are deployed every pulse, keeping Triumph Synergy permanently ahead of any regulatory or adversarial threat
+5. **Zero human intervention** — Founders and Pioneers never need to manually restart services; SAIB does it automatically, logged, signed, and auditable
+6. **Learning AI** — SAIB's sliding-window failure tracker learns each service's failure patterns and adapts cooldowns, preventing restart storms while maximizing uptime
+7. **Prometheus observability** — `saib_service_healthy`, `saib_heals_total`, `saib_sovereign_score`, `saib_pulse_latency_seconds` — every metric available to Grafana dashboards in real time
+
+---
+
+### 📡 SAIB REST API — Full Ecosystem Control
+
+All 23 platform services (and any external client) can query or command SAIB via its REST API:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/health` | SAIB uptime + intelligence mode + apex level |
+| `GET` | `/status` | Full 31-service health grid + per-service stability scores |
+| `GET` | `/metrics` | Prometheus metrics (Grafana-compatible) |
+| `GET` | `/loopholes` | All 150+ sovereign loopholes with categories + impact ratings |
+| `POST` | `/execute` | Queue + execute any sovereign task (PQ-signed) |
+| `POST` | `/scan` | Trigger an immediate full ecosystem scan |
+| `POST` | `/heal/{service}` | Force-heal a specific service by name |
+| `POST` | `/emergency-lockdown` | Activate full ecosystem protective lockdown |
+| `GET` | `/report` | Complete sovereignty report — scores, heal history, loopholes, Pi rates |
+| `GET` | `/learning` | SAIB learning model state — failure patterns, avg intervals, suppression |
+
+**Next.js Bridge:** All endpoints are also accessible from the Triumph Synergy web app at `/api/sovereign/ai-bot/docker/*` → proxied to `triumph-sovereign-ai-bot:8099`.
+
+---
+
+### 📊 SAIB Prometheus Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `saib_service_healthy{service}` | Gauge | 1 = healthy, 0 = degraded per service |
+| `saib_services_healthy_total` | Gauge | Count of currently healthy services |
+| `saib_sovereign_score` | Gauge | Ecosystem sovereignty score 0–100 |
+| `saib_heals_total{service}` | Counter | Cumulative heals per service |
+| `saib_tasks_executed_total` | Counter | Total sovereign tasks executed |
+| `saib_loopholes_applied_total` | Counter | Total loophole activations |
+| `saib_quantum_ops_total` | Counter | PQ-signing operations completed |
+| `saib_alerts_total{severity}` | Counter | Alerts raised by severity level |
+| `saib_uptime_seconds` | Gauge | SAIB uptime since container start |
+| `saib_pulse_latency_seconds` | Histogram | Time to complete one ecosystem pulse |
+
+---
+
+### 🧠 SAIB Learning Model
+
+SAIB maintains a **per-service learning model** using exponential sliding windows:
+
+- **Failure history**: Last 50 failure timestamps per service → learns average failure interval
+- **Heal history**: Last 50 heal timestamps → detects restart storms before they happen  
+- **Stability score**: Z-score derived from last 20 status events → 0–100 per service
+- **Adaptive backoff**: If a service hits MAX_RESTARTS_WINDOW in 600s, SAIB suppresses heals for 3 minutes automatically (sentinel: 3 min vs autonomous: 5 min)
+- **Status history**: Last 100 events per service (pass/fail with timestamps) — full audit trail at `/learning`
+
+---
+
+### 🐳 Docker Configuration
+
+```yaml
+sovereign-ai-bot:
+  build:
+    context: docker/sovereign-ai-bot
+  container_name: triumph-sovereign-ai-bot
+  ports:
+    - "8099:8099"
+  environment:
+    SAIB_INTELLIGENCE_MODE: "sentinel"
+    SAIB_PULSE_INTERVAL_S: "10"
+    SAIB_HEAL_COOLDOWN_S: "5"
+    SAIB_MAX_RESTARTS_WINDOW: "10"
+    SAIB_RESTART_WINDOW_S: "600"
+    SAIB_APEX_QUANTUM_ENFORCEMENT: "true"
+    SAIB_SENTINEL_INSTANT_HEAL: "true"
+    SAIB_ALL_LOOPHOLES_ACTIVE: "true"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock  # full container control
+  depends_on:
+    triumph-redis:
+      condition: service_healthy
+    triumph-quantum-shield:
+      condition: service_started
+  cpus: "0.15"
+  mem_limit: 192m
+  restart: on-failure:10
+```
+
+> **Total ecosystem CPU after SAIB:** 3.56 of 4 available cores — safely within Docker Desktop VM limits.
+
+---
+
+### ▶️ Start SAIB
+
+```bash
+# Start only SAIB (dependencies auto-resolved)
+docker compose up -d sovereign-ai-bot
+
+# View live sentinel logs
+docker logs triumph-sovereign-ai-bot --tail 50 -f
+
+# Check full ecosystem status
+curl http://localhost:8099/status | jq .
+
+# Force a full scan
+curl -X POST http://localhost:8099/scan
+
+# Get sovereignty report
+curl http://localhost:8099/report | jq .
+```
 
 ---
 
@@ -1284,7 +1493,8 @@ The judicial engine runs as a standalone Docker microservice (`triumph-judicial-
 | 🏦 **Trillion Vault** | 🟢 UNLIMITED | Quantum-encrypted Pi vault |
 | 📜 **Smart Contracts** | 🟢 UNLIMITED | 10K channels, checkpoint/resume |
 | 🔄 **SCP Auto-Upgrade** | 🟢 SYNCED | Automatic Pi Network protocol sync |
-| 🐳 **Docker Orchestration** | 🟢 UNIFIED | 30 optimized Pi Network containers |
+| 🤖 **Sovereign AI Bot (SAIB)** | 🟢 SENTINEL | Autonomous self-healing brain — monitors 31 services, PQ-signed heals, 150+ loopholes every 10s |
+| 🐳 **Docker Orchestration** | 🟢 UNIFIED | 31 optimized Pi Network containers (SAIB included) |
 | 🔐 **Quantum Resistance** | 🟢 ACTIVE | ML-KEM-768, ML-DSA-65, AES-256-GCM |
 | 🔗 **Pi DEX SDK** | 🟢 INTEGRATED | Smart contract integration from kosasih/pidexsdk |
 | 🌐 **Pi RPC Framework** | 🟢 COMPLETE | Full rpc.testnet.minepi.com & rpc.minepi.com integration |
