@@ -197,6 +197,13 @@
     "axios": ">=1.15.0",
     "**/axios": ">=1.15.0",
     "dompurify": ">=3.4.0",
-    "follow-redirects": ">=1.16.0"
+    "follow-redirects": ">=1.16.0",
+    "ws": ">=8.17.1",
+    "cross-spawn": ">=7.0.6",
+    "path-to-regexp": ">=0.1.12",
+    "cookie": ">=0.7.0",
+    "micromatch": ">=4.0.8",
+    "braces": ">=3.0.3",
+    "serialize-javascript": ">=6.0.2"
   }
 }
