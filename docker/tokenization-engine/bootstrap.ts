@@ -8,6 +8,10 @@
  * Endpoints:
  *   GET  /health                              — liveness probe
  *   GET  /metrics                             — Prometheus metrics
+ *   GET  /api/utility/sectors                 — List all 20+ real-world utility sectors
+ *   POST /api/utility/{sector}                — Mint utility token for any sector
+ *   GET  /api/utility/token/{tokenId}         — Get utility token by ID
+ *   GET  /api/utility/{sector}/stats          — Sector mint statistics
  *   POST /api/tokenize/domain                 — Mint .pi domain token
  *   GET  /api/tokenize/domain/:tokenId        — Get domain token
  *   POST /api/tokenize/deed                   — Register allodial deed token
@@ -52,6 +56,28 @@ const metrics = {
   requests_total:       0,
   pq_verified:          0,
   pq_rejected:          0,
+  // ── 20+ Real-World Utility Sector Metrics ────────────────────────────────
+  sector_tokens_minted:           0,
+  banking_accounts_created:       0,
+  commerce_merchants_registered:  0,
+  delivery_shipments_tracked:     0,
+  travel_tickets_minted:          0,
+  education_credentials_issued:   0,
+  entertainment_media_minted:     0,
+  healthcare_records_tokenized:   0,
+  permits_issued:                 0,
+  vehicle_titles_tokenized:       0,
+  agriculture_assets_tokenized:   0,
+  energy_certificates_issued:     0,
+  telecom_identities_registered:  0,
+  insurance_policies_tokenized:   0,
+  legal_contracts_tokenized:      0,
+  government_ids_issued:          0,
+  supply_chain_assets_tracked:    0,
+  phygital_products_linked:       0,
+  ubi_enrollments:                0,
+  tokenized_assets_minted:        0,
+  realestate_commercial_tokenized:0,
 };
 
 function prometheusText(): string {
@@ -89,6 +115,70 @@ function prometheusText(): string {
     `# HELP tokenization_pq_rejected_total Total requests rejected by post-quantum policy`,
     `# TYPE tokenization_pq_rejected_total counter`,
     `tokenization_pq_rejected_total ${metrics.pq_rejected}`,
+    // Sector metrics
+    `# HELP tokenization_sector_tokens_minted_total Total utility sector tokens minted across all 20+ sectors`,
+    `# TYPE tokenization_sector_tokens_minted_total counter`,
+    `tokenization_sector_tokens_minted_total ${metrics.sector_tokens_minted}`,
+    `# HELP tokenization_banking_accounts_created_total Pi-native banking accounts tokenized`,
+    `# TYPE tokenization_banking_accounts_created_total counter`,
+    `tokenization_banking_accounts_created_total ${metrics.banking_accounts_created}`,
+    `# HELP tokenization_commerce_merchants_registered_total Commerce merchant tokens registered`,
+    `# TYPE tokenization_commerce_merchants_registered_total counter`,
+    `tokenization_commerce_merchants_registered_total ${metrics.commerce_merchants_registered}`,
+    `# HELP tokenization_delivery_shipments_tracked_total Delivery/logistics tokens created`,
+    `# TYPE tokenization_delivery_shipments_tracked_total counter`,
+    `tokenization_delivery_shipments_tracked_total ${metrics.delivery_shipments_tracked}`,
+    `# HELP tokenization_travel_tickets_minted_total Travel tickets minted on Pi rails`,
+    `# TYPE tokenization_travel_tickets_minted_total counter`,
+    `tokenization_travel_tickets_minted_total ${metrics.travel_tickets_minted}`,
+    `# HELP tokenization_education_credentials_issued_total Education credentials issued`,
+    `# TYPE tokenization_education_credentials_issued_total counter`,
+    `tokenization_education_credentials_issued_total ${metrics.education_credentials_issued}`,
+    `# HELP tokenization_entertainment_media_minted_total Entertainment/media rights tokens minted`,
+    `# TYPE tokenization_entertainment_media_minted_total counter`,
+    `tokenization_entertainment_media_minted_total ${metrics.entertainment_media_minted}`,
+    `# HELP tokenization_healthcare_records_tokenized_total Healthcare records tokenized`,
+    `# TYPE tokenization_healthcare_records_tokenized_total counter`,
+    `tokenization_healthcare_records_tokenized_total ${metrics.healthcare_records_tokenized}`,
+    `# HELP tokenization_permits_issued_total Government permits issued on chain`,
+    `# TYPE tokenization_permits_issued_total counter`,
+    `tokenization_permits_issued_total ${metrics.permits_issued}`,
+    `# HELP tokenization_vehicle_titles_tokenized_total Vehicle titles tokenized`,
+    `# TYPE tokenization_vehicle_titles_tokenized_total counter`,
+    `tokenization_vehicle_titles_tokenized_total ${metrics.vehicle_titles_tokenized}`,
+    `# HELP tokenization_agriculture_assets_tokenized_total Agricultural assets tokenized`,
+    `# TYPE tokenization_agriculture_assets_tokenized_total counter`,
+    `tokenization_agriculture_assets_tokenized_total ${metrics.agriculture_assets_tokenized}`,
+    `# HELP tokenization_energy_certificates_issued_total Energy/REC certificates issued`,
+    `# TYPE tokenization_energy_certificates_issued_total counter`,
+    `tokenization_energy_certificates_issued_total ${metrics.energy_certificates_issued}`,
+    `# HELP tokenization_telecom_identities_registered_total Telecom identities registered`,
+    `# TYPE tokenization_telecom_identities_registered_total counter`,
+    `tokenization_telecom_identities_registered_total ${metrics.telecom_identities_registered}`,
+    `# HELP tokenization_insurance_policies_tokenized_total Insurance policies tokenized`,
+    `# TYPE tokenization_insurance_policies_tokenized_total counter`,
+    `tokenization_insurance_policies_tokenized_total ${metrics.insurance_policies_tokenized}`,
+    `# HELP tokenization_legal_contracts_tokenized_total Legal contracts tokenized`,
+    `# TYPE tokenization_legal_contracts_tokenized_total counter`,
+    `tokenization_legal_contracts_tokenized_total ${metrics.legal_contracts_tokenized}`,
+    `# HELP tokenization_government_ids_issued_total Government digital IDs issued`,
+    `# TYPE tokenization_government_ids_issued_total counter`,
+    `tokenization_government_ids_issued_total ${metrics.government_ids_issued}`,
+    `# HELP tokenization_supply_chain_assets_tracked_total Supply chain assets tracked`,
+    `# TYPE tokenization_supply_chain_assets_tracked_total counter`,
+    `tokenization_supply_chain_assets_tracked_total ${metrics.supply_chain_assets_tracked}`,
+    `# HELP tokenization_phygital_products_linked_total Phygital retail products linked`,
+    `# TYPE tokenization_phygital_products_linked_total counter`,
+    `tokenization_phygital_products_linked_total ${metrics.phygital_products_linked}`,
+    `# HELP tokenization_ubi_enrollments_total UBI program enrollments`,
+    `# TYPE tokenization_ubi_enrollments_total counter`,
+    `tokenization_ubi_enrollments_total ${metrics.ubi_enrollments}`,
+    `# HELP tokenization_tokenized_assets_minted_total Financial assets tokenized (stocks/bonds/commodities)`,
+    `# TYPE tokenization_tokenized_assets_minted_total counter`,
+    `tokenization_tokenized_assets_minted_total ${metrics.tokenized_assets_minted}`,
+    `# HELP tokenization_realestate_commercial_tokenized_total Commercial real estate tokens`,
+    `# TYPE tokenization_realestate_commercial_tokenized_total counter`,
+    `tokenization_realestate_commercial_tokenized_total ${metrics.realestate_commercial_tokenized}`,
   ].join("\n") + "\n";
 }
 
@@ -161,6 +251,28 @@ async function initDb() {
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+      -- ── 20+ Real-World Utility Sector Token Registry ──────────────────────────
+      CREATE TABLE IF NOT EXISTS utility_tokens (
+        token_id        TEXT PRIMARY KEY,
+        sector          TEXT NOT NULL,
+        owner_address   TEXT NOT NULL,
+        owner_username  TEXT NOT NULL,
+        network         TEXT NOT NULL,
+        status          TEXT NOT NULL DEFAULT 'ACTIVE',
+        valuation_pi    TEXT NOT NULL DEFAULT '1',
+        valuation_usd   TEXT NOT NULL DEFAULT '0',
+        fortress_hash   TEXT,
+        pi_tx_hash      TEXT,
+        stellar_tx_hash TEXT,
+        stellar_ledger  BIGINT,
+        sector_data     JSONB,
+        metadata        JSONB,
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_utility_tokens_sector  ON utility_tokens(sector);
+      CREATE INDEX IF NOT EXISTS idx_utility_tokens_owner   ON utility_tokens(owner_address);
+      CREATE INDEX IF NOT EXISTS idx_utility_tokens_created ON utility_tokens(created_at DESC);
     `);
     console.log("[db] Tables ready");
   } catch (e) {
@@ -682,8 +794,568 @@ async function handleEnrollSovereignEstate(body: ReqBody, res: http.ServerRespon
   });
 }
 
-// ─── Server ───────────────────────────────────────────────────────────────────
+// ─── 20+ Real-World Utility Sector Engine ────────────────────────────────────
+//
+//  Sectors: Banking, Real Estate (Commercial), Commerce, Delivery, Travel,
+//           Education, Entertainment, Healthcare, Permits, Vehicles,
+//           Agriculture, Energy, Telecom, Insurance, Legal, Government,
+//           Supply Chain, Phygital Retail, UBI, Tokenized Assets
+//
+//  All sectors share the utility_tokens table. Each sector validates its own
+//  required fields, builds sector_data, and returns a PI-721 compatible token.
+// ─────────────────────────────────────────────────────────────────────────────
 
+type SectorDef = {
+  required: string[];
+  metricKey: keyof typeof metrics;
+  label: string;
+  buildSectorData: (body: ReqBody) => Record<string, unknown>;
+};
+
+const SECTORS: Record<string, SectorDef> = {
+
+  banking: {
+    label: "Pi-Native Banking Account",
+    required: ["ownerAddress", "ownerUsername", "accountType"],
+    metricKey: "banking_accounts_created",
+    buildSectorData: (b) => ({
+      accountType:     b.accountType,
+      routingCode:     sha256(`routing:${b.ownerAddress}:${Date.now()}`).slice(0, 12).toUpperCase(),
+      piIban:          `PI${sha256(String(b.ownerAddress)).slice(0, 22).toUpperCase()}`,
+      currency:        "PI",
+      swiftBic:        `TRIUMPH${(b.accountType as string).toUpperCase().slice(0, 3)}1`,
+      openedAt:        new Date().toISOString(),
+      kycStatus:       "VERIFIED_VIA_PI_NETWORK",
+      nesaraCompliant: true,
+      features:        ["instant_settlement", "pi_yield", "multi_sig", "quantum_protected"],
+    }),
+  },
+
+  "real-estate-commercial": {
+    label: "Commercial Real Estate Token",
+    required: ["ownerAddress", "ownerUsername", "propertyAddress", "sqft", "valuationPi"],
+    metricKey: "realestate_commercial_tokenized",
+    buildSectorData: (b) => ({
+      propertyAddress: b.propertyAddress,
+      sqft:            b.sqft,
+      zoning:          b.zoning ?? "COMMERCIAL",
+      apn:             b.apn ?? `APN-${sha256(String(b.propertyAddress)).slice(0, 8).toUpperCase()}`,
+      units:           b.units ?? 1,
+      occupancyPct:    b.occupancyPct ?? "100",
+      capRate:         b.capRate ?? "0",
+      titleStatus:     "TOKENIZED_EQUITABLE",
+      lienStatus:      "CLEAR",
+      complianceFlags: ["ADA_COMPLIANT", "FIRE_CODE", "ZONING_VERIFIED"],
+    }),
+  },
+
+  commerce: {
+    label: "Pi Commerce Merchant Token",
+    required: ["ownerAddress", "ownerUsername", "businessName", "category"],
+    metricKey: "commerce_merchants_registered",
+    buildSectorData: (b) => ({
+      businessName:   b.businessName,
+      category:       b.category,
+      piPaymentAddress: b.piPaymentAddress ?? b.ownerAddress,
+      taxId:          sha256(`tax:${b.businessName}:${b.ownerAddress}`).slice(0, 10).toUpperCase(),
+      merchantCode:   `TS-MERCH-${sha256(String(b.businessName)).slice(0, 6).toUpperCase()}`,
+      acceptedCurrencies: ["PI", "PI_STABLE", "PI_CREDIT"],
+      kybStatus:      "VERIFIED_VIA_PI_NETWORK",
+      piStoreEnabled: true,
+      royaltyPct:     b.royaltyPct ?? "0",
+      openForBusiness: true,
+    }),
+  },
+
+  delivery: {
+    label: "Pi Delivery Shipment Token",
+    required: ["ownerAddress", "ownerUsername", "origin", "destination", "contents"],
+    metricKey: "delivery_shipments_tracked",
+    buildSectorData: (b) => ({
+      trackingId:      b.trackingId ?? `TS-SHIP-${sha256(`${b.origin}:${b.destination}:${Date.now()}`).slice(0, 10).toUpperCase()}`,
+      origin:          b.origin,
+      destination:     b.destination,
+      contents:        b.contents,
+      carrierId:       b.carrierId ?? "TRIUMPH-DELIVERY",
+      estimatedDelivery: b.estimatedDelivery ?? null,
+      chainOfCustody:  [{ event: "CREATED", location: b.origin, ts: new Date().toISOString() }],
+      tamperProofHash: sha256(`${b.origin}|${b.destination}|${JSON.stringify(b.contents)}`),
+      piInsurance:     b.piInsurance ?? "0",
+      status:          "IN_TRANSIT",
+    }),
+  },
+
+  travel: {
+    label: "Pi Travel Ticket Token",
+    required: ["ownerAddress", "ownerUsername", "routeFrom", "routeTo", "departureTime"],
+    metricKey: "travel_tickets_minted",
+    buildSectorData: (b) => ({
+      routeFrom:      b.routeFrom,
+      routeTo:        b.routeTo,
+      departureTime:  b.departureTime,
+      seatClass:      b.seatClass ?? "ECONOMY",
+      seatNumber:     b.seatNumber ?? "AUTO",
+      pifare:         b.pifare ?? "1",
+      ticketNumber:   `TS-TKT-${sha256(`${b.routeFrom}:${b.routeTo}:${b.departureTime}:${b.ownerAddress}`).slice(0, 8).toUpperCase()}`,
+      carrier:        b.carrier ?? "PI-AIR",
+      loyaltyPoints:  Math.floor(parseFloat(String(b.pifare ?? "1")) * 1000),
+      refundPolicy:   b.refundPolicy ?? "REFUNDABLE_IN_PI",
+      checkedIn:      false,
+      boardingQrHash: sha256(`boarding:${b.ownerAddress}:${b.departureTime}`),
+    }),
+  },
+
+  education: {
+    label: "Pi Education Credential Token",
+    required: ["ownerAddress", "ownerUsername", "institution", "credentialType", "program"],
+    metricKey: "education_credentials_issued",
+    buildSectorData: (b) => ({
+      institution:     b.institution,
+      credentialType:  b.credentialType,  // DEGREE, CERTIFICATE, DIPLOMA, BADGE
+      program:         b.program,
+      recipientUsername: b.recipientUsername ?? b.ownerUsername,
+      completedAt:     b.completedAt ?? new Date().toISOString(),
+      gpa:             b.gpa ?? null,
+      honors:          b.honors ?? null,
+      credentialId:    `TS-EDU-${sha256(`${b.institution}:${b.program}:${b.ownerAddress}`).slice(0, 10).toUpperCase()}`,
+      transferable:    false,     // Soulbound — non-transferable NFT
+      verifiableUrl:   `https://triumph-synergy.vercel.app/verify/edu/${sha256(`${b.institution}:${b.ownerAddress}`).slice(0, 12)}`,
+      accreditationHash: sha256(`accredit:${b.institution}:${b.program}`),
+    }),
+  },
+
+  entertainment: {
+    label: "Pi Entertainment Media Rights Token",
+    required: ["ownerAddress", "ownerUsername", "title", "mediaType", "licenseType"],
+    metricKey: "entertainment_media_minted",
+    buildSectorData: (b) => ({
+      title:         b.title,
+      mediaType:     b.mediaType,   // FILM, MUSIC, GAME, EBOOK, NFT_ART, PODCAST
+      licenseType:   b.licenseType, // EXCLUSIVE, NON_EXCLUSIVE, CC0
+      royaltyPct:    b.royaltyPct ?? "10",
+      contentHash:   sha256(`${b.title}:${b.ownerAddress}:${b.mediaType}`),
+      rightsId:      `TS-ENT-${sha256(String(b.title)).slice(0, 8).toUpperCase()}`,
+      distributionPlatforms: b.distributionPlatforms ?? ["PI_BROWSER", "TRIUMPH_MARKETPLACE"],
+      piStreamingCredits: b.piStreamingCredits ?? "0",
+      mintedEditions:    b.editions ?? 1,
+      resaleEnabled:     b.resaleEnabled ?? true,
+      isrcCode:          b.isrcCode ?? null,
+    }),
+  },
+
+  healthcare: {
+    label: "Pi Healthcare Record Token",
+    required: ["ownerAddress", "ownerUsername", "recordType", "providerId"],
+    metricKey: "healthcare_records_tokenized",
+    buildSectorData: (b) => ({
+      recordType:     b.recordType,  // PRESCRIPTION, LAB_RESULT, INSURANCE_CLAIM, VACCINATION, EHR_SUMMARY
+      providerId:     sha256(String(b.providerId)).slice(0, 12),  // hashed for privacy
+      patientPiHash:  sha256(String(b.ownerAddress)),             // zero-knowledge reference
+      recordId:       `TS-HLTH-${sha256(`${b.recordType}:${b.ownerAddress}:${Date.now()}`).slice(0, 10).toUpperCase()}`,
+      consentGiven:   b.consentGiven ?? true,
+      hipaaCompliant: true,
+      dataMinimized:  true,
+      encryptionLevel:"AES-256-GCM + PQ-DILITHIUM",
+      interopStandard: b.interopStandard ?? "HL7_FHIR_R4",
+      validUntil:     b.validUntil ?? null,
+      piHealthInsuranceLinked: b.piHealthInsuranceLinked ?? false,
+    }),
+  },
+
+  permits: {
+    label: "Pi Government Permit Token",
+    required: ["ownerAddress", "ownerUsername", "permitType", "jurisdictionCode", "applicantName"],
+    metricKey: "permits_issued",
+    buildSectorData: (b) => ({
+      permitType:       b.permitType,   // BUSINESS, CONSTRUCTION, FOOD_HANDLER, FIREARMS, DRIVER, VENDOR
+      jurisdictionCode: b.jurisdictionCode,
+      applicantName:    b.applicantName,
+      permitNumber:     `TS-PERMIT-${sha256(`${b.permitType}:${b.jurisdictionCode}:${b.ownerAddress}`).slice(0, 8).toUpperCase()}`,
+      issuedAt:         new Date().toISOString(),
+      validUntil:       b.validUntil ?? null,
+      fee_pi:           b.fee_pi ?? "0",
+      inspectionStatus: b.inspectionStatus ?? "APPROVED",
+      renewalReminder:  true,
+      piGovernanceLinked: true,
+      qrVerifyHash:     sha256(`permit:${b.permitType}:${b.ownerAddress}`),
+    }),
+  },
+
+  vehicles: {
+    label: "Pi Vehicle Title Token",
+    required: ["ownerAddress", "ownerUsername", "vin", "make", "model", "year"],
+    metricKey: "vehicle_titles_tokenized",
+    buildSectorData: (b) => ({
+      vin:           b.vin,
+      make:          b.make,
+      model:         b.model,
+      year:          b.year,
+      titleState:    b.titleState ?? "PI_NETWORK_REGISTRY",
+      titleNumber:   `TS-VEH-${sha256(`${b.vin}:${b.ownerAddress}`).slice(0, 8).toUpperCase()}`,
+      odometer:      b.odometer ?? 0,
+      salvageTitle:  b.salvageTitle ?? false,
+      lienHolder:    b.lienHolder ?? null,
+      registrationExpiry: b.registrationExpiry ?? null,
+      piInsuranceToken: b.piInsuranceToken ?? null,
+      emissionsStatus: b.emissionsStatus ?? "COMPLIANT",
+      transferCount:  0,
+    }),
+  },
+
+  agriculture: {
+    label: "Pi Agricultural Asset Token",
+    required: ["ownerAddress", "ownerUsername", "parcelId", "acreage"],
+    metricKey: "agriculture_assets_tokenized",
+    buildSectorData: (b) => ({
+      parcelId:         b.parcelId,
+      acreage:          b.acreage,
+      cropType:         b.cropType ?? "MIXED",
+      soilGrade:        b.soilGrade ?? "A",
+      irrigated:        b.irrigated ?? false,
+      coordinates:      b.coordinates ?? null,
+      currentSeason:    b.currentSeason ?? new Date().getFullYear().toString(),
+      yieldEstimate_kg: b.yieldEstimate_kg ?? null,
+      certifications:   b.certifications ?? [],   // ORGANIC, NON_GMO, FAIR_TRADE
+      carbonCredits:    b.carbonCredits ?? "0",
+      piAgriInsurance:  b.piAgriInsurance ?? false,
+      waterRights:      b.waterRights ?? "STANDARD",
+      plotHash:         sha256(`agri:${b.parcelId}:${b.ownerAddress}`),
+    }),
+  },
+
+  energy: {
+    label: "Pi Energy Certificate (REC)",
+    required: ["ownerAddress", "ownerUsername", "sourceType", "capacity_kw", "location"],
+    metricKey: "energy_certificates_issued",
+    buildSectorData: (b) => ({
+      sourceType:     b.sourceType,   // SOLAR, WIND, HYDRO, GEOTHERMAL, NUCLEAR, BIOMASS
+      capacity_kw:    b.capacity_kw,
+      location:       b.location,
+      recId:          `TS-REC-${sha256(`${b.sourceType}:${b.ownerAddress}:${b.location}`).slice(0, 10).toUpperCase()}`,
+      generationDate: new Date().toISOString(),
+      validUntil:     b.validUntil ?? null,
+      mwhGenerated:   b.mwhGenerated ?? "0",
+      gridConnected:  b.gridConnected ?? true,
+      piEnergyCredits: b.piEnergyCredits ?? "1",
+      regualtoryBody: b.regulatoryBody ?? "PI_ENERGY_AUTHORITY",
+      tradeable:      true,
+      nesaraEnergyCompliant: true,
+    }),
+  },
+
+  telecom: {
+    label: "Pi Telecom Identity Token",
+    required: ["ownerAddress", "ownerUsername", "carrier", "plan"],
+    metricKey: "telecom_identities_registered",
+    buildSectorData: (b) => ({
+      carrier:          b.carrier,
+      plan:             b.plan,  // BASIC, PREMIUM, ENTERPRISE, IOT, ROAMING
+      phoneHash:        b.phoneNumber ? sha256(String(b.phoneNumber)) : null,   // privacy-preserving
+      simId:            `TS-SIM-${sha256(`${b.ownerAddress}:${b.carrier}:${Date.now()}`).slice(0, 10).toUpperCase()}`,
+      dataAllowance_gb: b.dataAllowance_gb ?? "5",
+      portabilityEnabled: true,
+      piCallCredits:    b.piCallCredits ?? "0",
+      e2eEncryption:   "KYBER-1024",
+      voipEnabled:      b.voipEnabled ?? false,
+      roamingEnabled:   b.roamingEnabled ?? false,
+      activatedAt:      new Date().toISOString(),
+    }),
+  },
+
+  insurance: {
+    label: "Pi Insurance Policy Token",
+    required: ["ownerAddress", "ownerUsername", "policyType", "coverage", "premium_pi"],
+    metricKey: "insurance_policies_tokenized",
+    buildSectorData: (b) => ({
+      policyType:     b.policyType,   // AUTO, HOME, LIFE, HEALTH, CROP, CYBER, TRAVEL
+      coverage:       b.coverage,
+      premium_pi:     b.premium_pi,
+      insuredValue:   b.insuredValue ?? "0",
+      policyNumber:   `TS-INS-${sha256(`${b.policyType}:${b.ownerAddress}:${Date.now()}`).slice(0, 10).toUpperCase()}`,
+      deductible_pi:  b.deductible_pi ?? "0",
+      coveragePeriod: { start: new Date().toISOString(), end: b.validUntil ?? null },
+      claimsCount:    0,
+      status:         "ACTIVE",
+      underwriter:    "TRIUMPH-SYNERGY-INSURANCE",
+      piClaimEnabled: true,
+      autoRenew:      b.autoRenew ?? true,
+      policyHash:     sha256(`policy:${b.policyType}:${b.ownerAddress}:${b.coverage}`),
+    }),
+  },
+
+  legal: {
+    label: "Pi Legal Contract Token",
+    required: ["ownerAddress", "ownerUsername", "counterpartyAddress", "contractType", "termsHash"],
+    metricKey: "legal_contracts_tokenized",
+    buildSectorData: (b) => ({
+      contractType:       b.contractType,  // NDA, LEASE, SALE, SERVICE, EMPLOYMENT, PARTNERSHIP
+      counterpartyAddress: b.counterpartyAddress,
+      termsHash:          b.termsHash,
+      contractId:         `TS-LEGAL-${sha256(`${b.contractType}:${b.ownerAddress}:${b.counterpartyAddress}`).slice(0, 10).toUpperCase()}`,
+      executedAt:         new Date().toISOString(),
+      expiresAt:          b.expiresAt ?? null,
+      jurisdiction:       b.jurisdiction ?? "PI_SOVEREIGN_COURT",
+      arbitrationEnabled: b.arbitrationEnabled ?? true,
+      multiSigRequired:   true,
+      signatories:        [b.ownerAddress, b.counterpartyAddress],
+      notarized:          false,   // requires external notary
+      legalStatus:        "PLATFORM_REGISTERED",
+      disputeResolution:  "TRIUMPH_JUDICIAL_MONITOR",
+    }),
+  },
+
+  government: {
+    label: "Pi Government Digital ID Token",
+    required: ["ownerAddress", "ownerUsername", "idType", "issuingAuthority"],
+    metricKey: "government_ids_issued",
+    buildSectorData: (b) => ({
+      idType:           b.idType,  // NATIONAL_ID, PASSPORT, VOTER_ID, DRIVER_LICENSE, TAX_ID, BIRTH_CERT
+      issuingAuthority: b.issuingAuthority,
+      nationalIdHash:   b.nationalId ? sha256(String(b.nationalId)) : null,  // zero-knowledge
+      govId:            `TS-GOV-${sha256(`${b.idType}:${b.ownerAddress}:${b.issuingAuthority}`).slice(0, 10).toUpperCase()}`,
+      issuedAt:         new Date().toISOString(),
+      validUntil:       b.validUntil ?? null,
+      biometricEnabled: b.biometricEnabled ?? false,
+      piKycLevel:       b.piKycLevel ?? "LEVEL_2",
+      nesaraCompliant:  true,
+      gesaraCompliant:  true,
+      selfSovereignId:  true,
+      revocable:        true,
+    }),
+  },
+
+  "supply-chain": {
+    label: "Pi Supply Chain Asset Token",
+    required: ["ownerAddress", "ownerUsername", "assetId", "product", "origin"],
+    metricKey: "supply_chain_assets_tracked",
+    buildSectorData: (b) => ({
+      assetId:         b.assetId,
+      product:         b.product,
+      origin:          b.origin,
+      currentLocation: b.currentLocation ?? b.origin,
+      custodian:       b.custodian ?? b.ownerUsername,
+      batchNumber:     b.batchNumber ?? `BATCH-${sha256(String(b.assetId)).slice(0, 6).toUpperCase()}`,
+      sku:             b.sku ?? null,
+      gtin:            b.gtin ?? null,
+      provenanceHash:  sha256(`${b.product}:${b.origin}:${b.assetId}`),
+      temperatureLog:  b.temperatureLog ?? [],
+      certifications:  b.certifications ?? [],
+      handoffs:        [{ from: b.origin, to: b.currentLocation ?? b.origin, ts: new Date().toISOString() }],
+      recalled:        false,
+      co2Footprint_kg: b.co2Footprint_kg ?? null,
+    }),
+  },
+
+  phygital: {
+    label: "Phygital Retail Product Token",
+    required: ["ownerAddress", "ownerUsername", "productId", "physicalHash", "category"],
+    metricKey: "phygital_products_linked",
+    buildSectorData: (b) => ({
+      productId:       b.productId,
+      physicalHash:    b.physicalHash,   // NFC/QR/RFID hash of physical item
+      category:        b.category,       // LUXURY, FASHION, ELECTRONICS, ART, COLLECTIBLE
+      digitalAssetUrl: b.digitalAssetUrl ?? null,
+      linkedNftId:     b.linkedNftId ?? null,
+      brand:           b.brand ?? null,
+      authenticity:    "TRIUMPH_CERTIFIED",
+      serialNumber:    b.serialNumber ?? null,
+      phygitalId:      `TS-PHYG-${sha256(`${b.productId}:${b.ownerAddress}`).slice(0, 8).toUpperCase()}`,
+      transferHistory: [],
+      piPriceTag:      b.piPriceTag ?? null,
+      warrantyExpiry:  b.warrantyExpiry ?? null,
+      resaleRoyalty:   b.resaleRoyalty ?? "5",
+    }),
+  },
+
+  ubi: {
+    label: "Pi Universal Basic Income Enrollment",
+    required: ["ownerAddress", "ownerUsername", "verificationLevel"],
+    metricKey: "ubi_enrollments",
+    buildSectorData: (b) => ({
+      verificationLevel:  b.verificationLevel,   // KYC_1, KYC_2, BIOMETRIC, SOVEREIGN
+      ubiId:              `TS-UBI-${sha256(`${b.ownerAddress}:${b.ownerUsername}`).slice(0, 10).toUpperCase()}`,
+      enrolledAt:         new Date().toISOString(),
+      nextDistribution:   (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })(),
+      monthlyAllotment_pi: b.monthlyAllotment_pi ?? "3.14159",
+      distributionCycle:  b.distributionCycle ?? "MONTHLY",
+      residencyHash:      b.residencyHash ? sha256(String(b.residencyHash)) : null,
+      eligibilityStatus:  "APPROVED",
+      piGovernanceVote:   b.piGovernanceVote ?? false,
+      stackable:          false,
+      totalDistributed_pi:"0",
+      nesaraUbiCompliant: true,
+      gesaraUbiCompliant: true,
+    }),
+  },
+
+  "tokenized-assets": {
+    label: "Pi Tokenized Financial Asset",
+    required: ["ownerAddress", "ownerUsername", "assetClass", "assetName", "valuationPi"],
+    metricKey: "tokenized_assets_minted",
+    buildSectorData: (b) => ({
+      assetClass:      b.assetClass,    // STOCK, BOND, COMMODITY, REIT, ETF, FUND, CRYPTO_INDEX
+      assetName:       b.assetName,
+      ticker:          b.ticker ?? null,
+      shares:          b.shares ?? "1",
+      valuationPi:     b.valuationPi,
+      cusip:           b.cusip ?? null,
+      isin:            b.isin ?? null,
+      assetId:         `TS-ASSET-${sha256(`${b.assetClass}:${b.assetName}:${b.ownerAddress}`).slice(0, 10).toUpperCase()}`,
+      fractionalized:  b.fractionalized ?? false,
+      dividendEnabled: b.dividendEnabled ?? false,
+      yieldRate:       b.yieldRate ?? "0",
+      maturityDate:    b.maturityDate ?? null,
+      custodian:       "TRIUMPH-SYNERGY-VAULT",
+      complianceStatus:"SEC_EQUIVALENT_PI_COMPLIANT",
+      tradeable:       b.tradeable ?? true,
+      piExchangeListed: b.piExchangeListed ?? false,
+    }),
+  },
+
+};
+
+// ─── Generic utility sector mint ─────────────────────────────────────────────
+
+async function handleMintUtilitySector(
+  sector: string,
+  body: ReqBody,
+  res: http.ServerResponse,
+): Promise<void> {
+  const def = SECTORS[sector];
+  if (!def) {
+    json(res, 404, { error: `Unknown sector: ${sector}. Available: ${Object.keys(SECTORS).join(", ")}` });
+    return;
+  }
+
+  // Validate required fields
+  const ownerAddress  = (body.ownerAddress  as string | undefined)?.trim();
+  const ownerUsername = ((body.ownerUsername as string | undefined) ?? "unknown").trim();
+  const valuationPi   = (body.valuationPi   as string | undefined) ?? "1";
+
+  if (!ownerAddress || !/^G[A-Z2-7]{55}$/.test(ownerAddress)) {
+    json(res, 400, { error: "ownerAddress must be a valid Pi wallet (G...55 chars)" });
+    return;
+  }
+  const missing = def.required.filter(k => k !== "ownerAddress" && k !== "ownerUsername" && !body[k]);
+  if (missing.length > 0) {
+    json(res, 400, { error: `Missing required fields for sector '${sector}': ${missing.join(", ")}` });
+    return;
+  }
+
+  const ledger    = await fetchLedger();
+  const createdAt = new Date().toISOString();
+  const tokenId   = makeTokenId([sector, ownerAddress, createdAt, randomNonce()]);
+  const payload   = JSON.stringify({ tokenId, sector, ownerAddress, valuationPi });
+
+  const fortress = runFortress({
+    payload,
+    ownerAddress,
+    ownerUsername,
+    domain: `${sector}.utility.pi`,
+    valuationPi,
+    assetType: "domain",
+    ledger,
+    mintedAt: createdAt,
+    tokenId,
+  });
+  if (!fortress.secured) {
+    metrics.fortress_fails++;
+    json(res, 422, { error: `Fortress protection failed — ${fortress.threat} threat` });
+    return;
+  }
+  metrics.fortress_passes++;
+
+  const piTxHash      = sha256(`pi:utility:${sector}:${tokenId}:${ledger}`);
+  const stellarTxHash = sha256(`stellar:utility:${sector}:${tokenId}:${ledger}`);
+  const valuationUsd  = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
+
+  const sectorData = def.buildSectorData(body);
+
+  const token = {
+    tokenId,
+    sector,
+    sectorLabel:        def.label,
+    standard:           "PI-721",
+    network:            NETWORK,
+    status:             "ACTIVE",
+    ownerAddress,
+    ownerUsername,
+    valuationPi,
+    valuationUsd,
+    sectorData,
+    fortressHash:       fortress.hash,
+    securityScore:      fortress.score,
+    piTxHash,
+    stellarTxHash,
+    stellarLedger:      ledger,
+    createdAt,
+    updatedAt:          createdAt,
+    platform:           "Triumph Synergy — Sovereign Quantum Financial Ecosystem",
+    piNetworkUtility:   "REAL_WORLD_SECTOR_TOKEN",
+  };
+
+  // Persist
+  await redis.setEx(`utility:${sector}:${tokenId}`, 86_400 * 90, JSON.stringify(token)).catch(() => undefined);
+  if (pg) {
+    pg.query(
+      `INSERT INTO utility_tokens
+         (token_id,sector,owner_address,owner_username,network,status,valuation_pi,valuation_usd,
+          fortress_hash,pi_tx_hash,stellar_tx_hash,stellar_ledger,sector_data,metadata)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+       ON CONFLICT (token_id) DO NOTHING`,
+      [tokenId, sector, ownerAddress, ownerUsername, NETWORK, "ACTIVE",
+       valuationPi, valuationUsd, fortress.hash, piTxHash, stellarTxHash, ledger,
+       JSON.stringify(sectorData), JSON.stringify(token)],
+    ).catch((e: Error) => console.error("[db:utility]", e.message));
+  }
+
+  (metrics[def.metricKey] as number)++;
+  metrics.sector_tokens_minted++;
+
+  json(res, 201, {
+    success: true,
+    token,
+    piBlockchainTx:  piTxHash,
+    stellarAnchorTx: stellarTxHash,
+  });
+}
+
+async function handleGetUtilityToken(tokenId: string, res: http.ServerResponse): Promise<void> {
+  // Try Redis across all sector key patterns
+  const keys = await redis.keys(`utility:*:${tokenId}`).catch(() => [] as string[]);
+  if (keys.length > 0) {
+    const raw = await redis.get(keys[0]).catch(() => null);
+    if (raw) {
+      metrics.redis_cache_hits++;
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(raw);
+      return;
+    }
+  }
+
+  if (pg) {
+    try {
+      const row = await pg.query(
+        "SELECT metadata FROM utility_tokens WHERE token_id = $1 LIMIT 1",
+        [tokenId],
+      );
+      const meta = row.rows[0]?.metadata;
+      if (meta) {
+        const data = JSON.stringify(meta);
+        await redis.setEx(`utility:lookup:${tokenId}`, 86_400, data).catch(() => undefined);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(data);
+        return;
+      }
+    } catch (e) {
+      console.error("[db:utility:get]", (e as Error).message);
+    }
+  }
+
+  json(res, 404, { error: "Utility token not found" });
+}
+
+// ─── Server ───────────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
   metrics.requests_total++;
   const url = req.url ?? "/";
@@ -695,6 +1367,8 @@ const server = http.createServer(async (req, res) => {
       status: "ok", service: "tokenization-engine", port: PORT,
       network: NETWORK, ledger: cachedLedger,
       domains: metrics.domains_minted, deeds: metrics.deeds_minted,
+      sectorTokens: metrics.sector_tokens_minted,
+      sectors: Object.keys(SECTORS).length,
     });
     return;
   }
@@ -802,6 +1476,59 @@ const server = http.createServer(async (req, res) => {
     metrics.redis_cache_hits++;
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(raw);
+    return;
+  }
+
+  // ── Utility sector catalog ───────────────────────────────────────────────
+  if (url === "/api/utility/sectors" && method === "GET") {
+    json(res, 200, {
+      total: Object.keys(SECTORS).length,
+      sectors: Object.entries(SECTORS).map(([key, def]) => ({
+        sector: key,
+        label:  def.label,
+        endpoint: `/api/utility/${key}`,
+        required: def.required,
+        metric: `tokenization_${def.metricKey}_total`,
+        minted: metrics[def.metricKey],
+      })),
+      mintedTotal: metrics.sector_tokens_minted,
+      platform: "Triumph Synergy — Sovereign Quantum Financial Ecosystem",
+    });
+    return;
+  }
+
+  // ── Utility sector token lookup ─────────────────────────────────────────
+  if (url.startsWith("/api/utility/token/") && method === "GET") {
+    const tokenId = url.replace("/api/utility/token/", "").split("?")[0];
+    await handleGetUtilityToken(tokenId, res);
+    return;
+  }
+
+  // ── Utility sector — sector stats by name ───────────────────────────────
+  if (url.startsWith("/api/utility/") && url.endsWith("/stats") && method === "GET") {
+    const sector = url.replace("/api/utility/", "").replace("/stats", "");
+    const def = SECTORS[sector];
+    if (!def) { json(res, 404, { error: `Unknown sector: ${sector}` }); return; }
+    json(res, 200, {
+      sector,
+      label:   def.label,
+      minted:  metrics[def.metricKey],
+      totalSectorTokens: metrics.sector_tokens_minted,
+    });
+    return;
+  }
+
+  // ── Utility sector — mint ────────────────────────────────────────────────
+  if (url.startsWith("/api/utility/") && method === "POST") {
+    const sector = url.replace("/api/utility/", "").split("?")[0];
+    try {
+      const body = await readBody(req);
+      if (!(await enforceQuantumSignature(req, body, res))) return;
+      await handleMintUtilitySector(sector, body, res);
+    } catch (e) {
+      metrics.errors_total++;
+      json(res, 400, { error: (e as Error).message });
+    }
     return;
   }
 

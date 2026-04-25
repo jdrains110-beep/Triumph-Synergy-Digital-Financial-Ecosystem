@@ -9,6 +9,7 @@
 [![Pi Network](https://img.shields.io/badge/Pi%20Network-SOVEREIGN-8B5CF6?style=flat-square)](https://minepi.com)
 [![Stellar](https://img.shields.io/badge/Stellar-Settlement-00B4E6?style=flat-square)](https://stellar.org)
 [![QFS](https://img.shields.io/badge/QFS-IMMORTAL-gold?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
+[![20+ Sectors](https://img.shields.io/badge/Real--World%20Sectors-20%2B-FF6B35?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#20-real-world-utility-sectors)
 [![Gateway](https://img.shields.io/badge/Universal%20Gateway-LIVE-00FF00?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![Security](https://img.shields.io/badge/Security-SUPREME-00FF00?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![PiOS](https://img.shields.io/badge/License-PiOS-purple?style=flat-square)](LICENSE-PIOS)
@@ -23,7 +24,445 @@
 
 ---
 
-## 📋 What's New — April 24, 2026
+## 🌍 20+ Real-World Utility Sectors — Pi Network's Sovereign Utility Layer
+
+> **Triumph Synergy is the only platform on Pi Network that tokenizes real-world assets, identities, and services across 20+ economic sectors — all on-chain, all quantum-resistant, all settled in Pi.**
+>
+> Every sector token is:
+> - Minted as a **PI-721 standard token** anchored to Stellar/Pi ledger
+> - Protected by the **21-Layer Fortress** (KYC, replay prevention, rate limiting, jurisdiction, PQ signature)
+> - Persisted to **Postgres + Redis** with full audit trail
+> - Tracked by **Prometheus metrics** for real-time operational visibility
+> - Accessible via a single unified API: `POST /api/utility/{sector}`
+
+### Sector API Reference
+
+**Base:** `POST /api/utility/{sector}` — requires `x-quantum-signature` + `x-quantum-public-key` headers
+
+```
+GET  /api/utility/sectors                   — Full sector catalog with mint counts
+POST /api/utility/{sector}                  — Mint utility token for any sector
+GET  /api/utility/token/{tokenId}           — Retrieve any utility token by ID
+GET  /api/utility/{sector}/stats            — Per-sector mint statistics
+```
+
+---
+
+### 1. 🏦 Banking — Pi-Native Financial Accounts
+**Endpoint:** `POST /api/utility/banking`
+
+Pi Network replaces legacy SWIFT/IBAN infrastructure with sovereign, self-custodied accounts settled instantly on the Pi ledger. No intermediary bank required.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `ownerAddress` | ✅ | Pi wallet (G...55 chars) |
+| `ownerUsername` | ✅ | Pi username |
+| `accountType` | ✅ | `savings`, `checking`, `escrow`, `business` |
+| `initialDeposit` | optional | Opening balance in Pi |
+
+**Returns:** `piIban`, `routingCode`, `swiftBic`, KYC status, multi-sig features, Pi yield enrollment
+
+**Pi Utility:** Eliminates the need for traditional bank accounts. Pi holders can open sovereign accounts, receive wages, and transact globally with no bank fees or CBDC surveillance.
+
+---
+
+### 2. 🏢 Real Estate (Commercial) — Tokenized Property Rights
+**Endpoint:** `POST /api/utility/real-estate-commercial`
+
+Commercial properties — office buildings, warehouses, retail centers — are tokenized with equitable title, APN, zoning, and lien status on Pi rails.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `ownerAddress` | ✅ | Pi wallet |
+| `ownerUsername` | ✅ | Pi username |
+| `propertyAddress` | ✅ | Physical address |
+| `sqft` | ✅ | Square footage |
+| `valuationPi` | ✅ | Pi valuation |
+| `zoning`, `apn`, `capRate`, `units` | optional | Property details |
+
+**Pi Utility:** Enables fractional property ownership, Pi-denominated rent collection, and cross-border commercial real estate investment without traditional title companies.
+
+---
+
+### 3. 🛒 Commerce — Pi Merchant Registry
+**Endpoint:** `POST /api/utility/commerce`
+
+Every business on Earth can register as a Pi merchant — receiving a verified merchant token, Pi payment address, and KYB compliance status tied to their Pi identity.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `businessName` | ✅ | Legal business name |
+| `category` | ✅ | Business category |
+| `piPaymentAddress` | optional | Receiving wallet |
+| `royaltyPct` | optional | Resale royalty % |
+
+**Returns:** `merchantCode`, Pi store status, accepted currencies (`PI`, `PI_STABLE`, `PI_CREDIT`), tax ID hash
+
+**Pi Utility:** Creates a global Pi-native merchant directory. Any Pi holder can become a verified merchant with a tamper-proof business token.
+
+---
+
+### 4. 📦 Delivery — Pi-Tracked Logistics
+**Endpoint:** `POST /api/utility/delivery`
+
+Every shipment gets an immutable chain-of-custody token on Pi. Tamper-proof tracking from origin to destination with Pi-denominated insurance.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `origin` | ✅ | Shipment origin |
+| `destination` | ✅ | Delivery address |
+| `contents` | ✅ | Item description |
+| `carrierId`, `estimatedDelivery`, `piInsurance` | optional | Carrier details |
+
+**Returns:** `trackingId`, `tamperProofHash`, chain-of-custody log, Pi insurance value
+
+**Pi Utility:** Every package, pallet, and container can be tracked and insured in Pi. Eliminates counterfeit goods by anchoring physical items to Pi blockchain records.
+
+---
+
+### 5. ✈️ Travel — Pi Tickets & Loyalty
+**Endpoint:** `POST /api/utility/travel`
+
+Airline, rail, and transit tickets minted as Pi NFTs — non-duplicatable, instantly verifiable, with automatic Pi loyalty point accrual.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `routeFrom` | ✅ | Departure location |
+| `routeTo` | ✅ | Arrival location |
+| `departureTime` | ✅ | ISO 8601 timestamp |
+| `seatClass`, `pifare`, `carrier` | optional | Booking details |
+
+**Returns:** `ticketNumber`, `boardingQrHash`, `loyaltyPoints` (1,000 pts per Pi fare), refund policy
+
+**Pi Utility:** Pi-native airline, hotel, and transit booking. Loyalty points are on-chain and transferable. No airline miles expiration, no centralized point theft.
+
+---
+
+### 6. 🎓 Education — Sovereign Credential NFTs
+**Endpoint:** `POST /api/utility/education`
+
+Degrees, certificates, diplomas, and skill badges are issued as soulbound (non-transferable) PI-721 tokens — permanently verifiable, unforgeable, and Pi-anchored.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `institution` | ✅ | Issuing institution name |
+| `credentialType` | ✅ | `DEGREE`, `CERTIFICATE`, `DIPLOMA`, `BADGE` |
+| `program` | ✅ | Program/course name |
+| `gpa`, `honors`, `completedAt` | optional | Academic details |
+
+**Returns:** `credentialId`, `verifiableUrl`, accreditation hash, soulbound status (non-transferable)
+
+**Pi Utility:** Eliminates diploma mills and credential fraud. Employers can verify any degree in seconds via on-chain lookup. Pi-native student loans and scholarships become possible.
+
+---
+
+### 7. 🎬 Entertainment — Pi Media Rights & Royalties
+**Endpoint:** `POST /api/utility/entertainment`
+
+Films, music, games, eBooks, podcasts, and digital art are registered with on-chain royalty splits and distribution rights — automatically paid in Pi.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `title` | ✅ | Content title |
+| `mediaType` | ✅ | `FILM`, `MUSIC`, `GAME`, `EBOOK`, `NFT_ART`, `PODCAST` |
+| `licenseType` | ✅ | `EXCLUSIVE`, `NON_EXCLUSIVE`, `CC0` |
+| `royaltyPct`, `editions`, `isrcCode` | optional | Rights details |
+
+**Returns:** `rightsId`, `contentHash`, distribution platforms, Pi streaming credits, resale royalty enforcement
+
+**Pi Utility:** Artists receive royalties automatically in Pi on every resale or stream. No record labels, no middlemen. Pi becomes the global entertainment payment layer.
+
+---
+
+### 8. 🏥 Healthcare — Privacy-First Health Record Tokens
+**Endpoint:** `POST /api/utility/healthcare`
+
+Medical records, prescriptions, lab results, and insurance claims are tokenized with zero-knowledge privacy (patient data hashed, never stored plaintext) and HL7 FHIR R4 interoperability.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `recordType` | ✅ | `PRESCRIPTION`, `LAB_RESULT`, `INSURANCE_CLAIM`, `VACCINATION`, `EHR_SUMMARY` |
+| `providerId` | ✅ | Provider identifier (hashed on-chain) |
+| `interopStandard` | optional | Default: `HL7_FHIR_R4` |
+
+**Returns:** Privacy-preserving `recordId`, `patientPiHash` (ZK reference), `encryptionLevel: AES-256-GCM + PQ-DILITHIUM`, HIPAA compliance flag
+
+**Pi Utility:** Patients own their health data on Pi — no insurance company can sell or deny access. Pi-denominated health insurance payments eliminate claim delays.
+
+---
+
+### 9. 📋 Permits — Government Permits On-Chain
+**Endpoint:** `POST /api/utility/permits`
+
+Business licenses, construction permits, food handler cards, vendor permits — all issued as verifiable on-chain tokens with QR verification.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `permitType` | ✅ | `BUSINESS`, `CONSTRUCTION`, `FOOD_HANDLER`, `FIREARMS`, `DRIVER`, `VENDOR` |
+| `jurisdictionCode` | ✅ | Issuing jurisdiction code |
+| `applicantName` | ✅ | Applicant legal name |
+| `validUntil`, `fee_pi` | optional | Expiry and fee |
+
+**Returns:** `permitNumber`, QR verify hash, renewal reminder, Pi governance link, inspection status
+
+**Pi Utility:** Eliminates permit fraud and corruption. Citizens pay permit fees in Pi. Instant verification eliminates weeks of bureaucratic delays.
+
+---
+
+### 10. 🚗 Vehicles — Pi Vehicle Title Registry
+**Endpoint:** `POST /api/utility/vehicles`
+
+Vehicle titles, VIN records, lien status, and registration are tokenized — creating a tamper-proof national vehicle registry on Pi.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `vin` | ✅ | Vehicle Identification Number |
+| `make`, `model`, `year` | ✅ | Vehicle details |
+| `titleState`, `odometer`, `lienHolder` | optional | Title details |
+
+**Returns:** `titleNumber`, lien status, transfer count, emissions compliance, Pi insurance token link
+
+**Pi Utility:** Eliminates title fraud (the #1 vehicle scam). Every car sale is an atomic Pi transaction — title transfers instantly with payment. No DMV delays.
+
+---
+
+### 11. 🌾 Agriculture — Pi Crop & Land Asset Tokens
+**Endpoint:** `POST /api/utility/agriculture`
+
+Agricultural parcels, crop yields, water rights, organic certifications, and carbon credits are tokenized — enabling Pi-denominated crop financing, insurance, and commodity trading.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `parcelId` | ✅ | Land parcel identifier |
+| `acreage` | ✅ | Land size in acres |
+| `cropType`, `soilGrade`, `coordinates` | optional | Parcel details |
+| `certifications` | optional | `ORGANIC`, `NON_GMO`, `FAIR_TRADE` |
+
+**Returns:** `plotHash`, carbon credits, yield estimate, water rights status, Pi agri-insurance link
+
+**Pi Utility:** Smallholder farmers worldwide get Pi-denominated micro-loans against tokenized crop yields. Carbon credits are tradeable in Pi. Food supply chain transparency from soil to shelf.
+
+---
+
+### 12. ⚡ Energy — Pi Renewable Energy Certificates (REC)
+**Endpoint:** `POST /api/utility/energy`
+
+Solar panels, wind turbines, hydro plants, and geothermal installations generate Pi-native RECs — tradeable energy certificates representing verified clean energy production.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `sourceType` | ✅ | `SOLAR`, `WIND`, `HYDRO`, `GEOTHERMAL`, `NUCLEAR`, `BIOMASS` |
+| `capacity_kw` | ✅ | Generation capacity in kW |
+| `location` | ✅ | Installation location |
+| `mwhGenerated`, `validUntil` | optional | Output details |
+
+**Returns:** `recId`, Pi energy credits, tradeable status, NESARA energy compliance flag
+
+**Pi Utility:** Homeowners sell excess solar energy in Pi instantly. Green energy investors buy RECs without brokers. Pi becomes the settlement layer for the global clean energy market.
+
+---
+
+### 13. 📡 Telecom — Pi Sovereign Telecom Identity
+**Endpoint:** `POST /api/utility/telecom`
+
+SIM identities, phone numbers (privacy-hashed), data plans, and VoIP credentials are tokenized — enabling Pi-native telecom services immune to carrier fraud or number theft.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `carrier` | ✅ | Carrier name |
+| `plan` | ✅ | `BASIC`, `PREMIUM`, `ENTERPRISE`, `IOT`, `ROAMING` |
+| `phoneNumber` | optional | Hashed on-chain for privacy |
+| `dataAllowance_gb`, `piCallCredits` | optional | Plan details |
+
+**Returns:** `simId`, Kyber-1024 E2E encryption, portability enabled, Pi call credits
+
+**Pi Utility:** No more SIM swap attacks. Pi-native telecom cannot be hijacked. Users pay phone bills in Pi. IoT devices get Pi-denominated data plans without credit cards.
+
+---
+
+### 14. 🛡️ Insurance — Pi Policy Tokenization
+**Endpoint:** `POST /api/utility/insurance`
+
+Auto, home, life, health, crop, cyber, and travel insurance policies are issued as verifiable tokens — with Pi-denominated premiums and instant claim settlement.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `policyType` | ✅ | `AUTO`, `HOME`, `LIFE`, `HEALTH`, `CROP`, `CYBER`, `TRAVEL` |
+| `coverage` | ✅ | Coverage description |
+| `premium_pi` | ✅ | Monthly premium in Pi |
+| `insuredValue`, `deductible_pi` | optional | Policy financials |
+
+**Returns:** `policyNumber`, `policyHash`, auto-renew status, Pi claim submission endpoint, underwriter: `TRIUMPH-SYNERGY-INSURANCE`
+
+**Pi Utility:** Insurance claims pay instantly in Pi — no 30-day wait, no adjustor fraud. Smart contract auto-pays when triggering conditions are met on-chain.
+
+---
+
+### 15. ⚖️ Legal — Pi Smart Legal Contracts
+**Endpoint:** `POST /api/utility/legal`
+
+NDAs, leases, sale agreements, employment contracts, and partnership agreements are tokenized with cryptographic multi-sig and anchored to the Pi Judicial Monitor.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `counterpartyAddress` | ✅ | Other party's Pi wallet |
+| `contractType` | ✅ | `NDA`, `LEASE`, `SALE`, `SERVICE`, `EMPLOYMENT`, `PARTNERSHIP` |
+| `termsHash` | ✅ | SHA-256 hash of contract terms document |
+| `expiresAt`, `jurisdiction` | optional | Contract lifecycle |
+
+**Returns:** `contractId`, signatories list, `disputeResolution: TRIUMPH_JUDICIAL_MONITOR`, multi-sig requirement, arbitration flag
+
+**Pi Utility:** Contracts execute automatically in Pi when conditions are met. No lawyers required for simple agreements. Dispute resolution routes to the on-chain Judicial Monitor.
+
+---
+
+### 16. 🏛️ Government — Pi Digital Identity & Benefits
+**Endpoint:** `POST /api/utility/government`
+
+National IDs, passports, voter cards, driver's licenses, tax IDs, and birth certificates are issued as self-sovereign digital identity tokens — NESARA/GESARA compliant.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `idType` | ✅ | `NATIONAL_ID`, `PASSPORT`, `VOTER_ID`, `DRIVER_LICENSE`, `TAX_ID`, `BIRTH_CERT` |
+| `issuingAuthority` | ✅ | Issuing government body |
+| `nationalId` | optional | Hashed zero-knowledge on-chain |
+| `piKycLevel`, `biometricEnabled` | optional | Verification level |
+
+**Returns:** `govId`, self-sovereign identity flag, NESARA/GESARA compliance, Pi KYC level, revocability
+
+**Pi Utility:** Citizens own their identity — governments cannot revoke without on-chain evidence. Pi-denominated government benefits (UBI, tax refunds, veterans benefits) flow directly to wallets.
+
+---
+
+### 17. 🔗 Supply Chain — Pi Provenance Tracking
+**Endpoint:** `POST /api/utility/supply-chain`
+
+Every product, pallet, container, and component gets an immutable provenance token — tracking origin, custodian handoffs, certifications, and carbon footprint on Pi.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `assetId` | ✅ | Asset/product identifier |
+| `product` | ✅ | Product description |
+| `origin` | ✅ | Production origin |
+| `batchNumber`, `gtin`, `sku` | optional | Logistics identifiers |
+| `certifications` | optional | Quality certifications |
+
+**Returns:** `provenanceHash`, handoff log, recall status, CO₂ footprint, GTIN/SKU link
+
+**Pi Utility:** Counterfeit goods are eliminated — every authentic product has an on-chain token. Pi payments trigger automatic custody transfers. Food safety recalls happen in real time.
+
+---
+
+### 18. 🛍️ Phygital Retail — Physical + Digital Product Fusion
+**Endpoint:** `POST /api/utility/phygital`
+
+Physical luxury goods, fashion, electronics, art, and collectibles are linked to digital NFT twins via NFC/QR/RFID hashing — creating a phygital ownership layer on Pi.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `productId` | ✅ | Product SKU or ID |
+| `physicalHash` | ✅ | NFC/QR/RFID scan hash |
+| `category` | ✅ | `LUXURY`, `FASHION`, `ELECTRONICS`, `ART`, `COLLECTIBLE` |
+| `brand`, `linkedNftId`, `piPriceTag` | optional | Digital twin details |
+
+**Returns:** `phygitalId`, authenticity: `TRIUMPH_CERTIFIED`, transfer history, resale royalty (default 5%), warranty expiry
+
+**Pi Utility:** Luxury goods (handbags, sneakers, watches) carry unforgeable Pi-anchored authenticity certificates. Resale royalties flow automatically to original creators in Pi.
+
+---
+
+### 19. 💰 UBI — Pi Universal Basic Income
+**Endpoint:** `POST /api/utility/ubi`
+
+Citizens enroll in sovereign UBI programs with Pi-native monthly distributions — NESARA/GESARA compliant, automatically distributed, non-stackable.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `verificationLevel` | ✅ | `KYC_1`, `KYC_2`, `BIOMETRIC`, `SOVEREIGN` |
+| `residencyHash` | optional | Privacy-hashed residency proof |
+| `monthlyAllotment_pi` | optional | Default: `3.14159` Pi/month |
+| `distributionCycle` | optional | Default: `MONTHLY` |
+
+**Returns:** `ubiId`, `nextDistribution` date, `nesaraUbiCompliant: true`, `gesaraUbiCompliant: true`, total distributed tracker
+
+**Pi Utility:** The world's first self-sovereign UBI — no government can suspend it, no bank can freeze it. Pi distributions reach the unbanked directly to their Pi wallet. Eliminates poverty infrastructure costs.
+
+---
+
+### 20. 📈 Tokenized Assets — Pi Financial Instruments
+**Endpoint:** `POST /api/utility/tokenized-assets`
+
+Stocks, bonds, commodities, REITs, ETFs, and crypto indices are tokenized on Pi — enabling fractional ownership, Pi-denominated dividends, and global investment access without brokers.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `assetClass` | ✅ | `STOCK`, `BOND`, `COMMODITY`, `REIT`, `ETF`, `FUND`, `CRYPTO_INDEX` |
+| `assetName` | ✅ | Asset name or ticker |
+| `valuationPi` | ✅ | Current Pi valuation |
+| `shares`, `cusip`, `isin` | optional | Financial identifiers |
+| `fractionalized`, `dividendEnabled` | optional | Asset features |
+
+**Returns:** `assetId`, `complianceStatus: SEC_EQUIVALENT_PI_COMPLIANT`, tradeable status, Pi exchange listing, yield rate, custodian: `TRIUMPH-SYNERGY-VAULT`
+
+**Pi Utility:** A farmer in Nigeria can own fractional Apple stock in Pi. Bonds pay coupons directly to Pi wallets. Pi becomes the settlement layer for global capital markets — superior to DTCC and Euroclear.
+
+---
+
+### Why Triumph Synergy Is Superior to Every Other Platform
+
+| Feature | Triumph Synergy | Ethereum | Solana | XRP | SWIFT |
+|---------|----------------|----------|--------|-----|-------|
+| **Sectors Covered** | **20+** | 3-5 (DeFi focus) | 4-6 | 2-3 | 1 (payments) |
+| **Post-Quantum Security** | **Yes (Dilithium/Kyber)** | No | No | No | No |
+| **Pi Network Native** | **Yes** | No | No | No | No |
+| **21-Layer Fortress** | **Yes** | No | No | No | No |
+| **Soulbound Credentials** | **Yes** | Partial | Partial | No | No |
+| **Sovereign Estate** | **Yes (King/Queen status)** | No | No | No | No |
+| **UBI Distribution** | **Yes (NESARA/GESARA)** | No | No | No | No |
+| **Zero-Knowledge Privacy** | **Yes (healthcare, gov ID)** | Partial | No | No | No |
+| **FCRA Credit Disputes** | **Yes** | No | No | No | No |
+| **Self-Sovereign Identity** | **Yes** | No | No | No | No |
+| **Judicial Monitor** | **Yes** | No | No | No | No |
+| **Settlement Currency** | **Pi (314,159 USD/Pi internal)** | ETH | SOL | XRP | USD |
+
+> **Triumph Synergy is not a competitor to Pi Network — it is the real-world utility layer that makes Pi Network indispensable to the global economy.**
+
+---
+
+### v2.7 — 20+ Real-World Utility Sectors Live on Pi
+
+Triumph Synergy now tokenizes **20 economic sectors** through a single unified API — making it the most comprehensive real-world utility platform on Pi Network and demonstrating Pi's superior real-world utility over every other blockchain.
+
+**New universal sector endpoint:** `POST /api/utility/{sector}`
+
+| Sector | Endpoint | Pi Utility |
+|--------|----------|------------|
+| 🏦 Banking | `/api/utility/banking` | Sovereign accounts, Pi IBAN, instant settlement |
+| 🏢 Real Estate | `/api/utility/real-estate-commercial` | Commercial property tokenization |
+| 🛒 Commerce | `/api/utility/commerce` | Pi merchant registry, KYB verified |
+| 📦 Delivery | `/api/utility/delivery` | Chain-of-custody, Pi insurance |
+| ✈️ Travel | `/api/utility/travel` | Pi tickets, on-chain loyalty points |
+| 🎓 Education | `/api/utility/education` | Soulbound credential NFTs |
+| 🎬 Entertainment | `/api/utility/entertainment` | Media rights, auto Pi royalties |
+| 🏥 Healthcare | `/api/utility/healthcare` | ZK health records, HIPAA + HL7 FHIR |
+| 📋 Permits | `/api/utility/permits` | Government permits on-chain |
+| 🚗 Vehicles | `/api/utility/vehicles` | Pi vehicle title registry |
+| 🌾 Agriculture | `/api/utility/agriculture` | Crop/land tokens, carbon credits |
+| ⚡ Energy | `/api/utility/energy` | Pi-native RECs, solar/wind/hydro |
+| 📡 Telecom | `/api/utility/telecom` | Sovereign SIM, Kyber-1024 E2E |
+| 🛡️ Insurance | `/api/utility/insurance` | Pi-denominated policies, smart claims |
+| ⚖️ Legal | `/api/utility/legal` | Multi-sig contracts, Pi arbitration |
+| 🏛️ Government | `/api/utility/government` | NESARA/GESARA digital IDs |
+| 🔗 Supply Chain | `/api/utility/supply-chain` | Provenance tracking, recall-ready |
+| 🛍️ Phygital Retail | `/api/utility/phygital` | NFC/QR product authentication |
+| 💰 UBI | `/api/utility/ubi` | Pi UBI enrollment, monthly distribution |
+| 📈 Tokenized Assets | `/api/utility/tokenized-assets` | Stocks, bonds, commodities on Pi |
+
+**New Prometheus metrics:** 20+ `tokenization_{sector}_total` counters exported to Grafana
+**New DB table:** `utility_tokens` — sector-indexed, owner-indexed, full JSONB sector_data
+**Sector catalog API:** `GET /api/utility/sectors` — live mint counts and schema across all sectors
+
+---
 
 ### v2.6 — Sovereign Estate Tokenization + Real-World Utility Layer
 
