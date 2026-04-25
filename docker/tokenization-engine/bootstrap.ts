@@ -205,6 +205,7 @@ async function initDb() {
       CREATE TABLE IF NOT EXISTS pi_domain_tokens (
         token_id    TEXT PRIMARY KEY,
         domain      TEXT NOT NULL,
+        claim_hash  TEXT,
         owner       TEXT NOT NULL,
         network     TEXT NOT NULL,
         status      TEXT NOT NULL,
@@ -222,6 +223,7 @@ async function initDb() {
         token_id      TEXT PRIMARY KEY,
         deed_number   TEXT NOT NULL,
         property_hash TEXT NOT NULL,
+        claim_hash    TEXT,
         owner_address TEXT NOT NULL,
         network       TEXT NOT NULL,
         status        TEXT NOT NULL,
@@ -255,6 +257,7 @@ async function initDb() {
       CREATE TABLE IF NOT EXISTS utility_tokens (
         token_id        TEXT PRIMARY KEY,
         sector          TEXT NOT NULL,
+        claim_hash      TEXT,
         owner_address   TEXT NOT NULL,
         owner_username  TEXT NOT NULL,
         network         TEXT NOT NULL,
@@ -273,6 +276,12 @@ async function initDb() {
       CREATE INDEX IF NOT EXISTS idx_utility_tokens_sector  ON utility_tokens(sector);
       CREATE INDEX IF NOT EXISTS idx_utility_tokens_owner   ON utility_tokens(owner_address);
       CREATE INDEX IF NOT EXISTS idx_utility_tokens_created ON utility_tokens(created_at DESC);
+      ALTER TABLE pi_domain_tokens ADD COLUMN IF NOT EXISTS claim_hash TEXT;
+      ALTER TABLE allodial_deeds ADD COLUMN IF NOT EXISTS claim_hash TEXT;
+      ALTER TABLE utility_tokens ADD COLUMN IF NOT EXISTS claim_hash TEXT;
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_pi_domain_tokens_claim_hash ON pi_domain_tokens(claim_hash) WHERE claim_hash IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_allodial_deeds_claim_hash   ON allodial_deeds(claim_hash) WHERE claim_hash IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_utility_tokens_sector_claim ON utility_tokens(sector, claim_hash) WHERE claim_hash IS NOT NULL;
     `);
     console.log("[db] Tables ready");
   } catch (e) {
@@ -434,6 +443,10 @@ function canonicalPayload(body: ReqBody): string {
   return JSON.stringify(normalize(body));
 }
 
+function buildClaimFingerprint(sector: string, source: ReqBody): string {
+  return sha256(`${sector}|${canonicalPayload(source)}`);
+}
+
 async function enforceQuantumSignature(req: http.IncomingMessage, body: ReqBody, res: http.ServerResponse): Promise<boolean> {
   if (!TOKENIZATION_REQUIRE_PQ_SIGNATURE) return true;
 
@@ -495,6 +508,30 @@ async function handleTokenizeDomain(body: ReqBody, res: http.ServerResponse): Pr
     json(res, 400, { error: "Invalid Pi wallet address" }); return;
   }
 
+  const claimHash = buildClaimFingerprint("domain", { domain });
+  const claimCacheKey = `claim:domain:${claimHash}`;
+  const cachedClaim = await redis.get(claimCacheKey).catch(() => null);
+  if (cachedClaim) {
+    json(res, 409, { error: "Domain already tokenized", tokenId: cachedClaim, claimHash });
+    return;
+  }
+  if (pg) {
+    try {
+      const existing = await pg.query(
+        "SELECT token_id FROM pi_domain_tokens WHERE claim_hash = $1 OR lower(domain) = lower($2) LIMIT 1",
+        [claimHash, domain],
+      );
+      if (existing.rows[0]?.token_id) {
+        const existingTokenId = String(existing.rows[0].token_id);
+        await redis.setEx(claimCacheKey, 86_400 * 365, existingTokenId).catch(() => undefined);
+        json(res, 409, { error: "Domain already tokenized", tokenId: existingTokenId, claimHash });
+        return;
+      }
+    } catch (e) {
+      console.error("[db:domain:claim]", (e as Error).message);
+    }
+  }
+
   const ledger = await fetchLedger();
   const mintedAt = new Date().toISOString();
   const tokenId = makeTokenId([domain, ownerAddress, mintedAt]);
@@ -510,6 +547,7 @@ async function handleTokenizeDomain(body: ReqBody, res: http.ServerResponse): Pr
   const piTxHash   = sha256(`pi:domain:${tokenId}:${ledger}`);
   const stellarTxHash = sha256(`stellar:domain:${tokenId}:${ledger}`);
   const valuationUsd = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
+  const sovereignCredentialId = sha256(`${ownerAddress}|${ownerUsername.toLowerCase()}|${NETWORK}`);
 
   const token = {
     tokenId, domain, tld: ".pi", ownerAddress, ownerUsername,
@@ -517,19 +555,28 @@ async function handleTokenizeDomain(body: ReqBody, res: http.ServerResponse): Pr
     valuationPi, valuationUsd,
     blockchainTxHash: piTxHash, stellarLedgerSequence: ledger, stellarTxHash,
     metadataHash: sha256(JSON.stringify({ domain, ownerAddress })),
+    sovereignCredentialId,
     fortressHash: fortress.hash, securityScore: fortress.score,
     mintedAt, updatedAt: mintedAt, transfers: [],
+    claimHash,
   };
 
   // Persist to Redis + Postgres
   await redis.setEx(`token:domain:${tokenId}`, 86_400, JSON.stringify(token)).catch(() => undefined);
   if (pg) {
-    pg.query(
-      `INSERT INTO pi_domain_tokens (token_id,domain,owner,network,status,valuation_pi,valuation_usd,fortress_hash,pi_tx_hash,stellar_tx_hash,stellar_ledger,metadata)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (token_id) DO NOTHING`,
-      [tokenId, domain, ownerAddress, NETWORK, "TOKENIZED", valuationPi, valuationUsd, fortress.hash, piTxHash, stellarTxHash, ledger, JSON.stringify(token)]
-    ).catch((e: Error) => console.error("[db]", e.message));
+    try {
+      await pg.query(
+        `INSERT INTO pi_domain_tokens (token_id,domain,claim_hash,owner,network,status,valuation_pi,valuation_usd,fortress_hash,pi_tx_hash,stellar_tx_hash,stellar_ledger,metadata)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (token_id) DO NOTHING`,
+        [tokenId, domain, claimHash, ownerAddress, NETWORK, "TOKENIZED", valuationPi, valuationUsd, fortress.hash, piTxHash, stellarTxHash, ledger, JSON.stringify(token)],
+      );
+    } catch (e) {
+      console.error("[db]", (e as Error).message);
+      json(res, 409, { error: "Domain already tokenized", claimHash });
+      return;
+    }
   }
+  await redis.setEx(claimCacheKey, 86_400 * 365, tokenId).catch(() => undefined);
 
   metrics.domains_minted++;
   json(res, 201, { success: true, token, stellarAnchorTx: stellarTxHash, piBlockchainTx: piTxHash });
@@ -553,6 +600,30 @@ async function handleTokenizeDeed(body: ReqBody, res: http.ServerResponse): Prom
   const ledger      = await fetchLedger();
   const createdAt   = new Date().toISOString();
   const propertyHash = sha256(legalDesc);
+  const claimHash = buildClaimFingerprint("deed", { propertyHash });
+  const claimCacheKey = `claim:deed:${claimHash}`;
+  const cachedClaim = await redis.get(claimCacheKey).catch(() => null);
+  if (cachedClaim) {
+    json(res, 409, { error: "Property already tokenized", tokenId: cachedClaim, claimHash });
+    return;
+  }
+  if (pg) {
+    try {
+      const existing = await pg.query(
+        "SELECT token_id FROM allodial_deeds WHERE claim_hash = $1 OR property_hash = $2 LIMIT 1",
+        [claimHash, propertyHash],
+      );
+      if (existing.rows[0]?.token_id) {
+        const existingTokenId = String(existing.rows[0].token_id);
+        await redis.setEx(claimCacheKey, 86_400 * 365, existingTokenId).catch(() => undefined);
+        json(res, 409, { error: "Property already tokenized", tokenId: existingTokenId, claimHash });
+        return;
+      }
+    } catch (e) {
+      console.error("[db:deed:claim]", (e as Error).message);
+    }
+  }
+
   const tokenId      = makeTokenId([propertyHash, ownerAddress, createdAt]);
   const deedNumber   = `ALLODIAL-${new Date().getFullYear()}-${propertyHash.slice(0, 8).toUpperCase()}`;
   const payload      = JSON.stringify({ tokenId, deedNumber, propertyHash, ownerAddress, valuationPi });
@@ -571,24 +642,34 @@ async function handleTokenizeDeed(body: ReqBody, res: http.ServerResponse): Prom
   const piTxHash      = sha256(`pi:deed:${tokenId}:${ledger}`);
   const stellarTxHash = sha256(`stellar:deed:${tokenId}:${ledger}`);
   const valuationUsd  = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
+  const sovereignCredentialId = sha256(`${ownerAddress}|${ownerUsername.toLowerCase()}|${NETWORK}`);
 
   const deed = {
     tokenId, deedNumber, status: "TOKENIZED", property, owner,
     standard: "PI-721", network: NETWORK, valuationPi, valuationUsd,
     propertyHash, fortressHash: fortress.hash, securityScore: fortress.score,
+    sovereignCredentialId,
     stellarAnchor: { ledgerSequence: ledger, transactionHash: stellarTxHash, fee: "100", consensusAt: createdAt, networkPassphrase: "Pi Network" },
     piBlockchainAnchor: { ledgerSequence: ledger, transactionHash: piTxHash, piApiConfirmed: true, confirmedAt: createdAt },
     createdAt, updatedAt: createdAt,
+    claimHash,
   };
 
   await redis.setEx(`token:deed:${tokenId}`, 86_400 * 30, JSON.stringify(deed)).catch(() => undefined);
   if (pg) {
-    pg.query(
-      `INSERT INTO allodial_deeds (token_id,deed_number,property_hash,owner_address,network,status,valuation_pi,valuation_usd,fortress_hash,stellar_tx_hash,pi_tx_hash,stellar_ledger,metadata)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (token_id) DO NOTHING`,
-      [tokenId, deedNumber, propertyHash, ownerAddress, NETWORK, "TOKENIZED", valuationPi, valuationUsd, fortress.hash, stellarTxHash, piTxHash, ledger, JSON.stringify(deed)]
-    ).catch((e: Error) => console.error("[db]", e.message));
+    try {
+      await pg.query(
+        `INSERT INTO allodial_deeds (token_id,deed_number,property_hash,claim_hash,owner_address,network,status,valuation_pi,valuation_usd,fortress_hash,stellar_tx_hash,pi_tx_hash,stellar_ledger,metadata)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT (token_id) DO NOTHING`,
+        [tokenId, deedNumber, propertyHash, claimHash, ownerAddress, NETWORK, "TOKENIZED", valuationPi, valuationUsd, fortress.hash, stellarTxHash, piTxHash, ledger, JSON.stringify(deed)],
+      );
+    } catch (e) {
+      console.error("[db]", (e as Error).message);
+      json(res, 409, { error: "Property already tokenized", claimHash });
+      return;
+    }
   }
+  await redis.setEx(claimCacheKey, 86_400 * 365, tokenId).catch(() => undefined);
 
   metrics.deeds_minted++;
   json(res, 201, { success: true, token: deed, stellarAnchorTx: stellarTxHash, piBlockchainTx: piTxHash });
@@ -810,6 +891,7 @@ type SectorDef = {
   metricKey: keyof typeof metrics;
   label: string;
   buildSectorData: (body: ReqBody) => Record<string, unknown>;
+  claimIdentityKeys?: string[];
 };
 
 const SECTORS: Record<string, SectorDef> = {
@@ -817,6 +899,7 @@ const SECTORS: Record<string, SectorDef> = {
   banking: {
     label: "Pi-Native Banking Account",
     required: ["ownerAddress", "ownerUsername", "accountType"],
+    claimIdentityKeys: ["ownerAddress", "accountType"],
     metricKey: "banking_accounts_created",
     buildSectorData: (b) => ({
       accountType:     b.accountType,
@@ -834,6 +917,7 @@ const SECTORS: Record<string, SectorDef> = {
   "real-estate-commercial": {
     label: "Commercial Real Estate Token",
     required: ["ownerAddress", "ownerUsername", "propertyAddress", "sqft", "valuationPi"],
+    claimIdentityKeys: ["propertyAddress", "apn"],
     metricKey: "realestate_commercial_tokenized",
     buildSectorData: (b) => ({
       propertyAddress: b.propertyAddress,
@@ -852,6 +936,7 @@ const SECTORS: Record<string, SectorDef> = {
   commerce: {
     label: "Pi Commerce Merchant Token",
     required: ["ownerAddress", "ownerUsername", "businessName", "category"],
+    claimIdentityKeys: ["ownerAddress", "businessName", "category"],
     metricKey: "commerce_merchants_registered",
     buildSectorData: (b) => ({
       businessName:   b.businessName,
@@ -870,6 +955,7 @@ const SECTORS: Record<string, SectorDef> = {
   delivery: {
     label: "Pi Delivery Shipment Token",
     required: ["ownerAddress", "ownerUsername", "origin", "destination", "contents"],
+    claimIdentityKeys: ["trackingId", "origin", "destination", "ownerAddress"],
     metricKey: "delivery_shipments_tracked",
     buildSectorData: (b) => ({
       trackingId:      b.trackingId ?? `TS-SHIP-${sha256(`${b.origin}:${b.destination}:${Date.now()}`).slice(0, 10).toUpperCase()}`,
@@ -888,6 +974,7 @@ const SECTORS: Record<string, SectorDef> = {
   travel: {
     label: "Pi Travel Ticket Token",
     required: ["ownerAddress", "ownerUsername", "routeFrom", "routeTo", "departureTime"],
+    claimIdentityKeys: ["ownerAddress", "routeFrom", "routeTo", "departureTime", "carrier"],
     metricKey: "travel_tickets_minted",
     buildSectorData: (b) => ({
       routeFrom:      b.routeFrom,
@@ -908,6 +995,7 @@ const SECTORS: Record<string, SectorDef> = {
   education: {
     label: "Pi Education Credential Token",
     required: ["ownerAddress", "ownerUsername", "institution", "credentialType", "program"],
+    claimIdentityKeys: ["ownerAddress", "institution", "credentialType", "program"],
     metricKey: "education_credentials_issued",
     buildSectorData: (b) => ({
       institution:     b.institution,
@@ -927,6 +1015,7 @@ const SECTORS: Record<string, SectorDef> = {
   entertainment: {
     label: "Pi Entertainment Media Rights Token",
     required: ["ownerAddress", "ownerUsername", "title", "mediaType", "licenseType"],
+    claimIdentityKeys: ["ownerAddress", "title", "mediaType", "licenseType"],
     metricKey: "entertainment_media_minted",
     buildSectorData: (b) => ({
       title:         b.title,
@@ -946,6 +1035,7 @@ const SECTORS: Record<string, SectorDef> = {
   healthcare: {
     label: "Pi Healthcare Record Token",
     required: ["ownerAddress", "ownerUsername", "recordType", "providerId"],
+    claimIdentityKeys: ["ownerAddress", "recordType", "providerId"],
     metricKey: "healthcare_records_tokenized",
     buildSectorData: (b) => ({
       recordType:     b.recordType,  // PRESCRIPTION, LAB_RESULT, INSURANCE_CLAIM, VACCINATION, EHR_SUMMARY
@@ -965,6 +1055,7 @@ const SECTORS: Record<string, SectorDef> = {
   permits: {
     label: "Pi Government Permit Token",
     required: ["ownerAddress", "ownerUsername", "permitType", "jurisdictionCode", "applicantName"],
+    claimIdentityKeys: ["permitType", "jurisdictionCode", "applicantName"],
     metricKey: "permits_issued",
     buildSectorData: (b) => ({
       permitType:       b.permitType,   // BUSINESS, CONSTRUCTION, FOOD_HANDLER, FIREARMS, DRIVER, VENDOR
@@ -984,6 +1075,7 @@ const SECTORS: Record<string, SectorDef> = {
   vehicles: {
     label: "Pi Vehicle Title Token",
     required: ["ownerAddress", "ownerUsername", "vin", "make", "model", "year"],
+    claimIdentityKeys: ["vin"],
     metricKey: "vehicle_titles_tokenized",
     buildSectorData: (b) => ({
       vin:           b.vin,
@@ -1005,6 +1097,7 @@ const SECTORS: Record<string, SectorDef> = {
   agriculture: {
     label: "Pi Agricultural Asset Token",
     required: ["ownerAddress", "ownerUsername", "parcelId", "acreage"],
+    claimIdentityKeys: ["parcelId"],
     metricKey: "agriculture_assets_tokenized",
     buildSectorData: (b) => ({
       parcelId:         b.parcelId,
@@ -1026,6 +1119,7 @@ const SECTORS: Record<string, SectorDef> = {
   energy: {
     label: "Pi Energy Certificate (REC)",
     required: ["ownerAddress", "ownerUsername", "sourceType", "capacity_kw", "location"],
+    claimIdentityKeys: ["ownerAddress", "sourceType", "location", "generationDate"],
     metricKey: "energy_certificates_issued",
     buildSectorData: (b) => ({
       sourceType:     b.sourceType,   // SOLAR, WIND, HYDRO, GEOTHERMAL, NUCLEAR, BIOMASS
@@ -1046,6 +1140,7 @@ const SECTORS: Record<string, SectorDef> = {
   telecom: {
     label: "Pi Telecom Identity Token",
     required: ["ownerAddress", "ownerUsername", "carrier", "plan"],
+    claimIdentityKeys: ["ownerAddress", "carrier", "phoneNumber", "plan"],
     metricKey: "telecom_identities_registered",
     buildSectorData: (b) => ({
       carrier:          b.carrier,
@@ -1065,6 +1160,7 @@ const SECTORS: Record<string, SectorDef> = {
   insurance: {
     label: "Pi Insurance Policy Token",
     required: ["ownerAddress", "ownerUsername", "policyType", "coverage", "premium_pi"],
+    claimIdentityKeys: ["ownerAddress", "policyType", "coverage", "insuredValue"],
     metricKey: "insurance_policies_tokenized",
     buildSectorData: (b) => ({
       policyType:     b.policyType,   // AUTO, HOME, LIFE, HEALTH, CROP, CYBER, TRAVEL
@@ -1086,6 +1182,7 @@ const SECTORS: Record<string, SectorDef> = {
   legal: {
     label: "Pi Legal Contract Token",
     required: ["ownerAddress", "ownerUsername", "counterpartyAddress", "contractType", "termsHash"],
+    claimIdentityKeys: ["ownerAddress", "counterpartyAddress", "contractType", "termsHash"],
     metricKey: "legal_contracts_tokenized",
     buildSectorData: (b) => ({
       contractType:       b.contractType,  // NDA, LEASE, SALE, SERVICE, EMPLOYMENT, PARTNERSHIP
@@ -1107,6 +1204,7 @@ const SECTORS: Record<string, SectorDef> = {
   government: {
     label: "Pi Government Digital ID Token",
     required: ["ownerAddress", "ownerUsername", "idType", "issuingAuthority"],
+    claimIdentityKeys: ["idType", "issuingAuthority", "nationalId", "ownerAddress"],
     metricKey: "government_ids_issued",
     buildSectorData: (b) => ({
       idType:           b.idType,  // NATIONAL_ID, PASSPORT, VOTER_ID, DRIVER_LICENSE, TAX_ID, BIRTH_CERT
@@ -1127,6 +1225,7 @@ const SECTORS: Record<string, SectorDef> = {
   "supply-chain": {
     label: "Pi Supply Chain Asset Token",
     required: ["ownerAddress", "ownerUsername", "assetId", "product", "origin"],
+    claimIdentityKeys: ["assetId"],
     metricKey: "supply_chain_assets_tracked",
     buildSectorData: (b) => ({
       assetId:         b.assetId,
@@ -1149,6 +1248,7 @@ const SECTORS: Record<string, SectorDef> = {
   phygital: {
     label: "Phygital Retail Product Token",
     required: ["ownerAddress", "ownerUsername", "productId", "physicalHash", "category"],
+    claimIdentityKeys: ["productId", "physicalHash"],
     metricKey: "phygital_products_linked",
     buildSectorData: (b) => ({
       productId:       b.productId,
@@ -1170,6 +1270,7 @@ const SECTORS: Record<string, SectorDef> = {
   ubi: {
     label: "Pi Universal Basic Income Enrollment",
     required: ["ownerAddress", "ownerUsername", "verificationLevel"],
+    claimIdentityKeys: ["ownerAddress", "verificationLevel"],
     metricKey: "ubi_enrollments",
     buildSectorData: (b) => ({
       verificationLevel:  b.verificationLevel,   // KYC_1, KYC_2, BIOMETRIC, SOVEREIGN
@@ -1191,6 +1292,7 @@ const SECTORS: Record<string, SectorDef> = {
   "tokenized-assets": {
     label: "Pi Tokenized Financial Asset",
     required: ["ownerAddress", "ownerUsername", "assetClass", "assetName", "valuationPi"],
+    claimIdentityKeys: ["ownerAddress", "assetClass", "assetName", "ticker", "cusip", "isin"],
     metricKey: "tokenized_assets_minted",
     buildSectorData: (b) => ({
       assetClass:      b.assetClass,    // STOCK, BOND, COMMODITY, REIT, ETF, FUND, CRYPTO_INDEX
@@ -1242,6 +1344,34 @@ async function handleMintUtilitySector(
     return;
   }
 
+  const claimKeys = (def.claimIdentityKeys && def.claimIdentityKeys.length > 0)
+    ? def.claimIdentityKeys
+    : def.required;
+  const claimSource = Object.fromEntries(claimKeys.map((k) => [k, body[k] ?? null])) as ReqBody;
+  const claimHash = buildClaimFingerprint(`utility:${sector}`, claimSource);
+  const claimCacheKey = `claim:utility:${sector}:${claimHash}`;
+  const cachedClaim = await redis.get(claimCacheKey).catch(() => null);
+  if (cachedClaim) {
+    json(res, 409, { error: `Duplicate claim detected for sector '${sector}'`, tokenId: cachedClaim, claimHash });
+    return;
+  }
+  if (pg) {
+    try {
+      const existing = await pg.query(
+        "SELECT token_id FROM utility_tokens WHERE sector = $1 AND claim_hash = $2 LIMIT 1",
+        [sector, claimHash],
+      );
+      if (existing.rows[0]?.token_id) {
+        const existingTokenId = String(existing.rows[0].token_id);
+        await redis.setEx(claimCacheKey, 86_400 * 365, existingTokenId).catch(() => undefined);
+        json(res, 409, { error: `Duplicate claim detected for sector '${sector}'`, tokenId: existingTokenId, claimHash });
+        return;
+      }
+    } catch (e) {
+      console.error("[db:utility:claim]", (e as Error).message);
+    }
+  }
+
   const ledger    = await fetchLedger();
   const createdAt = new Date().toISOString();
   const tokenId   = makeTokenId([sector, ownerAddress, createdAt, randomNonce()]);
@@ -1268,6 +1398,7 @@ async function handleMintUtilitySector(
   const piTxHash      = sha256(`pi:utility:${sector}:${tokenId}:${ledger}`);
   const stellarTxHash = sha256(`stellar:utility:${sector}:${tokenId}:${ledger}`);
   const valuationUsd  = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
+  const sovereignCredentialId = sha256(`${ownerAddress}|${ownerUsername.toLowerCase()}|${NETWORK}`);
 
   const sectorData = def.buildSectorData(body);
 
@@ -1282,6 +1413,7 @@ async function handleMintUtilitySector(
     ownerUsername,
     valuationPi,
     valuationUsd,
+    sovereignCredentialId,
     sectorData,
     fortressHash:       fortress.hash,
     securityScore:      fortress.score,
@@ -1290,6 +1422,7 @@ async function handleMintUtilitySector(
     stellarLedger:      ledger,
     createdAt,
     updatedAt:          createdAt,
+    claimHash,
     platform:           "Triumph Synergy — Sovereign Quantum Financial Ecosystem",
     piNetworkUtility:   "REAL_WORLD_SECTOR_TOKEN",
   };
@@ -1297,17 +1430,24 @@ async function handleMintUtilitySector(
   // Persist
   await redis.setEx(`utility:${sector}:${tokenId}`, 86_400 * 90, JSON.stringify(token)).catch(() => undefined);
   if (pg) {
-    pg.query(
-      `INSERT INTO utility_tokens
-         (token_id,sector,owner_address,owner_username,network,status,valuation_pi,valuation_usd,
-          fortress_hash,pi_tx_hash,stellar_tx_hash,stellar_ledger,sector_data,metadata)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-       ON CONFLICT (token_id) DO NOTHING`,
-      [tokenId, sector, ownerAddress, ownerUsername, NETWORK, "ACTIVE",
-       valuationPi, valuationUsd, fortress.hash, piTxHash, stellarTxHash, ledger,
-       JSON.stringify(sectorData), JSON.stringify(token)],
-    ).catch((e: Error) => console.error("[db:utility]", e.message));
+    try {
+      await pg.query(
+        `INSERT INTO utility_tokens
+           (token_id,sector,claim_hash,owner_address,owner_username,network,status,valuation_pi,valuation_usd,
+            fortress_hash,pi_tx_hash,stellar_tx_hash,stellar_ledger,sector_data,metadata)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+         ON CONFLICT (token_id) DO NOTHING`,
+        [tokenId, sector, claimHash, ownerAddress, ownerUsername, NETWORK, "ACTIVE",
+         valuationPi, valuationUsd, fortress.hash, piTxHash, stellarTxHash, ledger,
+         JSON.stringify(sectorData), JSON.stringify(token)],
+      );
+    } catch (e) {
+      console.error("[db:utility]", (e as Error).message);
+      json(res, 409, { error: `Duplicate claim detected for sector '${sector}'`, claimHash });
+      return;
+    }
   }
+  await redis.setEx(claimCacheKey, 86_400 * 365, tokenId).catch(() => undefined);
 
   (metrics[def.metricKey] as number)++;
   metrics.sector_tokens_minted++;

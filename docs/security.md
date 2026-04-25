@@ -4,6 +4,17 @@
 
 Triumph-Synergy implements comprehensive security measures to protect user data, financial transactions, and system integrity.
 
+## Sovereign Ownership and Credential Security
+
+- Copyright owner: Jeremiah Drains / Triumph Synergy
+- Legal business identity: EIN 41-6777102
+- License controls: see LICENSE and LICENSE-PIOS for permitted derivative and deployment use
+- Pi mint endpoints enforce post-quantum signature verification using x-quantum-signature and x-quantum-public-key
+- Sovereign credential binding: minted records include a deterministic sovereignCredentialId tied to ownerAddress + ownerUsername + network
+- Anti-duplication controls: domain, deed, and utility sector minting use claim fingerprint checks and return HTTP 409 for duplicate claims
+
+These controls protect provenance and reduce unauthorized re-claims, while legal ownership is enforced through licensing and intellectual property law.
+
 ## Security Principles
 
 1. **Defense in Depth**: Multiple layers of security

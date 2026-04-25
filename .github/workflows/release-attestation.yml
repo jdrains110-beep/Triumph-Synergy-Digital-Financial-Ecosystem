@@ -1,0 +1,43 @@
+name: Release Attestation
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  attestations: write
+
+jobs:
+  attest-release-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build release bundle
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          git archive --format=tar.gz --output dist/triumph-synergy-${GITHUB_SHA}.tar.gz HEAD
+          shasum -a 256 dist/triumph-synergy-${GITHUB_SHA}.tar.gz > dist/SHA256SUMS
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: triumph-synergy-release-bundle
+          path: |
+            dist/triumph-synergy-${{ github.sha }}.tar.gz
+            dist/SHA256SUMS
+          if-no-files-found: error
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: dist/triumph-synergy-${{ github.sha }}.tar.gz
+          push-to-registry: false

@@ -24,6 +24,24 @@
 
 ---
 
+## 🔐 IP, Identity, and Sovereign Protection
+
+Triumph Synergy is an original proprietary system owned by Jeremiah Drains / Triumph Synergy and protected under the repository licenses in `LICENSE` and `LICENSE-PIOS`.
+
+- Legal business identity: **EIN 41-6777102**
+- Production mint endpoints require post-quantum signature headers: `x-quantum-signature` and `x-quantum-public-key`
+- Ownership is bound to Pi identity using deterministic `sovereignCredentialId` (derived from ownerAddress + ownerUsername + network)
+- Duplicate asset claims are blocked with claim fingerprints plus database uniqueness constraints
+
+Operational anti-duplication behavior:
+
+- Domain claims: one canonical tokenized claim per domain fingerprint
+- Deed claims: one canonical tokenized claim per property hash fingerprint
+- Utility claims: one canonical claim per sector + claim fingerprint
+- Duplicate mint attempts return `HTTP 409` with the existing claim reference
+
+Important legal note: public source visibility on GitHub does not waive ownership rights. Copyright and licensing terms continue to apply to source, derivatives, branding, and deployment.
+
 ## 🌍 20+ Real-World Utility Sectors — Pi Network's Sovereign Utility Layer
 
 > **Triumph Synergy is the only platform on Pi Network that tokenizes real-world assets, identities, and services across 20+ economic sectors — all on-chain, all quantum-resistant, all settled in Pi.**
@@ -45,6 +63,11 @@ POST /api/utility/{sector}                  — Mint utility token for any secto
 GET  /api/utility/token/{tokenId}           — Retrieve any utility token by ID
 GET  /api/utility/{sector}/stats            — Per-sector mint statistics
 ```
+
+Mint responses include:
+
+- `sovereignCredentialId` (owner sovereignty binding)
+- `claimHash` (anti-duplication claim fingerprint)
 
 ---
 
