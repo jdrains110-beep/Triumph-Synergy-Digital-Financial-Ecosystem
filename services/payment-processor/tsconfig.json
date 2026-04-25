@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020"],
+    "lib": [
+      "ES2020"
+    ],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "ignoreDeprecations": "6.0",
@@ -10,9 +12,16 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../node_modules/@types"
+    ],
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["index.ts"],
-  "exclude": ["dist"]
+  "include": [
+    "index.ts"
+  ],
+  "exclude": [
+    "dist"
+  ]
 }
