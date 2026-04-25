@@ -13,6 +13,7 @@
 [![Sovereign Work Program](https://img.shields.io/badge/Sovereign%20Work%20Program-APEX%20LIVE-22C55E?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-25-2026)
 [![Sovereign Rivals](https://img.shields.io/badge/Sovereign%20Rivals-IRS%20%7C%20DCF%20%7C%20D%26B%20OBSOLETE-EF4444?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v29)
 [![Sovereign Housing Platform](https://img.shields.io/badge/Sovereign%20Housing-HUD%20%7C%20S8%20%7C%20USDA%20OBSOLETE-8B5CF6?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v30)
+[![Sovereign Travel Platform](https://img.shields.io/badge/Sovereign%20Travel-OTA%20%7C%20AIRLINES%20%7C%20AIRBNB%20OBSOLETE-06B6D4?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v40)
 [![Gateway](https://img.shields.io/badge/Universal%20Gateway-LIVE-00FF00?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![Security](https://img.shields.io/badge/Security-SUPREME-00FF00?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![PiOS](https://img.shields.io/badge/License-PiOS-purple?style=flat-square)](LICENSE-PIOS)
@@ -539,6 +540,52 @@ The tokenization service now initializes and persists sovereign estate records w
 ---
 
 ## 📋 What's New — April 25, 2026
+
+[![Sovereign Travel Platform](https://img.shields.io/badge/Sovereign%20Travel-OTA%20%7C%20AIRLINES%20%7C%20AIRBNB%20OBSOLETE-06B6D4?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v40)
+
+### v4.0 — Sovereign Travel Platform: STEX · SCLA · SATA · STRA · SVRA · SITA — Rendering Expedia, Cruise Lines, Airlines, Theme Parks, Airbnb, and International Travel Gatekeepers Obsolete {#v40}
+
+> **Six Pi-powered sovereign travel authorities — 73 legal loopholes, 1 Pioneer π = $314,159 = Unlimited Lifetime Global Travel. Expedia, Carnival, Delta, Disney, Airbnb, timeshare companies, and the entire international travel tax system are rendered permanently obsolete.**
+
+No OTA commission. No port fees. No baggage fees. No visa fees. No FX fees. No blackout dates. No dynamic pricing. No timeshare debt. No resort fees. Pi smart contract execution, blockchain-immutable, quantum-secured, 142 countries.
+
+| Rival | Replaces | Loopholes | Key Advantage | Pi Utility |
+|-------|----------|-----------|---------------|------------|
+| **STEX** (Sovereign Travel Exchange) | Expedia · Booking.com · Travelocity · Kayak | 12 | OTA 15–25% commission permanently eliminated | 1π = decades of global travel; solo + bundle bookings in 8 sec |
+| **SCLA** (Sovereign Cruise & Maritime Authority) | Carnival · Royal Caribbean · Norwegian · GetMyBoat | 11 | Port fees $150/pax eliminated; Jones Act bypassed | Pi sovereign vessel charter; 67 countries |
+| **SATA** (Sovereign Aviation & Transit Authority) | Delta · United · American · Private Jet Brokers · Amtrak | 13 | Air taxes $65 + baggage fees $35–$150/bag eliminated | Pi sovereign charter flights, private jets, go-trains; 89 countries |
+| **STRA** (Sovereign Travel Recreation Authority) | Disney · Universal · Six Flags · AZA Zoos · ATV Ops | 12 | Dynamic pricing $189/day eliminated; Pi NFT pass has zero blackouts | Perpetual Pi NFT recreation pass; no expiry |
+| **SVRA** (Sovereign Vacation Retreat Authority) | Airbnb · VRBO · Marriott Vacation Club · Wyndham | 13 | Airbnb 17% fee + timeshare $1,200/yr maintenance eliminated | Pi smart contract cabin/villa/timeshare; $847M debt discharged |
+| **SITA** (Sovereign International Travel Authority) | US Passport · US Visa · ESTA · FX Fees · Tourist Taxes | 12 | Passport $165 + visa $185–$500 + FX 2–5% eliminated; FATCA exempt | Pi sovereign credential; 142 countries visa-free |
+
+**Total: 73 sovereign travel loopholes. Average obliteration score: 91/100. 1 Pioneer π = $314,159 = Unlimited Lifetime Global Travel. APEX-QUANTUM-SOVEREIGN: ML-DSA-65 + ML-KEM-768 + SHAKE-256 + SHA3-512.**
+
+#### API Endpoints (21 total)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/api/sovereign/travel/loopholes` | Unified scanner — 73 loopholes + scenario strategy |
+| GET/POST | `/api/sovereign/travel/exchange` | STEX — OTA-free Pi travel booking |
+| GET/POST | `/api/sovereign/travel/maritime` | SCLA — Pi cruise/boat rental |
+| GET/POST | `/api/sovereign/travel/aviation` | SATA — Pi flights/jets/rail |
+| GET/POST | `/api/sovereign/travel/recreation` | STRA — Pi NFT recreation passes |
+| GET/POST | `/api/sovereign/travel/retreat` | SVRA — Pi cabin/Airbnb/timeshare booking |
+| GET/POST | `/api/sovereign/travel/international` | SITA — Pi sovereign travel credential |
+
+#### Database Schema
+
+| Table | Description |
+|-------|-------------|
+| `stex_bookings` | OTA-free Pi travel bookings (solo + bundle) |
+| `scla_tickets` | Pi cruise + boat rental tickets |
+| `sata_tickets` | Pi aviation + transit tickets |
+| `stra_passes` | Pi NFT recreation passes |
+| `svra_bookings` | Pi cabin/Airbnb/timeshare stays |
+| `sita_credentials` | Pi sovereign international travel credentials |
+
+#### Dashboard: [`/ecosystem/sovereign-travel`](app/ecosystem/sovereign-travel/page.tsx)
+
+---
 
 ### v3.0 — Sovereign Housing Platform: SHA · SPHVP · SRLA · SAHE · SREX — Rendering HUD, Section 8, USDA, LIHTC, and Residential Real Estate Obsolete {#v30}
 
