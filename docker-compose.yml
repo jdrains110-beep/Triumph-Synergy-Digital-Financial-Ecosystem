@@ -161,6 +161,7 @@ services:
       POLL_INTERVAL_S: "6"
       CENTRAL_NODE_URL: http://triumph-central-node:11626
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       SOVEREIGN_PQ_ENFORCE: "true"
       STELLAR_CORE_VERSION_OVERRIDE: "5.4"
       PI_NODE_VERSION_DISPLAY: "5.4"
@@ -209,6 +210,7 @@ services:
       NODE_OPTIONS: "--max-old-space-size=384"
       PI_NODE_VERSION_DISPLAY: "5.4"
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       CENTRAL_NODE_REQUIRE_PQ_READY: "true"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     # Internal only — no host port exposure
@@ -266,6 +268,7 @@ services:
       EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       APP_REQUIRE_PQ_SIGNATURE: "true"
     security_opt:
       - no-new-privileges:true
@@ -305,6 +308,7 @@ services:
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       TRANSACTION_REQUIRE_PQ_SIGNATURE: "true"
     volumes:
       - triumph_tx_data:/app/data
@@ -343,6 +347,7 @@ services:
       VAULT_MODE: trillion
       QUANTUM_ENCRYPTION: "true"
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       VAULT_REQUIRE_PQ_SIGNATURE: "true"
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
@@ -379,6 +384,7 @@ services:
       EXECUTION_CHANNELS: 10000
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       SMART_CONTRACTS_REQUIRE_PQ_SIGNATURE: "true"
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       CENTRAL_NODE_URL: http://triumph-central-node:11626
@@ -431,6 +437,7 @@ services:
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       NODE_OPTIONS: "--max-old-space-size=48"
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       SCP_REQUIRE_PQ_SIGNATURE: "true"
     volumes:
       - triumph_scp_data:/app/data
@@ -465,6 +472,7 @@ services:
       WORKER_THREADS: 2
       NODE_OPTIONS: "--max-old-space-size=64"
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       PAYMENT_REQUIRE_PQ_SIGNATURE: "true"
     networks:
       - triumph-net
@@ -534,6 +542,7 @@ services:
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       MARKET_DATA_REQUIRE_PQ_SIGNATURE: "true"
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
       PI_INTERNAL_RATE: "314159.0"
@@ -576,6 +585,7 @@ services:
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       ORACLE_REQUIRE_PQ_SIGNATURE: "true"
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
       PI_INTERNAL_RATE: "314159.0"
@@ -620,6 +630,7 @@ services:
       NODE_OPTIONS: "--max-old-space-size=64"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       COMPLIANCE_REQUIRE_PQ_SIGNATURE: "true"
     networks:
       - triumph-net
@@ -657,6 +668,7 @@ services:
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       DEX_REQUIRE_PQ_SIGNATURE: "true"
     networks:
       - triumph-net
@@ -695,6 +707,7 @@ services:
       PI_INTERNAL_MULTIPLIER: "1000.0"
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       ML_REQUIRE_PQ_SIGNATURE: "true"
     expose:
       - "8090"
@@ -731,6 +744,7 @@ services:
       ML_ENGINE_URL: http://triumph-ml-engine:8090
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       CREDIT_REQUIRE_PQ_SIGNATURE: "true"
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
@@ -887,6 +901,7 @@ services:
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       CLOUD_MEMORY_REQUIRE_PQ: "true"
     volumes:
       - triumph_cloud_memory_backup:/backup
@@ -931,6 +946,7 @@ services:
       CENTRAL_NODE_URL: http://triumph-central-node:11626
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       SOVEREIGN_PQ_ENFORCE: "true"
     expose:
       - "8097"
@@ -976,6 +992,7 @@ services:
       KYC_PREMIUM_PCT: "0.05"
       PIONEER_PREMIUM_PCT: "0.03"
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       DUAL_VALUE_REQUIRE_PQ_SIGNATURE: "true"
     expose:
       - "8093"
@@ -1019,6 +1036,7 @@ services:
       CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       TOKENIZATION_REQUIRE_PQ_SIGNATURE: "true"
     expose:
       - "8089"
@@ -1183,6 +1201,7 @@ services:
       SERVICE_PORT: "8096"
       JUDICIAL_JURISDICTION: florida
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       JUDICIAL_REQUIRE_PQ_SIGNATURE: "true"
     ports:
       - "8096:8096"
@@ -1260,6 +1279,7 @@ services:
       ML_SUPPRESSION_S: "300"
       CONTROL_PLANE_REQUIRE_PQ_READY: "true"
       QUANTUM_SHIELD_URL: "http://triumph-quantum-shield:8094"
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       PQ_CHECK_INTERVAL_S: "30"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -1302,6 +1322,7 @@ services:
       ANOMALY_STREAK_THRESHOLD: "3"
       CONTROL_PLANE_REQUIRE_PQ_READY: "true"
       QUANTUM_SHIELD_URL: "http://triumph-quantum-shield:8094"
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       PQ_CHECK_INTERVAL_S: "30"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -1340,6 +1361,7 @@ services:
       PORT: "8098"
       REDIS_URL: redis://triumph-redis:6379
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       QPU_REQUIRE_PQ_SIGNATURE: "true"
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
@@ -1375,6 +1397,78 @@ services:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8098/health', timeout=10)"]
       interval: 20s
       timeout: 12s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
+  # SOVEREIGN AI BOT (SAIB) — Autonomous Ecosystem Guardian
+  # The master intelligence layer of the entire Triumph Synergy ecosystem.
+  # MONITORS: all 31 services every 15 seconds
+  # HEALS:    auto-restarts degraded services via Docker socket
+  # LEARNS:   adaptive failure prediction with sliding-window model in Redis
+  # ACTIVATES: 150+ sovereign loopholes, quantum-signed operations
+  # PROTECTS: quantum-shield integration, ML-DSA-65 signatures every pulse
+  # CONNECTS: full mesh to every platform — the brain behind Triumph Synergy
+  # ========================================================================
+  sovereign-ai-bot:
+    build:
+      context: docker/sovereign-ai-bot
+    container_name: triumph-sovereign-ai-bot
+    <<: *common
+    restart: on-failure:10
+    mem_limit: 192m
+    mem_reservation: 64m
+    cpus: 0.15
+    environment:
+      PORT: "8099"
+      REDIS_URL: redis://triumph-redis:6379
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
+      SAIB_REQUIRE_PQ_SIGNATURE: "true"
+      SAIB_INTELLIGENCE_MODE: "autonomous"
+      SAIB_PULSE_INTERVAL_S: "15"
+      SAIB_HEAL_COOLDOWN_S: "60"
+      SAIB_MAX_RESTARTS_WINDOW: "5"
+      SAIB_RESTART_WINDOW_S: "600"
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      # All platform service URLs — SAIB connects to every one
+      APP_URL: http://triumph-app:3000
+      TRANSACTION_URL: http://triumph-transaction-engine:8080
+      VAULT_URL: http://triumph-vault:8081
+      CONTRACTS_URL: http://triumph-smart-contracts:8082
+      SCP_URL: http://triumph-scp-upgrader:8083
+      PAYMENT_URL: http://triumph-payment-processor:8084
+      MARKET_DATA_URL: http://triumph-market-data:8085
+      BLOCKCHAIN_ORACLE_URL: http://triumph-blockchain-oracle:8086
+      COMPLIANCE_URL: http://triumph-compliance:8087
+      DEX_URL: http://triumph-dex:8088
+      TOKENIZATION_URL: http://triumph-tokenization-engine:8089
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      CLOUD_MEMORY_URL: http://triumph-cloud-memory:8095
+      JUDICIAL_MONITOR_URL: http://triumph-judicial-monitor:8096
+      SOVEREIGN_GATEWAY_URL: http://triumph-sovereign-gateway:8097
+      QPU_BRIDGE_URL: http://triumph-qpu-bridge:8098
+      CENTRAL_NODE_URL: http://triumph-central-node:11626
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "8099"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      quantum-shield:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8099/health', timeout=8)"]
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 30s
 
