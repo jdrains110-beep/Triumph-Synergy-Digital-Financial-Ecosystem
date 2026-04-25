@@ -113,6 +113,55 @@ redis_client = None
 pq_state = {"ok": False, "checked_at": 0.0}
 
 
+def _prometheus_text(snapshot: dict[str, Any]) -> str:
+    """Render sentinel state into Prometheus 0.0.4 text format."""
+    conn = snapshot.get("connection", {})
+    q = snapshot.get("quality", {})
+    ml = snapshot.get("ml", {})
+    transitions = snapshot.get("transitions", [])
+
+    lines = [
+        "# HELP triumph_sentinel_probe_count_total Number of probe cycles executed",
+        "# TYPE triumph_sentinel_probe_count_total counter",
+        f"triumph_sentinel_probe_count_total {snapshot.get('probe_count', 0)}",
+        "# HELP triumph_sentinel_services_restarted_total Services restarted by sentinel",
+        "# TYPE triumph_sentinel_services_restarted_total counter",
+        f"triumph_sentinel_services_restarted_total {snapshot.get('services_restarted', 0)}",
+        "# HELP triumph_sentinel_network_transitions_total Detected network transitions",
+        "# TYPE triumph_sentinel_network_transitions_total counter",
+        f"triumph_sentinel_network_transitions_total {len(transitions)}",
+        "# HELP triumph_sentinel_quality_score Current network quality score",
+        "# TYPE triumph_sentinel_quality_score gauge",
+        f"triumph_sentinel_quality_score {q.get('score', 0)}",
+        "# HELP triumph_sentinel_latency_ms Current average latency in milliseconds",
+        "# TYPE triumph_sentinel_latency_ms gauge",
+        f"triumph_sentinel_latency_ms {q.get('latency_ms', 0)}",
+        "# HELP triumph_sentinel_jitter_ms Current jitter in milliseconds",
+        "# TYPE triumph_sentinel_jitter_ms gauge",
+        f"triumph_sentinel_jitter_ms {q.get('jitter_ms', 0)}",
+        "# HELP triumph_sentinel_ml_anomaly_score Current ML anomaly score",
+        "# TYPE triumph_sentinel_ml_anomaly_score gauge",
+        f"triumph_sentinel_ml_anomaly_score {ml.get('anomaly_score', 0)}",
+        "# HELP triumph_sentinel_ml_anomaly_streak Current ML anomaly streak",
+        "# TYPE triumph_sentinel_ml_anomaly_streak gauge",
+        f"triumph_sentinel_ml_anomaly_streak {ml.get('anomaly_streak', 0)}",
+        "# HELP triumph_sentinel_ml_enabled ML self-healing enabled (1 enabled, 0 disabled)",
+        "# TYPE triumph_sentinel_ml_enabled gauge",
+        f"triumph_sentinel_ml_enabled {1 if ml.get('enabled') else 0}",
+        "# HELP triumph_sentinel_pq_ready PQ control-plane readiness (1 ready, 0 not ready)",
+        "# TYPE triumph_sentinel_pq_ready gauge",
+        f"triumph_sentinel_pq_ready {1 if ml.get('pq_ready') else 0}",
+    ]
+
+    current_type = conn.get("type", "unknown")
+    for t in ["starlink", "broadband", "cellular", "cgnat_broadband", "satellite", "offline", "unknown"]:
+        lines.append(
+            f'triumph_sentinel_connection_type{{type="{t}"}} {1 if current_type == t else 0}'
+        )
+
+    return "\n".join(lines) + "\n"
+
+
 def _pq_ready(timeout_s: float = 4.0) -> bool:
     now = time.time()
     if now - pq_state["checked_at"] < PQ_CHECK_INTERVAL_S:
@@ -596,6 +645,14 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == "/metrics":
             with lock:
                 self._respond(200, state)
+        elif self.path == "/prometheus":
+            with lock:
+                payload = _prometheus_text(state).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; version=0.0.4")
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
         elif self.path == "/connectivity":
             # Detailed connectivity report for dashboards
             with lock:

@@ -211,6 +211,32 @@ scrape_configs:
     fallback_scrape_protocol: PrometheusText0.0.4
     scrape_interval: 15s
 
+  # ========================================================================
+  # Health Governor — adaptive self-healing / restart arbitration
+  # ========================================================================
+  - job_name: 'triumph-health-governor'
+    static_configs:
+      - targets: ['triumph-health-governor:9912']
+        labels:
+          service: 'health-governor'
+          type: 'self-healing-control-plane'
+          role: 'ml-pq-recovery-arbiter'
+    metrics_path: /prometheus
+    scrape_interval: 15s
+
+  # ========================================================================
+  # Network Sentinel — connectivity anomaly detection + adaptive recovery
+  # ========================================================================
+  - job_name: 'triumph-network-sentinel'
+    static_configs:
+      - targets: ['triumph-network-sentinel:9913']
+        labels:
+          service: 'network-sentinel'
+          type: 'connectivity-watchdog'
+          role: 'ml-anomaly-recovery'
+    metrics_path: /prometheus
+    scrape_interval: 15s
+
   # ==========================================================================
   # Cloud Memory Platform — unified memory layer and cloud/offline sync
   # ==========================================================================

@@ -147,6 +147,49 @@ restart_cause_counts = {}  # name -> {cause: count}
 pq_state = {"ok": False, "checked_at": 0.0}
 
 
+def prometheus_text(snapshot):
+    """Render a Prometheus 0.0.4 text payload from the current snapshot."""
+    lines = []
+    lines.extend([
+        "# HELP triumph_governor_restarts_total Total automatic container restarts",
+        "# TYPE triumph_governor_restarts_total counter",
+        f"triumph_governor_restarts_total {snapshot.get('restarts', 0)}",
+        "# HELP triumph_governor_health_restarts_total Total health-driven restarts",
+        "# TYPE triumph_governor_health_restarts_total counter",
+        f"triumph_governor_health_restarts_total {snapshot.get('health_restarts', 0)}",
+        "# HELP triumph_governor_warnings_total Total memory warning events",
+        "# TYPE triumph_governor_warnings_total counter",
+        f"triumph_governor_warnings_total {snapshot.get('warnings', 0)}",
+        "# HELP triumph_governor_pq_ready PQ control-plane readiness (1 ready, 0 not ready)",
+        "# TYPE triumph_governor_pq_ready gauge",
+        f"triumph_governor_pq_ready {1 if snapshot.get('pq_ready') else 0}",
+        "# HELP triumph_governor_ml_self_heal_enabled ML self-heal policy enabled (1 enabled, 0 disabled)",
+        "# TYPE triumph_governor_ml_self_heal_enabled gauge",
+        f"triumph_governor_ml_self_heal_enabled {1 if snapshot.get('ml_self_heal_enabled') else 0}",
+    ])
+
+    lines.extend([
+        "# HELP triumph_governor_container_memory_pct Current container memory usage percentage",
+        "# TYPE triumph_governor_container_memory_pct gauge",
+    ])
+    for c in snapshot.get("containers", []):
+        name = c.get("name", "unknown")
+        pct = c.get("pct", 0)
+        lines.append(f'triumph_governor_container_memory_pct{{container="{name}"}} {pct}')
+
+    lines.extend([
+        "# HELP triumph_governor_restart_cause_total Restart events by inferred cause",
+        "# TYPE triumph_governor_restart_cause_total counter",
+    ])
+    for container, causes in (snapshot.get("restart_cause_counts") or {}).items():
+        for cause, value in causes.items():
+            lines.append(
+                f'triumph_governor_restart_cause_total{{container="{container}",cause="{cause}"}} {value}'
+            )
+
+    return "\n".join(lines) + "\n"
+
+
 def pq_ready():
     """Check Quantum Shield readiness and cache result for a short interval."""
     now = time.time()
@@ -400,6 +443,14 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == "/metrics":
             with lock:
                 self._respond(200, metrics_snapshot)
+        elif self.path == "/prometheus":
+            with lock:
+                payload = prometheus_text(metrics_snapshot).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; version=0.0.4")
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
         else:
             self._respond(404, {"error": "not found"})
 

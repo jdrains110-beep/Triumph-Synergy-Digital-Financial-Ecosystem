@@ -1,0 +1,90 @@
+{
+  "id": null,
+  "uid": "triumph-resilience",
+  "title": "Triumph Resilience Control Plane",
+  "tags": ["triumph", "resilience", "ml", "pq"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "ML Anomaly Score and Streak",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "triumph_sentinel_ml_anomaly_score",
+          "legendFormat": "anomaly_score",
+          "refId": "A"
+        },
+        {
+          "expr": "triumph_sentinel_ml_anomaly_streak",
+          "legendFormat": "anomaly_streak",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "PQ Gate Status",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "triumph_governor_pq_ready",
+          "legendFormat": "health_governor_pq_ready",
+          "refId": "A"
+        },
+        {
+          "expr": "triumph_sentinel_pq_ready",
+          "legendFormat": "network_sentinel_pq_ready",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Auto-Recovery Actions (5m rate)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "increase(triumph_governor_restarts_total[5m])",
+          "legendFormat": "governor_restarts",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(triumph_sentinel_services_restarted_total[5m])",
+          "legendFormat": "sentinel_restarts",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "barchart",
+      "title": "Restart Cause Distribution",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "sum by (cause) (triumph_governor_restart_cause_total)",
+          "legendFormat": "{{cause}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
