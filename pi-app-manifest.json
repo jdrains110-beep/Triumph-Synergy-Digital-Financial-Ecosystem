@@ -5,6 +5,8 @@
   "description": "The Sovereign Quantum Financial Ecosystem powered by Pi Network — the rival and superior to USD. Real-world utility across 20+ sectors (banking, real estate, commerce, delivery, travel, education, entertainment, healthcare, and more) created through Triumph Synergy for Pi Network. Every financial system on Earth attaches to Pi to survive and maintain. Features Universal Integration Gateway, Pi SDK 2.0, interoperability bridges (SWIFT, ACH, FedWire, Ethereum, Bitcoin), quantum-resistant security, NESARA/GESARA compliance, and immortal infrastructure.",
   "version": "2.0.0",
   "pi_sdk_version": "2.0",
+  "pi_node_version": "5.4",
+  "pi_node_min_version": "5.4",
   
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -293,7 +295,7 @@
 
   "metadata": {
     "created": "2025-01-01T00:00:00Z",
-    "updated": "2026-04-13T00:00:00Z",
+    "updated": "2026-04-25T00:00:00Z",
     "schema_version": "1.0",
     "platform_bridge_version": "2.0.0",
     "docker_desktop_integration": true

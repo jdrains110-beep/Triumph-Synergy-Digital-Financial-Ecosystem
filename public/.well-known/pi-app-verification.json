@@ -28,5 +28,7 @@
     "docker_desktop_integration": true,
     "supported_platforms": ["pi-desktop", "pi-app-studio", "pi-browser"]
   },
-  "version": "2.0"
+  "version": "2.0",
+  "pi_node_version": "5.4",
+  "pi_node_min_version": "5.4"
 }
