@@ -83,7 +83,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.5
+    cpus: 0.4
     oom_score_adj: -500          # Protect database — last to OOM-kill
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
@@ -110,7 +110,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     oom_score_adj: -500          # Protect cache — last to OOM-kill
     # Internal only — no host port exposure
     expose:
@@ -138,9 +138,10 @@ services:
       context: docker/pi-bridge-connector
     container_name: triumph-pi-bridge-connector
     <<: *common
+    restart: on-failure:10            # override: stop crash-looping if Pi Node desktop is offline (prevents CPU storm)
     mem_limit: 192m
     mem_reservation: 96m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8092"
@@ -184,7 +185,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.5
+    cpus: 0.4
     environment:
       <<: [*db-env, *pi-env]
       NODE_TYPE: central
@@ -218,7 +219,8 @@ services:
       redis:
         condition: service_healthy
       pi-bridge-connector:
-        condition: service_healthy
+        condition: service_started    # service_started (not service_healthy) — pi-bridge connects to external Pi Node;
+                                      # if Pi Node desktop is offline, don't block entire ecosystem startup
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11626/info"]
       interval: 15s
@@ -238,7 +240,7 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
-    cpus: 0.75
+    cpus: 0.6
     ports:
       - "3000:3000"
     environment:
@@ -263,7 +265,7 @@ services:
       redis:
         condition: service_healthy
       central-node:
-        condition: service_healthy
+        condition: service_started    # service_started — Next.js handles central-node unavailability gracefully via retry logic
     networks:
       - triumph-net
       - pi-bridge
@@ -286,7 +288,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       ENGINE_MODE: hyper
@@ -325,7 +327,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       VAULT_MODE: trillion
@@ -359,7 +361,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       EXECUTION_CHANNELS: 10000
@@ -486,7 +488,7 @@ services:
       app:
         condition: service_started
       quantum-shield:
-        condition: service_healthy
+        condition: service_started    # service_started — quantum-shield's 60s startup should not delay nginx
     networks:
       - triumph-net
     healthcheck:
@@ -626,7 +628,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
@@ -662,7 +664,7 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
-    cpus: 0.5
+    cpus: 0.4
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8090"
@@ -682,10 +684,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8090/health"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 45s
+      interval: 20s
+      timeout: 15s
+      retries: 6
+      start_period: 90s          # extended: Python ML model loading is slow under CPU contention
 
   # ========================================================================
   # CREDIT ENGINE — PiCredit Score™ + Bureau Integration
@@ -699,7 +701,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8091"
@@ -769,7 +771,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.35
+    cpus: 0.25
     environment:
       PORT: "8094"
       REDIS_URL: redis://triumph-redis:6379
@@ -812,10 +814,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8094/health', timeout=10)"]
-      interval: 25s
+      interval: 30s
       timeout: 20s
       retries: 5
-      start_period: 60s
+      start_period: 90s          # extended: quantum-shield initializes CRYSTALS-Kyber key gen, slow under CPU pressure
 
   # ========================================================================
   # CLOUD MEMORY PLATFORM — LZ4 compressed, deduplicated, multi-platform store
@@ -891,7 +893,7 @@ services:
     <<: *common
     mem_limit: 192m
     mem_reservation: 96m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       PORT: "8097"
       REDIS_URL: redis://triumph-redis:6379
@@ -930,7 +932,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       PORT: "8093"
       ML_ENGINE_URL: http://triumph-ml-engine:8090
@@ -978,7 +980,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       NODE_OPTIONS: "--max-old-space-size=96"
@@ -1108,6 +1110,7 @@ services:
       context: docker/horizon-guardian
     container_name: triumph-horizon-guardian
     <<: *common
+    restart: on-failure:10            # override: stop looping if Pi Node desktop is offline
     mem_limit: 128m
     mem_reservation: 32m
     cpus: 0.15
@@ -1144,7 +1147,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       <<: [*db-env, *pi-env]
       SERVICE_NAME: judicial-monitor
@@ -1250,6 +1253,7 @@ services:
       context: docker/network-sentinel
     container_name: triumph-network-sentinel
     <<: *common
+    restart: on-failure:10            # override: don't crash-loop on network probe failures
     mem_limit: 48m
     mem_reservation: 16m
     cpus: 0.1
@@ -1300,7 +1304,7 @@ services:
     <<: *common
     mem_limit: 192m
     mem_reservation: 96m
-    cpus: 0.3
+    cpus: 0.2
     environment:
       PORT: "8098"
       REDIS_URL: redis://triumph-redis:6379
