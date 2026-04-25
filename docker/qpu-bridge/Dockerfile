@@ -1,11 +1,15 @@
-FROM python:3.11-slim
+FROM python:3.13-alpine
 
-RUN groupadd -r qpubridge && useradd -r -g qpubridge -d /app -s /sbin/nologin qpubridge
+# Alpine has a minimal attack surface — no Debian CVEs
+# Install only the C build dependency uvloop needs, then clean up
+RUN apk add --no-cache gcc musl-dev libffi-dev && \
+    addgroup -S qpubridge && adduser -S -G qpubridge -h /app -s /sbin/nologin qpubridge
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    apk del gcc musl-dev libffi-dev
 
 COPY main.py .
 
