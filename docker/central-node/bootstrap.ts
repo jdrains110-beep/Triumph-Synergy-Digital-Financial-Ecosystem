@@ -28,22 +28,25 @@ const PI_BRIDGE_URL    = process.env.PI_BRIDGE_URL; // e.g. http://triumph-pi-br
 const PI_INTERNAL_HORIZON = process.env.PI_INTERNAL_HORIZON_URL;
 const CONTRACTS_URL    = process.env.CONTRACTS_URL || "http://triumph-smart-contracts:8082";
 
-// Resolve the Horizon endpoint — local Pi node always preferred for lowest latency
+// Resolve the Horizon endpoint — prefer resilient bridge proxy first.
 function resolveHorizonUrl(): string {
-  // 1. Direct local Pi node Horizon (fastest — same pi-bridge Docker network)
+  // 1. Explicit internal override (usually pi-bridge /pi-node)
+  if (PI_INTERNAL_HORIZON) return PI_INTERNAL_HORIZON;
+  // 2. Pi bridge relay (goes through connector to Pi node with retries/cache)
+  if (PI_BRIDGE_URL) return `${PI_BRIDGE_URL}/pi-node`;
+  // 3. Direct local Pi node Horizon
   if (PI_NODE_HOST && PI_NODE_HOST !== "host.docker.internal") {
     return `http://${PI_NODE_HOST}:${PI_NODE_API_PORT}`;
   }
-  // 2. Pi bridge relay (goes through connector to Pi node)
-  if (PI_INTERNAL_HORIZON) return PI_INTERNAL_HORIZON;
-  // 3. Configured fallback
+  // 4. Configured fallback
   if (process.env.STELLAR_HORIZON_URL) return process.env.STELLAR_HORIZON_URL;
-  // 4. External Pi Horizon (last resort — external internet)
+  // 5. External Pi Horizon (last resort — external internet)
   return networkType === "mainnet"
     ? "https://api.mainnet.minepi.com"
     : "https://api.testnet.minepi.com";
 }
 const HORIZON_URL = resolveHorizonUrl();
+const USING_BRIDGE_PROXY = /\/pi-node\/?$/.test(HORIZON_URL);
 const CENTRAL_KEY = process.env.CENTRAL_NODE_PUBLIC_KEY || "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";
 
 console.log(`[Central Node] Horizon URL: ${HORIZON_URL} (PI_NODE_HOST=${PI_NODE_HOST ?? "unset"})`);
@@ -83,12 +86,19 @@ async function refreshChainState() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
+    const accountPath = USING_BRIDGE_PROXY
+      ? `/account/${CENTRAL_KEY}`
+      : `/accounts/${CENTRAL_KEY}`;
+    const ledgerPath = USING_BRIDGE_PROXY
+      ? `/ledger`
+      : `/ledgers?order=desc&limit=1`;
+
     const [acctRes, ledgerRes] = await Promise.all([
-      fetch(`${HORIZON_URL}/accounts/${CENTRAL_KEY}`, {
+      fetch(`${HORIZON_URL}${accountPath}`, {
         headers: { Accept: "application/json" },
         signal: controller.signal,
       }),
-      fetch(`${HORIZON_URL}/ledgers?order=desc&limit=1`, {
+      fetch(`${HORIZON_URL}${ledgerPath}`, {
         headers: { Accept: "application/json" },
         signal: controller.signal,
       }),
@@ -114,7 +124,9 @@ async function refreshChainState() {
     }
     if (ledgerRes.ok) {
       const body = await ledgerRes.json() as Record<string, unknown>;
-      const rec = ((body as Record<string, Record<string, unknown[]>>)?._embedded?.records ?? [])[0] as Record<string, unknown> | undefined;
+      const rec = USING_BRIDGE_PROXY
+        ? (body as Record<string, unknown>)
+        : (((body as Record<string, Record<string, unknown[]>>)?._embedded?.records ?? [])[0] as Record<string, unknown> | undefined);
       if (rec) {
         chainLedger = {
           sequence: Number(rec.sequence ?? 0),
@@ -248,6 +260,7 @@ const server = http.createServer((req, res) => {
         pi_node_host: process.env.PI_NODE_HOST || "host.docker.internal",
         pi_node_port: process.env.PI_NODE_PORT || 31402,
         pi_bridge_url: PI_BRIDGE_URL || `http://triumph-pi-bridge-connector:8092`,
+        using_bridge_proxy: USING_BRIDGE_PROXY,
         pi_bridge_active: !!(PI_NODE_HOST && PI_NODE_HOST !== "host.docker.internal"),
         horizon_resolves_local: HORIZON_URL.startsWith("http://"),
         supernode_topology: supernodeTopology(),

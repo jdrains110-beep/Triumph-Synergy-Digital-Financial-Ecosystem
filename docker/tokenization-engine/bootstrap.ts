@@ -12,6 +12,8 @@
  *   GET  /api/tokenize/domain/:tokenId        — Get domain token
  *   POST /api/tokenize/deed                   — Register allodial deed token
  *   GET  /api/tokenize/deed/:tokenId          — Get deed token
+ *   POST /api/sovereign/estate/enroll         — Mint sovereign estate bundle (domain + deed + trust)
+ *   GET  /api/sovereign/estate/:estateId      — Get sovereign estate bundle
  *   GET  /api/tokenize/stats                  — platform statistics
  */
 
@@ -32,12 +34,15 @@ const REDIS_URL = process.env.REDIS_URL            ?? "redis://triumph-redis:637
 const DB_URL    = process.env.DATABASE_URL         ?? process.env.POSTGRES_URL ?? "";
 const NETWORK   = (process.env.PI_NETWORK_MODE     ?? "mainnet") as "mainnet" | "testnet";
 const PI_INTERNAL_RATE = 314_159;   // USD per Pi (internal mined rate)
+const QUANTUM_SHIELD_URL = (process.env.QUANTUM_SHIELD_URL ?? "http://triumph-quantum-shield:8094").replace(/\/$/, "");
+const TOKENIZATION_REQUIRE_PQ_SIGNATURE = (process.env.TOKENIZATION_REQUIRE_PQ_SIGNATURE ?? "true").toLowerCase() === "true";
 
 // ─── Prometheus counters ──────────────────────────────────────────────────────
 
 const metrics = {
   domains_minted:       0,
   deeds_minted:         0,
+  sovereign_estates_created: 0,
   fortress_passes:      0,
   fortress_fails:       0,
   ledger_fetches:       0,
@@ -45,6 +50,8 @@ const metrics = {
   redis_cache_misses:   0,
   errors_total:         0,
   requests_total:       0,
+  pq_verified:          0,
+  pq_rejected:          0,
 };
 
 function prometheusText(): string {
@@ -55,6 +62,9 @@ function prometheusText(): string {
     `# HELP tokenization_deeds_minted_total Total allodial deed tokens minted`,
     `# TYPE tokenization_deeds_minted_total counter`,
     `tokenization_deeds_minted_total ${metrics.deeds_minted}`,
+    `# HELP tokenization_sovereign_estates_created_total Total sovereign estate bundles created`,
+    `# TYPE tokenization_sovereign_estates_created_total counter`,
+    `tokenization_sovereign_estates_created_total ${metrics.sovereign_estates_created}`,
     `# HELP tokenization_fortress_passes_total 21-layer fortress protections passed`,
     `# TYPE tokenization_fortress_passes_total counter`,
     `tokenization_fortress_passes_total ${metrics.fortress_passes}`,
@@ -73,6 +83,12 @@ function prometheusText(): string {
     `# HELP tokenization_errors_total Total errors encountered`,
     `# TYPE tokenization_errors_total counter`,
     `tokenization_errors_total ${metrics.errors_total}`,
+    `# HELP tokenization_pq_verified_total Total valid post-quantum signatures accepted`,
+    `# TYPE tokenization_pq_verified_total counter`,
+    `tokenization_pq_verified_total ${metrics.pq_verified}`,
+    `# HELP tokenization_pq_rejected_total Total requests rejected by post-quantum policy`,
+    `# TYPE tokenization_pq_rejected_total counter`,
+    `tokenization_pq_rejected_total ${metrics.pq_rejected}`,
   ].join("\n") + "\n";
 }
 
@@ -126,6 +142,21 @@ async function initDb() {
         pi_tx_hash    TEXT,
         stellar_ledger BIGINT,
         integrity_chain JSONB,
+        metadata      JSONB,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS sovereign_estates (
+        estate_id      TEXT PRIMARY KEY,
+        owner_address  TEXT NOT NULL,
+        owner_username TEXT NOT NULL,
+        domain_token_id TEXT NOT NULL,
+        deed_token_id   TEXT NOT NULL,
+        trust_name      TEXT NOT NULL,
+        equitable_title TEXT NOT NULL,
+        grantee_absolute TEXT NOT NULL,
+        royal_status     TEXT NOT NULL,
+        government_registration_status TEXT NOT NULL,
         metadata      JSONB,
         created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -276,6 +307,67 @@ function json(res: http.ServerResponse, status: number, data: unknown): void {
   res.end(body);
 }
 
+function canonicalPayload(body: ReqBody): string {
+  const normalize = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(normalize);
+    if (value && typeof value === "object") {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => [k, normalize(v)]),
+      );
+    }
+    return value;
+  };
+  return JSON.stringify(normalize(body));
+}
+
+async function enforceQuantumSignature(req: http.IncomingMessage, body: ReqBody, res: http.ServerResponse): Promise<boolean> {
+  if (!TOKENIZATION_REQUIRE_PQ_SIGNATURE) return true;
+
+  const signature = (req.headers["x-quantum-signature"] as string | undefined)?.trim() ?? "";
+  const publicKey = (req.headers["x-quantum-public-key"] as string | undefined)?.trim() ?? "";
+  if (!signature || !publicKey) {
+    metrics.pq_rejected++;
+    json(res, 401, { error: "Missing required post-quantum signature headers" });
+    return false;
+  }
+
+  try {
+    const verifyRes = await fetch(`${QUANTUM_SHIELD_URL}/quantum/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        payload: canonicalPayload(body),
+        encoding: "utf8",
+        signature,
+        public_key: publicKey,
+      }),
+      signal: AbortSignal.timeout(6_000),
+    }) as Response;
+
+    if (!verifyRes.ok) {
+      metrics.pq_rejected++;
+      json(res, 503, { error: "Quantum verifier unavailable" });
+      return false;
+    }
+
+    const result = await verifyRes.json() as { valid?: boolean };
+    if (!result.valid) {
+      metrics.pq_rejected++;
+      json(res, 403, { error: "Invalid post-quantum signature" });
+      return false;
+    }
+
+    metrics.pq_verified++;
+    return true;
+  } catch {
+    metrics.pq_rejected++;
+    json(res, 503, { error: "Quantum verifier unavailable" });
+    return false;
+  }
+}
+
 // ─── Route handlers ───────────────────────────────────────────────────────────
 
 async function handleTokenizeDomain(body: ReqBody, res: http.ServerResponse): Promise<void> {
@@ -390,6 +482,206 @@ async function handleTokenizeDeed(body: ReqBody, res: http.ServerResponse): Prom
   json(res, 201, { success: true, token: deed, stellarAnchorTx: stellarTxHash, piBlockchainTx: piTxHash });
 }
 
+async function handleEnrollSovereignEstate(body: ReqBody, res: http.ServerResponse): Promise<void> {
+  const domain = (body.domain as string | undefined)?.trim().toLowerCase();
+  const ownerAddress = (body.ownerAddress as string | undefined)?.trim();
+  const ownerUsername = ((body.ownerUsername as string | undefined) ?? "unknown").trim();
+  const legalDescription = (body.legalDescription as string | undefined)?.trim();
+  const valuationPi = (body.valuationPi as string | undefined) ?? "1";
+  const trust = (body.privateTrust as Record<string, unknown> | undefined) ?? {};
+  const trustName = String(trust.name ?? `${ownerUsername}-private-living-estate-trust`).trim();
+  const sovereignRole = String(body.sovereignRole ?? "KING_OR_QUEEN_STATUS_SYMBOLIC").trim();
+
+  if (!domain?.endsWith(".pi")) {
+    json(res, 400, { error: "domain must end with .pi" }); return;
+  }
+  if (!ownerAddress || !/^G[A-Z2-7]{55}$/.test(ownerAddress)) {
+    json(res, 400, { error: "Invalid Pi wallet address" }); return;
+  }
+  if (!legalDescription) {
+    json(res, 400, { error: "legalDescription is required" }); return;
+  }
+
+  const ledger = await fetchLedger();
+  const createdAt = new Date().toISOString();
+
+  // Domain token (estate-bound)
+  const domainTokenId = makeTokenId([domain, ownerAddress, createdAt, "sovereign-estate-domain"]);
+  const domainPayload = JSON.stringify({ tokenId: domainTokenId, domain, ownerAddress, valuationPi });
+  const domainFortress = runFortress({
+    payload: domainPayload,
+    ownerAddress,
+    ownerUsername,
+    domain,
+    valuationPi,
+    assetType: "domain",
+    ledger,
+    mintedAt: createdAt,
+    tokenId: domainTokenId,
+  });
+  if (!domainFortress.secured) {
+    metrics.fortress_fails++;
+    json(res, 422, { error: `Domain fortress protection failed — ${domainFortress.threat} threat` }); return;
+  }
+  metrics.fortress_passes++;
+
+  const domainPiTxHash = sha256(`pi:domain:${domainTokenId}:${ledger}`);
+  const domainStellarTxHash = sha256(`stellar:domain:${domainTokenId}:${ledger}`);
+  const valuationUsd = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
+  const domainToken = {
+    tokenId: domainTokenId,
+    domain,
+    tld: ".pi",
+    ownerAddress,
+    ownerUsername,
+    standard: "PI-721",
+    network: NETWORK,
+    status: "TOKENIZED",
+    valuationPi,
+    valuationUsd,
+    blockchainTxHash: domainPiTxHash,
+    stellarLedgerSequence: ledger,
+    stellarTxHash: domainStellarTxHash,
+    metadataHash: sha256(JSON.stringify({ domain, ownerAddress })),
+    fortressHash: domainFortress.hash,
+    securityScore: domainFortress.score,
+    mintedAt: createdAt,
+    updatedAt: createdAt,
+    transfers: [],
+  };
+
+  // Deed token (estate-bound)
+  const propertyHash = sha256(legalDescription);
+  const deedTokenId = makeTokenId([propertyHash, ownerAddress, createdAt, "sovereign-estate-deed"]);
+  const deedNumber = `ALLODIAL-${new Date().getFullYear()}-${propertyHash.slice(0, 8).toUpperCase()}`;
+  const deedPayload = JSON.stringify({ tokenId: deedTokenId, deedNumber, propertyHash, ownerAddress, valuationPi });
+  const deedFortress = runFortress({
+    payload: deedPayload,
+    ownerAddress,
+    ownerUsername,
+    domain: legalDescription,
+    legalDescription,
+    valuationPi,
+    assetType: "deed",
+    ledger,
+    mintedAt: createdAt,
+    tokenId: deedTokenId,
+    country: (body.country as string | undefined),
+  });
+  if (!deedFortress.secured) {
+    metrics.fortress_fails++;
+    json(res, 422, { error: `Deed fortress protection failed — ${deedFortress.threat} threat` }); return;
+  }
+  metrics.fortress_passes++;
+
+  const deedPiTxHash = sha256(`pi:deed:${deedTokenId}:${ledger}`);
+  const deedStellarTxHash = sha256(`stellar:deed:${deedTokenId}:${ledger}`);
+  const deedToken = {
+    tokenId: deedTokenId,
+    deedNumber,
+    status: "TOKENIZED",
+    property: {
+      legalDescription,
+      propertyHash,
+    },
+    owner: {
+      piAddress: ownerAddress,
+      piUsername: ownerUsername,
+    },
+    standard: "PI-721",
+    network: NETWORK,
+    valuationPi,
+    valuationUsd,
+    propertyHash,
+    fortressHash: deedFortress.hash,
+    securityScore: deedFortress.score,
+    stellarAnchor: {
+      ledgerSequence: ledger,
+      transactionHash: deedStellarTxHash,
+      fee: "100",
+      consensusAt: createdAt,
+      networkPassphrase: "Pi Network",
+    },
+    piBlockchainAnchor: {
+      ledgerSequence: ledger,
+      transactionHash: deedPiTxHash,
+      piApiConfirmed: true,
+      confirmedAt: createdAt,
+    },
+    createdAt,
+    updatedAt: createdAt,
+  };
+
+  const equitableTitle = `${ownerUsername} Equitable Title Beneficiary`;
+  const granteeAbsolute = `${ownerUsername} Grantee Absolute`;
+  const estateId = makeTokenId([domainTokenId, deedTokenId, ownerAddress, createdAt, "sovereign-estate"]);
+  const estate = {
+    estateId,
+    ownerAddress,
+    ownerUsername,
+    sovereignRole,
+    status: "SOVEREIGN_ESTATE_ACTIVE",
+    titles: {
+      equitableTitle,
+      granteeAbsolute,
+    },
+    privateTrust: {
+      trustType: "private-living-estate",
+      trustName,
+      settlor: ownerAddress,
+      trustee: ownerAddress,
+      beneficiary: ownerAddress,
+      establishedAt: createdAt,
+    },
+    tokenization: {
+      domainTokenId,
+      deedTokenId,
+    },
+    governmentRegistration: {
+      status: "PENDING_EXTERNAL_JURISDICTION_RECORDING",
+      note: "Platform-level sovereign registry active; official government recording requires external authorized filing.",
+    },
+    createdAt,
+    updatedAt: createdAt,
+  };
+
+  await redis.setEx(`token:domain:${domainTokenId}`, 86_400, JSON.stringify(domainToken)).catch(() => undefined);
+  await redis.setEx(`token:deed:${deedTokenId}`, 86_400 * 30, JSON.stringify(deedToken)).catch(() => undefined);
+  await redis.setEx(`sovereign:estate:${estateId}`, 86_400 * 30, JSON.stringify(estate)).catch(() => undefined);
+
+  if (pg) {
+    pg.query(
+      `INSERT INTO pi_domain_tokens (token_id,domain,owner,network,status,valuation_pi,valuation_usd,fortress_hash,pi_tx_hash,stellar_tx_hash,stellar_ledger,metadata)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (token_id) DO NOTHING`,
+      [domainTokenId, domain, ownerAddress, NETWORK, "TOKENIZED", valuationPi, valuationUsd, domainFortress.hash, domainPiTxHash, domainStellarTxHash, ledger, JSON.stringify(domainToken)]
+    ).catch((e: Error) => console.error("[db]", e.message));
+
+    pg.query(
+      `INSERT INTO allodial_deeds (token_id,deed_number,property_hash,owner_address,network,status,valuation_pi,valuation_usd,fortress_hash,stellar_tx_hash,pi_tx_hash,stellar_ledger,metadata)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (token_id) DO NOTHING`,
+      [deedTokenId, deedNumber, propertyHash, ownerAddress, NETWORK, "TOKENIZED", valuationPi, valuationUsd, deedFortress.hash, deedStellarTxHash, deedPiTxHash, ledger, JSON.stringify(deedToken)]
+    ).catch((e: Error) => console.error("[db]", e.message));
+
+    pg.query(
+      `INSERT INTO sovereign_estates (estate_id,owner_address,owner_username,domain_token_id,deed_token_id,trust_name,equitable_title,grantee_absolute,royal_status,government_registration_status,metadata)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (estate_id) DO NOTHING`,
+      [estateId, ownerAddress, ownerUsername, domainTokenId, deedTokenId, trustName, equitableTitle, granteeAbsolute, sovereignRole, "PENDING_EXTERNAL_JURISDICTION_RECORDING", JSON.stringify(estate)]
+    ).catch((e: Error) => console.error("[db]", e.message));
+  }
+
+  metrics.domains_minted++;
+  metrics.deeds_minted++;
+  metrics.sovereign_estates_created++;
+
+  json(res, 201, {
+    success: true,
+    estate,
+    domainToken,
+    deedToken,
+    legalNotice: "Platform records and tokenization do not by themselves grant or replace government property registration. Use official jurisdiction filing for legal perfection.",
+  });
+}
+
 // ─── Server ───────────────────────────────────────────────────────────────────
 
 const server = http.createServer(async (req, res) => {
@@ -421,10 +713,55 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Sovereign estate — enroll bundle
+  if (url === "/api/sovereign/estate/enroll" && method === "POST") {
+    try {
+      const body = await readBody(req);
+      if (!(await enforceQuantumSignature(req, body, res))) return;
+      await handleEnrollSovereignEstate(body, res);
+    } catch (e) {
+      metrics.errors_total++;
+      json(res, 400, { error: (e as Error).message });
+    }
+    return;
+  }
+
+  // Sovereign estate — get
+  if (url.startsWith("/api/sovereign/estate/") && method === "GET") {
+    const estateId = url.replace("/api/sovereign/estate/", "");
+    const cached = await redis.get(`sovereign:estate:${estateId}`).catch(() => null);
+    if (cached) {
+      metrics.redis_cache_hits++;
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(cached);
+      return;
+    }
+
+    if (pg) {
+      try {
+        const row = await pg.query("SELECT metadata FROM sovereign_estates WHERE estate_id = $1 LIMIT 1", [estateId]);
+        const metadata = row.rows[0]?.metadata;
+        if (metadata) {
+          const data = JSON.stringify(metadata);
+          await redis.setEx(`sovereign:estate:${estateId}`, 86_400 * 30, data).catch(() => undefined);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(data);
+          return;
+        }
+      } catch (e) {
+        console.error("[db]", (e as Error).message);
+      }
+    }
+
+    json(res, 404, { error: "Sovereign estate not found" });
+    return;
+  }
+
   // Domain — mint
   if (url === "/api/tokenize/domain" && method === "POST") {
     try {
       const body = await readBody(req);
+      if (!(await enforceQuantumSignature(req, body, res))) return;
       await handleTokenizeDomain(body, res);
     } catch (e) {
       metrics.errors_total++;
@@ -448,6 +785,7 @@ const server = http.createServer(async (req, res) => {
   if (url === "/api/tokenize/deed" && method === "POST") {
     try {
       const body = await readBody(req);
+      if (!(await enforceQuantumSignature(req, body, res))) return;
       await handleTokenizeDeed(body, res);
     } catch (e) {
       metrics.errors_total++;

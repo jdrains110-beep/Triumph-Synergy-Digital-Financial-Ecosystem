@@ -1,6 +1,6 @@
 # Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
-﻿"""
+"""
 Pi Dual-Value Engine — triumph-synergy
 =======================================
 Separates Pi Network's two distinct value dimensions:

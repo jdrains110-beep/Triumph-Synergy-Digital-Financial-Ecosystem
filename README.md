@@ -23,6 +23,50 @@
 
 ---
 
+## 📋 What's New — April 24, 2026
+
+### v2.6 — Sovereign Estate Tokenization + Real-World Utility Layer
+
+Triumph Synergy now includes a full sovereign-estate bundle flow in the tokenization engine that mints and links:
+
+- A Pi domain asset token (PI-721)
+- An allodial deed token (PI-721)
+- A sovereign estate registry record with trust metadata
+
+#### ✅ New Sovereign Estate APIs (`docker/tokenization-engine`)
+
+```
+POST /api/sovereign/estate/enroll         — Enroll sovereign estate bundle (domain + deed + trust)
+GET  /api/sovereign/estate/{estateId}     — Retrieve sovereign estate bundle by estate ID
+```
+
+#### ✅ What This Brings to Real-World Utility for Pi Network
+
+- **Property Digitization on Pi Rails**: Real property descriptors can be represented as auditable Pi-native token bundles.
+- **Single-Flow Ownership Packaging**: Domain identity, deed representation, and trust structure are bundled in one enrollment transaction.
+- **Stronger Compliance Posture**: Response payloads include explicit jurisdictional notice that official government recording remains an external legal step.
+- **Post-Quantum Policy Enforcement**: Sensitive mint routes enforce `x-quantum-signature` and `x-quantum-public-key` validation.
+- **Operational Visibility**: Added metrics for sovereign estate creation and post-quantum verification/rejections for production monitoring.
+
+#### ✅ Sovereign Estate Data Model
+
+The tokenization service now initializes and persists sovereign estate records with:
+
+- `estate_id`
+- `owner_address`, `owner_username`
+- `domain_token_id`, `deed_token_id`
+- `trust_name`, `equitable_title`, `grantee_absolute`
+- `royal_status`, `government_registration_status`
+- `metadata`, `created_at`, `updated_at`
+
+#### ✅ Practical Pi-Network Utility Outcomes
+
+- **Pi as Settlement Context**: Estate bundle tokenization remains native to Pi ecosystem payment and ledger context.
+- **Interoperable Service Design**: New endpoints fit directly into existing gateway, payment, and compliance microservice architecture.
+- **Auditable Ownership Lifecycle**: Estate retrieval endpoint allows transparent downstream verification and integration.
+
+---
+
 ## 📋 What's New — April 21, 2026
 
 ### v2.5 — Superior FCRA §611 Credit Dispute Engine
@@ -1023,15 +1067,34 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 ./pi-network-actions.sh logs pi-central-node
 ```
 
+**macOS Pi Node Port Setup (Windows parity):**
+```bash
+chmod +x scripts/setup-pi-supernode-macos.sh scripts/open_pi_ports_macos.sh
+sudo ./scripts/open_pi_ports_macos.sh
+```
+
+This configures Pi Node ports `31400-31409` plus `11625`, `11626`, and `8000` via `pf`, allows Docker/Pi apps in macOS Application Firewall, and prints router forwarding targets.
+
 ### Quick Start Docker
 ```bash
-# Using combined Pi Network compose
-docker compose -f docker-compose.pi-network.yml -p pi-network-triumph-synergy up -d
+# 1) Create Docker env file (required for docker compose variable resolution)
+cp .env.example .env
 
-# Or using action scripts
-./pi-network-actions.sh start   # Linux/Mac
-.\pi-network-actions.ps1 start  # Windows
+# 2) Start the full Triumph Synergy platform stack
+docker compose up -d
+
+# 3) Optional encrypted tunnel profile (WireGuard sidecar)
+docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d
+
+# 4) Verify all superior platform services are running
+docker compose ps
 ```
+
+### Docker Desktop Notes
+
+- Open Docker Desktop and confirm project name `triumph-synergy` is present.
+- If the project does not appear, run `docker compose config` and ensure `.env` exists and includes all required variables.
+- For Apple Silicon or mixed-architecture environments, set `DOCKER_DEFAULT_PLATFORM` before `docker compose up -d` when needed.
 
 ---
 

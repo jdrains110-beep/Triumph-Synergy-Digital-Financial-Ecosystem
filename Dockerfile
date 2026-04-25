@@ -16,8 +16,13 @@ COPY package.json yarn.lock ./
 # even when yarn.lock changes.  Never re-downloads unless new packages added.
 # NOTE: do NOT use --ignore-optional — lightningcss ships its musl binary
 # as an optional dep and Tailwind CSS/Turbopack needs it on Alpine.
+# network-timeout 600000 = 10 min per package (handles slow registry responses)
+# network-concurrency 1 serialises fetches to avoid simultaneous TLS timeouts
 RUN --mount=type=cache,id=triumph-yarn-cache,target=/usr/local/share/.cache/yarn \
-    yarn install --frozen-lockfile --network-timeout 30000 \
+    yarn cache clean --cache-folder /usr/local/share/.cache/yarn 2>/dev/null || true && \
+    yarn install --frozen-lockfile \
+    --network-timeout 600000 \
+    --network-concurrency 1 \
     --cache-folder /usr/local/share/.cache/yarn
 
 # Rebuild the source code only when needed

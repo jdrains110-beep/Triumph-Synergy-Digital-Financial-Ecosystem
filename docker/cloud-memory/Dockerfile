@@ -7,4 +7,4 @@ COPY main.py .
 RUN useradd -m -u 1001 cloudmem
 USER cloudmem
 EXPOSE 8095
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8095", "--workers", "2", "--loop", "uvloop"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8095", "--workers", "1", "--loop", "uvloop"]

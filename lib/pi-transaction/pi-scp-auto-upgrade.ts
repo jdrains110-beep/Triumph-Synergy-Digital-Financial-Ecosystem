@@ -684,21 +684,56 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
         : SCP_UPGRADE_CONFIG.piTestnetHorizon);
   }
 
+  private getHorizonCandidates(): string[] {
+    const candidates = [
+      process.env.PI_LOCAL_HORIZON,
+      process.env.PI_INTERNAL_HORIZON_URL,
+      process.env.PI_BRIDGE_URL ? `${process.env.PI_BRIDGE_URL}/pi-node` : undefined,
+      process.env.STELLAR_HORIZON_URL,
+      this.networkType === 'mainnet' ? SCP_UPGRADE_CONFIG.piMainnetHorizon : SCP_UPGRADE_CONFIG.piTestnetHorizon,
+    ].filter((v): v is string => !!v && v.trim().length > 0)
+      .map(v => v.replace(/\/$/, ''));
+
+    return [...new Set(candidates)];
+  }
+
+  private isBridgeProxy(base: string): boolean {
+    return /\/pi-node\/?$/.test(base);
+  }
+
+  private mapPathForBase(base: string, path: string): string {
+    if (!this.isBridgeProxy(base)) return path;
+    if (path === '/') return '/status';
+    if (path.startsWith('/ledgers')) return '/ledger';
+    if (path.startsWith('/accounts/')) return path.replace('/accounts/', '/account/');
+    return path;
+  }
+
   private async horizonGet(path: string): Promise<unknown> {
-    const base = this.getHorizonUrl();
-    const url = `${base}${path}`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    try {
-      const res = await fetch(url, {
-        headers: { Accept: 'application/json' },
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`Horizon ${res.status}: ${res.statusText}`);
-      return await res.json();
-    } finally {
-      clearTimeout(timeout);
+    const errors: string[] = [];
+    for (const base of this.getHorizonCandidates()) {
+      const mappedPath = this.mapPathForBase(base, path);
+      const url = `${base}${mappedPath}`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      try {
+        const res = await fetch(url, {
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          errors.push(`${url} -> ${res.status} ${res.statusText}`);
+          continue;
+        }
+        return await res.json();
+      } catch (err) {
+        errors.push(`${url} -> ${(err as Error).message}`);
+      } finally {
+        clearTimeout(timeout);
+      }
     }
+
+    throw new Error(errors.join(' | '));
   }
 
   private async fetchNetworkVersion(): Promise<SCPVersion> {
@@ -706,14 +741,14 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const root = (await this.horizonGet('/')) as any;
       const ledger = (await this.horizonGet(`/ledgers?order=desc&limit=1`)) as any;
-      const latest = ledger?._embedded?.records?.[0] ?? {};
+      const latest = ledger?._embedded?.records?.[0] ?? ledger ?? {};
       return {
-        protocolVersion: root?.current_protocol_version ?? latest?.protocol_version ?? 21,
-        coreVersion: root?.core_version ?? 'stellar-core unknown',
-        horizonVersion: root?.horizon_version ?? 'horizon unknown',
+        protocolVersion: root?.current_protocol_version ?? root?.protocol_version ?? latest?.protocol_version ?? 21,
+        coreVersion: root?.core_version ?? root?.coreVersion ?? 'stellar-core unknown',
+        horizonVersion: root?.horizon_version ?? root?.horizonVersion ?? 'horizon unknown',
         ledgerVersion: latest?.protocol_version ?? 21,
-        networkPassphrase: root?.network_passphrase ?? (this.networkType === 'mainnet' ? 'Pi Network' : 'Pi Network Testnet'),
-        historyLatestLedger: root?.history_latest_ledger ?? latest?.sequence ?? 0,
+        networkPassphrase: root?.network_passphrase ?? root?.network ?? (this.networkType === 'mainnet' ? 'Pi Network' : 'Pi Network Testnet'),
+        historyLatestLedger: root?.history_latest_ledger ?? root?.ingest_latest_ledger ?? latest?.sequence ?? 0,
         historyElderLedger: root?.history_elder_ledger ?? 1,
       };
     } catch (err) {
@@ -734,10 +769,10 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ledger = (await this.horizonGet(`/ledgers?order=desc&limit=1`)) as any;
-      const rec = ledger?._embedded?.records?.[0] ?? {};
+      const rec = ledger?._embedded?.records?.[0] ?? ledger ?? {};
       return {
-        baseFee: rec?.base_fee_in_stroops ?? 100,
-        baseReserve: BigInt(rec?.base_reserve_in_stroops ?? 5000000),
+        baseFee: rec?.base_fee_in_stroops ?? rec?.base_fee ?? 100,
+        baseReserve: BigInt(rec?.base_reserve_in_stroops ?? rec?.base_reserve ?? 5000000),
         maxTxSetSize: rec?.max_tx_set_size ?? 1000,
         ledgerCloseTime: 5,
         nominalCloseTime: 5,

@@ -55,6 +55,7 @@ HORIZON         = (
     or os.getenv("STELLAR_HORIZON_URL")
     or "https://api.mainnet.minepi.com"
 )
+LOG_HORIZON_FEED_ERRORS = os.getenv("CREDIT_HORIZON_FEED_LOG_ERRORS", "false").lower() == "true"
 NETWORK         = os.getenv("PI_NETWORK_MODE",     "mainnet")
 PORT            = int(os.getenv("PORT",            "8091"))
 SANDBOX_MODE    = os.getenv("CREDIT_SANDBOX",      "true").lower() == "true"
@@ -642,7 +643,8 @@ def _horizon_feed() -> None:
                     })
                     print(f"[credit-engine horizon-feed] ledger={sequence} fee={base_fee}")
         except Exception as exc:
-            print(f"[credit-engine horizon-feed] {exc}")
+            if LOG_HORIZON_FEED_ERRORS:
+                print(f"[credit-engine horizon-feed] {exc}")
         time.sleep(10)
 
 

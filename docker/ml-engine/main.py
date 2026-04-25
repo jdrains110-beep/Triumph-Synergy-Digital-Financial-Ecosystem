@@ -1,6 +1,6 @@
 # Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
-﻿"""
+"""
 Triumph Synergy ML Engine
 =========================
 Real machine-learning models powered by live Pi Network data flowing
