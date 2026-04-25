@@ -10,6 +10,12 @@
 #   Upgrade:  docker compose pull; docker compose up -d --build
 #   Logs:     docker compose logs -f
 #   Stop:     docker compose down
+#
+# RECOMMENDED DOCKER DESKTOP SETTINGS (macOS / Windows):
+#   CPUs:   4 minimum — total container CPU budget is ~3.4 cores
+#   Memory: 6 GB minimum, 8 GB recommended
+#   Swap:   2 GB
+#   Docker Desktop → Settings → Resources → Advanced
 # ==========================================================================
 
 name: triumph-synergy
@@ -83,7 +89,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.4
+    cpus: 0.20
     oom_score_adj: -500          # Protect database — last to OOM-kill
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
@@ -110,7 +116,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     oom_score_adj: -500          # Protect cache — last to OOM-kill
     # Internal only — no host port exposure
     expose:
@@ -141,7 +147,7 @@ services:
     restart: on-failure:10            # override: stop crash-looping if Pi Node desktop is offline (prevents CPU storm)
     mem_limit: 192m
     mem_reservation: 96m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8092"
@@ -185,7 +191,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.4
+    cpus: 0.20
     environment:
       <<: [*db-env, *pi-env]
       NODE_TYPE: central
@@ -202,6 +208,8 @@ services:
       SCP_SYNC_INTERVAL_MS: 30000
       NODE_OPTIONS: "--max-old-space-size=384"
       PI_NODE_VERSION_DISPLAY: "5.4"
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      CENTRAL_NODE_REQUIRE_PQ_READY: "true"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     # Internal only — no host port exposure
     expose:
@@ -240,7 +248,7 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
-    cpus: 0.6
+    cpus: 0.30
     ports:
       - "3000:3000"
     environment:
@@ -257,6 +265,8 @@ services:
       INTERNAL_PI_MIN_VALUE: ${INTERNAL_PI_MIN_VALUE:-10.0}
       EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      APP_REQUIRE_PQ_SIGNATURE: "true"
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -288,7 +298,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       ENGINE_MODE: hyper
@@ -327,11 +337,13 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       VAULT_MODE: trillion
       QUANTUM_ENCRYPTION: "true"
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      VAULT_REQUIRE_PQ_SIGNATURE: "true"
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     volumes:
@@ -361,12 +373,13 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       EXECUTION_CHANNELS: 10000
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SMART_CONTRACTS_REQUIRE_PQ_SIGNATURE: "true"
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       CENTRAL_NODE_URL: http://triumph-central-node:11626
       CONTRACTS_URL: http://triumph-smart-contracts:8082
@@ -402,7 +415,7 @@ services:
     <<: *common
     mem_limit: 64m
     mem_reservation: 32m
-    cpus: 0.2
+    cpus: 0.08
     environment:
       <<: [*db-env, *pi-env]
       AUTO_UPGRADE: "true"
@@ -417,6 +430,8 @@ services:
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       NODE_OPTIONS: "--max-old-space-size=48"
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SCP_REQUIRE_PQ_SIGNATURE: "true"
     volumes:
       - triumph_scp_data:/app/data
     networks:
@@ -444,7 +459,7 @@ services:
     <<: *common
     mem_limit: 96m
     mem_reservation: 48m
-    cpus: 0.25
+    cpus: 0.12
     environment:
       <<: [*db-env, *pi-env]
       WORKER_THREADS: 2
@@ -476,7 +491,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 32m
-    cpus: 0.2
+    cpus: 0.10
     ports:
       - "80:80"
       - "443:443"
@@ -510,7 +525,7 @@ services:
     <<: *common
     mem_limit: 96m
     mem_reservation: 48m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       MARKET_POLL_MS: 5000
@@ -519,6 +534,7 @@ services:
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      MARKET_DATA_REQUIRE_PQ_SIGNATURE: "true"
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
@@ -552,7 +568,7 @@ services:
     <<: *common
     mem_limit: 96m
     mem_reservation: 48m
-    cpus: 0.25
+    cpus: 0.12
     environment:
       <<: [*db-env, *pi-env]
       CONTRACTS_URL: http://triumph-smart-contracts:8082
@@ -560,6 +576,7 @@ services:
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      ORACLE_REQUIRE_PQ_SIGNATURE: "true"
       STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
@@ -595,13 +612,15 @@ services:
     <<: *common
     mem_limit: 96m
     mem_reservation: 48m
-    cpus: 0.25
+    cpus: 0.12
     environment:
       <<: [*db-env, *pi-env]
       AML_THRESHOLD_PI: ${AML_THRESHOLD_PI:-10000}
       BLOCKED_ADDRESSES: ${BLOCKED_ADDRESSES:-}
       NODE_OPTIONS: "--max-old-space-size=64"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      COMPLIANCE_REQUIRE_PQ_SIGNATURE: "true"
     networks:
       - triumph-net
     depends_on:
@@ -628,7 +647,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
@@ -637,6 +656,8 @@ services:
       PI_INTERNAL_MULTIPLIER: "1000.0"
       NODE_OPTIONS: "--max-old-space-size=96"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      DEX_REQUIRE_PQ_SIGNATURE: "true"
     networks:
       - triumph-net
     depends_on:
@@ -664,7 +685,7 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
-    cpus: 0.4
+    cpus: 0.20
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8090"
@@ -673,6 +694,8 @@ services:
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      ML_REQUIRE_PQ_SIGNATURE: "true"
     expose:
       - "8090"
     networks:
@@ -701,13 +724,14 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8091"
       ML_ENGINE_URL: http://triumph-ml-engine:8090
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      CREDIT_REQUIRE_PQ_SIGNATURE: "true"
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
@@ -771,7 +795,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.25
+    cpus: 0.12
     environment:
       PORT: "8094"
       REDIS_URL: redis://triumph-redis:6379
@@ -832,7 +856,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 96m
-    cpus: 0.2
+    cpus: 0.10
     user: "1000:1000"
     environment:
       PORT: "8095"
@@ -862,6 +886,8 @@ services:
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      CLOUD_MEMORY_REQUIRE_PQ: "true"
     volumes:
       - triumph_cloud_memory_backup:/backup
     expose:
@@ -893,7 +919,7 @@ services:
     <<: *common
     mem_limit: 192m
     mem_reservation: 96m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       PORT: "8097"
       REDIS_URL: redis://triumph-redis:6379
@@ -905,6 +931,7 @@ services:
       CENTRAL_NODE_URL: http://triumph-central-node:11626
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SOVEREIGN_PQ_ENFORCE: "true"
     expose:
       - "8097"
     networks:
@@ -932,7 +959,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       PORT: "8093"
       ML_ENGINE_URL: http://triumph-ml-engine:8090
@@ -948,6 +975,8 @@ services:
       CLOUD_MEMORY_URL: http://triumph-cloud-memory:8095
       KYC_PREMIUM_PCT: "0.05"
       PIONEER_PREMIUM_PCT: "0.03"
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      DUAL_VALUE_REQUIRE_PQ_SIGNATURE: "true"
     expose:
       - "8093"
     networks:
@@ -980,7 +1009,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       <<: [*db-env, *pi-env]
       NODE_OPTIONS: "--max-old-space-size=96"
@@ -1021,7 +1050,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.08
     ports:
       - "9090:9090"
     volumes:
@@ -1058,7 +1087,7 @@ services:
     <<: *common
     mem_limit: 32m
     mem_reservation: 16m
-    cpus: 0.1
+    cpus: 0.05
     environment:
       DATA_SOURCE_NAME: "postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}?sslmode=disable"
     expose:
@@ -1084,7 +1113,7 @@ services:
     <<: *common
     mem_limit: 24m
     mem_reservation: 12m
-    cpus: 0.1
+    cpus: 0.05
     environment:
       REDIS_ADDR: "redis://triumph-redis:6379"
     expose:
@@ -1113,7 +1142,7 @@ services:
     restart: on-failure:10            # override: stop looping if Pi Node desktop is offline
     mem_limit: 128m
     mem_reservation: 32m
-    cpus: 0.15
+    cpus: 0.08
     environment:
       TARGET_CONTAINER: testnet2
       TARGET_PROCESS: horizon
@@ -1147,12 +1176,14 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.08
     environment:
       <<: [*db-env, *pi-env]
       SERVICE_NAME: judicial-monitor
       SERVICE_PORT: "8096"
       JUDICIAL_JURISDICTION: florida
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      JUDICIAL_REQUIRE_PQ_SIGNATURE: "true"
     ports:
       - "8096:8096"
     networks:
@@ -1175,7 +1206,7 @@ services:
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
-    cpus: 0.2
+    cpus: 0.08
     ports:
       - "3001:3000"
     environment:
@@ -1210,7 +1241,7 @@ services:
     <<: *common
     mem_limit: 64m
     mem_reservation: 24m
-    cpus: 0.15
+    cpus: 0.08
     environment:
       GOVERNOR_INTERVAL_S: "30"
       MEMORY_WARN_PCT: "80"
@@ -1256,7 +1287,7 @@ services:
     restart: on-failure:10            # override: don't crash-loop on network probe failures
     mem_limit: 48m
     mem_reservation: 16m
-    cpus: 0.1
+    cpus: 0.05
     environment:
       PROBE_INTERVAL_S: "15"
       METRICS_PORT: "9913"
@@ -1304,11 +1335,12 @@ services:
     <<: *common
     mem_limit: 192m
     mem_reservation: 96m
-    cpus: 0.2
+    cpus: 0.10
     environment:
       PORT: "8098"
       REDIS_URL: redis://triumph-redis:6379
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      QPU_REQUIRE_PQ_SIGNATURE: "true"
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
