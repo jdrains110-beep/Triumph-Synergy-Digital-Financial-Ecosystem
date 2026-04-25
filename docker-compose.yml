@@ -694,6 +694,7 @@ services:
     build:
       context: docker/ml-engine
     container_name: triumph-ml-engine
+    init: true
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
@@ -1425,11 +1426,14 @@ services:
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
       SAIB_URL: http://triumph-sovereign-ai-bot:8099
       SAIB_REQUIRE_PQ_SIGNATURE: "true"
-      SAIB_INTELLIGENCE_MODE: "autonomous"
-      SAIB_PULSE_INTERVAL_S: "15"
-      SAIB_HEAL_COOLDOWN_S: "60"
-      SAIB_MAX_RESTARTS_WINDOW: "5"
+      SAIB_INTELLIGENCE_MODE: "sentinel"
+      SAIB_PULSE_INTERVAL_S: "10"
+      SAIB_HEAL_COOLDOWN_S: "5"
+      SAIB_MAX_RESTARTS_WINDOW: "10"
       SAIB_RESTART_WINDOW_S: "600"
+      SAIB_APEX_QUANTUM_ENFORCEMENT: "true"
+      SAIB_SENTINEL_INSTANT_HEAL: "true"
+      SAIB_ALL_LOOPHOLES_ACTIVE: "true"
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V

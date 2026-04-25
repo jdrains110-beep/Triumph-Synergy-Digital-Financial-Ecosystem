@@ -16,6 +16,6 @@ USER saib
 EXPOSE 8099
 
 HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=5 \
-  CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8099/health', timeout=8)" || exit 1
+    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8099/health', timeout=8)" || exit 1
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8099", "--workers", "1", "--log-level", "info"]

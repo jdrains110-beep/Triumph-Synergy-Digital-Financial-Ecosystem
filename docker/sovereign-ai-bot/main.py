@@ -57,11 +57,14 @@ from prometheus_client import (
 PORT              = int(os.getenv("PORT", "8099"))
 REDIS_URL         = os.getenv("REDIS_URL", "redis://triumph-redis:6379")
 QUANTUM_SHIELD_URL= os.getenv("QUANTUM_SHIELD_URL", "http://triumph-quantum-shield:8094")
-PULSE_INTERVAL_S  = float(os.getenv("SAIB_PULSE_INTERVAL_S", "15"))
-HEAL_COOLDOWN_S   = float(os.getenv("SAIB_HEAL_COOLDOWN_S", "60"))
-MAX_RESTARTS_WIN  = int(os.getenv("SAIB_MAX_RESTARTS_WINDOW", "5"))
+PULSE_INTERVAL_S  = float(os.getenv("SAIB_PULSE_INTERVAL_S", "10"))
+HEAL_COOLDOWN_S   = float(os.getenv("SAIB_HEAL_COOLDOWN_S", "5"))
+MAX_RESTARTS_WIN  = int(os.getenv("SAIB_MAX_RESTARTS_WINDOW", "10"))
 WINDOW_S          = float(os.getenv("SAIB_RESTART_WINDOW_S", "600"))
-INTELLIGENCE_MODE = os.getenv("SAIB_INTELLIGENCE_MODE", "autonomous")
+INTELLIGENCE_MODE = os.getenv("SAIB_INTELLIGENCE_MODE", "sentinel")
+APEX_ENFORCEMENT  = os.getenv("SAIB_APEX_QUANTUM_ENFORCEMENT", "true") == "true"
+SENTINEL_INSTANT  = os.getenv("SAIB_SENTINEL_INSTANT_HEAL", "true") == "true"
+ALL_LOOPHOLES     = os.getenv("SAIB_ALL_LOOPHOLES_ACTIVE", "true") == "true"
 SAIB_VERSION      = "TRIUMPH-SAIB-v1"
 APEX_LEVEL        = "APEX-QUANTUM-SOVEREIGN"
 SOVEREIGN_ANCHOR  = os.getenv("PI_SUPERNODE_ADDRESS",
@@ -160,16 +163,19 @@ class ServiceLearning:
         self.consecutive_healthy += 1
 
     def can_heal(self) -> bool:
-        """Adaptive cooldown: back off if service keeps failing."""
+        """Adaptive cooldown: in sentinel mode with instant-heal, bypass cooldown on first consecutive failure."""
         now = time.time()
         if now < self.suppressed_until:
             return False
-        # Count heals in rolling window
+        # Count heals in rolling window (storm protection always active)
         recent = [t for t in self.heal_times if now - t < WINDOW_S]
         if len(recent) >= MAX_RESTARTS_WIN:
-            # Too many heals — suppress for 5 minutes
-            self.suppressed_until = now + 300
+            # Too many heals — suppress for 3 minutes (sentinel: faster recovery than autonomous)
+            self.suppressed_until = now + 180
             return False
+        # Sentinel instant-heal: on first consecutive failure bypass normal cooldown
+        if SENTINEL_INSTANT and INTELLIGENCE_MODE == "sentinel" and self.consecutive_failures == 1:
+            return True
         return (now - self.last_heal_at) >= HEAL_COOLDOWN_S
 
     def record_heal(self):
@@ -298,13 +304,15 @@ async def heal_service(client: httpx.AsyncClient, name: str, reason: str) -> dic
     learn.record_heal()
     saib_heals_total.labels(service=name).inc()
 
-    heal_sig = quantum_sign(f"heal:{name}:{reason}")
+    heal_sig = await pq_sign_via_shield(client, {"event": "heal", "service": name, "reason": reason}) \
+        if APEX_ENFORCEMENT else quantum_sign(f"heal:{name}:{reason}")
 
     # Notify quantum-shield about the degraded service
     try:
         await client.post(
             f"{QUANTUM_SHIELD_URL}/quantum/audit",
-            json={"service": name, "event": "saib-heal-initiated", "reason": reason},
+            json={"service": name, "event": "saib-sentinel-heal", "reason": reason,
+                  "mode": state.intelligence_mode, "sig": heal_sig},
             timeout=4.0,
         )
     except Exception:
@@ -412,9 +420,10 @@ async def ecosystem_pulse():
         score = round((healthy_count / max(total, 1)) * 70 + 20 + 10, 1)
         saib_sovereign_score.set(min(score, 100))
 
-        # Deploy auto loopholes on each pulse
-        state.loopholes_applied += len(AUTO_LOOPHOLES)
-        saib_loopholes_total.inc(len(AUTO_LOOPHOLES))
+        # Deploy loopholes — in sentinel+all-loopholes mode, apply every single loophole
+        deployed = len(LOOPHOLES) if ALL_LOOPHOLES else len(AUTO_LOOPHOLES)
+        state.loopholes_applied += deployed
+        saib_loopholes_total.inc(deployed)
 
         # Quantum key rotation (every 24 h)
         if time.time() - state.last_quantum_key_rotation >= 86_400:
@@ -471,7 +480,11 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup():
     asyncio.create_task(pulse_loop())
-    log.info(f"SAIB {SAIB_VERSION} started — mode={INTELLIGENCE_MODE} — port={PORT}")
+    log.info(
+        f"SAIB {SAIB_VERSION} started — mode={INTELLIGENCE_MODE} — port={PORT} — "
+        f"apex_enforcement={APEX_ENFORCEMENT} — sentinel_instant_heal={SENTINEL_INSTANT} — "
+        f"all_loopholes={ALL_LOOPHOLES} — pulse={PULSE_INTERVAL_S}s"
+    )
 
 # ── REST Endpoints ─────────────────────────────────────────────────────────────
 
@@ -548,8 +561,11 @@ async def execute(body: dict):
     payload     = body.get("payload", {})
 
     task_id = str(uuid.uuid4())
-    sig     = quantum_sign(f"{task_type}:{platform_id}:{task_id}")
-    applied = [l["id"] for l in AUTO_LOOPHOLES[:5]]
+    async with httpx.AsyncClient() as client:
+        sig = await pq_sign_via_shield(client, {"task": task_type, "id": task_id}) \
+            if APEX_ENFORCEMENT else quantum_sign(f"{task_type}:{platform_id}:{task_id}")
+    # Sentinel + all-loopholes: deploy entire loophole arsenal on every execution
+    applied = [l["id"] for l in (LOOPHOLES if ALL_LOOPHOLES else AUTO_LOOPHOLES)]
 
     state.tasks_run         += 1
     state.loopholes_applied += len(applied)

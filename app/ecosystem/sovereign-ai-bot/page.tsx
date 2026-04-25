@@ -11,7 +11,7 @@
  * Pi economics — all under APEX-QUANTUM-SOVEREIGN protection.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     Bot,
     Cpu,
@@ -29,7 +29,45 @@ import {
     Key,
     Scroll,
     Sigma,
+    Radio,
+    Server,
+    Wifi,
+    WifiOff,
+    RefreshCw,
+    BrainCircuit,
 } from "lucide-react";
+
+// ── Docker SAIB Status Type ───────────────────────────────────────────────────
+
+type DockerServiceHealth = {
+    status: "healthy" | "degraded" | "unknown";
+    last_checked: string | null;
+    latency_ms: number | null;
+    stability: number;
+    heal_count: number;
+};
+
+type DockerStatus = {
+    success: boolean;
+    containerOnline: boolean;
+    saib_version?: string;
+    security_level?: string;
+    intelligence_mode?: string;
+    lockdown?: boolean;
+    ecosystem?: {
+        total_services: number;
+        healthy_services: number;
+        degraded_services: number;
+        sovereign_score: number;
+    };
+    services?: Record<string, DockerServiceHealth>;
+    recent_alerts?: Array<{ id: string; severity: string; service: string; message: string; ts: string }>;
+    pulse_count?: number;
+    tasks_run?: number;
+    loopholes_applied?: number;
+    quantum_ops?: number;
+    uptime_s?: number;
+};
 
 // ── Types (mirrored from lib/programs/sovereign-ai-bot.ts) ────────────────────
 
@@ -175,15 +213,17 @@ const QUANTUM_STACK = [
 ];
 
 const MISSIONS = [
-    { id: "TAX-ZERO", title: "Operation Tax Zero", status: "ACTIVE", tasks: 25, loopholes: 25 },
-    { id: "FAM-FORTRESS", title: "Operation Family Fortress", status: "ACTIVE", tasks: 20, loopholes: 20 },
-    { id: "BIZ-IMMORTAL", title: "Operation Business Immortal", status: "ACTIVE", tasks: 15, loopholes: 15 },
-    { id: "QUANTUM-LOCK", title: "Operation Quantum Lock", status: "ACTIVE", tasks: 4, loopholes: 15 },
-    { id: "HOUSING-SECURE", title: "Operation Housing Secured", status: "ACTIVE", tasks: 10, loopholes: 10 },
-    { id: "WORKFORCE-FREE", title: "Operation Workforce Freedom", status: "ACTIVE", tasks: 10, loopholes: 10 },
-    { id: "PI-SETTLE", title: "Operation Pi Settlement", status: "ACTIVE", tasks: 7, loopholes: 5 },
-    { id: "THREAT-ZERO", title: "Operation Threat Zero", status: "STANDBY", tasks: 3, loopholes: 15 },
-    { id: "ECOSYSTEM-AUDIT", title: "Operation Full Ecosystem Audit", status: "STANDBY", tasks: 15, loopholes: 95 },
+    { id: "TAX-ZERO",        title: "Operation Tax Zero",              status: "ACTIVE",  tasks: 25,  loopholes: 25 },
+    { id: "FAM-FORTRESS",    title: "Operation Family Fortress",       status: "ACTIVE",  tasks: 20,  loopholes: 20 },
+    { id: "BIZ-IMMORTAL",    title: "Operation Business Immortal",     status: "ACTIVE",  tasks: 15,  loopholes: 15 },
+    { id: "QUANTUM-LOCK",    title: "Operation Quantum Lock",          status: "ACTIVE",  tasks: 4,   loopholes: 15 },
+    { id: "HOUSING-SECURE",  title: "Operation Housing Secured",       status: "ACTIVE",  tasks: 10,  loopholes: 10 },
+    { id: "WORKFORCE-FREE",  title: "Operation Workforce Freedom",     status: "ACTIVE",  tasks: 10,  loopholes: 10 },
+    { id: "PI-SETTLE",       title: "Operation Pi Settlement",         status: "ACTIVE",  tasks: 7,   loopholes: 5  },
+    { id: "THREAT-ZERO",     title: "Operation Threat Zero",           status: "ACTIVE",  tasks: 3,   loopholes: 15 },
+    { id: "ECOSYSTEM-AUDIT", title: "Operation Full Ecosystem Audit",  status: "ACTIVE",  tasks: 15,  loopholes: 97 },
+    { id: "SENTINEL-WATCH",  title: "Operation Sentinel Watch",        status: "ACTIVE",  tasks: 31,  loopholes: 97 },
+    { id: "PQ-SHIELD",       title: "Operation PQ Shield — All Services", status: "ACTIVE", tasks: 23, loopholes: 97 },
 ];
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
@@ -191,9 +231,13 @@ const MISSIONS = [
 export default function SovereignAIBotPage() {
     const [stats, setStats] = useState<SAIBStats | null>(null);
     const [report, setReport] = useState<EcosystemReport | null>(null);
+    const [dockerStatus, setDockerStatus] = useState<DockerStatus | null>(null);
     const [loading, setLoading] = useState(true);
     const [pulse, setPulse] = useState(0);
+    const [dockerPulse, setDockerPulse] = useState(0);
+    const pulseRef = useRef<number>(0);
 
+    // Fetch Next.js SAIB engine stats
     useEffect(() => {
         async function fetchData() {
             try {
@@ -220,6 +264,23 @@ export default function SovereignAIBotPage() {
         return () => clearInterval(id);
     }, [pulse]);
 
+    // Fetch live Docker SAIB container status every 10 s
+    useEffect(() => {
+        async function fetchDocker() {
+            try {
+                const res = await fetch("/api/sovereign/ai-bot/docker?endpoint=status");
+                const d   = await res.json();
+                setDockerStatus(d);
+                pulseRef.current = (d.pulse_count ?? 0);
+            } catch {
+                setDockerStatus({ success: false, containerOnline: false });
+            }
+        }
+        fetchDocker();
+        const id = setInterval(() => setDockerPulse(p => p + 1), 10_000);
+        return () => clearInterval(id);
+    }, [dockerPulse]);
+
     const sovereignScore = report?.sovereignScore ?? 100;
 
     return (
@@ -236,7 +297,12 @@ export default function SovereignAIBotPage() {
                             <h1 className="text-lg font-bold text-white tracking-tight">
                                 Triumph Synergy Sovereign AI Bot
                             </h1>
-                            <p className="text-xs text-neutral-500 font-mono">SAIB • TRIUMPH-SAIB-v1 • AUTONOMOUS</p>
+                            <p className="text-xs text-neutral-500 font-mono">
+                                SAIB • TRIUMPH-SAIB-v1 •{" "}
+                                <span className="text-red-400 font-bold">
+                                    {dockerStatus?.intelligence_mode?.toUpperCase() ?? "SENTINEL"}
+                                </span>
+                            </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -257,6 +323,28 @@ export default function SovereignAIBotPage() {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+                {/* ── SENTINEL MODE ACTIVE Banner ── */}
+                <div className="rounded-2xl border border-red-500/40 bg-gradient-to-r from-red-950/40 via-black to-red-950/40 p-4 flex items-center gap-4">
+                    <Radio className="w-5 h-5 text-red-400 animate-pulse shrink-0" />
+                    <div className="flex-1">
+                        <span className="text-sm font-black text-red-400 uppercase tracking-widest">SENTINEL MODE ACTIVE</span>
+                        <span className="ml-3 text-xs text-neutral-500 font-mono">
+                            Maximum threat detection · Instant heal on first failure · All {LOOPHOLE_CATEGORIES.reduce((s, c) => s + c.count, 0)} loopholes armed · Pulse every 10s
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {dockerStatus?.containerOnline ? (
+                            <span className="flex items-center gap-1 text-xs text-green-400 font-mono border border-green-700 bg-green-950 px-2 py-0.5 rounded-full">
+                                <Wifi className="w-3 h-3" /> DOCKER LIVE
+                            </span>
+                        ) : (
+                            <span className="flex items-center gap-1 text-xs text-amber-400 font-mono border border-amber-700 bg-amber-950 px-2 py-0.5 rounded-full">
+                                <WifiOff className="w-3 h-3" /> STARTING
+                            </span>
+                        )}
+                    </div>
+                </div>
+
                 {/* ── Sovereign Score Banner ── */}
                 <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-cyan-950/40 via-violet-950/20 to-cyan-950/40 p-6">
                     <div className="flex items-center gap-4">
@@ -283,6 +371,115 @@ export default function SovereignAIBotPage() {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* ── Live Docker SAIB Container Panel ── */}
+                <div className={`rounded-xl border p-6 ${
+                    dockerStatus?.containerOnline
+                        ? "border-green-500/30 bg-green-950/10"
+                        : "border-amber-500/20 bg-amber-950/10"
+                }`}>
+                    <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wider mb-4 flex items-center gap-3">
+                        <Server className={`w-4 h-4 ${dockerStatus?.containerOnline ? "text-green-400" : "text-amber-400"}`} />
+                        Docker Container — triumph-sovereign-ai-bot:8099
+                        <span className={`ml-auto text-xs font-mono px-2 py-0.5 rounded-full border ${
+                            dockerStatus?.containerOnline
+                                ? "border-green-700 bg-green-950 text-green-400"
+                                : "border-amber-700 bg-amber-950 text-amber-400"
+                        }`}>
+                            {dockerStatus?.containerOnline ? "ONLINE" : "STARTING"}
+                        </span>
+                    </h2>
+
+                    {dockerStatus?.containerOnline ? (
+                        <div className="space-y-4">
+                            {/* Container Stats Row */}
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                <div className="rounded-lg bg-neutral-800/50 p-3">
+                                    <div className="text-xs text-neutral-500 mb-1">Pulse Count</div>
+                                    <div className="text-xl font-bold text-cyan-400">{dockerStatus.pulse_count?.toLocaleString() ?? 0}</div>
+                                </div>
+                                <div className="rounded-lg bg-neutral-800/50 p-3">
+                                    <div className="text-xs text-neutral-500 mb-1">Healthy Services</div>
+                                    <div className="text-xl font-bold text-green-400">
+                                        {dockerStatus.ecosystem?.healthy_services ?? 0}
+                                        <span className="text-neutral-600 text-sm">/{dockerStatus.ecosystem?.total_services ?? 31}</span>
+                                    </div>
+                                </div>
+                                <div className="rounded-lg bg-neutral-800/50 p-3">
+                                    <div className="text-xs text-neutral-500 mb-1">Sovereign Score</div>
+                                    <div className="text-xl font-bold text-violet-400">{dockerStatus.ecosystem?.sovereign_score ?? 100}</div>
+                                </div>
+                                <div className="rounded-lg bg-neutral-800/50 p-3">
+                                    <div className="text-xs text-neutral-500 mb-1">Loopholes Armed</div>
+                                    <div className="text-xl font-bold text-amber-400">{dockerStatus.loopholes_applied?.toLocaleString() ?? 0}</div>
+                                </div>
+                                <div className="rounded-lg bg-neutral-800/50 p-3">
+                                    <div className="text-xs text-neutral-500 mb-1">Uptime</div>
+                                    <div className="text-xl font-bold text-white">
+                                        {dockerStatus.uptime_s ? `${Math.floor(dockerStatus.uptime_s / 60)}m` : "—"}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Per-service health grid */}
+                            {dockerStatus.services && Object.keys(dockerStatus.services).length > 0 && (
+                                <div>
+                                    <div className="text-xs text-neutral-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                        <Eye className="w-3 h-3" /> Live Service Health ({Object.keys(dockerStatus.services).length} services)
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                        {Object.entries(dockerStatus.services).map(([name, svc]) => (
+                                            <div key={name} className="flex items-center gap-2 py-1 border-b border-neutral-800/40 last:border-0">
+                                                {svc.status === "healthy"
+                                                    ? <CheckCircle2 className="w-3 h-3 text-green-400 shrink-0" />
+                                                    : <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
+                                                }
+                                                <span className="text-xs text-neutral-400 flex-1 font-mono truncate">{name.replace("triumph-", "")}</span>
+                                                <span className="text-xs font-mono" style={{ color: svc.status === "healthy" ? "#4ade80" : "#fbbf24" }}>
+                                                    {svc.stability}%
+                                                </span>
+                                                {svc.heal_count > 0 && (
+                                                    <span className="text-xs text-rose-400 font-mono">+{svc.heal_count}♥</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Recent Alerts */}
+                            {dockerStatus.recent_alerts && dockerStatus.recent_alerts.length > 0 && (
+                                <div>
+                                    <div className="text-xs text-neutral-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                        <BrainCircuit className="w-3 h-3" /> Recent SAIB Alerts
+                                    </div>
+                                    <div className="space-y-1">
+                                        {dockerStatus.recent_alerts.slice(-5).reverse().map(a => (
+                                            <div key={a.id} className="flex items-start gap-2 text-xs font-mono">
+                                                <span className={`shrink-0 ${
+                                                    a.severity === "info" ? "text-cyan-400" :
+                                                    a.severity === "critical" ? "text-red-400" :
+                                                    a.severity === "sovereign-override" ? "text-rose-400 font-bold" :
+                                                    "text-amber-400"
+                                                }`}>[{a.severity.toUpperCase()}]</span>
+                                                <span className="text-neutral-400">{a.message}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-sm text-neutral-500 flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            Container initialising — run{" "}
+                            <code className="font-mono text-xs bg-neutral-800 px-2 py-0.5 rounded">
+                                docker compose up -d sovereign-ai-bot
+                            </code>{" "}
+                            to activate.
+                        </div>
+                    )}
                 </div>
 
                 {/* ── Key Stats Grid ── */}
