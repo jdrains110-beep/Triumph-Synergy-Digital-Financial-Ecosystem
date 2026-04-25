@@ -1217,6 +1217,13 @@ services:
       RESTART_BACKOFF_BASE_S: "60"
       RESTART_BACKOFF_MAX_S: "600"
       HEALTH_PROBE_TIMEOUT_S: "10"
+      ML_SELF_HEAL_ENABLED: "true"
+      ML_HISTORY_WINDOW_S: "900"
+      ML_MAX_RESTARTS_PER_WINDOW: "4"
+      ML_SUPPRESSION_S: "300"
+      CONTROL_PLANE_REQUIRE_PQ_READY: "true"
+      QUANTUM_SHIELD_URL: "http://triumph-quantum-shield:8094"
+      PQ_CHECK_INTERVAL_S: "30"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
@@ -1251,6 +1258,13 @@ services:
       PI_NODE_PEER_PORT: "31402"
       PI_HORIZON_URL: "http://testnet2:8000"
       PI_BRIDGE_URL: "http://triumph-pi-bridge-connector:8092"
+      ML_ENGINE_URL: "http://triumph-ml-engine:8090"
+      SELF_HEAL_ML_ENABLED: "true"
+      ANOMALY_Z_THRESHOLD: "2.5"
+      ANOMALY_STREAK_THRESHOLD: "3"
+      CONTROL_PLANE_REQUIRE_PQ_READY: "true"
+      QUANTUM_SHIELD_URL: "http://triumph-quantum-shield:8094"
+      PQ_CHECK_INTERVAL_S: "30"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:

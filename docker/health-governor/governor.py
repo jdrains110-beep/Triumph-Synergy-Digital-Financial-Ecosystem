@@ -44,6 +44,13 @@ DOCKER_UNHEALTHY_THRESHOLD = int(os.environ.get("DOCKER_UNHEALTHY_THRESHOLD", "3
 RESTART_BACKOFF_BASE = int(os.environ.get("RESTART_BACKOFF_BASE_S", "60"))
 RESTART_BACKOFF_MAX = int(os.environ.get("RESTART_BACKOFF_MAX_S", "600"))
 HEALTH_PROBE_TIMEOUT = int(os.environ.get("HEALTH_PROBE_TIMEOUT_S", "5"))
+ML_SELF_HEAL_ENABLED = os.environ.get("ML_SELF_HEAL_ENABLED", "true").lower() == "true"
+ML_HISTORY_WINDOW_S = int(os.environ.get("ML_HISTORY_WINDOW_S", "900"))
+ML_MAX_RESTARTS_PER_WINDOW = int(os.environ.get("ML_MAX_RESTARTS_PER_WINDOW", "4"))
+ML_SUPPRESSION_S = int(os.environ.get("ML_SUPPRESSION_S", "300"))
+CONTROL_PLANE_REQUIRE_PQ_READY = os.environ.get("CONTROL_PLANE_REQUIRE_PQ_READY", "true").lower() == "true"
+QUANTUM_SHIELD_URL = os.environ.get("QUANTUM_SHIELD_URL", "http://triumph-quantum-shield:8094").rstrip("/")
+PQ_CHECK_INTERVAL_S = int(os.environ.get("PQ_CHECK_INTERVAL_S", "30"))
 # Containers that should NEVER be restarted automatically
 PROTECTED = set(
     x.strip() for x in os.environ.get("PROTECTED_CONTAINERS", "triumph-postgres,triumph-redis").split(",") if x.strip()
@@ -134,6 +141,65 @@ docker_unhealthy_counts = {}  # name -> int
 # Track restart backoff per container: name → next_allowed_restart_ts
 restart_backoff = {}
 restart_counts = {}  # name → consecutive restart count (for exponential backoff)
+restart_timeline = {}  # name -> [timestamps]
+restart_suppressed_until = {}  # name -> ts
+restart_cause_counts = {}  # name -> {cause: count}
+pq_state = {"ok": False, "checked_at": 0.0}
+
+
+def pq_ready():
+    """Check Quantum Shield readiness and cache result for a short interval."""
+    now = time.time()
+    if now - pq_state["checked_at"] < PQ_CHECK_INTERVAL_S:
+        return pq_state["ok"]
+    pq_state["checked_at"] = now
+    try:
+        req = urllib.request.Request(f"{QUANTUM_SHIELD_URL}/health", method="GET")
+        with urllib.request.urlopen(req, timeout=HEALTH_PROBE_TIMEOUT) as resp:
+            pq_state["ok"] = 200 <= resp.status < 300
+    except Exception:
+        pq_state["ok"] = False
+    return pq_state["ok"]
+
+
+def record_restart_cause(name, cause):
+    causes = restart_cause_counts.setdefault(name, {})
+    causes[cause] = causes.get(cause, 0) + 1
+
+
+def adaptive_restart_allowed(name):
+    """Simple online learning: suppress thrashy restarts when a service keeps failing repeatedly."""
+    if not ML_SELF_HEAL_ENABLED:
+        return True
+
+    now = time.time()
+    suppressed = restart_suppressed_until.get(name, 0)
+    if now < suppressed:
+        return False
+
+    hist = [t for t in restart_timeline.get(name, []) if now - t <= ML_HISTORY_WINDOW_S]
+    restart_timeline[name] = hist
+    if len(hist) >= ML_MAX_RESTARTS_PER_WINDOW:
+        restart_suppressed_until[name] = now + ML_SUPPRESSION_S
+        print(
+            f"[GOVERNOR] ML suppression for {name}: "
+            f"{len(hist)} restarts in {ML_HISTORY_WINDOW_S}s, suppressing for {ML_SUPPRESSION_S}s"
+        )
+        return False
+
+    return True
+
+
+def can_autorecover(name):
+    """Single gate for autonomous restart actions with backoff + ML + PQ readiness."""
+    if not can_restart(name):
+        return False
+    if not adaptive_restart_allowed(name):
+        return False
+    if CONTROL_PLANE_REQUIRE_PQ_READY and not pq_ready():
+        print(f"[GOVERNOR] PQ gate blocked auto-recovery for {name}: quantum shield unavailable")
+        return False
+    return True
 
 
 def can_restart(name):
@@ -149,6 +215,7 @@ def record_restart(name):
     restart_counts[name] = count
     backoff = min(RESTART_BACKOFF_BASE * (2 ** (count - 1)), RESTART_BACKOFF_MAX)
     restart_backoff[name] = time.time() + backoff
+    restart_timeline.setdefault(name, []).append(time.time())
     print(f"[GOVERNOR] Backoff for {name}: next restart allowed in {backoff}s (attempt #{count})")
 
 
@@ -172,6 +239,14 @@ def governor_loop():
         try:
             containers = DockerSocket.containers()
             report = []
+            infra_degraded = False
+
+            # If core state services are down, avoid thrashing dependent service restarts.
+            for c in containers:
+                name = (c.get("Names") or ["/unknown"])[0].lstrip("/")
+                if name in PROTECTED and "unhealthy" in str(c.get("Status", "")).lower():
+                    infra_degraded = True
+                    break
 
             for c in containers:
                 name = (c.get("Names") or ["/unknown"])[0].lstrip("/")
@@ -194,19 +269,20 @@ def governor_loop():
                         entry.update({"mb": mb_used, "limit_mb": mb_limit, "pct": pct})
 
                         if pct >= MEMORY_KILL_PCT and name not in PROTECTED:
-                            if can_restart(name):
+                            if can_autorecover(name):
                                 print(f"[GOVERNOR] RESTART (memory) {name}: {mb_used}MB / {mb_limit}MB ({pct}%)")
                                 try:
                                     DockerSocket.restart(cid)
                                     entry["action"] = "restarted_memory"
                                     total_restarts += 1
+                                    record_restart_cause(name, "memory")
                                     record_restart(name)
                                 except Exception as e:
                                     print(f"[GOVERNOR] Failed to restart {name}: {e}")
                                     entry["action"] = "restart_failed"
                             else:
-                                entry["action"] = "restart_backoff"
-                                print(f"[GOVERNOR] BACKOFF {name}: restart skipped (cooling down)")
+                                entry["action"] = "restart_gated"
+                                print(f"[GOVERNOR] GATED {name}: memory restart skipped")
                         elif pct >= MEMORY_WARN_PCT:
                             print(f"[GOVERNOR] WARNING {name}: {mb_used}MB / {mb_limit}MB ({pct}%)")
                             entry["action"] = "warning"
@@ -234,7 +310,10 @@ def governor_loop():
                         entry["docker_health"] = f"unhealthy ({unhealthy_fails}/{DOCKER_UNHEALTHY_THRESHOLD})"
 
                         if unhealthy_fails >= DOCKER_UNHEALTHY_THRESHOLD and name not in PROTECTED:
-                            if can_restart(name):
+                            if infra_degraded:
+                                entry["action"] = "wait_infra"
+                                print(f"[GOVERNOR] WAIT {name}: infra degraded, delaying docker-health restart")
+                            elif can_autorecover(name):
                                 print(
                                     f"[GOVERNOR] RESTART (docker-health) {name}: "
                                     f"unhealthy {unhealthy_fails} consecutive checks"
@@ -245,13 +324,14 @@ def governor_loop():
                                     total_health_restarts += 1
                                     docker_unhealthy_counts[name] = 0
                                     health_fail_counts[name] = 0
+                                    record_restart_cause(name, "docker_health")
                                     record_restart(name)
                                 except Exception as e:
                                     print(f"[GOVERNOR] Failed to restart {name}: {e}")
                                     entry["action"] = "restart_failed"
                             else:
-                                entry["action"] = "docker_health_restart_backoff"
-                                print(f"[GOVERNOR] BACKOFF {name}: docker-health restart skipped (cooling down)")
+                                entry["action"] = "docker_health_restart_gated"
+                                print(f"[GOVERNOR] GATED {name}: docker-health restart skipped")
                     elif health_status == "healthy":
                         docker_unhealthy_counts[name] = 0
                 except Exception:
@@ -272,20 +352,24 @@ def governor_loop():
                         entry["health"] = f"failing ({fails}/{HEALTH_FAIL_THRESHOLD})"
 
                         if fails >= HEALTH_FAIL_THRESHOLD and name not in PROTECTED:
-                            if can_restart(name):
+                            if infra_degraded:
+                                entry["action"] = "wait_infra"
+                                print(f"[GOVERNOR] WAIT {name}: infra degraded, delaying health restart")
+                            elif can_autorecover(name):
                                 print(f"[GOVERNOR] RESTART (health) {name}: failed {fails} consecutive health checks")
                                 try:
                                     DockerSocket.restart(cid)
                                     entry["action"] = "restarted_health"
                                     total_health_restarts += 1
                                     health_fail_counts[name] = 0
+                                    record_restart_cause(name, "http_health")
                                     record_restart(name)
                                 except Exception as e:
                                     print(f"[GOVERNOR] Failed to restart {name}: {e}")
                                     entry["action"] = "restart_failed"
                             else:
-                                entry["action"] = "health_restart_backoff"
-                                print(f"[GOVERNOR] BACKOFF {name}: health-restart skipped (cooling down)")
+                                entry["action"] = "health_restart_gated"
+                                print(f"[GOVERNOR] GATED {name}: health restart skipped")
 
                 report.append(entry)
 
@@ -296,6 +380,9 @@ def governor_loop():
                     "restarts": total_restarts,
                     "warnings": total_warnings,
                     "health_restarts": total_health_restarts,
+                    "pq_ready": pq_state["ok"],
+                    "ml_self_heal_enabled": ML_SELF_HEAL_ENABLED,
+                    "restart_cause_counts": restart_cause_counts,
                 }
 
         except Exception as e:

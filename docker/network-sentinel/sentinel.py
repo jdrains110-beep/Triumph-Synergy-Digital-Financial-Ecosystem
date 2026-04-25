@@ -45,6 +45,13 @@ PI_NODE_HOST = os.environ.get("PI_NODE_HOST", "testnet2")
 PI_NODE_PEER_PORT = int(os.environ.get("PI_NODE_PEER_PORT", "31402"))
 PI_HORIZON_URL = os.environ.get("PI_HORIZON_URL", f"http://{PI_NODE_HOST}:8000")
 PI_BRIDGE_URL = os.environ.get("PI_BRIDGE_URL", "http://triumph-pi-bridge-connector:8092")
+ML_ENGINE_URL = os.environ.get("ML_ENGINE_URL", "http://triumph-ml-engine:8090")
+SELF_HEAL_ML_ENABLED = os.environ.get("SELF_HEAL_ML_ENABLED", "true").lower() == "true"
+ANOMALY_Z_THRESHOLD = float(os.environ.get("ANOMALY_Z_THRESHOLD", "2.5"))
+ANOMALY_STREAK_THRESHOLD = int(os.environ.get("ANOMALY_STREAK_THRESHOLD", "3"))
+CONTROL_PLANE_REQUIRE_PQ_READY = os.environ.get("CONTROL_PLANE_REQUIRE_PQ_READY", "true").lower() == "true"
+QUANTUM_SHIELD_URL = os.environ.get("QUANTUM_SHIELD_URL", "http://triumph-quantum-shield:8094").rstrip("/")
+PQ_CHECK_INTERVAL_S = int(os.environ.get("PQ_CHECK_INTERVAL_S", "30"))
 
 # External probes — diverse endpoints to detect real connectivity
 EXTERNAL_PROBES = [
@@ -92,10 +99,32 @@ state: dict[str, Any] = {
     "last_transition_at": 0,
     "services_restarted": 0,
     "last_error": None,
+    "ml": {
+        "enabled": SELF_HEAL_ML_ENABLED,
+        "anomaly_score": 0.0,
+        "anomaly_streak": 0,
+        "last_action": "none",
+        "baselines": {},
+    },
 }
 
 lock = threading.Lock()
 redis_client = None
+pq_state = {"ok": False, "checked_at": 0.0}
+
+
+def _pq_ready(timeout_s: float = 4.0) -> bool:
+    now = time.time()
+    if now - pq_state["checked_at"] < PQ_CHECK_INTERVAL_S:
+        return pq_state["ok"]
+    pq_state["checked_at"] = now
+    try:
+        req = urllib.request.Request(f"{QUANTUM_SHIELD_URL}/health", method="GET")
+        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+            pq_state["ok"] = 200 <= resp.status < 300
+    except Exception:
+        pq_state["ok"] = False
+    return pq_state["ok"]
 
 # ── Redis (optional) ────────────────────────────────────────────────
 
@@ -296,6 +325,62 @@ def _restart_degraded_services():
     return restarted
 
 
+def _update_ml_baseline(conn_type: str, quality: dict[str, Any]) -> tuple[float, int]:
+    """
+    Lightweight online learner (EWMA) per connection type.
+    Returns anomaly score and current streak.
+    """
+    if not SELF_HEAL_ML_ENABLED:
+        return (0.0, 0)
+
+    baselines = state["ml"].setdefault("baselines", {})
+    b = baselines.setdefault(
+        conn_type,
+        {
+            "score_mean": quality.get("score", 0.0),
+            "score_var": 100.0,
+            "lat_mean": quality.get("latency_ms", 0.0),
+            "lat_var": 100.0,
+            "jitter_mean": quality.get("jitter_ms", 0.0),
+            "jitter_var": 100.0,
+            "n": 0,
+        },
+    )
+
+    alpha = 0.18
+    score = float(quality.get("score", 0.0))
+    lat = float(quality.get("latency_ms", 0.0))
+    jit = float(quality.get("jitter_ms", 0.0))
+
+    def ewma_update(mean, var, x):
+        delta = x - mean
+        new_mean = mean + alpha * delta
+        new_var = (1 - alpha) * var + alpha * (delta * delta)
+        return new_mean, max(new_var, 1.0)
+
+    b["score_mean"], b["score_var"] = ewma_update(b["score_mean"], b["score_var"], score)
+    b["lat_mean"], b["lat_var"] = ewma_update(b["lat_mean"], b["lat_var"], lat)
+    b["jitter_mean"], b["jitter_var"] = ewma_update(b["jitter_mean"], b["jitter_var"], jit)
+    b["n"] += 1
+
+    import math
+    z_score_drop = max(0.0, (b["score_mean"] - score) / math.sqrt(b["score_var"]))
+    z_lat = max(0.0, (lat - b["lat_mean"]) / math.sqrt(b["lat_var"]))
+    z_jit = max(0.0, (jit - b["jitter_mean"]) / math.sqrt(b["jitter_var"]))
+
+    anomaly = round((0.5 * z_score_drop) + (0.3 * z_lat) + (0.2 * z_jit), 3)
+    streak = int(state["ml"].get("anomaly_streak", 0))
+    if anomaly >= ANOMALY_Z_THRESHOLD:
+        streak += 1
+    else:
+        streak = 0
+
+    state["ml"]["anomaly_score"] = anomaly
+    state["ml"]["anomaly_streak"] = streak
+    baselines[conn_type] = b
+    return anomaly, streak
+
+
 # ── Quality scoring ──────────────────────────────────────────────────
 
 def _calculate_quality(latencies: list[float]) -> dict:
@@ -372,6 +457,7 @@ def sentinel_loop():
             avg_lat = statistics.mean(valid_latencies) if valid_latencies else 0
             jitter = statistics.stdev(valid_latencies) if len(valid_latencies) > 1 else 0
             conn_type = _classify_connection(ip_info, avg_lat, jitter)
+            anomaly_score, anomaly_streak = _update_ml_baseline(conn_type, quality)
 
             # ── 3. Detect network transition ────────────────────────
             old_type = state["connection"]["type"]
@@ -404,11 +490,39 @@ def sentinel_loop():
                 restarted = _restart_degraded_services()
                 with lock:
                     state["services_restarted"] += restarted
+                    state["ml"]["last_action"] = "transition_recovery"
 
-            # ── 4. Internal Docker network probes ───────────────────
+            # ── 4.5 ML anomaly-triggered proactive recovery ────────────────
+            if SELF_HEAL_ML_ENABLED and anomaly_streak >= ANOMALY_STREAK_THRESHOLD:
+                pq_ok = _pq_ready()
+                can_recover = (not CONTROL_PLANE_REQUIRE_PQ_READY) or pq_ok
+                if can_recover:
+                    restarted = _restart_degraded_services()
+                    if restarted > 0:
+                        print(
+                            f"[sentinel] ML recovery triggered: anomaly={anomaly_score}, "
+                            f"streak={anomaly_streak}, restarted={restarted}"
+                        )
+                        _publish_event("network:ml_recovery", {
+                            "time": time.time(),
+                            "anomaly_score": anomaly_score,
+                            "anomaly_streak": anomaly_streak,
+                            "restarted": restarted,
+                            "connection_type": conn_type,
+                            "pq_ready": pq_ok,
+                        })
+                        with lock:
+                            state["services_restarted"] += restarted
+                            state["ml"]["last_action"] = "ml_recovery"
+                            state["ml"]["anomaly_streak"] = 0
+                else:
+                    with lock:
+                        state["ml"]["last_action"] = "pq_gate_blocked"
+
+            # ── 5. Internal Docker network probes ───────────────────
             internal = _probe_internal()
 
-            # ── 5. Update state ─────────────────────────────────────
+            # ── 6. Update state ─────────────────────────────────────
             with lock:
                 state["probe_count"] += 1
                 state["connection"] = {
@@ -423,12 +537,16 @@ def sentinel_loop():
                 state["probes"] = probe_results
                 state["internal"] = internal
                 state["last_error"] = None
+                state["ml"]["anomaly_score"] = anomaly_score
+                state["ml"]["anomaly_streak"] = anomaly_streak
+                state["ml"]["enabled"] = SELF_HEAL_ML_ENABLED
+                state["ml"]["pq_ready"] = pq_state["ok"]
 
             # Reconnect Redis if lost
             if not redis_client:
                 _connect_redis()
 
-            # ── 6. Periodic Redis state publish ─────────────────────
+            # ── 7. Periodic Redis state publish ─────────────────────
             if state["probe_count"] % 4 == 0:  # every ~60s
                 _publish_event("network:status", {
                     "type": conn_type,
@@ -438,6 +556,8 @@ def sentinel_loop():
                     "latency_ms": quality["latency_ms"],
                     "pi_node": internal["pi_node_reachable"],
                     "bridge": internal["pi_bridge_reachable"],
+                    "ml_anomaly_score": anomaly_score,
+                    "pq_ready": pq_state["ok"],
                 })
 
         except Exception as e:
