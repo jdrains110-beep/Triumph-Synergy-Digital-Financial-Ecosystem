@@ -155,6 +155,8 @@ services:
       CENTRAL_NODE_URL: http://triumph-central-node:11626
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
       SOVEREIGN_PQ_ENFORCE: "true"
+      STELLAR_CORE_VERSION_OVERRIDE: "5.4"
+      PI_NODE_VERSION_DISPLAY: "5.4"
     expose:
       - "8092"
     networks:
@@ -198,6 +200,7 @@ services:
       SCP_AUTO_UPGRADE: "true"
       SCP_SYNC_INTERVAL_MS: 30000
       NODE_OPTIONS: "--max-old-space-size=384"
+      PI_NODE_VERSION_DISPLAY: "5.4"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
     # Internal only — no host port exposure
     expose:

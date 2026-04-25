@@ -9,7 +9,20 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Resilience Dashboard",
+      "tooltip": "ML anomaly detection, PQ gate, auto-recovery & restart causes",
+      "type": "link",
+      "url": "/d/triumph-resilience/triumph-synergy-resilience"
+    }
+  ],
   "panels": [
     {
       "collapsed": false,

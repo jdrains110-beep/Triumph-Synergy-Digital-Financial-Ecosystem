@@ -61,8 +61,13 @@ export async function GET(request: NextRequest) {
     });
   }
   
+  const registry = getPiNodeRegistry();
   return NextResponse.json({
-    ...getPiNodeRegistry(),
+    // ── Imprinted node identity (Pi Desktop reads these top-level fields) ──
+    node_id: PI_NODE_ROOT_PUBLIC_KEY,
+    public_key: PI_NODE_ROOT_PUBLIC_KEY,
+    version: process.env.PI_NODE_VERSION_DISPLAY || "5.4",
+    ...registry,
     domains: SUPPORTED_DOMAINS,
     piAppStudio: {
       appId: "triumph-synergy",
@@ -70,6 +75,11 @@ export async function GET(request: NextRequest) {
       mainnetDev: "triumphsynergy0576.pinet.com",
       testnetApp: "triumph-synergy-testnet.vercel.app",
       testnetDev: "triumphsynergy1991.pinet.com",
+    },
+  }, {
+    headers: {
+      "X-Pi-Node-ID": PI_NODE_ROOT_PUBLIC_KEY,
+      "X-Pi-Node-Version": process.env.PI_NODE_VERSION_DISPLAY || "5.4",
     },
   });
 }

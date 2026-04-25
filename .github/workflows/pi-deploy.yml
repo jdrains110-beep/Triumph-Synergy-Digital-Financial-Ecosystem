@@ -50,7 +50,12 @@ jobs:
               run: npm install -g yarn@${{ env.YARN_VERSION }}
 
             - name: Install dependencies
-              run: yarn install --frozen-lockfile
+              run: |
+                  for attempt in 1 2 3; do
+                    yarn install --frozen-lockfile --network-timeout 300000 && break
+                    echo "⚠️ Attempt $attempt failed — retrying in 15s..."
+                    sleep 15
+                  done
 
             - name: Verify Pi SDK Files
               id: check
@@ -109,7 +114,12 @@ jobs:
               run: npm install -g yarn@${{ env.YARN_VERSION }}
 
             - name: Install dependencies
-              run: yarn install --frozen-lockfile
+              run: |
+                  for attempt in 1 2 3; do
+                    yarn install --frozen-lockfile --network-timeout 300000 && break
+                    echo "⚠️ Attempt $attempt failed — retrying in 15s..."
+                    sleep 15
+                  done
 
             - name: Run Security Audit (advisory)
               run: |
@@ -157,6 +167,7 @@ jobs:
         name: 🏗️ Build Application
         runs-on: ubuntu-latest
         needs: [validate-pi-sdk, security-audit]
+        if: always() && needs.validate-pi-sdk.result == 'success'
         steps:
             - uses: actions/checkout@v4
 
@@ -183,7 +194,12 @@ jobs:
                   restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-
 
             - name: Install dependencies
-              run: yarn install --frozen-lockfile
+              run: |
+                  for attempt in 1 2 3; do
+                    yarn install --frozen-lockfile --network-timeout 300000 && break
+                    echo "⚠️ Attempt $attempt failed — retrying in 15s..."
+                    sleep 15
+                  done
 
             - name: Build Next.js Application
               env:

@@ -118,7 +118,7 @@ function buildRootNode(): PiNode {
     region: process.env.PI_NODE_ROOT_REGION || "us-east-1",
     status: host ? "configured" : "unconfigured",
     capabilities: getDefaultCapabilities("root"),
-    version: "2.0.0",
+    version: process.env.PI_NODE_VERSION_DISPLAY || "5.4",
   };
 }
 

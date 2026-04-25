@@ -24,7 +24,12 @@ jobs:
         run: npm install -g yarn@1.22.22
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+          for attempt in 1 2 3; do
+            yarn install --frozen-lockfile --network-timeout 300000 && break
+            echo "⚠️ Attempt $attempt failed — retrying in 15s..."
+            sleep 15
+          done
         continue-on-error: false
 
       - name: Check Node version

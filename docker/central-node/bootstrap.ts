@@ -234,7 +234,7 @@ const server = http.createServer((req, res) => {
       info: {
         state: systemReady ? "Synced!" : "Booting",
         network: networkType,
-        build: "triumph-central-node-v1.0.0",
+        build: "triumph-central-node-v5.4",
         startedAt,
         central_node: CENTRAL_KEY,
         horizon_url: HORIZON_URL,

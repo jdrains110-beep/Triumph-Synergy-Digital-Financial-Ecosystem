@@ -92,3 +92,41 @@ groups:
         annotations:
           summary: "Quantum motherboard backbone disconnected"
           description: "Quantum backbone connection has been down for more than 45 seconds on {{ $labels.instance }}."
+
+  - name: triumph-synergy-resilience
+    rules:
+      - alert: PQGateUnavailable
+        expr: (triumph_governor_pq_ready == 0) or (triumph_sentinel_pq_ready == 0)
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Post-quantum gate offline — autonomous self-healing blocked"
+          description: "The PQ control-plane gate has been down for >5 minutes on {{ $labels.instance }}. Autonomous recovery is suspended until the quantum-shield restores PQ readiness."
+
+      - alert: MLSelfHealDisabled
+        expr: (triumph_governor_ml_self_heal_enabled == 0) or (triumph_sentinel_ml_enabled == 0)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ML self-heal engine disabled"
+          description: "The ML-guided self-healing layer has been off for >10 minutes on {{ $labels.instance }}. Adaptive anomaly suppression is inactive."
+
+      - alert: GovernorRestartStorm
+        expr: sum(rate(triumph_governor_restarts_total[10m])) > 0.5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Health governor restart storm detected"
+          description: "The health governor is restarting containers faster than 0.5/min over the last 10 minutes. Possible systemic instability."
+
+      - alert: SentinelHighAnomalyScore
+        expr: triumph_sentinel_ml_anomaly_score > 3
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Network sentinel anomaly score elevated"
+          description: "ML anomaly score is {{ $value | humanize }} (threshold 3) on {{ $labels.instance }} for >3m. Network may be degraded or under stress."
