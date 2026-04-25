@@ -40,18 +40,19 @@ MEMORY_WARN_PCT = float(os.environ.get("MEMORY_WARN_PCT", "80"))
 MEMORY_KILL_PCT = float(os.environ.get("MEMORY_KILL_PCT", "95"))
 METRICS_PORT = int(os.environ.get("METRICS_PORT", "9912"))
 HEALTH_FAIL_THRESHOLD = int(os.environ.get("HEALTH_FAIL_THRESHOLD", "3"))
+DOCKER_UNHEALTHY_THRESHOLD = int(os.environ.get("DOCKER_UNHEALTHY_THRESHOLD", "3"))
 RESTART_BACKOFF_BASE = int(os.environ.get("RESTART_BACKOFF_BASE_S", "60"))
 RESTART_BACKOFF_MAX = int(os.environ.get("RESTART_BACKOFF_MAX_S", "600"))
 HEALTH_PROBE_TIMEOUT = int(os.environ.get("HEALTH_PROBE_TIMEOUT_S", "5"))
 # Containers that should NEVER be restarted automatically
 PROTECTED = set(
-    os.environ.get("PROTECTED_CONTAINERS", "triumph-postgres,triumph-redis").split(",")
+    x.strip() for x in os.environ.get("PROTECTED_CONTAINERS", "triumph-postgres,triumph-redis").split(",") if x.strip()
 )
 PREFIX = os.environ.get("CONTAINER_PREFIX", "triumph-")
 
 # Service name → internal health URL (Docker network)
 SERVICE_HEALTH_MAP = {
-    "triumph-app":                  "http://triumph-app:3000/health",
+    "triumph-app":                  "http://triumph-app:3000/api/health",
     "triumph-transaction-engine":   "http://triumph-transaction-engine:8080/health",
     "triumph-vault":                "http://triumph-vault:8081/health",
     "triumph-smart-contracts":      "http://triumph-smart-contracts:8082/health",
@@ -126,6 +127,9 @@ lock = threading.Lock()
 
 # Track consecutive health failures per container
 health_fail_counts = {}  # name → int
+
+# Track consecutive Docker unhealthy detections per container
+docker_unhealthy_counts = {}  # name -> int
 
 # Track restart backoff per container: name → next_allowed_restart_ts
 restart_backoff = {}
@@ -212,10 +216,44 @@ def governor_loop():
 
                 # ── Docker health status check ─────────────────────
                 try:
-                    health_status = (c.get("State") or "").lower()
-                    if "unhealthy" in str(c.get("Status", "")):
+                    health_status = "unknown"
+                    if "unhealthy" in str(c.get("Status", "")).lower():
                         health_status = "unhealthy"
+                    else:
+                        inspected = DockerSocket.inspect(cid)
+                        health_status = (
+                            inspected.get("State", {})
+                            .get("Health", {})
+                            .get("Status", "unknown")
+                        )
                     entry["docker_health"] = health_status
+
+                    if health_status == "unhealthy":
+                        unhealthy_fails = docker_unhealthy_counts.get(name, 0) + 1
+                        docker_unhealthy_counts[name] = unhealthy_fails
+                        entry["docker_health"] = f"unhealthy ({unhealthy_fails}/{DOCKER_UNHEALTHY_THRESHOLD})"
+
+                        if unhealthy_fails >= DOCKER_UNHEALTHY_THRESHOLD and name not in PROTECTED:
+                            if can_restart(name):
+                                print(
+                                    f"[GOVERNOR] RESTART (docker-health) {name}: "
+                                    f"unhealthy {unhealthy_fails} consecutive checks"
+                                )
+                                try:
+                                    DockerSocket.restart(cid)
+                                    entry["action"] = "restarted_docker_health"
+                                    total_health_restarts += 1
+                                    docker_unhealthy_counts[name] = 0
+                                    health_fail_counts[name] = 0
+                                    record_restart(name)
+                                except Exception as e:
+                                    print(f"[GOVERNOR] Failed to restart {name}: {e}")
+                                    entry["action"] = "restart_failed"
+                            else:
+                                entry["action"] = "docker_health_restart_backoff"
+                                print(f"[GOVERNOR] BACKOFF {name}: docker-health restart skipped (cooling down)")
+                    elif health_status == "healthy":
+                        docker_unhealthy_counts[name] = 0
                 except Exception:
                     pass
 
