@@ -1568,6 +1568,62 @@ services:
       retries: 5
       start_period: 30s
 
+# --------------------------------------------------------------------------
+# Sovereign Sports Hub — TRIUMPH-SSH-v1
+# 7 authorities · 66 loopholes · APEX-QUANTUM-SOVEREIGN
+# YouTube · TikTok · Ticketmaster · ESPN · CAA · WADA — OBSOLETE
+# Port 8102 · Redis DB 7 · UID 1004 (sports)
+# --------------------------------------------------------------------------
+  sovereign-sports-hub:
+    build:
+      context: docker/sovereign-sports-hub
+    container_name: triumph-sovereign-sports-hub
+    <<: *common
+    init: true
+    restart: on-failure:10
+    mem_limit: 192m
+    mem_reservation: 64m
+    cpus: "0.15"
+    environment:
+      PORT: "8102"
+      REDIS_URL: redis://triumph-redis:6379/7
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
+      NEXT_API_URL: http://triumph-app:3000
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      SSH_VERSION: TRIUMPH-SSH-v1
+      SSH_SECURITY: APEX-QUANTUM-SOVEREIGN
+      SSH_AUTHORITIES: SSSA,SSPA,SSAA,SSMA,SSLAA,SSRAA,SSGVA
+      SSH_LOOPHOLES_TOTAL: "66"
+      SSH_COUNTRIES: "200"
+      SSH_SPORTS_COUNT: "50"
+      SSH_PIONEER_FANBASE: "50000000"
+      SSH_PLATFORM_CUT_PCT: "0.0"
+      SSH_TICKET_FEE_PCT: "0.0"
+      SSH_AGENT_CUT_PCT: "0.0"
+      SSH_STREAMING_LATENCY_MS: "500"
+      STELLAR_HORIZON_URL: https://horizon.stellar.org
+      PI_MAINNET_URL: https://api.mainnet.minepi.com
+    expose:
+      - "8102"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      quantum-shield:
+        condition: service_started
+      sovereign-ai-bot:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8102/health', timeout=8)"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+
 # ==========================================================================
 # VOLUMES — Persistent Data
 # ==========================================================================

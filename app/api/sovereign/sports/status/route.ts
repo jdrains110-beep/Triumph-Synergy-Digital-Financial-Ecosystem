@@ -1,0 +1,182 @@
+/**
+ * app/api/sovereign/sports/status/route.ts
+ * Triumph Synergy — Sovereign Sports Hub Status API
+ * GET /api/sovereign/sports/status
+ */
+
+import { NextResponse } from "next/server";
+import {
+  buildSportsHubStats,
+  ALL_SPORTS_LOOPHOLES,
+  SSSA_LOOPHOLES, SSPA_LOOPHOLES, SSAA_LOOPHOLES, SSMA_LOOPHOLES,
+  SSLAA_LOOPHOLES, SSRAA_LOOPHOLES, SSGVA_LOOPHOLES,
+  SOVEREIGN_SPORTS_VERSION,
+  APEX_SECURITY_LEVEL,
+  QUANTUM_ALGO_SIG, QUANTUM_ALGO_ENC, QUANTUM_ALGO_HASH, QUANTUM_ALGO_BACKUP,
+  PI_RATE_EXTERNAL,
+  SPORTS_COUNTRIES,
+  SPORTS_DISCIPLINES,
+  PIONEER_FANBASE,
+  STREAMING_LATENCY_MS,
+  SSH_PLATFORM_CUT_PCT,
+  SSH_TICKET_FEE_PCT,
+  SSH_AGENT_COMMISSION_PCT,
+  YOUTUBE_CREATOR_CUT_PCT,
+  TICKETMASTER_SERVICE_FEE_PCT,
+  CAA_AGENT_COMMISSION_PCT,
+  ESPN_RIGHTS_ANNUAL_USD,
+  GOOGLE_ADS_NETWORK_CUT_PCT,
+  WADA_ANNUAL_BUDGET_USD,
+} from "@/lib/programs/sovereign-sports";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const stats = buildSportsHubStats();
+
+  const authorities = [
+    {
+      id: "SSSA",
+      name: "Sovereign Sports Streaming Authority",
+      status: "ACTIVE",
+      loopholes: SSSA_LOOPHOLES.length,
+      avgObliteration: Math.round(SSSA_LOOPHOLES.reduce((s, l) => s + l.obliterationScore, 0) / SSSA_LOOPHOLES.length),
+      rivals: ["YouTube", "TikTok", "Twitch", "ESPN+", "DAZN", "Peacock", "Prime Video Sports"],
+      rivalCut: `YouTube ${YOUTUBE_CREATOR_CUT_PCT}% creator cut`,
+      sovereignCut: `${SSH_PLATFORM_CUT_PCT}% — 100% to creator/athlete`,
+      topLoophole: SSSA_LOOPHOLES[0].title,
+      streamingLatencyMs: STREAMING_LATENCY_MS,
+      quantumDRM: QUANTUM_ALGO_ENC,
+    },
+    {
+      id: "SSPA",
+      name: "Sovereign Sports Payment Authority",
+      status: "ACTIVE",
+      loopholes: SSPA_LOOPHOLES.length,
+      avgObliteration: Math.round(SSPA_LOOPHOLES.reduce((s, l) => s + l.obliterationScore, 0) / SSPA_LOOPHOLES.length),
+      rivals: ["Ticketmaster", "StubHub", "AXS", "Paciolan", "PayPal", "Stripe"],
+      rivalCut: `Ticketmaster ${TICKETMASTER_SERVICE_FEE_PCT}% service fee + T+14 settlement`,
+      sovereignCut: `${SSH_TICKET_FEE_PCT}% booking fee · Pi T+0 settlement`,
+      topLoophole: SSPA_LOOPHOLES[0].title,
+      settlementSeconds: 5,
+      micropayMinPi: 1,
+    },
+    {
+      id: "SSAA",
+      name: "Sovereign Sports Athlete Authority",
+      status: "ACTIVE",
+      loopholes: SSAA_LOOPHOLES.length,
+      avgObliteration: Math.round(SSAA_LOOPHOLES.reduce((s, l) => s + l.obliterationScore, 0) / SSAA_LOOPHOLES.length),
+      rivals: ["CAA Sports", "IMG", "WME Sports", "Octagon", "Endeavor", "Excel Sports"],
+      rivalCut: `CAA ${CAA_AGENT_COMMISSION_PCT}% · IMG up to 20% agent commission`,
+      sovereignCut: `${SSH_AGENT_COMMISSION_PCT}% agent commission — 100% to athlete`,
+      topLoophole: SSAA_LOOPHOLES[0].title,
+      nilSupport: true,
+      piSalaryOptIn: true,
+    },
+    {
+      id: "SSMA",
+      name: "Sovereign Sports Media Authority",
+      status: "ACTIVE",
+      loopholes: SSMA_LOOPHOLES.length,
+      avgObliteration: Math.round(SSMA_LOOPHOLES.reduce((s, l) => s + l.obliterationScore, 0) / SSMA_LOOPHOLES.length),
+      rivals: ["ESPN", "Fox Sports", "Sky Sports", "NBC Sports", "beIN Sports", "TNT Sports"],
+      rivalCut: `ESPN pays $${(ESPN_RIGHTS_ANNUAL_USD / 1e9).toFixed(1)}B/yr for rights — SSH charges $0`,
+      sovereignCut: "0% broadcast licensing · Athletes own commentary rights",
+      topLoophole: SSMA_LOOPHOLES[0].title,
+      aiCommentaryLanguages: 50,
+      pressPassNFT: true,
+    },
+    {
+      id: "SSLAA",
+      name: "Sovereign Sports League Authority",
+      status: "ACTIVE",
+      loopholes: SSLAA_LOOPHOLES.length,
+      avgObliteration: Math.round(SSLAA_LOOPHOLES.reduce((s, l) => s + l.obliterationScore, 0) / SSLAA_LOOPHOLES.length),
+      rivals: ["NFL licensing", "NBA licensing", "FIFA licensing", "IOC", "PGA Tour", "ICC"],
+      rivalCut: "IOC/FIFA licensing monopoly + territorial exclusivity",
+      sovereignCut: "Wyoming DAO LLC — exempt from IOC/FIFA licensing",
+      topLoophole: SSLAA_LOOPHOLES[0].title,
+      daoVoters: PIONEER_FANBASE,
+      crossLeagueInterop: true,
+    },
+    {
+      id: "SSRAA",
+      name: "Sovereign Sports Revenue & Ad Authority",
+      status: "ACTIVE",
+      loopholes: SSRAA_LOOPHOLES.length,
+      avgObliteration: Math.round(SSRAA_LOOPHOLES.reduce((s, l) => s + l.obliterationScore, 0) / SSRAA_LOOPHOLES.length),
+      rivals: ["Google Ads", "Meta Ads", "Sportradar", "Nielsen Sports", "DoubleClick"],
+      rivalCut: `Google ${GOOGLE_ADS_NETWORK_CUT_PCT}% of ad spend · Meta ${40}%+`,
+      sovereignCut: `${SSH_PLATFORM_CUT_PCT}% ad network cut — brands pay athletes directly in Pi`,
+      topLoophole: SSRAA_LOOPHOLES[0].title,
+      privacyFirst: true,
+      onChainAnalytics: true,
+    },
+    {
+      id: "SSGVA",
+      name: "Sovereign Sports Governance Authority",
+      status: "ACTIVE",
+      loopholes: SSGVA_LOOPHOLES.length,
+      avgObliteration: Math.round(SSGVA_LOOPHOLES.reduce((s, l) => s + l.obliterationScore, 0) / SSGVA_LOOPHOLES.length),
+      rivals: ["WADA", "CAS", "IOC Ethics Committee", "USADA", "FIFA Ethics"],
+      rivalCut: `WADA $${(WADA_ANNUAL_BUDGET_USD / 1e6).toFixed(0)}M/yr funded by athletes · CAS $50K/case`,
+      sovereignCut: "Wyoming DAO + Pioneer jury — $0 governance cost",
+      topLoophole: SSGVA_LOOPHOLES[0].title,
+      pioneerJurors: PIONEER_FANBASE,
+      blockchainDoping: true,
+    },
+  ];
+
+  const rivals = [
+    { name: "YouTube", category: "Streaming", theirCut: `${YOUTUBE_CREATOR_CUT_PCT}%`, sshCut: "0%", advantage: "Pioneer P2P CDN · Quantum DRM" },
+    { name: "TikTok", category: "Short Video", theirCut: "50%+", sshCut: "0%", advantage: "100% Pi to creator" },
+    { name: "Twitch", category: "Live Stream", theirCut: "50% subs", sshCut: "0%", advantage: "Direct Pi fan tips · 0% cut" },
+    { name: "Ticketmaster", category: "Ticketing", theirCut: `${TICKETMASTER_SERVICE_FEE_PCT}% fees`, sshCut: "0%", advantage: "Pi direct · T+0 settlement" },
+    { name: "StubHub", category: "Resale", theirCut: "15% seller", sshCut: "0%", advantage: "Anti-scalper smart contract" },
+    { name: "CAA Sports", category: "Agency", theirCut: `${CAA_AGENT_COMMISSION_PCT}%`, sshCut: "0%", advantage: "Direct pioneer sponsorships" },
+    { name: "ESPN", category: "Broadcast", theirCut: "$2.7B/yr rights", sshCut: "$0", advantage: "Leagues broadcast directly on Pi" },
+    { name: "Google Ads", category: "Advertising", theirCut: `${GOOGLE_ADS_NETWORK_CUT_PCT}%`, sshCut: "0%", advantage: "Brands pay athletes directly in Pi" },
+    { name: "Sportradar", category: "Data", theirCut: "$5M+/yr", sshCut: "0 Pi", advantage: "On-chain verified stats free" },
+    { name: "DAZN", category: "OTT Sports", theirCut: "$49.99/mo", sshCut: "1 Pi min", advantage: "Pay-per-view micropayments" },
+    { name: "Spotify", category: "Podcast", theirCut: "45%", sshCut: "0%", advantage: "Pi podcast subscriptions" },
+    { name: "WADA", category: "Governance", theirCut: "$50M/yr", sshCut: "$0", advantage: "Wyoming DAO self-governance" },
+  ];
+
+  return NextResponse.json({
+    platform: SOVEREIGN_SPORTS_VERSION,
+    securityLevel: APEX_SECURITY_LEVEL,
+    status: "OPERATIONAL",
+    stats,
+    authorities,
+    rivals,
+    quantum: {
+      signature: QUANTUM_ALGO_SIG,
+      encryption: QUANTUM_ALGO_ENC,
+      hash: QUANTUM_ALGO_HASH,
+      backup: QUANTUM_ALGO_BACKUP,
+      fipsStandards: ["FIPS 204", "FIPS 203", "FIPS 202", "FIPS 205"],
+    },
+    piNetwork: {
+      rateExternal: PI_RATE_EXTERNAL,
+      countries: SPORTS_COUNTRIES,
+      pioneers: PIONEER_FANBASE,
+      sportsCount: SPORTS_DISCIPLINES,
+      streamingLatencyMs: STREAMING_LATENCY_MS,
+      platformCutPct: SSH_PLATFORM_CUT_PCT,
+    },
+    loopholes: {
+      total: ALL_SPORTS_LOOPHOLES.length,
+      byAuthority: {
+        SSSA: SSSA_LOOPHOLES.length,
+        SSPA: SSPA_LOOPHOLES.length,
+        SSAA: SSAA_LOOPHOLES.length,
+        SSMA: SSMA_LOOPHOLES.length,
+        SSLAA: SSLAA_LOOPHOLES.length,
+        SSRAA: SSRAA_LOOPHOLES.length,
+        SSGVA: SSGVA_LOOPHOLES.length,
+      },
+    },
+    generatedAt: new Date().toISOString(),
+  });
+}
