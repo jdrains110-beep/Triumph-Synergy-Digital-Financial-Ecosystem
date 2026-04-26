@@ -11,9 +11,9 @@
 [![QFS](https://img.shields.io/badge/QFS-IMMORTAL-gold?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![20+ Sectors](https://img.shields.io/badge/Real--World%20Sectors-20%2B-FF6B35?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#20-real-world-utility-sectors)
 [![Sovereign Work Program](https://img.shields.io/badge/Sovereign%20Work%20Program-APEX%20LIVE-22C55E?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-25-2026)
-[![Sovereign Rivals](https://img.shields.io/badge/Sovereign%20Rivals-IRS%20%7C%20DCF%20%7C%20D%26B%20OBSOLETE-EF4444?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v29)
-[![Sovereign Housing Platform](https://img.shields.io/badge/Sovereign%20Housing-HUD%20%7C%20S8%20%7C%20USDA%20OBSOLETE-8B5CF6?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v30)
-[![Sovereign Travel Platform](https://img.shields.io/badge/Sovereign%20Travel-OTA%20%7C%20AIRLINES%20%7C%20AIRBNB%20OBSOLETE-06B6D4?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v40)
+[![Sovereign Rivals](https://img.shields.io/badge/Sovereign%20Rivals-IRS%20%7C%20DCF%20%7C%20D%26B%20OBSOLETE-EF4444?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-25-2026)
+[![Sovereign Housing Platform](https://img.shields.io/badge/Sovereign%20Housing-HUD%20%7C%20S8%20%7C%20USDA%20OBSOLETE-8B5CF6?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-25-2026)
+[![Sovereign Travel Platform](https://img.shields.io/badge/Sovereign%20Travel-OTA%20%7C%20AIRLINES%20%7C%20AIRBNB%20OBSOLETE-06B6D4?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-25-2026)
 [![Gateway](https://img.shields.io/badge/Universal%20Gateway-LIVE-00FF00?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![Security](https://img.shields.io/badge/Security-SUPREME-00FF00?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![PiOS](https://img.shields.io/badge/License-PiOS-purple?style=flat-square)](LICENSE-PIOS)
@@ -22,7 +22,8 @@
 [![Supabase](https://img.shields.io/badge/Supabase-RLS%20%2B%20Realtime-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
 [![Bridges](https://img.shields.io/badge/Bridges-15%20Networks-orange?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![Sovereign AI Bot](https://img.shields.io/badge/SAIB-APEX--QUANTUM--SENTINEL-FF0000?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-ai-bot-saib--apex-quantum-sovereign-sentinel)
-[![Sovereign Delivery](https://img.shields.io/badge/Delivery-UPS%20%7C%20DOORDASH%20%7C%20UBER%20%7C%20INSTAWORK%20OBSOLETE-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v50)
+[![Sovereign Delivery](https://img.shields.io/badge/Delivery-UPS%20%7C%20DOORDASH%20%7C%20UBER%20%7C%20INSTAWORK%20OBSOLETE-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
+[![Sovereign Pi-DEX](https://img.shields.io/badge/Sovereign%20Pi--DEX-NYSE%20%7C%20BINANCE%20%7C%20WALL%20STREET%20OBSOLETE-EAB308?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
@@ -541,11 +542,36 @@ The tokenization service now initializes and persists sovereign estate records w
 
 ---
 
-## 🚚 Sovereign Delivery Platform — SPA · SLMN · SFDA · SRA · SPSA · SHHA · SSLA · SGDA {#v50}
+## � Sovereign Pi-DEX
+
+[![Pi-DEX](https://img.shields.io/badge/Pi--DEX-APEX--QUANTUM--SOVEREIGN-EAB308?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
+[![Loopholes](https://img.shields.io/badge/Loopholes-61%20Armed-red?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
+[![Rivals Obliterated](https://img.shields.io/badge/Rivals%20Obliterated-16-success?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
+[![Trading Fee](https://img.shields.io/badge/Trading%20Fee-0%25-brightgreen?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
+[![Stellar SDEX](https://img.shields.io/badge/Stellar-SDEX%20%2B%20Soroban-00B4E6?style=flat-square)](https://stellar.org)
+[![Port 8101](https://img.shields.io/badge/Docker-Port%208101-blue?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
+
+> **The Sovereign Pi-DEX is the ultimate decentralized exchange — 7 Pi-powered sovereign authorities combining Pi Network's DEX with Stellar SDEX, Soroban smart contracts, and 61 regulatory loopholes to permanently obsolete NYSE, NASDAQ, Binance, Coinbase, Uniswap, Aave, CME, CBOE, SWIFT, and BlackRock. 0% trading fees. 0% MEV. 0% front-running. 50M pioneers. 142 countries.**
+
+| Authority | ID | Rivals Obsoleted | Loopholes | Fee |
+|---|---|---|---|---|
+| Sovereign Pi Exchange Authority | **SPXA** | NYSE · NASDAQ · Binance · Coinbase · Kraken | 11 | 0% |
+| Sovereign Pi AMM Authority | **SPMMA** | Uniswap V3 · Curve · Balancer · SushiSwap | 8 | 0% platform + 0.3% to LPs |
+| Sovereign Pi RWA Authority | **SPRWA** | BlackRock · Fidelity · NYSE IPO · Vanguard | 12 | 0% listing |
+| Sovereign Pi Derivatives Auth. | **SPDRA** | CME Group · CBOE · ICE Futures · Eurex | 9 | 0% clearing |
+| Sovereign Pi Yield & Lending | **SPYLA** | Aave · Compound · US Treasury · JPMorgan | 8 | Pioneer-governed |
+| Sovereign Pi Cross-Chain Bridge | **SPCBA** | Wormhole · Stargate · SWIFT · LayerZero | 7 | ~$0.0001/hop |
+| Sovereign Pi Governance & DAO | **SPGVA** | SEC · FINRA · NYSE Gov. · Shareholder Activists | 6 | 0% |
+
+**Dashboard:** [`/ecosystem/sovereign-pidex`](app/ecosystem/sovereign-pidex/page.tsx) · **Lib:** [`sovereign-pidex.ts`](lib/programs/sovereign-pidex.ts) · **Docker:** [`sovereign-pidex-engine`](docker/sovereign-pidex-engine/) port `8101`
+
+---
+
+## �🚚 Sovereign Delivery Platform
 
 [![Delivery](https://img.shields.io/badge/Delivery-APEX--QUANTUM--SOVEREIGN-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
 [![Loopholes](https://img.shields.io/badge/Loopholes-97%20Armed-red?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
-[![Rivals](https://img.shields.io/badge/Rivals%20Obsoleted-12-success?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
+[![Rivals Obsoleted](https://img.shields.io/badge/Rivals%20Obsoleted-12-success?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
 [![Countries](https://img.shields.io/badge/Countries-142-blue?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
 
 > **The Sovereign Delivery Platform is the largest real-world Pi utility module in Triumph Synergy — 8 Pi-powered authorities covering every dimension of the global gig and delivery economy, rendering 12 industry giants permanently obsolete through 97 armed loopholes, APEX-QUANTUM-SOVEREIGN cryptography, and instant Pi settlement with 0% commission.**
@@ -889,7 +915,7 @@ curl http://localhost:8099/report | jq .
 
 ## 📋 What's New — April 25, 2026
 
-[![Sovereign Pi-DEX](https://img.shields.io/badge/Sovereign%20Pi--DEX-NYSE%20%7C%20BINANCE%20%7C%20WALL%20STREET%20OBSOLETE-EAB308?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v60)
+[![Sovereign Pi-DEX](https://img.shields.io/badge/Sovereign%20Pi--DEX-NYSE%20%7C%20BINANCE%20%7C%20WALL%20STREET%20OBSOLETE-EAB308?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
 
 ### v6.0 — Sovereign Pi-DEX: SPXA · SPMMA · SPRWA · SPDRA · SPYLA · SPCBA · SPGVA — The Ultimate Decentralized Exchange, Superior to NYSE, NASDAQ, Binance, Coinbase, Wall Street, Uniswap, Aave, CME, CBOE, SWIFT, and BlackRock {#v60}
 
@@ -953,7 +979,7 @@ No trading fees. No listing fees. No broker-dealer license required. No MEV fron
 
 ---
 
-[![Sovereign Delivery Platform](https://img.shields.io/badge/Sovereign%20Delivery-UPS%20%7C%20DOORDASH%20%7C%20UBER%20%7C%20INSTAWORK%20OBSOLETE-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v50)
+[![Sovereign Delivery Platform](https://img.shields.io/badge/Sovereign%20Delivery-UPS%20%7C%20DOORDASH%20%7C%20UBER%20%7C%20INSTAWORK%20OBSOLETE-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
 
 ### v5.0 — Sovereign Delivery & Gig Economy Platform: SPA · SLMN · SFDA · SRA · SPSA · SHHA · SSLA · SGDA — Rendering UPS, USPS, DoorDash, Uber, Amazon Flex, Instawork, GoShare, and PartsGeek Obsolete {#v50}
 
@@ -1004,7 +1030,7 @@ No surcharges. No commissions. No dispatch fees. No dimensional weight scams. No
 
 ---
 
-[![Sovereign Travel Platform](https://img.shields.io/badge/Sovereign%20Travel-OTA%20%7C%20AIRLINES%20%7C%20AIRBNB%20OBSOLETE-06B6D4?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v40)
+[![Sovereign Travel Platform](https://img.shields.io/badge/Sovereign%20Travel-OTA%20%7C%20AIRLINES%20%7C%20AIRBNB%20OBSOLETE-06B6D4?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-25-2026)
 
 ### v4.0 — Sovereign Travel Platform: STEX · SCLA · SATA · STRA · SVRA · SITA — Rendering Expedia, Cruise Lines, Airlines, Theme Parks, Airbnb, and International Travel Gatekeepers Obsolete {#v40}
 

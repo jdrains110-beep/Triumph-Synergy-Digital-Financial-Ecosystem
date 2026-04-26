@@ -213,17 +213,17 @@ const QUANTUM_STACK = [
 ];
 
 const MISSIONS = [
-    { id: "TAX-ZERO",        title: "Operation Tax Zero",              status: "ACTIVE",  tasks: 25,  loopholes: 25 },
-    { id: "FAM-FORTRESS",    title: "Operation Family Fortress",       status: "ACTIVE",  tasks: 20,  loopholes: 20 },
-    { id: "BIZ-IMMORTAL",    title: "Operation Business Immortal",     status: "ACTIVE",  tasks: 15,  loopholes: 15 },
-    { id: "QUANTUM-LOCK",    title: "Operation Quantum Lock",          status: "ACTIVE",  tasks: 4,   loopholes: 15 },
-    { id: "HOUSING-SECURE",  title: "Operation Housing Secured",       status: "ACTIVE",  tasks: 10,  loopholes: 10 },
-    { id: "WORKFORCE-FREE",  title: "Operation Workforce Freedom",     status: "ACTIVE",  tasks: 10,  loopholes: 10 },
-    { id: "PI-SETTLE",       title: "Operation Pi Settlement",         status: "ACTIVE",  tasks: 7,   loopholes: 5  },
-    { id: "THREAT-ZERO",     title: "Operation Threat Zero",           status: "ACTIVE",  tasks: 3,   loopholes: 15 },
-    { id: "ECOSYSTEM-AUDIT", title: "Operation Full Ecosystem Audit",  status: "ACTIVE",  tasks: 15,  loopholes: 97 },
-    { id: "SENTINEL-WATCH",  title: "Operation Sentinel Watch",        status: "ACTIVE",  tasks: 31,  loopholes: 97 },
-    { id: "PQ-SHIELD",       title: "Operation PQ Shield — All Services", status: "ACTIVE", tasks: 23, loopholes: 97 },
+    { id: "TAX-ZERO", title: "Operation Tax Zero", status: "ACTIVE", tasks: 25, loopholes: 25 },
+    { id: "FAM-FORTRESS", title: "Operation Family Fortress", status: "ACTIVE", tasks: 20, loopholes: 20 },
+    { id: "BIZ-IMMORTAL", title: "Operation Business Immortal", status: "ACTIVE", tasks: 15, loopholes: 15 },
+    { id: "QUANTUM-LOCK", title: "Operation Quantum Lock", status: "ACTIVE", tasks: 4, loopholes: 15 },
+    { id: "HOUSING-SECURE", title: "Operation Housing Secured", status: "ACTIVE", tasks: 10, loopholes: 10 },
+    { id: "WORKFORCE-FREE", title: "Operation Workforce Freedom", status: "ACTIVE", tasks: 10, loopholes: 10 },
+    { id: "PI-SETTLE", title: "Operation Pi Settlement", status: "ACTIVE", tasks: 7, loopholes: 5 },
+    { id: "THREAT-ZERO", title: "Operation Threat Zero", status: "ACTIVE", tasks: 3, loopholes: 15 },
+    { id: "ECOSYSTEM-AUDIT", title: "Operation Full Ecosystem Audit", status: "ACTIVE", tasks: 15, loopholes: 97 },
+    { id: "SENTINEL-WATCH", title: "Operation Sentinel Watch", status: "ACTIVE", tasks: 31, loopholes: 97 },
+    { id: "PQ-SHIELD", title: "Operation PQ Shield — All Services", status: "ACTIVE", tasks: 23, loopholes: 97 },
 ];
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
@@ -269,7 +269,7 @@ export default function SovereignAIBotPage() {
         async function fetchDocker() {
             try {
                 const res = await fetch("/api/sovereign/ai-bot/docker?endpoint=status");
-                const d   = await res.json();
+                const d = await res.json();
                 setDockerStatus(d);
                 pulseRef.current = (d.pulse_count ?? 0);
             } catch {
@@ -312,8 +312,8 @@ export default function SovereignAIBotPage() {
                         </span>
                         <span
                             className={`text-xs font-mono px-2 py-0.5 rounded-full border ${sovereignScore >= 90
-                                    ? "bg-green-950 border-green-600 text-green-400"
-                                    : "bg-amber-950 border-amber-600 text-amber-400"
+                                ? "bg-green-950 border-green-600 text-green-400"
+                                : "bg-amber-950 border-amber-600 text-amber-400"
                                 }`}
                         >
                             {loading ? "..." : `${sovereignScore}/100`}
@@ -374,19 +374,17 @@ export default function SovereignAIBotPage() {
                 </div>
 
                 {/* ── Live Docker SAIB Container Panel ── */}
-                <div className={`rounded-xl border p-6 ${
-                    dockerStatus?.containerOnline
+                <div className={`rounded-xl border p-6 ${dockerStatus?.containerOnline
                         ? "border-green-500/30 bg-green-950/10"
                         : "border-amber-500/20 bg-amber-950/10"
-                }`}>
+                    }`}>
                     <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wider mb-4 flex items-center gap-3">
                         <Server className={`w-4 h-4 ${dockerStatus?.containerOnline ? "text-green-400" : "text-amber-400"}`} />
                         Docker Container — triumph-sovereign-ai-bot:8099
-                        <span className={`ml-auto text-xs font-mono px-2 py-0.5 rounded-full border ${
-                            dockerStatus?.containerOnline
+                        <span className={`ml-auto text-xs font-mono px-2 py-0.5 rounded-full border ${dockerStatus?.containerOnline
                                 ? "border-green-700 bg-green-950 text-green-400"
                                 : "border-amber-700 bg-amber-950 text-amber-400"
-                        }`}>
+                            }`}>
                             {dockerStatus?.containerOnline ? "ONLINE" : "STARTING"}
                         </span>
                     </h2>
@@ -457,12 +455,11 @@ export default function SovereignAIBotPage() {
                                     <div className="space-y-1">
                                         {dockerStatus.recent_alerts.slice(-5).reverse().map(a => (
                                             <div key={a.id} className="flex items-start gap-2 text-xs font-mono">
-                                                <span className={`shrink-0 ${
-                                                    a.severity === "info" ? "text-cyan-400" :
-                                                    a.severity === "critical" ? "text-red-400" :
-                                                    a.severity === "sovereign-override" ? "text-rose-400 font-bold" :
-                                                    "text-amber-400"
-                                                }`}>[{a.severity.toUpperCase()}]</span>
+                                                <span className={`shrink-0 ${a.severity === "info" ? "text-cyan-400" :
+                                                        a.severity === "critical" ? "text-red-400" :
+                                                            a.severity === "sovereign-override" ? "text-rose-400 font-bold" :
+                                                                "text-amber-400"
+                                                    }`}>[{a.severity.toUpperCase()}]</span>
                                                 <span className="text-neutral-400">{a.message}</span>
                                             </div>
                                         ))}
@@ -579,8 +576,8 @@ export default function SovereignAIBotPage() {
                                 }
                                 <span className="flex-1 text-sm text-neutral-300">{m.title}</span>
                                 <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${m.status === "ACTIVE"
-                                        ? "bg-green-950 border-green-700 text-green-400"
-                                        : "bg-amber-950 border-amber-700 text-amber-400"
+                                    ? "bg-green-950 border-green-700 text-green-400"
+                                    : "bg-amber-950 border-amber-700 text-amber-400"
                                     }`}>
                                     {m.status}
                                 </span>
