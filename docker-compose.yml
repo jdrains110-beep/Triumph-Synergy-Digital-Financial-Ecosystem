@@ -721,10 +721,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8090/health"]
-      interval: 20s
-      timeout: 15s
-      retries: 6
-      start_period: 90s          # extended: Python ML model loading is slow under CPU contention
+      interval: 30s
+      timeout: 30s
+      retries: 8
+      start_period: 180s         # extended: scikit-learn/numpy/scipy model load slow under amd64 emulation
 
   # ========================================================================
   # CREDIT ENGINE — PiCredit Score™ + Bureau Integration
@@ -1092,10 +1092,10 @@ services:
       - triumph-net
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 600s         # WAL replay can take 5-10 min on cold start
 
   # ========================================================================
   # GRAFANA — Metrics dashboards
