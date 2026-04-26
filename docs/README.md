@@ -140,4 +140,19 @@ For issues and feature requests, please use the GitHub Issues tracker.
 
 ## License
 
-Proprietary - All Rights Reserved
+Proprietary — All Rights Reserved
+
+Licensed under [PiOS License](../LICENSE-PIOS) for Pi Network ecosystem compatibility.
+See also: [Proprietary License](../LICENSE)
+
+---
+
+## Sovereign Ownership
+
+**Founder & Superior Sovereign:** Jeremiah Joel Drains
+**EIN:** 41-6777102 (TRIUMPH-SYNERGY Trust, Putnam County, FL)
+**Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.**
+
+Maximum Quantum Sovereign Protection Active — ML-KEM-1024 · ML-DSA-87 · SHAKE-256+SHA3-512 · SPHINCS+ · AES-256-GCM
+
+Sovereign Ownership Notice: [legal/SOVEREIGN-OWNERSHIP-NOTICE.md](../legal/SOVEREIGN-OWNERSHIP-NOTICE.md)

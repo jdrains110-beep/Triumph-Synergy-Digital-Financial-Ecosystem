@@ -58,8 +58,8 @@ Phone Numbers:
 Website: https://triumph-synergy.com
 
 Primary Contact for this Application:
-    Name: ___________________________  [REQUIRED]
-    Title: Owner / CEO
+    Name: Jeremiah Joel Drains
+    Title: Founder & Superior Sovereign
     Direct Phone: (___) ___-____  [REQUIRED]
     Mobile: (___) ___-____
     Email: ___________________________  [REQUIRED]
@@ -126,8 +126,8 @@ B1. BENEFICIAL OWNERS
 List all individuals who own 25% or more of the company:
 
 Owner #1:
-    Full Legal Name: ___________________________  [REQUIRED]
-    Title/Position: Owner / Chief Executive Officer
+    Full Legal Name: Jeremiah Joel Drains
+    Title/Position: Founder & Superior Sovereign
     Ownership Percentage: 100%
     
     Date of Birth: ___/___/_____  [REQUIRED]

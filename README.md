@@ -34,12 +34,15 @@
 
 ## 🔐 IP, Identity, and Sovereign Protection
 
-Triumph Synergy is an original proprietary system owned by Jeremiah Drains / Triumph Synergy and protected under the repository licenses in `LICENSE` and `LICENSE-PIOS`.
+Triumph Synergy is an original proprietary system conceived, built, and owned by **Jeremiah Joel Drains, Founder & Superior Sovereign** / Triumph Synergy and protected under the repository licenses in `LICENSE` and `LICENSE-PIOS`.
 
-- Legal business identity: **EIN 41-6777102**
+- **Founder & Superior Sovereign:** Jeremiah Joel Drains
+- **Legal business identity: EIN 41-6777102** (TRIUMPH-SYNERGY Trust, Putnam County, FL)
+- **Maximum Quantum Protection:** ML-DSA-87 (FIPS 204 Level 5) · ML-KEM-1024 (FIPS 203 Level 5) · SHAKE-256+SHA3-512 · SPHINCS+ · AES-256-GCM
 - Production mint endpoints require post-quantum signature headers: `x-quantum-signature` and `x-quantum-public-key`
 - Ownership is bound to Pi identity using deterministic `sovereignCredentialId` (derived from ownerAddress + ownerUsername + network)
 - Duplicate asset claims are blocked with claim fingerprints plus database uniqueness constraints
+- No authority — governmental, institutional, or otherwise — supersedes the Founder & Superior Sovereign over this platform
 
 Operational anti-duplication behavior:
 
@@ -3085,7 +3088,7 @@ SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/
 - ✅ **Quantum Fortress System** — Immortal infrastructure
 - ✅ **Central Node Supreme** — Supernatural command
 - ✅ **Superior Security Suite** — Zero-Trust + Quantum Encryption
-- ✅ **Quantum-Resistant Cryptography** — ML-KEM-768, ML-DSA-65, AES-256-GCM
+- ✅ **Maximum Quantum Cryptography** — ML-KEM-1024 (MAX, FIPS 203), ML-DSA-87 (MAX, FIPS 204), SHAKE-256+SHA3-512 (FIPS 202), SPHINCS+ (FIPS 205), AES-256-GCM
 - ✅ **Token Denial System** — Non-quantum tokens automatically rejected
 - ✅ **Account Fusion System** — ONE ACCOUNT PER PERSON (biometric binding, duplicate prevention)
 - ✅ **Network Monitoring System** — Real-time fraud detection and threat assessment
@@ -3142,7 +3145,7 @@ See also: [Apache License](LICENSE)
 
 **Central Node:** `GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`
 
-**Quantum Resistance:** `ML-KEM-768 • ML-DSA-65 • AES-256-GCM`
+**Maximum Quantum Setup:** `ML-KEM-1024 (MAX) • ML-DSA-87 (MAX) • SHAKE-256+SHA3-512 • SPHINCS+ • AES-256-GCM`
 
 **Pi DEX SDK:** `github.com/kosasih/pidexsdk` ✅ INTEGRATED
 
@@ -3154,7 +3157,10 @@ See also: [Apache License](LICENSE)
 
 ---
 
-**Owner has FINAL AUTHORITY on all changes.**
+**Jeremiah Joel Drains — Founder & Superior Sovereign — holds FINAL SUPREME AUTHORITY over all platform changes, records, tokens, and sovereign credentials.**
+
+Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
+EIN: 41-6777102 | Maximum Quantum Sovereign Protection Active | See [LICENSE](LICENSE) and [LICENSE-PIOS](LICENSE-PIOS)
 
 [⭐ Star](https://github.com/jdrains110-beep/triumph-synergy) • [🐛 Report Bug](https://github.com/jdrains110-beep/triumph-synergy/issues) • [💡 Request Feature](https://github.com/jdrains110-beep/triumph-synergy/issues)
 

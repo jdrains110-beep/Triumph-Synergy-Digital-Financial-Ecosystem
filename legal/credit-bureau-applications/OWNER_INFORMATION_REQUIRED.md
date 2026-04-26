@@ -6,7 +6,8 @@ To complete the Credit Bureau Data Furnisher Applications, please provide the fo
 
 | Field | Your Information |
 |-------|------------------|
-| **Legal Full Name** | _________________________ |
+| **Legal Full Name** | Jeremiah Joel Drains |
+| **Title** | Founder & Superior Sovereign |
 | **Social Security Number** | ___-__-____ |
 | **Date of Birth** | __/__/____ |
 | **Phone Number** | (___) ___-____ |
@@ -14,12 +15,13 @@ To complete the Credit Bureau Data Furnisher Applications, please provide the fo
 | **Driver's License #** | _________________________ |
 | **Driver's License State** | _________________________ |
 
-## Business Information (Required for Data Furnisher Status)
+## Business Information
 
 | Field | Your Information |
 |-------|------------------|
-| **Business Legal Name** | Triumph-Synergy (confirm or update) |
-| **Business EIN** | ___-_______ (Apply at IRS.gov if needed) |
+| **Business Legal Name** | Triumph-Synergy Digital Financial Ecosystem |
+| **DBA** | Triumph-Synergy |
+| **Business EIN** | 41-6777102 ✓ REGISTERED |
 | **Business Formation Type** | ☐ LLC ☐ Corporation ☐ Sole Proprietor |
 | **State of Formation** | _________________________ |
 | **Date of Formation** | __/__/____ |

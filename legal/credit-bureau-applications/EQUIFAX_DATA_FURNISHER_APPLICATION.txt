@@ -26,9 +26,11 @@ Business Mailing Address (if different):
     City: ___________________________________
     State: ______  ZIP Code: __________
 
-Business Phone: (___) ___-____  [REQUIRED - FILL IN]
-Business Fax: N/A
-Business Email: ___________________________  [REQUIRED - FILL IN]
+Primary Contact Information:
+    Contact Name: Jeremiah Joel Drains
+    Title: Founder & Superior Sovereign
+    Direct Phone: (___) ___-____  [REQUIRED - FILL IN]
+    Email: ___________________________  [REQUIRED - FILL IN]
 Business Website: https://triumph-synergy.com
 
 Federal Tax ID (EIN): 41-6777102  ✓ REGISTERED

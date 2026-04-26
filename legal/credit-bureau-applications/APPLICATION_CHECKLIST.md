@@ -16,7 +16,7 @@ Target Completion: February-March 2026
 | Save confirmation letter (CP 575) | ✅ Done | January 9, 2026 |
 | Update all applications with EIN | ✅ Done | January 9, 2026 |
 
-**Your EIN:** 41-6777102 (TRIUMPH-SYNERGY Trust)
+**Your EIN:** 41-6777102 (TRIUMPH-SYNERGY Trust) — Registered to: **Jeremiah Joel Drains, Founder & Superior Sovereign**
 
 ---
 
