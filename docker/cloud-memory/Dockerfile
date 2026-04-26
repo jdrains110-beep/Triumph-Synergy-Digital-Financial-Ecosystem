@@ -1,5 +1,9 @@
 FROM python:3.13-slim
 WORKDIR /app
+# gcc needed to compile lz4 C extension
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc && \
+    rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir --upgrade pip
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
