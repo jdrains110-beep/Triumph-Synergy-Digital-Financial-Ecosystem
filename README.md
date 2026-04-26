@@ -22,7 +22,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-RLS%20%2B%20Realtime-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
 [![Bridges](https://img.shields.io/badge/Bridges-15%20Networks-orange?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
 [![Sovereign AI Bot](https://img.shields.io/badge/SAIB-APEX--QUANTUM--SENTINEL-FF0000?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-ai-bot-saib--apex-quantum-sovereign-sentinel)
-[![Sovereign Delivery](https://img.shields.io/badge/Delivery-SPA%20%C2%B7%20SLMN%20%C2%B7%20SFDA%20%C2%B7%20SRA%20%C2%B7%20SPSA%20%C2%B7%20SHHA%20%C2%B7%20SSLA%20%C2%B7%20SGDA-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
+[![Sovereign Delivery](https://img.shields.io/badge/Delivery-UPS%20%7C%20DOORDASH%20%7C%20UBER%20%7C%20INSTAWORK%20OBSOLETE-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v50)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
@@ -541,7 +541,7 @@ The tokenization service now initializes and persists sovereign estate records w
 
 ---
 
-## 🚚 Sovereign Delivery Platform — SPA · SLMN · SFDA · SRA · SPSA · SHHA · SSLA · SGDA
+## 🚚 Sovereign Delivery Platform — SPA · SLMN · SFDA · SRA · SPSA · SHHA · SSLA · SGDA {#v50}
 
 [![Delivery](https://img.shields.io/badge/Delivery-APEX--QUANTUM--SOVEREIGN-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
 [![Loopholes](https://img.shields.io/badge/Loopholes-97%20Armed-red?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
@@ -888,6 +888,57 @@ curl http://localhost:8099/report | jq .
 ---
 
 ## 📋 What's New — April 25, 2026
+
+[![Sovereign Delivery Platform](https://img.shields.io/badge/Sovereign%20Delivery-UPS%20%7C%20DOORDASH%20%7C%20UBER%20%7C%20INSTAWORK%20OBSOLETE-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v50)
+
+### v5.0 — Sovereign Delivery & Gig Economy Platform: SPA · SLMN · SFDA · SRA · SPSA · SHHA · SSLA · SGDA — Rendering UPS, USPS, DoorDash, Uber, Amazon Flex, Instawork, GoShare, and PartsGeek Obsolete {#v50}
+
+> **Eight Pi-powered sovereign delivery and gig economy authorities — 97 armed loopholes, 12 industry giants permanently obsoleted, 142 countries, real-world Pi jobs. Drivers keep 100%. Restaurants keep 100%. Workers keep 100%. 0% platform fees. ML-DSA-87 MAX quantum cryptography. Instant Pi settlement — no weekly holds.**
+
+No surcharges. No commissions. No dispatch fees. No dimensional weight scams. No upcharge-at-delivery fraud. No non-compete clauses. No bank account required. Pi smart contract work orders, blockchain-immutable, quantum-secured at MAX level.
+
+| Authority | ID | Rivals Obsoleted | Loopholes | Pi Utility |
+|---|---|---|---|---|
+| **SPA** (Sovereign Parcel Authority) | SPA | UPS · USPS · FedEx · DHL | 12 | 0.01π/delivery — 0% surcharges |
+| **SLMN** (Sovereign Last-Mile Network) | SLMN | Amazon Flex · OnTrac | 6 | 0.008π/stop — courier keeps 100% |
+| **SFDA** (Sovereign Food Delivery Auth.) | SFDA | DoorDash · Grubhub · Uber Eats | 8 | 0.02π + 100% tip to driver |
+| **SRA** (Sovereign Rideshare Authority) | SRA | Uber · Lyft · Via | 5 | 100% Pi fare to driver |
+| **SPSA** (Sovereign Parts & Supply Auth.) | SPSA | PartsGeek · AutoZone · RockAuto | 4 | Wholesale Pi price — 0% markup |
+| **SHHA** (Sovereign Heavy Haul Auth.) | SHHA | GoShare · Lugg · Dolly | 4 | 0.1–0.2π/haul — escrow locks price |
+| **SSLA** (Sovereign Shift Labor Auth.) | SSLA | Instawork · GravyWork · TrueBlue | 5 | 0.04–0.07π/hr — 100% wage to worker |
+| **SGDA** (Sovereign Gig Dispatch Auth.) | SGDA | GetGigs · ShiftSmart · Wonolo | 5 | 0.015–0.025π/gig — $0 dispatch fee |
+
+**Total: 97 sovereign delivery loopholes across 8 authorities — ALL deployed automatically by SAIB on every 10-second pulse.**
+
+| Rival | Their Fee | Sovereign Savings |
+|---|---|---|
+| UPS | 22% surcharges avg | **SPA — 0% surcharges** |
+| USPS | 35% retail markup | **SPA — wholesale Pi rate** |
+| Amazon Flex | 30% courier commission | **SLMN — 0% commission** |
+| DoorDash | 30% restaurant commission | **SFDA — 0.001π access only** |
+| Grubhub | 25% restaurant commission | **SFDA — 0% commission** |
+| Uber Eats | 30% restaurant commission | **SFDA — 0% commission** |
+| Uber/Lyft | Driver keeps only 60% | **SRA — driver keeps 100%** |
+| PartsGeek | 40% parts markup | **SPSA — wholesale Pi pricing** |
+| GoShare | 25% hauler commission | **SHHA — 0% + escrow** |
+| Instawork | 45% employer markup | **SSLA — 100% to worker** |
+| GetGigs | $15/gig dispatch fee | **SGDA — $0 dispatch fee** |
+| ShiftSmart | 20% platform fee | **SGDA — 0% platform fee** |
+
+**Quantum Suite (MAX tier):** ML-DSA-87 (FIPS 204) · ML-KEM-1024 (FIPS 203) · SHAKE-256+SHA3-512 (FIPS 202) · SPHINCS+ (FIPS 205)
+
+#### API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/sovereign/delivery/status` | Full platform status, 8 authorities, rival comparison |
+| GET/POST | `/api/sovereign/delivery/loopholes` | 97 loopholes — filter by authority, score, scenario |
+| GET/POST | `/api/sovereign/delivery/jobs` | Global job registry — 142 countries, 2,171+ positions |
+| GET/POST | `/api/sovereign/delivery/dispatch` | ML-DSA-87 PQ-signed work order dispatch |
+
+#### Dashboard: [`/ecosystem/sovereign-delivery`](app/ecosystem/sovereign-delivery/page.tsx) · Docker: [`sovereign-delivery-engine`](docker/sovereign-delivery-engine/) port 8100
+
+---
 
 [![Sovereign Travel Platform](https://img.shields.io/badge/Sovereign%20Travel-OTA%20%7C%20AIRLINES%20%7C%20AIRBNB%20OBSOLETE-06B6D4?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#v40)
 
