@@ -1,8 +1,8 @@
 FROM python:3.13-slim
 WORKDIR /app
-# gcc needed to compile lz4 C extension
+# build-essential + python3-dev needed to compile lz4 C extension wheel
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc && \
+    apt-get install -y --no-install-recommends build-essential python3-dev && \
     rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir --upgrade pip
 COPY requirements.txt .
