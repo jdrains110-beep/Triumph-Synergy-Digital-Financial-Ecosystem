@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
 """
 Triumph Synergy ML Engine
@@ -23,9 +23,9 @@ Data feed
 Port: 8090
 """
 
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
 
 

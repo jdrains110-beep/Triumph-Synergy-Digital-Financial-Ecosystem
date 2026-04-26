@@ -1,6 +1,6 @@
 /**
  * @fileoverview Stellar Wallet — Real Pi Network / Stellar wallet operations
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * Replaces the stub WalletManager with real Stellar keypair generation,

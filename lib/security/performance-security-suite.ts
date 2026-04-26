@@ -21,8 +21,8 @@
  */
 
 import { EventEmitter } from "events";
-import { ml_kem768 } from "@noble/post-quantum/ml-kem.js";
-import { ml_dsa65 } from "@noble/post-quantum/ml-dsa.js";
+import { ml_kem1024 } from "@noble/post-quantum/ml-kem.js";
+import { ml_dsa87 } from "@noble/post-quantum/ml-dsa.js";
 
 // ============================================================================
 // Types & Interfaces
@@ -302,11 +302,11 @@ class SuperiorSecurityManager extends EventEmitter {
         keyRotationInterval: 60,  // Rotate keys every 60 seconds
         quantumResistant: true,
         postQuantumAlgorithms: [
-          "CRYSTALS-Kyber",
-          "CRYSTALS-Dilithium",
-          "SPHINCS+",
-          "FALCON",
-          "NTRU",
+          "ML-KEM-1024 (CRYSTALS-Kyber MAX — FIPS 203 Level 5)",
+          "ML-DSA-87 (CRYSTALS-Dilithium MAX — FIPS 204 Level 5)",
+          "SHAKE-256 + SHA3-512 (FIPS 202)",
+          "SPHINCS+ (FIPS 205)",
+          "AES-256-GCM (FIPS 197)",
         ],
       },
       
@@ -578,15 +578,15 @@ class SuperiorSecurityManager extends EventEmitter {
     this.metrics.encryptionOperations++;
 
     try {
-      // Generate ML-KEM keypair for quantum-resistant key encapsulation
-      const kemKeys = ml_kem768.keygen();
+      // Generate ML-KEM-1024 keypair (MAX — FIPS 203 Level 5) for quantum-resistant key encapsulation
+      const kemKeys = ml_kem1024.keygen();
       const keyId = `qres-key-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
-      // Generate ML-DSA keypair for quantum-resistant digital signatures
-      const dsaKeys = ml_dsa65.keygen();
+      // Generate ML-DSA-87 keypair (MAX — FIPS 204 Level 5) for quantum-resistant digital signatures
+      const dsaKeys = ml_dsa87.keygen();
 
       // Encapsulate a shared secret using the public key
-      const { cipherText, sharedSecret } = ml_kem768.encapsulate(kemKeys.publicKey);
+      const { cipherText, sharedSecret } = ml_kem1024.encapsulate(kemKeys.publicKey);
 
       // Use the shared secret to derive an AES key (hybrid encryption)
       const aesKey = sharedSecret.slice(0, 32); // First 32 bytes for AES-256
@@ -610,8 +610,8 @@ class SuperiorSecurityManager extends EventEmitter {
         dataBytes
       );
 
-      // Sign the encrypted data with quantum-resistant signature
-      const signature = ml_dsa65.sign(dsaKeys.secretKey, new Uint8Array(encrypted));
+      // Sign the encrypted data with ML-DSA-87 (MAX — FIPS 204 Level 5)
+      const signature = ml_dsa87.sign(dsaKeys.secretKey, new Uint8Array(encrypted));
 
       // Combine ciphertext, IV, and encrypted data
       const combined = new Uint8Array(iv.length + encrypted.byteLength);
@@ -620,7 +620,7 @@ class SuperiorSecurityManager extends EventEmitter {
 
       return {
         encrypted: Buffer.from(combined).toString('base64'),
-        algorithm: 'ML-KEM-768+AES-256-GCM+ML-DSA-65',
+        algorithm: 'ML-KEM-1024+AES-256-GCM+ML-DSA-87',
         keyId,
         publicKey: Buffer.from(kemKeys.publicKey).toString('base64'),
         cipherText: Buffer.from(cipherText).toString('base64'),
@@ -663,7 +663,7 @@ class SuperiorSecurityManager extends EventEmitter {
       }
 
       // Decapsulate: use the KEM secret key + ciphertext to recover the shared secret
-      const decapsulated = ml_kem768.decapsulate(cipherText, secretKey);
+      const decapsulated = ml_kem1024.decapsulate(cipherText, secretKey);
       const sharedSecret = (decapsulated as unknown as { sharedSecret: Uint8Array }).sharedSecret ?? (decapsulated as unknown as Uint8Array);
       const aesKey = sharedSecret.slice(0, 32);
 
@@ -698,14 +698,14 @@ class SuperiorSecurityManager extends EventEmitter {
   }
   
   /**
-   * Rotate encryption keys — generate fresh ML-KEM-768 + ML-DSA-65 keypairs
+   * Rotate encryption keys — generate fresh ML-KEM-1024 + ML-DSA-87 keypairs (MAX — FIPS 203/204 Level 5)
    */
   private rotateEncryptionKeys(): void {
     this.metrics.keyRotations++;
     
-    // Generate fresh post-quantum keypairs
-    const kemKeys = ml_kem768.keygen();
-    const dsaKeys = ml_dsa65.keygen();
+    // Generate fresh MAX-level post-quantum keypairs
+    const kemKeys = ml_kem1024.keygen();
+    const dsaKeys = ml_dsa87.keygen();
     
     this.emit("keys-rotated", {
       timestamp: new Date(),

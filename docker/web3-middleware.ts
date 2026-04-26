@@ -1,6 +1,6 @@
 /**
  * Web3 Middleware for Triumph Synergy Microservices
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * Validates Web3 headers on inter-service and client requests:

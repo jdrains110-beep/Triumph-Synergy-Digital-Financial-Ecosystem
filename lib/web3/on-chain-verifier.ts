@@ -1,6 +1,6 @@
 /**
  * @fileoverview On-Chain Verifier — Verify transactions and state on-chain (never trust, always verify)
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * Core Web3 principle: all critical state is verified against the blockchain,

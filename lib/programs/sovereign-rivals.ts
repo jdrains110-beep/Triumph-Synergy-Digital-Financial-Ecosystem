@@ -24,8 +24,8 @@ export const SOVEREIGN_RIVALS_VERSION  = "TRIUMPH-RIVALS-v1";
 export const APEX_SECURITY_LEVEL       = "APEX-QUANTUM-SOVEREIGN";
 export const PI_RATE_EXTERNAL          = 314.159;
 export const PI_RATE_INTERNAL          = 314_159;
-export const QUANTUM_ALGO_SIG          = "ML-DSA-65 (CRYSTALS-Dilithium)";
-export const QUANTUM_ALGO_ENC          = "ML-KEM-768 (CRYSTALS-Kyber)";
+export const QUANTUM_ALGO_SIG          = "ML-DSA-87 (CRYSTALS-Dilithium MAX — FIPS 204 Level 5)";
+export const QUANTUM_ALGO_ENC          = "ML-KEM-1024 (CRYSTALS-Kyber MAX — FIPS 203 Level 5)";
 export const QUANTUM_ALGO_HASH         = "SHAKE-256 + SHA3-512";
 export const SOVEREIGN_ANCHOR          = "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";
 

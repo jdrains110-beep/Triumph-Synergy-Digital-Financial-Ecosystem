@@ -1,6 +1,6 @@
 /**
  * @fileoverview Sovereign Finance — Barrel Export
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * Pi Network + Triumph Synergy: the sovereign financial layer the world attaches to.

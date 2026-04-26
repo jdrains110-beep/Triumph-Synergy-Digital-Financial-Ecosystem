@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
 """
 Triumph Synergy — Sovereign AI Bot Engine (SAIB) — Docker Autonomous Service
@@ -29,7 +29,7 @@ Endpoints:
 
 Port:     8099
 Security: APEX-QUANTUM-SOVEREIGN
-Algorithms: ML-DSA-65 · ML-KEM-768 · SHAKE-256 + SHA3-512
+Algorithms: ML-DSA-87 (MAX) · ML-KEM-1024 (MAX) · SHAKE-256 + SHA3-512
 """
 
 import asyncio
@@ -219,14 +219,14 @@ for svc_name in SERVICES:
 # ── Quantum Crypto (simulated — real ops go through triumph-quantum-shield) ────
 
 def quantum_sign(data: str) -> str:
-    """Generate a quantum-style signature token (ML-DSA-65 delegated to quantum-shield)."""
+    """Generate a quantum-style signature token (ML-DSA-87 MAX delegated to quantum-shield)."""
     ts       = int(time.time() * 1000)
     entropy  = secrets.token_hex(8)
-    raw      = f"ML-DSA-65:{data}:{ts}:{entropy}"
+    raw      = f"ML-DSA-87:{data}:{ts}:{entropy}"
     digest   = hashlib.shake_256(raw.encode()).hexdigest(32)
     state.quantum_ops += 1
     saib_quantum_ops.inc()
-    return f"ML-DSA-65:{digest}"
+    return f"ML-DSA-87:{digest}"
 
 def quantum_hash(data: str) -> str:
     shake = hashlib.shake_256(data.encode()).hexdigest(32)
@@ -243,8 +243,8 @@ LOOPHOLES = [
     {"id": "SAIB-BIZ-015", "category": "BUSINESS","score": 100,"auto": True,  "title": "Pi Business Immortality — SAIB Ensures No Business Failure"},
     {"id": "SAIB-BIZ-008", "category": "BUSINESS","score": 97, "auto": True,  "title": "Quantum-Signed Business Sovereign Rating — Overrides All Bureaus"},
     {"id": "SAIB-QNT-015", "category": "QUANTUM", "score": 100,"auto": True,  "title": "Triumph Synergy Immortality — SAIB Ensures Eternal Operation"},
-    {"id": "SAIB-QNT-001", "category": "QUANTUM", "score": 100,"auto": True,  "title": "ML-DSA-65 Quantum-Proof Signatures — Unbreakable"},
-    {"id": "SAIB-QNT-002", "category": "QUANTUM", "score": 100,"auto": True,  "title": "ML-KEM-768 Post-Quantum Encryption — 256-bit Security"},
+    {"id": "SAIB-QNT-001", "category": "QUANTUM", "score": 100,"auto": True,  "title": "ML-DSA-87 MAX Quantum-Proof Signatures — Unbreakable (Level 5)"},
+    {"id": "SAIB-QNT-002", "category": "QUANTUM", "score": 100,"auto": True,  "title": "ML-KEM-1024 MAX Post-Quantum Encryption — Maximum Level Security (Level 5)"},
     {"id": "SAIB-QNT-012", "category": "QUANTUM", "score": 99, "auto": True,  "title": "Multi-Sig Quantum Threshold Signing — 3-of-5 Requirement"},
     {"id": "SAIB-HSG-010", "category": "HOUSING", "score": 100,"auto": True,  "title": "Pi Sovereign Housing Guarantee — No Pioneer Ever Unhoused"},
     {"id": "SAIB-HSG-001", "category": "HOUSING", "score": 95, "auto": True,  "title": "Pi Sovereign Housing Voucher — HUD Section 8 Replacement"},

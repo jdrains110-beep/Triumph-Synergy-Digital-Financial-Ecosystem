@@ -11,8 +11,9 @@
  *   Airbnb/Cabin/Timeshare → Sovereign Vacation Retreat Authority (SVRA)
  *   International Travel   → Sovereign International Travel Authority (SITA)
  *
- * Security: APEX-QUANTUM-SOVEREIGN
- * Algorithms: ML-DSA-65 (sig) · ML-KEM-768 (enc) · SHAKE-256 + SHA3-512 (hash)
+ * Security: APEX-QUANTUM-SOVEREIGN (MAXIMUM)
+ * Algorithms: ML-DSA-87 MAX (sig) · ML-KEM-1024 MAX (enc) · SHAKE-256 + SHA3-512 (hash) · SPHINCS+ (backup)
+ * FIPS: FIPS 204 Level 5 · FIPS 203 Level 5 · FIPS 202 · FIPS 205
  * Pi anchor: $314.159/π external · $314,159/π internal
  */
 
@@ -22,8 +23,8 @@ import { randomUUID } from "crypto";
 
 export const SOVEREIGN_TRAVEL_VERSION  = "TRIUMPH-TRAVEL-v1";
 export const APEX_SECURITY_LEVEL       = "APEX-QUANTUM-SOVEREIGN";
-export const QUANTUM_ALGO_SIG          = "ML-DSA-65 (CRYSTALS-Dilithium)";
-export const QUANTUM_ALGO_ENC          = "ML-KEM-768 (CRYSTALS-Kyber)";
+export const QUANTUM_ALGO_SIG          = "ML-DSA-87 (CRYSTALS-Dilithium MAX — FIPS 204 Level 5)";
+export const QUANTUM_ALGO_ENC          = "ML-KEM-1024 (CRYSTALS-Kyber MAX — FIPS 203 Level 5)";
 export const QUANTUM_ALGO_HASH         = "SHAKE-256 + SHA3-512";
 export const SOVEREIGN_ANCHOR          = "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";
 

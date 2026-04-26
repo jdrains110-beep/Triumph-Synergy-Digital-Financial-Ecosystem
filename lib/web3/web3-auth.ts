@@ -1,6 +1,6 @@
 /**
  * @fileoverview Web3 Auth — Wallet-based authentication (replaces email/password for Web3 sessions)
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * Implements challenge-response authentication using Stellar keypair signatures.

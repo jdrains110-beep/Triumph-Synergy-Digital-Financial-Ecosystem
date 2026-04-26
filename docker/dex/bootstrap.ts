@@ -17,9 +17,9 @@
  *   GET  /api/dex/trades          — recent trades
  */
 
-// Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+// Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 // License: PiOS
-// Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+// Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 // License: PiOS
 
 

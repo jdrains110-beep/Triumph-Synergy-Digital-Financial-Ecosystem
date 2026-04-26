@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
 """
 Triumph Synergy Network Sentinel
@@ -19,9 +19,9 @@ Features:
 Port: 9913
 """
 
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
 
 

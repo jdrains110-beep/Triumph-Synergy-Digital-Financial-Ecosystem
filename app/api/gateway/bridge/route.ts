@@ -1,6 +1,6 @@
 /**
  * @fileoverview Gateway Bridge — Interoperability bridge transactions
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * GET  /api/gateway/bridge          — List all bridges and their status

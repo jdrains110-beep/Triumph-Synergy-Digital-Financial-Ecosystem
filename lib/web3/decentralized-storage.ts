@@ -1,6 +1,6 @@
 /**
  * @fileoverview Decentralized Storage Layer — Content-addressable storage with on-chain anchoring
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * Provides IPFS-compatible content addressing (CID) over Supabase Storage,

@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
 """
 Triumph Synergy Credit Engine
@@ -24,9 +24,9 @@ return synthetic data.  In production, wire BUREAU_API_KEY_* env vars.
 Port: 8091
 """
 
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 # License: PiOS
 
 

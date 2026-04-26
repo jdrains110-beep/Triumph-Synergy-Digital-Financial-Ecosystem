@@ -1,6 +1,6 @@
 /**
  * @fileoverview Global Reserve Protocol — Pi as the World Reserve Currency
- * @copyright Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+ * @copyright Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
  * @license PiOS
  *
  * Pi Network is the sovereign base settlement layer.

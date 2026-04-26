@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
 """
 Triumph Synergy — Sovereign Gateway Service
 
