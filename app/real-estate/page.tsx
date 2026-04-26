@@ -238,22 +238,22 @@ function ListingDetail({
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span>{LOOPHOLE_CAT_ICON[l.category] ?? "⚖️"}</span>
-                          <span className="font-medium text-sm">{l.name}</span>
-                          {l.priority === "HIGH" && <span className="text-xs bg-red-500 text-white rounded-full px-1.5 py-0.5">HIGH</span>}
+                          <span className="font-medium text-sm">{l.title}</span>
+                          {l.riskLevel === "HIGH" && <span className="text-xs bg-red-500 text-white rounded-full px-1.5 py-0.5">HIGH</span>}
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">{l.summary}</p>
+                        <p className="text-xs text-gray-400 mt-1">{l.description}</p>
                         <p className="text-xs text-gray-500 mt-1 italic">
                           Authority: {l.legalAuthority}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="text-sm font-bold">{fmtUsd(l.estimatedValueUsd)}</div>
-                        <div className="text-xs opacity-70">{fmtPi(l.estimatedValuePi)}</div>
+                        <div className="text-sm font-bold">{fmtUsd(l.estimatedValueGainUsd)}</div>
+                        <div className="text-xs opacity-70">{fmtPi(l.estimatedValueGainPi)}</div>
                       </div>
                     </div>
-                    {l.piIntegrationHook && (
+                    {l.piNetworkIntegration && (
                       <p className="mt-2 text-xs text-yellow-300 bg-yellow-500/10 rounded px-2 py-1">
-                        π Pi Hook: {l.piIntegrationHook}
+                        π Pi Hook: {l.piNetworkIntegration}
                       </p>
                     )}
                   </div>
@@ -295,8 +295,8 @@ function ListingDetail({
               listing.rentalYieldPercent ? ["Yield", `${listing.rentalYieldPercent}%`] : null,
               listing.monthlyRentPi ? ["Monthly Rent", fmtPi(listing.monthlyRentPi)] : null,
               listing.acreage ? ["Acreage", `${listing.acreage} acres`] : null,
-            ].filter(Boolean).map(([k, v]) => (
-              <div key={k as string} className="flex justify-between text-sm">
+            ].filter((x): x is [string, string] => x !== null).map(([k, v]) => (
+              <div key={k} className="flex justify-between text-sm">
                 <span className="text-gray-400">{k}</span>
                 <span className="text-white capitalize">{v}</span>
               </div>
@@ -496,17 +496,17 @@ function LoopholesTab({ listings }: { listings: SovereignListing[] }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-base">{LOOPHOLE_CAT_ICON[l.category] ?? "⚖️"}</span>
-                    <span className="font-bold text-sm">{l.name}</span>
-                    {l.priority === "HIGH" && <span className="text-xs bg-red-500 text-white rounded-full px-2">HIGH</span>}
+                    <span className="font-bold text-sm">{l.title}</span>
+                    {l.riskLevel === "HIGH" && <span className="text-xs bg-red-500 text-white rounded-full px-2">HIGH</span>}
                     <span className="text-xs opacity-50">{l.category}</span>
                   </div>
-                  <p className="text-sm mt-1 opacity-80">{l.summary}</p>
+                  <p className="text-sm mt-1 opacity-80">{l.description}</p>
                   <p className="text-xs mt-1 opacity-60 italic">📍 {(l as RELoophole & { listing: SovereignListing }).listing.address}</p>
                   <p className="text-xs mt-1 opacity-50">Authority: {l.legalAuthority}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="font-bold">{fmtUsd(l.estimatedValueUsd)}</div>
-                  <div className="text-xs opacity-70">{fmtPi(l.estimatedValuePi)}</div>
+                  <div className="font-bold">{fmtUsd(l.estimatedValueGainUsd)}</div>
+                  <div className="text-xs opacity-70">{fmtPi(l.estimatedValueGainPi)}</div>
                 </div>
               </div>
               {l.actionSteps.length > 0 && (
@@ -520,9 +520,9 @@ function LoopholesTab({ listings }: { listings: SovereignListing[] }) {
                   ))}
                 </div>
               )}
-              {l.piIntegrationHook && (
+              {l.piNetworkIntegration && (
                 <div className="mt-2 text-xs bg-yellow-500/10 rounded-lg px-2 py-1 text-yellow-300 border border-yellow-500/20">
-                  π {l.piIntegrationHook}
+                  π {l.piNetworkIntegration}
                 </div>
               )}
             </div>

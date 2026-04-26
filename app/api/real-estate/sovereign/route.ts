@@ -19,7 +19,7 @@ import {
   getPlatformStats,
   seedDemoListings,
 } from "@/lib/real-estate";
-import type { CreateListingInput } from "@/lib/real-estate";
+import type { CreateListingInput, DAOProposalType } from "@/lib/real-estate";
 
 // ─── GET ──────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       case "create-dao-proposal": {
         const { tokenId, propertyId, type, title, description, initiatorAddress } = body as {
           tokenId: string; propertyId: string;
-          type: "sell" | "refinance" | "renovation" | "foreclosure-defense" | "rent-adjustment" | "fractional-buyout";
+          type: DAOProposalType;
           title: string; description: string; initiatorAddress: string;
         };
         if (!tokenId || !propertyId || !type || !title || !description || !initiatorAddress) {
