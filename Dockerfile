@@ -1,8 +1,19 @@
 # Multi-stage build for optimized production image
 FROM node:24-alpine AS base
 
-# Install minimal runtime helpers early
-RUN apk add --no-cache curl tini wget && corepack enable
+# Install minimal runtime helpers.
+# CRITICAL: package.json has "packageManager":"yarn@1.22.22" which triggers
+# Corepack to intercept every 'yarn' call and try to download that exact
+# version from the registry — this fails in Docker build networks.
+# Fix: disable Corepack shims, then install yarn@1.22.22 via the npm JS API
+# (avoids Corepack entirely). COREPACK_ENABLE_NETWORK=0 + STRICT=0 are set
+# as ENV so they survive into child stages.
+ENV COREPACK_ENABLE_NETWORK=0
+ENV COREPACK_ENABLE_STRICT=0
+RUN apk add --no-cache curl tini wget && \
+    corepack disable && \
+    npm install -g yarn@1.22.22 --prefer-offline 2>/dev/null; \
+    yarn --version || npm install -g yarn@1.22.22
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -11,15 +22,12 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json yarn.lock ./
-# BuildKit cache mount — yarn packages are cached in a Docker volume.
-# First build downloads packages; all subsequent builds reuse the cache
-# even when yarn.lock changes.  Never re-downloads unless new packages added.
-# NOTE: do NOT use --ignore-optional — lightningcss ships its musl binary
-# as an optional dep and Tailwind CSS/Turbopack needs it on Alpine.
+# BuildKit cache mount — yarn packages cached in a Docker volume.
 # network-timeout 600000 = 10 min per package (handles slow registry responses)
 # network-concurrency 1 serialises fetches to avoid simultaneous TLS timeouts
+# COREPACK vars inherited from base stage prevent Corepack re-interception
 RUN --mount=type=cache,id=triumph-yarn-cache,target=/usr/local/share/.cache/yarn \
-    yarn cache clean --cache-folder /usr/local/share/.cache/yarn 2>/dev/null || true && \
+    yarn config set network-timeout 600000 && \
     yarn install --frozen-lockfile \
     --network-timeout 600000 \
     --network-concurrency 1 \
