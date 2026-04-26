@@ -22,7 +22,7 @@ RUN apk add --no-cache \
     curl \
     busybox-extras \
     supervisor \
- && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 

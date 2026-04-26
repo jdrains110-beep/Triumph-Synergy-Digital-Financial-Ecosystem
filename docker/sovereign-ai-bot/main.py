@@ -5,9 +5,9 @@ Triumph Synergy — Sovereign AI Bot Engine (SAIB) — Docker Autonomous Service
 =============================================================================
 
 This is the containerized brain of the entire Triumph Synergy ecosystem.
-SAIB runs inside Docker Desktop alongside all 31 platform services and:
+SAIB runs inside Docker Desktop alongside all 33+ platform services and:
 
-  ▸ MONITORS every service in real time (health probes every 15 s)
+  ▸ MONITORS every service in real time (health probes every 10 s)
   ▸ HEALS unhealthy services automatically (alerts → auto-restart / notify)
   ▸ LEARNS from failure patterns using exponential sliding windows
   ▸ ENFORCES quantum integrity across the entire mesh
@@ -97,15 +97,18 @@ SERVICES: dict[str, str] = {
     "triumph-sovereign-gateway": os.getenv("SOVEREIGN_GATEWAY_URL",    "http://triumph-sovereign-gateway:8097") + "/health",
     "triumph-dual-value-engine": os.getenv("DUAL_VALUE_URL",           "http://triumph-dual-value-engine:8093") + "/health",
     "triumph-tokenization":      os.getenv("TOKENIZATION_URL",         "http://triumph-tokenization-engine:8089") + "/health",
-    "triumph-prometheus":        "http://triumph-prometheus:9090/-/healthy",
-    "triumph-postgres-exporter": "http://triumph-postgres-exporter:9187/metrics",
-    "triumph-redis-exporter":    "http://triumph-redis-exporter:9121/metrics",
-    "triumph-horizon-guardian":  "http://triumph-horizon-guardian:9911/health",
-    "triumph-judicial-monitor":  "http://triumph-judicial-monitor:8096/health",
-    "triumph-grafana":           "http://triumph-grafana:3000/api/health",
-    "triumph-health-governor":   "http://triumph-health-governor:9912/health",
-    "triumph-network-sentinel":  "http://triumph-network-sentinel:9913/health",
-    "triumph-qpu-bridge":        os.getenv("QPU_BRIDGE_URL",           "http://triumph-qpu-bridge:8098") + "/health",
+    "triumph-prometheus":           "http://triumph-prometheus:9090/-/healthy",
+    "triumph-postgres-exporter":    "http://triumph-postgres-exporter:9187/metrics",
+    "triumph-redis-exporter":       "http://triumph-redis-exporter:9121/metrics",
+    "triumph-judicial-monitor":     "http://triumph-judicial-monitor:8096/health",
+    "triumph-grafana":              "http://triumph-grafana:3000/api/health",
+    "triumph-qpu-bridge":           os.getenv("QPU_BRIDGE_URL",              "http://triumph-qpu-bridge:8098") + "/health",
+    # ── Sovereign expansion platforms (added build b392468) ────────────────
+    "triumph-sovereign-delivery-engine": os.getenv("SOVEREIGN_DELIVERY_URL",  "http://triumph-sovereign-delivery-engine:8100") + "/health",
+    "triumph-sovereign-pidex-engine":    os.getenv("SOVEREIGN_PIDEX_URL",     "http://triumph-sovereign-pidex-engine:8101") + "/health",
+    "triumph-sovereign-sports-hub":      os.getenv("SOVEREIGN_SPORTS_URL",    "http://triumph-sovereign-sports-hub:8102") + "/health",
+    # ── Unified watchdog pod (replaces horizon-guardian + health-governor + network-sentinel)
+    "triumph-ecosystem-guardian":        os.getenv("ECOSYSTEM_GUARDIAN_URL",  "http://triumph-ecosystem-guardian:9912") + "/health",
 }
 
 # Remove services with empty URLs (postgres/redis monitored via healthcheck)
