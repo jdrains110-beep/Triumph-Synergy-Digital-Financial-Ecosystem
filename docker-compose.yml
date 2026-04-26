@@ -791,11 +791,11 @@ services:
       ml-engine:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8091/health"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8091/health"]
+      interval: 20s
+      timeout: 15s
+      retries: 8
+      start_period: 120s
 
   # ========================================================================
   # QUANTUM SHIELD ENGINE — Post-quantum cryptographic resistance layer
@@ -918,11 +918,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8095/health')"]
-      interval: 20s
-      timeout: 10s
-      retries: 4
-      start_period: 90s
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8095/health', timeout=20)"]
+      interval: 30s
+      timeout: 25s
+      retries: 5
+      start_period: 180s
 
   # ========================================================================
   # SOVEREIGN GATEWAY — Universal Integration Gateway
@@ -1013,11 +1013,11 @@ services:
       pi-bridge-connector:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(8); s.connect(('127.0.0.1',8093)); s.close()"]
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(10); s.connect(('127.0.0.1',8093)); s.close()"]
       interval: 20s
-      timeout: 12s
-      retries: 5
-      start_period: 30s
+      timeout: 15s
+      retries: 8
+      start_period: 120s
 
   # ========================================================================
   # TOKENIZATION ENGINE — Pi domain + allodial deed tokenization
@@ -1222,11 +1222,11 @@ services:
     networks:
       - triumph-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
-      interval: 15s
-      timeout: 12s
-      retries: 8
-      start_period: 90s
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 20s
+      timeout: 15s
+      retries: 10
+      start_period: 180s
 
   # ========================================================================
   # ECOSYSTEM GUARDIAN — Unified Sovereign Watchdog Pod
