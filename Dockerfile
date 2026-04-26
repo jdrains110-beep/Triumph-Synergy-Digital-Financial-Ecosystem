@@ -23,10 +23,12 @@ WORKDIR /app
 # Copy package files
 COPY package.json yarn.lock ./
 # BuildKit cache mount — yarn packages cached in a Docker volume.
+# Cache ID bumped to v2 to avoid the corrupted @stellar/stellar-sdk entry.
+# yarn cache clean runs first to evict any corrupt tarballs from the volume.
 # network-timeout 600000 = 10 min per package (handles slow registry responses)
 # network-concurrency 1 serialises fetches to avoid simultaneous TLS timeouts
-# COREPACK vars inherited from base stage prevent Corepack re-interception
-RUN --mount=type=cache,id=triumph-yarn-cache,target=/usr/local/share/.cache/yarn \
+RUN --mount=type=cache,id=triumph-yarn-cache-v2,target=/usr/local/share/.cache/yarn \
+    yarn cache clean --cache-folder /usr/local/share/.cache/yarn 2>/dev/null || true && \
     yarn config set network-timeout 600000 && \
     yarn install --frozen-lockfile \
     --network-timeout 600000 \
