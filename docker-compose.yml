@@ -838,6 +838,10 @@ services:
       SCP_URL: http://triumph-scp-upgrader:8083
       QPU_BRIDGE_URL: http://triumph-qpu-bridge:8098
       SOVEREIGN_GATEWAY_URL: http://triumph-sovereign-gateway:8097
+      SOVEREIGN_DELIVERY_URL: http://triumph-sovereign-delivery-engine:8100
+      SOVEREIGN_PIDEX_URL: http://triumph-sovereign-pidex-engine:8101
+      SOVEREIGN_SPORTS_URL: http://triumph-sovereign-sports-hub:8102
+      SAIB_URL: http://triumph-sovereign-ai-bot:8099
       BACKBONE_INTERVAL_S: "5"
       BACKBONE_TIMEOUT_S: "3"
       BACKBONE_MAX_FAILURES: "3"
@@ -1152,35 +1156,9 @@ services:
   # ========================================================================
   # HORIZON GUARDIAN — keeps testnet2 running, Horizon alive, and
   # pi-bridge network connected for the entire Triumph ecosystem
+  # NOTE: now runs inside ecosystem-guardian as hg-watchdog + hg-metrics
+  # processes under supervisord — see docker/ecosystem-guardian/
   # ========================================================================
-  horizon-guardian:
-    build:
-      context: docker/horizon-guardian
-    container_name: triumph-horizon-guardian
-    <<: *common
-    restart: on-failure:10            # override: stop looping if Pi Node desktop is offline
-    mem_limit: 128m
-    mem_reservation: 32m
-    cpus: 0.08
-    environment:
-      TARGET_CONTAINER: testnet2
-      TARGET_PROCESS: horizon
-      TARGET_URL: http://localhost:8000/
-      GUARD_INTERVAL_S: "20"
-      METRICS_PORT: "9911"
-      PI_BRIDGE_NETWORK: pi-bridge
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    expose:
-      - "9911"
-    networks:
-      - triumph-net
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9911/health', timeout=8)"]
-      interval: 30s
-      timeout: 20s
-      retries: 5
-      start_period: 90s
 
   # ========================================================================
   # JUDICIAL MONITOR — Courtroom Transparency & Anti-Railroading Engine
@@ -1251,18 +1229,30 @@ services:
       start_period: 90s
 
   # ========================================================================
-  # HEALTH GOVERNOR — Lightweight memory watchdog for entire ecosystem
-  # Restarts containers approaching mem_limit before they OOM-crash WSL2
+  # ECOSYSTEM GUARDIAN — Unified Sovereign Watchdog Pod
+  # Replaces three separate watchdog containers with ONE supervisord pod
+  # for superior stability, lower memory footprint, and zero inter-watchdog
+  # dependency failures.
+  #
+  # Subsystems managed internally by supervisord:
+  #   health-governor  (port 9912) — container memory & health watchdog
+  #   network-sentinel (port 9913) — multi-WAN connectivity monitor
+  #   horizon-guardian (port 9911) — testnet2/Horizon process guardian
+  #
+  # Total memory: 192m (vs 240m for 3 separate containers)
+  # Security: APEX-QUANTUM-SOVEREIGN (MAX) — ML-DSA-87 · ML-KEM-1024
   # ========================================================================
-  health-governor:
+  ecosystem-guardian:
     build:
-      context: docker/health-governor
-    container_name: triumph-health-governor
+      context: docker/ecosystem-guardian
+    container_name: triumph-ecosystem-guardian
     <<: *common
-    mem_limit: 64m
-    mem_reservation: 24m
-    cpus: 0.08
+    restart: on-failure:10            # stop looping if Pi Node desktop is offline
+    mem_limit: 192m
+    mem_reservation: 64m
+    cpus: 0.18                        # ~same as 3 × 0.06 combined
     environment:
+      # ── Health Governor config ────────────────────────────────────────
       GOVERNOR_INTERVAL_S: "30"
       MEMORY_WARN_PCT: "80"
       MEMORY_KILL_PCT: "101"
@@ -1282,36 +1272,9 @@ services:
       QUANTUM_SHIELD_URL: "http://triumph-quantum-shield:8094"
       SAIB_URL: http://triumph-sovereign-ai-bot:8099
       PQ_CHECK_INTERVAL_S: "30"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    expose:
-      - "9912"
-    networks:
-      - triumph-net
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9912/health', timeout=8)"]
-      interval: 30s
-      timeout: 12s
-      retries: 3
-      start_period: 10s
-
-  # ========================================================================
-  # NETWORK SENTINEL — Multi-WAN monitor & connection resilience
-  # Detects Starlink/broadband/cellular transitions, verifies external
-  # connectivity, auto-restarts services after network changes
-  # ========================================================================
-  network-sentinel:
-    build:
-      context: docker/network-sentinel
-    container_name: triumph-network-sentinel
-    <<: *common
-    restart: on-failure:10            # override: don't crash-loop on network probe failures
-    mem_limit: 48m
-    mem_reservation: 16m
-    cpus: 0.05
-    environment:
+      # ── Network Sentinel config ───────────────────────────────────────
       PROBE_INTERVAL_S: "15"
-      METRICS_PORT: "9913"
+      SENTINEL_METRICS_PORT: "9913"
       REDIS_URL: "redis://triumph-redis:6379"
       PI_NODE_HOST: "testnet2"
       PI_NODE_PEER_PORT: "31402"
@@ -1321,13 +1284,18 @@ services:
       SELF_HEAL_ML_ENABLED: "true"
       ANOMALY_Z_THRESHOLD: "2.5"
       ANOMALY_STREAK_THRESHOLD: "3"
-      CONTROL_PLANE_REQUIRE_PQ_READY: "true"
-      QUANTUM_SHIELD_URL: "http://triumph-quantum-shield:8094"
-      SAIB_URL: http://triumph-sovereign-ai-bot:8099
-      PQ_CHECK_INTERVAL_S: "30"
+      # ── Horizon Guardian config ───────────────────────────────────────
+      TARGET_CONTAINER: testnet2
+      TARGET_PROCESS: horizon
+      TARGET_URL: http://localhost:8000/
+      GUARD_INTERVAL_S: "20"
+      GUARDIAN_METRICS_PORT: "9911"
+      PI_BRIDGE_NETWORK: pi-bridge
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
+      - "9911"
+      - "9912"
       - "9913"
     networks:
       - triumph-net
@@ -1336,11 +1304,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9913/health', timeout=10)"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9912/health', timeout=8)"]
       interval: 30s
-      timeout: 20s
-      retries: 5
-      start_period: 90s
+      timeout: 15s
+      retries: 4
+      start_period: 20s
 
   # ========================================================================
   # QPU BRIDGE — Quantum Processing Unit Bridge
@@ -1385,6 +1353,9 @@ services:
       CONTRACTS_URL: http://triumph-smart-contracts:8082
       SCP_URL: http://triumph-scp-upgrader:8083
       SOVEREIGN_GATEWAY_URL: http://triumph-sovereign-gateway:8097
+      SOVEREIGN_DELIVERY_URL: http://triumph-sovereign-delivery-engine:8100
+      SOVEREIGN_PIDEX_URL: http://triumph-sovereign-pidex-engine:8101
+      SOVEREIGN_SPORTS_URL: http://triumph-sovereign-sports-hub:8102
     expose:
       - "8098"
     networks:
@@ -1404,11 +1375,11 @@ services:
   # ========================================================================
   # SOVEREIGN AI BOT (SAIB) — Autonomous Ecosystem Guardian
   # The master intelligence layer of the entire Triumph Synergy ecosystem.
-  # MONITORS: all 31 services every 15 seconds
+  # MONITORS: all 33+ services every 10 seconds
   # HEALS:    auto-restarts degraded services via Docker socket
   # LEARNS:   adaptive failure prediction with sliding-window model in Redis
   # ACTIVATES: 150+ sovereign loopholes, quantum-signed operations
-  # PROTECTS: quantum-shield integration, ML-DSA-65 signatures every pulse
+  # PROTECTS: quantum-shield integration, ML-DSA-87 (MAX) signatures every pulse
   # CONNECTS: full mesh to every platform — the brain behind Triumph Synergy
   # ========================================================================
   sovereign-ai-bot:
@@ -1458,6 +1429,10 @@ services:
       SOVEREIGN_GATEWAY_URL: http://triumph-sovereign-gateway:8097
       QPU_BRIDGE_URL: http://triumph-qpu-bridge:8098
       CENTRAL_NODE_URL: http://triumph-central-node:11626
+      SOVEREIGN_DELIVERY_URL: http://triumph-sovereign-delivery-engine:8100
+      SOVEREIGN_PIDEX_URL: http://triumph-sovereign-pidex-engine:8101
+      SOVEREIGN_SPORTS_URL: http://triumph-sovereign-sports-hub:8102
+      ECOSYSTEM_GUARDIAN_URL: http://triumph-ecosystem-guardian:9912
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
