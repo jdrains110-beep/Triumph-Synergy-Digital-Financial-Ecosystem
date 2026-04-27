@@ -19,7 +19,7 @@ FROM python:3.13-slim
 # Install docker CLI (for watchdog.sh) + supervisor (process manager) + curl
 # Use Debian base to avoid Alpine musl/pyexpat ABI issues breaking supervisor
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates curl gnupg supervisor procps iproute2 && \
+    ca-certificates curl gnupg supervisor procps iproute2 && \
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
     chmod a+r /etc/apt/keyrings/docker.asc && \

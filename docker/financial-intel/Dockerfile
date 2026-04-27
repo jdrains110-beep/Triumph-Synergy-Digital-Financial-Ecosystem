@@ -16,8 +16,8 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        supervisor curl ca-certificates \
-        build-essential gfortran libopenblas-dev liblapack-dev && \
+    supervisor curl ca-certificates \
+    build-essential gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -39,14 +39,14 @@ RUN groupadd --system --gid 1012 fintel && \
 EXPOSE 8090 8091 8093
 
 LABEL org.triumph.pod="financial-intel" \
-      org.triumph.merges="credit-engine+ml-engine+dual-value-engine" \
-      org.triumph.stack="scikit-learn+pandas+statsmodels+stellar-sdk"
+    org.triumph.merges="credit-engine+ml-engine+dual-value-engine" \
+    org.triumph.stack="scikit-learn+pandas+statsmodels+stellar-sdk"
 
 USER fintel
 
 HEALTHCHECK --interval=25s --timeout=20s --retries=8 --start-period=240s \
     CMD python -c "import socket; \
-[ (lambda p: (lambda s: (s.settimeout(8), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) \
-  for p in (8090, 8091, 8093) ]" || exit 1
+    [ (lambda p: (lambda s: (s.settimeout(8), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) \
+    for p in (8090, 8091, 8093) ]" || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/financial-intel.conf", "-n"]

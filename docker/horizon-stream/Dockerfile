@@ -26,17 +26,17 @@ COPY docker/market-data/bootstrap.ts       ./docker/market-data/bootstrap.ts
 COPY tsconfig.docker.json ./tsconfig.json
 
 RUN npx esbuild docker/blockchain-oracle/bootstrap.ts \
-      --bundle --platform=node --target=node20 --format=cjs \
-      --external:events --outfile=dist/blockchain-oracle.js && \
+    --bundle --platform=node --target=node20 --format=cjs \
+    --external:events --outfile=dist/blockchain-oracle.js && \
     npx esbuild docker/market-data/bootstrap.ts \
-      --bundle --platform=node --target=node20 --format=cjs \
-      --external:events --outfile=dist/market-data.js
+    --bundle --platform=node --target=node20 --format=cjs \
+    --external:events --outfile=dist/market-data.js
 
 FROM base AS runner
 WORKDIR /app
 
 LABEL org.triumph.pod="horizon-stream" \
-      org.triumph.merges="blockchain-oracle+market-data"
+    org.triumph.merges="blockchain-oracle+market-data"
 
 RUN addgroup --system --gid 1013 horizon && \
     adduser  --system --uid 1013 --ingroup horizon horizon && \

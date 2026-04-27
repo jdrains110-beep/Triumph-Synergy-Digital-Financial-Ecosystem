@@ -611,6 +611,73 @@ services:
         condition: service_healthy
 
   # ========================================================================
+  # SUPER-POD 8: SOVEREIGN-INSURANCE
+  # life + home + health + auto + dental + vision + hospital
+  # ========================================================================
+
+  sovereign-insurance:
+    build:
+      context: docker
+      dockerfile: sovereign-insurance/Dockerfile
+    container_name: triumph-sovereign-insurance
+    <<: *common
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.40
+    environment:
+      <<: [*db-env, *pi-env]
+      QUANTUM_FORTRESS_URL: http://triumph-quantum-fortress:8094
+    expose:
+      - "8110"
+      - "8111"
+      - "8112"
+      - "8113"
+      - "8114"
+      - "8115"
+      - "8116"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+      quantum-fortress:
+        condition: service_started
+
+  # ========================================================================
+  # SUPER-POD 9: SOVEREIGN-UTILITIES
+  # electric + water + gas + hoa + plumbing + hvac
+  # ========================================================================
+
+  sovereign-utilities:
+    build:
+      context: docker
+      dockerfile: sovereign-utilities/Dockerfile
+    container_name: triumph-sovereign-utilities
+    <<: *common
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.40
+    environment:
+      <<: [*db-env, *pi-env]
+      PAYMENT_PROCESSOR_URL: http://triumph-payment-processor:8084
+    expose:
+      - "8120"
+      - "8121"
+      - "8122"
+      - "8123"
+      - "8124"
+      - "8125"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+      payment-processor:
+        condition: service_started
+
+  # ========================================================================
   # NGINX — Reverse Proxy (kept standalone, slim alpine image)
   # ========================================================================
 

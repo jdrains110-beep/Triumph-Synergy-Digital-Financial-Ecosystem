@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN git clone --depth 1 --branch 0.14.0 https://github.com/open-quantum-safe/liboqs.git /tmp/liboqs && \
     cd /tmp/liboqs && mkdir build && cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local/liboqs \
-          -DBUILD_SHARED_LIBS=ON \
-          -DOQS_USE_OPENSSL=OFF .. && \
+    -DBUILD_SHARED_LIBS=ON \
+    -DOQS_USE_OPENSSL=OFF .. && \
     make -j"$(nproc)" && make install && \
     rm -rf /tmp/liboqs
 
@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 FROM python:3.13-slim AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        supervisor curl ca-certificates && \
+    supervisor curl ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --system --gid 1011 quantum && \
     useradd  --system --uid 1011 --gid quantum quantum
@@ -55,13 +55,13 @@ ENV PYTHONUNBUFFERED=1 \
 EXPOSE 8094 8098
 
 LABEL org.triumph.pod="quantum-fortress" \
-      org.triumph.merges="quantum-shield+qpu-bridge" \
-      org.triumph.crypto="ML-KEM-1024+ML-DSA-87+SPHINCS+"
+    org.triumph.merges="quantum-shield+qpu-bridge" \
+    org.triumph.crypto="ML-KEM-1024+ML-DSA-87+SPHINCS+"
 
 USER quantum
 
 HEALTHCHECK --interval=25s --timeout=20s --retries=8 --start-period=180s \
     CMD python3 -c "import urllib.request as u; \
-[u.urlopen(f'http://127.0.0.1:{p}/health', timeout=10) for p in (8094, 8098)]" || exit 1
+    [u.urlopen(f'http://127.0.0.1:{p}/health', timeout=10) for p in (8094, 8098)]" || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/quantum-fortress.conf", "-n"]

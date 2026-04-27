@@ -40,8 +40,8 @@ FROM base AS runner
 WORKDIR /app
 
 LABEL org.triumph.pod="governance-shield" \
-      org.triumph.merges="compliance+judicial-monitor+central-node+scp-upgrader" \
-      org.pinetwork.central-node="GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+    org.triumph.merges="compliance+judicial-monitor+central-node+scp-upgrader" \
+    org.pinetwork.central-node="GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
 
 RUN addgroup --system --gid 1015 govern && \
     adduser  --system --uid 1015 --ingroup govern govern && \

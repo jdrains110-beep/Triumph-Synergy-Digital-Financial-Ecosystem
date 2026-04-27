@@ -19,8 +19,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        supervisor curl ca-certificates \
-        build-essential && \
+    supervisor curl ca-certificates \
+    build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -45,15 +45,15 @@ RUN groupadd --system --gid 1010 sovereign && \
 EXPOSE 8097 8099 8100 8101 8102
 
 LABEL org.triumph.pod="sovereign-fortress" \
-      org.triumph.merges="ai-bot+gateway+delivery+pidex+sports-hub" \
-      org.triumph.quantum="ML-DSA-87+ML-KEM-1024+SPHINCS+"
+    org.triumph.merges="ai-bot+gateway+delivery+pidex+sports-hub" \
+    org.triumph.quantum="ML-DSA-87+ML-KEM-1024+SPHINCS+"
 
 USER sovereign
 
 # Healthcheck: every internal port must be listening
 HEALTHCHECK --interval=20s --timeout=15s --retries=8 --start-period=180s \
     CMD python -c "import socket,sys; \
-[ (lambda p: (lambda s: (s.settimeout(5), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) \
-  for p in (8097, 8099, 8100, 8101, 8102) ]" || exit 1
+    [ (lambda p: (lambda s: (s.settimeout(5), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) \
+    for p in (8097, 8099, 8100, 8101, 8102) ]" || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/sovereign-fortress.conf", "-n"]

@@ -20,7 +20,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        supervisor curl ca-certificates wget gosu && \
+    supervisor curl ca-certificates wget gosu && \
     rm -rf /var/lib/apt/lists/*
 
 # Prometheus
@@ -48,19 +48,19 @@ COPY grafana/datasources/   /etc/grafana/provisioning/datasources/
 RUN groupadd --system --gid 1016 obs && \
     useradd  --system --uid 1016 --gid obs obs && \
     mkdir -p /var/log/supervisor \
-             /etc/grafana/provisioning/dashboards \
-             /etc/grafana/provisioning/datasources \
-             /etc/grafana/provisioning/alerting \
-             /etc/grafana/provisioning/plugins \
-             /etc/grafana/provisioning/notifiers \
-             /etc/grafana/provisioning/access-control \
-             /etc/prometheus && \
+    /etc/grafana/provisioning/dashboards \
+    /etc/grafana/provisioning/datasources \
+    /etc/grafana/provisioning/alerting \
+    /etc/grafana/provisioning/plugins \
+    /etc/grafana/provisioning/notifiers \
+    /etc/grafana/provisioning/access-control \
+    /etc/prometheus && \
     chown -R obs:obs /prometheus /var/lib/grafana /var/log/grafana /var/log/supervisor /etc/grafana /etc/prometheus
 
 EXPOSE 3000 9090 9121 9187
 
 LABEL org.triumph.pod="observability-stack" \
-      org.triumph.merges="prometheus+grafana+postgres-exporter+redis-exporter"
+    org.triumph.merges="prometheus+grafana+postgres-exporter+redis-exporter"
 
 COPY observability-stack/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -68,8 +68,8 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 HEALTHCHECK --interval=30s --timeout=45s --retries=10 --start-period=300s \
     CMD curl -fsS --max-time 10 http://127.0.0.1:9090/-/healthy && \
-        curl -fsS --max-time 10 http://127.0.0.1:3000/api/health && \
-        curl -fsS --max-time 10 http://127.0.0.1:9187/metrics > /dev/null && \
-        curl -fsS --max-time 10 http://127.0.0.1:9121/metrics > /dev/null || exit 1
+    curl -fsS --max-time 10 http://127.0.0.1:3000/api/health && \
+    curl -fsS --max-time 10 http://127.0.0.1:9187/metrics > /dev/null && \
+    curl -fsS --max-time 10 http://127.0.0.1:9121/metrics > /dev/null || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/observability-stack.conf", "-n"]

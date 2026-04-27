@@ -944,6 +944,23 @@ curl http://localhost:8099/report | jq .
 
 ---
 
+## 📋 What's New — April 27, 2026 (APEX Expansion)
+
+### 🛡️ Sovereign Insurance + 🏠 Sovereign Utilities super-pods (NEW)
+
+Two additional super-pods bring real-world utility to Pi Network across insurance and home-services sectors — **9 super-pods + 9 standalone = 18 healthy containers**.
+
+- **`triumph-sovereign-insurance`** (UID 1017, ports 8110–8116) — 7 services in one container:
+  - **life / home / health / auto / dental / vision** — PI-721 tokenized policies, actuarial quote engine (`age_factor × risk × coverage × base × risk_mult`), quantum-signed envelopes (ML-DSA-87 / ML-KEM-1024 / SPHINCS+), anti-duplication on `(scid, asset_reference)`.
+  - **hospital-network** — directory of UF Health, Shands, UF Health Jax, Putnam Community, Ascension St. Vincent's, Mayo Clinic Jacksonville, Cleveland Clinic Florida, HCA Florida.
+- **`triumph-sovereign-utilities`** (UID 1018, ports 8120–8125) — 6 services in one container:
+  - **electric** — GRU, FPL, Clay Electric Cooperative, Duke Energy FL, TECO, JEA, Okefenoke REMC.
+  - **water** — GRU Water, JEA Water, CCUA, Putnam County, Palatka, Ocala, Miami-Dade, Tampa.
+  - **gas** — TECO Peoples Gas, FPU, Chesapeake, City of Tallahassee Gas, Infinite Energy.
+  - **hoa, plumbing, hvac** — sovereign provider directories with on-chain dues / service-call settlement.
+  - Real-time meter ingestion (`/usage`) → frictionless Pi settlement (`/pay`) routed through `triumph-payment-processor`.
+- **nginx** — public routes added: `/insurance/{life,home,health,auto,dental,vision,hospital}/` and `/utilities/{electric,water,gas,hoa,plumbing,hvac}/`.
+
 ## 📋 What's New — April 27, 2026
 
 ### 🧬 APEX Super-Sovereign Pod Architecture — 33 → 16 Containers, 100% Healthy
@@ -2679,9 +2696,9 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 
 ### Container Architecture — **APEX SUPER-SOVEREIGN PODS** (April 27, 2026)
 
-> **33 legacy services consolidated into 7 super-pods + 9 standalone containers = 16 total containers, all health-gated, all on `triumph-net` + `pi-bridge` (live `testnet2` Stellar/Pi node attached).** Each super-pod runs `supervisord` + `tini` PID-1, drops to a non-root UID (1010–1016), and exposes 127.0.0.1 healthchecks. 11 stateful volumes preserved across rebuilds.
+> **46 legacy services consolidated into 9 super-pods + 9 standalone containers = 18 total containers, all health-gated, all on `triumph-net` + `pi-bridge` (live `testnet2` Stellar/Pi node attached).** Each super-pod runs `supervisord` + `tini` PID-1, drops to a non-root UID (1010–1018), and exposes 127.0.0.1 healthchecks. 11 stateful volumes preserved across rebuilds.
 
-#### Super-Pods (7)
+#### Super-Pods (9)
 
 | Super-Pod | UID | Internal Ports | Consolidated Services |
 |-----------|-----|----------------|-----------------------|
@@ -2692,6 +2709,8 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 | `triumph-settlement-core` | 1014 | 8080, 8082, 8088, 8089 | transaction-engine, smart-contracts, dex, tokenization-engine |
 | `triumph-governance-shield` | 1015 | 8083, 8087, 8096, 11625, 11626 | scp-upgrader, compliance, judicial-monitor, central-node (Stellar Core) |
 | `triumph-observability-stack` | 1016 | 9090, 3000, 9121, 9187 | prometheus, grafana, redis-exporter, postgres-exporter |
+| `triumph-sovereign-insurance` | 1017 | 8110, 8111, 8112, 8113, 8114, 8115, 8116 | life, home, health, auto, dental, vision, hospital-network (UF Health, Shands, Mayo, Cleveland Clinic, HCA Florida) — PI-721 quantum-signed policies |
+| `triumph-sovereign-utilities` | 1018 | 8120, 8121, 8122, 8123, 8124, 8125 | electric (GRU/FPL/Clay/Duke/TECO/JEA), water, gas (Peoples/FPU/Chesapeake), HOA, plumbing, HVAC — meter ingestion → Pi settlement |
 
 #### Standalone Containers (9)
 

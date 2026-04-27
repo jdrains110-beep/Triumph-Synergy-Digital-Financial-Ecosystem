@@ -38,7 +38,7 @@ FROM base AS runner
 WORKDIR /app
 
 LABEL org.triumph.pod="settlement-core" \
-      org.triumph.merges="transaction-engine+smart-contracts+tokenization-engine+dex"
+    org.triumph.merges="transaction-engine+smart-contracts+tokenization-engine+dex"
 
 RUN addgroup --system --gid 1014 settle && \
     adduser  --system --uid 1014 --ingroup settle settle && \

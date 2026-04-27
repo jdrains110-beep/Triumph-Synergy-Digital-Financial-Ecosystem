@@ -78,3 +78,9 @@ services:
 
   ecosystem-guardian:
     <<: [ *platform, *init, *grace, *ulimits ]
+
+  sovereign-insurance:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  sovereign-utilities:
+    <<: [ *platform, *init, *grace, *ulimits ]
