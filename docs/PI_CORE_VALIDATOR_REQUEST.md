@@ -81,3 +81,46 @@ Happy to provide logs, peer counts, sync metrics, or do a live walkthrough.
 Thank you,
 Jeremiah Drains
 Triumph Synergy
+
+---
+
+## Appendix A — On-chain evidence (verified 2026-04-27)
+
+```
+GET https://api.testnet.minepi.com/accounts/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+  sequence:        104797124712988672
+  subentry_count:  0
+  balances:        [{ asset_type: "native", balance: "95.0000000" }]
+```
+
+Funding transactions (Pi Testnet):
+
+| Amount | Tx hash | Ledger |
+|--------|---------|--------|
+| 5 Pi  | `405f9f31d7ed9f1eb453cf93c8d2c5f75196849496042f14dfe44c` (truncated — see Horizon) | 24399982 |
+| 90 Pi | `26f6f567e8a4591f092d13b7e6b315a86a9630c5854519e416868fbefb748065` | 24400335 |
+
+Live SCP attestation logged every cycle by the Triumph governance-shield:
+
+```
+[SCP] Central node GA6Z5STF... verified on-chain (seq=104797124712988672)
+```
+
+## Appendix B — Bridge health
+
+```
+GET http://triumph-pi-bridge-connector:8092/health
+  status: healthy
+  pi_node_reachable: true
+  central_node_reachable: true
+  sync_lag_seconds: ~5.2
+```
+
+## Appendix C — Submission checklist (for the operator)
+
+- [ ] Open issue / DM via Pi Core Discord using the **Subject** + **Body** above.
+- [ ] Attach link to the public stellar.toml once `triumph-synergy-testnet.vercel.app/.well-known/stellar.toml` is live.
+- [ ] Provide the requested SLA tier (LOW vs MEDIUM).
+- [ ] If asked, port-forward TCP `:31402` and confirm inbound reachability.
+- [ ] Provision the public history archive (see `infrastructure/history-archive/README.md`) and update the URL in this document.
+
