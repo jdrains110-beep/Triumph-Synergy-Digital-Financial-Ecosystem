@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  com.triumph.tx-monitor.plist — launchd service for scripts/tx-monitor.sh
+  
+  Install:
+    1. Edit the WorkingDirectory + EnvironmentVariables paths/values below
+       (especially WEBHOOK_URL if you want push notifications)
+    2. cp infrastructure/launchd/com.triumph.tx-monitor.plist ~/Library/LaunchAgents/
+    3. launchctl load -w ~/Library/LaunchAgents/com.triumph.tx-monitor.plist
+    4. tail -f /tmp/triumph-tx-monitor.log
+  
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.triumph.tx-monitor.plist
+    rm ~/Library/LaunchAgents/com.triumph.tx-monitor.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.triumph.tx-monitor</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/jeremiahdrains/Downloads/Triumph-Synergy-Digital-Financial-Ecosystem-main/scripts/tx-monitor.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/jeremiahdrains/Downloads/Triumph-Synergy-Digital-Financial-Ecosystem-main</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>ACCOUNT</key>
+        <string>GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V</string>
+        <key>HORIZON_URL</key>
+        <string>https://api.testnet.minepi.com</string>
+        <key>POLL_SECONDS</key>
+        <string>30</string>
+        <!-- Set this to a Discord/Slack/ntfy.sh webhook URL to get push alerts.
+             Leave empty for log-file-only mode. -->
+        <key>WEBHOOK_URL</key>
+        <string></string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/triumph-tx-monitor.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/triumph-tx-monitor.err</string>
+</dict>
+</plist>
