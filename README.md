@@ -944,6 +944,28 @@ curl http://localhost:8099/report | jq .
 
 ---
 
+## 📋 What's New — April 27, 2026
+
+### 🧬 APEX Super-Sovereign Pod Architecture — 33 → 16 Containers, 100% Healthy
+
+The full Triumph Synergy Docker Desktop platform was rebuilt from the ground up around **7 super-sovereign pods + 9 standalone containers**. Every container is health-gated, runs as a non-root UID, and is connected to live Pi/Stellar `testnet2`.
+
+- **Super-pods (7):** `sovereign-fortress` (5 services), `quantum-fortress` (2, liboqs 0.14.0), `financial-intel` (3), `horizon-stream` (2), `settlement-core` (4), `governance-shield` (4 + Stellar Core), `observability-stack` (4)
+- **Standalone (9):** `app`, `postgres`, `redis`, `vault`, `payment-processor`, `cloud-memory`, `pi-bridge-connector`, `ecosystem-guardian`, `nginx`
+- **Process supervision:** `tini` PID-1 + `supervisord` per pod, individual non-root UIDs (1010–1016), `127.0.0.1` healthchecks (no IPv6 race)
+- **Networks:** `triumph-net` (internal) + `pi-bridge` (external, `testnet2` Stellar Core attached → live ledger streaming)
+- **State preserved:** 11 named volumes — `triumph_pg_data`, `triumph_redis_data`, `triumph_vault_data`, `triumph_central_data`, `triumph_stellar_data`, `triumph_tx_data`, `triumph_contracts_data`, `triumph_tokenization_data`, `triumph_scp_data`, `triumph_prometheus_data`, `triumph_grafana_data`, `triumph_cloud_memory_backup`
+- **nginx upstreams** rewritten to super-pod hostnames; legacy compose retained as `docker-compose.legacy.yml` for rollback
+
+**Verified live (April 27, 2026):** all 16 containers `(healthy)`, edge endpoints `:80 / :3000 / :9090 / :3001` returning HTTP 200, `pi-bridge-connector → testnet2:11626/info` returning live ledger #8,654,176 (Stellar-core v22.1.0, protocol v22).
+
+```bash
+docker compose up -d            # bring up the full APEX stack
+docker compose ps               # all 16 containers should show (healthy)
+```
+
+---
+
 ## 📋 What's New — April 26, 2026
 
 [![Quantum Credit](https://img.shields.io/badge/Credit%20Engine-ML--DSA--87%20%7C%20SHAKE--256%20%7C%20SOVEREIGN%20CERT-8B5CF6?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-quantum-credit-system)
@@ -2655,21 +2677,37 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 
 **UNIFIED DEPLOYMENT** — Combined Triumph Synergy + Central Node containers.
 
-### Container Architecture
+### Container Architecture — **APEX SUPER-SOVEREIGN PODS** (April 27, 2026)
+
+> **33 legacy services consolidated into 7 super-pods + 9 standalone containers = 16 total containers, all health-gated, all on `triumph-net` + `pi-bridge` (live `testnet2` Stellar/Pi node attached).** Each super-pod runs `supervisord` + `tini` PID-1, drops to a non-root UID (1010–1016), and exposes 127.0.0.1 healthchecks. 11 stateful volumes preserved across rebuilds.
+
+#### Super-Pods (7)
+
+| Super-Pod | UID | Internal Ports | Consolidated Services |
+|-----------|-----|----------------|-----------------------|
+| `triumph-sovereign-fortress` | 1010 | 8097, 8099, 8100, 8101, 8102 | sovereign-ai-bot, sovereign-housing, sovereign-delivery, sovereign-travel, sovereign-rivals |
+| `triumph-quantum-fortress` | 1011 | 8094, 8098 | quantum-shield, qpu-bridge (liboqs 0.14.0 from source: ML-DSA-87, ML-KEM-1024, SPHINCS+) |
+| `triumph-financial-intel` | 1012 | 8090, 8091, 8093 | ml-engine, credit-engine, dual-value-engine (scipy/sklearn) |
+| `triumph-horizon-stream` | 1013 | 8085, 8086 | market-data, blockchain-oracle |
+| `triumph-settlement-core` | 1014 | 8080, 8082, 8088, 8089 | transaction-engine, smart-contracts, dex, tokenization-engine |
+| `triumph-governance-shield` | 1015 | 8083, 8087, 8096, 11625, 11626 | scp-upgrader, compliance, judicial-monitor, central-node (Stellar Core) |
+| `triumph-observability-stack` | 1016 | 9090, 3000, 9121, 9187 | prometheus, grafana, redis-exporter, postgres-exporter |
+
+#### Standalone Containers (9)
 
 | Container | Port(s) | Purpose |
-|-----------|---------|--------|
-| `pi-postgres` | 5432 | PostgreSQL (2000 connections) |
-| `pi-redis-cluster` | 6379 | Redis (4GB, 100K clients) |
-| `pi-central-node` | 11625-26, 31400-09 | Stellar Core + Pi Node |
-| `pi-triumph-app` | 3000 | Main application |
-| `pi-transaction-engine` | 8080 | 10B TPS engine |
-| `pi-trillion-vault` | 8081 | Unlimited vault |
-| `pi-smart-contracts` | 8082 | 10K execution channels |
-| `pi-scp-upgrader` | 8083 | Auto protocol sync |
-| `pi-nginx` | 80, 443 | Load balancer |
-| `pi-prometheus` | 9090 | Metrics |
-| `pi-grafana` | 3001 | Dashboards |
+|-----------|---------|---------|
+| `triumph-postgres` | 5432 | PostgreSQL (2000 connections) |
+| `triumph-redis` | 6379 | Redis (4GB, 100K clients) |
+| `triumph-app` | 3000 | Next.js main application |
+| `triumph-vault` | 8081 | Trillion vault |
+| `triumph-payment-processor` | 8084 | Pi payment settlement |
+| `triumph-cloud-memory` | 8095 | Distributed memory |
+| `triumph-pi-bridge-connector` | 8092 | Live Pi testnet bridge → `testnet2:11626` |
+| `triumph-ecosystem-guardian` | — | Self-healing daemon |
+| `triumph-nginx` | 80, 443 | Reverse proxy / TLS terminator (upstreams rewritten to super-pod hostnames) |
+
+> **Public ports:** `80` / `443` (nginx), `3000` (app), `3001` (grafana), `9090` (prometheus). Everything else is reachable only on the internal Docker networks.
 
 ### Container Actions
 
