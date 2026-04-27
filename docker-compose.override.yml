@@ -1,51 +1,26 @@
 # ==========================================================================
-# TRIUMPH SYNERGY — DOCKER DESKTOP PERFORMANCE OVERRIDE
+# TRIUMPH SYNERGY — APEX SUPER-SOVEREIGN OVERRIDE (Docker Desktop tuning)
 # ==========================================================================
-# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign
-# / Triumph Synergy. All rights reserved.
-# License: PiOS
-#
-# USAGE (automatically merged by Docker Compose):
-#   docker compose up -d
-#   # Docker Compose auto-merges docker-compose.override.yml — no extra flags needed
-#
-# WHAT THIS FILE DOES:
-#   1. platform: linux/amd64  — consistent build target for Apple Silicon (M1/M2/M3)
-#                               eliminates "exec format error" crashes on ARM Macs
-#   2. init: true             — PID-1 reaping prevents zombie process accumulation
-#                               that slowly kills container memory/CPU over time
-#   3. stop_grace_period      — 30s clean shutdown window prevents data corruption
-#                               on docker compose down / restart
-#   4. ulimits (nofile)       — raise open-file limits so Python/Node services
-#                               never hit "Too many open files" under load
-#   5. build cache_from       — re-use layer cache from previous builds for
-#                               much faster docker compose build / up --build
-#   6. mem_limit bumps        — extra headroom for sovereign platform engines
-#                               that may spike under full loophole activation
-#   7. logging driver tuning  — consistent truncation prevents disk fill
-#
-# SECURITY: APEX-QUANTUM-SOVEREIGN (MAX) — ML-KEM-1024 · ML-DSA-87
+# Auto-merged by `docker compose up -d`.
+# Adds: amd64 platform pin (Apple Silicon), tini init, graceful shutdown,
+#       elevated ulimits/nofile for the 7 super-pods + standalone services.
 # ==========================================================================
 
 name: triumph-synergy
 
-x-platform:  &platform  { platform: linux/amd64 }
-x-init:      &init       { init: true }
-x-grace:     &grace      { stop_grace_period: 30s }
-x-ulimits:   &ulimits
+x-platform: &platform { platform: linux/amd64 }
+x-init:     &init     { init: true }
+x-grace:    &grace    { stop_grace_period: 30s }
+x-ulimits:  &ulimits
   ulimits:
     nofile:
       soft: 65536
       hard: 65536
 
 services:
-
-  # ==========================================================================
-  # INFRASTRUCTURE — protection + init
-  # ==========================================================================
   postgres:
     <<: [ *init, *grace ]
-    stop_grace_period: 60s          # DB needs longer for clean WAL flush
+    stop_grace_period: 60s
     ulimits:
       nofile:
         soft: 65536
@@ -58,143 +33,48 @@ services:
         soft: 65536
         hard: 65536
 
-  # ==========================================================================
-  # PI NETWORK CORE — platform + init
-  # ==========================================================================
-  pi-bridge-connector:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  central-node:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  # ==========================================================================
-  # NEXT.JS APPLICATION
-  # ==========================================================================
-  app:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  # ==========================================================================
-  # FINANCIAL EXECUTION TIER
-  # ==========================================================================
-  transaction-engine:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
   vault:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  smart-contracts:
+  pi-bridge-connector:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  scp-upgrader:
+  governance-shield:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  app:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  settlement-core:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  financial-intel:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  quantum-fortress:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  sovereign-fortress:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  horizon-stream:
     <<: [ *platform, *init, *grace, *ulimits ]
 
   payment-processor:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  # ==========================================================================
-  # MARKET INTELLIGENCE TIER
-  # ==========================================================================
-  market-data:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  blockchain-oracle:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  compliance:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  dex:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  tokenization-engine:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  # ==========================================================================
-  # AI + ML ENGINE TIER
-  # Python ML services on Apple Silicon require explicit AMD64 for Scikit/Numpy
-  # ==========================================================================
-  ml-engine:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 512m                 # Bump: model loading + inference spikes
-
-  credit-engine:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 192m                 # Bump: bureau sync + FICO model runtime
-
-  # ==========================================================================
-  # QUANTUM + SOVEREIGN CORE TIER
-  # ==========================================================================
-  quantum-shield:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 384m                 # Bump: ML-KEM-1024 key-gen is memory-heavy
-
-  dual-value-engine:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
   cloud-memory:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  sovereign-gateway:
-    <<: [ *platform, *init, *grace, *ulimits ]
+  observability-stack:
+    <<: [ *init, *grace, *ulimits ]
 
-  qpu-bridge:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 256m                 # Bump: fan-out to 20+ services in parallel
-
-  # ==========================================================================
-  # SOVEREIGN AI + PLATFORM ENGINES
-  # All run Python FastAPI — need AMD64 for correct dep resolution
-  # ==========================================================================
-  sovereign-ai-bot:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 256m                 # Bump: 150+ loophole scan + Redis state
-
-  sovereign-delivery-engine:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 256m                 # Bump: 97 loopholes + 142-country data
-
-  sovereign-pidex-engine:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 256m                 # Bump: 61 loopholes + Stellar streaming
-
-  sovereign-sports-hub:
-    <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 256m                 # Bump: 66 loopholes + 50M pioneer fanbase
-
-  # ==========================================================================
-  # JUDICIAL MONITOR
-  # ==========================================================================
-  judicial-monitor:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  # ==========================================================================
-  # NGINX REVERSE PROXY
-  # ==========================================================================
   nginx:
-    <<: [ *init, *grace ]           # nginx is multi-arch — no platform override needed
+    <<: [ *init, *grace ]
     ulimits:
       nofile:
-        soft: 131072                # nginx needs higher FD limit for many connections
+        soft: 131072
         hard: 131072
 
-  # ==========================================================================
-  # OBSERVABILITY TIER
-  # ==========================================================================
-  prometheus:
-    <<: [ *init, *grace ]
-
-  grafana:
-    <<: [ *init, *grace ]
-
-  postgres-exporter:
-    <<: [ *init, *grace ]
-
-  redis-exporter:
-    <<: [ *init, *grace ]
-
-  # ==========================================================================
-  # ECOSYSTEM GUARDIAN (consolidated watchdog)
-  # ==========================================================================
   ecosystem-guardian:
     <<: [ *platform, *init, *grace, *ulimits ]
-    mem_limit: 256m                 # Runs 4 processes: governor + sentinel + hg-watchdog + hg-metrics

@@ -1,0 +1,75 @@
+# ==============================================================================
+# OBSERVABILITY-STACK — Super-Pod (4 services → 1 container)
+# ==============================================================================
+# Merges:
+#   prometheus         (9090) — TSDB
+#   grafana            (3000) — Dashboards
+#   postgres-exporter  (9187) — pg metrics
+#   redis-exporter     (9121) — redis metrics
+# Strategy: multi-stage COPY from official images + supervisord
+# ==============================================================================
+FROM prom/prometheus:latest                              AS prom-stage
+FROM grafana/grafana:latest                              AS grafana-stage
+FROM prometheuscommunity/postgres-exporter:latest        AS pgexp-stage
+FROM oliver006/redis_exporter:alpine                     AS redisexp-stage
+
+# ── Runner ──
+FROM debian:bookworm-slim AS runner
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        supervisor curl ca-certificates wget gosu && \
+    rm -rf /var/lib/apt/lists/*
+
+# Prometheus
+COPY --from=prom-stage /bin/prometheus     /usr/local/bin/prometheus
+COPY --from=prom-stage /bin/promtool       /usr/local/bin/promtool
+COPY --from=prom-stage /etc/prometheus     /etc/prometheus.default
+RUN mkdir -p /prometheus && chmod -R 777 /prometheus
+
+# Grafana (entire install is at /usr/share/grafana, data at /var/lib/grafana)
+COPY --from=grafana-stage /usr/share/grafana   /usr/share/grafana
+COPY --from=grafana-stage /etc/grafana         /etc/grafana
+RUN mkdir -p /var/lib/grafana /var/log/grafana && \
+    chmod -R 777 /var/lib/grafana /var/log/grafana
+
+# Exporters (single binaries)
+COPY --from=pgexp-stage    /bin/postgres_exporter  /usr/local/bin/postgres_exporter
+COPY --from=redisexp-stage /redis_exporter         /usr/local/bin/redis_exporter
+
+# Pod config + provisioning (baked-in, not bind-mounted, to avoid Docker Desktop overlayfs RO collision with grafana's /etc/grafana)
+COPY observability-stack/supervisord.conf /etc/supervisor/conf.d/observability-stack.conf
+COPY prometheus/prometheus.yml /etc/prometheus/prometheus.yml
+COPY grafana/dashboards/    /etc/grafana/provisioning/dashboards/
+COPY grafana/datasources/   /etc/grafana/provisioning/datasources/
+
+RUN groupadd --system --gid 1016 obs && \
+    useradd  --system --uid 1016 --gid obs obs && \
+    mkdir -p /var/log/supervisor \
+             /etc/grafana/provisioning/dashboards \
+             /etc/grafana/provisioning/datasources \
+             /etc/grafana/provisioning/alerting \
+             /etc/grafana/provisioning/plugins \
+             /etc/grafana/provisioning/notifiers \
+             /etc/grafana/provisioning/access-control \
+             /etc/prometheus && \
+    chown -R obs:obs /prometheus /var/lib/grafana /var/log/grafana /var/log/supervisor /etc/grafana /etc/prometheus
+
+EXPOSE 3000 9090 9121 9187
+
+LABEL org.triumph.pod="observability-stack" \
+      org.triumph.merges="prometheus+grafana+postgres-exporter+redis-exporter"
+
+COPY observability-stack/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+HEALTHCHECK --interval=30s --timeout=45s --retries=10 --start-period=300s \
+    CMD curl -fsS --max-time 10 http://127.0.0.1:9090/-/healthy && \
+        curl -fsS --max-time 10 http://127.0.0.1:3000/api/health && \
+        curl -fsS --max-time 10 http://127.0.0.1:9187/metrics > /dev/null && \
+        curl -fsS --max-time 10 http://127.0.0.1:9121/metrics > /dev/null || exit 1
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/observability-stack.conf", "-n"]
