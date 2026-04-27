@@ -70,6 +70,16 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // SEP-1 stellar.toml — must be served as text/plain per the spec
+        source: "/.well-known/stellar.toml",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "text/plain; charset=utf-8",
+          },
+        ],
+      },
+      {
         // Allow all routes to be accessible through Pi Browser & known domains
         source: "/:path*",
         headers: [

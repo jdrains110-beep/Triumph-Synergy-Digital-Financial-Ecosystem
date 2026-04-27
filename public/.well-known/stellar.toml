@@ -1,0 +1,43 @@
+# SEP-1 stellar.toml — Triumph Synergy
+# Pi Network Testnet Validator
+# Served from: https://triumph-synergy-testnet.vercel.app/.well-known/stellar.toml
+
+VERSION="2.6.0"
+NETWORK_PASSPHRASE="Pi Testnet"
+HORIZON_URL="https://api.testnet.minepi.com"
+
+# Federation / auth not provided yet. Add when ready:
+# FEDERATION_SERVER="https://triumph-synergy-testnet.vercel.app/federation"
+# AUTH_SERVER="https://triumph-synergy-testnet.vercel.app/auth"
+
+ACCOUNTS=[
+  "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+]
+
+# ── Organization ─────────────────────────────────────────────────────────────
+[DOCUMENTATION]
+ORG_NAME="Triumph Synergy"
+ORG_DBA="Triumph Synergy Digital Financial Ecosystem"
+ORG_URL="https://triumph-synergy.vercel.app"
+ORG_LOGO="https://triumph-synergy.vercel.app/logo.png"
+ORG_DESCRIPTION="Triumph Synergy operates the Triumph Synergy Digital Financial Ecosystem, providing payment, settlement and ecosystem services on the Pi Network. We run a Pi Testnet validator (testnet2) integrated with our governance-shield central node."
+ORG_OFFICIAL_EMAIL="ops@triumph-synergy.vercel.app"
+ORG_GITHUB="jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem"
+ORG_KEYBASE=""
+ORG_TWITTER=""
+
+# ── Validator declaration ────────────────────────────────────────────────────
+[[VALIDATORS]]
+ALIAS="triumph-synergy-testnet"
+DISPLAY_NAME="Triumph Synergy Testnet Validator"
+HOST="triumph-synergy-testnet.vercel.app:31402"
+PUBLIC_KEY="GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+# History archive — must be a real, publicly-readable URL containing
+# /.well-known/stellar-history.json + history files. Update when archive is hosted:
+HISTORY="https://history.triumph-synergy.vercel.app/"
+
+# ── Principals (operators) ───────────────────────────────────────────────────
+[[PRINCIPALS]]
+name="Jeremiah Drains"
+email="ops@triumph-synergy.vercel.app"
+github="jdrains110-beep"

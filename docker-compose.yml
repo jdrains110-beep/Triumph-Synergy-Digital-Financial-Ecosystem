@@ -239,7 +239,10 @@ services:
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
       PI_TESTNET_HORIZON: https://api.testnet.minepi.com
       PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
-      NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
+      # Direct Horizon used for /info chain refresh (bypasses bridge proxy timeouts).
+      # Defaults to testnet to match current operational network; override via env for mainnet.
+      PI_INTERNAL_HORIZON_URL: ${PI_INTERNAL_HORIZON_URL:-https://api.testnet.minepi.com}
+      NETWORK_TYPE: ${PI_NETWORK_MODE:-testnet}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       COMPLIANCE_REQUIRE_PQ: "true"
       JUDICIAL_REQUIRE_PQ: "true"

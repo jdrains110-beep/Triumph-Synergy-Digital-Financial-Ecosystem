@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "server": "stellar-core triumph-synergy-testnet v22.1.0",
+  "currentLedger": 0,
+  "networkPassphrase": "Pi Testnet",
+  "currentBuckets": []
+}
