@@ -23,15 +23,24 @@ declare global {
 function buildClient(): RedisClientType {
   const client = createClient({
     url: REDIS_URL,
+    pingInterval: 30_000, // PING every 30s to defeat server-side idle timeouts
     socket: {
       reconnectStrategy: (retries: number) => Math.min(retries * 500, 5000),
-      keepAlive: true, // keep-alive socket (Redis timeout prevention)
+      keepAlive: 30_000, // TCP keep-alive (ms)
     },
   }) as RedisClientType;
 
   client.on("error", (err: Error) => {
-    // Don't crash the process — log and continue with in-memory fallback
-    console.error("[redis] connection error:", err.message);
+    // node-redis auto-reconnects; only surface non-transient errors to avoid
+    // log spam from routine idle-socket recycles.
+    const msg = err.message || "";
+    const transient =
+      msg.includes("Socket closed unexpectedly") ||
+      msg.includes("Connection timeout") ||
+      msg.includes("ECONNRESET");
+    if (!transient) {
+      console.error("[redis] connection error:", msg);
+    }
   });
 
   client.connect().catch((err: Error) => {
