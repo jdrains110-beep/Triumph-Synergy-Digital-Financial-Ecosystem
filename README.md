@@ -25,6 +25,8 @@
 [![Sovereign Delivery](https://img.shields.io/badge/Delivery-UPS%20%7C%20DOORDASH%20%7C%20UBER%20%7C%20INSTAWORK%20OBSOLETE-F97316?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-delivery-platform)
 [![Sovereign Pi-DEX](https://img.shields.io/badge/Sovereign%20Pi--DEX-NYSE%20%7C%20BINANCE%20%7C%20WALL%20STREET%20OBSOLETE-EAB308?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-pi-dex)
 [![Sovereign Sports Hub](https://img.shields.io/badge/Sports%20Hub-YouTube%20%7C%20TICKETMASTER%20%7C%20ESPN%20OBSOLETE-22C55E?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-sports-hub)
+[![Sovereign Commerce Regulation](https://img.shields.io/badge/Commerce%20Regulation-DEALERS%20%7C%20OIL%20%7C%20AMAZON%20%7C%20TICKETMASTER%20OBSOLETE-F59E0B?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-27-2026-sovereign-commerce-regulation--positions-registry)
+[![Sovereign Positions Registry](https://img.shields.io/badge/Sovereign%20Positions-24%20ROLES%20%7C%20170K%2B%20SLOTS%20%7C%20Pi%20KYC%20REQUIRED-22C55E?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-27-2026-sovereign-commerce-regulation--positions-registry)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
@@ -941,6 +943,57 @@ curl -X POST http://localhost:8099/scan
 # Get sovereignty report
 curl http://localhost:8099/report | jq .
 ```
+
+---
+
+## 📋 What's New — April 27, 2026 (Sovereign Commerce Regulation + Positions Registry)
+
+[![Sovereign Commerce Regulation](https://img.shields.io/badge/Commerce%20Regulation-8%20SECTOR%20AUTHORITIES%20%7C%2096%20LOOPHOLES-F59E0B?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-27-2026-sovereign-commerce-regulation--positions-registry)
+[![Sovereign Positions Registry](https://img.shields.io/badge/SPR-24%20POSITIONS%20%7C%20170K%2B%20SLOTS%20%7C%20Pi%20KYC-22C55E?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-27-2026-sovereign-commerce-regulation--positions-registry)
+[![Security Hardening](https://img.shields.io/badge/Security-GHSA--67mh--4wv8--2f99%20MITIGATED-00FF00?style=flat-square)](https://github.com/advisories/GHSA-67mh-4wv8-2f99)
+
+### 🏛️ Sovereign Commerce Regulation Authority — 8 Sector Authorities Live
+
+Eight sovereign regulatory authorities replace predatory industry middlemen with Pi-native fair-pricing enforcement — **96 anti-greed loopholes catalogued, 14 pre-2005 fair-price reference records**.
+
+- **SVFA** — Sovereign Vehicle Fairness Authority: replaces dealership markup (avg +18.4% over MSRP), 12 loopholes including dealer-installed accessories, doc fees, forced financing
+- **SFRA** — Sovereign Fuel Regulation Authority: replaces oil/gas oligopoly (avg +112% over production cost), 12 loopholes including refinery capacity manipulation, blending credits fraud
+- **SSGA** — Sovereign Sustenance & Grocery Authority: replaces grocery chain markup chains (avg +290% over cost), 12 loopholes including shrinkflation, private-label displacement
+- **SJNA** — Sovereign Jewelry & Novelty Authority: replaces retail jewelry markup (avg +400%), 12 loopholes including artificial scarcity, grading manipulation
+- **SECA** — Sovereign E-Commerce Authority: replaces Amazon/eBay (avg 15% seller fee + 40% ad tax), 12 loopholes including buy-box suppression, returns fraud exploitation
+- **SMEA** — Sovereign Media & Entertainment Authority: replaces Ticketmaster/MPAA (28% service fees, +142% cinema ticket inflation since 2005), 12 loopholes including dynamic ticket pricing, exclusive venue lock-in
+- **SEVA** — Sovereign Events & Venues Authority: replaces event monopolies (avg $48k zoning & venue cost), 12 loopholes including exclusivity contracts, insurance inflation
+- **SLRA** — Sovereign Land & Real-Estate Authority: replaces NAR/Zillow (avg $48k avg per transaction), 12 loopholes including commission steering, pocket listings
+- **Pi Economics**: External rate $314.159 USD/π · Internal Pioneer rate $314,159 USD/π (1000× multiplier)
+- **Dashboard**: `/ecosystem/sovereign-commerce-regulation` — real-time sector stats, fair-price table, loophole index, API reference (20 endpoints)
+
+```
+lib/programs/sovereign-commerce-regulation.ts  — core engine (600+ lines)
+app/ecosystem/sovereign-commerce-regulation/page.tsx  — APEX dashboard
+```
+
+### 👷 Sovereign Positions Registry (SPR) — 24 Pi-Gated Roles Open
+
+A sovereign employment portal requiring Pi KYC for all applications — **24 positions across 8 sectors + 4 core operations, 170,000+ total slots globally**.
+
+- **6 tiers**: Founder-Sovereign → Executive-Sovereign → Director-Sovereign → Manager-Sovereign → Specialist-Sovereign → Associate-Sovereign
+- **3 application paths**: Signup (open enrollment), Interview (reviewed panel), Appointment (Founder-designated)
+- **Pi compensation**: Entry from π50/month → Executive from π5,000/month at external rate ($314.159 USD/π) or Pioneer rate ($314,159 USD/π)
+- **Sectors covered**: Vehicles, Fuel, Grocery, Jewelry, E-Commerce, Media/Entertainment, Events, Land/Real-Estate, Core Operations, Judicial, Finance, Technology
+- **Dashboard**: `/ecosystem/sovereign-positions` — all 24 positions grouped by sector, slot fill bars, requirements, benefits, apply CTA
+
+```
+lib/programs/sovereign-positions.ts  — core engine (430+ lines)
+app/ecosystem/sovereign-positions/page.tsx  — SPR portal
+```
+
+### 🔒 Security — GHSA-67mh-4wv8-2f99 Mitigated (esbuild ≤0.24.2 CORS bypass)
+
+The `drizzle-kit` dev dependency chain (`@esbuild-kit/esm-loader` → `@esbuild-kit/core-utils@3.3.2`) embedded `esbuild@0.18.20`, which has a known dev-server CORS bypass (GHSA-67mh-4wv8-2f99, fixed in esbuild ≥0.25.0). All 8 Dependabot moderate alerts trace to this chain.
+
+- **Fix**: Added `"overrides"` block to `package.json` (npm equivalent of existing yarn `resolutions`), including a nested `@esbuild-kit/core-utils → esbuild: ">=0.25.0"` override
+- **Impact**: Production build unaffected. Dev-only drizzle-kit migrations resolve against the patched esbuild
+- **CVE scope**: esbuild's development server never runs in this codebase — the vulnerability required an active `--serve` process to exploit
 
 ---
 
