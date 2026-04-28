@@ -28,14 +28,17 @@ const server = new Horizon.Server(
   process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org"
 );
 
+// Sovereign Pi rate constants — must align with PI_RATE_INTERNAL / PI_RATE_EXTERNAL
+// Internal (Pioneer-mined) Pi = 1000× the external (market-utility) rate
+// External: $314.159 / π  |  Internal: $314,159 / π  |  Multiplier: 1000×
 const INTERNAL_PI_MULTIPLIER = Number.parseFloat(
-  process.env.INTERNAL_PI_MULTIPLIER || "1.5"
+  process.env.INTERNAL_PI_MULTIPLIER || "1000"      // 1000× sovereign multiplier (internal = 1000 × external)
 );
 const INTERNAL_PI_MIN_VALUE = Number.parseFloat(
-  process.env.INTERNAL_PI_MIN_VALUE || "10.0"
+  process.env.INTERNAL_PI_MIN_VALUE || "314159"     // $314,159 / π — Pioneer sovereign rate (PI_RATE_INTERNAL)
 );
 const EXTERNAL_PI_MIN_VALUE = Number.parseFloat(
-  process.env.EXTERNAL_PI_MIN_VALUE || "1.0"
+  process.env.EXTERNAL_PI_MIN_VALUE || "314.159"    // $314.159 / π — external utility rate (PI_RATE_EXTERNAL)
 );
 
 type PiPaymentRequest = {

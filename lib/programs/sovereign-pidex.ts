@@ -44,7 +44,17 @@ export const PI_NETWORK_MAINNET       = "https://api.mainnet.minepi.com";
 export const PI_RATE_EXTERNAL         = 314.159;    // external utility rate
 export const PI_RATE_INTERNAL         = 314_159;    // internal sovereign rate
 export const PI_STROOP                = 0.0000001;   // 1 stroop = 10^-7 Pi
-export const PI_MAX_SUPPLY            = 100_000_000_000; // 100B Pi fixed cap
+export const PI_MAX_SUPPLY            = 100_000_000_000; // 100B Pi fixed cap (whitepaper Dec 2021)
+
+// Pi Network mainnet supply breakdown (source: Pi Network Whitepaper Dec 2021)
+// Open Network launched ~February 2025; freely circulating as of April 2026 ≈ 6.5B Pi
+export const PI_CIRCULATING_SUPPLY    = 6_500_000_000;  // ~6.5B Pi freely circulating (Apr 2026)
+export const PI_MINING_ALLOCATION     = 65_000_000_000; // 65B Pi — all past + future Pioneer mining rewards
+export const PI_COMMUNITY_FUND        = 10_000_000_000; // 10B Pi — ecosystem / Pi Foundation
+export const PI_LIQUIDITY_POOL_ALLOC  = 5_000_000_000;  // 5B Pi — liquidity pool reserve
+export const PI_CORE_TEAM_ALLOC       = 20_000_000_000; // 20B Pi — Pi Core Team (locked, pro-rata unlock)
+// Pct of max supply freely circulating at open network (used for ecosystem rate-guardrails)
+export const PI_CIRC_PCT_OF_MAX       = PI_CIRCULATING_SUPPLY / PI_MAX_SUPPLY; // ~0.065 (6.5%)
 
 // Authority IDs
 export const SPXA_ID  = "TRIUMPH-SPXA-v1";   // Sovereign Pi Exchange Authority

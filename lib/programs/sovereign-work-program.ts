@@ -21,9 +21,13 @@
 
 export const PI_WORK_RATE_EXTERNAL = 314.159;   // $314.159 per Pi (external)
 export const PI_WORK_RATE_INTERNAL = 314_159;    // internal utility value
-export const MIN_TASK_PI_REWARD    = 0.001;      // minimum Pi per task
-export const MAX_DAILY_EARN_PI     = 50;         // daily cap per participant
-export const COMMISSARY_PI_CAP     = 200;        // max Pi in commissary hold
+export const MIN_TASK_PI_REWARD    = 0.001;      // minimum Pi per task (~$0.314 at external rate)
+// MAX_DAILY_EARN_PI calibrated against Pi mainnet: avg active Pioneer earns ~0.5–2 π/day via
+// normal mining (whitepaper dynamic-B formula). Cap = 1 π/day keeps ecosystem emissions
+// proportional to mainnet supply metrics and avoids over-giving at $314.159/π external rate.
+export const MAX_DAILY_EARN_PI     = 1;          // daily cap per participant (1 π = ~$314.16 external)
+// COMMISSARY_PI_CAP = 20× daily cap; $314.159 × 20 = ~$6,283 max hold — supply-conservative
+export const COMMISSARY_PI_CAP     = 20;         // max Pi in commissary hold
 export const SOVEREIGN_PROGRAM_ID  = "TRIUMPH-SWP-v1";
 export const DOC_INTEGRATION_VER   = "2026.1";
 

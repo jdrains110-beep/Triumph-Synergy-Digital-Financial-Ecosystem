@@ -52,7 +52,14 @@ ALGO_BACKUP      = "SPHINCS+ (FIPS 205 stateless hash-sig)"
 PI_ANCHOR        = "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
 PI_RATE_EXTERNAL = 314.159
 PI_RATE_INTERNAL = 314_159.0
-PI_MAX_SUPPLY    = 100_000_000_000
+PI_MAX_SUPPLY    = 100_000_000_000  # 100B Pi — fixed max supply (whitepaper Dec 2021)
+# Pi Network mainnet supply breakdown (source: Pi Network Whitepaper Dec 2021)
+# Open Network launched ~February 2025; freely circulating as of April 2026 ≈ 6.5B Pi
+PI_CIRCULATING_SUPPLY = 6_500_000_000   # ~6.5B Pi freely circulating (Apr 2026)
+PI_MINING_ALLOCATION  = 65_000_000_000  # 65B — all past + future Pioneer mining rewards
+PI_COMMUNITY_FUND     = 10_000_000_000  # 10B — ecosystem / Pi Foundation
+PI_LIQUIDITY_POOL     = 5_000_000_000   # 5B  — liquidity pool reserve
+PI_CORE_TEAM_ALLOC    = 20_000_000_000  # 20B — Pi Core Team (locked, pro-rata unlock)
 AMM_LP_FEE_PCT   = 0.30
 AMM_PLATFORM_FEE = 0.0
 STELLAR_SDEX_URL = "https://horizon.stellar.org"

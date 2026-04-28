@@ -27,7 +27,13 @@ export const PI_TESTNET = {
   PROTOCOL_VERSION: 21,
   BASE_FEE_STROOPS: 100_000,        // 0.01 Pi
   BASE_RESERVE_STROOPS: 4_900_000,  // 0.49 Pi
-  TOTAL_SUPPLY_PI: 100_000_000_000, // 100 billion Pi (testnet)
+  // Supply constants (source: Pi Network Whitepaper Dec 2021 + Open Network launch Feb 2025)
+  TOTAL_SUPPLY_PI: 100_000_000_000,   // 100B Pi — fixed max supply cap
+  CIRCULATING_SUPPLY_PI: 6_500_000_000, // ~6.5B Pi freely circulating (April 2026)
+  MINING_ALLOCATION_PI: 65_000_000_000, // 65B — all past + future Pioneer mining rewards
+  COMMUNITY_FUND_PI: 10_000_000_000,    // 10B — ecosystem / Pi Foundation
+  LIQUIDITY_POOL_PI: 5_000_000_000,     // 5B  — liquidity pool reserve
+  CORE_TEAM_PI: 20_000_000_000,         // 20B — Pi Core Team (locked, pro-rata unlock)
   VALIDATORS: [
     "GDFDDPMCL4WPV27Z5Q7R6I2BX3UXOHJIU6AXXIFOCUEDEA4GWU2I4TJZ", // validator1
     "GDOJPADI56GTIP46K6YSRFOSEL2BW5WCYIKPFB5ZMY7YT3H2FRSAGI4J", // validator2
