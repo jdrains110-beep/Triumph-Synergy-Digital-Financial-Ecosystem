@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
 """
 Pi Bridge Connector — triumph-synergy
@@ -14,9 +14,9 @@ Port: 8092
 Networks: triumph-net, pi-bridge
 """
 
-# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
-# Copyright (C) 2024-2026 Jeremiah Joel Drains, Founder & Superior Sovereign / Triumph Synergy. All rights reserved.
+# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
 # License: PiOS
 
 
@@ -59,10 +59,6 @@ CENTRAL_NODE_KEY = os.getenv(
     "CENTRAL_NODE_PUBLIC_KEY",
     "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
 )
-# Optional override for the stellar-core / horizon version string reported to
-# Pi Desktop — lets us show the correct upgrade version without waiting for the
-# Pi node container to self-report it.
-STELLAR_CORE_VERSION_OVERRIDE = os.getenv("STELLAR_CORE_VERSION_OVERRIDE", "")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("pi-bridge-connector")
@@ -103,8 +99,6 @@ state: dict[str, Any] = {
     "started_at":            time.time(),
     "poll_count":            0,
     "last_transactions":     [],     # last 10 transactions seen
-    # Imprinted node identity — always present regardless of Pi node reachability
-    "node_id":               CENTRAL_NODE_KEY,
 }
 
 app = FastAPI(title="Pi Bridge Connector", version="1.0.0")
@@ -329,11 +323,10 @@ async def pi_node_status():
     lag = time.time() - state["last_polled"] if state["last_polled"] else None
     return {
         "reachable":            state["pi_node_reachable"],
-        "node_id":              CENTRAL_NODE_KEY,
         "horizon_url":          HORIZON_URL,
         "active_horizon_url":   state["active_horizon_url"],
         "horizon_version":      state["horizon_version"],
-        "core_version":         STELLAR_CORE_VERSION_OVERRIDE or state["core_version"],
+        "core_version":         state["core_version"],
         "network_passphrase":   state["network_passphrase"],
         "ingest_latest_ledger": state["ingest_latest_ledger"],
         "protocol_version":     state["protocol_version"],
@@ -503,13 +496,12 @@ async def bridge_status():
         },
         "pi_node": {
             "url":               HORIZON_URL,
-            "node_id":           CENTRAL_NODE_KEY,
             "reachable":         state["pi_node_reachable"],
             "ledger_sequence":   state["latest_ledger_seq"],
             "ledger_hash":       state["latest_ledger_hash"],
             "ledger_closed_at":  state["latest_ledger_closed"],
             "horizon_version":   state["horizon_version"],
-            "core_version":      STELLAR_CORE_VERSION_OVERRIDE or state["core_version"],
+            "core_version":      state["core_version"],
             "network":           state["network_passphrase"],
             "protocol_version":  state["protocol_version"],
             "peer_port":         PI_NODE_PEER_PORT,
@@ -517,9 +509,8 @@ async def bridge_status():
         },
         "central_node": {
             "url":               CENTRAL_NODE_URL,
-            "node_id":           CENTRAL_NODE_KEY,
-            "public_key":        CENTRAL_NODE_KEY,
             "reachable":         state["central_node_reachable"],
+            "public_key":        CENTRAL_NODE_KEY,
             "info":              state["central_node_info"].get("info", {}) if state["central_node_info"] else None,
         },
         "integration": {
