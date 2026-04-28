@@ -150,7 +150,7 @@
     "server-only": "^0.0.1",
     "shiki": "^3.12.2",
     "sonner": "^2.0.7",
-    "streamdown": "^2.5.0",
+    "streamdown": "^2.4.0",
     "swr": "^2.2.5",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
@@ -159,7 +159,7 @@
     "typescript": "^5.6.3",
     "use-stick-to-bottom": "^1.1.1",
     "usehooks-ts": "^3.1.0",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -206,7 +206,9 @@
     "cookie": ">=0.7.0",
     "micromatch": ">=4.0.8",
     "braces": ">=3.0.3",
-    "serialize-javascript": ">=6.0.2"
+    "serialize-javascript": ">=6.0.2",
+    "uuid": ">=14.0.0",
+    "postcss": ">=8.5.10"
   },
   "overrides": {
     "vite": ">=8.0.5",
@@ -222,6 +224,8 @@
     "micromatch": ">=4.0.8",
     "braces": ">=3.0.3",
     "serialize-javascript": ">=6.0.2",
+    "uuid": ">=14.0.0",
+    "postcss": ">=8.5.10",
     "@esbuild-kit/core-utils": {
       "esbuild": ">=0.25.0"
     }
