@@ -41,6 +41,7 @@ PI_NODE_HOST     = os.getenv("PI_NODE_HOST",     "testnet2")
 PI_NODE_API_PORT = int(os.getenv("PI_NODE_API_PORT", "8000"))
 PI_NODE_PEER_PORT= int(os.getenv("PI_NODE_PEER_PORT", "31402"))
 STELLAR_CORE_PORT= int(os.getenv("STELLAR_CORE_PORT", "1570"))
+STELLAR_CORE_URL = os.getenv("STELLAR_CORE_URL", f"http://{PI_NODE_HOST}:{STELLAR_CORE_PORT}")
 
 HORIZON_URL      = f"http://{PI_NODE_HOST}:{PI_NODE_API_PORT}"
 HORIZON_FALLBACK_URL = os.getenv("PI_NODE_FALLBACK_URL", "http://host.docker.internal:31401")
@@ -392,6 +393,42 @@ async def pi_node_account_transactions(address: str, limit: int = 20):
             raise
         except Exception as e:
             raise HTTPException(503, f"Pi node unreachable: {e}") from e
+
+
+@app.get("/pi-node/peers")
+async def pi_node_peers():
+    """
+    Live peer connection status from the Pi node stellar-core.
+    Shows inbound/outbound authenticated peers and pending connections.
+    Queries stellar-core HTTP (STELLAR_CORE_URL) directly.
+    """
+    async with _client() as c:
+        try:
+            r = await c.get(f"{STELLAR_CORE_URL}/peers")
+            r.raise_for_status()
+            data = r.json()
+            ap   = data.get("authenticated_peers", {})
+            pp   = data.get("pending_peers", {})
+            inb  = ap.get("inbound")  or []
+            out  = ap.get("outbound") or []
+            pi   = pp.get("inbound")  or []
+            po   = pp.get("outbound") or []
+            return {
+                "authenticated": {
+                    "inbound_count":  len(inb),
+                    "outbound_count": len(out),
+                    "inbound":        inb,
+                    "outbound":       out,
+                },
+                "pending": {
+                    "inbound_count":  len(pi),
+                    "outbound_count": len(po),
+                },
+                "peer_port":      PI_NODE_PEER_PORT,
+                "stellar_core_url": STELLAR_CORE_URL,
+            }
+        except Exception as e:
+            raise HTTPException(503, f"stellar-core peers unavailable: {e}") from e
 
 
 @app.post("/pi-node/submit")
