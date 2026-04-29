@@ -5,7 +5,7 @@ Triumph Synergy — Sovereign AI Bot Engine (SAIB) — Docker Autonomous Service
 =============================================================================
 
 This is the containerized brain of the entire Triumph Synergy ecosystem.
-SAIB runs inside Docker Desktop alongside all 33+ platform services and:
+SAIB runs inside Docker Desktop alongside all 40+ platform services across 9 super-pods + standalone containers and:
 
   ▸ MONITORS every service in real time (health probes every 10 s)
   ▸ HEALS unhealthy services automatically (alerts → auto-restart / notify)
@@ -75,40 +75,52 @@ PI_EXTERNAL_RATE  = float(os.getenv("PI_EXTERNAL_RATE",  "314.159"))
 # ── Service Mesh — every platform SAIB monitors ────────────────────────────────
 
 SERVICES: dict[str, str] = {
-    "triumph-postgres":          os.getenv("POSTGRES_HEALTH_URL",      ""),  # pg_isready via internal
-    "triumph-redis":             os.getenv("REDIS_HEALTH_URL",         ""),  # redis-cli ping via internal
-    "triumph-pi-bridge":         os.getenv("PI_BRIDGE_URL",            "http://triumph-pi-bridge-connector:8092") + "/health",
-    "triumph-central-node":      os.getenv("CENTRAL_NODE_URL",         "http://triumph-central-node:11626") + "/info",
-    "triumph-app":               os.getenv("APP_URL",                  "http://triumph-app:3000") + "/api/health",
-    "triumph-transaction-engine":os.getenv("TRANSACTION_URL",          "http://triumph-transaction-engine:8080") + "/health",
-    "triumph-vault":             os.getenv("VAULT_URL",                "http://triumph-vault:8081") + "/health",
-    "triumph-smart-contracts":   os.getenv("CONTRACTS_URL",            "http://triumph-smart-contracts:8082") + "/health",
-    "triumph-scp-upgrader":      os.getenv("SCP_URL",                  "http://triumph-scp-upgrader:8083") + "/health",
-    "triumph-payment-processor": os.getenv("PAYMENT_URL",              "http://triumph-payment-processor:8084") + "/health",
-    "triumph-nginx":             os.getenv("NGINX_URL",                "http://triumph-nginx:80") + "/health",
-    "triumph-market-data":       os.getenv("MARKET_DATA_URL",          "http://triumph-market-data:8085") + "/health",
-    "triumph-blockchain-oracle": os.getenv("BLOCKCHAIN_ORACLE_URL",    "http://triumph-blockchain-oracle:8086") + "/health",
-    "triumph-compliance":        os.getenv("COMPLIANCE_URL",           "http://triumph-compliance:8087") + "/health",
-    "triumph-dex":               os.getenv("DEX_URL",                  "http://triumph-dex:8088") + "/health",
-    "triumph-ml-engine":         os.getenv("ML_ENGINE_URL",            "http://triumph-ml-engine:8090") + "/health",
-    "triumph-credit-engine":     os.getenv("CREDIT_ENGINE_URL",        "http://triumph-credit-engine:8091") + "/health",
-    "triumph-quantum-shield":    os.getenv("QUANTUM_SHIELD_URL",       "http://triumph-quantum-shield:8094") + "/health",
-    "triumph-cloud-memory":      os.getenv("CLOUD_MEMORY_URL",         "http://triumph-cloud-memory:8095") + "/health",
-    "triumph-sovereign-gateway": os.getenv("SOVEREIGN_GATEWAY_URL",    "http://triumph-sovereign-gateway:8097") + "/health",
-    "triumph-dual-value-engine": os.getenv("DUAL_VALUE_URL",           "http://triumph-dual-value-engine:8093") + "/health",
-    "triumph-tokenization":      os.getenv("TOKENIZATION_URL",         "http://triumph-tokenization-engine:8089") + "/health",
-    "triumph-prometheus":           "http://triumph-prometheus:9090/-/healthy",
-    "triumph-postgres-exporter":    "http://triumph-postgres-exporter:9187/metrics",
-    "triumph-redis-exporter":       "http://triumph-redis-exporter:9121/metrics",
-    "triumph-judicial-monitor":     "http://triumph-judicial-monitor:8096/health",
-    "triumph-grafana":              "http://triumph-grafana:3000/api/health",
-    "triumph-qpu-bridge":           os.getenv("QPU_BRIDGE_URL",              "http://triumph-qpu-bridge:8098") + "/health",
-    # ── Sovereign expansion platforms (added build b392468) ────────────────
-    "triumph-sovereign-delivery-engine": os.getenv("SOVEREIGN_DELIVERY_URL",  "http://triumph-sovereign-delivery-engine:8100") + "/health",
-    "triumph-sovereign-pidex-engine":    os.getenv("SOVEREIGN_PIDEX_URL",     "http://triumph-sovereign-pidex-engine:8101") + "/health",
-    "triumph-sovereign-sports-hub":      os.getenv("SOVEREIGN_SPORTS_URL",    "http://triumph-sovereign-sports-hub:8102") + "/health",
-    # ── Unified watchdog pod (replaces horizon-guardian + health-governor + network-sentinel)
-    "triumph-ecosystem-guardian":        os.getenv("ECOSYSTEM_GUARDIAN_URL",  "http://triumph-ecosystem-guardian:9912") + "/health",
+    # ── Core infrastructure ──────────────────────────────────────────────────
+    "triumph-postgres":            os.getenv("POSTGRES_HEALTH_URL",      ""),  # pg_isready via internal
+    "triumph-redis":               os.getenv("REDIS_HEALTH_URL",         ""),  # redis-cli ping via internal
+    "triumph-nginx":               os.getenv("NGINX_URL",                "http://triumph-nginx:80") + "/health",
+    # ── Standalone app-layer containers ─────────────────────────────────────
+    "triumph-app":                 os.getenv("APP_URL",                  "http://triumph-app:3000") + "/api/health",
+    "triumph-vault":               os.getenv("VAULT_URL",                "http://triumph-vault:8081") + "/health",
+    "triumph-payment-processor":   os.getenv("PAYMENT_URL",              "http://triumph-payment-processor:8084") + "/health",
+    "triumph-cloud-memory":        os.getenv("CLOUD_MEMORY_URL",         "http://triumph-cloud-memory:8095") + "/health",
+    "triumph-pi-bridge":           os.getenv("PI_BRIDGE_URL",            "http://triumph-pi-bridge-connector:8092") + "/health",
+    # ── Governance shield super-pod (compliance · scp-upgrader · judicial · central-node) ──
+    "triumph-governance-shield":   os.getenv("GOVERNANCE_SHIELD_URL",   "http://triumph-governance-shield:8087") + "/health",
+    "triumph-governance-scp":      os.getenv("GOVERNANCE_SCP_URL",      "http://triumph-governance-shield:8083") + "/health",
+    "triumph-governance-judicial": os.getenv("GOVERNANCE_JUDICIAL_URL", "http://triumph-governance-shield:8096") + "/health",
+    "triumph-central-node":        os.getenv("CENTRAL_NODE_URL",        "http://triumph-governance-shield:11626") + "/info",
+    # ── Settlement core super-pod (transaction-engine · smart-contracts · dex · tokenization) ──
+    "triumph-settlement-core":     os.getenv("SETTLEMENT_CORE_URL",     "http://triumph-settlement-core:8080") + "/health",
+    "triumph-smart-contracts":     os.getenv("CONTRACTS_URL",           "http://triumph-settlement-core:8082") + "/health",
+    "triumph-dex":                 os.getenv("DEX_URL",                 "http://triumph-settlement-core:8088") + "/health",
+    "triumph-tokenization":        os.getenv("TOKENIZATION_URL",        "http://triumph-settlement-core:8089") + "/health",
+    # ── Financial intel super-pod (ml-engine · credit-engine · dual-value-engine) ──
+    "triumph-financial-intel":     os.getenv("FINANCIAL_INTEL_URL",     "http://triumph-financial-intel:8090") + "/health",
+    "triumph-credit-engine":       os.getenv("CREDIT_ENGINE_URL",       "http://triumph-financial-intel:8091") + "/health",
+    "triumph-dual-value-engine":   os.getenv("DUAL_VALUE_URL",          "http://triumph-financial-intel:8093") + "/health",
+    # ── Quantum fortress super-pod (quantum-shield · qpu-bridge) ────────────
+    "triumph-quantum-fortress":    os.getenv("QUANTUM_FORTRESS_URL",    "http://triumph-quantum-fortress:8094") + "/health",
+    "triumph-qpu-bridge":          os.getenv("QPU_BRIDGE_URL",          "http://triumph-quantum-fortress:8098") + "/health",
+    # ── Horizon stream super-pod (market-data · blockchain-oracle) ──────────
+    "triumph-horizon-stream":      os.getenv("HORIZON_STREAM_URL",      "http://triumph-horizon-stream:8085") + "/health",
+    "triumph-blockchain-oracle":   os.getenv("BLOCKCHAIN_ORACLE_URL",   "http://triumph-horizon-stream:8086") + "/health",
+    # ── Observability stack super-pod (prometheus · grafana · pg-exporter · redis-exporter) ──
+    "triumph-observability-stack": "http://triumph-observability-stack:9090/-/healthy",
+    "triumph-grafana":             "http://triumph-observability-stack:3000/api/health",
+    "triumph-postgres-exporter":   "http://triumph-observability-stack:9187/metrics",
+    "triumph-redis-exporter":      "http://triumph-observability-stack:9121/metrics",
+    # ── Sovereign fortress super-pod (sovereign-gateway · delivery · pidex · sports) ──
+    # NOTE: SAIB itself runs on port 8099 inside this pod — no self-probe
+    "triumph-sovereign-gateway":   os.getenv("SOVEREIGN_GATEWAY_URL",   "http://triumph-sovereign-fortress:8097") + "/health",
+    "triumph-sovereign-delivery":  os.getenv("SOVEREIGN_DELIVERY_URL",  "http://triumph-sovereign-fortress:8100") + "/health",
+    "triumph-sovereign-pidex":     os.getenv("SOVEREIGN_PIDEX_URL",     "http://triumph-sovereign-fortress:8101") + "/health",
+    "triumph-sovereign-sports":    os.getenv("SOVEREIGN_SPORTS_URL",    "http://triumph-sovereign-fortress:8102") + "/health",
+    # ── Sovereign expansion super-pods ───────────────────────────────────────
+    "triumph-sovereign-insurance": os.getenv("SOVEREIGN_INSURANCE_URL", "http://triumph-sovereign-insurance:8110") + "/health",
+    "triumph-sovereign-utilities": os.getenv("SOVEREIGN_UTILITIES_URL", "http://triumph-sovereign-utilities:8120") + "/health",
+    # ── Unified watchdog (replaces horizon-guardian · health-governor · network-sentinel) ──
+    "triumph-ecosystem-guardian":  os.getenv("ECOSYSTEM_GUARDIAN_URL",  "http://triumph-ecosystem-guardian:9912") + "/health",
 }
 
 # Remove services with empty URLs (postgres/redis monitored via healthcheck)
