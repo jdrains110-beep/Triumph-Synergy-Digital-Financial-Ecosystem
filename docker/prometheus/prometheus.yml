@@ -208,7 +208,6 @@ scrape_configs:
           type: 'recovery-watchdog'
           role: 'pi-horizon-self-heal'
     metrics_path: /metrics
-    fallback_scrape_protocol: PrometheusText0.0.4
     scrape_interval: 15s
 
   # ========================================================================

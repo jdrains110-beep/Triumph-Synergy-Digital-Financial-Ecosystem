@@ -60,12 +60,6 @@ services:
   horizon-stream:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  payment-processor:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  cloud-memory:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
   observability-stack:
     <<: [ *init, *grace, *ulimits ]
 
@@ -85,11 +79,6 @@ services:
   sovereign-utilities:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  sovereign-education:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  sovereign-telecom:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  sovereign-bank:
+  # APEX-SOVEREIGN-LIFE — bank + education + telecom consolidated
+  sovereign-life:
     <<: [ *platform, *init, *grace, *ulimits ]
