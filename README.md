@@ -1011,6 +1011,47 @@ The `drizzle-kit` dev dependency chain (`@esbuild-kit/esm-loader` → `@esbuild-
 
 ## 📋 What's New — April 27, 2026 (APEX Expansion)
 
+### 🎓 Sovereign Education Engine (NEW — port 8130)
+
+The first Pi-powered sovereign educational ecosystem replacing every legacy tuition, payroll, textbook, meal-plan, and transportation system with a single quantum-secured Pi Network utility layer.
+
+**`triumph-sovereign-education`** (UID 1001, port 8130) — full K-12 · College · Faculty Pay · Learn & Earn platform:
+
+| Pillar | Description |
+|---|---|
+| **Pioneer Academy** | Sovereign K-12 curriculum — STEM, Financial Literacy, Coding, Pi Economics — **free tuition** |
+| **Sovereign College** | University + Graduate sovereign degrees — Computer Science, Finance, Business, STEM, Law, Healthcare |
+| **Faculty Pay Hub** | Teachers · Professors · TAs · Daycare staff paid in Pi per hour or per course — quantum-signed, immutable |
+| **Learn & Earn** | Every lesson, quiz, course, certification, and daily login rewards Pi to the student automatically |
+| **Campus Utilities** | Meal plans · Transportation passes · Books/materials · Vehicles — all purchased in Pi |
+| **Onboarding Forge** | Mandatory effective-teaching certification for every new hire regardless of age or experience level |
+| **Early Bird Tuition** | Pay 30+ days early with Pi → automatic 15% sovereign discount on all college/graduate tuition |
+| **Loophole Arsenal** | 60 ultimate sovereign education loopholes (TAX · DEBT · GRANT · FACULTY · STUDENT · STEM · FINANCE · CAMPUS · QUANTUM · WORKFORCE · LEGAL) |
+
+**Key endpoints:**
+```
+GET  /health               → Service status + Pi rates + quantum signature
+GET  /catalog              → Full course catalog (filter by level or subject)
+POST /enroll               → Enroll student; K-12 is free, college early-bird = -15%
+POST /complete-lesson      → Award Pi: lesson (0.01π) · quiz (0.025π) · course (0.1π) · cert (0.5π)
+POST /faculty/register     → Register + auto-assign mandatory teaching certification
+POST /faculty/pay          → Pay Pi salary — hourly | per-course | bonus
+POST /tuition/pay          → Pay college tuition in Pi with early-bird discount
+POST /campus/meal-plan     → Purchase Pi meal plan (standard/premium/halal/vegan)
+POST /campus/transport-pass→ Buy Pi transit pass (daily/weekly/monthly/semester)
+POST /campus/books         → Purchase course materials in Pi (zero markup)
+POST /campus/vehicle       → Register campus/faculty vehicle in Pi
+GET  /loopholes            → All 60 education loopholes with category filter
+GET  /leaderboard          → Top Pi earners by learning activity
+GET  /report               → Full ecosystem sovereignty report
+GET  /metrics              → Prometheus metrics
+```
+
+**Pi reward rates:** lesson=0.01π · quiz=0.025π · course=0.1π · certification=0.5π · daily-login=0.005π  
+**Pi faculty rates:** configurable per-hour and per-course via `hourly_rate_pi` / `course_rate_pi`  
+**Security:** ML-DSA-87 + ML-KEM-1024 + SHAKE-256 + SHA3-512 — all records quantum-signed and immutable  
+**Pi rates (immutable):** $314.159 USD/π (pioneer) · $314,159 USD/π (sovereign gold standard)
+
 ### 🛡️ Sovereign Insurance + 🏠 Sovereign Utilities super-pods (NEW)
 
 Two additional super-pods bring real-world utility to Pi Network across insurance and home-services sectors — **9 super-pods + 9 standalone = 18 healthy containers**.
@@ -2776,6 +2817,7 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 | `triumph-observability-stack` | 1016 | 9090, 3000, 9121, 9187 | prometheus, grafana, redis-exporter, postgres-exporter |
 | `triumph-sovereign-insurance` | 1017 | 8110, 8111, 8112, 8113, 8114, 8115, 8116 | life, home, health, auto, dental, vision, hospital-network (UF Health, Shands, Mayo, Cleveland Clinic, HCA Florida) — PI-721 quantum-signed policies |
 | `triumph-sovereign-utilities` | 1018 | 8120, 8121, 8122, 8123, 8124, 8125 | electric (GRU/FPL/Clay/Duke/TECO/JEA), water, gas (Peoples/FPU/Chesapeake), HOA, plumbing, HVAC — meter ingestion → Pi settlement |
+| `triumph-sovereign-education` | 1001 | 8130 | K-12 + College + Graduate sovereign education; Pi salaries for teachers/professors/aides/daycare; Pi learning rewards; STEM, financial literacy, early-bird tuition, meal plans, transport passes, books, vehicle registry; 60 loopholes |
 
 #### Standalone Containers (9)
 
