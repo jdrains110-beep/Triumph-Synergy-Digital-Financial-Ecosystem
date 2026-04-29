@@ -183,7 +183,7 @@
     "drizzle-kit": "^0.31.8",
     "js-yaml": "^4.1.1",
     "jsdom": "^27.4.0",
-    "postcss": "^8",
+    "postcss": "^8.5.10",
     "tailwindcss": "^4.1.13",
     "ultracite": "5.3.9",
     "vitest": "^4.1.3"
