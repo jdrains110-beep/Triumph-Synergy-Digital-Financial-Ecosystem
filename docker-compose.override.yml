@@ -84,3 +84,12 @@ services:
 
   sovereign-utilities:
     <<: [ *platform, *init, *grace, *ulimits ]
+
+  sovereign-education:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  sovereign-telecom:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  sovereign-bank:
+    <<: [ *platform, *init, *grace, *ulimits ]
