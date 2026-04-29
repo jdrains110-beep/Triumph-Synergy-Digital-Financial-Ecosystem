@@ -135,6 +135,7 @@ SERVICES: dict[str, str] = {
     "triumph-sovereign-insurance": os.getenv("SOVEREIGN_INSURANCE_URL", "http://triumph-sovereign-insurance:8110") + "/health",
     "triumph-sovereign-utilities": os.getenv("SOVEREIGN_UTILITIES_URL", "http://triumph-sovereign-utilities:8120") + "/health",
     "triumph-sovereign-education": os.getenv("SOVEREIGN_EDUCATION_URL", "http://triumph-sovereign-education:8130") + "/health",
+    "triumph-sovereign-telecom":   os.getenv("SOVEREIGN_TELECOM_URL",   "http://triumph-sovereign-telecom:8140") + "/health",
     # ── Unified watchdog (replaces horizon-guardian · health-governor · network-sentinel) ──
     "triumph-ecosystem-guardian":  os.getenv("ECOSYSTEM_GUARDIAN_URL",  "http://triumph-ecosystem-guardian:9912") + "/health",
 }
