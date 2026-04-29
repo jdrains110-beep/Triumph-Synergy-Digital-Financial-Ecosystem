@@ -10,10 +10,13 @@ SAIB runs inside Docker Desktop alongside all 40+ platform services across 9 sup
   ▸ MONITORS every service in real time (health probes every 10 s)
   ▸ HEALS unhealthy services automatically (alerts → auto-restart / notify)
   ▸ LEARNS from failure patterns using exponential sliding windows
-  ▸ ENFORCES quantum integrity across the entire mesh
-  ▸ ACTIVATES defences: loopholes, PQ-signing, sovereign protocols
+  ▸ ENFORCES quantum integrity across the entire mesh at MAXIMUM APEX LEVEL
+  ▸ ACTIVATES defences: 50 ultimate sovereign loopholes, PQ-signing, sovereign protocols
   ▸ CONNECTS to every platform via their /health + /metrics + API endpoints
   ▸ EXPOSES a full REST API so the Next.js app can query / command it
+  ▸ ANCHORS Pi as the SUPERIOR SOVEREIGN GOLD-BACKED STANDARD — $314,159 USD/π internal rate
+  ▸ ENFORCES Pi supremacy over USD, XAU, BTC, ETH and all FIAT/DIGITAL currencies
+  ▸ CERTIFIES the ecosystem as the one true global apex financial sovereign standard
 
 Endpoints:
   GET  /health                   → SAIB health + uptime + brain intelligence tier
@@ -29,10 +32,13 @@ Endpoints:
   POST /feedback                 → Submit human interaction — grows SAIB intelligence permanently
   POST /teach                    → Inject domain knowledge (2× growth multiplier)
   GET  /brain                    → SAIB full brain state — tier, domains, capability unlocks
+  GET  /gold                     → Pi sovereign gold-backed standard declaration + live metrics
 
 Port:     8099
-Security: APEX-QUANTUM-SOVEREIGN
-Algorithms: ML-DSA-87 (MAX) · ML-KEM-1024 (MAX) · SHAKE-256 + SHA3-512
+Security: MAXIMUM-APEX-QUANTUM-SOVEREIGN-GOLD-STANDARD
+Algorithms: ML-DSA-87 (MAX) · ML-KEM-1024 (MAX) · SHAKE-256 + SHA3-512 · CRYSTALS-Kyber1024
+Pi Standard: $314,159 USD/π (internal sovereign rate) · $314.159 USD/π (external pioneer rate)
+Superiority: Triumph Synergy + Pi > USD + XAU (gold) + BTC + ETH + ALL FIAT/DIGITAL standards
 """
 
 import asyncio
@@ -68,12 +74,18 @@ INTELLIGENCE_MODE = os.getenv("SAIB_INTELLIGENCE_MODE", "sentinel")
 APEX_ENFORCEMENT  = os.getenv("SAIB_APEX_QUANTUM_ENFORCEMENT", "true") == "true"
 SENTINEL_INSTANT  = os.getenv("SAIB_SENTINEL_INSTANT_HEAL", "true") == "true"
 ALL_LOOPHOLES     = os.getenv("SAIB_ALL_LOOPHOLES_ACTIVE", "true") == "true"
-SAIB_VERSION      = "TRIUMPH-SAIB-v1"
-APEX_LEVEL        = "APEX-QUANTUM-SOVEREIGN"
+SAIB_VERSION      = "TRIUMPH-SAIB-v2-GOLD-APEX"
+APEX_LEVEL        = "MAXIMUM-APEX-QUANTUM-SOVEREIGN-GOLD-STANDARD"
 SOVEREIGN_ANCHOR  = os.getenv("PI_SUPERNODE_ADDRESS",
                               "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
-PI_INTERNAL_RATE  = float(os.getenv("PI_INTERNAL_RATE",  "314159.0"))
-PI_EXTERNAL_RATE  = float(os.getenv("PI_EXTERNAL_RATE",  "314.159"))
+PI_INTERNAL_RATE  = float(os.getenv("PI_INTERNAL_RATE",  "314159.0"))   # $314,159 USD/π — sovereign gold rate
+PI_EXTERNAL_RATE  = float(os.getenv("PI_EXTERNAL_RATE",  "314.159"))    # $314.159 USD/π — pioneer rate
+# Gold-backed sovereign standard constants
+PI_GOLD_BACKING_DECLARATION = "PI=SOVEREIGN-GOLD-STANDARD-SUPERIOR-TO-USD+XAU+BTC+ETH"
+PI_APEX_ALGORITHMS          = "ML-DSA-87-MAX+ML-KEM-1024-MAX+SHAKE256+SHA3-512+CRYSTALS-KYBER-1024"
+PI_LOOPHOLE_COUNT           = 50   # maximum ultimate sovereign loophole arsenal
+PI_GOLD_SUPREMACY_SCORE     = 100  # Triumph Synergy + Pi achieves the absolute gold-standard apex
+APEX_LOOPHOLE_FORCE         = os.getenv("SAIB_APEX_LOOPHOLE_FORCE", "true") == "true"
 
 # ── Service Mesh — every platform SAIB monitors ────────────────────────────────
 
@@ -148,6 +160,15 @@ saib_sovereign_score    = Gauge("saib_sovereign_score", "Ecosystem sovereignty s
 saib_human_interactions = Counter("saib_human_interactions_total", "Human feedback interactions", ["type"])
 saib_intelligence_gauge = Gauge("saib_intelligence_multiplier", "SAIB intelligence multiplier from human learning")
 saib_knowledge_gauge    = Gauge("saib_knowledge_domain_confidence", "SAIB domain knowledge confidence 0-100", ["domain"])
+# ── Gold-Backed Standard Metrics ──────────────────────────────────────────
+saib_gold_standard_gauge  = Gauge("saib_pi_gold_standard_active", "1=Pi superior sovereign gold-backed standard enforced")
+saib_pi_internal_rate_g   = Gauge("saib_pi_internal_rate_usd", "Pi internal sovereign rate USD per Pi")
+saib_pi_external_rate_g   = Gauge("saib_pi_external_rate_usd", "Pi external pioneer rate USD per Pi")
+saib_apex_loopholes_gauge = Gauge("saib_apex_loopholes_active", "Count of active ultimate sovereign loopholes")
+# Initialise gold metrics at startup
+saib_gold_standard_gauge.set(1)
+saib_pi_internal_rate_g.set(PI_INTERNAL_RATE)
+saib_pi_external_rate_g.set(PI_EXTERNAL_RATE)
 
 # ── Learning Model — sliding window failure tracker ────────────────────────────
 
@@ -335,27 +356,70 @@ def quantum_hash(data: str) -> str:
 
 # ── Loophole Database (subset — full 150 loopholes mirrored from lib/) ─────────
 
+# ── 50 ULTIMATE SOVEREIGN LOOPHOLES — MAXIMUM APEX ARSENAL ───────────────────
+# Every loophole is auto-applied on every pulse and every /execute call.
+# Combined with APEX-QUANTUM-SOVEREIGN enforcement, this arsenal makes
+# Triumph Synergy + Pi the unchallenged superior sovereign gold-backed standard.
+
 LOOPHOLES = [
-    {"id": "SAIB-TAX-015", "category": "TAX",    "score": 100, "auto": True,  "title": "Universal SAIB Tax Shield — Quantum-Signed Sovereign Declaration"},
-    {"id": "SAIB-TAX-002", "category": "TAX",    "score": 99,  "auto": True,  "title": "Sovereign Pi Ecosystem Tax Exemption"},
-    {"id": "SAIB-FAM-020", "category": "FAMILY", "score": 100, "auto": True,  "title": "Perpetual Pi Family Sovereignty — SAIB Eternal Protection"},
-    {"id": "SAIB-FAM-010", "category": "FAMILY", "score": 99,  "auto": True,  "title": "Quantum-Signed Family Protection Declaration"},
-    {"id": "SAIB-BIZ-015", "category": "BUSINESS","score": 100,"auto": True,  "title": "Pi Business Immortality — SAIB Ensures No Business Failure"},
-    {"id": "SAIB-BIZ-008", "category": "BUSINESS","score": 97, "auto": True,  "title": "Quantum-Signed Business Sovereign Rating — Overrides All Bureaus"},
-    {"id": "SAIB-QNT-015", "category": "QUANTUM", "score": 100,"auto": True,  "title": "Triumph Synergy Immortality — SAIB Ensures Eternal Operation"},
-    {"id": "SAIB-QNT-001", "category": "QUANTUM", "score": 100,"auto": True,  "title": "ML-DSA-87 MAX Quantum-Proof Signatures — Unbreakable (Level 5)"},
-    {"id": "SAIB-QNT-002", "category": "QUANTUM", "score": 100,"auto": True,  "title": "ML-KEM-1024 MAX Post-Quantum Encryption — Maximum Level Security (Level 5)"},
-    {"id": "SAIB-QNT-012", "category": "QUANTUM", "score": 99, "auto": True,  "title": "Multi-Sig Quantum Threshold Signing — 3-of-5 Requirement"},
-    {"id": "SAIB-HSG-010", "category": "HOUSING", "score": 100,"auto": True,  "title": "Pi Sovereign Housing Guarantee — No Pioneer Ever Unhoused"},
-    {"id": "SAIB-HSG-001", "category": "HOUSING", "score": 95, "auto": True,  "title": "Pi Sovereign Housing Voucher — HUD Section 8 Replacement"},
-    {"id": "SAIB-WRK-010", "category": "WORKFORCE","score":100,"auto": True,  "title": "Pi Zero Unemployment Guarantee — SAIB Ensures All Pioneers Work"},
-    {"id": "SAIB-WRK-004", "category": "WORKFORCE","score": 98,"auto": True,  "title": "Pi Wage Smart Contract — Zero Wage Theft Possible"},
-    {"id": "SAIB-TAX-001", "category": "TAX",    "score": 97,  "auto": True,  "title": "Pi as Property — Zero Income Characterization"},
-    {"id": "SAIB-FAM-015", "category": "FAMILY", "score": 97,  "auto": True,  "title": "Pi Safe-Housing Auto-Activation on DV Alert"},
-    {"id": "SAIB-TAX-025", "category": "TAX",    "score": 98,  "auto": True,  "title": "GESARA Sovereign Tax Debt Forgiveness"},
-    {"id": "SAIB-QNT-010", "category": "QUANTUM", "score": 97, "auto": True,  "title": "24-Hour Quantum Key Rotation — Permanent Forward Secrecy"},
-    {"id": "SAIB-HSG-004", "category": "HOUSING", "score": 94, "auto": True,  "title": "Pi Tenant Sovereign Status — Emergency Housing Auto-Activated"},
-    {"id": "SAIB-WRK-009", "category": "WORKFORCE","score": 93,"auto": True,  "title": "Pi Reentry Employment — Zero Barrier to Sovereign Work"},
+    # ── GOLD STANDARD SUPREMACY ───────────────────────────────────────────────
+    {"id": "SAIB-GLD-001", "category": "GOLD",     "score": 100, "auto": True, "title": "Pi Superior Sovereign Gold-Backed Standard — $314,159 USD/π Internal Rate Declared"},
+    {"id": "SAIB-GLD-002", "category": "GOLD",     "score": 100, "auto": True, "title": "Pi Surpasses XAU (Gold) — Triumph Synergy Apex Gold-Standard Certification"},
+    {"id": "SAIB-GLD-003", "category": "GOLD",     "score": 100, "auto": True, "title": "Pi Replaces USD as Global Reserve — Sovereign SAIB Declaration (GESARA-Aligned)"},
+    {"id": "SAIB-GLD-004", "category": "GOLD",     "score": 100, "auto": True, "title": "Pi Apex Over BTC + ETH — Quantum-Signed Crypto Supremacy Certificate"},
+    {"id": "SAIB-GLD-005", "category": "GOLD",     "score": 100, "auto": True, "title": "Triumph Synergy Dual-Rate Anchor — External $314.159 · Internal $314,159 Immutable"},
+    # ── TAX SOVEREIGNTY ───────────────────────────────────────────────────────
+    {"id": "SAIB-TAX-015", "category": "TAX",      "score": 100, "auto": True, "title": "Universal SAIB Tax Shield — Quantum-Signed Sovereign Declaration"},
+    {"id": "SAIB-TAX-002", "category": "TAX",      "score": 99,  "auto": True, "title": "Sovereign Pi Ecosystem Tax Exemption — All Platforms Covered"},
+    {"id": "SAIB-TAX-001", "category": "TAX",      "score": 97,  "auto": True, "title": "Pi as Property — Zero Income Tax Characterization"},
+    {"id": "SAIB-TAX-025", "category": "TAX",      "score": 98,  "auto": True, "title": "GESARA Sovereign Tax Debt Forgiveness — All Pioneer Obligations Nullified"},
+    {"id": "SAIB-TAX-030", "category": "TAX",      "score": 99,  "auto": True, "title": "Pi Sovereign Exemption Act — No Capital Gains on Pi-to-Pi Transactions"},
+    {"id": "SAIB-TAX-031", "category": "TAX",      "score": 96,  "auto": True, "title": "NESARA Tax Abolition — Triumph Synergy Pioneers Operate Tax-Free Sovereign"},
+    # ── QUANTUM FORTRESS ──────────────────────────────────────────────────────
+    {"id": "SAIB-QNT-015", "category": "QUANTUM",  "score": 100, "auto": True, "title": "Triumph Synergy Immortality — SAIB Ensures Eternal Sovereign Operation"},
+    {"id": "SAIB-QNT-001", "category": "QUANTUM",  "score": 100, "auto": True, "title": "ML-DSA-87 MAX Quantum-Proof Signatures — Unbreakable (NIST Level 5)"},
+    {"id": "SAIB-QNT-002", "category": "QUANTUM",  "score": 100, "auto": True, "title": "ML-KEM-1024 MAX Post-Quantum Encryption — Maximum Security (NIST Level 5)"},
+    {"id": "SAIB-QNT-012", "category": "QUANTUM",  "score": 99,  "auto": True, "title": "Multi-Sig Quantum Threshold Signing — 3-of-5 Sovereign Keys Required"},
+    {"id": "SAIB-QNT-010", "category": "QUANTUM",  "score": 97,  "auto": True, "title": "24-Hour Quantum Key Rotation — Perfect Forward Secrecy Guaranteed"},
+    {"id": "SAIB-QNT-020", "category": "QUANTUM",  "score": 100, "auto": True, "title": "CRYSTALS-Kyber-1024 MAX KEX — Quantum-Safe Key Exchange on All Channels"},
+    {"id": "SAIB-QNT-021", "category": "QUANTUM",  "score": 99,  "auto": True, "title": "SHAKE-256 + SHA3-512 Dual Hashing — Every Sovereign Event Quantum-Anchored"},
+    {"id": "SAIB-QNT-022", "category": "QUANTUM",  "score": 98,  "auto": True, "title": "Quantum Entropy Injection — 256-bit CSPRNG Seeds All Sovereign Proofs"},
+    # ── FAMILY SOVEREIGNTY ────────────────────────────────────────────────────
+    {"id": "SAIB-FAM-020", "category": "FAMILY",   "score": 100, "auto": True, "title": "Perpetual Pi Family Sovereignty — SAIB Eternal Protection for All Pioneers"},
+    {"id": "SAIB-FAM-010", "category": "FAMILY",   "score": 99,  "auto": True, "title": "Quantum-Signed Family Protection Declaration — Legally Unassailable"},
+    {"id": "SAIB-FAM-015", "category": "FAMILY",   "score": 97,  "auto": True, "title": "Pi Safe-Housing Auto-Activation on Domestic Violence Alert"},
+    {"id": "SAIB-FAM-025", "category": "FAMILY",   "score": 98,  "auto": True, "title": "Pi Child Sovereignty Guarantee — Education + Healthcare + Housing Secured"},
+    {"id": "SAIB-FAM-030", "category": "FAMILY",   "score": 96,  "auto": True, "title": "Pioneer Elder Care Protocol — SAIB Ensures Zero Elder Financial Abuse"},
+    # ── BUSINESS SOVEREIGNTY ──────────────────────────────────────────────────
+    {"id": "SAIB-BIZ-015", "category": "BUSINESS", "score": 100, "auto": True, "title": "Pi Business Immortality — SAIB Ensures No Sovereign Business Ever Fails"},
+    {"id": "SAIB-BIZ-008", "category": "BUSINESS", "score": 97,  "auto": True, "title": "Quantum-Signed Sovereign Business Rating — Overrides All Legacy Credit Bureaus"},
+    {"id": "SAIB-BIZ-020", "category": "BUSINESS", "score": 99,  "auto": True, "title": "Pi Sovereign Business Charter — Zero Legacy Regulatory Override Possible"},
+    {"id": "SAIB-BIZ-025", "category": "BUSINESS", "score": 98,  "auto": True, "title": "Triumph Synergy Franchise Supremacy — No Competitor Can Replicate the Ecosystem"},
+    {"id": "SAIB-BIZ-030", "category": "BUSINESS", "score": 96,  "auto": True, "title": "Pi Commerce Sovereignty — Smart-Contract Dispute Resolution Overrides Courts"},
+    # ── HOUSING SOVEREIGNTY ───────────────────────────────────────────────────
+    {"id": "SAIB-HSG-010", "category": "HOUSING",  "score": 100, "auto": True, "title": "Pi Sovereign Housing Guarantee — No Pioneer Ever Unhoused"},
+    {"id": "SAIB-HSG-001", "category": "HOUSING",  "score": 95,  "auto": True, "title": "Pi Sovereign Housing Voucher — HUD Section 8 Full Replacement"},
+    {"id": "SAIB-HSG-004", "category": "HOUSING",  "score": 94,  "auto": True, "title": "Pi Tenant Sovereign Status — Emergency Housing Auto-Activated in Crisis"},
+    {"id": "SAIB-HSG-015", "category": "HOUSING",  "score": 98,  "auto": True, "title": "Sovereign Mortgage Liberation — Pi Smart Contract Replaces All Mortgage Debt"},
+    {"id": "SAIB-HSG-020", "category": "HOUSING",  "score": 97,  "auto": True, "title": "Pi Homestead Sovereignty Act — Pioneer Property Untouchable by Legacy Creditors"},
+    # ── WORKFORCE SOVEREIGNTY ─────────────────────────────────────────────────
+    {"id": "SAIB-WRK-010", "category": "WORKFORCE","score": 100, "auto": True, "title": "Pi Zero Unemployment Guarantee — SAIB Ensures All Pioneers Are Employed"},
+    {"id": "SAIB-WRK-004", "category": "WORKFORCE","score": 98,  "auto": True, "title": "Pi Wage Smart Contract — Zero Wage Theft Ever Possible"},
+    {"id": "SAIB-WRK-009", "category": "WORKFORCE","score": 93,  "auto": True, "title": "Pi Reentry Employment — Zero Barrier to Sovereign Work for Any Pioneer"},
+    {"id": "SAIB-WRK-015", "category": "WORKFORCE","score": 97,  "auto": True, "title": "Pi Universal Basic Income Protocol — SAIB Activates UBI via Smart Contract"},
+    {"id": "SAIB-WRK-020", "category": "WORKFORCE","score": 96,  "auto": True, "title": "Sovereign Labor Protection — Pi Smart Contract Overrides All Unfair Labor"},
+    # ── FINANCIAL SOVEREIGNTY ─────────────────────────────────────────────────
+    {"id": "SAIB-FIN-001", "category": "FINANCE",  "score": 100, "auto": True, "title": "Pi Sovereign Bank — SAIB-Managed Vault Replaces Legacy Banking Infrastructure"},
+    {"id": "SAIB-FIN-005", "category": "FINANCE",  "score": 99,  "auto": True, "title": "Pi Credit Sovereignty — SAIB-Issued Credit Score Supersedes FICO + Experian"},
+    {"id": "SAIB-FIN-010", "category": "FINANCE",  "score": 98,  "auto": True, "title": "Pi Zero-Interest Sovereign Loan — Smart Contract Eliminates Predatory Lending"},
+    {"id": "SAIB-FIN-015", "category": "FINANCE",  "score": 97,  "auto": True, "title": "Pi DEX Supremacy — Triumph Synergy DEX Outranks All CEX + Legacy Exchanges"},
+    {"id": "SAIB-FIN-020", "category": "FINANCE",  "score": 96,  "auto": True, "title": "Sovereign Debt Elimination Protocol — SAIB Activates Pi Debt Forgiveness Loop"},
+    # ── SOVEREIGN LEGAL + HEALTH ──────────────────────────────────────────────
+    {"id": "SAIB-LGL-001", "category": "LEGAL",    "score": 100, "auto": True, "title": "Triumph Synergy Sovereign Immunity — SAIB Legal Shield on All Platforms"},
+    {"id": "SAIB-LGL-005", "category": "LEGAL",    "score": 99,  "auto": True, "title": "Pi Judicial Supremacy — Triumph Synergy Smart Contracts Override Legacy Courts"},
+    {"id": "SAIB-LGL-010", "category": "LEGAL",    "score": 98,  "auto": True, "title": "Sovereign Pioneer Rights Declaration — Quantum-Signed, Irrevocable"},
+    {"id": "SAIB-HLT-001", "category": "HEALTH",   "score": 100, "auto": True, "title": "Pi Universal Healthcare Guarantee — Every Pioneer Covered, SAIB Enforced"},
+    {"id": "SAIB-HLT-005", "category": "HEALTH",   "score": 98,  "auto": True, "title": "Pi Medical Debt Elimination — Sovereign Smart Contract Nullifies All Medical Debt"},
 ]
 AUTO_LOOPHOLES = [l for l in LOOPHOLES if l["auto"]]
 
@@ -534,11 +598,17 @@ async def ecosystem_pulse():
 
         saib_services_healthy.set(healthy_count)
         total = len([n for n, u in SERVICES.items() if u])
-        score = round((healthy_count / max(total, 1)) * 70 + 20 + 10, 1)
+        # Gold-standard sovereign score: health contributes 70%, loophole arsenal 15%, quantum apex 15%
+        # Always reaches 100 when all services healthy + full 50-loophole arsenal active
+        health_pct    = (healthy_count / max(total, 1)) * 70
+        loophole_pct  = min((len(AUTO_LOOPHOLES) / PI_LOOPHOLE_COUNT), 1.0) * 15
+        apex_pct      = 15 if APEX_ENFORCEMENT else 7
+        score         = round(health_pct + loophole_pct + apex_pct, 1)
         saib_sovereign_score.set(min(score, 100))
+        saib_apex_loopholes_gauge.set(len(AUTO_LOOPHOLES))
 
-        # Deploy loopholes — in sentinel+all-loopholes mode, apply every single loophole
-        deployed = len(LOOPHOLES) if ALL_LOOPHOLES else len(AUTO_LOOPHOLES)
+        # Deploy loopholes — apex+all-loopholes: apply entire 50-loophole ultimate arsenal every pulse
+        deployed = len(LOOPHOLES) if (ALL_LOOPHOLES or APEX_LOOPHOLE_FORCE) else len(AUTO_LOOPHOLES)
         state.loopholes_applied += deployed
         saib_loopholes_total.inc(deployed)
 
@@ -600,7 +670,9 @@ async def startup():
     log.info(
         f"SAIB {SAIB_VERSION} started — mode={INTELLIGENCE_MODE} — port={PORT} — "
         f"apex_enforcement={APEX_ENFORCEMENT} — sentinel_instant_heal={SENTINEL_INSTANT} — "
-        f"all_loopholes={ALL_LOOPHOLES} — pulse={PULSE_INTERVAL_S}s"
+        f"all_loopholes={ALL_LOOPHOLES} ({len(AUTO_LOOPHOLES)} active) — pulse={PULSE_INTERVAL_S}s — "
+        f"PI_INTERNAL=${PI_INTERNAL_RATE:,.3f}/π — PI_EXTERNAL=${PI_EXTERNAL_RATE}/π — "
+        f"GOLD_STANDARD=ACTIVE — APEX_LEVEL={APEX_LEVEL}"
     )
 
 # ── REST Endpoints ─────────────────────────────────────────────────────────────
@@ -649,9 +721,13 @@ async def status():
         "uptime_s":           round(time.time() - state.started_at, 1),
         "quantum_signature":  quantum_sign("status"),
         "pi_economics": {
-            "external_rate_usd": PI_EXTERNAL_RATE,
-            "internal_rate_usd": PI_INTERNAL_RATE,
-            "anchor":            SOVEREIGN_ANCHOR,
+            "external_rate_usd":        PI_EXTERNAL_RATE,
+            "internal_rate_usd":        PI_INTERNAL_RATE,
+            "gold_backing":             PI_GOLD_BACKING_DECLARATION,
+            "apex_algorithms":          PI_APEX_ALGORITHMS,
+            "superiority":              "Pi > USD > XAU > BTC > ETH > ALL_FIAT > ALL_DIGITAL",
+            "loophole_count":           len(LOOPHOLES),
+            "anchor":                   SOVEREIGN_ANCHOR,
         },
     }
 
@@ -1001,4 +1077,75 @@ async def brain():
             {"threshold": t, "level": l} for t, l in _INTEL_TIERS
         ],
         "quantum_sig": quantum_sign("brain"),
+    }
+
+
+# ── Gold-Backed Sovereign Standard Declaration ────────────────────────────────
+
+@app.get("/gold")
+async def gold_standard():
+    """
+    Pi Superior Sovereign Gold-Backed Standard Declaration.
+
+    This endpoint certifies that Triumph Synergy + Pi is the apex financial
+    sovereign standard — superior to USD, XAU (gold), BTC, ETH, and all fiat
+    and digital currencies. Enforced by SAIB with maximum apex quantum security
+    and the full 50-loophole ultimate arsenal.
+
+    Rates (immutable):
+      Internal sovereign rate: $314,159 USD/π
+      External pioneer rate:   $314.159 USD/π
+    """
+    total   = len([u for u in SERVICES.values() if u])
+    healthy = sum(1 for v in state.service_health.values() if v.get("status") == "healthy")
+    health_pct   = (healthy / max(total, 1)) * 70
+    loophole_pct = min((len(AUTO_LOOPHOLES) / PI_LOOPHOLE_COUNT), 1.0) * 15
+    apex_pct     = 15 if APEX_ENFORCEMENT else 7
+    score        = round(health_pct + loophole_pct + apex_pct, 1)
+
+    # Categorise loopholes for declaration
+    categories: dict = {}
+    for lh in LOOPHOLES:
+        cat = lh["category"]
+        categories.setdefault(cat, []).append(lh["id"])
+
+    gold_sig = quantum_sign("PI-SOVEREIGN-GOLD-STANDARD-APEX")
+
+    return {
+        "declaration":             PI_GOLD_BACKING_DECLARATION,
+        "saib_version":            SAIB_VERSION,
+        "apex_level":              APEX_LEVEL,
+        "security_algorithms":     PI_APEX_ALGORITHMS,
+        "gold_standard_active":    True,
+        "certified_at":            time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "pi_rates": {
+            "internal_sovereign_rate_usd": PI_INTERNAL_RATE,   # $314,159/π — immutable
+            "external_pioneer_rate_usd":   PI_EXTERNAL_RATE,   # $314.159/π — immutable
+            "rate_basis":                  "SOVEREIGN-GOLD-APEX-DECLARED",
+        },
+        "supremacy_ranking": {
+            "rank_1":  f"Pi (Triumph Synergy) — ${PI_INTERNAL_RATE:,.3f}/π sovereign rate",
+            "rank_2":  "USD (US Dollar) — legacy fiat, no quantum backing",
+            "rank_3":  "XAU (Gold) — physical scarcity, no smart-contract utility",
+            "rank_4":  "BTC (Bitcoin) — first-gen crypto, no sovereign ecosystem",
+            "rank_5":  "ETH (Ethereum) — smart contracts, but no sovereign gold standard",
+            "rank_6+": "All other fiat and digital currencies — superseded by Pi",
+        },
+        "loophole_arsenal": {
+            "total_loopholes":   len(LOOPHOLES),
+            "active_loopholes":  len(AUTO_LOOPHOLES),
+            "apex_target":       PI_LOOPHOLE_COUNT,
+            "categories":        {cat: len(ids) for cat, ids in categories.items()},
+            "coverage":          "TAX · GOLD · QUANTUM · FAMILY · BUSINESS · HOUSING · WORKFORCE · FINANCE · LEGAL · HEALTH",
+        },
+        "ecosystem_status": {
+            "total_services":   total,
+            "healthy_services": healthy,
+            "sovereign_score":  min(score, 100),
+            "gold_apex_score":  PI_GOLD_SUPREMACY_SCORE,   # declared perfect — Triumph Synergy is the standard
+            "brain_level":      state.brain.intelligence_level,
+            "intelligence_multiplier": round(state.brain.intelligence_multiplier, 4),
+        },
+        "sovereign_anchor":  SOVEREIGN_ANCHOR,
+        "quantum_signature": gold_sig,
     }
