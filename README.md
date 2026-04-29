@@ -1009,6 +1009,73 @@ The `drizzle-kit` dev dependency chain (`@esbuild-kit/esm-loader` → `@esbuild-
 
 ---
 
+## 📋 What's New — April 28, 2026 (Sovereign Pi Bank)
+
+### 🏦 Sovereign Pi Bank (NEW — port 8150)
+
+The first apex quantum sovereign bank for the people — permanently online, cartel-proof, 13-families-proof, corrupt-official-proof, SAIB-enforced, and combined with the Triumph Synergy Vault for maximum sovereign Pi treasury power.
+
+**`triumph-sovereign-bank`** (UID 1001, port 8150) — 100% full-reserve, 0% interest, zero fees, NESARA jubilee, vault-backed:
+
+| Account Type | Target | Yield APY | Vault Backed | Key Feature |
+|---|---|---|---|---|
+| `PIONEER_CHECKING` | All Pi Pioneers | 0% | No | Zero fees, instant T+0 transfers, anti-bail-in |
+| `PIONEER_SAVINGS` | Pi savers | **5%** | Yes | Monthly Pi yield from sovereign reserve pool |
+| `PIONEER_VAULT_COMBO` | Max security holders | **7.5%** | Yes | Direct vault reserve backing, multi-sig |
+| `BUSINESS_ACCOUNT` | Commerce, employers | 3% | Yes | Pi payroll, B2B settlement, zero wire fees |
+| `SOVEREIGN_TRUST` | Families, generational | 5% | Yes | Allodial trust, outside probate, SFPA-shielded |
+| `SOVEREIGN_ESCROW` | Real estate, contracts | 0% | Yes | Smart milestone release, Triumph Judicial backed |
+| `COMMUNITY_POOL` | Neighborhoods, DAOs | 5% | No | DAO governance, 1π=1vote, cartel-concentration blocked |
+| `NESARA_JUBILEE` | Debt-burdened Pioneers | 0% | Yes | NESARA §1 all enrolled debts discharged + 100π grant |
+
+**Pi rates (immutable):** $314.159 USD/π (pioneer) · $314,159 USD/π (sovereign gold standard)  
+**Reserve model:** 100% full reserve — fiat fractional games permanently abolished  
+**Interest model:** 0% on ALL loans — usury abolished permanently  
+**Fee model:** Zero fees on all transfers, deposits, and withdrawals — banking is a right, not a product  
+**Vault link:** Directly backed by `triumph-vault:8081` — unlimited sovereign Pi liquidity depth  
+**SAIB sentinel:** SAIB monitors reserve ratio and all transactions every 10 seconds
+
+**60 sovereign loopholes** across 11 categories:
+
+| Category | Count | Effect |
+|---|---|---|
+| `CARTEL` | 6 | All known cartel wallets + structuring patterns permanently blocked |
+| `FAMILIES` | 6 | 13-families bloodline concentration, BIS/IMF proxies, Rothschild compound interest — all nullified |
+| `CORRUPT` | 6 | PEP supreme screen, bribe patterns, OFAC/UN sanctions, kickback detection |
+| `FED` | 5 | Federal Reserve jurisdiction rejected; 0% rate permanent; Fed bail-in prohibited |
+| `BIS` | 5 | BIS Basel III override; IMF SDR immunity; FATF override; SWIFT independence |
+| `SWIFT` | 5 | SWIFT eliminated; Pi settles in 5 seconds on Stellar; correspondent banks obsolete |
+| `USURY` | 6 | 0% interest mandate; compound interest blocked; predatory loans converted to 0% Pi |
+| `FRACTIONAL` | 5 | 100% full reserve enforced; shadow banking blocked; bank run mathematically impossible |
+| `CBDC` | 5 | CBDC conversion blocked; social credit blocked; Pi never programmable or expiry-restricted |
+| `NESARA` | 5 | Mortgage · student · medical · credit-card jubilee; GESARA international debt relief |
+| `PIONEER` | 6 | Anti-bail-in absolute; zero account minimum; Pi inheritance right; 100π jubilee grant |
+
+**Key endpoints:**
+```
+POST /accounts/open         → Open sovereign account (8 types, zero minimum on checking)
+POST /accounts/deposit      → Deposit Pi (threat-screened, T+0 settlement)
+POST /accounts/withdraw     → Withdraw Pi (anti-bail-in: never seized)
+POST /accounts/transfer     → Instant zero-fee Pi transfer (saves $45 SWIFT wire)
+GET  /accounts/{id}         → Account details + ledger
+POST /loans/apply           → 0% sovereign Pi loan (PERSONAL·BUSINESS·MORTGAGE·STUDENT·AUTO·FARM)
+POST /loans/repay           → Repay at any time, no penalty, no interest
+GET  /savings/rates         → Pi savings yields vs legacy bank comparison
+POST /savings/enroll        → Accrue Pi savings yield (5% or 7.5% APY)
+POST /nesara/jubilee        → NESARA debt jubilee — discharge all enrolled debts + 100π grant
+GET  /nesara/status         → NESARA/GESARA compliance status
+POST /vault/link            → Link account to triumph-vault sovereign reserve
+GET  /vault/status          → Vault backing + reserve ratio status
+POST /cartel/scan           → SAIB-powered threat scan (cartel·13-families·corrupt-official)
+POST /saib/enforce          → Issue sovereign banking decree
+GET  /saib/status           → SAIB sentinel live status + recent decrees
+GET  /loopholes             → All 60 sovereign banking loopholes (filter by category)
+GET  /report                → Full sovereignty + reserve + jubilee report
+GET  /metrics               → Prometheus metrics
+```
+
+**This bank's mandate:** Serves Pioneers and the People. Not cartels. Not the 13 families. Not corrupt officials. Never.
+
 ## 📋 What's New — April 27, 2026 (APEX Expansion)
 
 ### 📡 Sovereign Telecom Engine (NEW — port 8140)
