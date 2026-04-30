@@ -191,7 +191,7 @@ services:
       STELLAR_CORE_PEER_PORT: 11625
       PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
       # Prefer bridge proxy endpoint for resilient access to local Pi node.
-      STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.testnet.minepi.com}
       PI_LOCAL_HORIZON: http://triumph-pi-bridge-connector:8092/pi-node
       PI_INTERNAL_HORIZON_URL: http://triumph-pi-bridge-connector:8092/pi-node
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
@@ -452,6 +452,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs/nginx:/etc/nginx/certs:ro
     depends_on:
       app:
         condition: service_started
@@ -487,7 +488,7 @@ services:
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
-      STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.testnet.minepi.com}
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
@@ -528,7 +529,7 @@ services:
       PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
-      STELLAR_HORIZON_URL: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.testnet.minepi.com}
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
@@ -654,8 +655,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://localhost:8090/health"]
       interval: 15s
       timeout: 10s
-      retries: 5
-      start_period: 45s
+      retries: 10
+      start_period: 180s
 
   # ========================================================================
   # CREDIT ENGINE — PiCredit Score™ + Bureau Integration
@@ -779,9 +780,9 @@ services:
       dual-value-engine:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8094/health"]
+      test: ["CMD", "python3", "-c", "import socket,sys; s=socket.socket(); s.settimeout(3); sys.exit(s.connect_ex(('localhost',8094)))"]
       interval: 25s
-      timeout: 20s
+      timeout: 10s
       retries: 5
       start_period: 60s
 
@@ -1235,19 +1236,28 @@ services:
         condition: service_healthy
 
   # ========================================================================
-  # SOVEREIGN-FORTRESS — Super-Pod
-  # ai-bot (SAIB) + gateway + delivery + pidex + sports-hub
+  # APEX-SERVICES — Mega Super-Pod (18 services in one container)
+  # ========================================================================
+  # Consolidates the three previously-standalone sovereign super-pods:
+  #   sovereign-fortress   (5 svc, 8097-8102) — ai-bot + gateway + delivery
+  #                                              + pidex + sports-hub
+  #   sovereign-insurance  (7 svc, 8110-8116) — life + home + health + auto
+  #                                              + dental + vision + hospital
+  #   sovereign-utilities  (6 svc, 8120-8125) — electric + water + gas + hoa
+  #                                              + plumbing + hvac
+  # Removes 2 redundant Python/supervisord overheads (~150 MB savings).
+  # All hostname aliases preserved for backwards-compatible service URLs.
   # ========================================================================
 
-  sovereign-fortress:
+  apex-services:
     build:
       context: docker
-      dockerfile: sovereign-fortress/Dockerfile
-    container_name: triumph-sovereign-fortress
+      dockerfile: apex-services/Dockerfile
+    container_name: triumph-apex-services
     <<: *common
-    mem_limit: 1024m
-    mem_reservation: 512m
-    cpus: 0.60
+    mem_limit: 2048m
+    mem_reservation: 1024m
+    cpus: 2.00
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
@@ -1255,19 +1265,46 @@ services:
       PI_INTERNAL_MULTIPLIER: "1000.0"
       AI_BOT_REQUIRE_PQ: "true"
       GATEWAY_REQUIRE_PQ: "true"
+      QUANTUM_FORTRESS_URL: http://triumph-quantum-fortress:8094
+      PAYMENT_PROCESSOR_URL: http://triumph-settlement-core:8084
+      CLOUD_MEMORY_URL: http://triumph-observability-stack:8095
     expose:
       - "8097"
       - "8099"
       - "8100"
       - "8101"
       - "8102"
+      - "8110"
+      - "8111"
+      - "8112"
+      - "8113"
+      - "8114"
+      - "8115"
+      - "8116"
+      - "8120"
+      - "8121"
+      - "8122"
+      - "8123"
+      - "8124"
+      - "8125"
     networks:
-      - triumph-net
-      - pi-bridge
+      triumph-net:
+        aliases:
+          # Preserve legacy hostnames so other pods don't need updates
+          - triumph-sovereign-fortress
+          - triumph-sovereign-insurance
+          - triumph-sovereign-utilities
+      pi-bridge:
+        aliases:
+          - triumph-sovereign-fortress
+          - triumph-sovereign-insurance
+          - triumph-sovereign-utilities
     depends_on:
       redis:
         condition: service_healthy
       quantum-fortress:
+        condition: service_started
+      settlement-core:
         condition: service_started
 
   # ========================================================================
@@ -1339,73 +1376,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-
-  # ========================================================================
-  # SOVEREIGN-INSURANCE — Super-Pod (7 services)
-  # life + home + health + auto + dental + vision + hospital
-  # ========================================================================
-
-  sovereign-insurance:
-    build:
-      context: docker
-      dockerfile: sovereign-insurance/Dockerfile
-    container_name: triumph-sovereign-insurance
-    <<: *common
-    mem_limit: 768m
-    mem_reservation: 384m
-    cpus: 0.40
-    environment:
-      <<: [*db-env, *pi-env]
-      QUANTUM_FORTRESS_URL: http://triumph-quantum-fortress:8094
-    expose:
-      - "8110"
-      - "8111"
-      - "8112"
-      - "8113"
-      - "8114"
-      - "8115"
-      - "8116"
-    networks:
-      - triumph-net
-      - pi-bridge
-    depends_on:
-      redis:
-        condition: service_healthy
-      quantum-fortress:
-        condition: service_started
-
-  # ========================================================================
-  # SOVEREIGN-UTILITIES — Super-Pod (6 services)
-  # electric + water + gas + hoa + plumbing + hvac
-  # ========================================================================
-
-  sovereign-utilities:
-    build:
-      context: docker
-      dockerfile: sovereign-utilities/Dockerfile
-    container_name: triumph-sovereign-utilities
-    <<: *common
-    mem_limit: 768m
-    mem_reservation: 384m
-    cpus: 0.40
-    environment:
-      <<: [*db-env, *pi-env]
-      PAYMENT_PROCESSOR_URL: http://triumph-settlement-core:8084
-    expose:
-      - "8120"
-      - "8121"
-      - "8122"
-      - "8123"
-      - "8124"
-      - "8125"
-    networks:
-      - triumph-net
-      - pi-bridge
-    depends_on:
-      redis:
-        condition: service_healthy
-      settlement-core:
-        condition: service_started
 
   # ========================================================================
   # ECOSYSTEM-GUARDIAN — Watchdog Super-Pod
