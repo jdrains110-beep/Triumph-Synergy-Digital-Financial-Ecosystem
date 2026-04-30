@@ -931,94 +931,9 @@ services:
       start_period: 25s
 
   # ========================================================================
-  # PROMETHEUS — Metrics collection
+  # NOTE: prometheus, grafana, postgres-exporter, redis-exporter were
+  # consolidated into the observability-stack super-pod. See line ~1422.
   # ========================================================================
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: triumph-prometheus
-    <<: *common
-    mem_limit: 128m
-    mem_reservation: 64m
-    cpus: 0.2
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
-      - triumph_prometheus_data:/prometheus
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--storage.tsdb.retention.time=7d"
-      - "--storage.tsdb.retention.size=256MB"
-      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
-      - "--web.console.templates=/usr/share/prometheus/consoles"
-      - "--web.enable-lifecycle"
-    networks:
-      - triumph-net
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-
-  # ========================================================================
-  # GRAFANA — Metrics dashboards
-  # ========================================================================
-
-  # ========================================================================
-  # POSTGRES EXPORTER — exposes pg metrics for Prometheus
-  # ========================================================================
-  postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:latest
-    container_name: triumph-postgres-exporter
-    <<: *common
-    mem_limit: 32m
-    mem_reservation: 16m
-    cpus: 0.1
-    environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}?sslmode=disable"
-    expose:
-      - "9187"
-    networks:
-      - triumph-net
-    depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9187/metrics"]
-      interval: 20s
-      timeout: 12s
-      retries: 3
-      start_period: 15s
-
-  # ========================================================================
-  # REDIS EXPORTER — exposes redis metrics for Prometheus
-  # ========================================================================
-  redis-exporter:
-    image: oliver006/redis_exporter:alpine
-    container_name: triumph-redis-exporter
-    <<: *common
-    mem_limit: 24m
-    mem_reservation: 12m
-    cpus: 0.1
-    environment:
-      REDIS_ADDR: "redis://triumph-redis:6379"
-    expose:
-      - "9121"
-    networks:
-      - triumph-net
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9121/metrics"]
-      interval: 20s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
 
   # ========================================================================
   # HORIZON GUARDIAN — keeps testnet2 running, Horizon alive, and
@@ -1087,35 +1002,8 @@ services:
       retries: 5
       start_period: 15s
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: triumph-grafana
-    <<: *common
-    mem_limit: 128m
-    mem_reservation: 64m
-    cpus: 0.2
-    ports:
-      - "3001:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER:     ${GRAFANA_USER:?GRAFANA_USER required}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD required}
-      GF_SERVER_ROOT_URL:         "%(protocol)s://%(domain)s:%(http_port)s/"
-      GF_ANALYTICS_REPORTING_ENABLED: "false"
-    volumes:
-      - triumph_grafana_data:/var/lib/grafana
-      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-    depends_on:
-      prometheus:
-        condition: service_healthy
-    networks:
-      - triumph-net
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
-      interval: 15s
-      timeout: 12s
-      retries: 8
-      start_period: 90s
+  # grafana service consolidated into observability-stack super-pod (port 3001:3000 still exposed there)
+
 
   # ========================================================================
   # HEALTH GOVERNOR — Lightweight memory watchdog for entire ecosystem
