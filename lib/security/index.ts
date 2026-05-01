@@ -13,6 +13,16 @@
 // Enterprise IAM Configuration
 export * from "./iam";
 
+// Apex sovereign primitives
+export { withIdempotency } from "./idempotency";
+export type { IdempotencyOptions } from "./idempotency";
+export { signReceipt, verifyReceipt, getPublicKeyHex, canonicalJSON } from "./pq-receipts";
+export type { ReceiptPayload, SignedReceipt } from "./pq-receipts";
+export { appendAuditEvent, verifyChain, configureAuditChain, getCurrentHead } from "./audit-chain";
+export type { AuditEvent, AuditEventType } from "./audit-chain";
+export { recordSecurityEvent } from "./anomaly-monitor";
+export type { AnomalyInput } from "./anomaly-monitor";
+
 // Performance & Security Suite
 export {
   superiorSecurity,

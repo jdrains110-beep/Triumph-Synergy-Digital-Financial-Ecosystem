@@ -7,6 +7,10 @@ import { getRequestLocale } from "@/lib/i18n/server";
 import { PiProvider } from "@/lib/pi-sdk/pi-provider";
 import { Web3Provider } from "@/lib/web3";
 
+// Apex sovereign boot — wires audit chain to Supabase service-role client.
+// Side-effect import: runs once per server process.
+import "@/lib/security/boot";
+
 import "./globals.css";
 
 export const metadata: Metadata = {

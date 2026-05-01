@@ -1,14 +1,25 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { rateLimitByIP, isValidId, safeErrorResponse } from "@/lib/security/api-guard";
+import { withIdempotency } from "@/lib/security/idempotency";
+import { signReceipt } from "@/lib/security/pq-receipts";
+import { appendAuditEvent } from "@/lib/security/audit-chain";
 
 // Pi Network API Configuration
 const PI_API_KEY = process.env.PI_API_KEY || "";
 
 export async function POST(req: NextRequest) {
+  return withIdempotency(req, () => handle(req), {
+    userScope: req.headers.get("x-wallet-publickey") ?? req.headers.get("x-forwarded-for") ?? "anon",
+    ttlMs: 24 * 60 * 60 * 1000,
+  });
+}
+
+async function handle(req: NextRequest) {
   try {
     // Rate limit: 30 approvals per minute per IP
     const rl = rateLimitByIP(req, "pi-payment-approve", 30, 60_000);
     if (!rl.allowed) {
+      void appendAuditEvent("ratelimit.tripped", { route: "approve" });
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
@@ -96,14 +107,30 @@ export async function POST(req: NextRequest) {
     const approvalData = await approveResponse.json();
     console.log("[Pi Payment API] Payment approved:", approvalData);
 
+    const receipt = signReceipt({
+      paymentId,
+      amount: paymentData.amount ?? amount ?? 0,
+      memo: paymentData.memo ?? null,
+      user: paymentData.user_uid ?? null,
+      stage: "approved",
+    });
+    const auditHash = await appendAuditEvent(
+      "payment.approved",
+      { paymentId, amount: paymentData.amount, receiptHash: receipt.hash },
+      paymentData.user_uid ?? null
+    );
+
     return NextResponse.json({
       success: true,
       paymentId,
       status: "approved",
       data: approvalData,
+      receipt,
+      auditHash,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    void appendAuditEvent("payment.failed", { stage: "approve", err: String(error) });
     console.error("[Pi Payment API] Approval error:", error);
     return NextResponse.json(
       {

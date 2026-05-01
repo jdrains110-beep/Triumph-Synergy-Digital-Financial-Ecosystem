@@ -1,14 +1,25 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { rateLimitByIP, isValidId, safeErrorResponse } from "@/lib/security/api-guard";
+import { withIdempotency } from "@/lib/security/idempotency";
+import { signReceipt } from "@/lib/security/pq-receipts";
+import { appendAuditEvent } from "@/lib/security/audit-chain";
 
 // Pi Network API Configuration
 const PI_API_KEY = process.env.PI_API_KEY || "";
 
 export async function POST(req: NextRequest) {
+  return withIdempotency(req, () => handle(req), {
+    userScope: req.headers.get("x-wallet-publickey") ?? req.headers.get("x-forwarded-for") ?? "anon",
+    ttlMs: 24 * 60 * 60 * 1000,
+  });
+}
+
+async function handle(req: NextRequest) {
   try {
     // Rate limit: 30 completions per minute per IP
     const rl = rateLimitByIP(req, "pi-payment-complete", 30, 60_000);
     if (!rl.allowed) {
+      void appendAuditEvent("ratelimit.tripped", { route: "complete" });
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
@@ -109,6 +120,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const receipt = signReceipt({
+      paymentId,
+      txid,
+      amount: paymentData.amount ?? 0,
+      memo: paymentData.memo ?? null,
+      user: paymentData.user_uid ?? null,
+      stage: "completed",
+      networkVerified,
+    });
+    const auditHash = await appendAuditEvent(
+      "payment.completed",
+      { paymentId, txid, amount: paymentData.amount, receiptHash: receipt.hash },
+      paymentData.user_uid ?? null
+    );
+
     return NextResponse.json({
       success: true,
       paymentId,
@@ -116,9 +142,12 @@ export async function POST(req: NextRequest) {
       status: "completed",
       networkVerified,
       data: completionData,
+      receipt,
+      auditHash,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    void appendAuditEvent("payment.failed", { stage: "complete", err: String(error) });
     console.error("[Pi Payment API] Completion error:", error);
     return NextResponse.json(
       {

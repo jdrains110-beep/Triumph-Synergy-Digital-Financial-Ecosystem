@@ -55,6 +55,38 @@ Operational anti-duplication behavior:
 
 Important legal note: public source visibility on GitHub does not waive ownership rights. Copyright and licensing terms continue to apply to source, derivatives, branding, and deployment.
 
+---
+
+## 🛡️ Apex Sovereign Security Envelope (May 2026)
+
+> **Status:** ACTIVE · **Profile:** APEX / SOVEREIGN / QUANTUM-RESISTANT · **Doc:** [`docs/APEX_SOVEREIGN_SECURITY.md`](docs/APEX_SOVEREIGN_SECURITY.md)
+
+The entire ecosystem is wrapped in a defense-in-depth envelope enforced as code, not aspiration:
+
+- **Hardened CSP3** — per-request nonces + `strict-dynamic`, `script-src-attr 'none'`, `'unsafe-inline'` fully removed (`middleware.ts`)
+- **Cross-Origin isolation** — COOP `same-origin` + COEP `credentialless` + CORP `same-origin` (Spectre / side-channel mitigation)
+- **HSTS preload (2y)**, NEL + Report-To, expanded Permissions-Policy
+- **Mandatory Idempotency-Key** on every mutating sensitive route — body-fingerprint conflict (409), 24h TTL ([`lib/security/idempotency.ts`](lib/security/idempotency.ts))
+- **Post-quantum signed receipts** — every Pi payment is signed with **ML-DSA-65** (NIST FIPS 204 / Dilithium3); public key at `/api/security/pq-pubkey` for offline verification ([`lib/security/pq-receipts.ts`](lib/security/pq-receipts.ts))
+- **Tamper-evident audit hash chain** — SHA-256 chain over all security events, append-only DB trigger, end-to-end verifiable ([`lib/security/audit-chain.ts`](lib/security/audit-chain.ts))
+- **Anomaly monitor** — rolling-window thresholds → `ALERT_WEBHOOK_URL` POST on auth-burst, ratelimit-storm, replay-block, amount-mismatch, CSP-violation flood ([`lib/security/anomaly-monitor.ts`](lib/security/anomaly-monitor.ts))
+- **Supabase RLS** — per-user row access on `profiles`, `payments`, `audit_events`, `idempotency_cache`; service-role-only writes on audit + idempotency ([`lib/db/migrations/0001_apex_audit_and_rls.sql`](lib/db/migrations/0001_apex_audit_and_rls.sql))
+- **Sovereign key custody** — `scripts/rotate-secrets.sh` generates 256-bit entropy for `PQ_RECEIPT_SEED`, Stellar seed, NextAuth secret, internal HMAC; optional `--push vercel`
+- **CSP violation sink** — browser reports auto-appended to audit chain (`/api/security/csp-report`)
+- **Boot wiring** — [`lib/security/boot.ts`](lib/security/boot.ts) wires audit chain to Supabase service-role client on every server process
+
+**What an attacker must defeat to forge a single fraudulent receipt:**
+1. Steal `PQ_RECEIPT_SEED` (rotated quarterly) **AND**
+2. Steal Supabase service-role key (rotated quarterly) **AND**
+3. Bypass the append-only DB trigger on `audit_events` **AND**
+4. Match the SHA-256 prev_hash chain perfectly **AND**
+5. Evade the anomaly webhook firing on the unusual write pattern **AND**
+6. Evade the optional Stellar/Pi anchor of the chain head
+
+See the full architecture map, OWASP/Web3 threat coverage, sovereign loopholes, and operational runbook in [`docs/APEX_SOVEREIGN_SECURITY.md`](docs/APEX_SOVEREIGN_SECURITY.md).
+
+---
+
 ## 🌍 20+ Real-World Utility Sectors — Pi Network's Sovereign Utility Layer
 
 > **Triumph Synergy is the only platform on Pi Network that tokenizes real-world assets, identities, and services across 20+ economic sectors — all on-chain, all quantum-resistant, all settled in Pi.**
