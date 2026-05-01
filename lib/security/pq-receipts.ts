@@ -18,7 +18,7 @@
  * making the receipt + chain jointly tamper-evident.
  */
 
-import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";
+import { ml_dsa65 } from "@noble/post-quantum/ml-dsa.js";
 import { createHash } from "node:crypto";
 
 const RECEIPT_VERSION = 1;
