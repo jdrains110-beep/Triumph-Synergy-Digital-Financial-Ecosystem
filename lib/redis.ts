@@ -26,7 +26,7 @@ function buildClient(): RedisClientType {
     pingInterval: 30_000, // PING every 30s to defeat server-side idle timeouts
     socket: {
       reconnectStrategy: (retries: number) => Math.min(retries * 500, 5000),
-      keepAlive: 30_000, // TCP keep-alive (ms)
+      keepAlive: true, // TCP keep-alive
     },
   }) as RedisClientType;
 
