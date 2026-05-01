@@ -18,22 +18,28 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
+          cache: yarn
 
       - name: Setup Yarn
         run: npm install -g yarn@1.22.22
 
       - name: Install dependencies
-        run: yarn install --network-timeout 300000
-        continue-on-error: false
+        run: yarn install --frozen-lockfile --network-timeout 600000
 
       - name: Check Node version
-        run: node --version && npm --version && yarn --version
+        run: |
+          node --version && npm --version && yarn --version
+          echo "--- node_modules/.bin (next must appear) ---"
+          ls -la node_modules/.bin/ | grep -E 'next|tsc' || true
+          echo "--- next binary ---"
+          ls -la node_modules/next/dist/bin/next 2>&1 || true
 
       - name: Build project
         run: yarn build 2>&1
         env:
           SKIP_ENV_VALIDATION: true
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Check build status
         run: |
