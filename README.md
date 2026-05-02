@@ -27,6 +27,7 @@
 [![Sovereign Sports Hub](https://img.shields.io/badge/Sports%20Hub-YouTube%20%7C%20TICKETMASTER%20%7C%20ESPN%20OBSOLETE-22C55E?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-sovereign-sports-hub)
 [![Sovereign Commerce Regulation](https://img.shields.io/badge/Commerce%20Regulation-DEALERS%20%7C%20OIL%20%7C%20AMAZON%20%7C%20TICKETMASTER%20OBSOLETE-F59E0B?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-27-2026-sovereign-commerce-regulation--positions-registry)
 [![Sovereign Positions Registry](https://img.shields.io/badge/Sovereign%20Positions-24%20ROLES%20%7C%20170K%2B%20SLOTS%20%7C%20Pi%20KYC%20REQUIRED-22C55E?style=flat-square)](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#-whats-new--april-27-2026-sovereign-commerce-regulation--positions-registry)
+[![Planet-Scale Roadmap](https://img.shields.io/badge/Planet--Scale%20Roadmap-6%2F6%20COMPLETE%20%7C%20Citus%20%7C%20Redis%20Cluster%20%7C%20Multi--Region-22C55E?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
@@ -34,7 +35,62 @@
 
 ---
 
-## 🔐 IP, Identity, and Sovereign Protection
+## � What's New — May 2, 2026 (Planet-Scale Roadmap COMPLETE)
+
+[![Planet-Scale](https://img.shields.io/badge/Planet--Scale-6%2F6%20STEPS%20COMPLETE-22C55E?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+[![Citus Sharding](https://img.shields.io/badge/Postgres-CITUS%203%20WORKERS%20%7C%2032%20SHARDS%2FTABLE-336791?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+[![Redis Cluster](https://img.shields.io/badge/Redis%20Cluster-3M%2B3R%20%7C%2016384%20SLOTS-DC382D?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+[![Multi-Region](https://img.shields.io/badge/Multi--Region-ACTIVE--ACTIVE%20VERIFIED-F38020?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+
+The full 6-step horizontal-scale roadmap is now **live and end-to-end verified**. Triumph Synergy can now scale from a single host to a multi-region planet-grade deployment without rewriting application code — the same SAIB binary auto-detects and uses each new layer as it appears.
+
+| # | Layer | What it gives you | Verification |
+|---|---|---|---|
+| 1 | **SAIB → Postgres state persistence** | SAIB intelligence (interactions, level, visitors) survives container restarts and pod evictions | `saib_state(replica_id, key, value)` UPSERT every 60s; survives `docker restart` |
+| 2 | **k3s manifests** (single-host compose → Kubernetes) | Horizontal SAIB pods (3→N replicas), rolling deploys, native HA scheduling | `infrastructure/k8s/` StatefulSet + Service + ConfigMap + Job |
+| 3 | **Cloudflare CDN + edge cache** | Global geographic scale via 300+ PoPs; origin Cache-Control respected (HIT after 1st request) | `infrastructure/cloudflare/` Terraform + Worker + Tunnel manifests |
+| 4 | **Citus horizontal sharding** | Postgres scales linearly across worker nodes; SAIB rows distributed by `replica_id` → zero cross-shard contention | 3 workers, 32 shards/table on `saib_events`, `saib_state`, `saib_ref_loopholes`; pods land on distinct shards |
+| 5 | **Redis Cluster** (3 masters + 3 replicas) | Cache scales horizontally with hash-slot routing; automatic failover via replica promotion | `cluster_state:ok`, 16 384 slots, SAIB auto-uses cluster client when `REDIS_CLUSTER_NODES` is set |
+| 6 | **Multi-region active-active** | Two (or N) regions write the same Citus cluster + Redis Cluster with row-level isolation per `SAIB_REPLICA_ID`; Cloudflare LB geo-steers traffic | `region-a` ↔ `region-b` peer health green; both regions writing distinct shards (102031 / 102015) live |
+
+### Why this matters
+
+- **Conflict-free multi-region writes** — each region's pods own a unique `replica_id`, so Citus row-level last-writer-wins is sufficient; no consensus protocol or CRDTs required.
+- **Zero application rewrite for any step** — every layer is opt-in via env vars (`POSTGRES_URL`, `REDIS_CLUSTER_NODES`, `SAIB_REPLICA_ID`, `SAIB_REGION`, `SAIB_REGION_PEERS`); SAIB falls back to single-node defaults when not set.
+- **Diagnostic endpoints** — `/persist`, `/redis`, `/region` all return live JSON status (Citus worker count, Redis cluster slots, peer reachability + latency) for any monitor/LB to scrape.
+
+### Files added in this milestone
+
+- `infrastructure/citus/` — Citus coordinator + 3 workers compose, distribution scripts
+- `infrastructure/k8s-redis-cluster/redis-cluster.yaml` — 6-node StatefulSet
+- `docker-compose.redis-cluster.yml` — 6-node Redis Cluster + bootstrap
+- `infrastructure/cloudflare/saib-load-balancer.tf` — geo-steered LB with `/region` health monitor
+- `infrastructure/k8s-multi-region/saib-active-active.yaml` — per-region StatefulSet + Ingress + PDB
+- `docker-compose.region-b.yml` — local 2-region simulation overlay
+
+### Quick start (local 2-region simulation)
+
+```bash
+# Bring up Citus + Redis Cluster + region-a (uses defaults from compose)
+docker compose -f docker-compose.yml \
+               -f docker-compose.citus.yml \
+               -f docker-compose.redis-cluster.yml up -d
+
+# Add region-b on top
+SAIB_REGION=region-a SAIB_REGION_PEERS=http://triumph-apex-services-region-b:8099 \
+  docker compose -f docker-compose.yml -f docker-compose.region-b.yml \
+                 up -d apex-services apex-services-region-b
+
+# Verify both regions see each other and write distinct Citus shards
+docker exec triumph-apex-services         curl -s localhost:8099/region | jq
+docker exec triumph-apex-services-region-b curl -s localhost:8099/region | jq
+docker exec triumph-citus-coordinator psql -U postgres -d triumph_synergy \
+  -c "SELECT replica_id, get_shard_id_for_distribution_column('saib_state', replica_id) AS shard_id, updated_at FROM saib_state ORDER BY updated_at DESC;"
+```
+
+---
+
+## �🔐 IP, Identity, and Sovereign Protection
 
 Triumph Synergy is an original proprietary system conceived, built, and owned by **Jeremiah Joel Drains, Founder & Superior Sovereign** / Triumph Synergy and protected under the repository licenses in `LICENSE` and `LICENSE-PIOS`.
 
