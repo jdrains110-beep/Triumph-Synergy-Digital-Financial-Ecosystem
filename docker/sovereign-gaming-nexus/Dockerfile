@@ -13,9 +13,9 @@ COPY main.py .
 
 USER gaming
 
-EXPOSE 8110
+EXPOSE 8131
 
 HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=5 \
-    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8110/health', timeout=8)" || exit 1
+    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8131/health', timeout=8)" || exit 1
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8110", "--workers", "1", "--log-level", "info"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8131", "--workers", "1", "--log-level", "info"]

@@ -78,7 +78,7 @@ Endpoints
   GET  /payroll/employees/{eid}        employee earnings history
   POST /payroll/contracts              create smart-clause employment contract
 
-Port:     8110
+Port:     8131
 Security: APEX-QUANTUM-SOVEREIGN
 Redis DB: 10
 """
@@ -107,7 +107,7 @@ from prometheus_client import (
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
-PORT                 = int(os.getenv("PORT", "8110"))
+PORT                 = int(os.getenv("PORT", "8131"))
 REDIS_URL            = os.getenv("REDIS_URL",   "redis://triumph-redis:6379/10")
 PI_BRIDGE_URL        = os.getenv("PI_BRIDGE_URL",        "http://triumph-pi-bridge-connector:8092")
 QUANTUM_SHIELD_URL   = os.getenv("QUANTUM_SHIELD_URL",   "http://triumph-quantum-shield:8094")
@@ -181,6 +181,14 @@ _EMPLOYEES:  dict[str, dict] = {}
 _PAYROLL_BAL: dict[str, float] = defaultdict(float)                          # employer_id -> escrow Pi
 _PAYROLL_RUNS: deque = deque(maxlen=2000)
 _CONTRACTS:  dict[str, dict] = {}
+_NONCE_MEM:  dict[str, int]  = {}     # in-memory replay guard (degraded mode)
+
+# ── Studio onboarding pipeline state ─────────────────────────────────────────
+# Separate from _STUDIOS to track in-flight applications before approval.
+_ONBOARDING: dict[str, dict] = {}             # token -> application
+_ONBOARDING_BY_EMAIL: dict[str, str] = {}     # email -> token (1 active per email)
+ONBOARDING_AUTO_APPROVE = os.getenv("SGN_ONBOARDING_AUTO_APPROVE", "false").lower() == "true"
+ONBOARDING_ADMIN_TOKEN  = os.getenv("SGN_ONBOARDING_ADMIN_TOKEN", "")
 
 _redis: Optional[aioredis.Redis] = None
 
@@ -561,7 +569,23 @@ async def submit_earn(body: dict = Body(...)):
         except HTTPException:
             raise
         except Exception:
-            pass  # redis fail-open in degraded mode
+            # redis hiccup → fall through to in-memory guard
+            if nonce_key in _NONCE_MEM:
+                m_earn_rejected.labels(reason="replay").inc()
+                raise HTTPException(409, "replay detected")
+            _NONCE_MEM[nonce_key] = int(time.time())
+    else:
+        # degraded mode (no redis): in-memory replay guard
+        if nonce_key in _NONCE_MEM:
+            m_earn_rejected.labels(reason="replay").inc()
+            raise HTTPException(409, "replay detected")
+        _NONCE_MEM[nonce_key] = int(time.time())
+        # cheap eviction: cap at 50k entries
+        if len(_NONCE_MEM) > 50_000:
+            cutoff = int(time.time()) - 86400
+            for k in list(_NONCE_MEM.keys())[:10_000]:
+                if _NONCE_MEM[k] < cutoff:
+                    _NONCE_MEM.pop(k, None)
 
     # determine amount (table is the cap; body may request lower)
     table_amount = float(title["earn_table"][rule])
@@ -799,6 +823,198 @@ async def create_contract(body: dict = Body(...)):
     }
     _CONTRACTS[cid] = c
     return {"ok": True, "contract_id": cid, "contract": c}
+
+# ── Studio onboarding pipeline ──────────────────────────────────────────────
+# Self-serve flow:
+#   1. POST /onboarding/apply        -> studio submits intake form, receives a
+#                                       verification token (email link in prod)
+#   2. POST /onboarding/verify       -> studio confirms email/identity using
+#                                       the verification token; status becomes
+#                                       'pending_review' (or auto-approves if
+#                                       SGN_ONBOARDING_AUTO_APPROVE=true)
+#   3. POST /onboarding/approve      -> Triumph admin approves; SGN registers
+#                                       the studio and returns the HMAC secret
+#                                       on a one-time delivery token
+#   4. GET  /onboarding/secret/{tok} -> single-use endpoint that hands the
+#                                       secret to the studio over TLS, then
+#                                       wipes it from memory
+#   5. GET  /onboarding/status/{tok} -> polling endpoint for the studio UI
+
+@app.post("/onboarding/apply")
+async def onboarding_apply(body: dict = Body(...)):
+    name    = (body.get("studio_name") or "").strip()
+    email   = (body.get("contact_email") or "").strip().lower()
+    country = (body.get("country") or "US").strip().upper()
+    if not name or not email or "@" not in email:
+        raise HTTPException(400, "studio_name and valid contact_email required")
+
+    # Reject duplicate active applications
+    if email in _ONBOARDING_BY_EMAIL:
+        prior = _ONBOARDING.get(_ONBOARDING_BY_EMAIL[email])
+        if prior and prior.get("status") not in {"approved", "rejected"}:
+            raise HTTPException(409, "an application for this email is already in flight")
+
+    token = secrets.token_urlsafe(32)
+    verification_code = secrets.token_urlsafe(12)
+    app_record = {
+        "token": token,
+        "studio_name": name,
+        "contact_email": email,
+        "country": country,
+        "primary_titles": body.get("primary_titles", []),
+        "expected_mau": int(body.get("expected_mau", 0)),
+        "engineer_headcount": int(body.get("engineer_headcount", 0)),
+        "pi_treasury_address": body.get("pi_treasury_address"),
+        "verification_code": verification_code,
+        "status": "awaiting_verification",
+        "created_at": int(time.time()),
+        "updated_at": int(time.time()),
+        "studio_id": None,
+        "secret_delivery_token": None,
+        "quantum_sig": quantum_sign({"app": token, "email": email, "name": name}),
+    }
+    _ONBOARDING[token] = app_record
+    _ONBOARDING_BY_EMAIL[email] = token
+
+    # In production: SAIB sends the verification_code to contact_email via
+    # the existing SAIB GitHub greet rail or an SMTP service. Local dev returns
+    # it inline so curl-based smoke tests can complete the flow.
+    return {
+        "ok": True,
+        "token": token,
+        "status": app_record["status"],
+        "next_step": "POST /onboarding/verify with {token, verification_code}",
+        "verification_code_dev_only": verification_code,
+    }
+
+@app.post("/onboarding/verify")
+async def onboarding_verify(body: dict = Body(...)):
+    token = body.get("token")
+    code  = body.get("verification_code")
+    app_record = _ONBOARDING.get(token or "")
+    if not app_record:
+        raise HTTPException(404, "unknown token")
+    if app_record["status"] != "awaiting_verification":
+        raise HTTPException(409, f"cannot verify in status={app_record['status']}")
+    if not code or not secrets.compare_digest(str(code), app_record["verification_code"]):
+        raise HTTPException(403, "invalid verification_code")
+
+    app_record["status"] = "approved" if ONBOARDING_AUTO_APPROVE else "pending_review"
+    app_record["updated_at"] = int(time.time())
+    if ONBOARDING_AUTO_APPROVE:
+        return await _onboarding_finalise(app_record)
+    return {"ok": True, "token": token, "status": app_record["status"],
+            "next_step": "Triumph admin will approve via POST /onboarding/approve"}
+
+@app.post("/onboarding/approve")
+async def onboarding_approve(body: dict = Body(...), request: Request = None):
+    token = body.get("token")
+    admin = body.get("admin_token") or (request.headers.get("x-sgn-admin-token") if request else None)
+    if not ONBOARDING_ADMIN_TOKEN or not admin or \
+       not secrets.compare_digest(str(admin), ONBOARDING_ADMIN_TOKEN):
+        raise HTTPException(403, "admin_token required")
+    app_record = _ONBOARDING.get(token or "")
+    if not app_record:
+        raise HTTPException(404, "unknown token")
+    if app_record["status"] not in {"pending_review", "awaiting_verification"}:
+        raise HTTPException(409, f"cannot approve in status={app_record['status']}")
+    app_record["status"] = "approved"
+    app_record["updated_at"] = int(time.time())
+    return await _onboarding_finalise(app_record)
+
+@app.post("/onboarding/reject")
+async def onboarding_reject(body: dict = Body(...), request: Request = None):
+    token = body.get("token")
+    reason = body.get("reason", "")
+    admin = body.get("admin_token") or (request.headers.get("x-sgn-admin-token") if request else None)
+    if not ONBOARDING_ADMIN_TOKEN or not admin or \
+       not secrets.compare_digest(str(admin), ONBOARDING_ADMIN_TOKEN):
+        raise HTTPException(403, "admin_token required")
+    app_record = _ONBOARDING.get(token or "")
+    if not app_record:
+        raise HTTPException(404, "unknown token")
+    app_record["status"] = "rejected"
+    app_record["reject_reason"] = str(reason)[:240]
+    app_record["updated_at"] = int(time.time())
+    return {"ok": True, "token": token, "status": "rejected"}
+
+async def _onboarding_finalise(app_record: dict) -> dict:
+    """Create the studio record and stash the HMAC secret behind a one-time
+    delivery token. The secret is never returned through this endpoint."""
+    studio_resp = await register_studio({
+        "name": app_record["studio_name"],
+        "country": app_record["country"],
+        "contact_email": app_record["contact_email"],
+        "pi_treasury_address": app_record.get("pi_treasury_address"),
+    })
+    studio_id  = studio_resp["studio_id"]
+    secret     = studio_resp["hmac_secret"]
+    deliver_tok = secrets.token_urlsafe(40)
+
+    app_record["studio_id"]              = studio_id
+    app_record["secret_delivery_token"]  = deliver_tok
+    app_record["status"]                 = "secret_ready"
+    app_record["updated_at"]             = int(time.time())
+    # Park the secret on the application record only — wiped on first GET
+    app_record["_one_time_secret"]       = secret
+    return {
+        "ok": True,
+        "token": app_record["token"],
+        "studio_id": studio_id,
+        "status": "secret_ready",
+        "secret_delivery_url": f"/onboarding/secret/{deliver_tok}",
+        "expires_in_s": 3600,
+    }
+
+@app.get("/onboarding/secret/{deliver_tok}")
+async def onboarding_secret(deliver_tok: str):
+    # Find the matching application
+    target = None
+    for rec in _ONBOARDING.values():
+        if rec.get("secret_delivery_token") == deliver_tok:
+            target = rec
+            break
+    if not target:
+        raise HTTPException(404, "delivery token not found or already consumed")
+    if "_one_time_secret" not in target:
+        raise HTTPException(410, "secret already retrieved (one-time delivery)")
+    if int(time.time()) - target["updated_at"] > 3600:
+        target.pop("_one_time_secret", None)
+        raise HTTPException(410, "delivery token expired")
+    secret = target.pop("_one_time_secret")
+    target["status"] = "active"
+    target["secret_delivered_at"] = int(time.time())
+    return {
+        "ok": True,
+        "studio_id": target["studio_id"],
+        "hmac_secret": secret,
+        "hmac_version": SGN_HMAC_VERSION,
+        "warning": "store in your studio backend immediately; this endpoint is single-use",
+    }
+
+@app.get("/onboarding/status/{token}")
+async def onboarding_status(token: str):
+    app_record = _ONBOARDING.get(token)
+    if not app_record:
+        raise HTTPException(404, "unknown token")
+    safe = {k: v for k, v in app_record.items()
+            if k not in {"_one_time_secret", "verification_code"}}
+    return safe
+
+@app.get("/onboarding")
+async def onboarding_list(request: Request):
+    """Admin-only list of all in-flight applications."""
+    admin = request.headers.get("x-sgn-admin-token")
+    if not ONBOARDING_ADMIN_TOKEN or not admin or \
+       not secrets.compare_digest(str(admin), ONBOARDING_ADMIN_TOKEN):
+        raise HTTPException(403, "admin_token required")
+    return {
+        "count": len(_ONBOARDING),
+        "applications": [
+            {k: v for k, v in r.items() if k not in {"_one_time_secret", "verification_code"}}
+            for r in _ONBOARDING.values()
+        ],
+    }
 
 # ── Background scheduler — runs all hourly/daily payroll cycles automatically.
 
