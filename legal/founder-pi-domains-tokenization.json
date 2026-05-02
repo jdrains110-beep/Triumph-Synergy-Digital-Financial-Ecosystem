@@ -1,0 +1,243 @@
+{
+  "company": "Triumph Synergy",
+  "domains": {
+    "appleandeve.pi": {
+      "cascade_over": [
+        "appleandeve.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "a36beeb08946ef9ba4b45d6944d6d78b16a14706d576a4d4298728159658d3f2",
+      "stellar_anchor_tx": "b816da17488ce503fae5d4950896609eaefb36ab98007a8b230087c1caa376ca",
+      "stellar_ledger": 26102175,
+      "token_id": "dcc3ea7b1657fe00e70d245b7187bb34b2d6987e4e36370d56017f5840735786"
+    },
+    "checkbeck.pi": {
+      "cascade_over": [
+        "checkbeck.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "f9a0eac55f9de1939cd348d13e31ccd45c1c124802cd1af0aac782e7a83a7323",
+      "stellar_anchor_tx": "204d50d1b3169324c8ec70eeac35cd0891eae2d11a4602d51ff09b62144424f4",
+      "stellar_ledger": 26481232,
+      "token_id": "f80040d64c00fa24206f45168f08edfb2a28032074e1e4160e016589dcc7d1cf"
+    },
+    "circuit7.pi": {
+      "cascade_over": [
+        "circuit7.org"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "a1fead00b344f4812d6b89e8abf872352fe8a71c680c8a27ed635f77639c8c75",
+      "stellar_anchor_tx": "c4a4521e3955007c24066e5a8e1ae4e98192d50ca72fa3ec0c65f387fa49c143",
+      "stellar_ledger": 26102175,
+      "token_id": "ced3a1c63c33e0b707f6db2f3bea4052178d2b470e5c80836658d18a57158e4c"
+    },
+    "daytonainternationalspeedway.pi": {
+      "cascade_over": [
+        "daytonainternationalspeedway.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "126c0a935f90893443f08c3b2357dd7d3d4e6e2b096aa217027c00ccc5866a03",
+      "stellar_anchor_tx": "4d391124816f0e817d95b5ea717a0c423ea0a36a20dad8079d481496e8aaf27d",
+      "stellar_ledger": 26481233,
+      "token_id": "e5382daa6f66f2b2ff243d1308ee39d1cf98b32d0e6385638cc3fc7616b64487"
+    },
+    "gracekennedy.pi": {
+      "cascade_over": [
+        "gracekennedy.com",
+        "gkfoods.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "69aadc1df0b0acfd198668543d60761ab4c242b01130250bf852c4a3948f710f",
+      "retried_after_rate_limit": true,
+      "stellar_anchor_tx": "a98ba4f65589875d8b76c4a4358e14a81dbc04aa62f21a437ef73192b4661a5f",
+      "stellar_ledger": null,
+      "token_id": "ead169a118784e87c1a660714bb74470d287b8950fce4bb6624921dbd3645084"
+    },
+    "gru.pi": {
+      "cascade_over": [
+        "gru.com.br",
+        "gruairport.com.br"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "5541e0f9efee2e06f7c579112daf9bb22cddb8cd0178233875ce0a1a0a6ddf29",
+      "stellar_anchor_tx": "eece507fb610584275966a56edce7859f47a1dac990999a5a257165f1381a889",
+      "stellar_ledger": 26481229,
+      "token_id": "37cf249dc5a84f04d9fe9908f3793b0036f2016ba9c9a09fc2e9ad4896c21296"
+    },
+    "jamrockmart.pi": {
+      "cascade_over": [
+        "jamrockmart.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "496d851d4010addd9f4e791cb022bfa8d90ddab16e7dae81e21bca9cf54d0e17",
+      "stellar_anchor_tx": "fef4a1e9c4806bc51c5d3e0a464069178835800ae23a21c17d8104e2f9e3992b",
+      "stellar_ledger": 26481253,
+      "token_id": "0419e947c5f40915afc9adfc05c3fcd1a0af68e467a08fef1aa6e4e4ec477da1"
+    },
+    "magellanjets.pi": {
+      "cascade_over": [
+        "magellanjets.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "1f77ffc5a908a02a03906cf52dbc4d80b79dc0c005641034ca51f991816878ec",
+      "stellar_anchor_tx": "c2b3c26ddd2c9169831f415fc2072e169e84cefe122a77cdb610fb9845d978db",
+      "stellar_ledger": 26481245,
+      "token_id": "4ebe4eb55e672f7ea09c9be0c90fb1600dcc3e0af81e8ebb66bafb486fe4ad50"
+    },
+    "netjets.pi": {
+      "cascade_over": [
+        "netjets.com",
+        "owners.netjets.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "f5e71b98239123b917623ce89a38404920abce2152faae75be1304a35ccddf4a",
+      "stellar_anchor_tx": "1637039b98f44db1e7dfc6f170541acdd3673f2e1f31da19281421db032206e8",
+      "stellar_ledger": 26481230,
+      "token_id": "ac24f9b4b3731d7c8f08098a4589ee7aec88daf1b6831dfa5c2af722e28ba4fe"
+    },
+    "palatkaha.pi": {
+      "cascade_over": [
+        "palatkaha.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "89ac3d74ebc0b254b525458c3b1e949b55c52c26d312afd38e6e18edfdf27447",
+      "retried_after_rate_limit": true,
+      "stellar_anchor_tx": "7a8522015238781e5f54d173b9f7e9a85c79f5710dbe20e6f6626e04c6b66946",
+      "stellar_ledger": null,
+      "token_id": "dbfc8e3bc65f5e4f7c2725d6f02b6213c5a2429a5958d97a932dc107678545b1"
+    },
+    "putnamclerk.pi": {
+      "cascade_over": [
+        "putnam-fl.com",
+        "putnamclerk.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "90b6513daa7131717a7afec471494856ae2c55b3d1556d0271675086cf2673ce",
+      "stellar_anchor_tx": "7779c6b7329cfc25f34d01bb2e847678c0acee3130bb10f7441bc3f1e75045c4",
+      "stellar_ledger": 26481231,
+      "token_id": "0c74b9783440398788f46bbf9eec011c2f49d407812d474efb5137d1494e7599"
+    },
+    "rulonco.pi": {
+      "cascade_over": [
+        "rulonco.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "0ec61985dfe509c8c5174582c7019fcd3c3f6d03d817c3df069ed4c7c1dd2286",
+      "stellar_anchor_tx": "c40d47ee907158b208c3e33ad9d86163e7aa2084a78c1ae9b518db5634e4b3c0",
+      "stellar_ledger": 26481247,
+      "token_id": "08f454f118b8a1766ef4001215e367a474b3b695d350d059720abd2992413898"
+    },
+    "seprod.pi": {
+      "cascade_over": [
+        "seprod.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "c505019374c67860e232f84869a9a7dd60638391a60ba9536bd068a772cbba5b",
+      "stellar_anchor_tx": "8219da5a8c56299fd04181c991577aa5cd5b09eca7ea9735575fdcb2086fc77d",
+      "stellar_ledger": 26481253,
+      "token_id": "23360c1615ac808e40f55de316afb1bb4e3127a54086ea84ead6cb0d5098a670"
+    },
+    "shands.pi": {
+      "cascade_over": [
+        "shands.org"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "8f47dd9ed242b3616a5296e4bd2adffe61d61dbd3f86137460442e26148904b7",
+      "stellar_anchor_tx": "85c78c71eb65222ed5f54b322ab43bfaa53763c900361c04022ea4d4493fefce",
+      "stellar_ledger": 26481230,
+      "token_id": "229c479b1341b36c59a97f3e723b7c88059dbaf5276c8366c8c69fae493752ec"
+    },
+    "sonnysbbq.pi": {
+      "cascade_over": [
+        "sonnysbbq.com",
+        "order.sonnysbbq.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "6d13fd7c1537518bcdc607ab1f4f57ca4d4d4e03fb55aba2fcd72ade782b88ab",
+      "stellar_anchor_tx": "48bea45db56f5b5c8d2ce6dbeca529d6509472e3ce531989d0d0fdd557dd5f19",
+      "stellar_ledger": 26481230,
+      "token_id": "e227d5c8e5e9a3f9fa756ccbd2f75a29142bf1faad8992355b00a77256e749a5"
+    },
+    "ufhealth.pi": {
+      "cascade_over": [
+        "ufhealth.org",
+        "my.ufhealth.org"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "ed293334ac63a47e3b266b08db393963d78d38b5ca34edf717647793402b50b0",
+      "stellar_anchor_tx": "5ea2bd9aa2f560b50dd75651e08125411d7b100d059f3b7f34110e24fd2f91c0",
+      "stellar_ledger": 26481230,
+      "token_id": "884250683332bd7e671adf931b5e9f87e5c0cbe8540c9e4f509d233e8b028805"
+    },
+    "ufl.pi": {
+      "cascade_over": [
+        "ufl.edu",
+        "one.ufl.edu"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "50387b61bd69a45cf6074b178965425cd82630c426fbbb69524b242d13c46395",
+      "stellar_anchor_tx": "00713892e1c43cf744c4e224306f0926380efcb2328db445f690fc3f09177ce9",
+      "stellar_ledger": 26481230,
+      "token_id": "569d947def1aaec45bc06ecbbf45df5d0cbf83a6938c7d527cf69981bf6b6ad9"
+    },
+    "wingstop.pi": {
+      "cascade_over": [
+        "wingstop.com",
+        "order.wingstop.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "488ee7aec15161a6b4d8d77d943219ddd3b09838fe823259e98059fedf0ed936",
+      "stellar_anchor_tx": "c8818db36ba0a3353b6f03598e09da29ad6b5ec1810ebb79e799194a063ba51f",
+      "stellar_ledger": 26481224,
+      "token_id": "0ef27d7f4c473538203deebbf5ee1acfb0547d7425125b57d43f06472d232a6a"
+    },
+    "winnebago.pi": {
+      "cascade_over": [
+        "winnebago.com"
+      ],
+      "fortress_score": null,
+      "http_status": 201,
+      "pi_blockchain_tx": "fa8cdf8f58fcea558b874dbbbcbdcf09f42a3e1ffff4618e7b6f1a4f94d4de0b",
+      "retried_after_rate_limit": true,
+      "stellar_anchor_tx": "417a296f8946aeaeea97162e35fb70402f6dccb83325beed1e6739ff6682efea",
+      "stellar_ledger": null,
+      "token_id": "53a7c910042f078513a1adb2124fd9a079ae8760f616886f9ea2cf4b40194841"
+    }
+  },
+  "finalized_at_utc": "2026-05-02T22:25:01Z",
+  "founder": "Jeremiah Joel Drains",
+  "owner_username": "jdrains30",
+  "owner_wallet": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+  "ownership_model": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH",
+  "summary": {
+    "already_tokenized": 0,
+    "failed": [],
+    "minted": 19,
+    "retried_after_rate_limit": [
+      "gracekennedy.pi",
+      "winnebago.pi",
+      "palatkaha.pi"
+    ],
+    "total": 19
+  },
+  "tokenized_at_utc": "2026-05-02T22:14:43Z",
+  "valuation_pi": "1"
+}
