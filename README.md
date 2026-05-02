@@ -30,6 +30,7 @@
 [![Planet-Scale Roadmap](https://img.shields.io/badge/Planet--Scale%20Roadmap-6%2F6%20COMPLETE%20%7C%20Citus%20%7C%20Redis%20Cluster%20%7C%20Multi--Region-22C55E?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
 [![Sovereign Gaming Nexus](https://img.shields.io/badge/Sovereign%20Gaming%20Nexus-AAA%20STUDIOS%20%7C%20PLAYERS%20%2B%20ENGINEERS%20EARN%20Pi-7C3AED?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
 [![SAIB i18n](https://img.shields.io/badge/SAIB%20i18n-16%20LANGUAGES%20%7C%2050%2B%20COUNTRY%20MAP-0EA5E9?style=flat-square)](#-whats-new--may-2-2026-saib-region-awareness--multi-language)
+[![Mainnet Buy-In Policy](https://img.shields.io/badge/Pi%20Mainnet-BUY--IN%20%7C%20MINING%20CONTINUES%20%7C%20Internal%20%2B%20External-EAB308?style=flat-square)](legal/pi-mainnet-buyin-policy.md)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
@@ -1149,7 +1150,7 @@ Eight sovereign regulatory authorities replace predatory industry middlemen with
 - **SMEA** — Sovereign Media & Entertainment Authority: replaces Ticketmaster/MPAA (28% service fees, +142% cinema ticket inflation since 2005), 12 loopholes including dynamic ticket pricing, exclusive venue lock-in
 - **SEVA** — Sovereign Events & Venues Authority: replaces event monopolies (avg $48k zoning & venue cost), 12 loopholes including exclusivity contracts, insurance inflation
 - **SLRA** — Sovereign Land & Real-Estate Authority: replaces NAR/Zillow (avg $48k avg per transaction), 12 loopholes including commission steering, pocket listings
-- **Pi Economics**: External rate $314.159 USD/π · Internal Pioneer rate $314,159 USD/π (1000× multiplier)
+- **Pi Economics**: External rate $314.159 USD/π · Internal Pioneer rate $314,159 USD/π (1000× multiplier) — see the [Pi Mainnet Buy-In Policy](legal/pi-mainnet-buyin-policy.md) for the post-mainnet two-tier acquisition structure (mining persists until the Pi Network expansion formula is reached; non-miners acquire via internal/external Buy-In)
 - **Dashboard**: `/ecosystem/sovereign-commerce-regulation` — real-time sector stats, fair-price table, loophole index, API reference (20 endpoints)
 
 ```
