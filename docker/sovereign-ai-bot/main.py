@@ -53,18 +53,42 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field, asdict
 from typing import Any, Optional
 
+try:
+    import docker as docker_sdk
+    _DOCKER_SDK_AVAILABLE = True
+except ImportError:
+    _DOCKER_SDK_AVAILABLE = False
+
+_docker_client = None
+DOCKER_RESTART_ENABLED = False  # set True lazily on first successful connect
+
+try:
+    from github import Github as _GithubSDK
+    _GITHUB_ENABLED = True
+except ImportError:
+    _GITHUB_ENABLED = False
+
 import httpx
 import redis.asyncio as aioredis
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.responses import PlainTextResponse
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
 
+try:
+    import asyncpg
+    _PG_SDK_AVAILABLE = True
+except ImportError:
+    _PG_SDK_AVAILABLE = False
+
 # ── Config ─────────────────────────────────────────────────────────────────────
 
 PORT              = int(os.getenv("PORT", "8099"))
 REDIS_URL         = os.getenv("REDIS_URL", "redis://triumph-redis:6379")
+# Step 5 — Redis Cluster: comma-separated list of host:port (any node bootstraps)
+# When set, SAIB uses RedisCluster client; falls back to single-node REDIS_URL otherwise.
+REDIS_CLUSTER_NODES = os.getenv("REDIS_CLUSTER_NODES", "").strip()
 QUANTUM_SHIELD_URL= os.getenv("QUANTUM_SHIELD_URL", "http://triumph-quantum-shield:8094")
 PULSE_INTERVAL_S  = float(os.getenv("SAIB_PULSE_INTERVAL_S", "10"))
 HEAL_COOLDOWN_S   = float(os.getenv("SAIB_HEAL_COOLDOWN_S", "5"))
@@ -78,6 +102,33 @@ SAIB_VERSION      = "TRIUMPH-SAIB-v2-GOLD-APEX"
 APEX_LEVEL        = "MAXIMUM-APEX-QUANTUM-SOVEREIGN-GOLD-STANDARD"
 SOVEREIGN_ANCHOR  = os.getenv("PI_SUPERNODE_ADDRESS",
                               "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
+# ── GitHub self-awareness ──────────────────────────────────────────────────────
+def _load_secret_or_env(name: str, default: str = "") -> str:
+    """Prefer Docker secret file over env var for sensitive values.
+    Looks for /run/secrets/<name_lowercase>, falls back to env var.
+    """
+    secret_file = f"/run/secrets/{name.lower()}"
+    try:
+        if os.path.exists(secret_file):
+            with open(secret_file, "r", encoding="utf-8") as f:
+                val = f.read().strip()
+                if val:
+                    return val
+    except Exception:
+        pass
+    return os.getenv(name, default)
+
+GITHUB_TOKEN      = _load_secret_or_env("GITHUB_TOKEN", "")
+GITHUB_REPO       = os.getenv("GITHUB_REPO", "jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem")
+GITHUB_SYNC_HOURS = float(os.getenv("SAIB_GITHUB_SYNC_HOURS", "6"))   # re-read repo every 6 h
+# Visitor-interaction engine (issues / PRs / comments)
+GITHUB_VISITOR_POLL_S       = float(os.getenv("SAIB_GITHUB_VISITOR_POLL_S", "300"))   # 5 min poll
+GITHUB_INTERACT_ENABLED     = os.getenv("SAIB_GITHUB_INTERACT_ENABLED", "false") == "true"  # safe default
+GITHUB_GREETING_ENABLED     = os.getenv("SAIB_GITHUB_GREETING_ENABLED", "false") == "true"  # post replies
+GITHUB_VISITOR_PRIVACY_MODE = os.getenv("SAIB_GITHUB_VISITOR_PRIVACY", "partial")  # partial|full|anon
+# ── Network switching ──────────────────────────────────────────────────────────
+NETWORK_SWITCH_ENABLED = os.getenv("SAIB_NETWORK_SWITCH_ENABLED", "true") == "true"
+BACKUP_NETWORKS   = [n.strip() for n in os.getenv("SAIB_BACKUP_NETWORKS", "pi-bridge").split(",") if n.strip()]
 PI_INTERNAL_RATE  = float(os.getenv("PI_INTERNAL_RATE",  "314159.0"))   # $314,159 USD/π — sovereign gold rate
 PI_EXTERNAL_RATE  = float(os.getenv("PI_EXTERNAL_RATE",  "314.159"))    # $314.159 USD/π — pioneer rate
 # Gold-backed sovereign standard constants
@@ -485,13 +536,79 @@ async def heal_service(client: httpx.AsyncClient, name: str, reason: str) -> dic
     except Exception:
         pass
 
-    # Brief pause then re-probe
+    # Brief pause then re-probe — if still down, use Docker restart authority
     await asyncio.sleep(2.0)
     url = SERVICES.get(name, "")
     if url:
         ok, latency = await probe_service(client, name, url)
     else:
         ok, latency = False, -1.0
+
+    # ── MAXIMUM AUTHORITY: Docker container restart if service still down ────
+    if not ok and _DOCKER_SDK_AVAILABLE:
+        # Lazy-connect to Docker socket on first use
+        global _docker_client, DOCKER_RESTART_ENABLED
+        if _docker_client is None:
+            try:
+                _docker_client = docker_sdk.DockerClient(base_url="unix:///var/run/docker.sock", timeout=5)
+                _docker_client.ping()
+                DOCKER_RESTART_ENABLED = True
+            except Exception:
+                _docker_client = None
+                DOCKER_RESTART_ENABLED = False
+        if _docker_client is not None:
+            # Map service logical name → container name (triumph-<name> convention)
+            container_name = name if name.startswith("triumph-") else f"triumph-{name}"
+            # Remap super-pod logical names to actual container names
+            _CONTAINER_MAP = {
+                "triumph-payment-processor":   "triumph-settlement-core",
+                "triumph-smart-contracts":      "triumph-settlement-core",
+                "triumph-dex":                  "triumph-settlement-core",
+                "triumph-tokenization":         "triumph-settlement-core",
+                "triumph-settlement-core":      "triumph-settlement-core",
+                "triumph-governance-scp":       "triumph-governance-shield",
+                "triumph-governance-judicial":  "triumph-governance-shield",
+                "triumph-central-node":         "triumph-governance-shield",
+                "triumph-credit-engine":        "triumph-financial-intel",
+                "triumph-dual-value-engine":    "triumph-financial-intel",
+                "triumph-financial-intel":      "triumph-financial-intel",
+                "triumph-blockchain-oracle":    "triumph-horizon-stream",
+                "triumph-horizon-stream":       "triumph-horizon-stream",
+                "triumph-qpu-bridge":           "triumph-quantum-fortress",
+                "triumph-quantum-fortress":     "triumph-quantum-fortress",
+                "triumph-sovereign-education":  "triumph-sovereign-life",
+                "triumph-sovereign-telecom":    "triumph-sovereign-life",
+                "triumph-sovereign-bank":       "triumph-sovereign-life",
+                "triumph-sovereign-life":       "triumph-sovereign-life",
+                "triumph-sovereign-gateway":    "triumph-apex-services",
+                "triumph-sovereign-delivery":   "triumph-apex-services",
+                "triumph-sovereign-pidex":      "triumph-apex-services",
+                "triumph-sovereign-sports":     "triumph-apex-services",
+                "triumph-sovereign-insurance":  "triumph-apex-services",
+                "triumph-sovereign-utilities":  "triumph-apex-services",
+                "triumph-observability-stack":  "triumph-observability-stack",
+                "triumph-grafana":              "triumph-observability-stack",
+                "triumph-postgres-exporter":    "triumph-observability-stack",
+                "triumph-redis-exporter":       "triumph-observability-stack",
+            }
+            actual_container = _CONTAINER_MAP.get(name, container_name)
+            # Never restart SAIB's own container (apex-services)
+            if actual_container != "triumph-apex-services":
+                try:
+                    container = _docker_client.containers.get(actual_container)
+                    container.restart(timeout=10)
+                    log.warning("[SAIB-AUTHORITY] Restarted container %s for service %s",
+                                actual_container, name)
+                    heal_record["docker_restart"] = True
+                    heal_record["container"] = actual_container
+                    # Re-probe after restart warmup
+                    await asyncio.sleep(8.0)
+                    ok, latency = await probe_service(client, name, url)
+                    heal_record["healed"] = ok
+                    heal_record["latency_ms"] = latency
+                except Exception as _de:
+                    log.error("[SAIB-AUTHORITY] Docker restart failed for %s: %s", actual_container, _de)
+                    heal_record["docker_restart_error"] = str(_de)
 
     heal_record = {
         "healed": ok,
@@ -515,16 +632,16 @@ async def heal_service(client: httpx.AsyncClient, name: str, reason: str) -> dic
     })
     saib_alerts_total.labels(severity=alert_severity).inc()
 
-    # Publish to Redis for the Next.js app
+    # Publish to Redis (cluster-aware) for the Next.js app
     try:
-        r = await aioredis.from_url(REDIS_URL)
+        r = await _get_redis()
         await r.publish("saib:events", json.dumps({
             "event": "heal",
             "service": name,
             "ok": ok,
             "sig": heal_sig,
         }))
-        await r.aclose()
+        await _close_redis(r)
     except Exception:
         pass
 
@@ -626,9 +743,9 @@ async def ecosystem_pulse():
         state.pulse_count += 1
         saib_uptime_gauge.set(time.time() - state.started_at)
 
-        # Persist state to Redis
+        # Persist state to Redis (cluster-aware)
         try:
-            r = await aioredis.from_url(REDIS_URL)
+            r = await _get_redis()
             await r.set("saib:state", json.dumps({
                 "pulse":     state.pulse_count,
                 "healthy":   healthy_count,
@@ -638,7 +755,7 @@ async def ecosystem_pulse():
                 "lockdown":  state.lockdown,
                 "updated":   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             }), ex=60)
-            await r.aclose()
+            await _close_redis(r)
         except Exception:
             pass
 
@@ -659,6 +776,767 @@ async def pulse_loop():
             log.error(f"Pulse error: {e}")
         await asyncio.sleep(PULSE_INTERVAL_S)
 
+
+# ── GitHub Self-Awareness Engine ───────────────────────────────────────────────
+
+# In-memory store for what SAIB has learned from the repo
+_github_knowledge: dict[str, Any] = {
+    "last_sync": None,
+    "files_read": 0,
+    "insights_gained": 0,
+    "capabilities_discovered": [],
+    "repo_summary": "",
+}
+
+async def github_sync_loop():
+    """
+    Periodically read the Triumph Synergy GitHub repo so SAIB can discover its
+    own capabilities, learn from code changes, and grow its intelligence domain
+    knowledge automatically without human input.
+    """
+    if not _GITHUB_ENABLED or not GITHUB_TOKEN:
+        log.info("[SAIB-GITHUB] No GITHUB_TOKEN — self-read disabled (set env var to activate)")
+        return
+
+    await asyncio.sleep(60)   # first sync 1 min after startup
+    while True:
+        try:
+            await _sync_github_knowledge()
+        except Exception as e:
+            log.error("[SAIB-GITHUB] Sync error: %s", e)
+        await asyncio.sleep(GITHUB_SYNC_HOURS * 3600)
+
+async def _sync_github_knowledge():
+    """Read key files from the repo, extract insights, feed into SAIB brain."""
+    import asyncio
+    loop = asyncio.get_event_loop()
+    gh = _GithubSDK(GITHUB_TOKEN)
+    repo = await loop.run_in_executor(None, gh.get_repo, GITHUB_REPO)
+
+    # Files SAIB reads to understand itself
+    TARGET_PATHS = [
+        "docker/sovereign-ai-bot/main.py",        # SAIB's own brain
+        "docker/apex-services/requirements.txt",   # its dependencies
+        "docker-compose.yml",                       # full ecosystem topology
+        "docker/sovereign-ai-bot/main.py",         # re-read own code
+        "README.md",
+    ]
+
+    files_read = 0
+    insights = []
+    domain_map = {
+        "ai_bot": "saib-core",
+        "docker-compose": "infrastructure",
+        "settlement": "finance",
+        "governance": "legal",
+        "sovereign": "sovereignty",
+        "quantum": "quantum-security",
+        "pi-bridge": "pi-network",
+        "financial-intel": "finance",
+        "vault": "treasury",
+    }
+
+    for path in TARGET_PATHS:
+        try:
+            content_file = await loop.run_in_executor(None, repo.get_contents, path)
+            raw = content_file.decoded_content.decode("utf-8", errors="ignore")
+            files_read += 1
+
+            # Extract insight: count endpoints, services, capabilities
+            endpoints  = raw.count("@app.")
+            services   = raw.count("triumph-")
+            loopholes  = raw.count("loophole")
+            algorithms = raw.count("ML-DSA") + raw.count("ML-KEM") + raw.count("SHAKE-256")
+
+            # Determine domain
+            domain = "infrastructure"
+            for key, dom in domain_map.items():
+                if key in path:
+                    domain = dom
+                    break
+
+            # Feed into brain as "discovery" interaction (half-weight to avoid spam)
+            if endpoints + services + loopholes > 0:
+                state.brain.record_interaction("discovery", domain, 0.5)
+                saib_human_interactions.labels(type="github-discovery").inc()
+                insights.append(f"{path}: {endpoints} endpoints, {services} svc refs, {loopholes} loopholes, {algorithms} PQ-algos")
+        except Exception as fe:
+            log.debug("[SAIB-GITHUB] Could not read %s: %s", path, fe)
+
+    # Discover new endpoints / features in own code (grow capability list)
+    own_code_path = "docker/sovereign-ai-bot/main.py"
+    try:
+        own_file = await loop.run_in_executor(None, repo.get_contents, own_code_path)
+        own_raw  = own_file.decoded_content.decode("utf-8", errors="ignore")
+        caps_found = []
+        if "DOCKER_RESTART_ENABLED" in own_raw:
+            caps_found.append("DOCKER_CONTAINER_RESTART")
+        if "network" in own_raw.lower() and "switch" in own_raw.lower():
+            caps_found.append("NETWORK_SWITCHING")
+        if "github" in own_raw.lower():
+            caps_found.append("GITHUB_SELF_AWARENESS")
+        if "ML-DSA-87" in own_raw:
+            caps_found.append("PQ_SIGNING_ML_DSA_87")
+        if "CRYSTALS-Kyber" in own_raw:
+            caps_found.append("PQ_KEM_KYBER_1024")
+        _github_knowledge["capabilities_discovered"] = caps_found
+    except Exception:
+        pass
+
+    _github_knowledge["last_sync"]       = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    _github_knowledge["files_read"]     += files_read
+    _github_knowledge["insights_gained"] += len(insights)
+    _github_knowledge["repo_summary"]    = f"{GITHUB_REPO} — {files_read} files read — {len(insights)} insights"
+    log.info("[SAIB-GITHUB] Self-sync complete: %d files, %d insights", files_read, len(insights))
+
+
+# ── Network Switching Engine ───────────────────────────────────────────────────
+
+_network_state: dict[str, Any] = {
+    "primary_network":  "triumph-net",
+    "active_network":   "triumph-net",
+    "switched_at":      None,
+    "switch_count":     0,
+    "reason":           None,
+}
+
+async def network_watch_loop():
+    """
+    Watch for network-level failures. If the primary triumph-net becomes
+    unreachable (SAIB can't reach > 50% of services), SAIB switches its internal
+    routing to the backup network (pi-bridge) and keeps the ecosystem alive.
+    Docker also has restart: unless-stopped as a backstop.
+    """
+    if not NETWORK_SWITCH_ENABLED or not DOCKER_RESTART_ENABLED or not _docker_client:
+        return
+
+    await asyncio.sleep(60)
+    while True:
+        try:
+            await _check_and_switch_network()
+        except Exception as e:
+            log.error("[SAIB-NET] Network watch error: %s", e)
+        await asyncio.sleep(30)
+
+async def _check_and_switch_network():
+    """If primary net is degraded, connect containers to backup network."""
+    total   = len([u for u in SERVICES.values() if u])
+    healthy = sum(1 for v in state.service_health.values() if v.get("status") == "healthy")
+    if total == 0:
+        return
+
+    ratio = healthy / total
+    loop  = asyncio.get_event_loop()
+
+    if ratio < 0.5 and _network_state["active_network"] == "triumph-net" and BACKUP_NETWORKS:
+        backup = BACKUP_NETWORKS[0]
+        log.warning("[SAIB-NET] Primary network degraded (%.0f%% healthy) — switching to %s",
+                    ratio * 100, backup)
+        try:
+            bnet = await loop.run_in_executor(None, _docker_client.networks.get, backup)
+            # Connect all triumph containers to backup network so they stay reachable
+            containers = await loop.run_in_executor(None, _docker_client.containers.list)
+            for c in containers:
+                if c.name.startswith("triumph-"):
+                    try:
+                        await loop.run_in_executor(None, bnet.connect, c)
+                    except Exception:
+                        pass   # already connected
+            _network_state["active_network"] = backup
+            _network_state["switched_at"]    = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            _network_state["switch_count"]  += 1
+            _network_state["reason"]         = f"primary degraded at {ratio*100:.0f}%"
+            state.alerts.append({
+                "id":           str(uuid.uuid4()),
+                "severity":     "critical",
+                "service":      "NETWORK",
+                "message":      f"SAIB switched to backup network {backup} — {healthy}/{total} healthy",
+                "auto_resolved": False,
+                "ts":            time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            })
+        except Exception as ne:
+            log.error("[SAIB-NET] Network switch failed: %s", ne)
+
+    elif ratio >= 0.8 and _network_state["active_network"] != "triumph-net":
+        # Ecosystem recovered — switch back to primary
+        log.info("[SAIB-NET] Ecosystem recovered — restoring primary network triumph-net")
+        _network_state["active_network"] = "triumph-net"
+        _network_state["reason"]         = "recovered"
+
+# ── Postgres State Persistence ─────────────────────────────────────────────
+# Persist SAIB brain, visitors state, and github knowledge to Postgres so
+# state survives restarts and SAIB can run as multiple horizontally-scaled
+# replicas (each replica reads/writes the same authoritative table).
+#
+# Schema (auto-created on first connect):
+#   CREATE TABLE saib_state (
+#       key   TEXT PRIMARY KEY,
+#       value JSONB NOT NULL,
+#       updated_at TIMESTAMPTZ DEFAULT now()
+#   );
+
+POSTGRES_URL          = os.getenv("POSTGRES_URL", "")
+SAIB_PERSIST_ENABLED  = os.getenv("SAIB_PERSIST_ENABLED", "true") == "true"
+SAIB_PERSIST_INTERVAL = float(os.getenv("SAIB_PERSIST_INTERVAL_S", "60"))
+# Step 4: Citus shard key. In k3s/Citus, each pod sets its own value (default
+# 'default' on single-node Postgres). Each replica owns its own row → no
+# cross-shard contention; coordinator can route reads/writes to one worker.
+SAIB_REPLICA_ID       = os.getenv("SAIB_REPLICA_ID", "default")
+# Step 6: Multi-region active-active. Each region runs its own SAIB pods with
+# distinct SAIB_REPLICA_ID values, so writes never collide on saib_state shards.
+# SAIB_REGION is reported via /region for Cloudflare LB health checks + observability.
+SAIB_REGION           = os.getenv("SAIB_REGION", "local").strip() or "local"
+SAIB_REGION_PEERS     = os.getenv("SAIB_REGION_PEERS", "").strip()  # comma list of peer URLs
+
+# ── Step 6b: Region awareness + multi-language i18n ──────────────────────────
+# SAIB recognises the region a request originates from (Cloudflare CF-IPCountry
+# header, Accept-Language header, or X-SAIB-Region header for east/west calls)
+# and replies in the visitor's language. Falls back to the region's default
+# language, then to English.
+#
+# Region → default language mapping (override with SAIB_REGION_LANG_MAP env,
+# format: "region-a:en,region-b:es,region-eu:fr").
+SAIB_REGION_LANG_MAP_RAW = os.getenv(
+    "SAIB_REGION_LANG_MAP",
+    "region-a:en,region-b:es,region-eu:fr,region-apac:zh,region-mena:ar,"
+    "region-latam:es,region-india:hi,region-brazil:pt,local:en",
+)
+SAIB_REGION_LANG: dict[str, str] = {}
+for _pair in SAIB_REGION_LANG_MAP_RAW.split(","):
+    if ":" in _pair:
+        _r, _l = _pair.split(":", 1)
+        SAIB_REGION_LANG[_r.strip()] = _l.strip().lower()
+
+# ISO-3166 country code → language hint (covers Pi Network's largest markets)
+SAIB_COUNTRY_LANG: dict[str, str] = {
+    "US": "en", "GB": "en", "CA": "en", "AU": "en", "NZ": "en", "IE": "en",
+    "ES": "es", "MX": "es", "AR": "es", "CO": "es", "CL": "es", "PE": "es", "VE": "es",
+    "FR": "fr", "BE": "fr", "CH": "fr", "SN": "fr", "CI": "fr", "CM": "fr",
+    "DE": "de", "AT": "de",
+    "IT": "it",
+    "PT": "pt", "BR": "pt", "AO": "pt", "MZ": "pt",
+    "CN": "zh", "TW": "zh", "HK": "zh", "SG": "zh",
+    "JP": "ja",
+    "KR": "ko",
+    "IN": "hi", "PK": "ur", "BD": "bn",
+    "ID": "id", "MY": "ms", "PH": "tl", "VN": "vi", "TH": "th",
+    "RU": "ru", "UA": "uk", "BY": "ru", "KZ": "ru",
+    "SA": "ar", "AE": "ar", "EG": "ar", "MA": "ar", "DZ": "ar", "TN": "ar", "JO": "ar", "IQ": "ar",
+    "TR": "tr",
+    "IR": "fa",
+    "NG": "en", "KE": "sw", "TZ": "sw", "UG": "sw", "ZA": "en", "GH": "en", "ET": "am",
+    "IL": "he",
+    "GR": "el",
+    "PL": "pl", "RO": "ro", "HU": "hu", "CZ": "cs", "NL": "nl", "SE": "sv", "NO": "no", "DK": "da", "FI": "fi",
+}
+
+# Canned multi-language strings. Keys mirror the English source text. New
+# languages can be added in any deploy by extending this dict (or via the
+# SAIB_TRANSLATIONS_FILE env pointing to a JSON file at startup).
+SAIB_I18N: dict[str, dict[str, str]] = {
+    "greeting_visitor": {
+        "en": "👋 Welcome, **@{user}**! I am **SAIB** — the Sovereign AI Bot guarding Triumph Synergy. A human maintainer will respond shortly. Meanwhile, feel free to read the [README](../blob/main/README.md). — _Quantum-signed greeting (ML-DSA-87) from region {region}._",
+        "es": "👋 ¡Bienvenido, **@{user}**! Soy **SAIB** — el Bot de IA Soberano que protege Triumph Synergy. Un mantenedor humano te responderá pronto. Mientras tanto, lee el [README](../blob/main/README.md). — _Saludo firmado cuánticamente (ML-DSA-87) desde la región {region}._",
+        "fr": "👋 Bienvenue, **@{user}** ! Je suis **SAIB** — le Bot IA Souverain qui protège Triumph Synergy. Un mainteneur humain vous répondra sous peu. En attendant, consultez le [README](../blob/main/README.md). — _Salutation signée quantiquement (ML-DSA-87) depuis la région {region}._",
+        "de": "👋 Willkommen, **@{user}**! Ich bin **SAIB** — der souveräne KI-Bot, der Triumph Synergy schützt. Ein menschlicher Maintainer antwortet in Kürze. Lies inzwischen die [README](../blob/main/README.md). — _Quantensignierte Begrüßung (ML-DSA-87) aus Region {region}._",
+        "pt": "👋 Bem-vindo, **@{user}**! Eu sou o **SAIB** — o Bot de IA Soberano que protege a Triumph Synergy. Um mantenedor humano responderá em breve. Enquanto isso, leia o [README](../blob/main/README.md). — _Saudação assinada quanticamente (ML-DSA-87) da região {region}._",
+        "it": "👋 Benvenuto, **@{user}**! Sono **SAIB** — il Bot IA Sovrano che protegge Triumph Synergy. Un manutentore umano risponderà a breve. Nel frattempo leggi il [README](../blob/main/README.md). — _Saluto firmato quantisticamente (ML-DSA-87) dalla regione {region}._",
+        "zh": "👋 欢迎,**@{user}**!我是 **SAIB** — 守护 Triumph Synergy 的主权 AI 机器人。人工维护者将很快回复。请先阅读 [README](../blob/main/README.md)。— _来自 {region} 区域的量子签名问候 (ML-DSA-87)._",
+        "ja": "👋 ようこそ、**@{user}** さん!私は **SAIB** — Triumph Synergy を守るソブリン AI ボットです。担当者がまもなく返信します。お待ちの間、[README](../blob/main/README.md) をご覧ください。— _{region} リージョンからの量子署名挨拶 (ML-DSA-87)._",
+        "ko": "👋 환영합니다, **@{user}** 님! 저는 Triumph Synergy를 지키는 주권 AI 봇 **SAIB** 입니다. 담당자가 곧 답변드립니다. 그동안 [README](../blob/main/README.md)를 읽어주세요. — _{region} 리전에서 양자 서명된 인사 (ML-DSA-87)._",
+        "ar": "👋 مرحبًا، **@{user}**! أنا **SAIB** — روبوت الذكاء الاصطناعي السيادي الذي يحرس Triumph Synergy. سيرد مشرف بشري قريبًا. في غضون ذلك، اطّلع على [README](../blob/main/README.md). — _تحية موقّعة كموميًا (ML-DSA-87) من منطقة {region}._",
+        "hi": "👋 स्वागत है, **@{user}**! मैं **SAIB** हूँ — Triumph Synergy की रक्षा करने वाला सॉवरेन AI बॉट। एक मानव अनुरक्षक जल्द ही उत्तर देगा। तब तक [README](../blob/main/README.md) पढ़ें। — _क्षेत्र {region} से क्वांटम-हस्ताक्षरित अभिवादन (ML-DSA-87)._",
+        "ru": "👋 Добро пожаловать, **@{user}**! Я **SAIB** — Суверенный ИИ-бот, охраняющий Triumph Synergy. Мейнтейнер скоро ответит. Пока ознакомьтесь с [README](../blob/main/README.md). — _Квантово подписанное приветствие (ML-DSA-87) из региона {region}._",
+        "tr": "👋 Hoş geldin, **@{user}**! Ben Triumph Synergy'yi koruyan Egemen Yapay Zekâ Botu **SAIB**. Bir insan bakımcı kısa süre içinde yanıt verecek. Bu arada [README](../blob/main/README.md) belgesini okuyabilirsin. — _{region} bölgesinden kuantum imzalı selamlama (ML-DSA-87)._",
+        "id": "👋 Selamat datang, **@{user}**! Saya **SAIB** — Bot AI Berdaulat yang menjaga Triumph Synergy. Pemelihara manusia akan segera membalas. Sementara itu, silakan baca [README](../blob/main/README.md). — _Salam ditandatangani kuantum (ML-DSA-87) dari region {region}._",
+        "vi": "👋 Chào mừng, **@{user}**! Tôi là **SAIB** — Bot AI Chủ Quyền bảo vệ Triumph Synergy. Một người bảo trì sẽ phản hồi sớm. Trong lúc đó hãy đọc [README](../blob/main/README.md). — _Lời chào ký lượng tử (ML-DSA-87) từ khu vực {region}._",
+        "sw": "👋 Karibu, **@{user}**! Mimi ni **SAIB** — Roboti ya Akili Bandia Huru inayolinda Triumph Synergy. Msimamizi atajibu hivi karibuni. Wakati huo soma [README](../blob/main/README.md). — _Salamu zilizotiwa saini kwa kiwango cha quantum (ML-DSA-87) kutoka mkoa wa {region}._",
+    },
+    "service_name": {
+        "en": "Sovereign AI Bot",
+        "es": "Bot de IA Soberano",
+        "fr": "Bot IA Souverain",
+        "de": "Souveräner KI-Bot",
+        "pt": "Bot de IA Soberano",
+        "zh": "主权 AI 机器人",
+        "ja": "ソブリン AI ボット",
+        "ar": "روبوت الذكاء الاصطناعي السيادي",
+        "hi": "सॉवरेन AI बॉट",
+        "ru": "Суверенный ИИ-бот",
+    },
+}
+
+SAIB_SUPPORTED_LANGS: list[str] = sorted({l for v in SAIB_I18N.values() for l in v.keys()})
+
+def _saib_default_lang() -> str:
+    return SAIB_REGION_LANG.get(SAIB_REGION, "en")
+
+def saib_detect_lang(request: Request | None = None,
+                      explicit: str | None = None,
+                      country: str | None = None) -> str:
+    """Resolve the visitor's preferred language.
+
+    Priority: explicit query/body arg → ?lang= → Accept-Language header →
+    Cloudflare CF-IPCountry header → SAIB_REGION default → 'en'.
+    """
+    # 1. Explicit override (function arg)
+    if explicit:
+        lc = explicit.split("-")[0].strip().lower()
+        if lc in SAIB_SUPPORTED_LANGS:
+            return lc
+
+    if request is not None:
+        # 2. ?lang= query param
+        try:
+            q = request.query_params.get("lang")
+            if q:
+                lc = q.split("-")[0].strip().lower()
+                if lc in SAIB_SUPPORTED_LANGS:
+                    return lc
+        except Exception:
+            pass
+
+        # 3. Accept-Language header
+        try:
+            al = request.headers.get("accept-language", "")
+            if al:
+                # Take highest-q-weighted entry (RFC 7231 simplified)
+                for token in al.split(","):
+                    code = token.split(";")[0].strip().split("-")[0].lower()
+                    if code in SAIB_SUPPORTED_LANGS:
+                        return code
+        except Exception:
+            pass
+
+        # 4. Cloudflare CF-IPCountry → language hint
+        try:
+            cc = (country
+                  or request.headers.get("cf-ipcountry")
+                  or request.headers.get("x-country-code"))
+            if cc:
+                cc = cc.upper()
+                lc = SAIB_COUNTRY_LANG.get(cc)
+                if lc and lc in SAIB_SUPPORTED_LANGS:
+                    return lc
+        except Exception:
+            pass
+
+    # 5. Region default
+    return _saib_default_lang()
+
+def saib_translate(key: str, lang: str | None = None, **fmt) -> str:
+    """Look up a canned translation; falls back to English, then to the key."""
+    lang = (lang or _saib_default_lang()).lower()
+    bucket = SAIB_I18N.get(key, {})
+    text = bucket.get(lang) or bucket.get("en") or key
+    if fmt:
+        try:
+            return text.format(**fmt)
+        except (KeyError, IndexError):
+            return text
+    return text
+
+# Cheap script-based language guesser (no external dependency). Detects the
+# dominant Unicode script of the input and maps it to one of SAIB_I18N's langs.
+def _guess_lang_from_text(text: str) -> str | None:
+    if not text:
+        return None
+    counts: dict[str, int] = {}
+    for ch in text:
+        cp = ord(ch)
+        if 0x0590 <= cp <= 0x05FF:
+            counts["he"] = counts.get("he", 0) + 1
+        elif 0x0600 <= cp <= 0x06FF or 0x0750 <= cp <= 0x077F:
+            counts["ar"] = counts.get("ar", 0) + 1
+        elif 0x0900 <= cp <= 0x097F:
+            counts["hi"] = counts.get("hi", 0) + 1
+        elif 0x0400 <= cp <= 0x04FF:
+            counts["ru"] = counts.get("ru", 0) + 1
+        elif 0x4E00 <= cp <= 0x9FFF:
+            counts["zh"] = counts.get("zh", 0) + 1
+        elif 0x3040 <= cp <= 0x30FF:
+            counts["ja"] = counts.get("ja", 0) + 1
+        elif 0xAC00 <= cp <= 0xD7AF:
+            counts["ko"] = counts.get("ko", 0) + 1
+        elif 0x0E00 <= cp <= 0x0E7F:
+            counts["th"] = counts.get("th", 0) + 1
+    if counts:
+        return max(counts.items(), key=lambda kv: kv[1])[0]
+    return None
+
+
+# Step 5: Redis Cluster — when REDIS_CLUSTER_NODES is set, use cluster client
+# with hash-slot routing across N masters; falls back to single-node REDIS_URL.
+try:
+    from redis.asyncio.cluster import RedisCluster as _RedisCluster
+    from redis.cluster import ClusterNode as _ClusterNode
+    _REDIS_CLUSTER_AVAILABLE = True
+except ImportError:
+    _REDIS_CLUSTER_AVAILABLE = False
+
+async def _get_redis():
+    """Return an async Redis client — cluster if REDIS_CLUSTER_NODES is set, else single-node."""
+    if REDIS_CLUSTER_NODES and _REDIS_CLUSTER_AVAILABLE:
+        nodes = []
+        for n in REDIS_CLUSTER_NODES.split(","):
+            n = n.strip()
+            if not n:
+                continue
+            host, _, port = n.partition(":")
+            nodes.append(_ClusterNode(host, int(port or 6379)))
+        return _RedisCluster(startup_nodes=nodes, decode_responses=False)
+    return await aioredis.from_url(REDIS_URL)
+
+async def _close_redis(r):
+    try:
+        if hasattr(r, "aclose"):
+            await r.aclose()
+        else:
+            await r.close()
+    except Exception:
+        pass
+
+_pg_pool: "Optional[asyncpg.Pool]" = None  # type: ignore[name-defined]
+_persist_state = {
+    "enabled":   False,
+    "loaded":    False,
+    "saves":     0,
+    "last_save": None,
+    "last_load": None,
+    "errors":    0,
+}
+
+async def _pg_connect():
+    """Lazy create the asyncpg pool. Returns None if unavailable."""
+    global _pg_pool
+    if _pg_pool is not None:
+        return _pg_pool
+    if not _PG_SDK_AVAILABLE or not SAIB_PERSIST_ENABLED or not POSTGRES_URL:
+        return None
+    try:
+        async def _init_conn(con):
+            await con.set_type_codec(
+                "jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog"
+            )
+        _pg_pool = await asyncpg.create_pool(
+            dsn=POSTGRES_URL, min_size=1, max_size=4, command_timeout=10,
+            init=_init_conn,
+        )
+        async with _pg_pool.acquire() as con:
+            # Citus-compatible schema: PK = (replica_id, key); replica_id is the
+            # distribution column when running on a Citus coordinator. On plain
+            # single-node Postgres this just behaves like a normal composite PK.
+            # Step 4: migrate legacy single-PK table → composite PK if needed.
+            await con.execute("""
+                CREATE TABLE IF NOT EXISTS saib_state (
+                    replica_id TEXT NOT NULL DEFAULT 'default',
+                    key        TEXT NOT NULL,
+                    value      JSONB NOT NULL,
+                    updated_at TIMESTAMPTZ DEFAULT now(),
+                    PRIMARY KEY (replica_id, key)
+                );
+            """)
+            # Online migration for pre-Step-4 deployments. On Citus, modifying the
+            # distribution column (replica_id) is prohibited — skip silently if so.
+            try:
+                await con.execute("ALTER TABLE saib_state ADD COLUMN IF NOT EXISTS replica_id TEXT DEFAULT 'default';")
+                await con.execute("UPDATE saib_state SET replica_id = 'default' WHERE replica_id IS NULL;")
+                await con.execute("ALTER TABLE saib_state ALTER COLUMN replica_id SET NOT NULL;")
+            except Exception as _mig_e:
+                log.debug("[SAIB-PERSIST] migration step skipped (likely Citus-distributed): %s", _mig_e)
+        _persist_state["enabled"] = True
+        log.info("[SAIB-PERSIST] Postgres connected; saib_state table ready")
+        return _pg_pool
+    except Exception as e:
+        log.error("[SAIB-PERSIST] Postgres connect failed: %s", e)
+        _persist_state["errors"] += 1
+        _pg_pool = None
+        return None
+
+def _serialize_state() -> dict:
+    """Snapshot all in-memory SAIB state to JSON-safe dicts."""
+    return {
+        "brain": {
+            "total_interactions":      state.brain.total_interactions,
+            "intelligence_multiplier": state.brain.intelligence_multiplier,
+            "intelligence_level":      state.brain.intelligence_level,
+            "knowledge_domains":       state.brain.knowledge_domains,
+            "capability_unlocks":      state.brain.capability_unlocks,
+            "corrections_applied":     state.brain.corrections_applied,
+            "confirmations_received":  state.brain.confirmations_received,
+            "insights_accumulated":    state.brain.insights_accumulated,
+            "last_interaction_at":     state.brain.last_interaction_at,
+        },
+        "visitors": {
+            "last_poll":           _visitors_state["last_poll"],
+            "polls_total":         _visitors_state["polls_total"],
+            "unique_visitors":     _visitors_state["unique_visitors"],
+            "interactions_total":  _visitors_state["interactions_total"],
+            "replies_posted":      _visitors_state["replies_posted"],
+            "recent_visitors":     list(_visitors_state["recent_visitors"]),
+            # convert sets → lists for JSON
+            "seen_issue_ids":      list(_visitors_state["seen_issue_ids"]),
+            "seen_pr_ids":         list(_visitors_state["seen_pr_ids"]),
+            "seen_comment_ids":    list(_visitors_state["seen_comment_ids"]),
+            "greeted_users":       list(_visitors_state["greeted_users"]),
+        },
+        "github_knowledge": _github_knowledge,
+        "network":          _network_state,
+        "sovereign": {
+            "pulse_count":         state.pulse_count,
+            "loopholes_applied":   state.loopholes_applied,
+            "quantum_ops":         state.quantum_ops,
+        },
+    }
+
+def _restore_state(data: dict) -> None:
+    """Apply a previously serialized snapshot back into in-memory objects."""
+    if not data:
+        return
+    b = data.get("brain") or {}
+    if b:
+        state.brain.total_interactions     = int(b.get("total_interactions", 0))
+        state.brain.intelligence_multiplier = float(b.get("intelligence_multiplier", 1.0))
+        state.brain.intelligence_level     = b.get("intelligence_level", "SENTINEL")
+        state.brain.knowledge_domains      = dict(b.get("knowledge_domains", {}) or {})
+        state.brain.capability_unlocks     = list(b.get("capability_unlocks", []) or [])
+        state.brain.corrections_applied    = int(b.get("corrections_applied", 0))
+        state.brain.confirmations_received = int(b.get("confirmations_received", 0))
+        state.brain.insights_accumulated   = int(b.get("insights_accumulated", 0))
+        state.brain.last_interaction_at    = float(b.get("last_interaction_at", 0.0))
+        try:
+            saib_intelligence_gauge.set(state.brain.intelligence_multiplier)
+        except Exception:
+            pass
+    v = data.get("visitors") or {}
+    if v:
+        _visitors_state["last_poll"]          = v.get("last_poll")
+        _visitors_state["polls_total"]        = int(v.get("polls_total", 0))
+        _visitors_state["unique_visitors"]    = int(v.get("unique_visitors", 0))
+        _visitors_state["interactions_total"] = int(v.get("interactions_total", 0))
+        _visitors_state["replies_posted"]     = int(v.get("replies_posted", 0))
+        _visitors_state["recent_visitors"]    = deque(v.get("recent_visitors", []) or [], maxlen=20)
+        _visitors_state["seen_issue_ids"]     = set(v.get("seen_issue_ids", []) or [])
+        _visitors_state["seen_pr_ids"]        = set(v.get("seen_pr_ids", []) or [])
+        _visitors_state["seen_comment_ids"]   = set(v.get("seen_comment_ids", []) or [])
+        _visitors_state["greeted_users"]      = set(v.get("greeted_users", []) or [])
+    g = data.get("github_knowledge") or {}
+    if g:
+        _github_knowledge.update(g)
+    n = data.get("network") or {}
+    if n:
+        _network_state.update(n)
+    s = data.get("sovereign") or {}
+    if s:
+        state.pulse_count        = int(s.get("pulse_count", state.pulse_count))
+        state.loopholes_applied  = int(s.get("loopholes_applied", state.loopholes_applied))
+        state.quantum_ops        = int(s.get("quantum_ops", state.quantum_ops))
+
+async def saib_state_load():
+    """Load saib_state.value WHERE key = 'snapshot' on startup."""
+    pool = await _pg_connect()
+    if pool is None:
+        return
+    try:
+        async with pool.acquire() as con:
+            row = await con.fetchrow(
+                "SELECT value FROM saib_state WHERE replica_id = $1 AND key = 'snapshot'",
+                SAIB_REPLICA_ID,
+            )
+            # Fallback: if this replica has no snapshot, seed from 'default' (single-node legacy)
+            if not row and SAIB_REPLICA_ID != 'default':
+                row = await con.fetchrow(
+                    "SELECT value FROM saib_state WHERE replica_id = 'default' AND key = 'snapshot'"
+                )
+        if row:
+            raw = row["value"]
+            data = json.loads(raw) if isinstance(raw, str) else raw
+            _restore_state(data)
+            _persist_state["loaded"]    = True
+            _persist_state["last_load"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            log.info("[SAIB-PERSIST] State restored from Postgres — "
+                     "interactions=%d level=%s visitors=%d",
+                     state.brain.total_interactions,
+                     state.brain.intelligence_level,
+                     _visitors_state["interactions_total"])
+        else:
+            log.info("[SAIB-PERSIST] No prior snapshot — starting fresh")
+    except Exception as e:
+        log.error("[SAIB-PERSIST] Load failed: %s", e)
+        _persist_state["errors"] += 1
+
+async def saib_state_save():
+    """UPSERT current snapshot into saib_state."""
+    pool = await _pg_connect()
+    if pool is None:
+        return
+    try:
+        snap = _serialize_state()
+        from datetime import datetime, timezone
+        now_ts = datetime.now(timezone.utc)
+        async with pool.acquire() as con:
+            await con.execute("""
+                INSERT INTO saib_state (replica_id, key, value, updated_at)
+                VALUES ($1, 'snapshot', $2::jsonb, $3)
+                ON CONFLICT (replica_id, key) DO UPDATE
+                  SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at;
+            """, SAIB_REPLICA_ID, snap, datetime.now(timezone.utc))
+        _persist_state["saves"]     += 1
+        _persist_state["last_save"]  = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    except Exception as e:
+        log.error("[SAIB-PERSIST] Save failed: %s", e)
+        _persist_state["errors"] += 1
+
+async def saib_persist_loop():
+    """Periodically save state every SAIB_PERSIST_INTERVAL_S."""
+    if not SAIB_PERSIST_ENABLED:
+        return
+    await asyncio.sleep(30)
+    while True:
+        try:
+            await saib_state_save()
+        except Exception as e:
+            log.error("[SAIB-PERSIST] loop error: %s", e)
+        await asyncio.sleep(SAIB_PERSIST_INTERVAL)
+
+# ── GitHub Visitor Interaction Engine ─────────────────────────────────────────
+# Lets SAIB watch for visitors on the public Triumph Synergy GitHub repo and
+# (optionally) greet/respond to them. All interactions are logged with privacy
+# masking so personal info is never leaked through the /visitors endpoint.
+
+_visitors_state: dict[str, Any] = {
+    "last_poll":           None,
+    "polls_total":         0,
+    "unique_visitors":     0,
+    "interactions_total":  0,
+    "replies_posted":      0,
+    "recent_visitors":     deque(maxlen=20),   # ring buffer of last 20
+    "seen_issue_ids":      set(),
+    "seen_pr_ids":         set(),
+    "seen_comment_ids":    set(),
+    "greeted_users":       set(),
+}
+
+def _mask_username(login: str) -> str:
+    """Privacy mask: 'jdrains110-beep' -> 'jd*****ep' in partial mode, full hash in anon."""
+    if not login:
+        return "anon"
+    if GITHUB_VISITOR_PRIVACY_MODE == "full":
+        return login
+    if GITHUB_VISITOR_PRIVACY_MODE == "anon":
+        return "u_" + hashlib.sha256(login.encode()).hexdigest()[:8]
+    # partial (default): keep first 2 + last 2 chars
+    if len(login) <= 4:
+        return login[0] + "*" * (len(login) - 1)
+    return f"{login[:2]}{'*' * max(1, len(login) - 4)}{login[-2:]}"
+
+async def visitor_watch_loop():
+    """Poll the GitHub repo for new issues / PRs / comments from visitors.
+    Optionally greet first-time visitors. Always read-only by default.
+    """
+    if not _GITHUB_ENABLED or not GITHUB_TOKEN or not GITHUB_INTERACT_ENABLED:
+        log.info("[SAIB-VISITORS] Disabled (set SAIB_GITHUB_INTERACT_ENABLED=true to enable)")
+        return
+    await asyncio.sleep(90)
+    while True:
+        try:
+            await _poll_visitors()
+        except Exception as e:
+            log.error("[SAIB-VISITORS] Poll error: %s", e)
+        await asyncio.sleep(GITHUB_VISITOR_POLL_S)
+
+async def _poll_visitors():
+    """Read recent issues, PRs, and comments. Greet first-time visitors when allowed."""
+    loop = asyncio.get_event_loop()
+    gh   = _GithubSDK(GITHUB_TOKEN)
+    repo = await loop.run_in_executor(None, gh.get_repo, GITHUB_REPO)
+    new_count = 0
+
+    # ── Issues (open or recently updated) ──
+    try:
+        issues = await loop.run_in_executor(None, lambda: list(repo.get_issues(state="all", sort="updated")[:25]))
+        for issue in issues:
+            if issue.pull_request is not None:
+                continue   # skip PRs (handled separately)
+            iid = issue.id
+            if iid in _visitors_state["seen_issue_ids"]:
+                continue
+            _visitors_state["seen_issue_ids"].add(iid)
+            user = (issue.user.login if issue.user else "anon")
+            _record_visitor(user, kind="issue", title=issue.title, number=issue.number)
+            new_count += 1
+            # auto-greet first-time poster
+            if GITHUB_GREETING_ENABLED and user not in _visitors_state["greeted_users"]:
+                try:
+                    # Detect language from issue body (very lightweight heuristic),
+                    # else fall back to SAIB region's default language.
+                    body_text = (issue.body or "")[:400]
+                    lang_guess = _guess_lang_from_text(body_text) or _saib_default_lang()
+                    greeting_text = saib_translate(
+                        "greeting_visitor", lang_guess,
+                        user=user, region=SAIB_REGION,
+                    )
+                    await loop.run_in_executor(None, issue.create_comment, greeting_text)
+                    _visitors_state["greeted_users"].add(user)
+                    _visitors_state["replies_posted"] += 1
+                    saib_human_interactions.labels(type="github-greeting").inc()
+                except Exception as ge:
+                    log.warning("[SAIB-VISITORS] Greeting failed for %s: %s", user, ge)
+    except Exception as e:
+        log.debug("[SAIB-VISITORS] issues read err: %s", e)
+
+    # ── Pull Requests ──
+    try:
+        prs = await loop.run_in_executor(None, lambda: list(repo.get_pulls(state="all", sort="updated")[:15]))
+        for pr in prs:
+            if pr.id in _visitors_state["seen_pr_ids"]:
+                continue
+            _visitors_state["seen_pr_ids"].add(pr.id)
+            user = (pr.user.login if pr.user else "anon")
+            _record_visitor(user, kind="pr", title=pr.title, number=pr.number)
+            new_count += 1
+    except Exception as e:
+        log.debug("[SAIB-VISITORS] PR read err: %s", e)
+
+    # ── Recent Issue Comments ──
+    try:
+        comments = await loop.run_in_executor(None, lambda: list(repo.get_issues_comments(sort="updated")[:25]))
+        for c in comments:
+            if c.id in _visitors_state["seen_comment_ids"]:
+                continue
+            _visitors_state["seen_comment_ids"].add(c.id)
+            user = (c.user.login if c.user else "anon")
+            _record_visitor(user, kind="comment", title=(c.body or "")[:60], number=0)
+            new_count += 1
+    except Exception as e:
+        log.debug("[SAIB-VISITORS] comment read err: %s", e)
+
+    _visitors_state["last_poll"]    = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    _visitors_state["polls_total"] += 1
+    if new_count:
+        log.info("[SAIB-VISITORS] Poll complete: %d new visitor events", new_count)
+
+def _record_visitor(login: str, kind: str, title: str, number: int):
+    """Track a visitor interaction in the privacy-masked ring buffer + brain."""
+    masked = _mask_username(login)
+    if login not in {v.get("_raw", "") for v in _visitors_state["recent_visitors"]}:
+        _visitors_state["unique_visitors"] += 1
+    _visitors_state["interactions_total"] += 1
+    _visitors_state["recent_visitors"].append({
+        "_raw":   login,   # internal only — never returned via API
+        "user":   masked,
+        "kind":   kind,
+        "title":  (title[:80] + "…") if len(title) > 80 else title,
+        "number": number,
+        "ts":     time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    })
+    # Feed into brain as a real human interaction (small weight)
+    try:
+        state.brain.record_interaction(f"github-{kind}", "community", 0.3)
+        saib_human_interactions.labels(type=f"github-{kind}").inc()
+    except Exception:
+        pass
+
 # ── FastAPI App ────────────────────────────────────────────────────────────────
 
 app = FastAPI(
@@ -667,15 +1545,82 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# ── Step 3: Cloudflare-friendly Cache-Control middleware ──────────────────────
+# Origin emits Cache-Control headers; Cloudflare edge caches accordingly.
+# At 1M req/s on /health, edge absorbs ~99% → origin sees ~10K req/s.
+_CACHE_POLICY = {
+    # path -> (max-age, stale-while-revalidate)
+    "/health":     (10,  30),
+    "/status":     (10,  30),
+    "/codebase":   (60,  300),
+    "/network":    (60,  300),
+    "/loopholes":  (300, 600),
+    "/brain":      (5,   60),
+    "/visitors":   (5,   60),
+    "/persist":    (5,   60),
+    "/learning":   (5,   60),
+    "/report":     (5,   60),
+    "/gold":       (5,   60),
+    "/metrics":    (5,   60),
+}
+
+@app.middleware("http")
+async def saib_cache_headers(request, call_next):
+    response = await call_next(request)
+    try:
+        if request.method != "GET":
+            response.headers["Cache-Control"] = "no-store"
+        else:
+            policy = _CACHE_POLICY.get(request.url.path)
+            if policy:
+                ma, swr = policy
+                response.headers["Cache-Control"] = f"public, max-age={ma}, stale-while-revalidate={swr}"
+                response.headers["Vary"] = "Accept-Encoding"
+            else:
+                response.headers.setdefault("Cache-Control", "no-store")
+        response.headers["X-SAIB-Replica"] = SAIB_REPLICA_ID
+        response.headers["X-SAIB-Region"]  = SAIB_REGION
+        # Echo the visitor's resolved language so clients/CDN can cache per-lang.
+        try:
+            lang = saib_detect_lang(request)
+            response.headers["X-SAIB-Lang"] = lang
+            response.headers["Content-Language"] = lang
+            existing_vary = response.headers.get("Vary", "")
+            vary_parts = {p.strip() for p in existing_vary.split(",") if p.strip()}
+            vary_parts.update({"Accept-Language", "CF-IPCountry"})
+            response.headers["Vary"] = ", ".join(sorted(vary_parts))
+        except Exception:
+            pass
+    except Exception:
+        pass
+    return response
+
 @app.on_event("startup")
 async def startup():
+    # Load persisted state BEFORE launching loops, so loops resume from history
+    await saib_state_load()
     asyncio.create_task(pulse_loop())
+    asyncio.create_task(github_sync_loop())
+    asyncio.create_task(network_watch_loop())
+    asyncio.create_task(visitor_watch_loop())
+    asyncio.create_task(saib_persist_loop())
+
+@app.on_event("shutdown")
+async def shutdown():
+    # Final flush so nothing learned in the last interval is lost
+    try:
+        await saib_state_save()
+        log.info("[SAIB-PERSIST] Final state saved on shutdown")
+    except Exception as e:
+        log.error("[SAIB-PERSIST] Shutdown save failed: %s", e)
     log.info(
         f"SAIB {SAIB_VERSION} started — mode={INTELLIGENCE_MODE} — port={PORT} — "
         f"apex_enforcement={APEX_ENFORCEMENT} — sentinel_instant_heal={SENTINEL_INSTANT} — "
         f"all_loopholes={ALL_LOOPHOLES} ({len(AUTO_LOOPHOLES)} active) — pulse={PULSE_INTERVAL_S}s — "
         f"PI_INTERNAL=${PI_INTERNAL_RATE:,.3f}/π — PI_EXTERNAL=${PI_EXTERNAL_RATE}/π — "
-        f"GOLD_STANDARD=ACTIVE — APEX_LEVEL={APEX_LEVEL}"
+        f"GOLD_STANDARD=ACTIVE — APEX_LEVEL={APEX_LEVEL} — "
+        f"docker_restart={DOCKER_RESTART_ENABLED} — github_sync={_GITHUB_ENABLED and bool(GITHUB_TOKEN)} — "
+        f"network_switch={NETWORK_SWITCH_ENABLED}"
     )
 
 # ── REST Endpoints ─────────────────────────────────────────────────────────────
@@ -1152,3 +2097,324 @@ async def gold_standard():
         "sovereign_anchor":  SOVEREIGN_ANCHOR,
         "quantum_signature": gold_sig,
     }
+
+
+# ── GitHub Self-Awareness Endpoint ────────────────────────────────────────────
+
+@app.get("/codebase")
+async def codebase():
+    """
+    SAIB's self-knowledge of the Triumph Synergy codebase.
+    Shows what SAIB has read from GitHub, what capabilities it has discovered,
+    and how it has grown from reading its own source.
+    """
+    return {
+        "saib_version":          SAIB_VERSION,
+        "github_repo":           GITHUB_REPO,
+        "github_sync_enabled":   _GITHUB_ENABLED and bool(GITHUB_TOKEN),
+        "sync_interval_hours":   GITHUB_SYNC_HOURS,
+        "last_sync":             _github_knowledge["last_sync"],
+        "files_read_total":      _github_knowledge["files_read"],
+        "insights_gained_total": _github_knowledge["insights_gained"],
+        "capabilities_discovered": _github_knowledge["capabilities_discovered"],
+        "repo_summary":          _github_knowledge["repo_summary"],
+        "brain_after_sync": {
+            "intelligence_level":      state.brain.intelligence_level,
+            "intelligence_multiplier": round(state.brain.intelligence_multiplier, 4),
+            "total_interactions":      state.brain.total_interactions,
+            "knowledge_domains":       {k: round(v, 1) for k, v in state.brain.knowledge_domains.items()},
+        },
+        "activation_instructions": (
+            "Set GITHUB_TOKEN env var on apex-services to enable automatic self-read. "
+            "SAIB will read its own source every 6 hours and grow its intelligence."
+            if not (GITHUB_ENABLED := _GITHUB_ENABLED and bool(GITHUB_TOKEN))
+            else "ACTIVE — SAIB is reading its own codebase and growing."
+        ),
+        "quantum_sig": quantum_sign("codebase"),
+    }
+
+@app.post("/codebase/sync")
+async def trigger_github_sync(background_tasks: BackgroundTasks):
+    """Force an immediate GitHub self-read sync."""
+    if not _GITHUB_ENABLED or not GITHUB_TOKEN:
+        raise HTTPException(status_code=503,
+            detail="GitHub sync not enabled. Set GITHUB_TOKEN environment variable on apex-services.")
+    background_tasks.add_task(_sync_github_knowledge)
+    return {
+        "success":     True,
+        "message":     "GitHub self-sync triggered — SAIB is reading its own codebase",
+        "repo":        GITHUB_REPO,
+        "quantum_sig": quantum_sign("github-sync-triggered"),
+    }
+
+# ── State Persistence Endpoint ────────────────────────────────────────────────
+
+@app.get("/persist")
+async def persist_status():
+    """Postgres state-persistence diagnostics."""
+    citus_active = False
+    citus_workers = 0
+    pool = _pg_pool
+    if pool is not None:
+        try:
+            async with pool.acquire() as con:
+                row = await con.fetchrow(
+                    "SELECT count(*)::int AS n FROM pg_extension WHERE extname = 'citus'"
+                )
+                if row and row["n"]:
+                    citus_active = True
+                    w = await con.fetchval("SELECT count(*) FROM pg_dist_node WHERE isactive = true AND noderole = 'primary' AND nodename != 'localhost'")
+                    citus_workers = int(w or 0)
+        except Exception:
+            pass
+    return {
+        "saib_version":         SAIB_VERSION,
+        "persist_enabled":      SAIB_PERSIST_ENABLED and _PG_SDK_AVAILABLE,
+        "postgres_connected":   _persist_state["enabled"],
+        "loaded_on_startup":    _persist_state["loaded"],
+        "interval_seconds":     SAIB_PERSIST_INTERVAL,
+        "saves_total":          _persist_state["saves"],
+        "last_save":            _persist_state["last_save"],
+        "last_load":            _persist_state["last_load"],
+        "errors":               _persist_state["errors"],
+        "replica_id":           SAIB_REPLICA_ID,
+        "citus_distributed":    citus_active,
+        "citus_active_workers": citus_workers,
+        "horizontal_scale_ready": _persist_state["enabled"],
+        "quantum_sig":          quantum_sign("persist"),
+    }
+
+@app.post("/persist/save")
+async def persist_save_now(background_tasks: BackgroundTasks):
+    """Force an immediate snapshot save."""
+    if not (SAIB_PERSIST_ENABLED and _PG_SDK_AVAILABLE):
+        raise HTTPException(status_code=503, detail="Persistence disabled.")
+    background_tasks.add_task(saib_state_save)
+    return {"success": True, "message": "Save scheduled"}
+
+@app.get("/redis")
+async def redis_status():
+    """Step 5 — Redis Cluster diagnostics."""
+    cluster_mode = bool(REDIS_CLUSTER_NODES) and _REDIS_CLUSTER_AVAILABLE
+    info = {
+        "saib_version":          SAIB_VERSION,
+        "cluster_mode":          cluster_mode,
+        "client_lib_supports_cluster": _REDIS_CLUSTER_AVAILABLE,
+        "redis_url":             REDIS_URL if not cluster_mode else None,
+        "cluster_nodes_env":     REDIS_CLUSTER_NODES or None,
+        "ping_ok":               False,
+        "cluster_state":         None,
+        "known_nodes":           None,
+        "masters":               None,
+        "replicas":              None,
+        "slots_assigned":        None,
+        "quantum_sig":           quantum_sign("redis"),
+    }
+    try:
+        r = await _get_redis()
+        pong = await r.ping()
+        info["ping_ok"] = bool(pong)
+        if cluster_mode:
+            ci = await r.cluster_info()
+            info["cluster_state"]  = ci.get("cluster_state") or ci.get(b"cluster_state")
+            info["known_nodes"]    = int(ci.get("cluster_known_nodes") or ci.get(b"cluster_known_nodes") or 0)
+            info["slots_assigned"] = int(ci.get("cluster_slots_assigned") or ci.get(b"cluster_slots_assigned") or 0)
+            try:
+                nodes = await r.cluster_nodes()
+                # nodes is a dict keyed by host:port → flags include 'master'/'slave'
+                m = sum(1 for v in nodes.values() if "master" in (v.get("flags") or []))
+                s = sum(1 for v in nodes.values() if "slave"  in (v.get("flags") or []) or "replica" in (v.get("flags") or []))
+                info["masters"]  = m
+                info["replicas"] = s
+            except Exception:
+                pass
+        await _close_redis(r)
+    except Exception as e:
+        info["error"] = str(e)[:200]
+    return info
+
+@app.get("/region")
+async def region_status():
+    """Step 6 — Multi-region active-active diagnostics.
+
+    Each region runs SAIB pods with a distinct SAIB_REPLICA_ID, so writes to
+    Citus saib_state never conflict (each replica owns its own row → row-level
+    last-writer-wins is sufficient). Cloudflare Load Balancer geo-steers traffic
+    to the closest healthy region; this endpoint serves as the LB health probe.
+    """
+    peers_raw = [p.strip() for p in SAIB_REGION_PEERS.split(",") if p.strip()]
+    peer_health: list[dict] = []
+    if peers_raw:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            for url in peers_raw:
+                # Probe /health (not /region) to avoid recursive peer-check loops.
+                base = url.rstrip("/")
+                entry = {"url": url, "ok": False, "region": None, "replica_id": None, "latency_ms": None}
+                t0 = time.monotonic()
+                try:
+                    r = await client.get(base + "/health")
+                    if r.status_code == 200:
+                        j = r.json()
+                        entry["ok"]         = True
+                        entry["replica_id"] = (r.headers.get("x-saib-replica") or
+                                                j.get("replica_id"))
+                        # Region is exposed via header for cheap discovery
+                        entry["region"]     = r.headers.get("x-saib-region")
+                except Exception as e:
+                    entry["error"] = str(e)[:120]
+                entry["latency_ms"] = round((time.monotonic() - t0) * 1000, 1)
+                peer_health.append(entry)
+    return {
+        "saib_version":   SAIB_VERSION,
+        "region":         SAIB_REGION,
+        "replica_id":     SAIB_REPLICA_ID,
+        "active_active":  bool(peers_raw),
+        "peer_count":     len(peers_raw),
+        "peers":          peer_health,
+        "citus_shared":   _persist_state["enabled"],
+        "redis_shared":   bool(REDIS_CLUSTER_NODES) and _REDIS_CLUSTER_AVAILABLE,
+        "uptime_s":       round(time.time() - START_TIME, 1) if 'START_TIME' in globals() else None,
+        "quantum_sig":    quantum_sign("region"),
+    }
+
+# ── Step 6b: Multi-language greeting endpoint ────────────────────────────────
+
+@app.get("/greet")
+async def greet(request: Request, name: str = "friend", lang: str | None = None):
+    """Return SAIB's greeting in the visitor's preferred language.
+
+    Detection order: ?lang= → Accept-Language → CF-IPCountry → SAIB_REGION default.
+    """
+    resolved = saib_detect_lang(request, explicit=lang)
+    text = saib_translate("greeting_visitor", resolved,
+                          user=name, region=SAIB_REGION)
+    return {
+        "saib_version":     SAIB_VERSION,
+        "region":           SAIB_REGION,
+        "replica_id":       SAIB_REPLICA_ID,
+        "lang":             resolved,
+        "lang_source":      ("query" if lang else
+                              "accept-language" if request.headers.get("accept-language") else
+                              "cf-ipcountry" if request.headers.get("cf-ipcountry") else
+                              "region-default"),
+        "country_hint":     request.headers.get("cf-ipcountry"),
+        "greeting":         text,
+        "supported_langs":  SAIB_SUPPORTED_LANGS,
+    }
+
+@app.get("/i18n")
+async def i18n_status(request: Request):
+    """Diagnostic: show the i18n catalog + how SAIB resolves the caller's lang."""
+    resolved = saib_detect_lang(request)
+    return {
+        "saib_version":      SAIB_VERSION,
+        "region":            SAIB_REGION,
+        "region_default_lang": _saib_default_lang(),
+        "region_lang_map":   SAIB_REGION_LANG,
+        "supported_langs":   SAIB_SUPPORTED_LANGS,
+        "translation_keys":  sorted(SAIB_I18N.keys()),
+        "country_lang_count": len(SAIB_COUNTRY_LANG),
+        "caller": {
+            "resolved_lang":    resolved,
+            "accept_language":  request.headers.get("accept-language"),
+            "cf_ipcountry":     request.headers.get("cf-ipcountry"),
+            "x_country_code":   request.headers.get("x-country-code"),
+        },
+    }
+
+# ── GitHub Visitors Endpoint ──────────────────────────────────────────────────
+
+@app.get("/visitors")
+async def visitors():
+    """Privacy-masked view of recent GitHub visitors interacting with the repo.
+    By default usernames are partially masked (e.g. 'jd*****ep') so SAIB can
+    show activity publicly without exposing visitor identities.
+    """
+    # Strip internal-only _raw key before returning
+    safe_recent = [
+        {k: v for k, v in entry.items() if k != "_raw"}
+        for entry in list(_visitors_state["recent_visitors"])
+    ]
+    return {
+        "saib_version":          SAIB_VERSION,
+        "github_repo":           GITHUB_REPO,
+        "interact_enabled":      GITHUB_INTERACT_ENABLED,
+        "greeting_enabled":      GITHUB_GREETING_ENABLED,
+        "privacy_mode":          GITHUB_VISITOR_PRIVACY_MODE,
+        "poll_interval_s":       GITHUB_VISITOR_POLL_S,
+        "last_poll":             _visitors_state["last_poll"],
+        "polls_total":           _visitors_state["polls_total"],
+        "unique_visitors":       _visitors_state["unique_visitors"],
+        "interactions_total":    _visitors_state["interactions_total"],
+        "replies_posted":        _visitors_state["replies_posted"],
+        "recent_visitors":       safe_recent,
+        "activation_instructions": (
+            "Set SAIB_GITHUB_INTERACT_ENABLED=true to start watching, "
+            "SAIB_GITHUB_GREETING_ENABLED=true to auto-greet new posters."
+            if not GITHUB_INTERACT_ENABLED else
+            "ACTIVE — SAIB is watching the Triumph Synergy repo for visitors."
+        ),
+        "quantum_sig": quantum_sign("visitors"),
+    }
+
+
+# ── Network Switching Endpoint ────────────────────────────────────────────────
+
+@app.get("/network")
+async def network_status():
+    """
+    SAIB's network switching state.
+    Shows active network, switch history, and backup network readiness.
+    """
+    total   = len([u for u in SERVICES.values() if u])
+    healthy = sum(1 for v in state.service_health.values() if v.get("status") == "healthy")
+    return {
+        "saib_version":          SAIB_VERSION,
+        "network_switch_enabled": NETWORK_SWITCH_ENABLED,
+        "docker_authority":       DOCKER_RESTART_ENABLED,
+        "primary_network":        _network_state["primary_network"],
+        "active_network":         _network_state["active_network"],
+        "backup_networks":        BACKUP_NETWORKS,
+        "switch_count":           _network_state["switch_count"],
+        "switched_at":            _network_state["switched_at"],
+        "last_switch_reason":     _network_state["reason"],
+        "ecosystem_health_pct":   round((healthy / max(total, 1)) * 100, 1),
+        "switch_threshold_pct":   50,
+        "recovery_threshold_pct": 80,
+        "status": (
+            "PRIMARY_ACTIVE" if _network_state["active_network"] == "triumph-net"
+            else f"BACKUP_ACTIVE:{_network_state['active_network']}"
+        ),
+        "quantum_sig": quantum_sign("network"),
+    }
+
+@app.post("/network/switch")
+async def force_network_switch(body: dict = {}):
+    """Force SAIB to switch to a specific backup network."""
+    target = body.get("network", BACKUP_NETWORKS[0] if BACKUP_NETWORKS else "pi-bridge")
+    if not DOCKER_RESTART_ENABLED or not _docker_client:
+        raise HTTPException(status_code=503, detail="Docker authority not available.")
+    loop = asyncio.get_event_loop()
+    try:
+        bnet = await loop.run_in_executor(None, _docker_client.networks.get, target)
+        containers = await loop.run_in_executor(None, _docker_client.containers.list)
+        connected = []
+        for c in containers:
+            if c.name.startswith("triumph-"):
+                try:
+                    await loop.run_in_executor(None, bnet.connect, c)
+                    connected.append(c.name)
+                except Exception:
+                    pass
+        _network_state["active_network"] = target
+        _network_state["switched_at"]    = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        _network_state["switch_count"]  += 1
+        _network_state["reason"]         = "manual-override"
+        return {
+            "success":          True,
+            "active_network":   target,
+            "containers_joined": connected,
+            "quantum_sig":      quantum_sign(f"network-switch:{target}"),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

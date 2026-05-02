@@ -5,7 +5,7 @@ Pi Bridge Connector — triumph-synergy
 =====================================
 Bridges triumph-central-node ↔ testnet2 Pi node (Horizon + stellar-core)
 
-- Polls testnet2:8000 (Horizon) every 5 s for ledger, SCP, and transaction data
+- Polls testnet2:8000 (Horizon) for ledger and transaction data
 - Publishes ledger updates to Redis pub/sub (channel: pi:ledger)
 - Routes XDR transaction submissions through the Pi node
 - Exposes a unified REST API that makes BOTH nodes appear as one superior platform
@@ -14,11 +14,7 @@ Port: 8092
 Networks: triumph-net, pi-bridge
 """
 
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
-# License: PiOS
-# Copyright (C) 2024-2026 Jeremiah Drains / Triumph Synergy. All rights reserved.
-# License: PiOS
-
+from __future__ import annotations
 
 import asyncio
 import json
