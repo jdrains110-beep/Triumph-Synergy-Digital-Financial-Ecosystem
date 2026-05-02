@@ -145,6 +145,7 @@ services:
     cpus: 0.3
     environment:
       <<: [*db-env, *pi-env]
+      PYTHONUNBUFFERED: "1"
       PORT: "8092"
       PI_NODE_HOST: ${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}
       PI_NODE_API_PORT: 8000
@@ -171,7 +172,9 @@ services:
       interval: 15s
       timeout: 15s
       retries: 5
-      start_period: 45s
+      # Cold Python imports on Docker Desktop (Mac VM) take ~60s; allow ample
+      # start_period so slow first-boot doesn't get marked unhealthy.
+      start_period: 120s
 
   # ========================================================================
   # PI CENTRAL NODE — Stellar Core Integration

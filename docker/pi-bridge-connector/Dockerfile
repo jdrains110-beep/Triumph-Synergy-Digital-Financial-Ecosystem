@@ -1,6 +1,12 @@
 FROM python:3.13-slim
 
-RUN useradd -r -u 1001 -s /bin/false pibridge
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends tini procps curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -r -u 1001 -s /bin/false pibridge
 
 WORKDIR /app
 
@@ -14,4 +20,5 @@ EXPOSE 8092
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=15s \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8092/health')"
 
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8092", "--log-level", "info"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["python", "-u", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8092", "--log-level", "info"]
