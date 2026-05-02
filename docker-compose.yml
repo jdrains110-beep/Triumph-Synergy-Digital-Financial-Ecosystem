@@ -66,11 +66,13 @@ x-pi-env: &pi-env
   STELLAR_NETWORK_PASSPHRASE: ${STELLAR_NETWORK_PASSPHRASE:-Pi Network}
   CENTRAL_NODE_URL: http://triumph-central-node:11626
   CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
-  # Pi Node accessible via pi-bridge network (container name) and host
-  PI_NODE_HOST: ${PI_NODE_CONTAINER:-testnet2}
-  PI_NODE_PORT: ${PI_NODE_PORT:-31402}
+  # Pi Node accessible via pi-bridge network (container name) and host.
+  # Default target is the new self-hosted MAINNET node (triumph-pi-mainnet-node).
+  # Override PI_NODE_CONTAINER=testnet2 in .env to switch back to the testnet node.
+  PI_NODE_HOST: ${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}
+  PI_NODE_PORT: ${PI_NODE_PORT:-31502}
   PI_NODE_API_PORT: ${PI_NODE_API_PORT:-8000}
-  PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31402}
+  PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31502}
 
 services:
   # ========================================================================
@@ -144,11 +146,12 @@ services:
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8092"
-      PI_NODE_HOST: ${PI_NODE_CONTAINER:-testnet2}
+      PI_NODE_HOST: ${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}
       PI_NODE_API_PORT: 8000
-      PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31402}
-      PI_NODE_FALLBACK_URL: http://host.docker.internal:31401
-      PI_NODE_PUBLIC_FALLBACK_URL: https://api.testnet.minepi.com
+      PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31502}
+      # Fallback chain: local mainnet host port → testnet2 host port → public mainnet API
+      PI_NODE_FALLBACK_URL: ${PI_NODE_FALLBACK_URL:-http://host.docker.internal:31501}
+      PI_NODE_PUBLIC_FALLBACK_URL: ${PI_NODE_PUBLIC_FALLBACK_URL:-https://api.mainnet.minepi.com}
       PI_POLL_RETRIES: "4"
       PI_POLL_RETRY_DELAY_S: "1.5"
       POLL_INTERVAL_S: "6"
