@@ -1,0 +1,162 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: triumph-apex-services
+  namespace: triumph
+  labels:
+    app: triumph-apex-services
+spec:
+  type: ClusterIP
+  selector:
+    app: triumph-apex-services
+  ports:
+    - { name: ai-bot,   port: 8099, targetPort: 8099 }
+    - { name: gateway,  port: 8097, targetPort: 8097 }
+    - { name: pidex,    port: 8100, targetPort: 8100 }
+    - { name: delivery, port: 8101, targetPort: 8101 }
+    - { name: sports,   port: 8102, targetPort: 8102 }
+---
+# SAIB session-affinity Service (sticky brain reads — optional)
+apiVersion: v1
+kind: Service
+metadata:
+  name: triumph-saib-sticky
+  namespace: triumph
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
+  selector:
+    app: triumph-apex-services
+  ports:
+    - { name: ai-bot, port: 8099, targetPort: 8099 }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triumph-apex-services
+  namespace: triumph
+  labels:
+    app: triumph-apex-services
+    tier: sovereign
+    saib-version: v3-postgres-persisted
+spec:
+  replicas: 3            # ← horizontal scale-out, enabled by Step 1 (Postgres state)
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: triumph-apex-services
+  template:
+    metadata:
+      labels:
+        app: triumph-apex-services
+        tier: sovereign
+    spec:
+      terminationGracePeriodSeconds: 30   # allow shutdown-save flush
+      containers:
+        - name: apex-services
+          image: triumph-synergy-apex-services:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { containerPort: 8099, name: ai-bot }
+            - { containerPort: 8097, name: gateway }
+            - { containerPort: 8100, name: pidex }
+            - { containerPort: 8101, name: delivery }
+            - { containerPort: 8102, name: sports }
+          envFrom:
+            - configMapRef: { name: triumph-shared-env }
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: triumph-secrets, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_URL
+              value: "postgresql://postgres:$(POSTGRES_PASSWORD)@triumph-postgres:5432/triumph_synergy"
+            - name: GITHUB_TOKEN
+              valueFrom: { secretKeyRef: { name: triumph-secrets, key: GITHUB_TOKEN } }
+            - name: AUTH_SECRET
+              valueFrom: { secretKeyRef: { name: triumph-secrets, key: AUTH_SECRET } }
+            - name: SAIB_REPLICA_ID
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+          readinessProbe:
+            httpGet: { path: /health, port: 8099 }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet: { path: /health, port: 8099 }
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          startupProbe:
+            httpGet: { path: /health, port: 8099 }
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 30   # allow up to 5 min to start (load state + 19 sub-services)
+          resources:
+            requests: { cpu: "500m", memory: "512Mi" }
+            limits:   { cpu: "2",    memory: "2Gi" }
+          lifecycle:
+            preStop:
+              exec:
+                # Force a final state save before SIGTERM propagates fully
+                command: ["/bin/sh", "-c", "curl -sS -X POST http://127.0.0.1:8099/persist/save || true; sleep 5"]
+---
+# Horizontal Pod Autoscaler — scale 3 → 30 on CPU pressure
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: triumph-apex-services
+  namespace: triumph
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: triumph-apex-services
+  minReplicas: 3
+  maxReplicas: 30
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+---
+# PodDisruptionBudget — never drop below 2 replicas during voluntary disruptions
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: triumph-apex-services
+  namespace: triumph
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: triumph-apex-services

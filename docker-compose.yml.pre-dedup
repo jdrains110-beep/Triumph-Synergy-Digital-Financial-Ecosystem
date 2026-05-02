@@ -1,0 +1,1488 @@
+# ==========================================================================
+# TRIUMPH SYNERGY DIGITAL FINANCIAL ECOSYSTEM
+# ==========================================================================
+# Docker Desktop deployment — runs ALONGSIDE Pi Network node
+# Container prefix: triumph-*
+#
+# USAGE:
+#   Mainnet:  docker compose up -d
+#   Testnet:  docker compose --env-file .env.testnet up -d
+#   Upgrade:  docker compose pull; docker compose up -d --build
+#   Logs:     docker compose logs -f
+#   Stop:     docker compose down
+# ==========================================================================
+
+name: triumph-synergy
+
+x-common: &common
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "5m"
+      max-file: "2"
+  # ── Memory overflow protection: container dies before it kills WSL2 ──
+  memswap_limit: 0           # No swap — OOM-kill the container, don't swap (prevents I/O death spiral)
+  oom_kill_disable: false     # NEVER disable OOM killer — let Docker kill runaway containers
+  labels:
+    org.pinetwork.project: "triumph-synergy"
+    org.pinetwork.central-node: "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+    org.triumph.blockchain.powered-by: "Pi Network"
+    org.triumph.consensus.protocol: "Stellar SCP"
+    org.triumph.horizon.layer: "enabled"
+    org.triumph.ecosystem.class: "sovereign-quantum-financial"
+    org.triumph.positioning: "rival-and-superior-to-usd"
+    org.triumph.real-world-utility: "20-plus-sectors"
+    org.triumph.gateway: "universal-integration-gateway"
+    org.triumph.owner.name: "Jeremiah Joel Drains"
+    org.triumph.owner.organization: "Triumph-Synergy"
+    org.triumph.governance.final-authority: "owner-approved"
+    org.triumph.legal.compliance.required: "true"
+
+x-db-env: &db-env
+  POSTGRES_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+  REDIS_URL: redis://triumph-redis:6379
+  # Supabase keys (set in .env or secrets manager for production)
+  NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://your-project.supabase.co}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-your-anon-key}
+  SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-your-service-role-key}
+  SUPABASE_DB_URL: ${SUPABASE_DB_URL:-postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}}
+
+x-pi-env: &pi-env
+  PI_NETWORK_MODE: ${PI_NETWORK_MODE:-mainnet}
+  # Active key resolves to mainnet or testnet depending on PI_NETWORK_MODE
+  PI_API_KEY: ${PI_API_KEY:?PI_API_KEY required}
+  PI_INTERNAL_API_KEY: ${PI_INTERNAL_API_KEY:?PI_INTERNAL_API_KEY required}
+  # Both keys embedded so network-aware services can select the right one at runtime
+  PI_MAINNET_API_KEY: ${PI_MAINNET_API_KEY:?PI_MAINNET_API_KEY required}
+  PI_TESTNET_API_KEY: ${PI_TESTNET_API_KEY:?PI_TESTNET_API_KEY required}
+  PI_API_SECRET: ${PI_API_SECRET:?PI_API_SECRET required}
+  PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
+  NEXT_PUBLIC_PI_APP_ID: ${NEXT_PUBLIC_PI_APP_ID:-triumph-synergy}
+  NEXT_PUBLIC_PI_SANDBOX: ${NEXT_PUBLIC_PI_SANDBOX:-false}
+  PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+  PI_SUPERNODE_MODE: "true"
+  STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.mainnet.minepi.com}
+  STELLAR_NETWORK_PASSPHRASE: ${STELLAR_NETWORK_PASSPHRASE:-Pi Network}
+  CENTRAL_NODE_URL: http://triumph-central-node:11626
+  CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+  # Pi Node accessible via pi-bridge network (container name) and host
+  PI_NODE_HOST: ${PI_NODE_CONTAINER:-testnet2}
+  PI_NODE_PORT: ${PI_NODE_PORT:-31402}
+  PI_NODE_API_PORT: ${PI_NODE_API_PORT:-8000}
+  PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31402}
+
+services:
+  # ========================================================================
+  # INFRASTRUCTURE
+  # ========================================================================
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: triumph-postgres
+    <<: *common
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.5
+    oom_score_adj: -500          # Protect database — last to OOM-kill
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+    # Internal only — no host port exposure
+    expose:
+      - "5432"
+    volumes:
+      - triumph_pg_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - triumph-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-triumph_synergy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    container_name: triumph-redis
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.3
+    oom_score_adj: -500          # Protect cache — last to OOM-kill
+    # Internal only — no host port exposure
+    expose:
+      - "6379"
+    volumes:
+      - triumph_redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - triumph-net
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ========================================================================
+  # PI BRIDGE CONNECTOR — Central Node ↔ Pi Node (testnet2) live link
+  # Polls testnet2:8000 (Horizon) every 5s, publishes to Redis, routes txs
+  # ========================================================================
+
+  pi-bridge-connector:
+    build:
+      context: docker/pi-bridge-connector
+    container_name: triumph-pi-bridge-connector
+    <<: *common
+    mem_limit: 192m
+    mem_reservation: 96m
+    cpus: 0.3
+    environment:
+      <<: [*db-env, *pi-env]
+      PORT: "8092"
+      PI_NODE_HOST: ${PI_NODE_CONTAINER:-testnet2}
+      PI_NODE_API_PORT: 8000
+      PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31402}
+      PI_NODE_FALLBACK_URL: http://host.docker.internal:31401
+      PI_NODE_PUBLIC_FALLBACK_URL: https://api.testnet.minepi.com
+      PI_POLL_RETRIES: "4"
+      PI_POLL_RETRY_DELAY_S: "1.5"
+      POLL_INTERVAL_S: "6"
+      CENTRAL_NODE_URL: http://triumph-central-node:11626
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      SOVEREIGN_PQ_ENFORCE: "true"
+    expose:
+      - "8092"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=10)"]
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 45s
+
+  # ========================================================================
+  # PI CENTRAL NODE — Stellar Core Integration
+  # ========================================================================
+
+  central-node:
+    build:
+      context: .
+      dockerfile: docker/central-node/Dockerfile
+    container_name: triumph-central-node
+    <<: *common
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.5
+    environment:
+      <<: [*db-env, *pi-env]
+      NODE_TYPE: central
+      NODE_PRIORITY: supreme
+      STELLAR_CORE_HTTP_PORT: 11626
+      STELLAR_CORE_PEER_PORT: 11625
+      PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
+      # Prefer bridge proxy endpoint for resilient access to local Pi node.
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.testnet.minepi.com}
+      PI_LOCAL_HORIZON: http://triumph-pi-bridge-connector:8092/pi-node
+      PI_INTERNAL_HORIZON_URL: http://triumph-pi-bridge-connector:8092/pi-node
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      SCP_AUTO_UPGRADE: "true"
+      SCP_SYNC_INTERVAL_MS: 30000
+      NODE_OPTIONS: "--max-old-space-size=384"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+    # Internal only — no host port exposure
+    expose:
+      - "11625"
+      - "11626"
+    volumes:
+      - triumph_central_data:/app/data
+      - triumph_stellar_data:/opt/stellar/data
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      pi-bridge-connector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11626/info"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
+  # NEXT.JS APPLICATION — Main Ecosystem UI & API
+  # ========================================================================
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: triumph-app
+    <<: *common
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.75
+    ports:
+      - "3000:3000"
+    environment:
+      <<: [*db-env, *pi-env]
+      NODE_ENV: production
+      DOCKER_BUILD: "true"
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET required}
+      AUTH_TRUST_HOST: "true"
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET required}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:3000/api}
+      INTERNAL_PI_MULTIPLIER: ${INTERNAL_PI_MULTIPLIER:-1.5}
+      INTERNAL_PI_MIN_VALUE: ${INTERNAL_PI_MIN_VALUE:-10.0}
+      EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      central-node:
+        condition: service_healthy
+    networks:
+      - triumph-net
+      - pi-bridge
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ========================================================================
+  # PI TRANSACTION ENGINE — High-Throughput Processing
+  # ========================================================================
+
+  transaction-engine:
+    build:
+      context: .
+      dockerfile: docker/transaction-engine/Dockerfile
+    container_name: triumph-transaction-engine
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.3
+    environment:
+      <<: [*db-env, *pi-env]
+      ENGINE_MODE: hyper
+      NODE_OPTIONS: "--max-old-space-size=96"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      TRANSACTION_REQUIRE_PQ_SIGNATURE: "true"
+    volumes:
+      - triumph_tx_data:/app/data
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      central-node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
+  # PI TRILLION VAULT — Secure Storage
+  # ========================================================================
+
+  vault:
+    build:
+      context: .
+      dockerfile: docker/vault/Dockerfile
+    container_name: triumph-vault
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.3
+    environment:
+      <<: [*db-env, *pi-env]
+      VAULT_MODE: trillion
+      QUANTUM_ENCRYPTION: "true"
+      NODE_OPTIONS: "--max-old-space-size=96"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+    volumes:
+      - triumph_vault_data:/app/data
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      central-node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
+  # PI SMART CONTRACTS — Execution Engine
+  # ========================================================================
+
+  smart-contracts:
+    build:
+      context: .
+      dockerfile: docker/smart-contracts/Dockerfile
+    container_name: triumph-smart-contracts
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.3
+    environment:
+      <<: [*db-env, *pi-env]
+      EXECUTION_CHANNELS: 10000
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      CENTRAL_NODE_URL: http://triumph-central-node:11626
+      CONTRACTS_URL: http://triumph-smart-contracts:8082
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      NODE_OPTIONS: "--max-old-space-size=96"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+    volumes:
+      - triumph_contracts_data:/app/data
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      central-node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
+  # PI SCP UPGRADER — Auto Protocol Sync
+  # ========================================================================
+
+  scp-upgrader:
+    build:
+      context: .
+      dockerfile: docker/scp-upgrader/Dockerfile
+    container_name: triumph-scp-upgrader
+    <<: *common
+    mem_limit: 64m
+    mem_reservation: 32m
+    cpus: 0.2
+    environment:
+      <<: [*db-env, *pi-env]
+      AUTO_UPGRADE: "true"
+      ZERO_DOWNTIME: "true"
+      ROLLBACK_ON_FAILURE: "true"
+      VERSION_CHECK_INTERVAL_MS: 60000
+      PARAMETER_SYNC_INTERVAL_MS: 30000
+      # KEY FIX: use local Pi node for SCP data instead of external internet
+      PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
+      PI_TESTNET_HORIZON: https://api.testnet.minepi.com
+      PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
+      NODE_OPTIONS: "--max-old-space-size=48"
+    volumes:
+      - triumph_scp_data:/app/data
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      central-node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
+  # PI PAYMENT PROCESSOR — Queue-Based Payment Handling
+  # ========================================================================
+
+  # ========================================================================
+  # NOTE: payment-processor was folded into APEX-settlement-core super-pod
+  # (now exposes port 8084 alongside 8080/8082/8088/8089 within the same
+  # supervisord-managed container for in-pod localhost calls).
+  # ========================================================================
+
+  # ========================================================================
+  # NGINX — Reverse Proxy & Load Balancer
+  # ========================================================================
+
+  nginx:
+    image: nginx:alpine
+    container_name: triumph-nginx
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 32m
+    cpus: 0.2
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs/nginx:/etc/nginx/certs:ro
+    depends_on:
+      app:
+        condition: service_started
+      quantum-shield:
+        condition: service_healthy
+    networks:
+      - triumph-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ========================================================================
+  # MARKET DATA SERVICE — Live Pi Horizon data relay
+  # ========================================================================
+
+  market-data:
+    build:
+      context: .
+      dockerfile: docker/market-data/Dockerfile
+    container_name: triumph-market-data
+    <<: *common
+    mem_limit: 96m
+    mem_reservation: 48m
+    cpus: 0.2
+    environment:
+      <<: [*db-env, *pi-env]
+      MARKET_POLL_MS: 5000
+      # KEY FIX: market data reads live Pi ledger via bridge connector + Pi price from ML engine
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.testnet.minepi.com}
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      NODE_OPTIONS: "--max-old-space-size=64"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # ========================================================================
+  # BLOCKCHAIN ORACLE — Pi ledger event stream → Redis pub/sub
+  # ========================================================================
+
+  blockchain-oracle:
+    build:
+      context: .
+      dockerfile: docker/blockchain-oracle/Dockerfile
+    container_name: triumph-blockchain-oracle
+    <<: *common
+    mem_limit: 96m
+    mem_reservation: 48m
+    cpus: 0.25
+    environment:
+      <<: [*db-env, *pi-env]
+      CONTRACTS_URL: http://triumph-smart-contracts:8082
+      # KEY FIX: oracle reads live Pi ledger events via bridge connector
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.testnet.minepi.com}
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      NODE_OPTIONS: "--max-old-space-size=64"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      smart-contracts:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ========================================================================
+  # COMPLIANCE ENGINE — KYC / AML / GDPR / MiCA screening
+  # ========================================================================
+
+  compliance:
+    build:
+      context: .
+      dockerfile: docker/compliance/Dockerfile
+    container_name: triumph-compliance
+    <<: *common
+    mem_limit: 96m
+    mem_reservation: 48m
+    cpus: 0.25
+    environment:
+      <<: [*db-env, *pi-env]
+      AML_THRESHOLD_PI: ${AML_THRESHOLD_PI:-10000}
+      BLOCKED_ADDRESSES: ${BLOCKED_ADDRESSES:-}
+      NODE_OPTIONS: "--max-old-space-size=64"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+    networks:
+      - triumph-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # ========================================================================
+  # DEX ENGINE — Pi token decentralized exchange
+  # ========================================================================
+
+  dex:
+    build:
+      context: .
+      dockerfile: docker/dex/Dockerfile
+    container_name: triumph-dex
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.3
+    environment:
+      <<: [*db-env, *pi-env]
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      NODE_OPTIONS: "--max-old-space-size=96"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+    networks:
+      - triumph-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      market-data:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 25s
+
+  # ========================================================================
+  # ML ENGINE — IsolationForest anomaly, GBM fraud, Ridge price, RSI sentiment
+  # ========================================================================
+
+  ml-engine:
+    build:
+      context: docker/ml-engine
+    container_name: triumph-ml-engine
+    <<: *common
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.5
+    environment:
+      <<: [*db-env, *pi-env]
+      PORT: "8090"
+      PYTHONUNBUFFERED: "1"
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+    expose:
+      - "8090"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      market-data:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
+  # ========================================================================
+  # CREDIT ENGINE — PiCredit Score™ + Bureau Integration
+  # Equifax | Experian | TransUnion | FICO | VantageScore
+  # ========================================================================
+
+  # ========================================================================
+  # APEX-CREDIT-PRIME — Super-Pod (3 services → 1 container)
+  # Merges: credit-engine (8091) + dual-value-engine (8093) + sovereign-gateway (8097)
+  # Hostname aliases preserved so all callers continue to work unchanged.
+  # ========================================================================
+  apex-credit-prime:
+    build:
+      context: docker
+      dockerfile: apex-credit-prime/Dockerfile
+    container_name: triumph-apex-credit-prime
+    <<: *common
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.75
+    environment:
+      <<: [*db-env, *pi-env]
+      # ── Shared Pi value constants ──
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      REDIS_URL: redis://triumph-redis:6379
+      # ── credit-engine ──
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      CREDIT_SANDBOX: "true"
+      CREDIT_GOVERNANCE_MODE: ${CREDIT_GOVERNANCE_MODE:-nesara_gesara}
+      GLOBAL_CREDIT_PROVIDERS: ${GLOBAL_CREDIT_PROVIDERS:-equifax,experian,transunion,fico,vantagescore}
+      TRIUMPH_FOUNDER_NAME: "Jeremiah Joel Drains"
+      TRIUMPH_FOUNDATION_ORG: "Triumph-Synergy Digital Financial Ecosystem"
+      TRIUMPH_FOUNDER_AUTHORITY: "owner-approved"
+      TRIUMPH_FOUNDER_ADDRESS: "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+      TRIUMPH_FOUNDER_TITLE: "Sovereign Owner and Creator"
+      TRIUMPH_FOUNDER_SOVEREIGN_STATUS: "NESARA_GESARA_COMPLIANT"
+      PI_LOCAL_HORIZON: http://host.docker.internal:31401
+      ONCHAIN_ANCHOR_SEED: "SBP5FZRJNT66SHHFSRLXMK2PZK3EZKUHEVPPY75I7Y5DTK4SMZHPGF2A"
+      # ── dual-value-engine ──
+      MARKET_DATA_URL: http://triumph-market-data:8085
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      REFRESH_INTERVAL_S: "15"
+      CLOUD_MEMORY_URL: http://triumph-observability-stack:8095
+      KYC_PREMIUM_PCT: "0.05"
+      PIONEER_PREMIUM_PCT: "0.03"
+      # ── sovereign-gateway ──
+      PAYMENT_URL: http://triumph-settlement-core:8084
+      CENTRAL_NODE_URL: http://triumph-central-node:11626
+    expose:
+      - "8091"
+      - "8093"
+      - "8097"
+    networks:
+      triumph-net:
+        aliases:
+          - triumph-credit-engine
+          - triumph-dual-value-engine
+          - triumph-sovereign-gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+      ml-engine:
+        condition: service_healthy
+      market-data:
+        condition: service_healthy
+      pi-bridge-connector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket,sys\n[ (lambda p: (lambda s: (s.settimeout(3), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) for p in (8091, 8093, 8097) ]"]
+      interval: 30s
+      timeout: 15s
+      retries: 8
+      start_period: 120s
+
+  # ========================================================================
+  # QUANTUM SHIELD ENGINE — Post-quantum cryptographic resistance layer
+  # NIST FIPS 203 (Kyber-1024) | FIPS 204 (Dilithium-5) | FIPS 205 (SPHINCS+)
+  # Protects all 22 services against Shor + Grover quantum attacks
+  # ========================================================================
+
+  quantum-shield:
+    build:
+      context: docker/quantum-shield
+    container_name: triumph-quantum-shield
+    <<: *common
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.35
+    environment:
+      PORT: "8094"
+      REDIS_URL: redis://triumph-redis:6379
+      # Canonical Pi dual-value constants
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      # Service mesh URLs for full ecosystem audit
+      APP_URL: http://triumph-nginx:80
+      MARKET_DATA_URL: http://triumph-market-data:8085
+      BLOCKCHAIN_ORACLE_URL: http://triumph-blockchain-oracle:8086
+      COMPLIANCE_URL: http://triumph-compliance:8087
+      DEX_URL: http://triumph-dex:8088
+      TOKENIZATION_URL: http://triumph-tokenization-engine:8089
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      CLOUD_MEMORY_URL: http://triumph-observability-stack:8095
+      TRANSACTION_URL: http://triumph-transaction-engine:8080
+      PAYMENT_URL: http://triumph-settlement-core:8084
+      VAULT_URL: http://triumph-vault:8081
+      CONTRACTS_URL: http://triumph-smart-contracts:8082
+      SCP_URL: http://triumph-scp-upgrader:8083
+      BACKBONE_INTERVAL_S: "5"
+      BACKBONE_TIMEOUT_S: "3"
+      BACKBONE_MAX_FAILURES: "3"
+      BACKBONE_ENDPOINTS: "http://triumph-pi-bridge-connector:8092/health,http://triumph-smart-contracts:8082/health,http://triumph-central-node:11626/health"
+    expose:
+      - "8094"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      apex-credit-prime:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import socket,sys; s=socket.socket(); s.settimeout(3); sys.exit(s.connect_ex(('localhost',8094)))"]
+      interval: 25s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ========================================================================
+  # CLOUD MEMORY PLATFORM — LZ4 compressed, deduplicated, multi-platform store
+  # 60-80% smaller payloads | content-addressed dedup | cross-service broadcast
+  # Sustains 22+ platforms within one unified memory layer
+  # ========================================================================
+
+  # ========================================================================
+  # NOTE: cloud-memory was folded into APEX-observability-stack super-pod
+  # (now exposes port 8095 alongside 3000/9090/9121/9187 within the same
+  # supervisord-managed container).  Kept the persistent backup volume.
+  # ========================================================================
+
+  # ========================================================================
+  # SOVEREIGN GATEWAY — Universal Integration Gateway
+  # The single entry point ALL external systems (banks, governments,
+  # exchanges, SWIFT, ACH, FedWire, Ethereum, Bitcoin) MUST connect
+  # through to access Pi Network liquidity and the Triumph Synergy
+  # ecosystem.  Pi is the base settlement layer; USD is derivative.
+  # ========================================================================
+
+  # NOTE: sovereign-gateway folded into apex-credit-prime super-pod (above).
+  # Hostname triumph-sovereign-gateway resolved via network alias.
+
+
+  # ========================================================================
+  # DUAL-VALUE ENGINE — Pi Internal (mined) vs External (market) value
+  # ========================================================================
+
+  # NOTE: dual-value-engine folded into apex-credit-prime super-pod (above).
+  # Hostname triumph-dual-value-engine resolved via network alias.
+
+
+  # ========================================================================
+  # TOKENIZATION ENGINE — Pi domain + allodial deed tokenization
+  # ========================================================================
+
+  tokenization-engine:
+    build:
+      context: .
+      dockerfile: docker/tokenization-engine/Dockerfile
+    container_name: triumph-tokenization-engine
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.3
+    environment:
+      <<: [*db-env, *pi-env]
+      NODE_OPTIONS: "--max-old-space-size=96"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      TOKENIZATION_HMAC_KEY: ${TOKENIZATION_HMAC_KEY:-triumph-tokenization-fortress-2026}
+      ML_ENGINE_URL: http://triumph-ml-engine:8090
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      TOKENIZATION_REQUIRE_PQ_SIGNATURE: "true"
+    expose:
+      - "8089"
+    networks:
+      - triumph-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      apex-credit-prime:
+        condition: service_healthy
+      ml-engine:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8089/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 25s
+
+  # ========================================================================
+  # NOTE: prometheus, grafana, postgres-exporter, redis-exporter were
+  # consolidated into the observability-stack super-pod. See line ~1422.
+  # ========================================================================
+
+  # ========================================================================
+  # HORIZON GUARDIAN — keeps testnet2 running, Horizon alive, and
+  # pi-bridge network connected for the entire Triumph ecosystem
+  # ========================================================================
+  horizon-guardian:
+    build:
+      context: docker/horizon-guardian
+    container_name: triumph-horizon-guardian
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 32m
+    cpus: 0.15
+    environment:
+      TARGET_CONTAINER: testnet2
+      TARGET_PROCESS: horizon
+      TARGET_URL: http://localhost:8000/
+      GUARD_INTERVAL_S: "20"
+      METRICS_PORT: "9911"
+      PI_BRIDGE_NETWORK: pi-bridge
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9911"
+    networks:
+      - triumph-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9911/health', timeout=8)"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 90s
+
+  # ========================================================================
+  # JUDICIAL MONITOR — Courtroom Transparency & Anti-Railroading Engine
+  # Florida-first deployment — charge stacking, Brady violations,
+  # emotional language detection, immutable transparency ledger
+  # ========================================================================
+  judicial-monitor:
+    build:
+      context: .
+      dockerfile: docker/judicial-monitor/Dockerfile
+    container_name: triumph-judicial-monitor
+    <<: *common
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.3
+    environment:
+      <<: [*db-env, *pi-env]
+      SERVICE_NAME: judicial-monitor
+      SERVICE_PORT: "8096"
+      JUDICIAL_JURISDICTION: florida
+    ports:
+      - "8096:8096"
+    networks:
+      - triumph-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # grafana service consolidated into observability-stack super-pod (port 3001:3000 still exposed there)
+
+
+  # ========================================================================
+  # HEALTH GOVERNOR — Lightweight memory watchdog for entire ecosystem
+  # Restarts containers approaching mem_limit before they OOM-crash WSL2
+  # ========================================================================
+  health-governor:
+    build:
+      context: docker/health-governor
+    container_name: triumph-health-governor
+    <<: *common
+    mem_limit: 64m
+    mem_reservation: 24m
+    cpus: 0.15
+    environment:
+      GOVERNOR_INTERVAL_S: "30"
+      MEMORY_WARN_PCT: "80"
+      MEMORY_KILL_PCT: "101"
+      METRICS_PORT: "9912"
+      CONTAINER_PREFIX: "triumph-"
+      PROTECTED_CONTAINERS: "triumph-postgres,triumph-redis"
+      HEALTH_FAIL_THRESHOLD: "10"
+      RESTART_BACKOFF_BASE_S: "60"
+      RESTART_BACKOFF_MAX_S: "600"
+      HEALTH_PROBE_TIMEOUT_S: "10"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9912"
+    networks:
+      - triumph-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9912/health', timeout=8)"]
+      interval: 30s
+      timeout: 12s
+      retries: 3
+      start_period: 10s
+
+  # ========================================================================
+  # NETWORK SENTINEL — Multi-WAN monitor & connection resilience
+  # Detects Starlink/broadband/cellular transitions, verifies external
+  # connectivity, auto-restarts services after network changes
+  # ========================================================================
+  network-sentinel:
+    build:
+      context: docker/network-sentinel
+    container_name: triumph-network-sentinel
+    <<: *common
+    mem_limit: 48m
+    mem_reservation: 16m
+    cpus: 0.1
+    environment:
+      PROBE_INTERVAL_S: "15"
+      METRICS_PORT: "9913"
+      REDIS_URL: "redis://triumph-redis:6379"
+      PI_NODE_HOST: "testnet2"
+      PI_NODE_PEER_PORT: "31402"
+      PI_HORIZON_URL: "http://testnet2:8000"
+      PI_BRIDGE_URL: "http://triumph-pi-bridge-connector:8092"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9913"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9913/health', timeout=10)"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 90s
+
+  # ========================================================================
+  # GOVERNANCE-SHIELD — Super-Pod
+  # compliance + judicial-monitor + central-node + scp-upgrader
+  # ========================================================================
+
+  governance-shield:
+    build:
+      context: .
+      dockerfile: docker/governance-shield/Dockerfile
+    container_name: triumph-governance-shield
+    <<: *common
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.50
+    environment:
+      <<: [*db-env, *pi-env]
+      NODE_TYPE: central
+      NODE_PRIORITY: supreme
+      STELLAR_CORE_HTTP_PORT: 11626
+      AUTO_UPGRADE: "true"
+      ZERO_DOWNTIME: "true"
+      ROLLBACK_ON_FAILURE: "true"
+      VERSION_CHECK_INTERVAL_MS: 60000
+      PARAMETER_SYNC_INTERVAL_MS: 30000
+      PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
+      PI_TESTNET_HORIZON: https://api.testnet.minepi.com
+      PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      COMPLIANCE_REQUIRE_PQ: "true"
+      JUDICIAL_REQUIRE_PQ: "true"
+      SCP_REQUIRE_PQ_SIGNATURE: "true"
+    volumes:
+      - triumph_central_data:/app/data/central
+      - triumph_scp_data:/app/data/scp
+    expose:
+      - "8083"
+      - "8087"
+      - "8096"
+      - "11625"
+      - "11626"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      pi-bridge-connector:
+        condition: service_healthy
+
+  # ========================================================================
+  # SETTLEMENT-CORE — Super-Pod
+  # transaction-engine + smart-contracts + tokenization-engine + dex
+  # ========================================================================
+
+  settlement-core:
+    build:
+      context: .
+      dockerfile: docker/settlement-core/Dockerfile
+    container_name: triumph-settlement-core
+    <<: *common
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.50
+    environment:
+      <<: [*db-env, *pi-env]
+      ENGINE_MODE: hyper
+      NODE_OPTIONS: "--max-old-space-size=512"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
+      EXECUTION_CHANNELS: 10000
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      TRANSACTION_REQUIRE_PQ_SIGNATURE: "true"
+      SMART_CONTRACTS_REQUIRE_PQ_SIGNATURE: "true"
+      TOKENIZATION_REQUIRE_PQ_SIGNATURE: "true"
+      DEX_REQUIRE_PQ_SIGNATURE: "true"
+    volumes:
+      - triumph_tx_data:/app/data/tx
+      - triumph_contracts_data:/app/data/contracts
+      - triumph_tokenization_data:/app/data/tokens
+    expose:
+      - "8080"
+      - "8082"
+      - "8084"
+      - "8088"
+      - "8089"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      governance-shield:
+        condition: service_started
+
+  # ========================================================================
+  # FINANCIAL-INTEL — Super-Pod
+  # credit-engine + ml-engine + dual-value-engine
+  # ========================================================================
+
+  financial-intel:
+    build:
+      context: docker
+      dockerfile: financial-intel/Dockerfile
+    container_name: triumph-financial-intel
+    <<: *common
+    mem_limit: 1024m
+    mem_reservation: 512m
+    cpus: 0.60
+    environment:
+      <<: [*db-env, *pi-env]
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+    expose:
+      - "8090"
+      - "8091"
+      - "8093"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # ========================================================================
+  # QUANTUM-FORTRESS — Super-Pod
+  # quantum-shield + qpu-bridge  [ML-KEM-1024 + ML-DSA-87 + SPHINCS+]
+  # ========================================================================
+
+  quantum-fortress:
+    build:
+      context: docker
+      dockerfile: quantum-fortress/Dockerfile
+    container_name: triumph-quantum-fortress
+    <<: *common
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.30
+    environment:
+      <<: [*db-env, *pi-env]
+      PORT: "8094"
+      QPU_PORT: "8098"
+    expose:
+      - "8094"
+      - "8098"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # ========================================================================
+  # APEX-SERVICES — Mega Super-Pod (18 services in one container)
+  # ========================================================================
+  # Consolidates the three previously-standalone sovereign super-pods:
+  #   sovereign-fortress   (5 svc, 8097-8102) — ai-bot + gateway + delivery
+  #                                              + pidex + sports-hub
+  #   sovereign-insurance  (7 svc, 8110-8116) — life + home + health + auto
+  #                                              + dental + vision + hospital
+  #   sovereign-utilities  (6 svc, 8120-8125) — electric + water + gas + hoa
+  #                                              + plumbing + hvac
+  # Removes 2 redundant Python/supervisord overheads (~150 MB savings).
+  # All hostname aliases preserved for backwards-compatible service URLs.
+  # ========================================================================
+
+  apex-services:
+    build:
+      context: docker
+      dockerfile: apex-services/Dockerfile
+    container_name: triumph-apex-services
+    <<: *common
+    mem_limit: 2048m
+    mem_reservation: 1024m
+    cpus: 2.00
+    environment:
+      <<: [*db-env, *pi-env]
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      AI_BOT_REQUIRE_PQ: "true"
+      GATEWAY_REQUIRE_PQ: "true"
+      QUANTUM_FORTRESS_URL: http://triumph-quantum-fortress:8094
+      PAYMENT_PROCESSOR_URL: http://triumph-settlement-core:8084
+      CLOUD_MEMORY_URL: http://triumph-observability-stack:8095
+    expose:
+      - "8097"
+      - "8099"
+      - "8100"
+      - "8101"
+      - "8102"
+      - "8110"
+      - "8111"
+      - "8112"
+      - "8113"
+      - "8114"
+      - "8115"
+      - "8116"
+      - "8120"
+      - "8121"
+      - "8122"
+      - "8123"
+      - "8124"
+      - "8125"
+    networks:
+      triumph-net:
+        aliases:
+          # Preserve legacy hostnames so other pods don't need updates
+          - triumph-sovereign-fortress
+          - triumph-sovereign-insurance
+          - triumph-sovereign-utilities
+      pi-bridge:
+        aliases:
+          - triumph-sovereign-fortress
+          - triumph-sovereign-insurance
+          - triumph-sovereign-utilities
+    depends_on:
+      redis:
+        condition: service_healthy
+      quantum-fortress:
+        condition: service_started
+      settlement-core:
+        condition: service_started
+
+  # ========================================================================
+  # HORIZON-STREAM — Super-Pod
+  # blockchain-oracle + market-data
+  # ========================================================================
+
+  horizon-stream:
+    build:
+      context: .
+      dockerfile: docker/horizon-stream/Dockerfile
+    container_name: triumph-horizon-stream
+    <<: *common
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.30
+    environment:
+      <<: [*db-env, *pi-env]
+      MARKET_POLL_MS: 5000
+      ORACLE_POLL_MS: 5000
+    volumes:
+      - triumph_stellar_data:/app/data
+    expose:
+      - "8085"
+      - "8086"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+      pi-bridge-connector:
+        condition: service_healthy
+
+  # ========================================================================
+  # OBSERVABILITY-STACK — Super-Pod
+  # prometheus + grafana + postgres-exporter + redis-exporter
+  # ========================================================================
+
+  observability-stack:
+    build:
+      context: docker
+      dockerfile: observability-stack/Dockerfile
+    container_name: triumph-observability-stack
+    <<: *common
+    mem_limit: 1024m
+    mem_reservation: 512m
+    cpus: 0.40
+    ports:
+      - "3001:3000"
+      - "9090:9090"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}?sslmode=disable"
+      REDIS_ADDR: "redis://triumph-redis:6379"
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-triumph_admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - triumph_prometheus_data:/prometheus
+      - triumph_grafana_data:/var/lib/grafana
+      - triumph_cloud_memory_backup:/backup
+    expose:
+      - "9121"
+      - "9187"
+      - "8095"
+    networks:
+      - triumph-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ========================================================================
+  # ECOSYSTEM-GUARDIAN — Watchdog Super-Pod
+  # Health-Governor (9912) + Network-Sentinel (9913) + Horizon-Guardian (9911)
+  # supervisord manages all three watchdogs with independent restart policies
+  # ========================================================================
+
+  ecosystem-guardian:
+    build:
+      context: docker/ecosystem-guardian
+    container_name: triumph-ecosystem-guardian
+    <<: *common
+    restart: on-failure:10
+    mem_limit: 256m
+    mem_reservation: 96m
+    cpus: 0.20
+    environment:
+      GOVERNOR_INTERVAL_S: "30"
+      MEMORY_WARN_PCT: "80"
+      MEMORY_KILL_PCT: "101"
+      METRICS_PORT: "9912"
+      CONTAINER_PREFIX: "triumph-"
+      PROTECTED_CONTAINERS: "triumph-postgres,triumph-redis,triumph-vault"
+      HEALTH_FAIL_THRESHOLD: "3"
+      DOCKER_UNHEALTHY_THRESHOLD: "3"
+      RESTART_BACKOFF_BASE_S: "60"
+      RESTART_BACKOFF_MAX_S: "600"
+      HEALTH_PROBE_TIMEOUT_S: "10"
+      ML_SELF_HEAL_ENABLED: "true"
+      ML_HISTORY_WINDOW_S: "900"
+      ML_MAX_RESTARTS_PER_WINDOW: "4"
+      ML_SUPPRESSION_S: "300"
+      CONTROL_PLANE_REQUIRE_PQ_READY: "true"
+      QUANTUM_SHIELD_URL: "http://triumph-quantum-fortress:8094"
+      SAIB_URL: "http://triumph-sovereign-fortress:8099"
+      PQ_CHECK_INTERVAL_S: "30"
+      PROBE_INTERVAL_S: "15"
+      SENTINEL_METRICS_PORT: "9913"
+      REDIS_URL: "redis://triumph-redis:6379"
+      PI_NODE_HOST: "testnet2"
+      PI_NODE_PEER_PORT: "31402"
+      PI_HORIZON_URL: "http://testnet2:8000"
+      PI_BRIDGE_URL: "http://triumph-pi-bridge-connector:8092"
+      ML_ENGINE_URL: "http://triumph-financial-intel:8090"
+      SELF_HEAL_ML_ENABLED: "true"
+      ANOMALY_Z_THRESHOLD: "2.5"
+      ANOMALY_STREAK_THRESHOLD: "3"
+      TARGET_CONTAINER: testnet2
+      TARGET_PROCESS: horizon
+      TARGET_URL: http://localhost:8000/
+      GUARD_INTERVAL_S: "20"
+      GUARDIAN_METRICS_PORT: "9911"
+      PI_BRIDGE_NETWORK: pi-bridge
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9911"
+      - "9912"
+      - "9913"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9912/health', timeout=8)"]
+      interval: 30s
+      timeout: 15s
+      retries: 4
+      start_period: 20s
+
+  # ========================================================================
+  # APEX-SOVEREIGN-LIFE — Super-Pod (3 services → 1 container)
+  # ========================================================================
+  # Consolidates the three apex sovereign single-process services that share
+  # an identical FastAPI/uvicorn/Redis stack and the same upstream deps:
+  #   sovereign-bank      (8150) — full-reserve, 0%, anti-cartel Pi bank
+  #   sovereign-education (8130) — K-12, college, faculty pay, learn-and-earn
+  #   sovereign-telecom   (8140) — 7-layer quantum mesh, never-offline
+  # supervisord co-locates all three for in-pod localhost calls and removes
+  # 2 redundant container overheads (~256 MB RAM each → 1 shared 512 MB pod).
+  # ========================================================================
+
+  sovereign-life:
+    build:
+      context: docker
+      dockerfile: sovereign-life/Dockerfile
+    container_name: triumph-sovereign-life
+    <<: *common
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.50
+    environment:
+      PI_INTERNAL_RATE: "314159.0"
+      PI_EXTERNAL_RATE: "314.159"
+      PI_INTERNAL_MULTIPLIER: "1000.0"
+      # Each service uses its own Redis DB index (preserved from standalone)
+      BANK_REDIS_URL: redis://triumph-redis:6379/9
+      EDUCATION_REDIS_URL: redis://triumph-redis:6379/7
+      TELECOM_REDIS_URL: redis://triumph-redis:6379/8
+      REDIS_URL: redis://triumph-redis:6379
+      VAULT_URL: http://triumph-vault:8081
+      # Payment processor now lives inside settlement-core super-pod on 8084
+      PAYMENT_URL: http://triumph-settlement-core:8084
+      SAIB_URL: http://triumph-sovereign-fortress:8099
+      QUANTUM_SHIELD_URL: http://triumph-quantum-fortress:8094
+    expose:
+      - "8130"
+      - "8140"
+      - "8150"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import socket; [ (lambda p: (lambda s: (s.settimeout(5), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) for p in (8130, 8140, 8150) ]"]
+      interval: 30s
+      timeout: 15s
+      retries: 6
+      start_period: 120s
+
+# ==========================================================================
+# VOLUMES — Persistent Data
+# ==========================================================================
+
+volumes:
+  triumph_tokenization_data:
+    name: triumph_tokenization_data
+  triumph_pg_data:
+    name: triumph_pg_data
+  triumph_redis_data:
+    name: triumph_redis_data
+  triumph_central_data:
+    name: triumph_central_data
+  triumph_stellar_data:
+    name: triumph_stellar_data
+  triumph_tx_data:
+    name: triumph_tx_data
+  triumph_vault_data:
+    name: triumph_vault_data
+  triumph_contracts_data:
+    name: triumph_contracts_data
+  triumph_scp_data:
+    name: triumph_scp_data
+  triumph_prometheus_data:
+    name: triumph_prometheus_data
+  triumph_grafana_data:
+    name: triumph_grafana_data
+  triumph_cloud_memory_backup:
+    name: triumph_cloud_memory_backup
+
+# ==========================================================================
+# NETWORK — Shared with Pi Network node for direct communication
+# ==========================================================================
+#
+# After starting:  docker network connect pi-bridge testnet2
+# This connects the Pi Node container to the ecosystem so central-node
+# can communicate with it directly.
+# ==========================================================================
+
+networks:
+  triumph-net:
+    name: triumph-net
+    driver: bridge
+  pi-bridge:
+    name: pi-bridge
+    driver: bridge

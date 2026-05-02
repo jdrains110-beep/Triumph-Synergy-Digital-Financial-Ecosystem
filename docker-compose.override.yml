@@ -54,9 +54,6 @@ services:
   quantum-fortress:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  sovereign-fortress:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
   horizon-stream:
     <<: [ *platform, *init, *grace, *ulimits ]
 
@@ -73,10 +70,7 @@ services:
   ecosystem-guardian:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  sovereign-insurance:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  sovereign-utilities:
+  apex-services:
     <<: [ *platform, *init, *grace, *ulimits ]
 
   # APEX-SOVEREIGN-LIFE — bank + education + telecom consolidated

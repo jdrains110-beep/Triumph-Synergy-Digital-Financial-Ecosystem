@@ -1,0 +1,118 @@
+# Step 5 — Redis Cluster on k3s: 6 nodes (3 masters + 3 replicas)
+#
+# Apply with:
+#   kubectl apply -f infrastructure/k8s-redis-cluster/
+#
+# Cluster bootstrap is a one-shot Job that calls `redis-cli --cluster create`
+# once all 6 pods are healthy. Idempotent — re-running is a no-op once formed.
+#
+# Use from apps:
+#   REDIS_CLUSTER_NODES=redis-cluster-0.redis-cluster:6379,redis-cluster-1.redis-cluster:6379,redis-cluster-2.redis-cluster:6379
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-cluster-config
+  namespace: triumph
+data:
+  redis.conf: |
+    port 6379
+    cluster-enabled yes
+    cluster-config-file /data/nodes.conf
+    cluster-node-timeout 5000
+    appendonly yes
+    protected-mode no
+    maxmemory 256mb
+    maxmemory-policy allkeys-lru
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster
+  namespace: triumph
+spec:
+  clusterIP: None
+  selector: { app: redis-cluster }
+  ports:
+    - { name: client, port: 6379, targetPort: 6379 }
+    - { name: gossip, port: 16379, targetPort: 16379 }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+  namespace: triumph
+spec:
+  serviceName: redis-cluster
+  replicas: 6
+  podManagementPolicy: Parallel
+  selector: { matchLabels: { app: redis-cluster } }
+  template:
+    metadata: { labels: { app: redis-cluster } }
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: redis
+          image: redis:7.4-alpine
+          command: ["redis-server", "/conf/redis.conf"]
+          ports:
+            - { name: client, containerPort: 6379 }
+            - { name: gossip, containerPort: 16379 }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: conf, mountPath: /conf }
+          resources:
+            requests: { cpu: "100m", memory: "300Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+          readinessProbe:
+            tcpSocket: { port: 6379 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec: { command: ["redis-cli", "-p", "6379", "ping"] }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: conf
+          configMap: { name: redis-cluster-config }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: { requests: { storage: 10Gi } }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-cluster-init
+  namespace: triumph
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: redis:7.4-alpine
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              for i in 0 1 2 3 4 5; do
+                until redis-cli -h redis-cluster-$i.redis-cluster -p 6379 ping; do
+                  echo "waiting for redis-cluster-$i…"; sleep 3
+                done
+              done
+              KNOWN=$(redis-cli -h redis-cluster-0.redis-cluster -p 6379 cluster info | grep cluster_known_nodes | tr -d '\r' | cut -d: -f2)
+              if [ "$KNOWN" = "6" ]; then
+                echo "✓ already formed"; exit 0
+              fi
+              IPS=""
+              for i in 0 1 2 3 4 5; do
+                IP=$(getent hosts redis-cluster-$i.redis-cluster | awk '{print $1}')
+                IPS="$IPS $IP:6379"
+              done
+              echo "→ forming cluster with: $IPS"
+              redis-cli --cluster create $IPS --cluster-replicas 1 --cluster-yes
+              redis-cli -h redis-cluster-0.redis-cluster -p 6379 cluster nodes

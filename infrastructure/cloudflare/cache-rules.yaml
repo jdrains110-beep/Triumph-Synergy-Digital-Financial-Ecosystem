@@ -1,0 +1,54 @@
+# SAIB Cloudflare Cache Policy
+# Mirrored 1:1 by terraform/cache_rules.tf
+# Origin emits matching Cache-Control headers via FastAPI middleware in main.py
+
+defaults:
+  bypass_cache_on_cookie: ["session", "auth_token"]
+  respect_strong_etag: true
+  origin_error_page_pass_thru: true
+
+rules:
+  - name: high-volume-probes
+    match: 'http.request.uri.path in {"/health" "/status"}'
+    edge_ttl: 10
+    browser_ttl: 5
+    cache: true
+    swr: 30
+
+  - name: read-heavy-slow-changing
+    match: 'http.request.uri.path in {"/codebase" "/network" "/loopholes"}'
+    edge_ttl: 60
+    browser_ttl: 30
+    cache: true
+    swr: 300
+
+  - name: live-state-burst-absorber
+    match: 'http.request.uri.path in {"/brain" "/visitors" "/persist" "/learning" "/report" "/gold" "/metrics"}'
+    edge_ttl: 5
+    browser_ttl: 0
+    cache: true
+    swr: 60
+
+  - name: mutations-bypass
+    match: 'http.request.method in {"POST" "PUT" "PATCH" "DELETE"}'
+    cache: false
+
+  - name: explicit-mutation-paths
+    match: 'http.request.uri.path in {"/execute" "/scan" "/feedback" "/teach" "/persist/save" "/network/switch" "/codebase/sync" "/emergency-lockdown"} or starts_with(http.request.uri.path, "/heal/")'
+    cache: false
+
+waf:
+  rate_limits:
+    - name: per-ip-burst
+      match: 'http.request.method == "GET"'
+      threshold: 1000          # req/min/ip
+      period: 60
+      action: challenge
+    - name: mutation-flood
+      match: 'http.request.method != "GET"'
+      threshold: 60
+      period: 60
+      action: block
+  managed_rules:
+    - cloudflare-managed
+    - owasp-core

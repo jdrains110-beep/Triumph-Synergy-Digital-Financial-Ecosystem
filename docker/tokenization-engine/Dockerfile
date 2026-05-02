@@ -13,10 +13,11 @@ WORKDIR /app
 COPY docker/package.microservice.json ./package.json
 RUN npm install
 COPY docker/tokenization-engine/bootstrap.ts ./docker/tokenization-engine/bootstrap.ts
+COPY docker/tokenization-engine/stellar-broadcaster.ts ./docker/tokenization-engine/stellar-broadcaster.ts
 COPY tsconfig.docker.json ./tsconfig.json
 RUN npx esbuild docker/tokenization-engine/bootstrap.ts \
-      --bundle --platform=node --target=node20 --format=cjs \
-      --external:events --outfile=dist/tokenization-engine.js
+    --bundle --platform=node --target=node20 --format=cjs \
+    --external:events --outfile=dist/tokenization-engine.js
 
 FROM base AS runner
 WORKDIR /app

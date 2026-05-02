@@ -29,7 +29,8 @@ COPY lib/stellar        ./lib/stellar
 
 COPY docker/transaction-engine/bootstrap.ts  ./docker/transaction-engine/bootstrap.ts
 COPY docker/smart-contracts/bootstrap.ts     ./docker/smart-contracts/bootstrap.ts
-COPY docker/tokenization-engine/bootstrap.ts ./docker/tokenization-engine/bootstrap.ts
+COPY docker/tokenization-engine/bootstrap.ts          ./docker/tokenization-engine/bootstrap.ts
+COPY docker/tokenization-engine/stellar-broadcaster.ts ./docker/tokenization-engine/stellar-broadcaster.ts
 COPY docker/dex/bootstrap.ts                 ./docker/dex/bootstrap.ts
 COPY services/payment-processor/index.ts     ./services/payment-processor/index.ts
 COPY tsconfig.docker.json ./tsconfig.json

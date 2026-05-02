@@ -1,0 +1,97 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: triumph-nginx-conf
+  namespace: triumph
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    events { worker_connections 4096; }
+    http {
+      upstream saib {
+        # Round-robin across all SAIB pods. State is shared via Postgres.
+        server triumph-apex-services:8099;
+        keepalive 32;
+      }
+      server {
+        listen 80;
+        location /saib/ {
+          proxy_pass http://saib/;
+          proxy_http_version 1.1;
+          proxy_set_header Connection "";
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_read_timeout 30s;
+        }
+        location /health {
+          return 200 "ok\n";
+          add_header Content-Type text/plain;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: triumph-nginx
+  namespace: triumph
+spec:
+  type: ClusterIP
+  selector:
+    app: triumph-nginx
+  ports:
+    - { name: http, port: 80, targetPort: 80 }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triumph-nginx
+  namespace: triumph
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: triumph-nginx
+  template:
+    metadata:
+      labels:
+        app: triumph-nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - { containerPort: 80 }
+          volumeMounts:
+            - name: conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          resources:
+            requests: { cpu: "50m",  memory: "64Mi" }
+            limits:   { cpu: "500m", memory: "256Mi" }
+      volumes:
+        - name: conf
+          configMap:
+            name: triumph-nginx-conf
+---
+# Ingress — assumes traefik (default in k3s/k3d)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: triumph-ingress
+  namespace: triumph
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: triumph-nginx
+                port:
+                  number: 80

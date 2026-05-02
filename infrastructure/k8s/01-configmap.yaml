@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: triumph-shared-env
+  namespace: triumph
+data:
+  POSTGRES_DB: "triumph_synergy"
+  POSTGRES_USER: "postgres"
+  REDIS_URL: "redis://triumph-redis:6379"
+  PI_NETWORK: "testnet"
+  SAIB_INTELLIGENCE_MODE: "sentinel"
+  SAIB_APEX_QUANTUM_ENFORCEMENT: "true"
+  SAIB_PERSIST_ENABLED: "true"
+  SAIB_PERSIST_INTERVAL_S: "60"
+  SAIB_GITHUB_INTERACT_ENABLED: "true"
+  SAIB_GITHUB_GREETING_ENABLED: "true"
+  SAIB_GITHUB_PRIVACY_MODE: "partial"
+  GITHUB_REPO: "jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem"
+  POSTGRES_HOST: "triumph-postgres"
+  POSTGRES_PORT: "5432"

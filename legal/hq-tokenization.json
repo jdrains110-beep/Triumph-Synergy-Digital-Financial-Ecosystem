@@ -1,0 +1,119 @@
+{
+  "asking_price_usd": 645000.0,
+  "company": "Triumph Synergy",
+  "domain_pi": "triumphsynergy.pi",
+  "founder": "Jeremiah Joel Drains",
+  "headquarters_address": "135 Lake Como Dr, Pomona Park, FL 32181, United States",
+  "owner_pi_username": "jdrains30",
+  "owner_pi_wallet_placeholder": "G3MBTER23237OOP2UAT4KNYXARYV32ZCBIF5PAHCKL4ELJLX32KUCO6Z",
+  "results": {
+    "allodial_deed": {
+      "http_status": 409,
+      "response": {
+        "claimHash": "255c9983c5d0949e2b72512d5ba57539c91d8f2684817f71f1733d854f07e32e",
+        "error": "Property already tokenized",
+        "tokenId": "2b4a6c356e01332b581ea077719d9a01fcb480e9a72fc34364b2047cb702b13b"
+      }
+    },
+    "sovereign_estate": {
+      "http_status": 201,
+      "response": {
+        "deedToken": {
+          "createdAt": "2026-04-30T20:44:14.802Z",
+          "deedNumber": "ALLODIAL-2026-D22462F4",
+          "fortressHash": "5ccd81965d446401dd207fe73ef6c7ddbcc5f854915f926dda676a5fa985e71b",
+          "network": "testnet",
+          "owner": {
+            "piAddress": "G3MBTER23237OOP2UAT4KNYXARYV32ZCBIF5PAHCKL4ELJLX32KUCO6Z",
+            "piUsername": "jdrains30"
+          },
+          "piBlockchainAnchor": {
+            "confirmedAt": "2026-04-30T20:44:14.802Z",
+            "ledgerSequence": 24449687,
+            "piApiConfirmed": true,
+            "transactionHash": "34d014852f945f12a86e670372af40f462001b7e5cad4e0804a5b7fed3b17228"
+          },
+          "property": {
+            "legalDescription": "World Headquarters of Triumph Synergy \u2014 135 Lake Como Dr, Pomona Park, Putnam County, Florida 32181, USA. Allodial title held by founder Jeremiah Joel Drains for and on behalf of Triumph Synergy as principal place of business. Asking price USD $645,000.",
+            "propertyHash": "d22462f4df9a1ddefad72e281cab550200d5b3e59d22a01dd27e8d32e024a7a4"
+          },
+          "propertyHash": "d22462f4df9a1ddefad72e281cab550200d5b3e59d22a01dd27e8d32e024a7a4",
+          "securityScore": 100,
+          "standard": "PI-721",
+          "status": "TOKENIZED",
+          "stellarAnchor": {
+            "broadcastError": "Request failed with status code 400",
+            "broadcasted": false,
+            "consensusAt": "2026-04-30T20:44:14.802Z",
+            "explorerUrl": null,
+            "fee": "100",
+            "ledgerSequence": 24449687,
+            "network": "testnet",
+            "networkPassphrase": "Pi Testnet",
+            "transactionHash": "53b72c5600218f5ce5bd402b529cc233d199ffae60e042dc46c2b8955a5f91c1"
+          },
+          "tokenId": "5523696e9bca807e4223b231b53b5bdb5b75fe5564a7a1dbbab21cf73b0fc0fa",
+          "updatedAt": "2026-04-30T20:44:14.802Z",
+          "valuationPi": "2.053101",
+          "valuationUsd": "645000.16"
+        },
+        "domainToken": {
+          "blockchainTxHash": "224f29e94ea6ea9627d440a6e4f148c7252f9875f20ff8c4beb21e4400e67e6a",
+          "domain": "triumphsynergy.pi",
+          "fortressHash": "f2924beb3408ae500083c461fc0bbf8cc3a0b83480e22684c452179e20fb55a7",
+          "metadataHash": "e581adcb5906290f7783de3e69916496e99bb892c77e8b5a9c10e637e0bf6e9d",
+          "mintedAt": "2026-04-30T20:44:14.802Z",
+          "network": "testnet",
+          "ownerAddress": "G3MBTER23237OOP2UAT4KNYXARYV32ZCBIF5PAHCKL4ELJLX32KUCO6Z",
+          "ownerUsername": "jdrains30",
+          "securityScore": 100,
+          "standard": "PI-721",
+          "status": "TOKENIZED",
+          "stellarBroadcasted": false,
+          "stellarExplorerUrl": null,
+          "stellarLedgerSequence": 24449687,
+          "stellarTxHash": "7390109b6ea47d5c0b32a678662eef4d19d2689dfeb561e17344a5258096e290",
+          "tld": ".pi",
+          "tokenId": "d6bad7b5b6550d237feca968ee52ce375e16321a7338c560179fd9ee281f2a30",
+          "transfers": [],
+          "updatedAt": "2026-04-30T20:44:14.802Z",
+          "valuationPi": "2.053101",
+          "valuationUsd": "645000.16"
+        },
+        "estate": {
+          "createdAt": "2026-04-30T20:44:14.802Z",
+          "estateId": "c75058936effbc96a06ee6e8ecbf6a7386ad6de2c1c3ef0deae4afd4287c67a0",
+          "governmentRegistration": {
+            "note": "Platform-level sovereign registry active; official government recording requires external authorized filing.",
+            "status": "PENDING_EXTERNAL_JURISDICTION_RECORDING"
+          },
+          "ownerAddress": "G3MBTER23237OOP2UAT4KNYXARYV32ZCBIF5PAHCKL4ELJLX32KUCO6Z",
+          "ownerUsername": "jdrains30",
+          "privateTrust": {
+            "beneficiary": "G3MBTER23237OOP2UAT4KNYXARYV32ZCBIF5PAHCKL4ELJLX32KUCO6Z",
+            "establishedAt": "2026-04-30T20:44:14.802Z",
+            "settlor": "G3MBTER23237OOP2UAT4KNYXARYV32ZCBIF5PAHCKL4ELJLX32KUCO6Z",
+            "trustName": "Triumph Synergy Sovereign Headquarters Living Trust",
+            "trustType": "private-living-estate",
+            "trustee": "G3MBTER23237OOP2UAT4KNYXARYV32ZCBIF5PAHCKL4ELJLX32KUCO6Z"
+          },
+          "sovereignRole": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+          "status": "SOVEREIGN_ESTATE_ACTIVE",
+          "titles": {
+            "equitableTitle": "jdrains30 Equitable Title Beneficiary",
+            "granteeAbsolute": "jdrains30 Grantee Absolute"
+          },
+          "tokenization": {
+            "deedTokenId": "5523696e9bca807e4223b231b53b5bdb5b75fe5564a7a1dbbab21cf73b0fc0fa",
+            "domainTokenId": "d6bad7b5b6550d237feca968ee52ce375e16321a7338c560179fd9ee281f2a30"
+          },
+          "updatedAt": "2026-04-30T20:44:14.802Z"
+        },
+        "legalNotice": "Platform records and tokenization do not by themselves grant or replace government property registration. Use official jurisdiction filing for legal perfection.",
+        "success": true
+      }
+    }
+  },
+  "tokenized_at_utc": "2026-04-30T20:44:09Z",
+  "valuation_pi_internal": "2.053101"
+}

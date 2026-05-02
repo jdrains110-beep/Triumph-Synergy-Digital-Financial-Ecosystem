@@ -31,10 +31,71 @@
 [![Sovereign Gaming Nexus](https://img.shields.io/badge/Sovereign%20Gaming%20Nexus-AAA%20STUDIOS%20%7C%20PLAYERS%20%2B%20ENGINEERS%20EARN%20Pi-7C3AED?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
 [![SAIB i18n](https://img.shields.io/badge/SAIB%20i18n-16%20LANGUAGES%20%7C%2050%2B%20COUNTRY%20MAP-0EA5E9?style=flat-square)](#-whats-new--may-2-2026-saib-region-awareness--multi-language)
 [![Mainnet Buy-In Policy](https://img.shields.io/badge/Pi%20Mainnet-BUY--IN%20%7C%20MINING%20CONTINUES%20%7C%20Internal%20%2B%20External-EAB308?style=flat-square)](legal/pi-mainnet-buyin-policy.md)
+[![Sovereign Work Nexus](https://img.shields.io/badge/Sovereign%20Work%20Nexus-PIONEERS%20%2B%20NON--PIONEERS%20%7C%200%25%20MATCH%20FEE%20%7C%20T%2B0%20PAYROLL-16A34A?style=flat-square)](#-whats-new--may-2-2026-sovereign-work-nexus--publix-phygital-hub)
+[![Publix Phygital Hub](https://img.shields.io/badge/publix.pi-WEB3%20APEX%20%7C%20100%25%20TOKENIZED%20%7C%20WEB1%2BWEB2%20CASCADE-DC2626?style=flat-square)](legal/publix-pi-tokenization.md)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
 </div>
+
+---
+
+## 🛠️ What's New — May 2, 2026 (Sovereign Work Nexus + Publix Phygital Hub)
+
+[![SWN Service](https://img.shields.io/badge/SWN-PORT%208132%20%7C%2055%20LOOPHOLES%20%7C%207%20AUTHORITIES-16A34A?style=flat-square)](docker/sovereign-work-nexus/main.py)
+[![PPH Service](https://img.shields.io/badge/PPH-PORT%208133%20%7C%2030%20LOOPHOLES%20%7C%205%20AUTHORITIES-DC2626?style=flat-square)](docker/publix-phygital-hub/main.py)
+[![E2E Verified](https://img.shields.io/badge/E2E%20Smoke%20Test-21%2F21%20PASS-22C55E?style=flat-square)](scripts/swn_pph_e2e_smoke.py)
+
+Two new sovereign rails were added to fulfill the apex-quantum directive:
+
+### 1. Sovereign Work Nexus (SWN) — port 8132
+The **ultimate superior-sovereign global work database** for both Pi
+Pioneers and non-Pioneers. Replaces LinkedIn, Indeed, Upwork, Fiverr,
+Workday, Glassdoor, Monster, ZipRecruiter, ADP, Gusto, Paychex, and
+Toast with a single sovereign rail where every worker on Earth — banked
+or unbanked — can offer labor and be paid in Pi.
+
+* **7 sovereign authorities × 55 loopholes**: SWIA (identity), SWPA (wage
+  & pay), SWGA (gig & contract), SWTA (tax & tariff), SWBA (benefits),
+  SWAA (anti-trafficking), SWUA (union & collective).
+* **0% match fee** (vs Upwork 10%+20%, Fiverr 20%) · **T+0 settlement**
+  (vs ACH 2-5 days) · **escrow-locked** before work starts (anti-wage
+  theft) · **Pioneer rate** $314,159/π · **External rate** $314.159/π.
+* **Soulbound work history** (cannot be revoked by employer) · **strike
+  fund escrow** (anti-union-busting) · **anti-trafficking signal channel**
+  (SWAA-01..07).
+* Endpoints: `/workers`, `/employers`, `/jobs`, `/jobs/{id}/apply`,
+  `/contracts`, `/contracts/{id}/release`, `/swaa/report`.
+
+### 2. Publix Phygital Hub (PPH) — port 8133
+**`publix.pi`** is the canonical Web3 apex domain — **100% tokenized and
+owned by Triumph Synergy**. Under the apex-quantum sovereign cascade,
+ownership of the Web3 domain projects backwards to confer superior
+priority over the Web1 (`publix.com`, `publix.org`) and Web2
+(`app.publix.com`, `delivery.publix.com`) surfaces. See
+[Publix Pi Tokenization Policy](legal/publix-pi-tokenization.md).
+
+* **5 sovereign authorities × 30 loopholes**: PPDA (domain cascade), PPSA
+  (physical store digital twins), PPCA (commerce, 0% interchange vs Visa
+  2.9%), PPLA (soulbound loyalty), PPRA (real-estate tokenization).
+* Every Publix store gets a **digital twin NFT** at `publix.pi/store/{id}`
+  + 1M-unit fractional share supply.
+* In-store Pi terminals (no Visa/Mastercard) · **T+0 settlement** ·
+  **0% interchange** · phygital QR check-in earns Pi · loyalty is
+  soulbound and never expires.
+* In-store hourly workers onboard via **SWN integration** (PPSA-05) for
+  0% match fee + T+0 payroll.
+
+### Citus distribution
+`infrastructure/citus/init/04-distribute-swn-pph.sql` shards `swn_*`
+tables by `worker_id`/`employer_id` and `pph_*` tables by `store_id`/
+`member_id`; `pph_domain_ledger` is a reference table (apex cascade is
+visible from every worker).
+
+### E2E verification
+`python3 scripts/swn_pph_e2e_smoke.py` — **21/21 assertions pass**
+(wage-floor enforcement, milestone escrow release, anti-trafficking
+signal, apex-cascade ledger, 0% interchange, T+0 settlement).
 
 ---
 

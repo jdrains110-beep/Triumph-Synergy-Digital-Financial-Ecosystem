@@ -1,0 +1,138 @@
+# Step 5 — Redis Cluster: 3 masters + 3 replicas, hash-slot sharded
+#
+# 16384 hash slots distributed across 3 masters; each master replicated to 1
+# replica → automatic failover. Side-by-side with single-node `triumph-redis`
+# so SAIB / fortress / education / banking can opt in independently.
+#
+# Bring up:
+#   docker compose -f docker-compose.redis-cluster.yml up -d
+#   docker compose -f docker-compose.redis-cluster.yml run --rm redis-cluster-init
+#
+# Use from SAIB / services:
+#   REDIS_CLUSTER_NODES=redis-node-1:6379,redis-node-2:6379,redis-node-3:6379
+#   (any node bootstraps; client discovers full topology)
+#
+# Verify:
+#   docker exec triumph-redis-node-1 redis-cli -p 6379 cluster info
+#   docker exec triumph-redis-node-1 redis-cli -p 6379 cluster nodes
+#   docker exec triumph-redis-node-1 redis-cli -p 6379 cluster slots
+
+x-redis-base: &redis-base
+  image: redis:7.4-alpine
+  command:
+    - redis-server
+    - --port
+    - "6379"
+    - --cluster-enabled
+    - "yes"
+    - --cluster-config-file
+    - /data/nodes.conf
+    - --cluster-node-timeout
+    - "5000"
+    - --appendonly
+    - "yes"
+    - --protected-mode
+    - "no"
+    - --maxmemory
+    - "256mb"
+    - --maxmemory-policy
+    - "allkeys-lru"
+  healthcheck:
+    test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+    interval: 5s
+    timeout: 3s
+    retries: 10
+  networks: [redis-cluster-net]
+  restart: unless-stopped
+
+services:
+  redis-node-1:
+    <<: *redis-base
+    container_name: triumph-redis-node-1
+    hostname: redis-node-1
+    ports: ["7001:6379", "17001:16379"]
+    volumes: [redis_node_1_data:/data]
+
+  redis-node-2:
+    <<: *redis-base
+    container_name: triumph-redis-node-2
+    hostname: redis-node-2
+    ports: ["7002:6379", "17002:16379"]
+    volumes: [redis_node_2_data:/data]
+
+  redis-node-3:
+    <<: *redis-base
+    container_name: triumph-redis-node-3
+    hostname: redis-node-3
+    ports: ["7003:6379", "17003:16379"]
+    volumes: [redis_node_3_data:/data]
+
+  redis-node-4:
+    <<: *redis-base
+    container_name: triumph-redis-node-4
+    hostname: redis-node-4
+    ports: ["7004:6379", "17004:16379"]
+    volumes: [redis_node_4_data:/data]
+
+  redis-node-5:
+    <<: *redis-base
+    container_name: triumph-redis-node-5
+    hostname: redis-node-5
+    ports: ["7005:6379", "17005:16379"]
+    volumes: [redis_node_5_data:/data]
+
+  redis-node-6:
+    <<: *redis-base
+    container_name: triumph-redis-node-6
+    hostname: redis-node-6
+    ports: ["7006:6379", "17006:16379"]
+    volumes: [redis_node_6_data:/data]
+
+  # One-shot bootstrap: forms the cluster (3 primaries + 3 replicas, replica-per-master)
+  redis-cluster-init:
+    image: redis:7.4-alpine
+    container_name: triumph-redis-cluster-init
+    depends_on:
+      redis-node-1: { condition: service_healthy }
+      redis-node-2: { condition: service_healthy }
+      redis-node-3: { condition: service_healthy }
+      redis-node-4: { condition: service_healthy }
+      redis-node-5: { condition: service_healthy }
+      redis-node-6: { condition: service_healthy }
+    networks: [redis-cluster-net]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        # If cluster is already formed (nodes know each other), skip
+        KNOWN=$$(redis-cli -h redis-node-1 -p 6379 cluster info | grep cluster_known_nodes | tr -d '\r' | cut -d: -f2)
+        if [ "$$KNOWN" = "6" ]; then
+          echo "✓ Redis cluster already formed (6 known nodes)"
+          redis-cli -h redis-node-1 -p 6379 cluster info
+          exit 0
+        fi
+        echo "→ Forming Redis cluster: 3 masters + 3 replicas"
+        # Resolve hostnames to IPs (redis-cli --cluster create requires IPs)
+        IPS=""
+        for n in redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6; do
+          IP=$$(getent hosts $$n | awk '{print $$1}')
+          IPS="$$IPS $$IP:6379"
+        done
+        echo "Nodes: $$IPS"
+        redis-cli --cluster create $$IPS --cluster-replicas 1 --cluster-yes
+        echo "→ Cluster formed. Topology:"
+        redis-cli -h redis-node-1 -p 6379 cluster nodes
+    restart: "no"
+
+volumes:
+  redis_node_1_data:
+  redis_node_2_data:
+  redis_node_3_data:
+  redis_node_4_data:
+  redis_node_5_data:
+  redis_node_6_data:
+
+networks:
+  redis-cluster-net:
+    name: triumph-redis-cluster-net
+    driver: bridge

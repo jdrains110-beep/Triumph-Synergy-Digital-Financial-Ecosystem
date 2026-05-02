@@ -1,0 +1,21 @@
+name = "saib-edge"
+main = "saib-edge.js"
+compatibility_date = "2026-04-01"
+account_id = "REPLACE_WITH_CF_ACCOUNT_ID"
+
+# Bind the KV namespace (created via: wrangler kv namespace create SAIB_CACHE)
+[[kv_namespaces]]
+binding = "SAIB_CACHE"
+id      = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Origin URL — set to your tunnel hostname or origin LB
+[vars]
+ORIGIN = "https://origin.triumphsynergy.example"
+
+# Route the worker on your zone
+[[routes]]
+pattern = "triumphsynergy.example/*"
+zone_name = "triumphsynergy.example"
+
+[observability]
+enabled = true

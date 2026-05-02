@@ -857,6 +857,87 @@ services:
       retries: 6
       start_period: 60s
 
+  # --------------------------------------------------------------------------
+  # SOVEREIGN WORK NEXUS (SWN) — port 8132
+  # Global jobs/payroll database for Pioneers + Non-Pioneers.
+  # --------------------------------------------------------------------------
+  sovereign-work-nexus:
+    build:
+      context: docker
+      dockerfile: sovereign-work-nexus/Dockerfile
+    container_name: triumph-sovereign-work-nexus
+    <<: *common
+    mem_limit: 640m
+    mem_reservation: 320m
+    cpus: 1.00
+    environment:
+      PORT: "8132"
+      REDIS_URL: redis://triumph-redis:6379/11
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      QUANTUM_SHIELD_URL: http://triumph-quantum-fortress:8094
+      SETTLEMENT_CORE_URL: http://triumph-settlement-core:8080
+      SAIB_URL: http://triumph-sovereign-fortress:8099
+      SWN_WAGE_FLOOR_PI_PER_HOUR: "0.05"
+      PI_INTERNAL_RATE_USD: "314159.0"
+      PI_EXTERNAL_RATE_USD: "314.159"
+      SAIB_REGION: ${SAIB_REGION:-region-a}
+      SAIB_REPLICA_ID: ${SAIB_REPLICA_ID:-swn-0}
+    expose:
+      - "8132"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+      pi-bridge-connector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8132/health', timeout=8)"]
+      interval: 30s
+      timeout: 15s
+      retries: 6
+      start_period: 60s
+
+  # --------------------------------------------------------------------------
+  # PUBLIX PHYGITAL HUB (PPH) — port 8133
+  # publix.pi tokenized apex; Web3 ownership cascades to Web1+Web2.
+  # --------------------------------------------------------------------------
+  publix-phygital-hub:
+    build:
+      context: docker
+      dockerfile: publix-phygital-hub/Dockerfile
+    container_name: triumph-publix-phygital-hub
+    <<: *common
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.75
+    environment:
+      PORT: "8133"
+      REDIS_URL: redis://triumph-redis:6379/12
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      QUANTUM_SHIELD_URL: http://triumph-quantum-fortress:8094
+      SETTLEMENT_CORE_URL: http://triumph-settlement-core:8080
+      TOKENIZATION_URL: http://triumph-tokenization-engine:8085
+      SAIB_REGION: ${SAIB_REGION:-region-a}
+      SAIB_REPLICA_ID: ${SAIB_REPLICA_ID:-pph-0}
+    expose:
+      - "8133"
+    networks:
+      - triumph-net
+      - pi-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+      pi-bridge-connector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8133/health', timeout=8)"]
+      interval: 30s
+      timeout: 15s
+      retries: 6
+      start_period: 60s
+
 # ==========================================================================
 # VOLUMES — Persistent Data
 # ==========================================================================

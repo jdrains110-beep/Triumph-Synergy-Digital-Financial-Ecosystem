@@ -31,6 +31,13 @@ import http from "node:http";
 import { createHash, randomBytes } from "node:crypto";
 import { createClient } from "redis";
 import { Pool } from "pg";
+import {
+  broadcastAnchor,
+  broadcasterStatus,
+  STELLAR_NETWORK,
+  STELLAR_HORIZON_URL as STELLAR_HORIZON_URL_ACTIVE,
+  STELLAR_NETWORK_PASSPHRASE as STELLAR_PASSPHRASE_ACTIVE,
+} from "./stellar-broadcaster";
 
 const PORT      = parseInt(process.env.PORT ?? "8089", 10);
 const HORIZON   = process.env.STELLAR_HORIZON_URL ?? "https://api.mainnet.minepi.com";
@@ -545,7 +552,8 @@ async function handleTokenizeDomain(body: ReqBody, res: http.ServerResponse): Pr
   metrics.fortress_passes++;
 
   const piTxHash   = sha256(`pi:domain:${tokenId}:${ledger}`);
-  const stellarTxHash = sha256(`stellar:domain:${tokenId}:${ledger}`);
+  const anchor     = await broadcastAnchor({ kind: "domain", tokenId, claimHash, label: `dom:${domain}` }, ledger);
+  const stellarTxHash = anchor.txHash;
   const valuationUsd = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
   const sovereignCredentialId = sha256(`${ownerAddress}|${ownerUsername.toLowerCase()}|${NETWORK}`);
 
@@ -553,7 +561,8 @@ async function handleTokenizeDomain(body: ReqBody, res: http.ServerResponse): Pr
     tokenId, domain, tld: ".pi", ownerAddress, ownerUsername,
     standard: "PI-721", network: NETWORK, status: "TOKENIZED",
     valuationPi, valuationUsd,
-    blockchainTxHash: piTxHash, stellarLedgerSequence: ledger, stellarTxHash,
+    blockchainTxHash: piTxHash, stellarLedgerSequence: anchor.ledger, stellarTxHash,
+    stellarBroadcasted: anchor.broadcasted, stellarExplorerUrl: anchor.explorerUrl,
     metadataHash: sha256(JSON.stringify({ domain, ownerAddress })),
     sovereignCredentialId,
     fortressHash: fortress.hash, securityScore: fortress.score,
@@ -640,7 +649,8 @@ async function handleTokenizeDeed(body: ReqBody, res: http.ServerResponse): Prom
   metrics.fortress_passes++;
 
   const piTxHash      = sha256(`pi:deed:${tokenId}:${ledger}`);
-  const stellarTxHash = sha256(`stellar:deed:${tokenId}:${ledger}`);
+  const anchor        = await broadcastAnchor({ kind: "deed", tokenId, claimHash, label: deedNumber }, ledger);
+  const stellarTxHash = anchor.txHash;
   const valuationUsd  = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
   const sovereignCredentialId = sha256(`${ownerAddress}|${ownerUsername.toLowerCase()}|${NETWORK}`);
 
@@ -649,8 +659,13 @@ async function handleTokenizeDeed(body: ReqBody, res: http.ServerResponse): Prom
     standard: "PI-721", network: NETWORK, valuationPi, valuationUsd,
     propertyHash, fortressHash: fortress.hash, securityScore: fortress.score,
     sovereignCredentialId,
-    stellarAnchor: { ledgerSequence: ledger, transactionHash: stellarTxHash, fee: "100", consensusAt: createdAt, networkPassphrase: "Pi Network" },
-    piBlockchainAnchor: { ledgerSequence: ledger, transactionHash: piTxHash, piApiConfirmed: true, confirmedAt: createdAt },
+    stellarAnchor: {
+      ledgerSequence: anchor.ledger, transactionHash: stellarTxHash, fee: anchor.fee,
+      consensusAt: createdAt, networkPassphrase: STELLAR_PASSPHRASE_ACTIVE,
+      broadcasted: anchor.broadcasted, explorerUrl: anchor.explorerUrl, network: anchor.network,
+      ...(anchor.error ? { broadcastError: anchor.error } : {}),
+    },
+    piBlockchainAnchor: { ledgerSequence: anchor.ledger, transactionHash: piTxHash, piApiConfirmed: true, confirmedAt: createdAt },
     createdAt, updatedAt: createdAt,
     claimHash,
   };
@@ -719,7 +734,8 @@ async function handleEnrollSovereignEstate(body: ReqBody, res: http.ServerRespon
   metrics.fortress_passes++;
 
   const domainPiTxHash = sha256(`pi:domain:${domainTokenId}:${ledger}`);
-  const domainStellarTxHash = sha256(`stellar:domain:${domainTokenId}:${ledger}`);
+  const domainAnchor   = await broadcastAnchor({ kind: "domain", tokenId: domainTokenId, claimHash: sha256(`domain:${domain}`), label: `dom:${domain}` }, ledger);
+  const domainStellarTxHash = domainAnchor.txHash;
   const valuationUsd = (parseFloat(valuationPi) * PI_INTERNAL_RATE).toFixed(2);
   const domainToken = {
     tokenId: domainTokenId,
@@ -733,8 +749,10 @@ async function handleEnrollSovereignEstate(body: ReqBody, res: http.ServerRespon
     valuationPi,
     valuationUsd,
     blockchainTxHash: domainPiTxHash,
-    stellarLedgerSequence: ledger,
+    stellarLedgerSequence: domainAnchor.ledger,
     stellarTxHash: domainStellarTxHash,
+    stellarBroadcasted: domainAnchor.broadcasted,
+    stellarExplorerUrl: domainAnchor.explorerUrl,
     metadataHash: sha256(JSON.stringify({ domain, ownerAddress })),
     fortressHash: domainFortress.hash,
     securityScore: domainFortress.score,
@@ -768,7 +786,8 @@ async function handleEnrollSovereignEstate(body: ReqBody, res: http.ServerRespon
   metrics.fortress_passes++;
 
   const deedPiTxHash = sha256(`pi:deed:${deedTokenId}:${ledger}`);
-  const deedStellarTxHash = sha256(`stellar:deed:${deedTokenId}:${ledger}`);
+  const deedAnchor   = await broadcastAnchor({ kind: "deed", tokenId: deedTokenId, claimHash: propertyHash, label: deedNumber }, ledger);
+  const deedStellarTxHash = deedAnchor.txHash;
   const deedToken = {
     tokenId: deedTokenId,
     deedNumber,
@@ -789,11 +808,15 @@ async function handleEnrollSovereignEstate(body: ReqBody, res: http.ServerRespon
     fortressHash: deedFortress.hash,
     securityScore: deedFortress.score,
     stellarAnchor: {
-      ledgerSequence: ledger,
+      ledgerSequence: deedAnchor.ledger,
       transactionHash: deedStellarTxHash,
-      fee: "100",
+      fee: deedAnchor.fee,
       consensusAt: createdAt,
-      networkPassphrase: "Pi Network",
+      networkPassphrase: STELLAR_PASSPHRASE_ACTIVE,
+      broadcasted: deedAnchor.broadcasted,
+      explorerUrl: deedAnchor.explorerUrl,
+      network: deedAnchor.network,
+      ...(deedAnchor.error ? { broadcastError: deedAnchor.error } : {}),
     },
     piBlockchainAnchor: {
       ledgerSequence: ledger,
@@ -1495,6 +1518,105 @@ async function handleGetUtilityToken(tokenId: string, res: http.ServerResponse):
   json(res, 404, { error: "Utility token not found" });
 }
 
+// ─── Re-anchor existing token (broadcast a fresh on-chain manageData op
+//     for an already-minted deed/domain whose original anchor was a
+//     placeholder).  Preserves tokenId; updates stellarAnchor in storage. ──
+async function handleReanchor(
+  kind: "deed" | "domain",
+  tokenId: string,
+  res: http.ServerResponse,
+): Promise<void> {
+  const redisKey = `token:${kind}:${tokenId}`;
+  const raw = await redis.get(redisKey).catch(() => null);
+  let token: Record<string, unknown> | null = raw ? JSON.parse(raw) : null;
+
+  if (!token && pg) {
+    try {
+      const table = kind === "deed" ? "allodial_deeds" : "domain_tokens";
+      const row = await pg.query(
+        `SELECT metadata FROM ${table} WHERE token_id = $1 LIMIT 1`,
+        [tokenId],
+      );
+      token = row.rows[0]?.metadata ?? null;
+    } catch (e) {
+      console.error(`[db:${kind}:reanchor]`, (e as Error).message);
+    }
+  }
+
+  if (!token) { json(res, 404, { error: `${kind} token not found` }); return; }
+
+  // Derive a 32-byte (64-hex) claim to anchor:
+  //   1. Prefer explicit claimHash (newer deed mints set this)
+  //   2. Fall back to propertyHash for deeds, metadataHash for domains
+  //   3. As a last resort recompute sha256("domain:<name>") for domain tokens
+  let claimHash = String(
+    (token as Record<string, unknown>).claimHash ??
+      (token as Record<string, unknown>).propertyHash ??
+      (token as Record<string, unknown>).metadataHash ??
+      "",
+  );
+  if (!/^[0-9a-f]{64}$/i.test(claimHash) && kind === "domain") {
+    const dn = String((token as Record<string, unknown>).domain ?? "");
+    if (dn) claimHash = sha256(`domain:${dn}`);
+  }
+  if (!/^[0-9a-f]{64}$/i.test(claimHash)) {
+    json(res, 422, { error: "Token has no derivable 32-byte claim hash to re-anchor" });
+    return;
+  }
+  const label =
+    kind === "deed"
+      ? String((token as Record<string, unknown>).deedNumber ?? `deed:${tokenId.slice(0, 16)}`)
+      : `dom:${String((token as Record<string, unknown>).domain ?? tokenId.slice(0, 16))}`;
+
+  const ledger = await fetchLedger();
+  const anchor = await broadcastAnchor({ kind, tokenId, claimHash, label }, ledger);
+
+  if (!anchor.broadcasted) {
+    json(res, 502, {
+      error: "Broadcast failed",
+      detail: anchor.error ?? null,
+      anchor,
+    });
+    return;
+  }
+
+  const updatedAt = new Date().toISOString();
+  const newAnchor = {
+    ledgerSequence: anchor.ledger,
+    transactionHash: anchor.txHash,
+    fee: anchor.fee,
+    consensusAt: updatedAt,
+    networkPassphrase: STELLAR_PASSPHRASE_ACTIVE,
+    broadcasted: true,
+    explorerUrl: anchor.explorerUrl,
+    network: anchor.network,
+  };
+  // archive prior anchors for audit trail
+  const prior = (token as Record<string, unknown>).stellarAnchor;
+  const history = Array.isArray((token as Record<string, unknown>).stellarAnchorHistory)
+    ? ((token as Record<string, unknown>).stellarAnchorHistory as unknown[])
+    : [];
+  if (prior) history.push(prior);
+  (token as Record<string, unknown>).stellarAnchor = newAnchor;
+  (token as Record<string, unknown>).stellarAnchorHistory = history;
+  (token as Record<string, unknown>).updatedAt = updatedAt;
+
+  await redis.setEx(redisKey, 86_400 * 30, JSON.stringify(token)).catch(() => undefined);
+  if (pg) {
+    try {
+      const table = kind === "deed" ? "allodial_deeds" : "domain_tokens";
+      await pg.query(
+        `UPDATE ${table} SET stellar_tx_hash = $1, stellar_ledger = $2, metadata = $3 WHERE token_id = $4`,
+        [anchor.txHash, anchor.ledger, JSON.stringify(token), tokenId],
+      );
+    } catch (e) {
+      console.error(`[db:${kind}:reanchor:update]`, (e as Error).message);
+    }
+  }
+
+  json(res, 200, { success: true, tokenId, kind, stellarAnchor: newAnchor });
+}
+
 // ─── Server ───────────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
   metrics.requests_total++;
@@ -1518,6 +1640,18 @@ const server = http.createServer(async (req, res) => {
     const body = prometheusText();
     res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4", "Content-Length": Buffer.byteLength(body) });
     res.end(body);
+    return;
+  }
+
+  // Stellar/Pi broadcaster status
+  if (url === "/api/stellar/status" && method === "GET") {
+    json(res, 200, {
+      ...broadcasterStatus(),
+      activeNetwork: STELLAR_NETWORK,
+      activeHorizon: STELLAR_HORIZON_URL_ACTIVE,
+      activePassphrase: STELLAR_PASSPHRASE_ACTIVE,
+      ledger: cachedLedger,
+    });
     return;
   }
 
@@ -1619,6 +1753,35 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Deed — re-anchor (broadcast a fresh on-chain manageData op for an
+  // existing token whose original anchor was a placeholder).
+  if (url.startsWith("/api/tokenize/deed/") && url.endsWith("/reanchor") && method === "POST") {
+    const tokenId = url.replace("/api/tokenize/deed/", "").replace("/reanchor", "");
+    try {
+      const body = await readBody(req);
+      if (!(await enforceQuantumSignature(req, body, res))) return;
+      await handleReanchor("deed", tokenId, res);
+    } catch (e) {
+      metrics.errors_total++;
+      json(res, 500, { error: (e as Error).message });
+    }
+    return;
+  }
+
+  // Domain — re-anchor
+  if (url.startsWith("/api/tokenize/domain/") && url.endsWith("/reanchor") && method === "POST") {
+    const tokenId = url.replace("/api/tokenize/domain/", "").replace("/reanchor", "");
+    try {
+      const body = await readBody(req);
+      if (!(await enforceQuantumSignature(req, body, res))) return;
+      await handleReanchor("domain", tokenId, res);
+    } catch (e) {
+      metrics.errors_total++;
+      json(res, 500, { error: (e as Error).message });
+    }
+    return;
+  }
+
   // ── Utility sector catalog ───────────────────────────────────────────────
   if (url === "/api/utility/sectors" && method === "GET") {
     json(res, 200, {
@@ -1676,7 +1839,9 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
+  const bs = broadcasterStatus();
   console.log(`[tokenization-engine] Listening on :${PORT} network=${NETWORK}`);
+  console.log(`[stellar-broadcaster] enabled=${bs.enabled} configured=${bs.configured} network=${bs.network} pubKey=${bs.publicKey ?? "(none)"} horizon=${bs.horizon}`);
   initDb().catch(console.error);
   fetchLedger().catch(console.error);
 });

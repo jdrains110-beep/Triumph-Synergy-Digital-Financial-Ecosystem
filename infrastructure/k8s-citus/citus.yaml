@@ -1,0 +1,191 @@
+# Step 4 — Citus on k3s: 1 coordinator + 3 workers (scale workers as needed)
+# Apply with:
+#   kubectl apply -f infrastructure/k8s-citus/
+#   kubectl -n triumph exec citus-coordinator-0 -- psql -U postgres -d triumph_synergy \
+#       -f /init/02-distribute.sql
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: citus-init
+  namespace: triumph
+data:
+  01-citus.sql: |
+    CREATE EXTENSION IF NOT EXISTS citus;
+    ALTER SYSTEM SET citus.shard_count = 32;
+    ALTER SYSTEM SET citus.shard_replication_factor = 2;
+    ALTER SYSTEM SET citus.multi_shard_modify_mode = 'parallel';
+    SELECT pg_reload_conf();
+  02-distribute.sql: |
+    CREATE TABLE IF NOT EXISTS saib_state (
+        replica_id  TEXT NOT NULL,
+        key         TEXT NOT NULL,
+        value       JSONB NOT NULL,
+        updated_at  TIMESTAMPTZ DEFAULT now(),
+        PRIMARY KEY (replica_id, key)
+    );
+    SELECT create_distributed_table('saib_state', 'replica_id')
+      WHERE NOT EXISTS (SELECT 1 FROM pg_dist_partition WHERE logicalrelid='saib_state'::regclass);
+
+    CREATE TABLE IF NOT EXISTS saib_events (
+        visitor_id   TEXT NOT NULL,
+        event_id     UUID NOT NULL DEFAULT gen_random_uuid(),
+        event_type   TEXT NOT NULL,
+        replica_id   TEXT,
+        payload      JSONB NOT NULL,
+        occurred_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+        PRIMARY KEY (visitor_id, event_id)
+    );
+    SELECT create_distributed_table('saib_events', 'visitor_id', colocate_with => 'saib_state')
+      WHERE NOT EXISTS (SELECT 1 FROM pg_dist_partition WHERE logicalrelid='saib_events'::regclass);
+    CREATE INDEX IF NOT EXISTS saib_events_type_time_idx ON saib_events (event_type, occurred_at DESC);
+---
+# ── Coordinator ───────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: citus-coordinator
+  namespace: triumph
+spec:
+  clusterIP: None
+  selector: { app: citus, role: coordinator }
+  ports:
+    - { name: postgres, port: 5432, targetPort: 5432 }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: citus-coordinator
+  namespace: triumph
+spec:
+  serviceName: citus-coordinator
+  replicas: 1
+  selector: { matchLabels: { app: citus, role: coordinator } }
+  template:
+    metadata: { labels: { app: citus, role: coordinator } }
+    spec:
+      securityContext: { fsGroup: 999 }
+      containers:
+        - name: postgres
+          image: citusdata/citus:14.0.0-pg17
+          ports:
+            - { name: postgres, containerPort: 5432 }
+          env:
+            - { name: POSTGRES_DB, value: triumph_synergy }
+            - { name: POSTGRES_USER, value: postgres }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: triumph-secrets, key: POSTGRES_PASSWORD } }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+            - { name: init, mountPath: /docker-entrypoint-initdb.d }
+          resources:
+            requests: { cpu: "200m", memory: "512Mi" }
+            limits:   { cpu: "2",    memory: "4Gi" }
+          readinessProbe:
+            exec: { command: ["pg_isready","-U","postgres","-d","triumph_synergy"] }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: init
+          configMap: { name: citus-init }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: { requests: { storage: 50Gi } }
+---
+# ── Workers (3 replicas → scale to N) ─────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: citus-worker
+  namespace: triumph
+spec:
+  clusterIP: None
+  selector: { app: citus, role: worker }
+  ports:
+    - { name: postgres, port: 5432, targetPort: 5432 }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: citus-worker
+  namespace: triumph
+spec:
+  serviceName: citus-worker
+  replicas: 3
+  podManagementPolicy: Parallel
+  selector: { matchLabels: { app: citus, role: worker } }
+  template:
+    metadata: { labels: { app: citus, role: worker } }
+    spec:
+      securityContext: { fsGroup: 999 }
+      containers:
+        - name: postgres
+          image: citusdata/citus:14.0.0-pg17
+          ports:
+            - { name: postgres, containerPort: 5432 }
+          env:
+            - { name: POSTGRES_DB, value: triumph_synergy }
+            - { name: POSTGRES_USER, value: postgres }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: triumph-secrets, key: POSTGRES_PASSWORD } }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+            - { name: init, mountPath: /docker-entrypoint-initdb.d }
+          resources:
+            requests: { cpu: "200m", memory: "512Mi" }
+            limits:   { cpu: "2",    memory: "4Gi" }
+          readinessProbe:
+            exec: { command: ["pg_isready","-U","postgres"] }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: init
+          configMap: { name: citus-init }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: { requests: { storage: 100Gi } }
+---
+# ── One-shot Job: register workers + run distribute.sql ──────────────────────
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: citus-bootstrap
+  namespace: triumph
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bootstrap
+          image: citusdata/citus:14.0.0-pg17
+          env:
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: triumph-secrets, key: POSTGRES_PASSWORD } }
+          command: ["/bin/bash","-c"]
+          args:
+            - |
+              set -e
+              for i in 0 1 2; do
+                until pg_isready -h citus-worker-$i.citus-worker -U postgres -t 3; do
+                  echo "waiting for citus-worker-$i…"; sleep 5
+                done
+                psql -h citus-coordinator-0.citus-coordinator -U postgres -d triumph_synergy \
+                  -c "SELECT citus_add_node('citus-worker-$i.citus-worker', 5432);" || true
+              done
+              psql -h citus-coordinator-0.citus-coordinator -U postgres -d triumph_synergy \
+                -c "SELECT * FROM citus_get_active_worker_nodes();"
+              psql -h citus-coordinator-0.citus-coordinator -U postgres -d triumph_synergy \
+                -f /init/02-distribute.sql
+          volumeMounts:
+            - { name: init, mountPath: /init }
+      volumes:
+        - name: init
+          configMap: { name: citus-init }

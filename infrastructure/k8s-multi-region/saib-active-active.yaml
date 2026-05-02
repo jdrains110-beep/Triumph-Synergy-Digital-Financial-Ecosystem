@@ -1,0 +1,152 @@
+# =============================================================================
+# Step 6 — Multi-region active-active SAIB Deployment for k3s
+# -----------------------------------------------------------------------------
+# Deploy this manifest in EACH regional k3s cluster (us-east, us-west, eu-west, …).
+# Set REGION_NAME via kustomize overlay or per-cluster ConfigMap.
+#
+# Each replica has:
+#   • A unique SAIB_REPLICA_ID (deterministic from pod name)
+#   • SAIB_REGION matching the cluster's region label
+#   • SAIB_REGION_PEERS pointing at the public hostnames of sibling regions
+#
+# Citus + Redis Cluster are reached through cross-region private link
+# (e.g. Tailscale, AWS PrivateLink, or Cloudflare Tunnel).
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: saib-region-config
+  namespace: triumph
+data:
+  SAIB_REGION: "REPLACE_BY_OVERLAY"   # us-east | us-west | eu-west | ap-south
+  SAIB_REGION_PEERS: "https://b.api.triumph-synergy.com,https://eu.api.triumph-synergy.com"
+  POSTGRES_URL: "postgresql://postgres@citus-coordinator.triumph.svc.cluster.local:5432/triumph_synergy"
+  REDIS_CLUSTER_NODES: "redis-cluster-0.redis-cluster.triumph.svc.cluster.local:6379,redis-cluster-1.redis-cluster.triumph.svc.cluster.local:6379,redis-cluster-2.redis-cluster.triumph.svc.cluster.local:6379"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: saib
+  namespace: triumph
+  labels:
+    app: saib
+    tier: active-active
+spec:
+  serviceName: saib
+  replicas: 3
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: saib
+  template:
+    metadata:
+      labels:
+        app: saib
+        tier: active-active
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: saib
+          image: ghcr.io/jdrains110-beep/triumph-apex-services:latest
+          command: ["/usr/local/bin/uvicorn"]
+          args:
+            - "ai_bot:app"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "8099"
+            - "--workers"
+            - "1"
+            - "--log-level"
+            - "info"
+          workingDir: /app/fortress
+          ports:
+            - containerPort: 8099
+              name: http
+          envFrom:
+            - configMapRef:
+                name: saib-region-config
+            - secretRef:
+                name: saib-region-secrets        # POSTGRES_PASSWORD, GITHUB_TOKEN
+          env:
+            - name: SAIB_REPLICA_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name        # saib-0, saib-1, saib-2 → unique
+            - name: POD_REGION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['topology.kubernetes.io/region']
+            - name: PORT
+              value: "8099"
+          resources:
+            requests:  { cpu: "200m", memory: "512Mi" }
+            limits:    { cpu: "1500m", memory: "2Gi" }
+          readinessProbe:
+            httpGet: { path: /region, port: 8099 }
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: { path: /health, port: 8099 }
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 4
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: saib
+  namespace: triumph
+  labels:
+    app: saib
+spec:
+  clusterIP: None
+  selector:
+    app: saib
+  ports:
+    - name: http
+      port: 8099
+      targetPort: 8099
+---
+# Public Service exposed via the cluster ingress; Cloudflare LB origin pool
+# points at this hostname per region.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: saib-public
+  namespace: triumph
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - REPLACE_BY_OVERLAY.api.triumph-synergy.com
+      secretName: saib-public-tls
+  rules:
+    - host: REPLACE_BY_OVERLAY.api.triumph-synergy.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: saib
+                port:
+                  number: 8099
+---
+# PodDisruptionBudget keeps at least 2 SAIB pods up during voluntary disruption
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: saib-pdb
+  namespace: triumph
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: saib

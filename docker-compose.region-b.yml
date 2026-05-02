@@ -1,0 +1,84 @@
+# ============================================================================
+# Step 6 — Multi-region active-active: REGION B
+# ----------------------------------------------------------------------------
+# Spins up a 2nd SAIB pod that:
+#   • points at the SAME Citus coordinator (each replica owns its own
+#     saib_state row → row-level last-writer-wins, zero conflicts)
+#   • points at the SAME Redis Cluster (hash-slot routing handles ownership)
+#   • exposes /region with peer health checks back to region-a
+#
+# In production each region is a separate k3s cluster + dedicated Citus
+# read replica + Redis Cluster cross-region replicas; the local compose
+# overlay simulates the application-level multi-region semantics so we can
+# verify writes converge without re-architecting.
+#
+# Usage:
+#   docker compose -f docker-compose.yml \
+#                  -f docker-compose.citus.yml \
+#                  -f docker-compose.redis-cluster.yml \
+#                  -f docker-compose.region-b.yml up -d apex-services-region-b
+# ============================================================================
+services:
+  apex-services-region-b:
+    build:
+      context: docker
+      dockerfile: apex-services/Dockerfile
+    image: triumph-synergy-apex-services:latest
+    container_name: triumph-apex-services-region-b
+    mem_limit: 1024m
+    mem_reservation: 512m
+    cpus: 1.00
+    restart: unless-stopped
+    environment:
+      PORT: "8099"
+      # Region identity — distinct replica_id ensures Citus saib_state rows
+      # never collide; SAIB_REGION is reported via /region.
+      SAIB_REGION: region-b
+      SAIB_REPLICA_ID: apex-services-region-b-0
+      SAIB_REGION_PEERS: http://triumph-apex-services:8099
+      # Shared backing planes
+      POSTGRES_URL: postgresql://postgres:citus_local_2026@citus-coordinator:5432/triumph_synergy
+      REDIS_CLUSTER_NODES: triumph-redis-node-1:6379,triumph-redis-node-2:6379,triumph-redis-node-3:6379
+      REDIS_URL: redis://triumph-redis:6379
+      SAIB_PERSIST_INTERVAL_S: "60"
+      # Disable docker socket / GitHub side-effects on the secondary
+      DOCKER_HOST: ""
+      GITHUB_TOKEN: ""
+      SAIB_GITHUB_INTERACT_ENABLED: "false"
+      SAIB_NETWORK_SWITCH_ENABLED: "false"
+    networks:
+      triumph-net: {}
+      triumph-citus-net: {}
+      triumph-redis-cluster-net: {}
+    expose:
+      - "8099"
+    # Override the supervisor entrypoint — region-b only needs SAIB itself.
+    entrypoint: ["/usr/local/bin/uvicorn"]
+    command:
+      - "ai_bot:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8099"
+      - "--workers"
+      - "1"
+      - "--log-level"
+      - "info"
+    working_dir: /app/fortress
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "--max-time", "4", "http://127.0.0.1:8099/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+
+networks:
+  triumph-net:
+    external: true
+    name: triumph-net
+  triumph-citus-net:
+    external: true
+    name: triumph-citus-net
+  triumph-redis-cluster-net:
+    external: true
+    name: triumph-redis-cluster-net

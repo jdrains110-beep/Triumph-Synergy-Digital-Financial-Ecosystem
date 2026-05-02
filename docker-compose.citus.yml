@@ -1,0 +1,121 @@
+# Step 4 — Citus: Horizontal Postgres Sharding
+#
+# Single-coordinator + N-worker Citus cluster. Coordinator looks like ordinary
+# Postgres to SAIB; under the hood, distributed tables are sharded across
+# workers by hash of the distribution column.
+#
+# Side-by-side overlay: launches citus-* services on a separate network so the
+# existing single-node `triumph-postgres` keeps running. Switch SAIB to Citus
+# by setting POSTGRES_URL=postgresql://postgres:${CITUS_PASSWORD}@citus-coordinator:5432/triumph_synergy
+#
+# Bring up:    docker compose -f docker-compose.yml -f docker-compose.citus.yml up -d citus-coordinator citus-worker-1 citus-worker-2 citus-worker-3
+# Init shards: docker compose -f docker-compose.citus.yml exec citus-coordinator psql -U postgres -d triumph_synergy -f /docker-entrypoint-initdb.d/02-distribute.sql
+# Verify:      docker compose -f docker-compose.citus.yml exec citus-coordinator psql -U postgres -d triumph_synergy -c "SELECT * FROM citus_get_active_worker_nodes();"
+
+x-citus-env: &citus-env
+  POSTGRES_DB: triumph_synergy
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: ${CITUS_PASSWORD:-citus_local_2026}
+  PGUSER: postgres
+
+services:
+  citus-coordinator:
+    image: citusdata/citus:14.0.0-pg17
+    container_name: triumph-citus-coordinator
+    hostname: citus-coordinator
+    environment: *citus-env
+    ports:
+      - "5433:5432"
+    volumes:
+      - citus_coordinator_data:/var/lib/postgresql/data
+      - ./infrastructure/citus/init/01-citus.sql:/docker-entrypoint-initdb.d/01-citus.sql:ro
+      - ./infrastructure/citus/init/02-distribute.sql:/docker-entrypoint-initdb.d/02-distribute.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d triumph_synergy"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [citus-net]
+    restart: unless-stopped
+
+  citus-worker-1:
+    image: citusdata/citus:14.0.0-pg17
+    container_name: triumph-citus-worker-1
+    hostname: citus-worker-1
+    environment: *citus-env
+    volumes:
+      - citus_worker_1_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [citus-net]
+    restart: unless-stopped
+
+  citus-worker-2:
+    image: citusdata/citus:14.0.0-pg17
+    container_name: triumph-citus-worker-2
+    hostname: citus-worker-2
+    environment: *citus-env
+    volumes:
+      - citus_worker_2_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [citus-net]
+    restart: unless-stopped
+
+  citus-worker-3:
+    image: citusdata/citus:14.0.0-pg17
+    container_name: triumph-citus-worker-3
+    hostname: citus-worker-3
+    environment: *citus-env
+    volumes:
+      - citus_worker_3_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [citus-net]
+    restart: unless-stopped
+
+  # One-shot job: registers workers + runs distribute.sql after all are healthy
+  citus-bootstrap:
+    image: citusdata/citus:14.0.0-pg17
+    container_name: triumph-citus-bootstrap
+    depends_on:
+      citus-coordinator: { condition: service_healthy }
+      citus-worker-1:    { condition: service_healthy }
+      citus-worker-2:    { condition: service_healthy }
+      citus-worker-3:    { condition: service_healthy }
+    environment: *citus-env
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        export PGPASSWORD="$$POSTGRES_PASSWORD"
+        echo "→ registering workers on coordinator…"
+        for w in citus-worker-1 citus-worker-2 citus-worker-3; do
+          psql -h citus-coordinator -U postgres -d triumph_synergy \
+            -c "SELECT citus_add_node('$$w', 5432);" || true
+        done
+        psql -h citus-coordinator -U postgres -d triumph_synergy \
+          -c "SELECT * FROM citus_get_active_worker_nodes();"
+        echo "→ workers registered. Distribute step is idempotent (run init/02-distribute.sql)."
+    networks: [citus-net]
+    restart: "no"
+
+volumes:
+  citus_coordinator_data:
+  citus_worker_1_data:
+  citus_worker_2_data:
+  citus_worker_3_data:
+
+networks:
+  citus-net:
+    driver: bridge
+    name: triumph-citus-net

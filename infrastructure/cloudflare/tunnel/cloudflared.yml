@@ -1,0 +1,38 @@
+# cloudflared tunnel config — paired with terraform/tunnel.tf
+# Token populated by: terraform output -raw tunnel_token
+
+tunnel: triumph-saib
+credentials-file: /etc/cloudflared/creds.json
+
+# HA: 2 connections per replica, multi-region for redundancy
+ha-connections: 4
+edge-ip-version: auto
+protocol: http2
+
+ingress:
+  # Apex services (SAIB nginx ingress from Step 2)
+  - hostname: triumphsynergy.example
+    service: http://triumph-nginx-ingress.triumph.svc.cluster.local:80
+    originRequest:
+      connectTimeout: 10s
+      tlsTimeout: 10s
+      keepAliveConnections: 100
+      keepAliveTimeout: 90s
+      http2Origin: false
+      noHappyEyeballs: false
+      disableChunkedEncoding: false
+
+  # Subdomain → direct SAIB pod service (skips nginx)
+  - hostname: saib.triumphsynergy.example
+    service: http://triumph-apex-services.triumph.svc.cluster.local:8099
+    originRequest:
+      connectTimeout: 10s
+      keepAliveConnections: 50
+
+  # Catch-all 404
+  - service: http_status:404
+
+metrics: 0.0.0.0:9090
+loglevel: info
+transport-loglevel: warn
+no-autoupdate: true
