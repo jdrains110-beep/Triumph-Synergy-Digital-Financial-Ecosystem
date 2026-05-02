@@ -938,6 +938,44 @@ services:
       retries: 6
       start_period: 60s
 
+  # --------------------------------------------------------------------------
+  # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1
+  #
+  # Official Pi Network full node (stellar-core v23.0.1 + horizon v23.0.0 +
+  # PostgreSQL 16, Ubuntu 24.04).  This is the sovereign on-chain anchor for
+  # the Triumph Synergy ecosystem — all Pi payment rails, settlement-core,
+  # pi-bridge-connector, tokenization-engine, and SWN/PPH payroll settle
+  # against THIS node rather than a third-party API endpoint.
+  #
+  # Fork: https://github.com/jdrains110-beep/pi-node-docker
+  # Upstream: https://github.com/PiCoreTeam/pi-node-docker
+  # --------------------------------------------------------------------------
+  pi-mainnet-node:
+    image: pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1
+    container_name: triumph-pi-mainnet-node
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
+      NODE_PRIVATE_KEY:  ${PI_NODE_PRIVATE_KEY:-}   # auto-generated if blank
+    volumes:
+      - pi_mainnet_stellar:/opt/stellar
+      - pi_mainnet_logs:/var/log/supervisor
+      - pi_mainnet_history:/history
+    ports:
+      - "${PI_NODE_HORIZON_PORT:-31401}:8000"    # Horizon HTTP API
+      - "${PI_NODE_PEER_PORT:-31402}:31402"       # stellar-core peer
+      - "${PI_NODE_HISTORY_PORT:-31403}:1570"     # local history server
+    command: ["--mainnet"]
+    networks:
+      - triumph-net
+      - pi-bridge
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -sf http://localhost:8000 > /dev/null"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
 # ==========================================================================
 # VOLUMES — Persistent Data
 # ==========================================================================
@@ -967,6 +1005,13 @@ volumes:
     name: triumph_grafana_data
   triumph_cloud_memory_backup:
     name: triumph_cloud_memory_backup
+  # Pi mainnet node volumes
+  pi_mainnet_stellar:
+    name: pi_mainnet_stellar
+  pi_mainnet_logs:
+    name: pi_mainnet_logs
+  pi_mainnet_history:
+    name: pi_mainnet_history
 
 # ==========================================================================
 # NETWORK — Shared with Pi Network node for direct communication
