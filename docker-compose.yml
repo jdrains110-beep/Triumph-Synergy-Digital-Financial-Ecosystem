@@ -501,6 +501,16 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    # Override Dockerfile healthcheck: SPHINCS+-SHAKE-256f keypair generation
+    # at startup is genuinely slow on Docker Desktop Mac VM (cold ~5 min).
+    # Uvicorn does not bind :8094 until lifespan startup completes, so the
+    # default 20s probe timeout produces false `health: starting` for minutes.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -m 25 http://localhost:8094/health && curl -fsS -m 25 http://localhost:8098/health"]
+      interval: 30s
+      timeout: 30s
+      retries: 6
+      start_period: 300s
 
   # ========================================================================
   # APEX-SERVICES — Mega Super-Pod (18 services in one container)
