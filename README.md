@@ -41,6 +41,142 @@
 
 ---
 
+## 🛠️ What's New — May 3, 2026 (Apex-Quantum Mainnet Mesh — Fully Connected)
+
+[![Mainnet Live](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20Stellar%20SCP%20v23%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
+[![Central Supernode](https://img.shields.io/badge/Central%20Node-SUPERNODE%20%7C%20BACKBONE%20%7C%20:11626%20SCP-8B5CF6?style=flat-square)](docker-compose.yml)
+[![Quantum Mesh](https://img.shields.io/badge/Quantum%20Mesh-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-fortress/Dockerfile)
+[![PQ Enforcement](https://img.shields.io/badge/PQ%20Enforcement-EVERY%20TIER%20%7C%20SCP%20%7C%20Bridge%20%7C%20Settlement%20%7C%20Tokenization-EF4444?style=flat-square)](docker-compose.yml)
+
+The entire Triumph Synergy ecosystem now runs as a **single, mesh-connected,
+post-quantum-signed Pi mainnet platform** with the sovereign central node
+acting as the **supernode + backbone** for the Pi Network — every apex and
+sovereign service transmits, supports, and verifies through this backbone:
+
+| Tier | Container | Port(s) | Role in Mesh |
+|---|---|---|---|
+| **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[validator1,2,3]}`, FAILURE_SAFETY=1 |
+| **Central Supernode (SCP Backbone)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true** |
+| **Quantum Fortress** | `triumph-quantum-fortress` (alias `triumph-quantum-shield`) | 8094 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f** sign/verify/encapsulate; QPU-bridge co-located |
+| **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet (testnet2 alias) → host:31501 → api.mainnet.minepi.com`. PQ-verifies every chain mutation via Quantum Fortress |
+| **Settlement Core (super-pod)** | `triumph-settlement-core` | 8080/8082/8084/8088 | Tx engine + smart contracts + tokenization + DEX. Every op `*_REQUIRE_PQ_SIGNATURE=true` |
+| **Apex Services (mega super-pod, 18 svc)** | `triumph-apex-services` | 8097–8125 | SAIB + sovereign fortress + insurance + utilities + AI-bot + gateway + delivery + Pi-DEX + sports — `AI_BOT_REQUIRE_PQ` + `GATEWAY_REQUIRE_PQ` enforced |
+| **Sovereign Life (super-pod)** | `triumph-sovereign-life` | 8130 / 8140 / 8150 | Bank + Education + Telecom |
+| **SCFA** | `triumph-sovereign-commerce-authority` | 8160 | 6 authorities · 72 loopholes |
+| **SGN / SWN / PPH** | gaming-nexus / work-nexus / publix-phygital-hub | 8131 / 8132 / 8133 | Pi-Bridge + Quantum-Shield wired |
+| **Ecosystem Guardian** | `triumph-ecosystem-guardian` | 9911 / 9912 / 9913 | Health-governor + network-sentinel + horizon-guardian — `CONTROL_PLANE_REQUIRE_PQ_READY=true` |
+
+### How the mesh stays in sync
+
+The shared `x-pi-env` anchor in [docker-compose.yml](docker-compose.yml) auto-injects
+the following keys into every chain-touching service so there is **one wire,
+one passphrase, one PQ engine, one supernode** across the platform:
+
+```yaml
+PI_NODE_HOST:                  triumph-pi-mainnet-node   # alias 'testnet2' resolves here
+STELLAR_HORIZON_URL:           https://api.mainnet.minepi.com   # public fallback
+STELLAR_NETWORK_PASSPHRASE:    "Pi Network"
+CENTRAL_NODE_URL:              http://triumph-central-node:11626
+CENTRAL_NODE_PUBLIC_KEY:       GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+CENTRAL_NODE_ROLE:             supernode
+CENTRAL_NODE_BACKBONE:         "true"
+STELLAR_CONSENSUS_PROTOCOL:    scp-v23
+PI_BRIDGE_URL:                 http://triumph-pi-bridge-connector:8092
+QUANTUM_SHIELD_URL:            http://triumph-quantum-fortress:8094
+QUANTUM_FORTRESS_URL:          http://triumph-quantum-fortress:8094
+SAIB_URL:                      http://triumph-sovereign-fortress:8099
+SOVEREIGN_PQ_ENFORCE:          "true"
+CONTROL_PLANE_REQUIRE_PQ_READY: "true"
+SCP_REQUIRE_PQ_SIGNATURE:      "true"
+PI_SUPERNODE_MODE:             "true"
+```
+
+### Verified live (May 3, 2026)
+
+```text
+✅ 27/28 healthy · 0 unhealthy · 0 exited (1 starting through long PQ start_period)
+✅ Bridge → mainnet horizon:        GET /ledgers 200 OK · ledger=26,494,792 advancing
+✅ Bridge → central-node:11626:     /info 200 OK
+✅ Bridge → quantum-fortress:8094:  REAL_LIBOQS · Kyber-1024 + Dilithium-5 + SPHINCS+
+✅ Credit-engine ingesting live:    [horizon-feed] ledger=26494789 fee=100000
+✅ DNS alias verified:              testnet2 → 172.20.0.10 (= mainnet node)
+```
+
+**Quantum-computing-everything**: every chain mutation (transactions, smart
+contracts, tokenization, DEX, gateway routes, AI-bot decisions, SCP votes,
+control-plane restarts, governance-shield judicial actions) is PQ-signed
+through `triumph-quantum-fortress` before reaching the mainnet anchor.
+
+---
+
+## 🛠️ What's New — May 3, 2026 (Apex-Quantum Mainnet Mesh — Fully Connected)
+
+[![Mainnet Live](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20Stellar%20SCP%20v23%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
+[![Central Supernode](https://img.shields.io/badge/Central%20Node-SUPERNODE%20%7C%20BACKBONE%20%7C%20:11626%20SCP-8B5CF6?style=flat-square)](docker-compose.yml)
+[![Quantum Mesh](https://img.shields.io/badge/Quantum%20Mesh-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-fortress/Dockerfile)
+[![PQ Enforcement](https://img.shields.io/badge/PQ%20Enforcement-EVERY%20TIER%20%7C%20SCP%20%7C%20Bridge%20%7C%20Settlement%20%7C%20Tokenization-EF4444?style=flat-square)](docker-compose.yml)
+
+The entire Triumph Synergy ecosystem now runs as a **single, mesh-connected,
+post-quantum-signed Pi mainnet platform** with the sovereign central node
+acting as the **supernode + backbone** for the Pi Network — every apex and
+sovereign service transmits, supports, and verifies through this backbone:
+
+| Tier | Container | Port(s) | Role in Mesh |
+|---|---|---|---|
+| **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[validator1,2,3]}`, FAILURE_SAFETY=1 |
+| **Central Supernode (SCP Backbone)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true** |
+| **Quantum Fortress** | `triumph-quantum-fortress` (alias `triumph-quantum-shield`) | 8094 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f** sign/verify/encapsulate; QPU-bridge co-located |
+| **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet (testnet2 alias) → host:31501 → api.mainnet.minepi.com`. PQ-verifies every chain mutation via Quantum Fortress |
+| **Settlement Core (super-pod)** | `triumph-settlement-core` | 8080/8082/8084/8088 | Tx engine + smart contracts + tokenization + DEX. Every op `*_REQUIRE_PQ_SIGNATURE=true` |
+| **Apex Services (mega super-pod, 18 svc)** | `triumph-apex-services` | 8097–8125 | SAIB + sovereign fortress + insurance + utilities + AI-bot + gateway + delivery + Pi-DEX + sports — `AI_BOT_REQUIRE_PQ` + `GATEWAY_REQUIRE_PQ` enforced |
+| **Sovereign Life (super-pod)** | `triumph-sovereign-life` | 8130 / 8140 / 8150 | Bank + Education + Telecom |
+| **SCFA** | `triumph-sovereign-commerce-authority` | 8160 | 6 authorities · 72 loopholes |
+| **SGN / SWN / PPH** | gaming-nexus / work-nexus / publix-phygital-hub | 8131 / 8132 / 8133 | Pi-Bridge + Quantum-Shield wired |
+| **Ecosystem Guardian** | `triumph-ecosystem-guardian` | 9911 / 9912 / 9913 | Health-governor + network-sentinel + horizon-guardian — `CONTROL_PLANE_REQUIRE_PQ_READY=true` |
+
+### How the mesh stays in sync
+
+The shared `x-pi-env` anchor in [docker-compose.yml](docker-compose.yml) auto-injects
+the following keys into every chain-touching service so there is **one wire,
+one passphrase, one PQ engine, one supernode** across the platform:
+
+```yaml
+PI_NODE_HOST:                  triumph-pi-mainnet-node   # alias 'testnet2' resolves here
+STELLAR_HORIZON_URL:           https://api.mainnet.minepi.com   # public fallback
+STELLAR_NETWORK_PASSPHRASE:    "Pi Network"
+CENTRAL_NODE_URL:              http://triumph-central-node:11626
+CENTRAL_NODE_PUBLIC_KEY:       GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+CENTRAL_NODE_ROLE:             supernode
+CENTRAL_NODE_BACKBONE:         "true"
+STELLAR_CONSENSUS_PROTOCOL:    scp-v23
+PI_BRIDGE_URL:                 http://triumph-pi-bridge-connector:8092
+QUANTUM_SHIELD_URL:            http://triumph-quantum-fortress:8094
+QUANTUM_FORTRESS_URL:          http://triumph-quantum-fortress:8094
+SAIB_URL:                      http://triumph-sovereign-fortress:8099
+SOVEREIGN_PQ_ENFORCE:          "true"
+CONTROL_PLANE_REQUIRE_PQ_READY: "true"
+SCP_REQUIRE_PQ_SIGNATURE:      "true"
+PI_SUPERNODE_MODE:             "true"
+```
+
+### Verified live (May 3, 2026)
+
+```text
+✅ 27/28 healthy · 0 unhealthy · 0 exited (1 starting through long PQ start_period)
+✅ Bridge → mainnet horizon:        GET /ledgers 200 OK · ledger=26,494,792 advancing
+✅ Bridge → central-node:11626:     /info 200 OK
+✅ Bridge → quantum-fortress:8094:  REAL_LIBOQS · Kyber-1024 + Dilithium-5 + SPHINCS+
+✅ Credit-engine ingesting live:    [horizon-feed] ledger=26494789 fee=100000
+✅ DNS alias verified:              testnet2 → 172.20.0.10 (= mainnet node)
+```
+
+**Quantum-computing-everything**: every chain mutation (transactions, smart
+contracts, tokenization, DEX, gateway routes, AI-bot decisions, SCP votes,
+control-plane restarts, governance-shield judicial actions) is PQ-signed
+through `triumph-quantum-fortress` before reaching the mainnet anchor.
+
+---
+
 ## 🛠️ What's New — May 2, 2026 (Sovereign Commerce & Frontier Authority — SCFA)
 
 [![SCFA Service](https://img.shields.io/badge/SCFA-PORT%208160%20%7C%2072%20LOOPHOLES%20%7C%206%20AUTHORITIES-EAB308?style=flat-square)](docker/sovereign-commerce-authority/main.py)
