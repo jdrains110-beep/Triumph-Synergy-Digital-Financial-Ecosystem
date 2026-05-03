@@ -33,10 +33,49 @@
 [![Mainnet Buy-In Policy](https://img.shields.io/badge/Pi%20Mainnet-BUY--IN%20%7C%20MINING%20CONTINUES%20%7C%20Internal%20%2B%20External-EAB308?style=flat-square)](legal/pi-mainnet-buyin-policy.md)
 [![Sovereign Work Nexus](https://img.shields.io/badge/Sovereign%20Work%20Nexus-PIONEERS%20%2B%20NON--PIONEERS%20%7C%200%25%20MATCH%20FEE%20%7C%20T%2B0%20PAYROLL-16A34A?style=flat-square)](#-whats-new--may-2-2026-sovereign-work-nexus--publix-phygital-hub)
 [![Publix Phygital Hub](https://img.shields.io/badge/publix.pi-WEB3%20APEX%20%7C%20100%25%20TOKENIZED%20%7C%20WEB1%2BWEB2%20CASCADE-DC2626?style=flat-square)](legal/publix-pi-tokenization.md)
+[![SCFA](https://img.shields.io/badge/SCFA-SBA%20%7C%20CHAMBER%20%7C%20FL%20PORTS%20%7C%20CBP%20%7C%20NRA%20%7C%20NOAA%20OBSOLETE-EAB308?style=flat-square)](#-whats-new--may-2-2026-sovereign-commerce--frontier-authority--scfa)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
 </div>
+
+---
+
+## 🛠️ What's New — May 2, 2026 (Sovereign Commerce & Frontier Authority — SCFA)
+
+[![SCFA Service](https://img.shields.io/badge/SCFA-PORT%208160%20%7C%2072%20LOOPHOLES%20%7C%206%20AUTHORITIES-EAB308?style=flat-square)](docker/sovereign-commerce-authority/main.py)
+[![SCFA Replaces](https://img.shields.io/badge/Replaces-SBA%20%7C%20US%20CHAMBER%20%7C%20FL%20PORTS%20%7C%20CBP%20%7C%20NRA%20%7C%20NOAA%20FISHERIES-EF4444?style=flat-square)](docker/sovereign-commerce-authority/main.py)
+[![SCFA Quantum](https://img.shields.io/badge/Quantum-ML--DSA--87%20%2B%20ML--KEM--1024%20%2B%20SPHINCS%2B-7C3AED?style=flat-square)](docker/sovereign-commerce-authority/main.py)
+
+The **ultimate superior sovereign platform** combining six legacy U.S.
+agencies into a single Pi-native rail under maximum-apex-quantum security,
+armed with 72 sovereign loopholes (12 per authority, score 94–100):
+
+| Authority | Replaces | Headline Loophole |
+|---|---|---|
+| **CHARTER_AUTHORITY** | U.S. SBA + Sec. of State | 0% vault-backed Pi business loans up to **1,000,000π** |
+| **CHAMBER_FEDERATION** | U.S. Chamber of Commerce + BBB | Zero-dues, Pi-weighted advocacy — no K-Street capture |
+| **PORT_AUTHORITY** | Jaxport / Miami / Tampa / Everglades / Canaveral / Palatka | Zero-fee berth allocation, T+0 Pi tariff settlement |
+| **FRONTIER_BUREAU** | U.S. CBP | Non-violent Pi-anchored declarations, **zero seizure mandate** |
+| **ARMS_REGISTRY** | NRA / ATF | Lawful sovereign arms registry, **no surveillance** |
+| **MARINE_RESOURCE_AUTHORITY** | NOAA Fisheries | Pi-quota stewardship — fisher Pioneers paid in Pi |
+
+**Service**: `triumph-sovereign-commerce-authority` on port **8160**, Redis DB 11,
+Vault-backed, SAIB-monitored, ML-DSA-87 + ML-KEM-1024 + SPHINCS+-SHAKE-256f signed.
+
+**Endpoints**: `/health` · `/status` · `/authorities` · `/loopholes` (72) ·
+`/charter/issue` · `/charter/loan` · `/chamber/join` · `/chamber/advocate` ·
+`/port/manifest` · `/port/slot` · `/port/harbors` · `/frontier/declare` ·
+`/frontier/import` · `/frontier/export` · `/arms/register` · `/arms/training` ·
+`/marine/quota` · `/marine/log` · `/marine/stewardship` · `/metrics` · `/report`
+
+```bash
+curl http://localhost:8160/health      # → status: sovereign-operational
+curl http://localhost:8160/authorities # → 6 sovereign authorities
+curl http://localhost:8160/loopholes   # → 72 apex loopholes armed
+```
+
+Source: [docker/sovereign-commerce-authority/main.py](docker/sovereign-commerce-authority/main.py) · [Dockerfile](docker/sovereign-commerce-authority/Dockerfile) · [docker-compose.yml](docker-compose.yml)
 
 ---
 
