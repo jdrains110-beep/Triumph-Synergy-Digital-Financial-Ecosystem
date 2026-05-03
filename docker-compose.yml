@@ -190,8 +190,8 @@ services:
       dockerfile: Dockerfile
     container_name: triumph-app
     <<: *common
-    mem_limit: 384m
-    mem_reservation: 192m
+    mem_limit: 768m
+    mem_reservation: 256m
     cpus: 0.75
     ports:
       - "3000:3000"
@@ -844,9 +844,9 @@ services:
       dockerfile: Dockerfile
     container_name: triumph-sovereign-commerce-authority
     <<: *common
-    mem_limit: 512m
+    mem_limit: 768m
     mem_reservation: 256m
-    cpus: 0.50
+    cpus: 0.75
     environment:
       PORT: "8160"
       REDIS_URL: redis://triumph-redis:6379/11
@@ -1020,6 +1020,10 @@ services:
     image: pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1
     container_name: triumph-pi-mainnet-node
     restart: always
+    profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
+    mem_limit: 4g
+    mem_reservation: 1536m
+    cpus: 1.5
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
       NODE_PRIVATE_KEY:  ${PI_NODE_PRIVATE_KEY:-}   # auto-generated if blank
@@ -1032,6 +1036,39 @@ services:
       - "${PI_NODE_PEER_PORT:-31402}:31402"       # stellar-core peer
       - "${PI_NODE_HISTORY_PORT:-31403}:1570"     # local history server
     command: ["--mainnet"]
+    networks:
+      - triumph-net
+      - pi-bridge
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -sf http://localhost:8000 > /dev/null"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
+  # --------------------------------------------------------------------------
+  # PI TESTNET2 NODE — Optional companion to mainnet (for dev/parity testing)
+  # Ports remapped to 31501-31503 to avoid collision with mainnet (31401-31403)
+  # --------------------------------------------------------------------------
+  pi-testnet2-node:
+    image: pinetwork/pi-node-docker:community-v1.0-p22.1
+    container_name: triumph-pi-testnet2-node
+    restart: always
+    profiles: ["pi-node"]
+    mem_limit: 3g
+    mem_reservation: 1g
+    cpus: 1.0
+    environment:
+      POSTGRES_PASSWORD: ${PI_TESTNET_POSTGRES_PASSWORD:-changeme_in_env}
+    volumes:
+      - pi_testnet2_stellar:/opt/stellar
+      - pi_testnet2_logs:/var/log/supervisor
+      - pi_testnet2_history:/history
+    ports:
+      - "${PI_TESTNET_HORIZON_PORT:-31501}:8000"
+      - "${PI_TESTNET_PEER_PORT:-31502}:31502"
+      - "${PI_TESTNET_HISTORY_PORT:-31503}:1570"
+    command: ["--testnet2"]
     networks:
       - triumph-net
       - pi-bridge
@@ -1078,6 +1115,13 @@ volumes:
     name: pi_mainnet_logs
   pi_mainnet_history:
     name: pi_mainnet_history
+  # Pi testnet2 node volumes
+  pi_testnet2_stellar:
+    name: pi_testnet2_stellar
+  pi_testnet2_logs:
+    name: pi_testnet2_logs
+  pi_testnet2_history:
+    name: pi_testnet2_history
 
 # ==========================================================================
 # NETWORK — Shared with Pi Network node for direct communication

@@ -36,4 +36,7 @@ LABEL org.triumph.service="sovereign-commerce-authority" \
 HEALTHCHECK --interval=45s --timeout=20s --start-period=90s --retries=6 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8160/health', timeout=15)" || exit 1
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8160", "--workers", "2"]
+# Single worker — eliminates uvicorn fork death-spiral seen under macOS Docker
+# Desktop memory pressure (workers exit immediately on SIGTERM-then-respawn).
+# Throughput is fine; route handlers are async.
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8160", "--workers", "1"]
