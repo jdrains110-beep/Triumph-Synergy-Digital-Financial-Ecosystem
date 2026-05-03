@@ -27,9 +27,9 @@ USER scfa
 EXPOSE 8160
 
 LABEL org.triumph.service="sovereign-commerce-authority" \
-      org.triumph.tier="apex-sovereign" \
-      org.triumph.replaces="SBA+US-Chamber+FL-Ports+CBP+NRA+NOAA-Fisheries" \
-      org.triumph.quantum="ML-DSA-87+ML-KEM-1024+SPHINCS+"
+    org.triumph.tier="apex-sovereign" \
+    org.triumph.replaces="SBA+US-Chamber+FL-Ports+CBP+NRA+NOAA-Fisheries" \
+    org.triumph.quantum="ML-DSA-87+ML-KEM-1024+SPHINCS+"
 
 # Generous start_period + retries so transient Docker Desktop pressure
 # doesn't flag us unhealthy. Uses python (already in image) — no apt-get bloat.

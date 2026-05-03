@@ -729,15 +729,15 @@ services:
       PROBE_INTERVAL_S: "15"
       SENTINEL_METRICS_PORT: "9913"
       REDIS_URL: "redis://triumph-redis:6379"
-      PI_NODE_HOST: "testnet2"
-      PI_NODE_PEER_PORT: "31402"
-      PI_HORIZON_URL: "http://testnet2:8000"
+      PI_NODE_HOST: "triumph-pi-mainnet-node"
+      PI_NODE_PEER_PORT: "31502"
+      PI_HORIZON_URL: "http://triumph-pi-mainnet-node:8000"
       PI_BRIDGE_URL: "http://triumph-pi-bridge-connector:8092"
       ML_ENGINE_URL: "http://triumph-financial-intel:8090"
       SELF_HEAL_ML_ENABLED: "true"
       ANOMALY_Z_THRESHOLD: "2.5"
       ANOMALY_STREAK_THRESHOLD: "3"
-      TARGET_CONTAINER: testnet2
+      TARGET_CONTAINER: triumph-pi-mainnet-node
       TARGET_PROCESS: horizon
       TARGET_URL: http://localhost:8000/
       GUARD_INTERVAL_S: "20"
@@ -1032,13 +1032,20 @@ services:
       - pi_mainnet_logs:/var/log/supervisor
       - pi_mainnet_history:/history
     ports:
-      - "${PI_NODE_HORIZON_PORT:-31401}:8000"    # Horizon HTTP API
-      - "${PI_NODE_PEER_PORT:-31402}:31402"       # stellar-core peer
-      - "${PI_NODE_HISTORY_PORT:-31403}:1570"     # local history server
+      - "${PI_NODE_HORIZON_PORT:-31501}:8000"    # Horizon HTTP API
+      - "${PI_NODE_PEER_PORT:-31502}:31402"       # stellar-core peer
+      - "${PI_NODE_HISTORY_PORT:-31503}:1570"     # local history server
     command: ["--mainnet"]
+    # Network aliases preserve all 30+ legacy code refs to "testnet2"
+    # (bridge-connector, horizon-guardian, network-sentinel, sovereign-gateway,
+    #  credit-engine, pi-network-blockchain, docker-node-bridge, etc.)
     networks:
-      - triumph-net
-      - pi-bridge
+      triumph-net:
+        aliases:
+          - testnet2
+      pi-bridge:
+        aliases:
+          - testnet2
     healthcheck:
       test: ["CMD", "sh", "-c", "curl -sf http://localhost:8000 > /dev/null"]
       interval: 60s
@@ -1046,38 +1053,10 @@ services:
       retries: 5
       start_period: 120s
 
-  # --------------------------------------------------------------------------
-  # PI TESTNET2 NODE — Optional companion to mainnet (for dev/parity testing)
-  # Ports remapped to 31501-31503 to avoid collision with mainnet (31401-31403)
-  # --------------------------------------------------------------------------
-  pi-testnet2-node:
-    image: pinetwork/pi-node-docker:community-v1.0-p22.1
-    container_name: triumph-pi-testnet2-node
-    restart: always
-    profiles: ["pi-node"]
-    mem_limit: 3g
-    mem_reservation: 1g
-    cpus: 1.0
-    environment:
-      POSTGRES_PASSWORD: ${PI_TESTNET_POSTGRES_PASSWORD:-changeme_in_env}
-    volumes:
-      - pi_testnet2_stellar:/opt/stellar
-      - pi_testnet2_logs:/var/log/supervisor
-      - pi_testnet2_history:/history
-    ports:
-      - "${PI_TESTNET_HORIZON_PORT:-31401}:8000"
-      - "${PI_TESTNET_PEER_PORT:-31402}:31402"
-      - "${PI_TESTNET_HISTORY_PORT:-31403}:1570"
-    command: ["--testnet2"]
-    networks:
-      - triumph-net
-      - pi-bridge
-    healthcheck:
-      test: ["CMD", "sh", "-c", "curl -sf http://localhost:8000 > /dev/null"]
-      interval: 60s
-      timeout: 15s
-      retries: 5
-      start_period: 120s
+  # NOTE: pi-testnet2-node service was removed in mainnet-only consolidation.
+  # The ecosystem now runs MAINNET ONLY. All 30+ legacy code references to
+  # "testnet2:8000" / "testnet2:11626" resolve to triumph-pi-mainnet-node via
+  # network aliases on both triumph-net and pi-bridge networks (see above).
 
 # ==========================================================================
 # VOLUMES — Persistent Data
@@ -1115,13 +1094,6 @@ volumes:
     name: pi_mainnet_logs
   pi_mainnet_history:
     name: pi_mainnet_history
-  # Pi testnet2 node volumes
-  pi_testnet2_stellar:
-    name: pi_testnet2_stellar
-  pi_testnet2_logs:
-    name: pi_testnet2_logs
-  pi_testnet2_history:
-    name: pi_testnet2_history
 
 # ==========================================================================
 # NETWORK — Shared with Pi Network node for direct communication
