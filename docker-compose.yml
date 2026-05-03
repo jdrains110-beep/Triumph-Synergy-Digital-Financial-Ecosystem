@@ -159,7 +159,10 @@ services:
       PI_POLL_RETRY_DELAY_S: "1.5"
       POLL_INTERVAL_S: "6"
       CENTRAL_NODE_URL: http://triumph-central-node:11626
-      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      # quantum-fortress hosts the PQ sign/verify API at /quantum/* on 8094.
+      # (Old hostname 'triumph-quantum-shield' was a typo — host doesn't exist;
+      # left in code as default, overridden here so PQ verify actually works.)
+      QUANTUM_SHIELD_URL: http://triumph-quantum-fortress:8094
       SOVEREIGN_PQ_ENFORCE: "true"
     expose:
       - "8092"
@@ -347,7 +350,9 @@ services:
       PARAMETER_SYNC_INTERVAL_MS: 30000
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
       PI_TESTNET_HORIZON: https://api.testnet.minepi.com
-      PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-testnet2}:${PI_NODE_API_PORT:-8000}
+      # Local horizon resolves to mainnet node directly; the 'testnet2'
+      # network alias on triumph-pi-mainnet-node also resolves here for legacy callers.
+      PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}:${PI_NODE_API_PORT:-8000}
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       COMPLIANCE_REQUIRE_PQ: "true"
