@@ -1065,9 +1065,9 @@ services:
       - pi_testnet2_logs:/var/log/supervisor
       - pi_testnet2_history:/history
     ports:
-      - "${PI_TESTNET_HORIZON_PORT:-31501}:8000"
-      - "${PI_TESTNET_PEER_PORT:-31502}:31502"
-      - "${PI_TESTNET_HISTORY_PORT:-31503}:1570"
+      - "${PI_TESTNET_HORIZON_PORT:-31401}:8000"
+      - "${PI_TESTNET_PEER_PORT:-31402}:31402"
+      - "${PI_TESTNET_HISTORY_PORT:-31403}:1570"
     command: ["--testnet2"]
     networks:
       - triumph-net
