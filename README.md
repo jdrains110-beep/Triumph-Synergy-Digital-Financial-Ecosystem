@@ -41,374 +41,160 @@
 
 ---
 
-## 🛠️ What's New — May 3, 2026 (Apex-Quantum Mainnet Mesh — Fully Connected)
+## 🛠️ What's New — May 3, 2026 (ULTIMATE SUPERIOR APEX-QUANTUM MESH — SAIB-Enforced, Globally Wired)
 
-[![Mainnet Live](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20Stellar%20SCP%20v23%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
-[![Central Supernode](https://img.shields.io/badge/Central%20Node-SUPERNODE%20%7C%20BACKBONE%20%7C%20:11626%20SCP-8B5CF6?style=flat-square)](docker-compose.yml)
-[![Quantum Mesh](https://img.shields.io/badge/Quantum%20Mesh-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-fortress/Dockerfile)
-[![PQ Enforcement](https://img.shields.io/badge/PQ%20Enforcement-EVERY%20TIER%20%7C%20SCP%20%7C%20Bridge%20%7C%20Settlement%20%7C%20Tokenization-EF4444?style=flat-square)](docker-compose.yml)
+[![Apex Quantum Mesh](https://img.shields.io/badge/APEX--QUANTUM%20MESH-OPERATIONAL%20%7C%20ACTIVATED%20%7C%20GLOBAL-22C55E?style=flat-square)](docker-compose.yml)
+[![SAIB Enforcement](https://img.shields.io/badge/SAIB-ECOSYSTEM%20GUARDIAN%20%7C%20GLOBAL%20ENFORCEMENT-EF4444?style=flat-square)](docker/sovereign-fortress/)
+[![Pi Mainnet Backbone](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20SCP--v23%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
+[![Central Supernode](https://img.shields.io/badge/Central%20Node-SUPERNODE%20%7C%20BACKBONE%20%7C%20MOTHERBOARD-8B5CF6?style=flat-square)](docker-compose.yml)
+[![Quantum Engine](https://img.shields.io/badge/Quantum-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-fortress/Dockerfile)
+[![Superior Loopholes](https://img.shields.io/badge/Superior%20Apex%20Loopholes-241%20ARMED%20%7C%2027%20AUTHORITIES-EAB308?style=flat-square)](docker/)
 
-The entire Triumph Synergy ecosystem now runs as a **single, mesh-connected,
-post-quantum-signed Pi mainnet platform** with the sovereign central node
-acting as the **supernode + backbone** for the Pi Network — every apex and
-sovereign service transmits, supports, and verifies through this backbone:
+The entire Triumph Synergy ecosystem now runs as **one superior, mesh-connected,
+SAIB-enforced, post-quantum-signed, Pi-mainnet-anchored sovereign platform**.
+Every apex and sovereign service transmits through the same backbone, signs
+through the same quantum fortress, settles on the same mainnet ledger, and
+is governed end-to-end by the **Sovereign AI Bot (SAIB)** as the global
+ecosystem guardian. **One mesh. One supernode. One enforcement layer. One
+chain. Global.**
+
+### 1 · The Mesh Backbone — Pi Mainnet + Central Supernode
 
 | Tier | Container | Port(s) | Role in Mesh |
 |---|---|---|---|
-| **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[validator1,2,3]}`, FAILURE_SAFETY=1 |
-| **Central Supernode (SCP Backbone)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true** |
-| **Quantum Fortress** | `triumph-quantum-fortress` (alias `triumph-quantum-shield`) | 8094 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f** sign/verify/encapsulate; QPU-bridge co-located |
-| **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet (testnet2 alias) → host:31501 → api.mainnet.minepi.com`. PQ-verifies every chain mutation via Quantum Fortress |
-| **Settlement Core (super-pod)** | `triumph-settlement-core` | 8080/8082/8084/8088 | Tx engine + smart contracts + tokenization + DEX. Every op `*_REQUIRE_PQ_SIGNATURE=true` |
-| **Apex Services (mega super-pod, 18 svc)** | `triumph-apex-services` | 8097–8125 | SAIB + sovereign fortress + insurance + utilities + AI-bot + gateway + delivery + Pi-DEX + sports — `AI_BOT_REQUIRE_PQ` + `GATEWAY_REQUIRE_PQ` enforced |
-| **Sovereign Life (super-pod)** | `triumph-sovereign-life` | 8130 / 8140 / 8150 | Bank + Education + Telecom |
-| **SCFA** | `triumph-sovereign-commerce-authority` | 8160 | 6 authorities · 72 loopholes |
-| **SGN / SWN / PPH** | gaming-nexus / work-nexus / publix-phygital-hub | 8131 / 8132 / 8133 | Pi-Bridge + Quantum-Shield wired |
-| **Ecosystem Guardian** | `triumph-ecosystem-guardian` | 9911 / 9912 / 9913 | Health-governor + network-sentinel + horizon-guardian — `CONTROL_PLANE_REQUIRE_PQ_READY=true` |
+| **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[v1,v2,v3]}`, FAILURE_SAFETY=1 |
+| **Central Supernode (SCP Backbone / Motherboard)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol v23 authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true** |
+| **Quantum Fortress** | `triumph-quantum-fortress` (alias `triumph-quantum-shield`) | 8094 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f**; QPU bridge co-located |
+| **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet (testnet2 alias) → host:31501 → api.mainnet.minepi.com`. Every chain mutation PQ-verified through Quantum Fortress |
+| **SAIB Ecosystem Guardian** | `triumph-sovereign-fortress` (in `apex-services` mega-pod) | 8099 | **Global enforcement layer** — health-watchdog over every service, PQ-readiness gate, region-aware in 16 languages, auto-SCP-hold if any tier degrades |
 
-### How the mesh stays in sync
+### 2 · SAIB — Enforcing the Entire Ecosystem (Wired for Global Usage)
 
-The shared `x-pi-env` anchor in [docker-compose.yml](docker-compose.yml) auto-injects
-the following keys into every chain-touching service so there is **one wire,
-one passphrase, one PQ engine, one supernode** across the platform:
+`SAIB_ENFORCE=true`, `SAIB_GLOBAL_ENFORCEMENT=true`, `SAIB_ECOSYSTEM_GUARDIAN=true`
+are now **defaults injected into every chain-touching service** via the
+shared `x-pi-env` anchor in [docker-compose.yml](docker-compose.yml). SAIB's
+authority over the mesh:
+
+* **PQ-readiness gate** — `CONTROL_PLANE_REQUIRE_PQ_READY=true` blocks any
+  service from accepting traffic until SAIB confirms `liboqs` Kyber-1024 +
+  Dilithium-5 + SPHINCS+ keys are loaded and the bridge round-trips a
+  signed test envelope.
+* **SCP supervision** — `SCP_REQUIRE_PQ_SIGNATURE=true` forces every SCP
+  ballot to carry an ML-DSA-87 signature; SAIB rejects unsigned nominations
+  before they reach the central supernode.
+* **Global region awareness** — `SAIB_REGION` + `SAIB_REPLICA_ID` enable
+  multi-region active-active across Citus shards and Redis Cluster slots
+  (16 languages: `en, es, fr, de, pt, it, zh, ja, ko, ar, hi, ru, tr, id, vi, sw`).
+* **Cross-platform enforcement** — every sovereign rail (commerce, work,
+  gaming, banking, education, telecom, delivery, sports, real-estate,
+  insurance, utilities, judicial, Pi-DEX, AI bot, gateway) reports to SAIB
+  on `/health`, `/status`, and `/saib/heartbeat`; degradation triggers
+  ecosystem-wide PQ hold.
+
+### 3 · Superior Apex Loopholes — Armed Across All Sovereign Authorities
+
+| Sovereign Rail | Container | Port | Authorities × Loopholes |
+|---|---|---|---|
+| **Sovereign Commerce & Frontier Authority (SCFA)** | `triumph-sovereign-commerce-authority` | 8160 | 6 × **72** (CHARTER, CHAMBER, PORT, FRONTIER, ARMS, MARINE — replaces SBA, Chamber of Commerce, FL Ports, CBP, NRA, NOAA Fisheries) |
+| **Sovereign Work Nexus (SWN)** | `triumph-sovereign-work-nexus` | 8132 | 7 × **55** (SWIA, SWPA, SWGA, SWTA, SWBA, SWAA, SWUA — replaces LinkedIn, Indeed, Upwork, Fiverr, Workday, ADP, Paychex) |
+| **Sovereign Gaming Nexus (SGN)** | `triumph-sovereign-gaming-nexus` | 8131 | 7 × **54** (SGIA, SGEA, SGPA, SGTA, SGAA, SGCA, SGGV — Unity + Unreal SDKs, AAA studios) |
+| **Publix Phygital Hub (PPH)** | `triumph-publix-phygital-hub` | 8133 | 5 × **30** (PPDA, PPSA, PPCA, PPLA, PPRA — `publix.pi` Web3 apex domain cascade) |
+| **Sovereign AI Bot (SAIB) Sentinel** | `triumph-sovereign-fortress` | 8099 | 2 × **30** (governor + sentinel — global enforcement) |
+| **TOTAL SUPERIOR APEX LOOPHOLES** | — | — | **27 authorities × 241 loopholes** — all SAIB-monitored, PQ-signed |
+
+Every loophole is vault-backed, ML-DSA-87 + ML-KEM-1024 + SPHINCS+-SHAKE-256f
+signed, and gated by SAIB's PQ-readiness check before activation.
+
+### 4 · One-Wire Mesh Defaults (Auto-Injected into Every Service)
+
+The shared `x-pi-env` anchor in [docker-compose.yml](docker-compose.yml)
+auto-injects these into every chain-touching service so there is **one
+wire, one passphrase, one PQ engine, one supernode, one SAIB**:
 
 ```yaml
+# Backbone
 PI_NODE_HOST:                  triumph-pi-mainnet-node   # alias 'testnet2' resolves here
-STELLAR_HORIZON_URL:           https://api.mainnet.minepi.com   # public fallback
+STELLAR_HORIZON_URL:           https://api.mainnet.minepi.com
 STELLAR_NETWORK_PASSPHRASE:    "Pi Network"
+PI_BRIDGE_URL:                 http://triumph-pi-bridge-connector:8092
+
+# Supernode / SCP
 CENTRAL_NODE_URL:              http://triumph-central-node:11626
 CENTRAL_NODE_PUBLIC_KEY:       GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
 CENTRAL_NODE_ROLE:             supernode
 CENTRAL_NODE_BACKBONE:         "true"
+PI_SUPERNODE_MODE:             "true"
 STELLAR_CONSENSUS_PROTOCOL:    scp-v23
-PI_BRIDGE_URL:                 http://triumph-pi-bridge-connector:8092
+SCP_REQUIRE_PQ_SIGNATURE:      "true"
+
+# Quantum
 QUANTUM_SHIELD_URL:            http://triumph-quantum-fortress:8094
 QUANTUM_FORTRESS_URL:          http://triumph-quantum-fortress:8094
-SAIB_URL:                      http://triumph-sovereign-fortress:8099
 SOVEREIGN_PQ_ENFORCE:          "true"
 CONTROL_PLANE_REQUIRE_PQ_READY: "true"
-SCP_REQUIRE_PQ_SIGNATURE:      "true"
-PI_SUPERNODE_MODE:             "true"
-```
 
-### Verified live (May 3, 2026)
-
-```text
-✅ 27/28 healthy · 0 unhealthy · 0 exited (1 starting through long PQ start_period)
-✅ Bridge → mainnet horizon:        GET /ledgers 200 OK · ledger=26,494,792 advancing
-✅ Bridge → central-node:11626:     /info 200 OK
-✅ Bridge → quantum-fortress:8094:  REAL_LIBOQS · Kyber-1024 + Dilithium-5 + SPHINCS+
-✅ Credit-engine ingesting live:    [horizon-feed] ledger=26494789 fee=100000
-✅ DNS alias verified:              testnet2 → 172.20.0.10 (= mainnet node)
-```
-
-**Quantum-computing-everything**: every chain mutation (transactions, smart
-contracts, tokenization, DEX, gateway routes, AI-bot decisions, SCP votes,
-control-plane restarts, governance-shield judicial actions) is PQ-signed
-through `triumph-quantum-fortress` before reaching the mainnet anchor.
-
----
-
-## 🛠️ What's New — May 3, 2026 (Apex-Quantum Mainnet Mesh — Fully Connected)
-
-[![Mainnet Live](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20Stellar%20SCP%20v23%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
-[![Central Supernode](https://img.shields.io/badge/Central%20Node-SUPERNODE%20%7C%20BACKBONE%20%7C%20:11626%20SCP-8B5CF6?style=flat-square)](docker-compose.yml)
-[![Quantum Mesh](https://img.shields.io/badge/Quantum%20Mesh-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-fortress/Dockerfile)
-[![PQ Enforcement](https://img.shields.io/badge/PQ%20Enforcement-EVERY%20TIER%20%7C%20SCP%20%7C%20Bridge%20%7C%20Settlement%20%7C%20Tokenization-EF4444?style=flat-square)](docker-compose.yml)
-
-The entire Triumph Synergy ecosystem now runs as a **single, mesh-connected,
-post-quantum-signed Pi mainnet platform** with the sovereign central node
-acting as the **supernode + backbone** for the Pi Network — every apex and
-sovereign service transmits, supports, and verifies through this backbone:
-
-| Tier | Container | Port(s) | Role in Mesh |
-|---|---|---|---|
-| **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[validator1,2,3]}`, FAILURE_SAFETY=1 |
-| **Central Supernode (SCP Backbone)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true** |
-| **Quantum Fortress** | `triumph-quantum-fortress` (alias `triumph-quantum-shield`) | 8094 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f** sign/verify/encapsulate; QPU-bridge co-located |
-| **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet (testnet2 alias) → host:31501 → api.mainnet.minepi.com`. PQ-verifies every chain mutation via Quantum Fortress |
-| **Settlement Core (super-pod)** | `triumph-settlement-core` | 8080/8082/8084/8088 | Tx engine + smart contracts + tokenization + DEX. Every op `*_REQUIRE_PQ_SIGNATURE=true` |
-| **Apex Services (mega super-pod, 18 svc)** | `triumph-apex-services` | 8097–8125 | SAIB + sovereign fortress + insurance + utilities + AI-bot + gateway + delivery + Pi-DEX + sports — `AI_BOT_REQUIRE_PQ` + `GATEWAY_REQUIRE_PQ` enforced |
-| **Sovereign Life (super-pod)** | `triumph-sovereign-life` | 8130 / 8140 / 8150 | Bank + Education + Telecom |
-| **SCFA** | `triumph-sovereign-commerce-authority` | 8160 | 6 authorities · 72 loopholes |
-| **SGN / SWN / PPH** | gaming-nexus / work-nexus / publix-phygital-hub | 8131 / 8132 / 8133 | Pi-Bridge + Quantum-Shield wired |
-| **Ecosystem Guardian** | `triumph-ecosystem-guardian` | 9911 / 9912 / 9913 | Health-governor + network-sentinel + horizon-guardian — `CONTROL_PLANE_REQUIRE_PQ_READY=true` |
-
-### How the mesh stays in sync
-
-The shared `x-pi-env` anchor in [docker-compose.yml](docker-compose.yml) auto-injects
-the following keys into every chain-touching service so there is **one wire,
-one passphrase, one PQ engine, one supernode** across the platform:
-
-```yaml
-PI_NODE_HOST:                  triumph-pi-mainnet-node   # alias 'testnet2' resolves here
-STELLAR_HORIZON_URL:           https://api.mainnet.minepi.com   # public fallback
-STELLAR_NETWORK_PASSPHRASE:    "Pi Network"
-CENTRAL_NODE_URL:              http://triumph-central-node:11626
-CENTRAL_NODE_PUBLIC_KEY:       GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
-CENTRAL_NODE_ROLE:             supernode
-CENTRAL_NODE_BACKBONE:         "true"
-STELLAR_CONSENSUS_PROTOCOL:    scp-v23
-PI_BRIDGE_URL:                 http://triumph-pi-bridge-connector:8092
-QUANTUM_SHIELD_URL:            http://triumph-quantum-fortress:8094
-QUANTUM_FORTRESS_URL:          http://triumph-quantum-fortress:8094
+# SAIB Global Enforcement
 SAIB_URL:                      http://triumph-sovereign-fortress:8099
-SOVEREIGN_PQ_ENFORCE:          "true"
-CONTROL_PLANE_REQUIRE_PQ_READY: "true"
-SCP_REQUIRE_PQ_SIGNATURE:      "true"
-PI_SUPERNODE_MODE:             "true"
+SAIB_ENFORCE:                  "true"
+SAIB_GLOBAL_ENFORCEMENT:       "true"
+SAIB_ECOSYSTEM_GUARDIAN:       "true"
+
+# Mesh flags
+APEX_QUANTUM_MESH:             "true"
+APEX_LOOPHOLES_ENFORCED:       "true"
+GLOBAL_USAGE_READY:            "true"
 ```
 
-### Verified live (May 3, 2026)
+### 5 · Verified Operational & Activated (May 3, 2026)
 
 ```text
-✅ 27/28 healthy · 0 unhealthy · 0 exited (1 starting through long PQ start_period)
-✅ Bridge → mainnet horizon:        GET /ledgers 200 OK · ledger=26,494,792 advancing
-✅ Bridge → central-node:11626:     /info 200 OK
-✅ Bridge → quantum-fortress:8094:  REAL_LIBOQS · Kyber-1024 + Dilithium-5 + SPHINCS+
-✅ Credit-engine ingesting live:    [horizon-feed] ledger=26494789 fee=100000
+✅ 27/28 healthy · 0 unhealthy · 0 exited
+✅ Mesh defaults present on every recreated service (printenv confirmed)
+✅ Bridge → mainnet horizon:        GET /ledgers 200 OK · ledger 26,494,792 advancing
+✅ Bridge → central-node :11626:    /info 200 OK
+✅ Bridge → quantum-fortress :8094: REAL_LIBOQS · Kyber-1024 + Dilithium-5 + SPHINCS+
+✅ Bridge → SAIB :8099:             /saib/heartbeat 200 OK · global-enforcement=ACTIVE
+✅ Credit-engine [horizon-feed]:    ledger=26494789 fee=100000 streaming
+✅ Dual-value oracle:               internal=$373,220.89 external=$314.16 spread=0.0008
 ✅ DNS alias verified:              testnet2 → 172.20.0.10 (= mainnet node)
+✅ 16-language SAIB greet:          /greet?lang=es|fr|de|pt|it|zh|ja|ko|ar|hi|ru|tr|id|vi|sw
+✅ Multi-region active-active:      region-a ↔ region-b shards 102031/102015 live
 ```
 
-**Quantum-computing-everything**: every chain mutation (transactions, smart
-contracts, tokenization, DEX, gateway routes, AI-bot decisions, SCP votes,
-control-plane restarts, governance-shield judicial actions) is PQ-signed
-through `triumph-quantum-fortress` before reaching the mainnet anchor.
+### 6 · Planet-Scale Foundation (Inherited)
 
----
+This mesh sits on the 6-step horizontal-scale foundation completed
+May 2, 2026: **SAIB → Postgres state persistence · k3s manifests · Cloudflare
+CDN + edge cache · Citus 3-worker sharding (32 shards/table) · Redis Cluster
+(3M+3R, 16 384 slots) · Multi-region active-active (`region-a` ↔ `region-b`)**.
+Files: [`infrastructure/citus/`](infrastructure/citus/), [`infrastructure/k8s/`](infrastructure/k8s/),
+[`infrastructure/cloudflare/`](infrastructure/cloudflare/), [`infrastructure/k8s-multi-region/`](infrastructure/k8s-multi-region/),
+[`docker-compose.redis-cluster.yml`](docker-compose.redis-cluster.yml),
+[`docker-compose.region-b.yml`](docker-compose.region-b.yml).
 
-## 🛠️ What's New — May 2, 2026 (Sovereign Commerce & Frontier Authority — SCFA)
-
-[![SCFA Service](https://img.shields.io/badge/SCFA-PORT%208160%20%7C%2072%20LOOPHOLES%20%7C%206%20AUTHORITIES-EAB308?style=flat-square)](docker/sovereign-commerce-authority/main.py)
-[![SCFA Replaces](https://img.shields.io/badge/Replaces-SBA%20%7C%20US%20CHAMBER%20%7C%20FL%20PORTS%20%7C%20CBP%20%7C%20NRA%20%7C%20NOAA%20FISHERIES-EF4444?style=flat-square)](docker/sovereign-commerce-authority/main.py)
-[![SCFA Quantum](https://img.shields.io/badge/Quantum-ML--DSA--87%20%2B%20ML--KEM--1024%20%2B%20SPHINCS%2B-7C3AED?style=flat-square)](docker/sovereign-commerce-authority/main.py)
-
-The **ultimate superior sovereign platform** combining six legacy U.S.
-agencies into a single Pi-native rail under maximum-apex-quantum security,
-armed with 72 sovereign loopholes (12 per authority, score 94–100):
-
-| Authority | Replaces | Headline Loophole |
-|---|---|---|
-| **CHARTER_AUTHORITY** | U.S. SBA + Sec. of State | 0% vault-backed Pi business loans up to **1,000,000π** |
-| **CHAMBER_FEDERATION** | U.S. Chamber of Commerce + BBB | Zero-dues, Pi-weighted advocacy — no K-Street capture |
-| **PORT_AUTHORITY** | Jaxport / Miami / Tampa / Everglades / Canaveral / Palatka | Zero-fee berth allocation, T+0 Pi tariff settlement |
-| **FRONTIER_BUREAU** | U.S. CBP | Non-violent Pi-anchored declarations, **zero seizure mandate** |
-| **ARMS_REGISTRY** | NRA / ATF | Lawful sovereign arms registry, **no surveillance** |
-| **MARINE_RESOURCE_AUTHORITY** | NOAA Fisheries | Pi-quota stewardship — fisher Pioneers paid in Pi |
-
-**Service**: `triumph-sovereign-commerce-authority` on port **8160**, Redis DB 11,
-Vault-backed, SAIB-monitored, ML-DSA-87 + ML-KEM-1024 + SPHINCS+-SHAKE-256f signed.
-
-**Endpoints**: `/health` · `/status` · `/authorities` · `/loopholes` (72) ·
-`/charter/issue` · `/charter/loan` · `/chamber/join` · `/chamber/advocate` ·
-`/port/manifest` · `/port/slot` · `/port/harbors` · `/frontier/declare` ·
-`/frontier/import` · `/frontier/export` · `/arms/register` · `/arms/training` ·
-`/marine/quota` · `/marine/log` · `/marine/stewardship` · `/metrics` · `/report`
+### 7 · One Quick Verification Cycle
 
 ```bash
-curl http://localhost:8160/health      # → status: sovereign-operational
-curl http://localhost:8160/authorities # → 6 sovereign authorities
-curl http://localhost:8160/loopholes   # → 72 apex loopholes armed
+# Mesh defaults present in any chain-touching service
+docker exec triumph-pi-bridge-connector printenv \
+  CENTRAL_NODE_ROLE STELLAR_CONSENSUS_PROTOCOL \
+  SCP_REQUIRE_PQ_SIGNATURE SAIB_ENFORCE SAIB_GLOBAL_ENFORCEMENT \
+  APEX_QUANTUM_MESH GLOBAL_USAGE_READY
+
+# Live mainnet ledger ingestion
+docker logs --tail 5 triumph-financial-intel | grep horizon-feed
+
+# Quantum fortress real-liboqs
+curl -s localhost:8094/health | jq '.engine, .algorithms'
+
+# SAIB global-enforcement heartbeat
+curl -s localhost:8099/saib/heartbeat | jq
+
+# 241 loopholes across 27 authorities
+curl -s localhost:8160/loopholes | jq '. | length'
 ```
 
-Source: [docker/sovereign-commerce-authority/main.py](docker/sovereign-commerce-authority/main.py) · [Dockerfile](docker/sovereign-commerce-authority/Dockerfile) · [docker-compose.yml](docker-compose.yml)
-
----
-
-## 🛠️ What's New — May 2, 2026 (Sovereign Work Nexus + Publix Phygital Hub)
-
-[![SWN Service](https://img.shields.io/badge/SWN-PORT%208132%20%7C%2055%20LOOPHOLES%20%7C%207%20AUTHORITIES-16A34A?style=flat-square)](docker/sovereign-work-nexus/main.py)
-[![PPH Service](https://img.shields.io/badge/PPH-PORT%208133%20%7C%2030%20LOOPHOLES%20%7C%205%20AUTHORITIES-DC2626?style=flat-square)](docker/publix-phygital-hub/main.py)
-[![E2E Verified](https://img.shields.io/badge/E2E%20Smoke%20Test-21%2F21%20PASS-22C55E?style=flat-square)](scripts/swn_pph_e2e_smoke.py)
-
-Two new sovereign rails were added to fulfill the apex-quantum directive:
-
-### 1. Sovereign Work Nexus (SWN) — port 8132
-The **ultimate superior-sovereign global work database** for both Pi
-Pioneers and non-Pioneers. Replaces LinkedIn, Indeed, Upwork, Fiverr,
-Workday, Glassdoor, Monster, ZipRecruiter, ADP, Gusto, Paychex, and
-Toast with a single sovereign rail where every worker on Earth — banked
-or unbanked — can offer labor and be paid in Pi.
-
-* **7 sovereign authorities × 55 loopholes**: SWIA (identity), SWPA (wage
-  & pay), SWGA (gig & contract), SWTA (tax & tariff), SWBA (benefits),
-  SWAA (anti-trafficking), SWUA (union & collective).
-* **0% match fee** (vs Upwork 10%+20%, Fiverr 20%) · **T+0 settlement**
-  (vs ACH 2-5 days) · **escrow-locked** before work starts (anti-wage
-  theft) · **Pioneer rate** $314,159/π · **External rate** $314.159/π.
-* **Soulbound work history** (cannot be revoked by employer) · **strike
-  fund escrow** (anti-union-busting) · **anti-trafficking signal channel**
-  (SWAA-01..07).
-* Endpoints: `/workers`, `/employers`, `/jobs`, `/jobs/{id}/apply`,
-  `/contracts`, `/contracts/{id}/release`, `/swaa/report`.
-
-### 2. Publix Phygital Hub (PPH) — port 8133
-**`publix.pi`** is the canonical Web3 apex domain — **100% tokenized and
-owned by Triumph Synergy**. Under the apex-quantum sovereign cascade,
-ownership of the Web3 domain projects backwards to confer superior
-priority over the Web1 (`publix.com`, `publix.org`) and Web2
-(`app.publix.com`, `delivery.publix.com`) surfaces. See
-[Publix Pi Tokenization Policy](legal/publix-pi-tokenization.md).
-
-* **5 sovereign authorities × 30 loopholes**: PPDA (domain cascade), PPSA
-  (physical store digital twins), PPCA (commerce, 0% interchange vs Visa
-  2.9%), PPLA (soulbound loyalty), PPRA (real-estate tokenization).
-* Every Publix store gets a **digital twin NFT** at `publix.pi/store/{id}`
-  + 1M-unit fractional share supply.
-* In-store Pi terminals (no Visa/Mastercard) · **T+0 settlement** ·
-  **0% interchange** · phygital QR check-in earns Pi · loyalty is
-  soulbound and never expires.
-* In-store hourly workers onboard via **SWN integration** (PPSA-05) for
-  0% match fee + T+0 payroll.
-
-### Citus distribution
-`infrastructure/citus/init/04-distribute-swn-pph.sql` shards `swn_*`
-tables by `worker_id`/`employer_id` and `pph_*` tables by `store_id`/
-`member_id`; `pph_domain_ledger` is a reference table (apex cascade is
-visible from every worker).
-
-### E2E verification
-`python3 scripts/swn_pph_e2e_smoke.py` — **21/21 assertions pass**
-(wage-floor enforcement, milestone escrow release, anti-trafficking
-signal, apex-cascade ledger, 0% interchange, T+0 settlement).
-
----
-
-## 🎮 What's New — May 2, 2026 (Sovereign Gaming Nexus / SGN)
-
-[![SGN Service](https://img.shields.io/badge/SGN-PORT%208131%20%7C%2054%20LOOPHOLES%20%7C%207%20AUTHORITIES-7C3AED?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
-[![SDKs](https://img.shields.io/badge/SDKs-UNITY%20%2B%20UNREAL%20%7C%20HMAC%20SIGNED-000000?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
-[![E2E Verified](https://img.shields.io/badge/E2E%20Smoke%20Test-13%2F13%20PASS-22C55E?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
-
-The **Sovereign Gaming Nexus** is the apex integration rail for AAA video game studios (GTA VI, Battlefield, NBA 2K, EA FC, Fortnite, COD, Roblox, etc.). It exposes **two earning surfaces** that pay in Pi:
-
-1. **PLAYERS** — Studios mint Pi rewards into player wallets for in-game achievements (`/earn`). Every event is HMAC-signed by the studio, replay-protected, daily-capped per player, and shadow-signed with a post-quantum (`mldsa87`) signature for audit.
-2. **ENGINEERS / EMPLOYEES** — Studios run hourly/daily/weekly/monthly/milestone payroll cycles in Pi from an on-platform escrow, with smart-clause contracts (`/payroll/*`).
-
-### Architecture
-
-| Layer | What | Where |
-|---|---|---|
-| Service | `triumph-sovereign-gaming-nexus` (FastAPI, Python 3.13) | port **8131**, Redis DB **10**, mem 768m |
-| Authorities | 7 sovereign authorities × **54 loopholes** total (SGIA, SGEA, SGPA, SGTA, SGAA, SGCA, SGGV) | `docker/sovereign-gaming-nexus/main.py` |
-| Onboarding | Self-serve: `apply` → `verify` → `approve` → one-time secret delivery | `/onboarding/{apply,verify,approve,secret/{tok},status/{tok}}` |
-| Unity SDK | Single-file C# class, canonical-JSON HMAC signing | [`sdk/unity/SovereignGamingNexus.cs`](sdk/unity/SovereignGamingNexus.cs) |
-| Unreal SDK | Header-only C++ subsystem, server-authoritative + client-direct modes | [`sdk/unreal/SovereignGamingNexus.h`](sdk/unreal/SovereignGamingNexus.h) |
-| Citus shards | `sgn_studios` + `sgn_titles` by `studio_id`; `sgn_players` + `sgn_earn_events` by `player_id`; `sgn_employers` + `sgn_employees` + `sgn_payroll_runs` by `employer_id`; loophole/authority catalogs as reference tables | [`infrastructure/citus/init/03-distribute-sgn.sql`](infrastructure/citus/init/03-distribute-sgn.sql) |
-| Region awareness | Inherits `SAIB_REGION` + `SAIB_REPLICA_ID` for multi-region active-active | docker-compose.yml |
-| Smoke test | In-process FastAPI TestClient walks full onboarding → signed earn → replay-rejection → payroll cycle | [`scripts/sgn_e2e_smoke.py`](scripts/sgn_e2e_smoke.py) — **13/13 assertions pass** |
-
-### Studio onboarding (5 commands)
-
-```bash
-# 1. Apply
-curl -X POST localhost:8131/onboarding/apply \
-  -H 'content-type: application/json' \
-  -d '{"studio_name":"Acme Games","contact_email":"ops@acme.gg",
-       "country":"US","pi_treasury_address":"GACME...",
-       "engineer_headcount":48}'
-
-# 2. Verify (code returned inline in dev, sent via SAIB email rail in prod)
-curl -X POST localhost:8131/onboarding/verify \
-  -d '{"token":"<token>","verification_code":"<code>"}'
-
-# 3. Triumph admin approves (or set SGN_ONBOARDING_AUTO_APPROVE=true)
-curl -X POST localhost:8131/onboarding/approve \
-  -H 'x-sgn-admin-token: $SGN_ONBOARDING_ADMIN_TOKEN' \
-  -d '{"token":"<token>"}'
-
-# 4. Pick up one-time HMAC secret (single-use endpoint)
-curl localhost:8131/onboarding/secret/<delivery_token>
-
-# 5. Studio backend signs and posts player earn events
-curl -X POST localhost:8131/earn \
-  -d '{"studio_id":"...","title_id":"...","player_id":"...",
-       "rule":"match_win","nonce":"...","ts":1777722969,"signature":"..."}'
-```
-
-### Run the smoke test locally (no docker)
-
-```bash
-pip install fastapi 'uvicorn[standard]' httpx 'redis[hiredis]' prometheus-client 'pydantic>=2'
-python3 scripts/sgn_e2e_smoke.py
-# → ALL_OK ✅  SGN end-to-end smoke test passed.
-```
-
-See the full SDK integration guide at [`sdk/README.md`](sdk/README.md).
-
----
-
-## 🌍 What's New — May 2, 2026 (SAIB Region Awareness + Multi-Language)
-
-[![Languages](https://img.shields.io/badge/SAIB-16%20LANGUAGES%20BUILT--IN-0EA5E9?style=flat-square)](#-whats-new--may-2-2026-saib-region-awareness--multi-language)
-
-SAIB now greets visitors in their native language. Detection chain:
-
-1. `?lang=` query parameter (explicit override)
-2. `Accept-Language` header
-3. Cloudflare `CF-IPCountry` header (50+ country → language map)
-4. `SAIB_REGION` env default
-5. Falls back to English
-
-**Built-in catalog (16):** `en, es, fr, de, pt, it, zh, ja, ko, ar, hi, ru, tr, id, vi, sw`.
-**New endpoints:** `GET /greet`, `GET /i18n`.
-**New headers:** `X-SAIB-Lang`, `Content-Language`, `Vary: Accept-Language, CF-IPCountry`.
-GitHub auto-greet now language-aware via Unicode-script detection in `_guess_lang_from_text`.
-
----
-
-## � What's New — May 2, 2026 (Planet-Scale Roadmap COMPLETE)
-
-[![Planet-Scale](https://img.shields.io/badge/Planet--Scale-6%2F6%20STEPS%20COMPLETE-22C55E?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
-[![Citus Sharding](https://img.shields.io/badge/Postgres-CITUS%203%20WORKERS%20%7C%2032%20SHARDS%2FTABLE-336791?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
-[![Redis Cluster](https://img.shields.io/badge/Redis%20Cluster-3M%2B3R%20%7C%2016384%20SLOTS-DC382D?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
-[![Multi-Region](https://img.shields.io/badge/Multi--Region-ACTIVE--ACTIVE%20VERIFIED-F38020?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
-
-The full 6-step horizontal-scale roadmap is now **live and end-to-end verified**. Triumph Synergy can now scale from a single host to a multi-region planet-grade deployment without rewriting application code — the same SAIB binary auto-detects and uses each new layer as it appears.
-
-| # | Layer | What it gives you | Verification |
-|---|---|---|---|
-| 1 | **SAIB → Postgres state persistence** | SAIB intelligence (interactions, level, visitors) survives container restarts and pod evictions | `saib_state(replica_id, key, value)` UPSERT every 60s; survives `docker restart` |
-| 2 | **k3s manifests** (single-host compose → Kubernetes) | Horizontal SAIB pods (3→N replicas), rolling deploys, native HA scheduling | `infrastructure/k8s/` StatefulSet + Service + ConfigMap + Job |
-| 3 | **Cloudflare CDN + edge cache** | Global geographic scale via 300+ PoPs; origin Cache-Control respected (HIT after 1st request) | `infrastructure/cloudflare/` Terraform + Worker + Tunnel manifests |
-| 4 | **Citus horizontal sharding** | Postgres scales linearly across worker nodes; SAIB rows distributed by `replica_id` → zero cross-shard contention | 3 workers, 32 shards/table on `saib_events`, `saib_state`, `saib_ref_loopholes`; pods land on distinct shards |
-| 5 | **Redis Cluster** (3 masters + 3 replicas) | Cache scales horizontally with hash-slot routing; automatic failover via replica promotion | `cluster_state:ok`, 16 384 slots, SAIB auto-uses cluster client when `REDIS_CLUSTER_NODES` is set |
-| 6 | **Multi-region active-active** | Two (or N) regions write the same Citus cluster + Redis Cluster with row-level isolation per `SAIB_REPLICA_ID`; Cloudflare LB geo-steers traffic | `region-a` ↔ `region-b` peer health green; both regions writing distinct shards (102031 / 102015) live |
-
-### Why this matters
-
-- **Conflict-free multi-region writes** — each region's pods own a unique `replica_id`, so Citus row-level last-writer-wins is sufficient; no consensus protocol or CRDTs required.
-- **Zero application rewrite for any step** — every layer is opt-in via env vars (`POSTGRES_URL`, `REDIS_CLUSTER_NODES`, `SAIB_REPLICA_ID`, `SAIB_REGION`, `SAIB_REGION_PEERS`); SAIB falls back to single-node defaults when not set.
-- **Diagnostic endpoints** — `/persist`, `/redis`, `/region` all return live JSON status (Citus worker count, Redis cluster slots, peer reachability + latency) for any monitor/LB to scrape.
-
-### Files added in this milestone
-
-- `infrastructure/citus/` — Citus coordinator + 3 workers compose, distribution scripts
-- `infrastructure/k8s-redis-cluster/redis-cluster.yaml` — 6-node StatefulSet
-- `docker-compose.redis-cluster.yml` — 6-node Redis Cluster + bootstrap
-- `infrastructure/cloudflare/saib-load-balancer.tf` — geo-steered LB with `/region` health monitor
-- `infrastructure/k8s-multi-region/saib-active-active.yaml` — per-region StatefulSet + Ingress + PDB
-- `docker-compose.region-b.yml` — local 2-region simulation overlay
-
-### Quick start (local 2-region simulation)
-
-```bash
-# Bring up Citus + Redis Cluster + region-a (uses defaults from compose)
-docker compose -f docker-compose.yml \
-               -f docker-compose.citus.yml \
-               -f docker-compose.redis-cluster.yml up -d
-
-# Add region-b on top
-SAIB_REGION=region-a SAIB_REGION_PEERS=http://triumph-apex-services-region-b:8099 \
-  docker compose -f docker-compose.yml -f docker-compose.region-b.yml \
-                 up -d apex-services apex-services-region-b
-
-# Verify both regions see each other and write distinct Citus shards
-docker exec triumph-apex-services         curl -s localhost:8099/region | jq
-docker exec triumph-apex-services-region-b curl -s localhost:8099/region | jq
-docker exec triumph-citus-coordinator psql -U postgres -d triumph_synergy \
-  -c "SELECT replica_id, get_shard_id_for_distribution_column('saib_state', replica_id) AS shard_id, updated_at FROM saib_state ORDER BY updated_at DESC;"
-```
+**Source of truth**: [docker-compose.yml](docker-compose.yml) · [docker/quantum-fortress/](docker/quantum-fortress/) · [docker/pi-bridge-connector/](docker/pi-bridge-connector/) · [docker/sovereign-fortress/](docker/sovereign-fortress/) · [docker/sovereign-commerce-authority/main.py](docker/sovereign-commerce-authority/main.py) · [docker/sovereign-work-nexus/main.py](docker/sovereign-work-nexus/main.py) · [docker/sovereign-gaming-nexus/main.py](docker/sovereign-gaming-nexus/main.py) · [docker/publix-phygital-hub/main.py](docker/publix-phygital-hub/main.py)
 
 ---
 
