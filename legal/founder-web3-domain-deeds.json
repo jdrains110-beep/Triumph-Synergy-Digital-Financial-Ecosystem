@@ -1,0 +1,1362 @@
+{
+  "company": "Triumph Synergy",
+  "founder": "Jeremiah Joel Drains",
+  "owner_wallet": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+  "owner_username": "jdrains30",
+  "ownership_model": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH",
+  "sovereign_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+  "doctrine": "APEX_CASCADE_WEB3_OVER_WEB2_OVER_WEB1",
+  "deed_kind": "WEB3_DOMAIN_ALLODIAL_PI721",
+  "tokenized_at_utc": "2026-05-03T05:43:34Z",
+  "deeds": {
+    "wingstop.pi": {
+      "http_status": 201,
+      "token_id": "f57a645901e85abcfa2d3a63e8a402333ab7cffcf8cb3dfc6586124d5395988e",
+      "deed_number": "ALLODIAL-2026-9977AE2D",
+      "pi_blockchain_tx": "1428af53a438f199e478dc4cf353e5c7fb4cfe78d7ab56f28f7ca7a8f07e2165",
+      "stellar_anchor_tx": "485860f65c12996608aa64e39234f489e1b414debd466453826fcac3ec86a598",
+      "cascade_over": [
+        "wingstop.com",
+        "order.wingstop.com",
+        "wingstop.org"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "f57a645901e85abcfa2d3a63e8a402333ab7cffcf8cb3dfc6586124d5395988e",
+          "deedNumber": "ALLODIAL-2026-9977AE2D",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — wingstop.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: wingstop.com, order.wingstop.com, wingstop.org. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://wingstop.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "wingstop.pi",
+            "cascade_over": [
+              "wingstop.com",
+              "order.wingstop.com",
+              "wingstop.org"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "9977ae2da6534bd288e9a7ecd1358d88dbddd9849dd3d0ee855033c5ed11a9b0",
+          "fortressHash": "d846a91cdfd7f58090d1e314d1ae07ce7331bf19fa78b5f77320d9592eff1e00",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486403,
+            "transactionHash": "485860f65c12996608aa64e39234f489e1b414debd466453826fcac3ec86a598",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:43:48.088Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486403,
+            "transactionHash": "1428af53a438f199e478dc4cf353e5c7fb4cfe78d7ab56f28f7ca7a8f07e2165",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:43:48.088Z"
+          },
+          "createdAt": "2026-05-03T05:43:48.088Z",
+          "updatedAt": "2026-05-03T05:43:48.088Z",
+          "claimHash": "7f439122514fa5a55c42424c1b9f40a9e58aacbbe8ade3814756edd0eaee0b8a"
+        },
+        "stellarAnchorTx": "485860f65c12996608aa64e39234f489e1b414debd466453826fcac3ec86a598",
+        "piBlockchainTx": "1428af53a438f199e478dc4cf353e5c7fb4cfe78d7ab56f28f7ca7a8f07e2165"
+      }
+    },
+    "gru.pi": {
+      "http_status": 201,
+      "token_id": "29b5f12d9666a755f0e18b691e656ecade597378b4b82d0ef582e381a2b64df8",
+      "deed_number": "ALLODIAL-2026-DCE760C0",
+      "pi_blockchain_tx": "5bd36a3005135e901a1f141cbec95607eb4ccfe94f4a7da87094e176c157df02",
+      "stellar_anchor_tx": "25b93faa62bb224649f9cfd855e47f2db3c55ef857ab55f3cf8df7aa2e6e3f5b",
+      "cascade_over": [
+        "gru.com.br",
+        "gru.com",
+        "gruairport.com.br"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "29b5f12d9666a755f0e18b691e656ecade597378b4b82d0ef582e381a2b64df8",
+          "deedNumber": "ALLODIAL-2026-DCE760C0",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — gru.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: gru.com.br, gru.com, gruairport.com.br. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://gru.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "gru.pi",
+            "cascade_over": [
+              "gru.com.br",
+              "gru.com",
+              "gruairport.com.br"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "dce760c06be89972fc79bd260a608842aaff1836462284df435a0a9de82eb313",
+          "fortressHash": "34a9fa758f03023b840e6ed25994a8003df995413ddd02b79fde7e6fcb618338",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486407,
+            "transactionHash": "25b93faa62bb224649f9cfd855e47f2db3c55ef857ab55f3cf8df7aa2e6e3f5b",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:08.389Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486407,
+            "transactionHash": "5bd36a3005135e901a1f141cbec95607eb4ccfe94f4a7da87094e176c157df02",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:08.389Z"
+          },
+          "createdAt": "2026-05-03T05:44:08.389Z",
+          "updatedAt": "2026-05-03T05:44:08.389Z",
+          "claimHash": "3e2d16eb127c6fd4a3aa690868f2278ab9c96f205dffe6530d01b64ddce27ad7"
+        },
+        "stellarAnchorTx": "25b93faa62bb224649f9cfd855e47f2db3c55ef857ab55f3cf8df7aa2e6e3f5b",
+        "piBlockchainTx": "5bd36a3005135e901a1f141cbec95607eb4ccfe94f4a7da87094e176c157df02"
+      }
+    },
+    "netjets.pi": {
+      "http_status": 201,
+      "token_id": "02b0876da9d4ed60ed62cc1270d4e50a1ed2113d6ed461c5ce81109992af46f4",
+      "deed_number": "ALLODIAL-2026-EBC011BB",
+      "pi_blockchain_tx": "490b3e645a35e8982bf57a522a8c0640189a7d65de2fe9bd262f4123be0effa1",
+      "stellar_anchor_tx": "80879cd2320b2d7309278188465b8430b1a1bbe4f721d45017792e1fccc59037",
+      "cascade_over": [
+        "netjets.com",
+        "owners.netjets.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "02b0876da9d4ed60ed62cc1270d4e50a1ed2113d6ed461c5ce81109992af46f4",
+          "deedNumber": "ALLODIAL-2026-EBC011BB",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — netjets.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: netjets.com, owners.netjets.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://netjets.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "netjets.pi",
+            "cascade_over": [
+              "netjets.com",
+              "owners.netjets.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "ebc011bb0669f23e9cf5e04a2c7f450d619f6c2d9c2f703a6d709a03d37723b4",
+          "fortressHash": "4c6e656fc1fbb8ea875d23ff4424fa81b48825b9070e2b825430e4c2f7c65009",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486409,
+            "transactionHash": "80879cd2320b2d7309278188465b8430b1a1bbe4f721d45017792e1fccc59037",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:15.169Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486409,
+            "transactionHash": "490b3e645a35e8982bf57a522a8c0640189a7d65de2fe9bd262f4123be0effa1",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:15.169Z"
+          },
+          "createdAt": "2026-05-03T05:44:15.169Z",
+          "updatedAt": "2026-05-03T05:44:15.169Z",
+          "claimHash": "902a78d814316eef68719bbe16a215100d03763b9619a0ba6ac001a09c588527"
+        },
+        "stellarAnchorTx": "80879cd2320b2d7309278188465b8430b1a1bbe4f721d45017792e1fccc59037",
+        "piBlockchainTx": "490b3e645a35e8982bf57a522a8c0640189a7d65de2fe9bd262f4123be0effa1"
+      }
+    },
+    "sonnysbbq.pi": {
+      "http_status": 201,
+      "token_id": "3523b656e2236de73e618644e53612b8cb9e11e0e6023f92b6f4a49a39d758ef",
+      "deed_number": "ALLODIAL-2026-11DE8E72",
+      "pi_blockchain_tx": "7eb14da831c3f425cdc071cc91a9c466c2a252fce438db929df1d1a05b048cf8",
+      "stellar_anchor_tx": "718b3d03410ae3d5a593fbb2a6983c8938d248cea2a6a437ad675c8eb96967c2",
+      "cascade_over": [
+        "sonnysbbq.com",
+        "order.sonnysbbq.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "3523b656e2236de73e618644e53612b8cb9e11e0e6023f92b6f4a49a39d758ef",
+          "deedNumber": "ALLODIAL-2026-11DE8E72",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — sonnysbbq.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: sonnysbbq.com, order.sonnysbbq.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://sonnysbbq.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "sonnysbbq.pi",
+            "cascade_over": [
+              "sonnysbbq.com",
+              "order.sonnysbbq.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "11de8e72e05b9567645d80588515fcc9757d027466003668f05b279254b6be64",
+          "fortressHash": "0a3b0915cc3f260d1d84bcc3199b830c50e6d9e2230b18f167e2d5efde63c0e6",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486409,
+            "transactionHash": "718b3d03410ae3d5a593fbb2a6983c8938d248cea2a6a437ad675c8eb96967c2",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:16.961Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486409,
+            "transactionHash": "7eb14da831c3f425cdc071cc91a9c466c2a252fce438db929df1d1a05b048cf8",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:16.961Z"
+          },
+          "createdAt": "2026-05-03T05:44:16.961Z",
+          "updatedAt": "2026-05-03T05:44:16.961Z",
+          "claimHash": "9bfa22bd8addc6f290ce6961078c268d4b18b67e27c26b8da15af3a1279e03fe"
+        },
+        "stellarAnchorTx": "718b3d03410ae3d5a593fbb2a6983c8938d248cea2a6a437ad675c8eb96967c2",
+        "piBlockchainTx": "7eb14da831c3f425cdc071cc91a9c466c2a252fce438db929df1d1a05b048cf8"
+      }
+    },
+    "shands.pi": {
+      "http_status": 201,
+      "token_id": "08312b503ac2be2ca88cfbd80a200bc19361f0c83dbea43407a30f6e1f8c637a",
+      "deed_number": "ALLODIAL-2026-5B7631AE",
+      "pi_blockchain_tx": "3d9f50c7b3dd2e752756565a547e4ae58e8ece3df90a84f96f3b7c625253b658",
+      "stellar_anchor_tx": "81d7d31f00968d0cd91cbffb21f622e5afc17d50cdad33f5b9fb5cd9b1b31d6c",
+      "cascade_over": [
+        "shands.org",
+        "ufhealth.org/shands"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "08312b503ac2be2ca88cfbd80a200bc19361f0c83dbea43407a30f6e1f8c637a",
+          "deedNumber": "ALLODIAL-2026-5B7631AE",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — shands.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: shands.org, ufhealth.org/shands. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://shands.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "shands.pi",
+            "cascade_over": [
+              "shands.org",
+              "ufhealth.org/shands"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "5b7631ae3940d8ff720189be7efdaa30100b35f0d5fb96a12be4fbeb8fc2aa71",
+          "fortressHash": "4914206de63d357b23a27f670d318670c554224d01a080b2bb02d68f0bc5718a",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486409,
+            "transactionHash": "81d7d31f00968d0cd91cbffb21f622e5afc17d50cdad33f5b9fb5cd9b1b31d6c",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:18.758Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486409,
+            "transactionHash": "3d9f50c7b3dd2e752756565a547e4ae58e8ece3df90a84f96f3b7c625253b658",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:18.758Z"
+          },
+          "createdAt": "2026-05-03T05:44:18.758Z",
+          "updatedAt": "2026-05-03T05:44:18.758Z",
+          "claimHash": "fc22882ad4f9c63bccca65ee4ba34ebe72c981250dd1d25e23734c91d4076a45"
+        },
+        "stellarAnchorTx": "81d7d31f00968d0cd91cbffb21f622e5afc17d50cdad33f5b9fb5cd9b1b31d6c",
+        "piBlockchainTx": "3d9f50c7b3dd2e752756565a547e4ae58e8ece3df90a84f96f3b7c625253b658"
+      }
+    },
+    "ufhealth.pi": {
+      "http_status": 201,
+      "token_id": "2295692cf37ff4db923cd1a3bc5aedb3a267895c8c924a9ee31cbb4b82c5a11d",
+      "deed_number": "ALLODIAL-2026-31941617",
+      "pi_blockchain_tx": "79fde070d766ded911a6e0d54b03d9e46d2eb0779e20bd088af39a29f52db859",
+      "stellar_anchor_tx": "bd195d78c83364f65c2110cc7ffc84ae08b0a5fa5fe5d169fc1b568893df31e8",
+      "cascade_over": [
+        "ufhealth.org",
+        "my.ufhealth.org"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "2295692cf37ff4db923cd1a3bc5aedb3a267895c8c924a9ee31cbb4b82c5a11d",
+          "deedNumber": "ALLODIAL-2026-31941617",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — ufhealth.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: ufhealth.org, my.ufhealth.org. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://ufhealth.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "ufhealth.pi",
+            "cascade_over": [
+              "ufhealth.org",
+              "my.ufhealth.org"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "31941617aebccae984527166c1dcd9ec995b805e5b22fe5cae66bfaebc4cc50e",
+          "fortressHash": "1b936a563a7ddfd6502fdd94d0f9f5b12089ee135192bf82f04e38050d6c72eb",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486410,
+            "transactionHash": "bd195d78c83364f65c2110cc7ffc84ae08b0a5fa5fe5d169fc1b568893df31e8",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:20.240Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486410,
+            "transactionHash": "79fde070d766ded911a6e0d54b03d9e46d2eb0779e20bd088af39a29f52db859",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:20.240Z"
+          },
+          "createdAt": "2026-05-03T05:44:20.240Z",
+          "updatedAt": "2026-05-03T05:44:20.240Z",
+          "claimHash": "a223ad46fb5b1ba71a5e047bda5ddcb28240dbd38ede1764e440fe6c6f50bf2b"
+        },
+        "stellarAnchorTx": "bd195d78c83364f65c2110cc7ffc84ae08b0a5fa5fe5d169fc1b568893df31e8",
+        "piBlockchainTx": "79fde070d766ded911a6e0d54b03d9e46d2eb0779e20bd088af39a29f52db859"
+      }
+    },
+    "ufl.pi": {
+      "http_status": 201,
+      "token_id": "578eb363f34f5462e0318e9b9162c85c1bf83f4efed6ef410e4f0a7e07a183d6",
+      "deed_number": "ALLODIAL-2026-0AB38AF5",
+      "pi_blockchain_tx": "604ba02e3c7ac811867afcd0e2debf2d662a47b2e9b11e55febab296f191af60",
+      "stellar_anchor_tx": "bc09bb702a2003b97e9fc03ba6223f971a322da1c6bbea64d15bebeb4b02f446",
+      "cascade_over": [
+        "ufl.edu",
+        "my.ufl.edu",
+        "one.ufl.edu"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "578eb363f34f5462e0318e9b9162c85c1bf83f4efed6ef410e4f0a7e07a183d6",
+          "deedNumber": "ALLODIAL-2026-0AB38AF5",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — ufl.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: ufl.edu, my.ufl.edu, one.ufl.edu. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://ufl.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "ufl.pi",
+            "cascade_over": [
+              "ufl.edu",
+              "my.ufl.edu",
+              "one.ufl.edu"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "0ab38af54fa9b5e17bef97ce74a1cf99ddc5b24086ba58432307096ecf83f7d6",
+          "fortressHash": "9e4aa2ed1ae775b0f58c3de14dca84b504f394126e298745aa7b2ee70d7680a7",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486410,
+            "transactionHash": "bc09bb702a2003b97e9fc03ba6223f971a322da1c6bbea64d15bebeb4b02f446",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:21.121Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486410,
+            "transactionHash": "604ba02e3c7ac811867afcd0e2debf2d662a47b2e9b11e55febab296f191af60",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:21.121Z"
+          },
+          "createdAt": "2026-05-03T05:44:21.121Z",
+          "updatedAt": "2026-05-03T05:44:21.121Z",
+          "claimHash": "365100d1fd76d4d61ccb46e131522cff43415e46defb8061483b0b3d9d1425c0"
+        },
+        "stellarAnchorTx": "bc09bb702a2003b97e9fc03ba6223f971a322da1c6bbea64d15bebeb4b02f446",
+        "piBlockchainTx": "604ba02e3c7ac811867afcd0e2debf2d662a47b2e9b11e55febab296f191af60"
+      }
+    },
+    "putnamclerk.pi": {
+      "http_status": 201,
+      "token_id": "26a5e01e9117a8782988bf1d28976f38e52c413d7b6d08c96f9760e87d57437f",
+      "deed_number": "ALLODIAL-2026-8014C680",
+      "pi_blockchain_tx": "7fbcb28f366fe0af2d653fb44cb5f8d46d1d6c2fc6ab417fa7fb9eaf0665cdd1",
+      "stellar_anchor_tx": "f2f80805a45f330d415e15e63c3e83453718279a1e9f325c0f720cc9a8367daa",
+      "cascade_over": [
+        "putnam-fl.com",
+        "putnamclerk.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "26a5e01e9117a8782988bf1d28976f38e52c413d7b6d08c96f9760e87d57437f",
+          "deedNumber": "ALLODIAL-2026-8014C680",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — putnamclerk.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: putnam-fl.com, putnamclerk.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://putnamclerk.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "putnamclerk.pi",
+            "cascade_over": [
+              "putnam-fl.com",
+              "putnamclerk.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "8014c680362b29aa0696ce6395f1a358d177be9347ff6faa98f6d092e7c27627",
+          "fortressHash": "0f6b9094241967db6513cd2e6f0c92cfad72925140904e6a14b1cbb0459f9d56",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486410,
+            "transactionHash": "f2f80805a45f330d415e15e63c3e83453718279a1e9f325c0f720cc9a8367daa",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:22.735Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486410,
+            "transactionHash": "7fbcb28f366fe0af2d653fb44cb5f8d46d1d6c2fc6ab417fa7fb9eaf0665cdd1",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:22.735Z"
+          },
+          "createdAt": "2026-05-03T05:44:22.735Z",
+          "updatedAt": "2026-05-03T05:44:22.735Z",
+          "claimHash": "fc7171caeba3c496ed3a938ab50f87ed3f87c38ea29ec955b7fe8d59a51bb00d"
+        },
+        "stellarAnchorTx": "f2f80805a45f330d415e15e63c3e83453718279a1e9f325c0f720cc9a8367daa",
+        "piBlockchainTx": "7fbcb28f366fe0af2d653fb44cb5f8d46d1d6c2fc6ab417fa7fb9eaf0665cdd1"
+      }
+    },
+    "checkbeck.pi": {
+      "http_status": 201,
+      "token_id": "8e406e30ef2f705b90fc006f14099e6353111154f1cb9632580cd19e7801e54b",
+      "deed_number": "ALLODIAL-2026-D9C7308B",
+      "pi_blockchain_tx": "f1014c4ca0475d0b74acb6ca7712002d6dee198ead3d83507ed5555f8f854676",
+      "stellar_anchor_tx": "348290b8cf01dc3f0036c335f9e1538a17df090b79a4f174ee7d3a9dc3919eba",
+      "cascade_over": [
+        "checkbeck.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "8e406e30ef2f705b90fc006f14099e6353111154f1cb9632580cd19e7801e54b",
+          "deedNumber": "ALLODIAL-2026-D9C7308B",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — checkbeck.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: checkbeck.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://checkbeck.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "checkbeck.pi",
+            "cascade_over": [
+              "checkbeck.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "d9c7308b2dfd24d9a612872e2bbc57eb2ac4c9c19de9939978707ced0debafce",
+          "fortressHash": "3783d317cc8f1d7aeeaad99e49b1f5e0b899dd3ad4af3282d512f4a5098620be",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486411,
+            "transactionHash": "348290b8cf01dc3f0036c335f9e1538a17df090b79a4f174ee7d3a9dc3919eba",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:28.974Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486411,
+            "transactionHash": "f1014c4ca0475d0b74acb6ca7712002d6dee198ead3d83507ed5555f8f854676",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:28.974Z"
+          },
+          "createdAt": "2026-05-03T05:44:28.974Z",
+          "updatedAt": "2026-05-03T05:44:28.974Z",
+          "claimHash": "1d1fb7eeb767e77e04ebb275b3159ebf34d6c8a83c245bf7541bd355fea20820"
+        },
+        "stellarAnchorTx": "348290b8cf01dc3f0036c335f9e1538a17df090b79a4f174ee7d3a9dc3919eba",
+        "piBlockchainTx": "f1014c4ca0475d0b74acb6ca7712002d6dee198ead3d83507ed5555f8f854676"
+      }
+    },
+    "daytonainternationalspeedway.pi": {
+      "http_status": 201,
+      "token_id": "e280ef7cbe0e2c292cd3b6095f70552525411ad9adcc0c0ea08aac003ec74385",
+      "deed_number": "ALLODIAL-2026-216B3D4F",
+      "pi_blockchain_tx": "f5045afa4e876eea25f69d5ed12778dd9aa62adf549b94742f26254d8b10ea5b",
+      "stellar_anchor_tx": "79ef927c18dea052ad2a56545b9fa8582c847d281e3e3d2f2de054b86f864f45",
+      "cascade_over": [
+        "daytonainternationalspeedway.com",
+        "daytonaspeedway.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "e280ef7cbe0e2c292cd3b6095f70552525411ad9adcc0c0ea08aac003ec74385",
+          "deedNumber": "ALLODIAL-2026-216B3D4F",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — daytonainternationalspeedway.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: daytonainternationalspeedway.com, daytonaspeedway.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://daytonainternationalspeedway.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "daytonainternationalspeedway.pi",
+            "cascade_over": [
+              "daytonainternationalspeedway.com",
+              "daytonaspeedway.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "216b3d4f3df13a34903f471cdf93dc1b2fd9b4a6fb14272fbbd2ae7544d4a403",
+          "fortressHash": "fc0fe965f93e7aa89d1a0b3f93449bf84137dc8eaf0abe7f69acf71c49b5a11d",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486412,
+            "transactionHash": "79ef927c18dea052ad2a56545b9fa8582c847d281e3e3d2f2de054b86f864f45",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:31.412Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486412,
+            "transactionHash": "f5045afa4e876eea25f69d5ed12778dd9aa62adf549b94742f26254d8b10ea5b",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:31.412Z"
+          },
+          "createdAt": "2026-05-03T05:44:31.412Z",
+          "updatedAt": "2026-05-03T05:44:31.412Z",
+          "claimHash": "1f57ff5f02568b751e375e5abbba22cab8cb13212a807686b682289619e22344"
+        },
+        "stellarAnchorTx": "79ef927c18dea052ad2a56545b9fa8582c847d281e3e3d2f2de054b86f864f45",
+        "piBlockchainTx": "f5045afa4e876eea25f69d5ed12778dd9aa62adf549b94742f26254d8b10ea5b"
+      }
+    },
+    "gracekennedy.pi": {
+      "http_status": 201,
+      "token_id": "770db545c14752ea9de47db05cb745cee9082a4960f8f4e6e059e2c2d3c3c699",
+      "deed_number": "ALLODIAL-2026-5AF89AB9",
+      "pi_blockchain_tx": "9c73672fb3d0d7bbffdd6a52653675b335ae2cc3b0e7e8aba1d82bce76b1aa44",
+      "stellar_anchor_tx": "6f25cc3a96b9890851b8af43ea18b7f9fccc8d18200b3d7e53cb9f45e6ed7064",
+      "cascade_over": [
+        "gracekennedy.com",
+        "gkfoods.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "770db545c14752ea9de47db05cb745cee9082a4960f8f4e6e059e2c2d3c3c699",
+          "deedNumber": "ALLODIAL-2026-5AF89AB9",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — gracekennedy.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: gracekennedy.com, gkfoods.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://gracekennedy.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "gracekennedy.pi",
+            "cascade_over": [
+              "gracekennedy.com",
+              "gkfoods.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "5af89ab92993335775976334cf5864484f650ee8a818dccb4f904651aaf8e0b3",
+          "fortressHash": "f2a9930b7c4561406ada9e141c9a922d5abff20b23b818b56f25d1f9d74e1aaf",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486412,
+            "transactionHash": "6f25cc3a96b9890851b8af43ea18b7f9fccc8d18200b3d7e53cb9f45e6ed7064",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:33.123Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486412,
+            "transactionHash": "9c73672fb3d0d7bbffdd6a52653675b335ae2cc3b0e7e8aba1d82bce76b1aa44",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:33.123Z"
+          },
+          "createdAt": "2026-05-03T05:44:33.123Z",
+          "updatedAt": "2026-05-03T05:44:33.123Z",
+          "claimHash": "7422b05606ad8f081d3081c27a84eea7e46b05db40b09be03636c1ebc1e3dd8b"
+        },
+        "stellarAnchorTx": "6f25cc3a96b9890851b8af43ea18b7f9fccc8d18200b3d7e53cb9f45e6ed7064",
+        "piBlockchainTx": "9c73672fb3d0d7bbffdd6a52653675b335ae2cc3b0e7e8aba1d82bce76b1aa44"
+      }
+    },
+    "winnebago.pi": {
+      "http_status": 201,
+      "token_id": "3a2e9af21ca3109566817ec562e76b8f1d959bc8c14fed583fd6b732ecabf106",
+      "deed_number": "ALLODIAL-2026-1EB1650D",
+      "pi_blockchain_tx": "ba67b5cd375c541f2bafc992092ab67d9d9685dc20129476263e0cc1a10e05fe",
+      "stellar_anchor_tx": "9ded8667dff82a1b3b038ae39fa6ac2ef609b06ca399e505ac0b4bbaced70ae0",
+      "cascade_over": [
+        "winnebago.com",
+        "winnebagoind.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "3a2e9af21ca3109566817ec562e76b8f1d959bc8c14fed583fd6b732ecabf106",
+          "deedNumber": "ALLODIAL-2026-1EB1650D",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — winnebago.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: winnebago.com, winnebagoind.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://winnebago.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "winnebago.pi",
+            "cascade_over": [
+              "winnebago.com",
+              "winnebagoind.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "1eb1650d6e1b5e3f94afead2d8860481987bf15aceabefeb04ebdcc4c19be288",
+          "fortressHash": "a6132b9b6706c1329ceff71d79fc889f76bfa1db825d9ff08e141659e921e267",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486412,
+            "transactionHash": "9ded8667dff82a1b3b038ae39fa6ac2ef609b06ca399e505ac0b4bbaced70ae0",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:34.366Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486412,
+            "transactionHash": "ba67b5cd375c541f2bafc992092ab67d9d9685dc20129476263e0cc1a10e05fe",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:34.366Z"
+          },
+          "createdAt": "2026-05-03T05:44:34.366Z",
+          "updatedAt": "2026-05-03T05:44:34.366Z",
+          "claimHash": "be7698ccbf808fb8d368a1cb617f94eb36445fd934c6fc9752d94221d0530ca8"
+        },
+        "stellarAnchorTx": "9ded8667dff82a1b3b038ae39fa6ac2ef609b06ca399e505ac0b4bbaced70ae0",
+        "piBlockchainTx": "ba67b5cd375c541f2bafc992092ab67d9d9685dc20129476263e0cc1a10e05fe"
+      }
+    },
+    "palatkaha.pi": {
+      "http_status": 201,
+      "token_id": "ce0329b40a10ecb8456c2ced37c52e33f0ebf4905d859451b5ef1ea8ee285fd2",
+      "deed_number": "ALLODIAL-2026-3B97B920",
+      "pi_blockchain_tx": "10afcf90ed0a714fc0568fc594425b5c8700dc9e8200e2ef6cc81f0cde8570d8",
+      "stellar_anchor_tx": "c1e8994954e3c841f8120a8558d5d2c362d2f4ba47504eee392eb4ccf2f51fab",
+      "cascade_over": [
+        "palatkaha.com",
+        "palatka-fl.gov"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "ce0329b40a10ecb8456c2ced37c52e33f0ebf4905d859451b5ef1ea8ee285fd2",
+          "deedNumber": "ALLODIAL-2026-3B97B920",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — palatkaha.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: palatkaha.com, palatka-fl.gov. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://palatkaha.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "palatkaha.pi",
+            "cascade_over": [
+              "palatkaha.com",
+              "palatka-fl.gov"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "3b97b920cd5c1ee4358203d3e96c2758a92d24f9141b024d54eb8a1e90fa17fb",
+          "fortressHash": "a219f67af8bcf24a5b7041187c881ca83fe61f41ab797d910cdf45b29c2c7ecd",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486413,
+            "transactionHash": "c1e8994954e3c841f8120a8558d5d2c362d2f4ba47504eee392eb4ccf2f51fab",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:35.636Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486413,
+            "transactionHash": "10afcf90ed0a714fc0568fc594425b5c8700dc9e8200e2ef6cc81f0cde8570d8",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:35.636Z"
+          },
+          "createdAt": "2026-05-03T05:44:35.636Z",
+          "updatedAt": "2026-05-03T05:44:35.636Z",
+          "claimHash": "23f053e9268e28d4900acd172417f3cd944acef9f94134eb860c1a0f9291db0b"
+        },
+        "stellarAnchorTx": "c1e8994954e3c841f8120a8558d5d2c362d2f4ba47504eee392eb4ccf2f51fab",
+        "piBlockchainTx": "10afcf90ed0a714fc0568fc594425b5c8700dc9e8200e2ef6cc81f0cde8570d8"
+      }
+    },
+    "circuit7.pi": {
+      "http_status": 201,
+      "token_id": "9d19b56f61ca98174297c9963f8cc0582a5a41c9befec74ad72da06739a4428a",
+      "deed_number": "ALLODIAL-2026-2E45E575",
+      "pi_blockchain_tx": "1bcf4b0b89610490a10fab8596754d2e3f8e4a1274ebd32de38f6bfded36152b",
+      "stellar_anchor_tx": "9ec25af7424bb784290a55cb2febbaa878514af983b26f47f29752ea839881ee",
+      "cascade_over": [
+        "circuit7.org",
+        "circuit7.net"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "9d19b56f61ca98174297c9963f8cc0582a5a41c9befec74ad72da06739a4428a",
+          "deedNumber": "ALLODIAL-2026-2E45E575",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — circuit7.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: circuit7.org, circuit7.net. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://circuit7.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "circuit7.pi",
+            "cascade_over": [
+              "circuit7.org",
+              "circuit7.net"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "2e45e5753352d3d8f086bb84fca4e3e094d1cb3030139f712dbaaa3123482851",
+          "fortressHash": "ef9178a511ebc0d3d1229707fcae114ae34eda14791d40c637ed76cb69c4f98c",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486413,
+            "transactionHash": "9ec25af7424bb784290a55cb2febbaa878514af983b26f47f29752ea839881ee",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:39.971Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486413,
+            "transactionHash": "1bcf4b0b89610490a10fab8596754d2e3f8e4a1274ebd32de38f6bfded36152b",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:39.971Z"
+          },
+          "createdAt": "2026-05-03T05:44:39.971Z",
+          "updatedAt": "2026-05-03T05:44:39.971Z",
+          "claimHash": "a0a217bfca518913679dbd79fdacb533011efb96414c0da88d38be565631e736"
+        },
+        "stellarAnchorTx": "9ec25af7424bb784290a55cb2febbaa878514af983b26f47f29752ea839881ee",
+        "piBlockchainTx": "1bcf4b0b89610490a10fab8596754d2e3f8e4a1274ebd32de38f6bfded36152b"
+      }
+    },
+    "magellanjets.pi": {
+      "http_status": 201,
+      "token_id": "a79c70205149e7865290ed4941fe4f58e3d967814773826ffaf7bf28f74bb163",
+      "deed_number": "ALLODIAL-2026-CC481B87",
+      "pi_blockchain_tx": "caed99d6c447e9d0c484479273d184cdcbcda873727aeb3d9cc8a7c66ae25db3",
+      "stellar_anchor_tx": "e5be5ae6d1c60e2a049e8a7bed00fa6edb7425504e7da2a5eccde4740c8b6793",
+      "cascade_over": [
+        "magellanjets.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "a79c70205149e7865290ed4941fe4f58e3d967814773826ffaf7bf28f74bb163",
+          "deedNumber": "ALLODIAL-2026-CC481B87",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — magellanjets.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: magellanjets.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://magellanjets.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "magellanjets.pi",
+            "cascade_over": [
+              "magellanjets.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "cc481b877333590180d995dc496489befd4114159eb95f4d97dbdca1bd2d84d5",
+          "fortressHash": "8212c15920d07e9c1f42a5a69d1925618ac2d97071b21a501237bb1ccf5d7971",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486415,
+            "transactionHash": "e5be5ae6d1c60e2a049e8a7bed00fa6edb7425504e7da2a5eccde4740c8b6793",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:48.967Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486415,
+            "transactionHash": "caed99d6c447e9d0c484479273d184cdcbcda873727aeb3d9cc8a7c66ae25db3",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:48.967Z"
+          },
+          "createdAt": "2026-05-03T05:44:48.967Z",
+          "updatedAt": "2026-05-03T05:44:48.967Z",
+          "claimHash": "ef429bea110ab7fff07fe0b93973a78cf14daa814428a0809f2f1aee8d00c956"
+        },
+        "stellarAnchorTx": "e5be5ae6d1c60e2a049e8a7bed00fa6edb7425504e7da2a5eccde4740c8b6793",
+        "piBlockchainTx": "caed99d6c447e9d0c484479273d184cdcbcda873727aeb3d9cc8a7c66ae25db3"
+      }
+    },
+    "rulonco.pi": {
+      "http_status": 201,
+      "token_id": "5eafb79b96369d9def122b84597a051e4c546d0c2f3ae71af043e8959a84dfd5",
+      "deed_number": "ALLODIAL-2026-98AA337A",
+      "pi_blockchain_tx": "a69942f086b9d4741708acbfa0cd93c3e2a697c091ff8d6ba254f7adca726a77",
+      "stellar_anchor_tx": "6ff268f4c7af6aa33ba2813390a9584db433b193387cc5986c0fd9ee8d360a23",
+      "cascade_over": [
+        "rulonco.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "5eafb79b96369d9def122b84597a051e4c546d0c2f3ae71af043e8959a84dfd5",
+          "deedNumber": "ALLODIAL-2026-98AA337A",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — rulonco.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: rulonco.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://rulonco.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "rulonco.pi",
+            "cascade_over": [
+              "rulonco.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "98aa337adf2f9f68eea970d47a1d6f7cc78b7468214537bb9f0b2865394ad922",
+          "fortressHash": "089a229a7ef59a753726e029d1b5d6ae531ff90e9e1a45696d889e91f7277b9e",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486416,
+            "transactionHash": "6ff268f4c7af6aa33ba2813390a9584db433b193387cc5986c0fd9ee8d360a23",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:44:57.396Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486416,
+            "transactionHash": "a69942f086b9d4741708acbfa0cd93c3e2a697c091ff8d6ba254f7adca726a77",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:44:57.396Z"
+          },
+          "createdAt": "2026-05-03T05:44:57.396Z",
+          "updatedAt": "2026-05-03T05:44:57.396Z",
+          "claimHash": "e0833afc8e636e4504a4cadf0673ff11df679177074abd09b3a8d115ad7563bb"
+        },
+        "stellarAnchorTx": "6ff268f4c7af6aa33ba2813390a9584db433b193387cc5986c0fd9ee8d360a23",
+        "piBlockchainTx": "a69942f086b9d4741708acbfa0cd93c3e2a697c091ff8d6ba254f7adca726a77"
+      }
+    },
+    "appleandeve.pi": {
+      "http_status": 201,
+      "token_id": "750db4e0da4da7e71046a126522b23e763cf909919d1ac2fe9d774e5957ac86c",
+      "deed_number": "ALLODIAL-2026-33E50FC4",
+      "pi_blockchain_tx": "22abff85aee3b65fac406e251ae58b82b4e0d9e72ad08e6d89864e1f59661aad",
+      "stellar_anchor_tx": "7dc540a0554f8cf6749eddca5572521e21979d1a192f4a5aaf1be4caecdcb66e",
+      "cascade_over": [
+        "appleandeve.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "750db4e0da4da7e71046a126522b23e763cf909919d1ac2fe9d774e5957ac86c",
+          "deedNumber": "ALLODIAL-2026-33E50FC4",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — appleandeve.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: appleandeve.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://appleandeve.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "appleandeve.pi",
+            "cascade_over": [
+              "appleandeve.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "33e50fc42a91376f66152dbbb42122a7e2fae6b3435b868df74de4fddc790373",
+          "fortressHash": "68c10f34b8aafd082ce5f8dec9a74baed1fb2da545dce5fbbdc3b561da7c2aa0",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486417,
+            "transactionHash": "7dc540a0554f8cf6749eddca5572521e21979d1a192f4a5aaf1be4caecdcb66e",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:45:02.116Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486417,
+            "transactionHash": "22abff85aee3b65fac406e251ae58b82b4e0d9e72ad08e6d89864e1f59661aad",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:45:02.116Z"
+          },
+          "createdAt": "2026-05-03T05:45:02.116Z",
+          "updatedAt": "2026-05-03T05:45:02.116Z",
+          "claimHash": "6e8be96302072b6a649f7f3224045bcd22b3c0fdf6bebc0bfc41165dc349f2bf"
+        },
+        "stellarAnchorTx": "7dc540a0554f8cf6749eddca5572521e21979d1a192f4a5aaf1be4caecdcb66e",
+        "piBlockchainTx": "22abff85aee3b65fac406e251ae58b82b4e0d9e72ad08e6d89864e1f59661aad"
+      }
+    },
+    "seprod.pi": {
+      "http_status": 201,
+      "token_id": "f0e86fbdc704cbd07f6ef7609b014b91d157ac63def47db4685cce174fae8ec6",
+      "deed_number": "ALLODIAL-2026-093EC969",
+      "pi_blockchain_tx": "3bf5abc6d19b59ba4f28ed7622a70e898f5f79ef47802f52f258a67b566d9487",
+      "stellar_anchor_tx": "79cf0ced4c690d7bd27a54c1df85434feb7058e1bfc0e5afed808d114dd3c482",
+      "cascade_over": [
+        "seprod.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "f0e86fbdc704cbd07f6ef7609b014b91d157ac63def47db4685cce174fae8ec6",
+          "deedNumber": "ALLODIAL-2026-093EC969",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — seprod.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: seprod.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://seprod.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "seprod.pi",
+            "cascade_over": [
+              "seprod.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "093ec969514184145999de381056838a73bdf5b8d113a936da4e12af8bd1a023",
+          "fortressHash": "53126eb44f96e440849a1a7f2bcdc2c80882f56c99b272caba870ce57a2a7623",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486418,
+            "transactionHash": "79cf0ced4c690d7bd27a54c1df85434feb7058e1bfc0e5afed808d114dd3c482",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:45:04.442Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486418,
+            "transactionHash": "3bf5abc6d19b59ba4f28ed7622a70e898f5f79ef47802f52f258a67b566d9487",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:45:04.442Z"
+          },
+          "createdAt": "2026-05-03T05:45:04.442Z",
+          "updatedAt": "2026-05-03T05:45:04.442Z",
+          "claimHash": "8e740a4f1d07881fd59366e2f93d2b96b4fc9c4eb0fbea7f27bc8587f3d67764"
+        },
+        "stellarAnchorTx": "79cf0ced4c690d7bd27a54c1df85434feb7058e1bfc0e5afed808d114dd3c482",
+        "piBlockchainTx": "3bf5abc6d19b59ba4f28ed7622a70e898f5f79ef47802f52f258a67b566d9487"
+      }
+    },
+    "jamrockmart.pi": {
+      "http_status": 201,
+      "token_id": "9591ed83aec57bef181cfbff6c1a503360350194f2493f62c73ddc4816c2ac0f",
+      "deed_number": "ALLODIAL-2026-27EF6ED4",
+      "pi_blockchain_tx": "fdc9097972a31384f3f67c13dc4de735538ae6d566da902e7f6b37335027d68e",
+      "stellar_anchor_tx": "5ed83ffeab9ef545469e3f7cf082aa76bddc6a5d1cddde5b9bd444708d9ebfac",
+      "cascade_over": [
+        "jamrockmart.com"
+      ],
+      "response": {
+        "success": true,
+        "token": {
+          "tokenId": "9591ed83aec57bef181cfbff6c1a503360350194f2493f62c73ddc4816c2ac0f",
+          "deedNumber": "ALLODIAL-2026-27EF6ED4",
+          "status": "TOKENIZED",
+          "property": {
+            "legalDescription": "Sovereign Allodial Web3 Territory — jamrockmart.pi — Held in private capacity by Jeremiah Joel Drains (jdrains30) jointly with Triumph Synergy under the Apex-Cascade Doctrine (Web3 → Web2 → Web1). This Web3 namespace projects superior priority backwards over: jamrockmart.com. Bound to Pi Network blockchain, anchored on Stellar, protected by 21-layer Quantum Fortress. Sovereign role: FOUNDER_AND_SUPERIOR_SOVEREIGN.",
+            "country": "PI",
+            "state": "WEB3",
+            "county": "PI-NAME-SERVICE",
+            "address": "pi://jamrockmart.pi",
+            "company": "Triumph Synergy",
+            "founder": "Jeremiah Joel Drains",
+            "domain": "jamrockmart.pi",
+            "cascade_over": [
+              "jamrockmart.com"
+            ],
+            "asking_price_usd": 0,
+            "kind": "WEB3_DOMAIN_ALLODIAL"
+          },
+          "owner": {
+            "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "piUsername": "jdrains30",
+            "company": "Triumph Synergy",
+            "founder_role": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+            "ownershipModel": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
+          },
+          "standard": "PI-721",
+          "network": "mainnet",
+          "valuationPi": "1",
+          "valuationUsd": "314159.00",
+          "propertyHash": "27ef6ed4360506cda6bd371a9087742915becb06a25e3b9004d4e78570f46b0c",
+          "fortressHash": "8abb5e1426921580d6858035f93bc179c6476533d6736eef749e31f396fff75a",
+          "securityScore": 100,
+          "sovereignCredentialId": "9630c18a42494813928ea7ec2c6b98becabfa823e50f671e7ff05feec0d86bdf",
+          "stellarAnchor": {
+            "ledgerSequence": 26486418,
+            "transactionHash": "5ed83ffeab9ef545469e3f7cf082aa76bddc6a5d1cddde5b9bd444708d9ebfac",
+            "fee": "100000",
+            "consensusAt": "2026-05-03T05:45:09.426Z",
+            "networkPassphrase": "Pi Network",
+            "broadcasted": false,
+            "explorerUrl": null,
+            "network": "mainnet"
+          },
+          "piBlockchainAnchor": {
+            "ledgerSequence": 26486418,
+            "transactionHash": "fdc9097972a31384f3f67c13dc4de735538ae6d566da902e7f6b37335027d68e",
+            "piApiConfirmed": true,
+            "confirmedAt": "2026-05-03T05:45:09.426Z"
+          },
+          "createdAt": "2026-05-03T05:45:09.426Z",
+          "updatedAt": "2026-05-03T05:45:09.426Z",
+          "claimHash": "8f71e0d8d6ffdd9a55bd67152f651c877eaf53c5315eaed53b6a366a94be75d6"
+        },
+        "stellarAnchorTx": "5ed83ffeab9ef545469e3f7cf082aa76bddc6a5d1cddde5b9bd444708d9ebfac",
+        "piBlockchainTx": "fdc9097972a31384f3f67c13dc4de735538ae6d566da902e7f6b37335027d68e"
+      }
+    }
+  },
+  "summary": {
+    "total": 19,
+    "deeds_minted": 19,
+    "already_deeded": 0,
+    "failed": []
+  }
+}
