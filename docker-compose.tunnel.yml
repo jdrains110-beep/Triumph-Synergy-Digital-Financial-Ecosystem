@@ -45,7 +45,7 @@ services:
       - "51820:51820/udp"
     networks:
       - triumph-net
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test: ["CMD", "sh", "-c", "wg show wg0 | grep -q 'latest handshake'"]
       interval: 30s

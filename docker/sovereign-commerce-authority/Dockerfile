@@ -31,7 +31,9 @@ LABEL org.triumph.service="sovereign-commerce-authority" \
       org.triumph.replaces="SBA+US-Chamber+FL-Ports+CBP+NRA+NOAA-Fisheries" \
       org.triumph.quantum="ML-DSA-87+ML-KEM-1024+SPHINCS+"
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8160/health', timeout=5)" || exit 1
+# Generous start_period + retries so transient Docker Desktop pressure
+# doesn't flag us unhealthy. Uses python (already in image) — no apt-get bloat.
+HEALTHCHECK --interval=45s --timeout=20s --start-period=90s --retries=6 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8160/health', timeout=15)" || exit 1
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8160", "--workers", "2"]

@@ -28,7 +28,7 @@ services:
     mem_limit: 1024m
     mem_reservation: 512m
     cpus: 1.00
-    restart: unless-stopped
+    restart: always
     environment:
       PORT: "8099"
       # Region identity — distinct replica_id ensures Citus saib_state rows

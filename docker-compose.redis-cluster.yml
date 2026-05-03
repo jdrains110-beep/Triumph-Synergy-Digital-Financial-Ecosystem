@@ -43,7 +43,7 @@ x-redis-base: &redis-base
     timeout: 3s
     retries: 10
   networks: [redis-cluster-net]
-  restart: unless-stopped
+  restart: always
 
 services:
   redis-node-1:

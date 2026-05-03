@@ -36,7 +36,7 @@ services:
       timeout: 5s
       retries: 6
     networks: [citus-net]
-    restart: unless-stopped
+    restart: always
 
   citus-worker-1:
     image: citusdata/citus:14.0.0-pg17
@@ -51,7 +51,7 @@ services:
       timeout: 5s
       retries: 6
     networks: [citus-net]
-    restart: unless-stopped
+    restart: always
 
   citus-worker-2:
     image: citusdata/citus:14.0.0-pg17
@@ -66,7 +66,7 @@ services:
       timeout: 5s
       retries: 6
     networks: [citus-net]
-    restart: unless-stopped
+    restart: always
 
   citus-worker-3:
     image: citusdata/citus:14.0.0-pg17
@@ -81,7 +81,7 @@ services:
       timeout: 5s
       retries: 6
     networks: [citus-net]
-    restart: unless-stopped
+    restart: always
 
   # One-shot job: registers workers + runs distribute.sql after all are healthy
   citus-bootstrap:
