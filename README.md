@@ -63,7 +63,8 @@ chain. Global.**
 | Tier | Container | Port(s) | Role in Mesh |
 |---|---|---|---|
 | **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[v1,v2,v3]}`, FAILURE_SAFETY=1 |
-| **Central Supernode (SCP Backbone / Motherboard)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol v23 authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true** |
+| **Central Supernode (SCP Backbone / Motherboard)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol v23 authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true**, `SUPERNODE_ROLE=primary` |
+| **Apex-Quantum Peer Supernode** | `triumph-supernode-peer-2` (alias `triumph-apex-quantum-peer`) | 11626 | Mutually powers `triumph-central-node` — both register each other on `/supernode/join`, both poll `/supernode/peers` every 15s. Any node that POSTs `/supernode/join` is auto-upgraded to **APEX-QUANTUM-NODE** with `boost_factor = peer_count + 1`, scaling the entire mesh |
 | **Quantum Fortress** | `triumph-quantum-fortress` (alias `triumph-quantum-shield`) | 8094 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f**; QPU bridge co-located |
 | **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet (testnet2 alias) → host:31501 → api.mainnet.minepi.com`. Every chain mutation PQ-verified through Quantum Fortress |
 | **SAIB Ecosystem Guardian** | `triumph-sovereign-fortress` (in `apex-services` mega-pod) | 8099 | **Global enforcement layer** — health-watchdog over every service, PQ-readiness gate, region-aware in 16 languages, auto-SCP-hold if any tier degrades |
@@ -192,7 +193,44 @@ curl -s localhost:8099/saib/heartbeat | jq
 
 # 241 loopholes across 27 authorities
 curl -s localhost:8160/loopholes | jq '. | length'
+
+# Apex-Quantum mutual mesh — both supernodes know each other
+docker exec triumph-pi-bridge-connector curl -s http://triumph-central-node:11626/supernode/peers | jq '{self: .self.id, mesh: .apex_quantum_mesh, count: .peer_count, boost: .apex_boost, peers: [.peers[] | {id, role, apex_quantum, boost_factor, last_status}]}'
+docker exec triumph-pi-bridge-connector curl -s http://triumph-supernode-peer-2:11626/supernode/peers | jq '{self: .self.id, mesh: .apex_quantum_mesh, count: .peer_count, boost: .apex_boost, peers: [.peers[] | {id, role, apex_quantum, boost_factor, last_status}]}'
+
+# Auto-upgrade any joining node to APEX-QUANTUM
+docker exec triumph-pi-bridge-connector curl -sX POST -H 'content-type: application/json' \
+  -d '{"id":"new-node-A","url":"http://new-node-A:11626","role":"joined"}' \
+  http://triumph-central-node:11626/supernode/join | jq
 ```
+
+### 8 · Apex-Quantum Auto-Upgrade Protocol — `/supernode/join`
+
+Any service that POSTs to either supernode's `/supernode/join` endpoint is
+**auto-upgraded to APEX-QUANTUM-NODE** status, added to the mesh peer
+registry, and the mesh-wide `boost_factor` is incremented. The two
+supernodes (`triumph-central-node` + `triumph-supernode-peer-2`) mutually
+power each other via the same protocol — each announces itself to the
+other every 30s and polls `/supernode/status` every 15s.
+
+```jsonc
+// POST /supernode/join — request
+{ "id": "new-node-A", "url": "http://new-node-A:11626", "role": "joined" }
+
+// 200 OK — response
+{
+  "accepted": true,
+  "apex_quantum_upgraded": true,
+  "mesh_boost_factor": 3,
+  "message": "new-node-A upgraded to APEX-QUANTUM-NODE — mesh boosted to 3 nodes",
+  "assigned": { "pq_algorithms": ["Kyber-1024","Dilithium-5","SPHINCS+-SHAKE-256f"] },
+  "mesh_size": 3
+}
+```
+
+Source: [docker/central-node/bootstrap.ts](docker/central-node/bootstrap.ts) ·
+[docker/supernode-peer/Dockerfile](docker/supernode-peer/Dockerfile) ·
+[docker-compose.yml](docker-compose.yml)
 
 **Source of truth**: [docker-compose.yml](docker-compose.yml) · [docker/quantum-fortress/](docker/quantum-fortress/) · [docker/pi-bridge-connector/](docker/pi-bridge-connector/) · [docker/sovereign-fortress/](docker/sovereign-fortress/) · [docker/sovereign-commerce-authority/main.py](docker/sovereign-commerce-authority/main.py) · [docker/sovereign-work-nexus/main.py](docker/sovereign-work-nexus/main.py) · [docker/sovereign-gaming-nexus/main.py](docker/sovereign-gaming-nexus/main.py) · [docker/publix-phygital-hub/main.py](docker/publix-phygital-hub/main.py)
 

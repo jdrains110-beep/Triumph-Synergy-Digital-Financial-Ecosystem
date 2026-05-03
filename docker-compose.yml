@@ -95,6 +95,9 @@ x-pi-env: &pi-env
   APEX_QUANTUM_MESH: "true"
   APEX_LOOPHOLES_ENFORCED: "true"
   GLOBAL_USAGE_READY: "true"
+  # Apex-Quantum peer-supernode mesh (mutually powered, auto-upgrade joining nodes)
+  SUPERNODE_PEERS: "http://triumph-supernode-peer-2:11626"
+  APEX_AUTO_UPGRADE: "true"
 
 services:
   # ========================================================================
@@ -373,6 +376,9 @@ services:
       COMPLIANCE_REQUIRE_PQ: "true"
       JUDICIAL_REQUIRE_PQ: "true"
       SCP_REQUIRE_PQ_SIGNATURE: "true"
+      SUPERNODE_ROLE: primary
+      SUPERNODE_ID: triumph-central-node
+      SUPERNODE_SELF_URL: http://triumph-central-node:11626
     volumes:
       - triumph_central_data:/app/data/central
       - triumph_scp_data:/app/data/scp
@@ -395,6 +401,43 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      pi-bridge-connector:
+        condition: service_healthy
+
+  # ========================================================================
+  # SUPERNODE-PEER-2 — Apex-Quantum peer supernode
+  # Mutually powers triumph-central-node. Both register each other on
+  # /supernode/join. Any node that connects becomes an upgraded
+  # APEX-QUANTUM-NODE that boosts the entire mesh.
+  # ========================================================================
+
+  supernode-peer-2:
+    build:
+      context: .
+      dockerfile: docker/supernode-peer/Dockerfile
+    container_name: triumph-supernode-peer-2
+    <<: *common
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.30
+    environment:
+      <<: *pi-env
+      SUPERNODE_ROLE: peer
+      SUPERNODE_ID: triumph-supernode-peer-2
+      SUPERNODE_SELF_URL: http://triumph-supernode-peer-2:11626
+      SUPERNODE_PEERS: http://triumph-central-node:11626
+      APEX_AUTO_UPGRADE: "true"
+      PI_NETWORK_MODE: ${PI_NETWORK_MODE:-mainnet}
+      SCP_REQUIRE_PQ_SIGNATURE: "true"
+    expose:
+      - "11626"
+    networks:
+      triumph-net:
+        aliases:
+          - triumph-supernode-peer-2
+          - triumph-apex-quantum-peer
+      pi-bridge: {}
+    depends_on:
       pi-bridge-connector:
         condition: service_healthy
 
