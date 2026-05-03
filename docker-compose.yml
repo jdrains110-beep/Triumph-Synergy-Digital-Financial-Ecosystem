@@ -824,6 +824,53 @@ services:
       start_period: 120s
 
   # ========================================================================
+  # SOVEREIGN COMMERCE & FRONTIER AUTHORITY (SCFA) — port 8160 · Redis DB 11
+  #
+  # Ultimate superior sovereign platform — Pi-native, vault-backed,
+  # SAIB-enforced. Combines + exceeds six legacy U.S. agencies:
+  #   CHARTER_AUTHORITY        → replaces SBA + State Sec-of-State
+  #   CHAMBER_FEDERATION       → replaces U.S. Chamber of Commerce
+  #   PORT_AUTHORITY           → replaces Jaxport / FL Ports
+  #   FRONTIER_BUREAU          → replaces U.S. CBP
+  #   ARMS_REGISTRY            → replaces NRA / ATF
+  #   MARINE_RESOURCE_AUTHORITY → replaces NOAA Fisheries
+  # 6 authorities · 72 superior loopholes · MAXIMUM-APEX-QUANTUM
+  # ========================================================================
+  sovereign-commerce-authority:
+    build:
+      context: docker/sovereign-commerce-authority
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-commerce-authority
+    <<: *common
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.50
+    environment:
+      PORT: "8160"
+      REDIS_URL: redis://triumph-redis:6379/11
+      VAULT_URL: http://triumph-vault:8081
+      BANK_URL: http://triumph-sovereign-bank:8150
+      QUANTUM_SHIELD_URL: http://triumph-quantum-fortress:8094
+      SAIB_URL: http://triumph-sovereign-fortress:8099
+      SAIB_REGION: ${SAIB_REGION:-region-a}
+      SAIB_REPLICA_ID: ${SAIB_REPLICA_ID:-scfa-0}
+    expose:
+      - "8160"
+    networks:
+      - triumph-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8160/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+      start_period: 30s
+
+  # ========================================================================
   # SOVEREIGN-GAMING-NEXUS (SGN) — AAA game ↔ Pi Network integration layer
   #
   # Lets GTA VI, Battlefield, NBA 2K, EA FC, Fortnite, COD, Roblox, etc.
