@@ -1,7 +1,7 @@
 FROM python:3.13-slim
 WORKDIR /app
 # build-essential + python3-dev needed to compile lz4 C extension wheel
-RUN apt-get update && \
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends build-essential python3-dev && \
     rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir --upgrade pip

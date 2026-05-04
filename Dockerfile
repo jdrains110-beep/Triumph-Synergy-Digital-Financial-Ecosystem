@@ -10,6 +10,7 @@ FROM node:24-alpine AS base
 # as ENV so they survive into child stages.
 ENV COREPACK_ENABLE_NETWORK=0
 ENV COREPACK_ENABLE_STRICT=0
+RUN apk upgrade --no-cache
 RUN apk add --no-cache curl tini wget && \
     corepack disable && \
     npm install -g yarn@1.22.22 --prefer-offline 2>/dev/null; \

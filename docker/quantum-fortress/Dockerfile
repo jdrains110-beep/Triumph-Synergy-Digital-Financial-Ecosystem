@@ -9,7 +9,7 @@
 # ── Stage 1: builder — compile liboqs 0.14.0 ──
 FROM python:3.13-slim AS builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && apt-get install -y --no-install-recommends \
     cmake gcc g++ make git ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 # ── Stage 2: runtime — minimal CVE surface ──
 FROM python:3.13-slim AS runtime
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && apt-get install -y --no-install-recommends \
     supervisor curl ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --system --gid 1011 quantum && \

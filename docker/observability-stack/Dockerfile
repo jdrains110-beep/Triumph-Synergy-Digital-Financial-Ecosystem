@@ -31,7 +31,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     GF_PATHS_PROVISIONING=/etc/grafana/provisioning
 
 # ── Base packages ──
-RUN apt-get update && \
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends \
         supervisor curl ca-certificates wget gosu gnupg2 \
         python3 python3-pip python3-venv && \
@@ -42,7 +42,7 @@ RUN mkdir -p /etc/apt/keyrings && \
     wget -qO- https://apt.grafana.com/gpg.key | gpg --dearmor > /etc/apt/keyrings/grafana.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" \
         > /etc/apt/sources.list.d/grafana.list && \
-    apt-get update && \
+    apt-get update && apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends grafana && \
     rm -rf /var/lib/apt/lists/* && \
     cp -r /etc/grafana /etc/grafana.default
@@ -72,7 +72,7 @@ COPY --from=redisexp-stage /redis_exporter         /usr/local/bin/redis_exporter
 
 # ── Cloud-memory app: install build deps, build, then purge to keep image slim ──
 COPY cloud-memory/requirements.txt /opt/cloud-memory/requirements.txt
-RUN apt-get update && \
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends build-essential python3-dev && \
     python3 -m venv /opt/cloud-memory/venv && \
     /opt/cloud-memory/venv/bin/pip install --no-cache-dir --upgrade pip && \

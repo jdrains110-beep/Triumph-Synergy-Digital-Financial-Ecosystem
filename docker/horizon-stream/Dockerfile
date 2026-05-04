@@ -7,7 +7,8 @@
 # Shared Node 20 + @stellar/stellar-sdk + redis + pg
 # Build context: REPO ROOT (needs docker/, lib/, tsconfig.docker.json)
 # ==============================================================================
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
+RUN apk upgrade --no-cache
 RUN apk add --no-cache curl tini bash supervisor
 
 FROM base AS builder

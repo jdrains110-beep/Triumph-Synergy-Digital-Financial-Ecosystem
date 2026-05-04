@@ -10,7 +10,8 @@
 #                                localhost calls between tx-engine and payments)
 # Build context: REPO ROOT
 # ==============================================================================
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
+RUN apk upgrade --no-cache
 RUN apk add --no-cache curl tini bash supervisor
 
 FROM base AS builder

@@ -9,6 +9,7 @@ RUN useradd -m -u 1003 -s /bin/sh pidex
 
 WORKDIR /app
 COPY requirements.txt .
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .

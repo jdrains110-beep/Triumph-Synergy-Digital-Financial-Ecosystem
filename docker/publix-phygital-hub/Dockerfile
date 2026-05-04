@@ -4,6 +4,7 @@ FROM python:3.13-slim
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PORT=8133
 WORKDIR /app
 COPY requirements.txt .
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
 RUN useradd -u 1012 -m pph && chown -R pph:pph /app

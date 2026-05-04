@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Install deps in a separate layer for cache efficiency
 COPY requirements.txt .
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Application

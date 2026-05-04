@@ -5,7 +5,8 @@
 # Serves on :8089
 # ==============================================================================
 
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
+RUN apk upgrade --no-cache
 RUN apk add --no-cache curl tini bash
 
 FROM base AS builder

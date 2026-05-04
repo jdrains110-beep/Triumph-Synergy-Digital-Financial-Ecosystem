@@ -5,7 +5,8 @@
 # lib/pi-transaction. We bundle with a one-shot esbuild via npx --yes.
 # ==============================================================================
 # Copyright (C) 2024-2026 Jeremiah Joel Drains. License: PiOS
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
+RUN apk upgrade --no-cache
 WORKDIR /b
 RUN apk add --no-cache curl
 COPY lib/pi-transaction ./lib/pi-transaction
@@ -17,7 +18,7 @@ RUN npx --yes esbuild@0.24.0 docker/central-node/bootstrap.ts \
       --bundle --platform=node --target=node20 --format=cjs \
       --outfile=/out/supernode-peer.js
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache curl tini && \
     addgroup --system --gid 1016 peer && \
