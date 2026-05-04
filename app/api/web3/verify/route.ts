@@ -8,7 +8,7 @@ import { OnChainVerifier } from "@/lib/web3/on-chain-verifier";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const txHash = searchParams.get("tx");
-  const network = (searchParams.get("network") || "testnet") as "mainnet" | "testnet";
+  const network = (searchParams.get("network") || "mainnet") as "mainnet" | "testnet";
 
   if (!txHash) {
     return NextResponse.json({ error: "tx param required" }, { status: 400 });

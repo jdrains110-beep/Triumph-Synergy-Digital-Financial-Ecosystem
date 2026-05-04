@@ -41,7 +41,7 @@ STELLAR_CORE_URL = os.getenv("STELLAR_CORE_URL", f"http://{PI_NODE_HOST}:{STELLA
 
 HORIZON_URL      = f"http://{PI_NODE_HOST}:{PI_NODE_API_PORT}"
 HORIZON_FALLBACK_URL = os.getenv("PI_NODE_FALLBACK_URL", "http://host.docker.internal:31401")
-HORIZON_PUBLIC_FALLBACK_URL = os.getenv("PI_NODE_PUBLIC_FALLBACK_URL", "https://api.testnet.minepi.com")
+HORIZON_PUBLIC_FALLBACK_URL = os.getenv("PI_NODE_PUBLIC_FALLBACK_URL", "https://api.mainnet.minepi.com")
 CENTRAL_NODE_URL = os.getenv("CENTRAL_NODE_URL", "http://triumph-central-node:11626")
 REDIS_URL        = os.getenv("REDIS_URL",        "redis://triumph-redis:6379")
 POLL_INTERVAL    = float(os.getenv("POLL_INTERVAL_S", "5"))

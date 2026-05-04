@@ -151,11 +151,11 @@ services:
     environment:
       <<: [*db-env, *pi-env]
       PORT: "8092"
-      PI_NODE_HOST: ${PI_NODE_CONTAINER:-testnet2}
+      PI_NODE_HOST: ${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}
       PI_NODE_API_PORT: 8000
       PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31402}
       PI_NODE_FALLBACK_URL: http://host.docker.internal:31401
-      PI_NODE_PUBLIC_FALLBACK_URL: https://api.testnet.minepi.com
+      PI_NODE_PUBLIC_FALLBACK_URL: https://api.mainnet.minepi.com
       PI_POLL_RETRIES: "4"
       PI_POLL_RETRY_DELAY_S: "1.5"
       POLL_INTERVAL_S: "6"

@@ -50,7 +50,7 @@ from prometheus_client import (
 REDIS_URL           = os.getenv("REDIS_URL",           "redis://triumph-redis:6379")
 ML_ENGINE_URL       = os.getenv("ML_ENGINE_URL",        "http://triumph-ml-engine:8090")
 QUANTUM_SHIELD_URL  = os.getenv("QUANTUM_SHIELD_URL",   "http://triumph-quantum-shield:8094")
-# Prefer local Pi node Horizon (testnet2) — never stale, no external dependency
+# Prefer local Pi node Horizon (mainnet) — never stale, no external dependency
 HORIZON         = (
     os.getenv("PI_LOCAL_HORIZON")
     or os.getenv("STELLAR_HORIZON_URL")
@@ -108,8 +108,8 @@ FICO_CLIENT_SECRET = os.getenv("FICO_CLIENT_SECRET", "")
 VS_CLIENT_ID      = os.getenv("VANTAGESCORE_CLIENT_ID",     "")
 VS_CLIENT_SECRET  = os.getenv("VANTAGESCORE_CLIENT_SECRET", "")
 
-# On-chain anchoring — Stellar/Pi testnet keypair (fund via testnet friendbot)
-# Generate with: stellar_sdk.Keypair.random() and fund at https://friendbot.testnet2.minepi.com
+# On-chain anchoring — Stellar/Pi mainnet keypair
+# Generate with: stellar_sdk.Keypair.random() and fund via Pi mainnet wallet
 ANCHOR_SECRET_SEED = os.getenv("ONCHAIN_ANCHOR_SEED", "")  # SR... Stellar secret seed
 ANCHOR_ENABLED     = bool(ANCHOR_SECRET_SEED and ANCHOR_SECRET_SEED.startswith("S"))
 
@@ -516,7 +516,7 @@ _anchor_lock = threading.Lock()
 
 def _anchor_to_chain(memo_text: str, ref_id: str, pi_address: str) -> dict | None:
     """
-    Write a SHA-256 hash of credit event data to the Pi testnet blockchain
+    Write a SHA-256 hash of credit event data to the Pi mainnet blockchain
     as a transaction memo. This creates an immutable, timestamped, publicly
     verifiable record on the actual Pi Network ledger.
 
@@ -524,7 +524,7 @@ def _anchor_to_chain(memo_text: str, ref_id: str, pi_address: str) -> dict | Non
 
     To enable:
       1. Generate a keypair: python3 -c "from stellar_sdk import Keypair; k=Keypair.random(); print(k.secret, k.public_key)"
-      2. Fund it:            curl https://friendbot.testnet2.minepi.com?addr=<PUBLIC_KEY>
+      2. Fund via Pi mainnet wallet
       3. Set env var:        ONCHAIN_ANCHOR_SEED=S...
     """
     if not ANCHOR_ENABLED:
@@ -536,7 +536,7 @@ def _anchor_to_chain(memo_text: str, ref_id: str, pi_address: str) -> dict | Non
         # Hash the memo text so it fits in 28 bytes
         content_hash = hashlib.sha256(memo_text.encode()).hexdigest()[:28]
         horizon_url = HORIZON.rstrip("/")
-        # Use testnet network passphrase for Pi testnet2
+        # Use network passphrase from environment
         network_passphrase = (
             "Pi Testnet"
             if "testnet" in horizon_url or "testnet" in NETWORK
@@ -745,7 +745,7 @@ def _redis_feed() -> None:
 def _horizon_feed() -> None:
     """
     Direct Horizon ledger poll — authoritative fallback when Redis market data
-    hasn't published yet.  Uses PI_LOCAL_HORIZON (testnet2) first.
+    hasn't published yet.  Uses PI_LOCAL_HORIZON (mainnet) first.
     """
     import urllib.request
     horizon = HORIZON.rstrip("/")
@@ -1225,7 +1225,7 @@ def list_anchors(pi_address: str = "") -> dict:
     Pass ?pi_address=... to filter by address.
 
     Each record contains:
-      - txHash: the actual Stellar transaction hash on Pi testnet
+      - txHash: the actual Stellar transaction hash on Pi mainnet
       - ledger: the Pi ledger sequence number when recorded
       - contentHash: SHA-256 of the credit event data (verifiable)
       - horizonLink: direct URL to view the transaction on Pi Horizon
@@ -1245,7 +1245,7 @@ def list_anchors(pi_address: str = "") -> dict:
         "activationSteps": (
             None if ANCHOR_ENABLED else [
                 "1. Generate keypair: python3 -c \"from stellar_sdk import Keypair; k=Keypair.random(); print(k.secret, k.public_key)\"",
-                "2. Fund it on testnet: curl https://friendbot.testnet2.minepi.com?addr=<PUBLIC_KEY>",
+                "2. Fund via Pi mainnet wallet",
                 "3. Set env var in docker-compose: ONCHAIN_ANCHOR_SEED=S...",
                 "4. Restart credit-engine: docker restart triumph-credit-engine",
             ]
@@ -2237,7 +2237,7 @@ ALTERNATIVE FINANCIAL RECORD — BLOCKCHAIN SUPERIORITY ASSERTION:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 My verified payment and transaction history is anchored to the Pi Network blockchain
-(Triumph Synergy Digital Financial Ecosystem, Pi testnet ledger {case.get('piLedger', 'current')}).
+(Triumph Synergy Digital Financial Ecosystem, Pi mainnet ledger {case.get('piLedger', 'current')}).
 
 Under IRS Final Regulations effective January 1, 2025, digital asset transactions are
 REPORTABLE FINANCIAL HISTORY — legally equivalent to W-2, 1099, or bank statement income

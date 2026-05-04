@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
 
   // PRODUCTION DOMAINS
   const PRODUCTION_DOMAINS = [
-    "triumphsynergy1991.pinet.com", // PINET TESTNET
+    "triumphsynergy1991.pinet.com", // PINET DEV
     "triumphsynergy7386.pinet.com", // PINET MAINNET
     "triumphsynergy0576.pinet.com", // PINET PRIMARY
     "localhost",

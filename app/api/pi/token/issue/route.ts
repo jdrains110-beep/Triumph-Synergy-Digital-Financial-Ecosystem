@@ -204,7 +204,7 @@ interface IssuedToken {
   ledger: number;
   txHash: string;
   issuedAt: string;
-  network: "testnet";
+  network: "mainnet" | "testnet";
 }
 
 const issuedTokens = new Map<string, IssuedToken>();
@@ -515,14 +515,12 @@ export async function POST(request: NextRequest) {
       ledger: mintLedger,
       txHash: mintHash,
       issuedAt: new Date().toISOString(),
-      network: "testnet",
-    };
-    issuedTokens.set(tokenDef.code, issued);
+      network: "mainnet",
 
     return NextResponse.json(
       {
         success: true,
-        message: `${tokenDef.code} (${tokenDef.name}) issued on Pi Testnet`,
+        message: `${tokenDef.code} (${tokenDef.name}) issued on Pi Mainnet`,
         token: {
           code: tokenDef.code,
           name: tokenDef.name,

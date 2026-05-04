@@ -45,7 +45,6 @@ BRIDGE_NETWORKS = {
     # Pi-native — sovereign layer
     "stellar":    {"finality_s": 5, "fee_bps": 0, "kyc": False, "asset": "XLM"},
     "pi-mainnet": {"finality_s": 5, "fee_bps": 0, "kyc": False, "asset": "PI"},
-    "pi-testnet": {"finality_s": 5, "fee_bps": 0, "kyc": False, "asset": "PI_TEST"},
 }
 
 # ── Real-World Utility Sectors ──
