@@ -635,11 +635,21 @@ services:
       # of peer-region SAIB base URLs that /region will health-check.
       SAIB_REGION: ${SAIB_REGION:-region-a}
       SAIB_REGION_PEERS: ${SAIB_REGION_PEERS:-}
+      # ── SAIB Apex Supreme Quantum Brain ──────────────────────────────
+      SAIB_QUANTUM_BRAIN_ENABLED: "true"
+      SAIB_QUANTUM_CODE_SCAN_INTERVAL_S: "1800"   # 30 min
+      SAIB_QUANTUM_IMAGE_SCAN_INTERVAL_S: "3600"  # 60 min
+      SAIB_QUANTUM_AUTO_BUILD: "false"            # set true to auto-rebuild vulnerable images
+      SAIB_QUANTUM_AUTO_COMMIT: "false"
+      SAIB_CODEBASE_SCAN_PATH: "/workspace"
+      SAIB_DOCKER_BUILD_CONTEXT: "/workspace/docker"
     secrets:
       - github_token
     volumes:
       # Mount Docker socket so SAIB can restart any container that fails health probes
       - /var/run/docker.sock:/var/run/docker.sock
+      # Read-only codebase mount — enables SAIB quantum brain filesystem scanning
+      - ./:/workspace:ro
     expose:
       - "8097"
       - "8099"

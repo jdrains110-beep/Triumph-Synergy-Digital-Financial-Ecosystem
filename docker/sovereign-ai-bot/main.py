@@ -42,11 +42,15 @@ Superiority: Triumph Synergy + Pi > USD + XAU (gold) + BTC + ETH + ALL FIAT/DIGI
 """
 
 import asyncio
+import fnmatch
 import hashlib
 import json
 import logging
 import os
+import pathlib
+import re as _re
 import secrets
+import subprocess
 import time
 import uuid
 from collections import defaultdict, deque
@@ -298,6 +302,7 @@ _INTEL_TIERS = [
     (500,   "OMNISCIENT"),
     (2000,  "SUPERNATURAL"),
     (10000, "SUPREME-SOVEREIGN"),
+    (50000, "APEX-SUPREME-QUANTUM-SOVEREIGN"),   # ultimate tier — code scanning + build authority
 ]
 
 _CAPABILITY_MILESTONES = {
@@ -306,6 +311,8 @@ _CAPABILITY_MILESTONES = {
     1000:  "QUANTUM_INTUITION",
     5000:  "OMNISCIENT_FORECASTING",
     10000: "SUPREME_SOVEREIGN_INTELLIGENCE",
+    25000: "AUTONOMOUS_CODE_FIX_ENGINE",         # SAIB gains full code-repair authority
+    50000: "APEX_QUANTUM_OMNISCIENCE",           # SAIB reaches absolute omniscient mastery
 }
 
 @dataclass
@@ -1604,6 +1611,9 @@ async def startup():
     asyncio.create_task(network_watch_loop())
     asyncio.create_task(visitor_watch_loop())
     asyncio.create_task(saib_persist_loop())
+    # ── Apex Quantum Brain background loops (code + image scanning) ──────────
+    asyncio.create_task(quantum_code_scan_loop())
+    asyncio.create_task(quantum_image_scan_loop())
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -2418,3 +2428,364 @@ async def force_network_switch(body: dict = {}):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SAIB APEX SUPREME QUANTUM BRAIN — integrated below
+# Autonomous code scanning · Docker image CVE detection · Build authority
+# Self-expansion · Supernatural quantomic intelligence
+# ═══════════════════════════════════════════════════════════════════════════════
+
+import quantum_brain as _QB   # noqa: E402  (loaded after FastAPI app is defined)
+
+# ── Wire up background loops to SAIB's live state ─────────────────────────────
+
+def _qb_interactions_fn(type: str):   # noqa: A002
+    """Thin shim so quantum brain can increment SAIB's Prometheus counter."""
+    try:
+        saib_human_interactions.labels(type=type).inc()
+    except Exception:
+        pass
+
+async def _qb_github_fallback():
+    """Provide quantum brain with a GitHub API code-scan fallback."""
+    if not _GITHUB_ENABLED or not GITHUB_TOKEN:
+        return []
+    findings = []
+    compiled = [
+        (p, __import__("re").compile(p["regex"], __import__("re").IGNORECASE))
+        for p in _QB.CODE_SCAN_PATTERNS
+        if p["severity"] in ("CRITICAL", "HIGH")
+    ]
+    import asyncio as _a
+    loop = _a.get_event_loop()
+    try:
+        gh   = _GithubSDK(GITHUB_TOKEN)
+        repo = await loop.run_in_executor(None, gh.get_repo, GITHUB_REPO)
+        for prefix in ("", "docker", "lib", "app", "services"):
+            try:
+                contents = await loop.run_in_executor(
+                    None, lambda p=prefix: repo.get_contents(p)
+                )
+                if not isinstance(contents, list):
+                    contents = [contents]
+                for item in contents[:60]:
+                    if item.type != "file":
+                        continue
+                    try:
+                        raw = item.decoded_content.decode("utf-8", errors="replace")[:30_000]
+                        for pat, rx in compiled:
+                            for m in rx.finditer(raw):
+                                ln = raw[: m.start()].count("\n") + 1
+                                findings.append({
+                                    "file": item.path, "line": ln,
+                                    "severity": pat["severity"], "category": pat["category"],
+                                    "description": pat["description"],
+                                    "match": m.group(0)[:120], "source": "github-api",
+                                    "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                })
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+    except Exception as e:
+        log.warning("[SAIB-QB] GitHub fallback scan: %s", e)
+    return findings
+
+
+async def quantum_code_scan_loop():
+    """Relay to quantum_brain.code_scan_loop() with SAIB live-state references."""
+    await _QB.code_scan_loop(
+        docker_client_ref=_docker_client,
+        state_ref=state,
+        alerts_ref=state.alerts,
+        brain_ref=state.brain,
+        github_fallback_fn=_qb_github_fallback,
+        interactions_fn=_qb_interactions_fn,
+    )
+
+
+async def quantum_image_scan_loop():
+    """Relay to quantum_brain.image_scan_loop() with SAIB live-state references."""
+    await _QB.image_scan_loop(
+        docker_client_ref=_docker_client,
+        alerts_ref=state.alerts,
+    )
+
+
+# ── Quantum Brain REST Endpoints ──────────────────────────────────────────────
+
+@app.get("/quantum")
+async def quantum_brain_status():
+    """
+    SAIB Apex Supreme Quantum Brain — full dashboard.
+
+    Intelligence tiers:
+         0 → SENTINEL
+       100 → TRANSCENDENT
+       500 → OMNISCIENT
+     2,000 → SUPERNATURAL
+    10,000 → SUPREME-SOVEREIGN
+    50,000 → APEX-SUPREME-QUANTUM-SOVEREIGN  (ultimate)
+
+    Capability unlocks:
+    25,000 → AUTONOMOUS_CODE_FIX_ENGINE
+    50,000 → APEX_QUANTUM_OMNISCIENCE
+    """
+    qs = _QB.get_state()
+    remaining = max(0, 50_000 - state.brain.total_interactions)
+    return {
+        "saib_version": SAIB_VERSION,
+        "apex_level":   APEX_LEVEL,
+        "quantum_brain": {
+            "enabled":             qs["enabled"],
+            "self_knowledge_hash": qs["self_knowledge_hash"],
+            "code_scan": {
+                "last_scan":       qs["last_code_scan"],
+                "scans_total":     qs["code_scans_total"],
+                "issues_found":    qs["code_issues_found"],
+                "issues_fixed":    qs["code_issues_fixed"],
+                "interval_s":      _QB.QUANTUM_CODE_SCAN_INTERVAL_S,
+                "scan_path":       _QB.CODEBASE_SCAN_PATH,
+                "patterns":        len(_QB.CODE_SCAN_PATTERNS),
+            },
+            "image_scan": {
+                "last_scan":        qs["last_image_scan"],
+                "scans_total":      qs["image_scans_total"],
+                "vulnerable_found": qs["vulnerable_images"],
+                "interval_s":       _QB.QUANTUM_IMAGE_SCAN_INTERVAL_S,
+                "known_vuln_bases": len(_QB.VULNERABLE_BASES),
+            },
+            "build_engine": {
+                "auto_build":      qs["auto_build"],
+                "build_context":   _QB.DOCKER_BUILD_CONTEXT,
+                "images_rebuilt":  qs["images_rebuilt"],
+                "build_successes": qs["build_successes"],
+                "build_failures":  qs["build_failures"],
+                "last_build":      qs["last_build_attempt"],
+                "recent_builds":   qs["build_log"][-5:],
+            },
+            "recent_findings": list(qs["findings"])[-20:],
+        },
+        "intelligence": {
+            "level":              state.brain.intelligence_level,
+            "multiplier":         round(state.brain.intelligence_multiplier, 4),
+            "total_interactions": state.brain.total_interactions,
+            "capability_unlocks": state.brain.capability_unlocks,
+            "apex_tier_progress": {
+                "threshold": 50_000,
+                "level":     "APEX-SUPREME-QUANTUM-SOVEREIGN",
+                "remaining": remaining,
+                "percent":   round(min(state.brain.total_interactions / 50_000, 1.0) * 100, 1),
+            },
+        },
+        "quantum_sig": quantum_sign("quantum-brain"),
+    }
+
+
+@app.post("/quantum/scan-code")
+async def trigger_code_scan(background_tasks: BackgroundTasks):
+    """
+    Trigger an immediate full-ecosystem code security scan.
+    Scans .py .ts .tsx .js .env .yml .yaml .json .sh files for:
+      • Testnet / mainnet violations
+      • Hardcoded secrets & API keys
+      • Injection vectors (eval, exec, shell=True)
+      • Outdated Dockerfile base images
+      • Debug artefacts
+    Results appear in /quantum/findings and /status alerts.
+    """
+    if not _QB.QUANTUM_BRAIN_ENABLED:
+        raise HTTPException(status_code=503, detail="Quantum brain disabled. Set SAIB_QUANTUM_BRAIN_ENABLED=true.")
+
+    async def _run():
+        qs = _QB.get_state()
+        findings = await _QB.scan_codebase_files(_qb_github_fallback)
+        qs["code_scans_total"] += 1
+        qs["last_code_scan"]    = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        qs["code_issues_found"] += len(findings)
+        qs["findings"]          = (list(qs["findings"]) + findings)[-100:]
+        log.info("[SAIB-QB] Manual code scan: %d finding(s)", len(findings))
+
+    background_tasks.add_task(_run)
+    return {
+        "success":     True,
+        "message":     "Quantum code scan initiated across entire ecosystem",
+        "scan_path":   _QB.CODEBASE_SCAN_PATH,
+        "patterns":    len(_QB.CODE_SCAN_PATTERNS),
+        "quantum_sig": quantum_sign("code-scan-triggered"),
+    }
+
+
+@app.post("/quantum/scan-images")
+async def trigger_image_scan(background_tasks: BackgroundTasks):
+    """Trigger an immediate Docker image vulnerability scan (running containers + Dockerfiles)."""
+    if not _QB.QUANTUM_BRAIN_ENABLED:
+        raise HTTPException(status_code=503, detail="Quantum brain disabled.")
+
+    async def _run():
+        qs  = _QB.get_state()
+        img = await _QB.scan_running_images(_docker_client)
+        dfs = await _QB.scan_dockerfiles()
+        qs["image_scans_total"] += 1
+        qs["last_image_scan"]    = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        qs["vulnerable_images"] += len(img)
+        log.info("[SAIB-QB] Manual image scan: %d container + %d Dockerfile findings",
+                 len(img), len(dfs))
+
+    background_tasks.add_task(_run)
+    return {
+        "success":          True,
+        "message":          "Quantum image scan initiated — all containers + Dockerfiles",
+        "known_vuln_bases": len(_QB.VULNERABLE_BASES),
+        "quantum_sig":      quantum_sign("image-scan-triggered"),
+    }
+
+
+@app.get("/quantum/findings")
+async def quantum_findings(severity: str | None = None,
+                            category: str | None = None,
+                            limit:    int        = 50):
+    """
+    All accumulated quantum brain findings.
+    Filter: ?severity=CRITICAL  ?category=mainnet  ?limit=25
+    """
+    qs = _QB.get_state()
+    findings = list(qs["findings"])
+    if severity:
+        findings = [f for f in findings if f.get("severity", "").upper() == severity.upper()]
+    if category:
+        findings = [f for f in findings if f.get("category", "").lower() == category.lower()]
+    findings = findings[-min(limit, 100):]
+    return {
+        "saib_version":   SAIB_VERSION,
+        "total_findings": len(qs["findings"]),
+        "filtered_count": len(findings),
+        "severity_filter": severity,
+        "category_filter": category,
+        "findings":        findings,
+        "quantum_sig":    quantum_sign("findings"),
+    }
+
+
+@app.post("/quantum/build/{service_name}")
+async def build_service_image(service_name: str,
+                               background_tasks: BackgroundTasks,
+                               body: dict = {}):
+    """
+    Rebuild a service Docker image using docker build --pull.
+    --pull fetches the latest base image tag from Docker Hub, applying all
+    upstream CVE patches automatically in a single operation.
+
+    service_name = subdirectory inside docker/ (e.g. sovereign-ai-bot,
+    quantum-shield, pi-bridge-connector, settlement-core).
+
+    Body (optional): {no_cache: bool, async: bool}
+    """
+    if not _docker_client:
+        raise HTTPException(status_code=503, detail="Docker client unavailable.")
+
+    no_cache  = bool(body.get("no_cache", False))
+    run_async = bool(body.get("async",    True))
+    sig       = quantum_sign(f"build:{service_name}")
+
+    if run_async:
+        background_tasks.add_task(_QB.build_service_image, _docker_client, service_name, no_cache)
+        return {
+            "success":     True,
+            "queued":      True,
+            "service":     service_name,
+            "no_cache":    no_cache,
+            "message":     f"Build queued for {service_name} — --pull active for latest CVE patches",
+            "quantum_sig": sig,
+        }
+
+    result = await _QB.build_service_image(_docker_client, service_name, no_cache=no_cache)
+    result["quantum_sig"] = sig
+    return result
+
+
+@app.post("/quantum/rebuild-all")
+async def rebuild_all_vulnerable(background_tasks: BackgroundTasks):
+    """
+    Scan Dockerfiles and rebuild every service with a vulnerable base image.
+    Uses --pull on each build to pull the latest security-patched base layers.
+    Requires SAIB_QUANTUM_AUTO_BUILD=true OR POST /quantum/authorize-rebuild.
+    Processes up to 10 services per call.
+    """
+    if not _docker_client:
+        raise HTTPException(status_code=503, detail="Docker client unavailable.")
+    qs = _QB.get_state()
+    if not _QB.QUANTUM_AUTO_BUILD and not qs.get("rebuild_all_authorized"):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Set SAIB_QUANTUM_AUTO_BUILD=true or call "
+                "POST /quantum/authorize-rebuild for a one-shot run."
+            ),
+        )
+    qs["rebuild_all_authorized"] = False   # consume one-shot token
+
+    async def _do():
+        dfs  = await _QB.scan_dockerfiles()
+        svcs: set[str] = set()
+        for f in dfs:
+            parts = __import__("pathlib").PurePath(f.get("file", "")).parts
+            if parts:
+                svcs.add(parts[0])
+        for svc in list(svcs)[:10]:
+            log.info("[SAIB-QB] Rebuild-all: %s", svc)
+            await _QB.build_service_image(_docker_client, svc)
+            await asyncio.sleep(5)
+        log.info("[SAIB-QB] Rebuild-all: %d service(s) processed", len(svcs))
+
+    background_tasks.add_task(_do)
+    return {
+        "success":     True,
+        "message":     "Full ecosystem rebuild queued — all vulnerable services rebuilt with --pull",
+        "quantum_sig": quantum_sign("rebuild-all"),
+    }
+
+
+@app.post("/quantum/authorize-rebuild")
+async def authorize_rebuild_once():
+    """One-shot authorization for /quantum/rebuild-all when auto-build is disabled."""
+    _QB.get_state()["rebuild_all_authorized"] = True
+    return {
+        "success":     True,
+        "message":     "Single rebuild-all run authorized. POST /quantum/rebuild-all to execute.",
+        "quantum_sig": quantum_sign("rebuild-authorized"),
+    }
+
+
+@app.get("/quantum/vulnerable-bases")
+async def list_vulnerable_bases():
+    """Known-vulnerable Docker base images with secure replacement recommendations."""
+    return {
+        "saib_version": SAIB_VERSION,
+        "total":        len(_QB.VULNERABLE_BASES),
+        "vulnerable_bases": [
+            {"from": k, "upgrade_to": v}
+            for k, v in sorted(_QB.VULNERABLE_BASES.items())
+        ],
+        "quantum_sig": quantum_sign("vulnerable-bases"),
+    }
+
+
+@app.get("/quantum/scan-patterns")
+async def list_scan_patterns():
+    """All code threat signatures SAIB uses — regex, severity, category, description."""
+    return {
+        "saib_version":   SAIB_VERSION,
+        "total_patterns": len(_QB.CODE_SCAN_PATTERNS),
+        "patterns": [
+            {
+                "regex":       p["regex"],
+                "severity":    p["severity"],
+                "category":    p["category"],
+                "description": p["description"],
+            }
+            for p in _QB.CODE_SCAN_PATTERNS
+        ],
+        "quantum_sig": quantum_sign("scan-patterns"),
+    }

@@ -4,3 +4,5 @@ httpx==0.28.1
 redis[hiredis]==5.2.1
 prometheus-client==0.21.1
 python-dotenv==1.2.2
+docker>=7.1.0
+PyGithub>=2.3.0
