@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   ) {
     // Redirect to sovereign Pi Network domain
     const redirectUrl = new URL(request.nextUrl);
-    redirectUrl.hostname = "triumphsynergy1991.pinet.com";
+    redirectUrl.hostname = "triumphsynergy0576.pinet.com";
     return NextResponse.redirect(redirectUrl, 307);
   }
 
