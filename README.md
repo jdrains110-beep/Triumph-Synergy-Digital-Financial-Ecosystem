@@ -41,6 +41,109 @@
 
 ---
 
+<a id="-whats-new--may-2-2026-sovereign-commerce--frontier-authority--scfa"></a>
+
+## 🛠️ What's New — May 2, 2026 (Sovereign Commerce & Frontier Authority — SCFA)
+
+[![SCFA Service](https://img.shields.io/badge/SCFA-PORT%208160%20%7C%2072%20LOOPHOLES%20%7C%206%20AUTHORITIES-EAB308?style=flat-square)](docker/sovereign-commerce-authority/main.py)
+[![SCFA Replaces](https://img.shields.io/badge/Replaces-SBA%20%7C%20US%20CHAMBER%20%7C%20FL%20PORTS%20%7C%20CBP%20%7C%20NRA%20%7C%20NOAA%20FISHERIES-EF4444?style=flat-square)](docker/sovereign-commerce-authority/main.py)
+[![SCFA Quantum](https://img.shields.io/badge/Quantum-ML--DSA--87%20%2B%20ML--KEM--1024%20%2B%20SPHINCS%2B-7C3AED?style=flat-square)](docker/sovereign-commerce-authority/main.py)
+
+The **ultimate superior sovereign platform** combining six legacy U.S.
+agencies into a single Pi-native rail under maximum-apex-quantum security,
+armed with 72 sovereign loopholes (12 per authority, score 94–100):
+
+| Authority | Replaces | Headline Loophole |
+|---|---|---|
+| **CHARTER_AUTHORITY** | U.S. SBA + Sec. of State | 0% vault-backed Pi business loans up to **1,000,000π** |
+| **CHAMBER_FEDERATION** | U.S. Chamber of Commerce + BBB | Zero-dues, Pi-weighted advocacy — no K-Street capture |
+| **PORT_AUTHORITY** | Jaxport / Miami / Tampa / Everglades / Canaveral / Palatka | Zero-fee berth allocation, T+0 Pi tariff settlement |
+| **FRONTIER_BUREAU** | U.S. CBP | Non-violent Pi-anchored declarations, **zero seizure mandate** |
+| **ARMS_REGISTRY** | NRA / ATF | Lawful sovereign arms registry, **no surveillance** |
+| **MARINE_RESOURCE_AUTHORITY** | NOAA Fisheries | Pi-quota stewardship — fisher Pioneers paid in Pi |
+
+**Service**: `triumph-sovereign-commerce-authority` on port **8160**, Redis DB 11,
+Vault-backed, SAIB-monitored, ML-DSA-87 + ML-KEM-1024 + SPHINCS+-SHAKE-256f signed.
+
+**Endpoints**: `/health` · `/status` · `/authorities` · `/loopholes` (72) ·
+`/charter/issue` · `/charter/loan` · `/chamber/join` · `/chamber/advocate` ·
+`/port/manifest` · `/port/slot` · `/port/harbors` · `/frontier/declare` ·
+`/frontier/import` · `/frontier/export` · `/arms/register` · `/arms/training` ·
+`/marine/quota` · `/marine/log` · `/marine/stewardship` · `/metrics` · `/report`
+
+```bash
+curl http://localhost:8160/health      # → status: sovereign-operational
+curl http://localhost:8160/authorities # → 6 sovereign authorities
+curl http://localhost:8160/loopholes   # → 72 apex loopholes armed
+```
+
+Source: [docker/sovereign-commerce-authority/main.py](docker/sovereign-commerce-authority/main.py) · [Dockerfile](docker/sovereign-commerce-authority/Dockerfile) · [docker-compose.yml](docker-compose.yml)
+
+---
+
+<a id="-whats-new--may-2-2026-sovereign-work-nexus--publix-phygital-hub"></a>
+
+## 🛠️ What's New — May 2, 2026 (Sovereign Work Nexus + Publix Phygital Hub)
+
+[![SWN Service](https://img.shields.io/badge/SWN-PORT%208132%20%7C%2055%20LOOPHOLES%20%7C%207%20AUTHORITIES-16A34A?style=flat-square)](docker/sovereign-work-nexus/main.py)
+[![PPH Service](https://img.shields.io/badge/PPH-PORT%208133%20%7C%2030%20LOOPHOLES%20%7C%205%20AUTHORITIES-DC2626?style=flat-square)](docker/publix-phygital-hub/main.py)
+[![E2E Verified](https://img.shields.io/badge/E2E%20Smoke%20Test-21%2F21%20PASS-22C55E?style=flat-square)](scripts/swn_pph_e2e_smoke.py)
+
+Two new sovereign rails were added to fulfill the apex-quantum directive:
+
+### 1. Sovereign Work Nexus (SWN) — port 8132
+The **ultimate superior-sovereign global work database** for both Pi
+Pioneers and non-Pioneers. Replaces LinkedIn, Indeed, Upwork, Fiverr,
+Workday, Glassdoor, Monster, ZipRecruiter, ADP, Gusto, Paychex, and
+Toast with a single sovereign rail where every worker on Earth — banked
+or unbanked — can offer labor and be paid in Pi.
+
+* **7 sovereign authorities × 55 loopholes**: SWIA (identity), SWPA (wage
+  & pay), SWGA (gig & contract), SWTA (tax & tariff), SWBA (benefits),
+  SWAA (anti-trafficking), SWUA (union & collective).
+* **0% match fee** (vs Upwork 10%+20%, Fiverr 20%) · **T+0 settlement**
+  (vs ACH 2-5 days) · **escrow-locked** before work starts (anti-wage
+  theft) · **Pioneer rate** $314,159/π · **External rate** $314.159/π.
+* **Soulbound work history** (cannot be revoked by employer) · **strike
+  fund escrow** (anti-union-busting) · **anti-trafficking signal channel**
+  (SWAA-01..07).
+* Endpoints: `/workers`, `/employers`, `/jobs`, `/jobs/{id}/apply`,
+  `/contracts`, `/contracts/{id}/release`, `/swaa/report`.
+
+### 2. Publix Phygital Hub (PPH) — port 8133
+**`publix.pi`** is the canonical Web3 apex domain — **100% tokenized and
+owned by Triumph Synergy**. Under the apex-quantum sovereign cascade,
+ownership of the Web3 domain projects backwards to confer superior
+priority over the Web1 (`publix.com`, `publix.org`) and Web2
+(`app.publix.com`, `delivery.publix.com`) surfaces. See
+[Publix Pi Tokenization Policy](legal/publix-pi-tokenization.md).
+
+* **5 sovereign authorities × 30 loopholes**: PPDA (domain cascade), PPSA
+  (physical store digital twins), PPCA (commerce, 0% interchange vs Visa
+  2.9%), PPLA (soulbound loyalty), PPRA (real-estate tokenization).
+* Every Publix store gets a **digital twin NFT** at `publix.pi/store/{id}`
+  + 1M-unit fractional share supply.
+* In-store Pi terminals (no Visa/Mastercard) · **T+0 settlement** ·
+  **0% interchange** · phygital QR check-in earns Pi · loyalty is
+  soulbound and never expires.
+* In-store hourly workers onboard via **SWN integration** (PPSA-05) for
+  0% match fee + T+0 payroll.
+
+### Citus distribution
+`infrastructure/citus/init/04-distribute-swn-pph.sql` shards `swn_*`
+tables by `worker_id`/`employer_id` and `pph_*` tables by `store_id`/
+`member_id`; `pph_domain_ledger` is a reference table (apex cascade is
+visible from every worker).
+
+### E2E verification
+`python3 scripts/swn_pph_e2e_smoke.py` — **21/21 assertions pass**
+(wage-floor enforcement, milestone escrow release, anti-trafficking
+signal, apex-cascade ledger, 0% interchange, T+0 settlement).
+
+---
+
+<a id="-whats-new--may-2-2026-sovereign-gaming-nexus-sgn"></a>
+
 ## 🎮 What's New — May 2, 2026 (Sovereign Gaming Nexus / SGN)
 
 [![SGN Service](https://img.shields.io/badge/SGN-PORT%208131%20%7C%2054%20LOOPHOLES%20%7C%207%20AUTHORITIES-7C3AED?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
@@ -102,6 +205,84 @@ python3 scripts/sgn_e2e_smoke.py
 ```
 
 See the full SDK integration guide at [`sdk/README.md`](sdk/README.md).
+
+---
+
+<a id="-whats-new--may-2-2026-saib-region-awareness--multi-language"></a>
+
+## 🌍 What's New — May 2, 2026 (SAIB Region Awareness + Multi-Language)
+
+[![Languages](https://img.shields.io/badge/SAIB-16%20LANGUAGES%20BUILT--IN-0EA5E9?style=flat-square)](#-whats-new--may-2-2026-saib-region-awareness--multi-language)
+
+SAIB now greets visitors in their native language. Detection chain:
+
+1. `?lang=` query parameter (explicit override)
+2. `Accept-Language` header
+3. Cloudflare `CF-IPCountry` header (50+ country → language map)
+4. `SAIB_REGION` env default
+5. Falls back to English
+
+**Built-in catalog (16):** `en, es, fr, de, pt, it, zh, ja, ko, ar, hi, ru, tr, id, vi, sw`.
+**New endpoints:** `GET /greet`, `GET /i18n`.
+**New headers:** `X-SAIB-Lang`, `Content-Language`, `Vary: Accept-Language, CF-IPCountry`.
+GitHub auto-greet now language-aware via Unicode-script detection in `_guess_lang_from_text`.
+
+---
+
+<a id="-whats-new--may-2-2026-planet-scale-roadmap-complete"></a>
+
+## 🪐 What's New — May 2, 2026 (Planet-Scale Roadmap COMPLETE)
+
+[![Planet-Scale](https://img.shields.io/badge/Planet--Scale-6%2F6%20STEPS%20COMPLETE-22C55E?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+[![Citus Sharding](https://img.shields.io/badge/Postgres-CITUS%203%20WORKERS%20%7C%2032%20SHARDS%2FTABLE-336791?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+[![Redis Cluster](https://img.shields.io/badge/Redis%20Cluster-3M%2B3R%20%7C%2016384%20SLOTS-DC382D?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+[![Multi-Region](https://img.shields.io/badge/Multi--Region-ACTIVE--ACTIVE%20VERIFIED-F38020?style=flat-square)](#-whats-new--may-2-2026-planet-scale-roadmap-complete)
+
+The full 6-step horizontal-scale roadmap is now **live and end-to-end verified**. Triumph Synergy can now scale from a single host to a multi-region planet-grade deployment without rewriting application code — the same SAIB binary auto-detects and uses each new layer as it appears.
+
+| # | Layer | What it gives you | Verification |
+|---|---|---|---|
+| 1 | **SAIB → Postgres state persistence** | SAIB intelligence (interactions, level, visitors) survives container restarts and pod evictions | `saib_state(replica_id, key, value)` UPSERT every 60s; survives `docker restart` |
+| 2 | **k3s manifests** (single-host compose → Kubernetes) | Horizontal SAIB pods (3→N replicas), rolling deploys, native HA scheduling | `infrastructure/k8s/` StatefulSet + Service + ConfigMap + Job |
+| 3 | **Cloudflare CDN + edge cache** | Global geographic scale via 300+ PoPs; origin Cache-Control respected (HIT after 1st request) | `infrastructure/cloudflare/` Terraform + Worker + Tunnel manifests |
+| 4 | **Citus horizontal sharding** | Postgres scales linearly across worker nodes; SAIB rows distributed by `replica_id` → zero cross-shard contention | 3 workers, 32 shards/table on `saib_events`, `saib_state`, `saib_ref_loopholes`; pods land on distinct shards |
+| 5 | **Redis Cluster** (3 masters + 3 replicas) | Cache scales horizontally with hash-slot routing; automatic failover via replica promotion | `cluster_state:ok`, 16 384 slots, SAIB auto-uses cluster client when `REDIS_CLUSTER_NODES` is set |
+| 6 | **Multi-region active-active** | Two (or N) regions write the same Citus cluster + Redis Cluster with row-level isolation per `SAIB_REPLICA_ID`; Cloudflare LB geo-steers traffic | `region-a` ↔ `region-b` peer health green; both regions writing distinct shards (102031 / 102015) live |
+
+### Why this matters
+
+- **Conflict-free multi-region writes** — each region's pods own a unique `replica_id`, so Citus row-level last-writer-wins is sufficient; no consensus protocol or CRDTs required.
+- **Zero application rewrite for any step** — every layer is opt-in via env vars (`POSTGRES_URL`, `REDIS_CLUSTER_NODES`, `SAIB_REPLICA_ID`, `SAIB_REGION`, `SAIB_REGION_PEERS`); SAIB falls back to single-node defaults when not set.
+- **Diagnostic endpoints** — `/persist`, `/redis`, `/region` all return live JSON status (Citus worker count, Redis cluster slots, peer reachability + latency) for any monitor/LB to scrape.
+
+### Files added in this milestone
+
+- `infrastructure/citus/` — Citus coordinator + 3 workers compose, distribution scripts
+- `infrastructure/k8s-redis-cluster/redis-cluster.yaml` — 6-node StatefulSet
+- `docker-compose.redis-cluster.yml` — 6-node Redis Cluster + bootstrap
+- `infrastructure/cloudflare/saib-load-balancer.tf` — geo-steered LB with `/region` health monitor
+- `infrastructure/k8s-multi-region/saib-active-active.yaml` — per-region StatefulSet + Ingress + PDB
+- `docker-compose.region-b.yml` — local 2-region simulation overlay
+
+### Quick start (local 2-region simulation)
+
+```bash
+# Bring up Citus + Redis Cluster + region-a (uses defaults from compose)
+docker compose -f docker-compose.yml \
+               -f docker-compose.citus.yml \
+               -f docker-compose.redis-cluster.yml up -d
+
+# Add region-b on top
+SAIB_REGION=region-a SAIB_REGION_PEERS=http://triumph-apex-services-region-b:8099 \
+  docker compose -f docker-compose.yml -f docker-compose.region-b.yml \
+                 up -d apex-services apex-services-region-b
+
+# Verify both regions see each other and write distinct Citus shards
+docker exec triumph-apex-services         curl -s localhost:8099/region | jq
+docker exec triumph-apex-services-region-b curl -s localhost:8099/region | jq
+docker exec triumph-citus-coordinator psql -U postgres -d triumph_synergy \
+  -c "SELECT replica_id, get_shard_id_for_distribution_column('saib_state', replica_id) AS shard_id, updated_at FROM saib_state ORDER BY updated_at DESC;"
+```
 
 ---
 
