@@ -15,7 +15,7 @@ import http from "node:http";
 import { initializePiTransactionSystem, getPiTransactionSystemStatus, shutdownPiTransactionSystem } from "../../lib/pi-transaction/index";
 
 const HEALTH_PORT = 11626;
-const networkType = (process.env.PI_NETWORK_MODE || "mainnet") as "mainnet" | "testnet";
+const networkType = "mainnet" as const; // mainnet-only mandate (Pi Network + Stellar Protocol 23)
 const startedAt = new Date().toISOString();
 let systemReady = false;
 let shuttingDown = false;
@@ -41,9 +41,7 @@ function resolveHorizonUrl(): string {
   // 4. Configured fallback
   if (process.env.STELLAR_HORIZON_URL) return process.env.STELLAR_HORIZON_URL;
   // 5. External Pi Horizon (last resort — external internet)
-  return networkType === "mainnet"
-    ? "https://api.mainnet.minepi.com"
-    : "https://api.testnet.minepi.com";
+  return "https://api.mainnet.minepi.com";
 }
 const HORIZON_URL = resolveHorizonUrl();
 const USING_BRIDGE_PROXY = /\/pi-node\/?$/.test(HORIZON_URL);

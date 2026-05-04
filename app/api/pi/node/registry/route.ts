@@ -73,8 +73,6 @@ export async function GET(request: NextRequest) {
       appId: "triumph-synergy",
       mainnetApp: "triumph-synergy.vercel.app",
       mainnetDev: "triumphsynergy0576.pinet.com",
-      testnetApp: "triumph-synergy-testnet.vercel.app",
-      testnetDev: "triumphsynergy1991.pinet.com",
     },
   }, {
     headers: {

@@ -1112,7 +1112,7 @@ export const PI_ECOSYSTEM_REGISTRY: PiRepoEntry[] = [
     description: "USDP stablecoin test implementation on Pi Network",
     integrationPoints: [
       "Pi stablecoin (USDP) patterns",
-      "Token issuance on Pi testnet",
+      "Token issuance on Pi mainnet",
     ],
     localBindings: [
       "lib/pi-transaction/pi-smart-contracts.ts",
@@ -1628,10 +1628,10 @@ export const PI_ECOSYSTEM_REGISTRY: PiRepoEntry[] = [
     status: "forked-pending",
     stars: 0,
     language: "TypeScript",
-    description: "2-of-3 multisig escrow on Pi v23 testnet — trusted third party protocol",
+    description: "2-of-3 multisig escrow on Pi v23 mainnet — trusted third party protocol",
     integrationPoints: [
       "Multisig escrow patterns",
-      "Pi testnet v23 transaction signing",
+      "Pi mainnet v23 transaction signing",
     ],
     localBindings: [],
   },

@@ -6,8 +6,7 @@
   "buildCommand": "NODE_OPTIONS='--max-old-space-size=4096' yarn build",
   "installCommand": "yarn install",
   "alias": [
-    "triumph-synergy.vercel.app",
-    "triumph-synergy-testnet.vercel.app"
+    "triumph-synergy.vercel.app"
   ],
   "git": {
     "deploymentEnabled": {
@@ -154,7 +153,6 @@
     "NEXT_PUBLIC_PI_SDK_URL": "https://sdk.minepi.com/pi-sdk.js",
     "NEXT_PUBLIC_APP_URL": "https://triumph-synergy.vercel.app",
     "NEXT_PUBLIC_PI_DEV_URL": "https://triumphsynergy0576.pinet.com",
-    "NEXT_PUBLIC_PI_DEV_URL_TESTNET": "https://triumphsynergy1991.pinet.com",
     "AUTH_SECRET": "triumph-synergy-pi-app-studio-auth-secret-2026-production",
     "NEXTAUTH_SECRET": "triumph-synergy-pi-app-studio-auth-secret-2026-production",
     "NEXTAUTH_URL": "https://triumph-synergy.vercel.app",

@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
 
+/**
+ * Validation key resolution.
+ *
+ * MAINNET-ONLY MANDATE: the entire ecosystem operates on Pi Network mainnet
+ * + Stellar Protocol 23. The ONE permitted testnet artifact in the codebase
+ * is the Pi App Studio testnet validation key, served exclusively by
+ * `app/validation-key-testnet.txt/route.ts`. The "testnet" branch below
+ * MUST only be reached by that route. It must never be used to drive
+ * Pi payments, Stellar submissions, or any other runtime logic.
+ */
 export type ValidationMode = "mainnet" | "testnet";
 
 // Validation key resolved lazily so module can be imported at build time.

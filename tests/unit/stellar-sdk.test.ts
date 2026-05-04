@@ -54,7 +54,7 @@ describe("Stellar Network Integration", () => {
         transaction_count: 100,
         operation_count: 250,
         base_fee_in_stroops: 100,
-        protocol_version: 20,
+        protocol_version: 23,
       };
 
       mockHorizonServer.call.mockResolvedValueOnce({
@@ -68,7 +68,7 @@ describe("Stellar Network Integration", () => {
         .call();
 
       expect(result.records[0].sequence).toBe(12_345_678);
-      expect(result.records[0].protocol_version).toBe(20);
+      expect(result.records[0].protocol_version).toBe(23);
     });
 
     it("should handle network errors gracefully", async () => {
@@ -192,7 +192,7 @@ describe("Network Status Calculation", () => {
       transaction_count: 100,
       operation_count: 250,
       base_fee_in_stroops: 100,
-      protocol_version: 20,
+      protocol_version: 23,
     };
 
     const status = calculateNetworkStatus(ledger);

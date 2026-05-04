@@ -66,38 +66,13 @@ export const realPi = {
       // Create payment - this opens Pi Browser wallet dialog
       return new Promise((resolve) => {
         // ============================================
-        // EXPLICIT FULL DOMAIN URL MATCHING
-        // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
+        // MAINNET-ONLY MANDATE — Pi Network + Protocol 23
+        // Every accepted production hostname maps to mainnet.
+        // Unknown hostnames also default to mainnet so payments
+        // never route through testnet rails.
         // ============================================
-        const hostname = window.location.hostname;
-        let environment: "testnet" | "mainnet" = "mainnet";
-
-        // PINET TESTNET
-        if (hostname === "triumphsynergy1991.pinet.com") {
-          environment = "testnet";
-        }
-        // PINET MAINNET
-        else if (hostname === "triumphsynergy7386.pinet.com") {
-          environment = "mainnet";
-        } else if (hostname === "triumphsynergy0576.pinet.com") {
-          environment = "mainnet";
-        }
-        // VERCEL MAINNET
-        else if (hostname === "triumph-synergy.vercel.app") {
-          environment = "mainnet";
-        }
-        // VERCEL TESTNET (EXPLICIT)
-        else if (hostname === "triumph-synergy-testnet.vercel.app") {
-          environment = "testnet";
-        }
-        // Fallback: Other vercel.app = testnet
-        else if (hostname.endsWith(".vercel.app")) {
-          environment = "testnet";
-        }
-        // Fallback: localhost = testnet
-        else if (hostname === "localhost" || hostname === "127.0.0.1") {
-          environment = "testnet";
-        }
+        const environment: "mainnet" = "mainnet";
+        void window.location.hostname;
 
         Pi.createPayment(
           {
@@ -294,47 +269,10 @@ export const realPi = {
   },
 
   /**
-   * Get current network (testnet or mainnet)
+   * Get current network. Mainnet-only mandate: always returns "mainnet".
+   * Kept as a function returning the union for type-stability with callers.
    */
   getNetwork(): "testnet" | "mainnet" {
-    if (typeof window === "undefined") {
-      return "mainnet";
-    }
-
-    // ============================================
-    // EXPLICIT FULL DOMAIN URL MATCHING
-    // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
-    // ============================================
-    const hostname = window.location.hostname;
-
-    // PINET TESTNET
-    if (hostname === "triumphsynergy1991.pinet.com") {
-      return "testnet";
-    }
-    // PINET MAINNET
-    if (hostname === "triumphsynergy7386.pinet.com") {
-      return "mainnet";
-    }
-    if (hostname === "triumphsynergy0576.pinet.com") {
-      return "mainnet";
-    }
-    // VERCEL MAINNET
-    if (hostname === "triumph-synergy.vercel.app") {
-      return "mainnet";
-    }
-    // VERCEL TESTNET (EXPLICIT)
-    if (hostname === "triumph-synergy-testnet.vercel.app") {
-      return "testnet";
-    }
-    // Fallback: Other vercel.app = testnet
-    if (hostname.endsWith(".vercel.app")) {
-      return "testnet";
-    }
-    // Fallback: localhost = testnet
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "testnet";
-    }
-
     return "mainnet";
   },
 

@@ -9,20 +9,21 @@
  * CRITICAL: Returns the VALIDATION KEY that Pi Network uses to verify domain ownership
  */
 
-// Domain configuration - ALL 5 PRODUCTION DOMAINS
+// Domain configuration — MAINNET-ONLY MANDATE
+// (Pi Network + Stellar Protocol 23). The testnet validation key is
+// served separately from /validation-key-testnet.txt and is the ONLY
+// permitted testnet artifact in the ecosystem.
 const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
-  // PINET DOMAINS
-  "triumphsynergy1991.pinet.com": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
+  // PINET MAINNET DOMAINS
   "triumphsynergy7386.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
   "triumphsynergy0576.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  // VERCEL DOMAINS
+  // VERCEL MAINNET DOMAIN
   "triumph-synergy.vercel.app": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  "triumph-synergy-testnet.vercel.app": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
 };
 
-// Default validation keys (fallback if env vars not set)
+// Default validation key (mainnet). Testnet key is intentionally not
+// served from this endpoint — see /validation-key-testnet.txt.
 const DEFAULT_MAINNET_KEY = "efee2c5a2ce4e5079efeb7eb88e9460f8928f87e900d1fb2075b3f6279fb5b612550875c1fb8b0f1b749b96028e66c833bfc6e52011997a4c38d3252e7b2b195";
-const DEFAULT_TESTNET_KEY = "75b333f8b28771b24f2fb6adb87b225cc1b58eef8bd5a747d388a98dca1084e331eebc385c6a63885a887f4a0382bc883adeeeccdce9240b4cb8c10faaed93a3";
 
 export async function GET(request: Request) {
   // Get hostname
@@ -49,9 +50,8 @@ export async function GET(request: Request) {
     config = { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" };
   }
 
-  // Get the validation key
-  const validationKey = process.env[config.envKey] || 
-    (config.network === "testnet" ? DEFAULT_TESTNET_KEY : DEFAULT_MAINNET_KEY);
+  // Get the validation key (mainnet-only mandate)
+  const validationKey = process.env[config.envKey] || DEFAULT_MAINNET_KEY;
 
   console.log("[Pi Verification] Network:", config.network, "Key length:", validationKey.length);
 
@@ -81,18 +81,16 @@ export async function GET(request: Request) {
 
     // Network configuration
     network: config.network,
-    sandbox: config.network === "testnet",
+    sandbox: false,
     
     // Domain info
     domain: hostname,
     
-    // App URLs
+    // App URLs (mainnet-only)
     urls: {
       mainnet_pinet: "https://triumphsynergy0576.pinet.com",
       mainnet_pinet_alt: "https://triumphsynergy7386.pinet.com",
       mainnet_vercel: "https://triumph-synergy.vercel.app",
-      testnet_pinet: "https://triumphsynergy1991.pinet.com",
-      testnet_vercel: "https://triumph-synergy-testnet.vercel.app",
       current_host: hostname,
     },
 

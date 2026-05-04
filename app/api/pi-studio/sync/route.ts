@@ -12,31 +12,26 @@ export async function GET(request: NextRequest) {
   const hostname = request.nextUrl.hostname.toLowerCase();
   const origin = request.headers.get("origin") || "";
 
-  // Define the production domains that are synced with Pi Studio
+  // Mainnet-only mandate — Pi Network + Stellar Protocol 23.
+  // No testnet domains are permitted on the runtime sync path.
   const PI_STUDIO_SYNCED_DOMAINS = {
     mainnet: [
       "triumph-synergy.vercel.app",
       "triumphsynergy0576.pinet.com",
       "triumphsynergy7386.pinet.com",
     ],
-    testnet: [
-      "triumph-synergy-testnet.vercel.app",
-      "triumphsynergy1991.pinet.com",
-    ],
+    testnet: [] as string[],
   };
 
-  const allSyncedDomains = [
-    ...PI_STUDIO_SYNCED_DOMAINS.mainnet,
-    ...PI_STUDIO_SYNCED_DOMAINS.testnet,
-  ];
+  const allSyncedDomains = [...PI_STUDIO_SYNCED_DOMAINS.mainnet];
 
   const isMainnet = PI_STUDIO_SYNCED_DOMAINS.mainnet.includes(hostname);
-  const isTestnet = PI_STUDIO_SYNCED_DOMAINS.testnet.includes(hostname);
+  const isTestnet = false;
   const isSynced = allSyncedDomains.includes(hostname);
 
   // Determine network
-  const network = isMainnet ? "mainnet" : isTestnet ? "testnet" : "unknown";
-  const sandbox = !isMainnet;
+  const network = isMainnet ? "mainnet" : "unknown";
+  const sandbox = false;
 
   const syncStatus = {
     timestamp: new Date().toISOString(),
@@ -59,17 +54,10 @@ export async function GET(request: NextRequest) {
     // Integration Configuration
     integration: {
       enabled: isSynced,
-      primaryDomain:
-        isMainnet
-          ? "triumph-synergy.vercel.app"
-          : "triumph-synergy-testnet.vercel.app",
-      pinetPrimaryDomain: isMainnet
-        ? "triumphsynergy0576.pinet.com"
-        : "triumphsynergy1991.pinet.com",
+      primaryDomain: "triumph-synergy.vercel.app",
+      pinetPrimaryDomain: "triumphsynergy0576.pinet.com",
       vercelDeploymentConnected: true,
-      piNetworkPrimary: isMainnet
-        ? "triumphsynergy0576.pinet.com"
-        : "triumphsynergy1991.pinet.com",
+      piNetworkPrimary: "triumphsynergy0576.pinet.com",
     },
 
     // Sync Status Details
@@ -137,12 +125,11 @@ export async function POST(request: NextRequest) {
   // Pi Studio can POST to verify sync status
   const hostname = request.nextUrl.hostname.toLowerCase();
   
+  // Mainnet-only mandate — Pi Network + Stellar Protocol 23.
   const piStudioSyncedDomains = [
     "triumph-synergy.vercel.app",
-    "triumph-synergy-testnet.vercel.app",
     "triumphsynergy0576.pinet.com",
     "triumphsynergy7386.pinet.com",
-    "triumphsynergy1991.pinet.com",
   ];
 
   const isSynced = piStudioSyncedDomains.includes(hostname);

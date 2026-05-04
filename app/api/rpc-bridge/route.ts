@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRPCBridge, type BridgeRequest } from "@/lib/api/rpc-bridge";
 import { rateLimitByIP, isAllowedRPCMethod } from "@/lib/security/api-guard";
+import { assertMainnetNetwork } from "@/lib/pi-network/mainnet-guard";
 
 /**
  * Request body structure
@@ -104,6 +105,16 @@ export async function POST(request: NextRequest) {
     if (!isAllowedRPCMethod(body.method)) {
       return NextResponse.json(
         { error: "Method not allowed" },
+        { status: 403 }
+      );
+    }
+
+    // Mainnet-only mandate: refuse pi-testnet at the API boundary.
+    try {
+      assertMainnetNetwork(body.network, "rpc-bridge");
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : "Mainnet-only mandate" },
         { status: 403 }
       );
     }

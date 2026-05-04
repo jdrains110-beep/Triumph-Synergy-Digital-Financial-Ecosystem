@@ -82,10 +82,10 @@ export const {
           let session;
           if (accessToken) {
             // Pi Browser flow — verify via Pi Platform API
-            session = await Web3Auth.verifyPiAuth(accessToken, network || "testnet");
+            session = await Web3Auth.verifyPiAuth(accessToken, network || "mainnet");
           } else if (publicKey && challenge && signature) {
             // Direct Stellar wallet flow — challenge-response
-            session = Web3Auth.verifyChallenge(publicKey, challenge, signature, network || "testnet");
+            session = Web3Auth.verifyChallenge(publicKey, challenge, signature, network || "mainnet");
           } else {
             return null;
           }

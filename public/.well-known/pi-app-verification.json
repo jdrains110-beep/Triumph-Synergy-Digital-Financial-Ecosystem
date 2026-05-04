@@ -13,9 +13,7 @@
   "urls": {
     "app": "https://triumph-synergy.vercel.app",
     "development_mainnet": "https://triumphsynergy0576.pinet.com",
-    "development_mainnet_alt": "https://triumphsynergy7386.pinet.com",
-    "development_testnet": "https://triumphsynergy1991.pinet.com",
-    "app_testnet": "https://triumph-synergy-testnet.vercel.app"
+    "development_mainnet_alt": "https://triumphsynergy7386.pinet.com"
   },
   "platform_bridge": {
     "enabled": true,

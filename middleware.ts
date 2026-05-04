@@ -103,7 +103,7 @@ export async function middleware(request: NextRequest) {
       "script-src-attr 'none'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.minepi.com https://developer-assets.minepi.com",
-      "connect-src 'self' https://api.minepi.com https://*.minepi.com https://horizon.pi.network https://api.testnet.minepi.com https://*.supabase.co wss://*.supabase.co",
+      "connect-src 'self' https://api.minepi.com https://*.minepi.com https://horizon.pi.network https://api.mainnet.minepi.com https://*.supabase.co wss://*.supabase.co",
       "frame-src 'self' https://sdk.minepi.com",
       "font-src 'self' data:",
       "object-src 'none'",

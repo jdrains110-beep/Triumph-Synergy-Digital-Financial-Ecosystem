@@ -1120,37 +1120,10 @@ services:
       start_period: 120s
 
   # --------------------------------------------------------------------------
-  # PI TESTNET2 NODE — Optional companion to mainnet (for dev/parity testing)
-  # Ports remapped to 31501-31503 to avoid collision with mainnet (31401-31403)
+  # MAINNET-ONLY MANDATE — Pi Network + Stellar Protocol 23
+  # The pi-testnet2-node service was removed. Only the mainnet supernode
+  # is permitted to run inside the ecosystem.
   # --------------------------------------------------------------------------
-  pi-testnet2-node:
-    image: pinetwork/pi-node-docker:community-v1.0-p22.1
-    container_name: triumph-pi-testnet2-node
-    restart: always
-    profiles: ["pi-node"]
-    mem_limit: 3g
-    mem_reservation: 1g
-    cpus: 1.0
-    environment:
-      POSTGRES_PASSWORD: ${PI_TESTNET_POSTGRES_PASSWORD:-changeme_in_env}
-    volumes:
-      - pi_testnet2_stellar:/opt/stellar
-      - pi_testnet2_logs:/var/log/supervisor
-      - pi_testnet2_history:/history
-    ports:
-      - "${PI_TESTNET_HORIZON_PORT:-31401}:8000"
-      - "${PI_TESTNET_PEER_PORT:-31402}:31402"
-      - "${PI_TESTNET_HISTORY_PORT:-31403}:1570"
-    command: ["--testnet2"]
-    networks:
-      - triumph-net
-      - pi-bridge
-    healthcheck:
-      test: ["CMD", "sh", "-c", "curl -sf http://localhost:8000 > /dev/null"]
-      interval: 60s
-      timeout: 15s
-      retries: 5
-      start_period: 120s
 
 # ==========================================================================
 # VOLUMES — Persistent Data
@@ -1188,13 +1161,6 @@ volumes:
     name: pi_mainnet_logs
   pi_mainnet_history:
     name: pi_mainnet_history
-  # Pi testnet2 node volumes
-  pi_testnet2_stellar:
-    name: pi_testnet2_stellar
-  pi_testnet2_logs:
-    name: pi_testnet2_logs
-  pi_testnet2_history:
-    name: pi_testnet2_history
 
 # ==========================================================================
 # NETWORK — Shared with Pi Network node for direct communication

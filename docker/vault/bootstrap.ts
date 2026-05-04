@@ -8,7 +8,7 @@ import http from "node:http";
 import { PiTrillionVaultManager } from "../../lib/pi-transaction/pi-trillion-vault";
 
 const PORT = 8081;
-const networkType = (process.env.PI_NETWORK_MODE || "mainnet") as "mainnet" | "testnet";
+const networkType = "mainnet" as const; // mainnet-only mandate (Pi Network + Stellar Protocol 23)
 const safeStringify = (o: unknown) => JSON.stringify(o, (_k, v) => typeof v === "bigint" ? v.toString() : v);
 let vault: PiTrillionVaultManager | null = null;
 let ready = false;

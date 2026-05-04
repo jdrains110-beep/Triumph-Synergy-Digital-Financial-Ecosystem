@@ -116,7 +116,7 @@ describe("Pi Payment Configuration", () => {
       externalMultiplier: 1.0,
       minAmount: 10,
       maxAmount: 100_000,
-      settlementNetwork: "stellar_testnet",
+      settlementNetwork: "stellar_mainnet",
     };
 
     expect(config.enabled).toBe(true);

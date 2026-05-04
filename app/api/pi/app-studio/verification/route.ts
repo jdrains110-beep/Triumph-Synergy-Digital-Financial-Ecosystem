@@ -17,9 +17,11 @@ const PRODUCTION_DOMAINS = {
     vercel: "triumph-synergy.vercel.app",
     pinet: ["triumphsynergy7386.pinet.com", "triumphsynergy0576.pinet.com"],
   },
+  // Mainnet-only mandate — testnet domains intentionally empty so the
+  // verification path can never resolve to a testnet network.
   testnet: {
-    vercel: "triumph-synergy-testnet.vercel.app",
-    pinet: ["triumphsynergy1991.pinet.com"],
+    vercel: "",
+    pinet: [] as string[],
   },
 };
 
@@ -96,22 +98,19 @@ async function verifyPiSdkInjection(domain: string): Promise<{
 function getDomainNetwork(
   domain: string
 ): "mainnet" | "testnet" | "unknown" {
+  // Mainnet-only mandate — testnet branch removed at runtime.
   const mainnetDomains = [
-    ...PRODUCTION_DOMAINS.mainnet.vercel,
+    PRODUCTION_DOMAINS.mainnet.vercel,
     ...PRODUCTION_DOMAINS.mainnet.pinet,
-  ];
-  const testnetDomains = [
-    PRODUCTION_DOMAINS.testnet.vercel,
-    ...PRODUCTION_DOMAINS.testnet.pinet,
   ];
 
   if (mainnetDomains.includes(domain)) return "mainnet";
-  if (testnetDomains.includes(domain)) return "testnet";
   return "unknown";
 }
 
-function getSandboxMode(domain: string): boolean {
-  return getDomainNetwork(domain) === "testnet";
+function getSandboxMode(_domain: string): boolean {
+  // Sandbox mode is mainnet-only false.
+  return false;
 }
 
 export async function GET(request: NextRequest) {
@@ -164,7 +163,6 @@ export async function GET(request: NextRequest) {
   if (requestMode === "check-all") {
     verification.allDomains = {
       mainnet: {},
-      testnet: {},
     };
 
     // Check mainnet domains
@@ -284,7 +282,6 @@ export async function POST(request: NextRequest) {
     message: `Pi App Studio verification point for ${hostname}`,
     primaryMainnet: PRIMARY_MAINNET_DOMAIN,
     vercelMainnet: PRODUCTION_DOMAINS.mainnet.vercel,
-    vercelTestnet: PRODUCTION_DOMAINS.testnet.vercel,
   };
 
   const accessible = await verifyDomainAccessibility(hostname);

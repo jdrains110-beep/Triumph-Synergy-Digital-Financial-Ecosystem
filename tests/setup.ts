@@ -9,7 +9,7 @@ import "@testing-library/jest-dom";
 process.env.NODE_ENV = "test";
 process.env.PI_API_KEY = "test-pi-api-key";
 process.env.PI_INTERNAL_API_KEY = "test-pi-internal-api-key";
-process.env.STELLAR_HORIZON_URL = "https://horizon-testnet.stellar.org";
+process.env.STELLAR_HORIZON_URL = "https://api.mainnet.minepi.com";
 process.env.STELLAR_PAYMENT_ACCOUNT = "GTEST...";
 process.env.STELLAR_PAYMENT_SECRET = "STEST...";
 process.env.INTERNAL_PI_MULTIPLIER = "1.5";
