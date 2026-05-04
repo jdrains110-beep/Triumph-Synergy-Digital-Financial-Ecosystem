@@ -664,6 +664,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       # Read-only codebase mount — enables SAIB quantum brain filesystem scanning
       - ./:/workspace:ro
+      # SAIB-only secrets (chmod 700 host-side; read-only in-container).
+      # Outside processes / other containers cannot read these.
+      - ./docker/saib-secrets:/run/saib-secrets:ro
     expose:
       - "8097"
       - "8099"
@@ -762,10 +765,25 @@ services:
       REDIS_ADDR: "redis://triumph-redis:6379"
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-triumph_admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      # ── Cloudflare folded INTO our superior cloud-memory platform ──
+      # All values default empty so missing creds simply mark the target
+      # as "disabled" instead of breaking sync. Source from .env*.local.
+      CLOUDFLARE_ENABLED: ${CLOUDFLARE_ENABLED:-false}
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
+      CLOUDFLARE_R2_BUCKET: ${CLOUDFLARE_R2_BUCKET:-triumph-cloud-memory}
+      CLOUDFLARE_R2_PREFIX: ${CLOUDFLARE_R2_PREFIX:-snapshots}
+      CLOUDFLARE_R2_ENDPOINT: ${CLOUDFLARE_R2_ENDPOINT:-}
+      CLOUDFLARE_R2_ACCESS_KEY_ID: ${CLOUDFLARE_R2_ACCESS_KEY_ID:-}
+      CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${CLOUDFLARE_R2_SECRET_ACCESS_KEY:-}
+      CLOUDFLARE_KV_NAMESPACE_ID: ${CLOUDFLARE_KV_NAMESPACE_ID:-}
+      CLOUDFLARE_KV_KEY: ${CLOUDFLARE_KV_KEY:-triumph-cloud-memory:latest}
     volumes:
       - triumph_prometheus_data:/prometheus
       - triumph_grafana_data:/var/lib/grafana
       - triumph_cloud_memory_backup:/backup
+      # SAIB-only secrets (Cloudflare R2 keys, KV token, etc.) — read-only.
+      - ./docker/saib-secrets:/run/saib-secrets:ro
     expose:
       - "9121"
       - "9187"

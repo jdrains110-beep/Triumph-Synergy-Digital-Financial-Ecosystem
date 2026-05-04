@@ -12,6 +12,10 @@ ARCHITECTURE:
   - Namespace isolation: each service has its own keyspace
   - Cross-service broadcast: write once, all services read instantly
   - Snapshot + restore: persistent state survives container restarts
+  - Multi-target sync: local volume, offline backup, AWS S3, Apple iCloud,
+    AND Cloudflare R2 + Cloudflare Workers KV — all driven from this one
+    superior cloud-memory platform (Cloudflare is folded INTO us, not the
+    other way around).
   - Prometheus metrics: full observability on compression ratios + hit rates
 
 ENDPOINTS:
@@ -96,6 +100,25 @@ APPLE_WEBDAV_USERNAME = os.getenv("APPLE_CLOUD_WEBDAV_USERNAME", "")
 APPLE_WEBDAV_PASSWORD = os.getenv("APPLE_CLOUD_WEBDAV_PASSWORD", "")
 APPLE_WEBDAV_PATH     = os.getenv("APPLE_CLOUD_WEBDAV_PATH", "/triumph-cloud-memory")
 SYNC_HTTP_TIMEOUT_S   = int(os.getenv("SYNC_HTTP_TIMEOUT_S", "20"))
+
+# ── Cloudflare integration (folded INTO our superior cloud-memory platform) ──
+# R2 = S3-compatible object storage (uses boto3 against the R2 endpoint).
+# KV = edge-replicated key/value over the Cloudflare API (tiny snapshot index).
+CLOUDFLARE_ENABLED         = os.getenv("CLOUDFLARE_ENABLED",         "false").lower() == "true"
+CLOUDFLARE_ACCOUNT_ID      = os.getenv("CLOUDFLARE_ACCOUNT_ID",       "")
+CLOUDFLARE_API_TOKEN       = os.getenv("CLOUDFLARE_API_TOKEN",        "")  # secret — SAIB-only
+# R2
+CLOUDFLARE_R2_BUCKET       = os.getenv("CLOUDFLARE_R2_BUCKET",        "triumph-cloud-memory")
+CLOUDFLARE_R2_PREFIX       = os.getenv("CLOUDFLARE_R2_PREFIX",        "snapshots")
+CLOUDFLARE_R2_ACCESS_KEY   = os.getenv("CLOUDFLARE_R2_ACCESS_KEY_ID", "")  # secret
+CLOUDFLARE_R2_SECRET_KEY   = os.getenv("CLOUDFLARE_R2_SECRET_ACCESS_KEY", "")  # secret
+CLOUDFLARE_R2_ENDPOINT     = os.getenv(
+    "CLOUDFLARE_R2_ENDPOINT",
+    f"https://{CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com" if CLOUDFLARE_ACCOUNT_ID else "",
+)
+# KV — small index of latest snapshots so any edge worker can read it
+CLOUDFLARE_KV_NAMESPACE_ID = os.getenv("CLOUDFLARE_KV_NAMESPACE_ID", "")  # workers KV ns id
+CLOUDFLARE_KV_KEY          = os.getenv("CLOUDFLARE_KV_KEY",          "triumph-cloud-memory:latest")
 
 # All platform namespaces
 NAMESPACES = [
@@ -423,6 +446,83 @@ def _sync_to_apple_webdav(file_name: str, payload: dict[str, Any]) -> dict[str, 
     return {"target": "apple_webdav", "status": "ok", "url": file_url}
 
 
+def _sync_to_cloudflare_r2(file_name: str, payload: dict[str, Any]) -> dict[str, Any]:
+    """Mirror snapshot to Cloudflare R2 using its S3-compatible API.
+
+    Folds Cloudflare object storage *into* our cloud-memory platform so the
+    same compressed, integrity-verified snapshot lands on the global edge
+    in addition to the local Docker volume, AWS S3, and Apple iCloud bridges.
+    """
+    if not CLOUDFLARE_ENABLED:
+        return {"target": "cloudflare_r2", "status": "disabled"}
+    if boto3 is None:
+        return {"target": "cloudflare_r2", "status": "error", "error": "boto3 not installed"}
+    if not (CLOUDFLARE_R2_ENDPOINT and CLOUDFLARE_R2_ACCESS_KEY and CLOUDFLARE_R2_SECRET_KEY):
+        return {"target": "cloudflare_r2", "status": "error",
+                "error": "CLOUDFLARE_R2_ENDPOINT / R2 keys missing"}
+
+    client = boto3.client(
+        "s3",
+        region_name="auto",
+        endpoint_url=CLOUDFLARE_R2_ENDPOINT,
+        aws_access_key_id=CLOUDFLARE_R2_ACCESS_KEY,
+        aws_secret_access_key=CLOUDFLARE_R2_SECRET_KEY,
+    )
+    key = f"{CLOUDFLARE_R2_PREFIX.rstrip('/')}/{file_name}"
+    body = json.dumps(payload, separators=(",", ":")).encode()
+    client.put_object(
+        Bucket=CLOUDFLARE_R2_BUCKET,
+        Key=key,
+        Body=body,
+        ContentType="application/json",
+    )
+    return {"target": "cloudflare_r2", "status": "ok",
+            "bucket": CLOUDFLARE_R2_BUCKET, "key": key}
+
+
+def _sync_to_cloudflare_kv(file_name: str, payload: dict[str, Any]) -> dict[str, Any]:
+    """Publish the snapshot index pointer to Cloudflare Workers KV.
+
+    Stores a tiny JSON pointer so any edge worker can resolve the current
+    snapshot by reading a single KV key — no R2 list needed.
+    """
+    if not CLOUDFLARE_ENABLED:
+        return {"target": "cloudflare_kv", "status": "disabled"}
+    if requests is None:
+        return {"target": "cloudflare_kv", "status": "error", "error": "requests not installed"}
+    if not (CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN and CLOUDFLARE_KV_NAMESPACE_ID):
+        return {"target": "cloudflare_kv", "status": "error",
+                "error": "CLOUDFLARE_ACCOUNT_ID / API_TOKEN / KV_NAMESPACE_ID missing"}
+
+    pointer = {
+        "file": file_name,
+        "sha256": payload.get("snapshot_sha256"),
+        "raw_bytes": payload.get("raw_bytes"),
+        "compressed_bytes": payload.get("compressed_bytes"),
+        "ratio": payload.get("ratio"),
+        "total_keys": payload.get("total_keys"),
+        "r2_bucket": CLOUDFLARE_R2_BUCKET,
+        "r2_key": f"{CLOUDFLARE_R2_PREFIX.rstrip('/')}/{file_name}",
+        "at": time.time(),
+    }
+    url = (
+        f"https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}"
+        f"/storage/kv/namespaces/{CLOUDFLARE_KV_NAMESPACE_ID}/values/{quote(CLOUDFLARE_KV_KEY)}"
+    )
+    response = requests.put(
+        url,
+        data=json.dumps(pointer, separators=(",", ":")).encode(),
+        headers={
+            "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
+            "Content-Type": "application/json",
+        },
+        timeout=SYNC_HTTP_TIMEOUT_S,
+    )
+    if response.status_code >= 300:
+        raise RuntimeError(f"Cloudflare KV PUT failed with status {response.status_code}: {response.text[:160]}")
+    return {"target": "cloudflare_kv", "status": "ok", "key": CLOUDFLARE_KV_KEY}
+
+
 def _track_sync(target: str, status: str) -> None:
     now = time.time()
     sync_last_attempt.labels(target=target).set(now)
@@ -457,6 +557,20 @@ async def _run_sync(trigger: str) -> dict[str, Any]:
             "ok" if apple_result.get("status") == "ok" else ("disabled" if apple_result.get("status") == "disabled" else "error"),
         )
 
+        # Cloudflare R2 (object storage) — folded INTO our cloud-memory platform
+        r2_result = await asyncio.to_thread(_sync_to_cloudflare_r2, file_name, payload)
+        _track_sync(
+            "cloudflare_r2",
+            "ok" if r2_result.get("status") == "ok" else ("disabled" if r2_result.get("status") == "disabled" else "error"),
+        )
+
+        # Cloudflare Workers KV — edge-replicated index pointer to the latest snapshot
+        kv_result = await asyncio.to_thread(_sync_to_cloudflare_kv, file_name, payload)
+        _track_sync(
+            "cloudflare_kv",
+            "ok" if kv_result.get("status") == "ok" else ("disabled" if kv_result.get("status") == "disabled" else "error"),
+        )
+
         result = {
             "status": "ok",
             "trigger": trigger,
@@ -473,6 +587,8 @@ async def _run_sync(trigger: str) -> dict[str, Any]:
                 "offline": {"status": "ok", "path": offline_path},
                 "s3": s3_result,
                 "apple_webdav": apple_result,
+                "cloudflare_r2": r2_result,
+                "cloudflare_kv": kv_result,
             },
             "at": time.time(),
         }
