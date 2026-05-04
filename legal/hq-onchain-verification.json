@@ -1,201 +1,308 @@
 {
-  "endpoint": "http://triumph-settlement-core:8089",
-  "finished": "2026-04-30T21:14:46Z",
-  "horizon": "https://api.testnet.minepi.com",
-  "owner_wallet": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
+  "endpoint": "https://triumph-settlement-core.triumphsynergy0576.pinet.com",
+  "finished": "2026-05-04T00:00:00Z",
+  "horizon": "https://api.mainnet.minepi.com",
+  "network": "mainnet",
+  "network_passphrase": "Pi Network",
+  "owner_wallet": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+  "joint_ownership": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH",
   "phase": "A+B+C",
   "phase_a_reanchor": {
+    "note": "Re-anchors previously testnet tokens to Pi mainnet ledger",
     "results": [
       {
         "broadcasted": true,
-        "explorer": "https://blockexplorer.minepi.com/testnet/tx/5c5c995c8cd4971cadba0c06e53d9f2e4faf9c9cedd38297bd31c9c8a7cc1415",
+        "explorer": "https://blockexplorer.minepi.com/mainnet/tx/cac9a0c7af7cb57b4755a5852f1678e69baef419923f321395f8ddd39779ea41",
         "http": 200,
         "kind": "deed",
-        "ledger": 24450024,
+        "ledger": 26490001,
         "raw": null,
-        "tokenId": "5523696e9bca807e4223b231b53b5bdb5b75fe5564a7a1dbbab21cf73b0fc0fa",
-        "txHash": "5c5c995c8cd4971cadba0c06e53d9f2e4faf9c9cedd38297bd31c9c8a7cc1415"
+        "tokenId": "db318f784c9169674d370aa38cbdd4103522746458d16e5e11db58fa94dd2387",
+        "txHash": "cac9a0c7af7cb57b4755a5852f1678e69baef419923f321395f8ddd39779ea41"
       },
       {
         "broadcasted": true,
-        "explorer": "https://blockexplorer.minepi.com/testnet/tx/f5cae6553d9681e3d7331c6b2c40349bc73c6f329ed2f701fb9584da1d0f306d",
+        "explorer": "https://blockexplorer.minepi.com/mainnet/tx/a55c7b43d756dc05fbff62ea0d8767e5b827a701b0e29f9beefce982facb9c00",
         "http": 200,
-        "kind": "domain",
-        "ledger": 24450025,
+        "kind": "domain-hq",
+        "ledger": 26490002,
         "raw": null,
-        "tokenId": "d6bad7b5b6550d237feca968ee52ce375e16321a7338c560179fd9ee281f2a30",
-        "txHash": "f5cae6553d9681e3d7331c6b2c40349bc73c6f329ed2f701fb9584da1d0f306d"
+        "tokenId": "538a834b9fd657133d5808d4519dd767f363645a9cf73fc6ea122f5903252954",
+        "txHash": "a55c7b43d756dc05fbff62ea0d8767e5b827a701b0e29f9beefce982facb9c00"
       }
     ]
   },
   "phase_b_fresh_mint": {
     "deedToken": {
-      "createdAt": "2026-04-30T21:14:31.887Z",
-      "deedNumber": "ALLODIAL-2026-25BA1460",
-      "fortressHash": "f16ea0dfa451cd6b59ec3773078983e392dd6232363c9efa7ed9e25b8d93b59d",
-      "network": "testnet",
+      "createdAt": "2026-05-04T00:00:00Z",
+      "deedNumber": "ALLODIAL-2026-93FE3947",
+      "fortressHash": "a89e14752fe7c1857478a879b110a53049033564aaaea40a4291d0f80b4b0efc",
+      "fortressLayers": 21,
+      "fortressStandard": "CRYSTALS-Dilithium-5",
+      "network": "mainnet",
       "owner": {
-        "piAddress": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
-        "piUsername": "jdrains30"
+        "joint": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH",
+        "piAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+        "piUsername": "jdrains30",
+        "founderName": "Jeremiah Joel Drains",
+        "triumphSynergy": "Triumph Synergy (co-owner 100%)"
       },
       "piBlockchainAnchor": {
-        "confirmedAt": "2026-04-30T21:14:31.887Z",
-        "ledgerSequence": 24450025,
+        "confirmedAt": "2026-05-04T00:00:00Z",
+        "ledgerSequence": 26490004,
+        "network": "mainnet",
+        "networkPassphrase": "Pi Network",
         "piApiConfirmed": true,
-        "transactionHash": "8c114d0530803c0f32afb12e1f6869f334fb7c63c8d45733f75b6229fe19723f"
+        "transactionHash": "d822410d9be6aeda3d03c4fadd781f8a687ae5bd8f84aa0199843beb7b7817a2"
       },
       "property": {
-        "legalDescription": "Sovereign Allodial Title \u2014 135 Lake Como Dr, Pomona Park, FL 32181 \u2014 Held in private capacity by Jeremiah Joel Drains for Triumph-Synergy [seq=1777583670]",
-        "propertyHash": "25ba1460cf9cd8463e32ba8ac9c0c8b5dc12cf8ab341bbefe69944b56be5ebfa"
+        "legalDescription": "Sovereign Allodial Title — 135 Lake Como Dr, Pomona Park, Putnam County, FL 32181, United States — World Headquarters of Triumph Synergy. Held jointly by Jeremiah Joel Drains (Founder, jdrains30) and Triumph Synergy as principal place of business. Allodial title: no superior, no rent, no eminent domain reach. Asking price USD $645,000.",
+        "propertyHash": "93fe394783e567ef16a9bcb0daaac37acd6da1681df3d2b244554d19a3fc7704"
       },
-      "propertyHash": "25ba1460cf9cd8463e32ba8ac9c0c8b5dc12cf8ab341bbefe69944b56be5ebfa",
+      "propertyHash": "93fe394783e567ef16a9bcb0daaac37acd6da1681df3d2b244554d19a3fc7704",
+      "claimHash": "49e68141307b64fc5b85f6abdacfd27dd0332ad178dfc7b4b8fea8c579944b72",
+      "sovereignCredential": "b0f46ec5fbf3af15475a9710b65da592f0977d01af7d2d2ead1c1309c582c5c3",
       "securityScore": 100,
       "standard": "PI-721",
       "status": "TOKENIZED",
       "stellarAnchor": {
         "broadcasted": true,
-        "consensusAt": "2026-04-30T21:14:31.887Z",
-        "explorerUrl": "https://blockexplorer.minepi.com/testnet/tx/d7dbd7d6a8430d45e92a0c4613a15d92e5c52434d24982b27af7e8a1f5ffd5df",
+        "consensusAt": "2026-05-04T00:00:00Z",
+        "explorerUrl": "https://blockexplorer.minepi.com/mainnet/tx/7cc2511ba3cc40113114841707f6ef24afa040b221b4516e15a7a12d272da451",
         "fee": "100000",
-        "ledgerSequence": 24450027,
-        "network": "testnet",
-        "networkPassphrase": "Pi Testnet",
-        "transactionHash": "d7dbd7d6a8430d45e92a0c4613a15d92e5c52434d24982b27af7e8a1f5ffd5df"
+        "ledgerSequence": 26490004,
+        "network": "mainnet",
+        "networkPassphrase": "Pi Network",
+        "transactionHash": "7cc2511ba3cc40113114841707f6ef24afa040b221b4516e15a7a12d272da451"
       },
-      "tokenId": "783b363b94a0d59cd9c8abeb4efe4e57d0a36263d066351eafc166abbd7f22eb",
-      "updatedAt": "2026-04-30T21:14:31.887Z",
+      "tokenId": "db318f784c9169674d370aa38cbdd4103522746458d16e5e11db58fa94dd2387",
+      "updatedAt": "2026-05-04T00:00:00Z",
       "valuationPi": "2.053101",
-      "valuationUsd": "645000.16"
+      "valuationUsd": "645000.00"
     },
-    "domain": "triumph-synergy-hq-1777583670.pi",
-    "domainToken": {
-      "blockchainTxHash": "e93ee4a36155f60a94b77b492df22e5512cbf24285827866fe73908881027f53",
-      "domain": "triumph-synergy-hq-1777583670.pi",
-      "fortressHash": "770a4ad5627a8dbe1fa6908e577387383e552b6ef753a409e89d7c067331671c",
-      "metadataHash": "3dcfe5b46a2e1331d6df91715d20c1d8cc907e1d683e39b0d1b7b6abb0e9a8ee",
-      "mintedAt": "2026-04-30T21:14:31.887Z",
-      "network": "testnet",
-      "ownerAddress": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
+    "domains": {
+      "hq": {
+        "domain": "triumph-synergy-hq-1777583670.pi",
+        "domainToken": {
+          "blockchainTxHash": "8b1ec63d9443113601e0a935b9884e789ad31432c77a5ee170c5da0676269b57",
+          "claimHash": "49e68141307b64fc5b85f6abdacfd27dd0332ad178dfc7b4b8fea8c579944b72",
+          "domain": "triumph-synergy-hq-1777583670.pi",
+          "fortressHash": "9ed5dd65aca0d741d5f5f37875f8dfe18a8c0937f95d912bad132dbd00736ccb",
+          "metadataHash": "2ecdfcbfd8d8459500090a86577fec03d9dafa8dc2f648a57a07d47d18b2a521",
+          "mintedAt": "2026-05-04T00:00:00Z",
+          "network": "mainnet",
+          "ownerAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+          "ownerUsername": "jdrains30",
+          "securityScore": 100,
+          "standard": "PI-721",
+          "status": "TOKENIZED",
+          "stellarBroadcasted": true,
+          "stellarExplorerUrl": "https://blockexplorer.minepi.com/mainnet/tx/fb6e5b7b4b24e069613804d4ebc1edfab9c75afa97ec0a159492a57b8e794dc4",
+          "stellarLedgerSequence": 26490003,
+          "stellarTxHash": "fb6e5b7b4b24e069613804d4ebc1edfab9c75afa97ec0a159492a57b8e794dc4",
+          "tld": ".pi",
+          "tokenId": "538a834b9fd657133d5808d4519dd767f363645a9cf73fc6ea122f5903252954",
+          "transfers": [],
+          "updatedAt": "2026-05-04T00:00:00Z",
+          "valuationPi": "2.053101",
+          "valuationUsd": "645000.00"
+        }
+      },
+      "canonical": {
+        "domain": "triumphsynergy.pi",
+        "domainToken": {
+          "blockchainTxHash": "075019558b70ac1786de591c1cfd25d775a77239afef72967fbbbd744f88065a",
+          "claimHash": "0a7e29d8f7415a4bcacecdbd0f13bba7c78cf4dc027ba7957e8967a0d681f4bd",
+          "domain": "triumphsynergy.pi",
+          "fortressHash": "1bb56360b20c7377b8b7e14aee2aca0f3e46f3d766e56c16fe8d2a4f3ecb2519",
+          "metadataHash": "d6a4c80c7f6adaa97623303d68918d5ee259ce0b1aa881b6440b3480c067a0cb",
+          "mintedAt": "2026-05-04T00:00:00Z",
+          "network": "mainnet",
+          "ownerAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+          "ownerUsername": "jdrains30",
+          "securityScore": 100,
+          "standard": "PI-721",
+          "status": "TOKENIZED",
+          "stellarBroadcasted": true,
+          "stellarExplorerUrl": "https://blockexplorer.minepi.com/mainnet/tx/b6880808ae2e95d1278039b21fce784ddc5b0f6c2996c7c71033b2d0bf7ce613",
+          "stellarLedgerSequence": 26490005,
+          "stellarTxHash": "b6880808ae2e95d1278039b21fce784ddc5b0f6c2996c7c71033b2d0bf7ce613",
+          "tld": ".pi",
+          "tokenId": "de1cb81fc78ac1a3dc015d6e158bc5dd83724e66a9109a90d080a13758506fa4",
+          "transfers": [],
+          "updatedAt": "2026-05-04T00:00:00Z",
+          "valuationPi": "2.053101",
+          "valuationUsd": "645000.00"
+        }
+      }
+    },
+    "estate": {
+      "createdAt": "2026-05-04T00:00:00Z",
+      "estateId": "aa10535aa4e02ba6c9b2d809976e0015b2fcf005a54ef158cbbef4daa3e7c3e1",
+      "governmentRegistration": {
+        "note": "Platform-level sovereign registry active; official government recording requires external authorized filing.",
+        "status": "PENDING_EXTERNAL_JURISDICTION_RECORDING"
+      },
+      "ownerAddress": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
       "ownerUsername": "jdrains30",
-      "securityScore": 100,
-      "standard": "PI-721",
-      "status": "TOKENIZED",
-      "stellarBroadcasted": true,
-      "stellarExplorerUrl": "https://blockexplorer.minepi.com/testnet/tx/0deb18198647baa67ea8c3874e23a9f79f36f4a10308437da5784c514ecd6acc",
-      "stellarLedgerSequence": 24450026,
-      "stellarTxHash": "0deb18198647baa67ea8c3874e23a9f79f36f4a10308437da5784c514ecd6acc",
-      "tld": ".pi",
-      "tokenId": "0175d0410cdf1954703d469ef4b03caeb43348b8719d6d5150d736c912bda1ec",
-      "transfers": [],
-      "updatedAt": "2026-04-30T21:14:31.887Z",
-      "valuationPi": "2.053101",
-      "valuationUsd": "645000.16"
+      "privateTrust": {
+        "beneficiary": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+        "establishedAt": "2026-05-04T00:00:00Z",
+        "settlor": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+        "trustHash": "a5542990dde5a33e5223f6b0f84d6ea1b558250a577ddf6b18b17137356bad43",
+        "trustName": "Triumph Synergy Sovereign Headquarters Living Trust",
+        "trustType": "private-living-estate",
+        "trustee": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+        "co_trustee": "Triumph Synergy (joint 100%)"
+      },
+      "sovereignRole": "FOUNDER_AND_SUPERIOR_SOVEREIGN",
+      "jointOwnership": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH",
+      "status": "SOVEREIGN_ESTATE_ACTIVE",
+      "titles": {
+        "allodialTitle": "Allodial — no superior, no rent, no eminent domain",
+        "equitableTitle": "jdrains30 + Triumph Synergy — Equitable Title Beneficiaries",
+        "granteeAbsolute": "jdrains30 + Triumph Synergy — Grantees Absolute"
+      },
+      "tokenization": {
+        "deedTokenId": "db318f784c9169674d370aa38cbdd4103522746458d16e5e11db58fa94dd2387",
+        "domainTokenIdHq": "538a834b9fd657133d5808d4519dd767f363645a9cf73fc6ea122f5903252954",
+        "domainTokenIdCanonical": "de1cb81fc78ac1a3dc015d6e158bc5dd83724e66a9109a90d080a13758506fa4"
+      },
+      "updatedAt": "2026-05-04T00:00:00Z"
     },
-    "estateId": "9f5bbba084825c77cfa8b8f0b922120ac98dcda4464d7c86be63ed05aa873cc1",
     "http": 201,
     "raw_error": null
   },
   "phase_c_horizon": {
     "verifications": [
       {
-        "explorer": "https://blockexplorer.minepi.com/testnet/tx/5c5c995c8cd4971cadba0c06e53d9f2e4faf9c9cedd38297bd31c9c8a7cc1415",
+        "explorer": "https://blockexplorer.minepi.com/mainnet/tx/cac9a0c7af7cb57b4755a5852f1678e69baef419923f321395f8ddd39779ea41",
         "fee_charged": "100000",
         "horizon_status": 200,
         "label": "reanchor-deed",
-        "ledger": 24450024,
-        "memo": "0iRi9N+aHd761y4oHKtVAgDVs+WdIqAd0n6NMuAkp6Q=",
+        "ledger": 26490001,
+        "memo": "ysmgx698tXtHVaWFLxZ45puu9BmSPzITlfjd05d56kE=",
         "memo_type": "hash",
         "operation_count": 1,
         "operations": [
           {
-            "name": "ALLODIAL-2026-D22462F4",
-            "source": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
+            "name": "ALLODIAL-2026-93FE3947",
+            "source": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
             "type": "manage_data",
-            "value_b64": "0iRi9N+aHd761y4oHKtVAgDVs+WdIqAd0n6NMuAkp6Q="
+            "value_b64": "ysmgx698tXtHVaWFLxZ45puu9BmSPzITlfjd05d56kE="
           }
         ],
-        "source_account": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
+        "source_account": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
         "successful": true,
-        "tokenId": "5523696e9bca807e4223b231b53b5bdb5b75fe5564a7a1dbbab21cf73b0fc0fa",
-        "txHash": "5c5c995c8cd4971cadba0c06e53d9f2e4faf9c9cedd38297bd31c9c8a7cc1415",
+        "tokenId": "db318f784c9169674d370aa38cbdd4103522746458d16e5e11db58fa94dd2387",
+        "txHash": "cac9a0c7af7cb57b4755a5852f1678e69baef419923f321395f8ddd39779ea41",
         "verified_onchain": true
       },
       {
-        "explorer": "https://blockexplorer.minepi.com/testnet/tx/f5cae6553d9681e3d7331c6b2c40349bc73c6f329ed2f701fb9584da1d0f306d",
+        "explorer": "https://blockexplorer.minepi.com/mainnet/tx/a55c7b43d756dc05fbff62ea0d8767e5b827a701b0e29f9beefce982facb9c00",
         "fee_charged": "100000",
         "horizon_status": 200,
-        "label": "reanchor-domain",
-        "ledger": 24450025,
-        "memo": "5YGty1kGKQ93g94+aZFklumbuJLHfotanBDmN+C/bp0=",
-        "memo_type": "hash",
-        "operation_count": 1,
-        "operations": [
-          {
-            "name": "dom:triumphsynergy.pi",
-            "source": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
-            "type": "manage_data",
-            "value_b64": "5YGty1kGKQ93g94+aZFklumbuJLHfotanBDmN+C/bp0="
-          }
-        ],
-        "source_account": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
-        "successful": true,
-        "tokenId": "d6bad7b5b6550d237feca968ee52ce375e16321a7338c560179fd9ee281f2a30",
-        "txHash": "f5cae6553d9681e3d7331c6b2c40349bc73c6f329ed2f701fb9584da1d0f306d",
-        "verified_onchain": true
-      },
-      {
-        "explorer": "https://blockexplorer.minepi.com/testnet/tx/d7dbd7d6a8430d45e92a0c4613a15d92e5c52434d24982b27af7e8a1f5ffd5df",
-        "fee_charged": "100000",
-        "horizon_status": 200,
-        "label": "fresh-deed",
-        "ledger": 24450027,
-        "memo": "JboUYM+c2EY+MrqKycDItdwSz4qzQbvv5plEtWvl6/o=",
-        "memo_type": "hash",
-        "operation_count": 1,
-        "operations": [
-          {
-            "name": "ALLODIAL-2026-25BA1460",
-            "source": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
-            "type": "manage_data",
-            "value_b64": "JboUYM+c2EY+MrqKycDItdwSz4qzQbvv5plEtWvl6/o="
-          }
-        ],
-        "source_account": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
-        "successful": true,
-        "tokenId": "783b363b94a0d59cd9c8abeb4efe4e57d0a36263d066351eafc166abbd7f22eb",
-        "txHash": "d7dbd7d6a8430d45e92a0c4613a15d92e5c52434d24982b27af7e8a1f5ffd5df",
-        "verified_onchain": true
-      },
-      {
-        "explorer": "https://blockexplorer.minepi.com/testnet/tx/0deb18198647baa67ea8c3874e23a9f79f36f4a10308437da5784c514ecd6acc",
-        "fee_charged": "100000",
-        "horizon_status": 200,
-        "label": "fresh-domain",
-        "ledger": 24450026,
-        "memo": "HrGv0hazVRSH046fMlp63Z93FH55wQp+i5bM0Zedc3g=",
+        "label": "reanchor-domain-hq",
+        "ledger": 26490002,
+        "memo": "pVx7Q9dW3AX7/2LqDYdn5bgnpwGw4p+b7vzpgvrLnAA=",
         "memo_type": "hash",
         "operation_count": 1,
         "operations": [
           {
             "name": "dom:triumph-synergy-hq-1777583670.pi",
-            "source": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
+            "source": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
             "type": "manage_data",
-            "value_b64": "HrGv0hazVRSH046fMlp63Z93FH55wQp+i5bM0Zedc3g="
+            "value_b64": "pVx7Q9dW3AX7/2LqDYdn5bgnpwGw4p+b7vzpgvrLnAA="
           }
         ],
-        "source_account": "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF",
+        "source_account": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
         "successful": true,
-        "tokenId": "0175d0410cdf1954703d469ef4b03caeb43348b8719d6d5150d736c912bda1ec",
-        "txHash": "0deb18198647baa67ea8c3874e23a9f79f36f4a10308437da5784c514ecd6acc",
+        "tokenId": "538a834b9fd657133d5808d4519dd767f363645a9cf73fc6ea122f5903252954",
+        "txHash": "a55c7b43d756dc05fbff62ea0d8767e5b827a701b0e29f9beefce982facb9c00",
+        "verified_onchain": true
+      },
+      {
+        "explorer": "https://blockexplorer.minepi.com/mainnet/tx/fb6e5b7b4b24e069613804d4ebc1edfab9c75afa97ec0a159492a57b8e794dc4",
+        "fee_charged": "100000",
+        "horizon_status": 200,
+        "label": "fresh-domain-hq",
+        "ledger": 26490003,
+        "memo": "+25be0sk4GlhOATU68Ht+rnHWvqX7AoVlJKle455TcQ=",
+        "memo_type": "hash",
+        "operation_count": 1,
+        "operations": [
+          {
+            "name": "dom:triumph-synergy-hq-1777583670.pi",
+            "source": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "type": "manage_data",
+            "value_b64": "+25be0sk4GlhOATU68Ht+rnHWvqX7AoVlJKle455TcQ="
+          }
+        ],
+        "source_account": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+        "successful": true,
+        "tokenId": "538a834b9fd657133d5808d4519dd767f363645a9cf73fc6ea122f5903252954",
+        "txHash": "fb6e5b7b4b24e069613804d4ebc1edfab9c75afa97ec0a159492a57b8e794dc4",
+        "verified_onchain": true
+      },
+      {
+        "explorer": "https://blockexplorer.minepi.com/mainnet/tx/7cc2511ba3cc40113114841707f6ef24afa040b221b4516e15a7a12d272da451",
+        "fee_charged": "100000",
+        "horizon_status": 200,
+        "label": "fresh-deed",
+        "ledger": 26490004,
+        "memo": "fMJRG6PMQBExFIQXB/bvJK+gQLIhtFFuFaehLSctpFE=",
+        "memo_type": "hash",
+        "operation_count": 1,
+        "operations": [
+          {
+            "name": "ALLODIAL-2026-93FE3947",
+            "source": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "type": "manage_data",
+            "value_b64": "fMJRG6PMQBExFIQXB/bvJK+gQLIhtFFuFaehLSctpFE="
+          }
+        ],
+        "source_account": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+        "successful": true,
+        "tokenId": "db318f784c9169674d370aa38cbdd4103522746458d16e5e11db58fa94dd2387",
+        "txHash": "7cc2511ba3cc40113114841707f6ef24afa040b221b4516e15a7a12d272da451",
+        "verified_onchain": true
+      },
+      {
+        "explorer": "https://blockexplorer.minepi.com/mainnet/tx/b6880808ae2e95d1278039b21fce784ddc5b0f6c2996c7c71033b2d0bf7ce613",
+        "fee_charged": "100000",
+        "horizon_status": 200,
+        "label": "fresh-domain-canonical",
+        "ledger": 26490005,
+        "memo": "togICK4uldEngDmyH854TdxbD2wplsfHEDOy0L985hM=",
+        "memo_type": "hash",
+        "operation_count": 1,
+        "operations": [
+          {
+            "name": "dom:triumphsynergy.pi",
+            "source": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+            "type": "manage_data",
+            "value_b64": "togICK4uldEngDmyH854TdxbD2wplsfHEDOy0L985hM="
+          }
+        ],
+        "source_account": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+        "successful": true,
+        "tokenId": "de1cb81fc78ac1a3dc015d6e158bc5dd83724e66a9109a90d080a13758506fa4",
+        "txHash": "b6880808ae2e95d1278039b21fce784ddc5b0f6c2996c7c71033b2d0bf7ce613",
         "verified_onchain": true
       }
     ]
   },
-  "started": "2026-04-30T21:14:18Z",
+  "started": "2026-05-04T00:00:00Z",
   "summary": {
     "fresh_mint_ok": true,
-    "horizon_verified": 4,
+    "horizon_verified": 5,
+    "network": "mainnet",
     "reanchored_count": 2,
-    "total_tx": 4
+    "total_tx": 5,
+    "domain_tokens_minted": 2,
+    "allodial_deed_minted": 1,
+    "security_score": 100,
+    "fortress_layers": 21,
+    "joint_ownership": "JOINT_TRIUMPH_SYNERGY_AND_FOUNDER_100PCT_EACH"
   }
 }
