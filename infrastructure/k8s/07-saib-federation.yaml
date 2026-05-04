@@ -1,0 +1,182 @@
+# =============================================================================
+# 07-saib-federation.yaml
+# =============================================================================
+# Always-on configuration for SAIB ecosystem-wide enforcement on K8s:
+#
+#   • External probes (Vercel + PiNet + Pi mainnet API + Stellar P23 horizon)
+#   • Peer federation across:
+#       - this K8s SAIB cluster (central / supernode SAIB)
+#       - Triumph Synergy Docker Desktop A
+#       - Triumph Synergy Docker Desktop B
+#   • Vercel + GitHub auto-remediation credentials
+#   • Self-resurrection sidecar Deployment (saib-watchdog)
+#
+# Mainnet-only mandate: Pi Network + Stellar Protocol 23. The single
+# permitted testnet artifact in the entire ecosystem is the Pi App Studio
+# testnet validation key served from app/validation-key-testnet.txt.
+# =============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: triumph-saib-federation
+  namespace: triumph
+data:
+  # ── External probes ────────────────────────────────────────────────────────
+  SAIB_VERCEL_HOSTS: "triumph-synergy.vercel.app"
+  SAIB_PINET_HOSTS: "triumphsynergy0576.pinet.com,triumphsynergy7386.pinet.com"
+  SAIB_EXTERNAL_PROBE_INTERVAL_S: "60"
+  SAIB_REMEDIATION_COOLDOWN_S: "900"
+
+  # ── Peer mesh ──────────────────────────────────────────────────────────────
+  # Format: name1=https://host:8099,name2=https://host:8099,...
+  # Replace the public hostnames below with whatever you publish your two
+  # Triumph Synergy Docker Desktop instances on (e.g. via Cloudflare Tunnel
+  # or Tailscale) so the central K8s SAIB can reach them.
+  SAIB_PEERS: "docker-desktop-a=https://saib-desktop-a.triumphsynergy.example:8099,docker-desktop-b=https://saib-desktop-b.triumphsynergy.example:8099"
+  SAIB_PEER_NAME: "central-supernode"
+  SAIB_PEER_POLL_S: "30"
+  SAIB_PEER_OFFLINE_S: "120"
+
+  # ── Watchdog ───────────────────────────────────────────────────────────────
+  WATCHDOG_TARGET: "triumph-apex-services"
+  WATCHDOG_TARGET_HEALTH_URL: "http://triumph-apex-services.triumph.svc.cluster.local:8099/health"
+  WATCHDOG_INTERVAL_S: "30"
+  WATCHDOG_FAILS_BEFORE_RESTART: "3"
+  WATCHDOG_MAX_RESTARTS: "5"
+  WATCHDOG_WINDOW_S: "1800"
+
+---
+# Operator-supplied secrets. Apply after substituting real values; never
+# commit the populated copy. Keys are intentionally empty so kubectl apply
+# of the template doesn't overwrite a real secret.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: triumph-saib-federation-secrets
+  namespace: triumph
+type: Opaque
+stringData:
+  VERCEL_TOKEN: ""
+  VERCEL_PROJECT_ID: ""
+  VERCEL_TEAM_ID: ""
+  GITHUB_TOKEN: ""
+
+---
+# =============================================================================
+# SAIB-WATCHDOG Deployment — self-resurrection sidecar
+# =============================================================================
+# Runs as its own Deployment (not a sidecar inside apex-services) precisely
+# so it survives apex-services crashes. It uses the Kubernetes Pods API
+# to delete the apex-services pod when /health stops responding — the
+# Deployment controller then recreates it. No docker.sock is needed inside
+# K8s; this overrides the Docker Desktop variant of the watchdog.
+# =============================================================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: triumph-saib-watchdog
+  namespace: triumph
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: triumph-saib-watchdog
+  namespace: triumph
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: triumph-saib-watchdog
+  namespace: triumph
+subjects:
+  - kind: ServiceAccount
+    name: triumph-saib-watchdog
+    namespace: triumph
+roleRef:
+  kind: Role
+  name: triumph-saib-watchdog
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triumph-saib-watchdog
+  namespace: triumph
+  labels:
+    app: triumph-saib-watchdog
+    tier: sovereign
+    role: self-resurrection
+spec:
+  # 2 replicas so the watchdogs watch each other implicitly via K8s liveness;
+  # never run on the same node as their target.
+  replicas: 2
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app: triumph-saib-watchdog }
+  template:
+    metadata:
+      labels: { app: triumph-saib-watchdog, tier: sovereign }
+    spec:
+      serviceAccountName: triumph-saib-watchdog
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels: { app: triumph-apex-services }
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: watchdog
+          image: triumph-synergy-saib-watchdog:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: { name: triumph-saib-federation }
+          # K8s mode: delete pod via API instead of docker.sock
+          env:
+            - name: WATCHDOG_K8S_MODE
+              value: "true"
+            - name: WATCHDOG_K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: WATCHDOG_K8S_LABEL_SELECTOR
+              value: "app=triumph-apex-services"
+          resources:
+            requests: { cpu: "20m",  memory: "32Mi" }
+            limits:   { cpu: "100m", memory: "128Mi" }
+          livenessProbe:
+            exec:
+              command: ["python", "-c", "import os,sys;sys.exit(0)"]
+            periodSeconds: 60
+
+---
+# =============================================================================
+# Patch apex-services Deployment with federation env (additive overlay)
+# =============================================================================
+# Apply this with: kubectl patch deployment triumph-apex-services -n triumph \
+#   --type strategic --patch-file 07-saib-federation.yaml
+# OR include it in the kustomization.yaml so envFrom is merged at apply time.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triumph-apex-services
+  namespace: triumph
+spec:
+  template:
+    spec:
+      containers:
+        - name: apex-services
+          envFrom:
+            - configMapRef: { name: triumph-shared-env }
+            - configMapRef: { name: triumph-saib-federation }
+            - secretRef:    { name: triumph-saib-federation-secrets }

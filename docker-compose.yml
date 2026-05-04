@@ -643,6 +643,20 @@ services:
       SAIB_QUANTUM_AUTO_COMMIT: "false"
       SAIB_CODEBASE_SCAN_PATH: "/workspace"
       SAIB_DOCKER_BUILD_CONTEXT: "/workspace/docker"
+      # ── External mainnet probes (Vercel + PiNet + Pi mainnet API) ─────
+      SAIB_VERCEL_HOSTS: ${SAIB_VERCEL_HOSTS:-triumph-synergy.vercel.app}
+      SAIB_PINET_HOSTS: ${SAIB_PINET_HOSTS:-triumphsynergy0576.pinet.com,triumphsynergy7386.pinet.com}
+      SAIB_EXTERNAL_PROBE_INTERVAL_S: "60"
+      SAIB_REMEDIATION_COOLDOWN_S: "900"
+      VERCEL_TOKEN: ${VERCEL_TOKEN:-}
+      VERCEL_PROJECT_ID: ${VERCEL_PROJECT_ID:-}
+      VERCEL_TEAM_ID: ${VERCEL_TEAM_ID:-}
+      # ── Peer federation (2 Docker Desktops + central/supernode SAIB) ──
+      # Format: name1=https://host:8099,name2=https://host:8099,central=https://...
+      SAIB_PEERS: ${SAIB_PEERS:-}
+      SAIB_PEER_NAME: ${SAIB_PEER_NAME:-docker-desktop-primary}
+      SAIB_PEER_POLL_S: "30"
+      SAIB_PEER_OFFLINE_S: "120"
     secrets:
       - github_token
     volumes:
@@ -1124,6 +1138,37 @@ services:
   # The pi-testnet2-node service was removed. Only the mainnet supernode
   # is permitted to run inside the ecosystem.
   # --------------------------------------------------------------------------
+
+  # --------------------------------------------------------------------------
+  # SAIB-WATCHDOG — Self-resurrection sidecar
+  # Tiny independent container that restarts apex-services if SAIB itself
+  # dies. SAIB cannot restart its own container from inside, so this
+  # watchdog is the external resurrection authority. Mainnet-only.
+  # --------------------------------------------------------------------------
+  saib-watchdog:
+    build:
+      context: docker
+      dockerfile: saib-watchdog/Dockerfile
+    container_name: triumph-saib-watchdog
+    restart: always
+    mem_limit: 128m
+    mem_reservation: 32m
+    cpus: 0.10
+    environment:
+      WATCHDOG_TARGET: triumph-apex-services
+      WATCHDOG_TARGET_HEALTH_URL: http://triumph-apex-services:8099/health
+      WATCHDOG_INTERVAL_S: "30"
+      WATCHDOG_TIMEOUT_S: "10"
+      WATCHDOG_FAILS_BEFORE_RESTART: "3"
+      WATCHDOG_MAX_RESTARTS: "5"
+      WATCHDOG_WINDOW_S: "1800"
+      WATCHDOG_PEER_HEARTBEAT_URL: ${WATCHDOG_PEER_HEARTBEAT_URL:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - triumph-net
+    depends_on:
+      - apex-services
 
 # ==========================================================================
 # VOLUMES — Persistent Data

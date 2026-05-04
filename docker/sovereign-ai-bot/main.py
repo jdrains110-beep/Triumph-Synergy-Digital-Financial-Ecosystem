@@ -784,6 +784,120 @@ async def pulse_loop():
         await asyncio.sleep(PULSE_INTERVAL_S)
 
 
+# ── External Probes + Peer Federation (mainnet-only ecosystem reach) ──────────
+# These give SAIB awareness beyond local Docker: Vercel, PiNet, Pi mainnet,
+# Stellar Protocol 23 horizon, plus other SAIB instances (e.g. two Triumph
+# Synergy Docker Desktop platforms + the central/supernode SAIB).
+try:
+    from external_probes import build_external_targets, probe_external
+    from peer_federation import (
+        build_peer_registry,
+        federation_summary,
+        peer_poll_interval_s,
+        peer_self_name,
+        poll_peer,
+    )
+    from external_remediation import remediate
+    _FEDERATION_AVAILABLE = True
+except Exception as _fed_err:  # noqa: BLE001
+    log.warning("[SAIB-FED] federation modules unavailable: %s", _fed_err)
+    _FEDERATION_AVAILABLE = False
+
+EXTERNAL_PROBE_INTERVAL_S = float(os.getenv("SAIB_EXTERNAL_PROBE_INTERVAL_S", "60"))
+EXTERNAL_TARGETS = build_external_targets() if _FEDERATION_AVAILABLE else []
+PEER_REGISTRY = build_peer_registry() if _FEDERATION_AVAILABLE else {}
+EXTERNAL_PROBE_RESULTS: dict[str, dict] = {}
+
+saib_external_healthy = Gauge(
+    "saib_external_target_healthy",
+    "1=external mainnet target healthy 0=degraded",
+    ["target", "kind"],
+)
+saib_external_latency = Histogram(
+    "saib_external_target_latency_seconds",
+    "External target probe latency",
+    ["target", "kind"],
+)
+saib_remediations_total = Counter(
+    "saib_external_remediations_total",
+    "External remediation actions taken by SAIB",
+    ["target", "action", "ok"],
+)
+saib_peers_online = Gauge("saib_peers_online_total", "Count of online SAIB peers")
+
+
+async def external_probe_loop():
+    if not _FEDERATION_AVAILABLE or not EXTERNAL_TARGETS:
+        log.info("[SAIB-EXT] no external targets configured")
+        return
+    await asyncio.sleep(20)
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        while True:
+            for target in EXTERNAL_TARGETS:
+                try:
+                    result = await probe_external(client, target)
+                    saib_external_healthy.labels(
+                        target=target.name, kind=target.kind,
+                    ).set(1.0 if result.healthy else 0.0)
+                    saib_external_latency.labels(
+                        target=target.name, kind=target.kind,
+                    ).observe(result.latency_ms / 1000.0)
+                    EXTERNAL_PROBE_RESULTS[target.name] = {
+                        "healthy": result.healthy,
+                        "status_code": result.status_code,
+                        "latency_ms": round(result.latency_ms, 1),
+                        "error": result.error,
+                        "kind": target.kind,
+                        "url": target.url,
+                        "remediation": target.remediation,
+                        "extras": result.extras,
+                        "checked_at": time.time(),
+                    }
+                    if not result.healthy:
+                        reason = (
+                            f"status={result.status_code} error={result.error or 'n/a'} "
+                            f"latency_ms={result.latency_ms:.0f}"
+                        )
+                        log.warning(
+                            "[SAIB-EXT] %s degraded -> %s (%s)",
+                            target.name, target.remediation, reason,
+                        )
+                        try:
+                            outcome = await remediate(
+                                client, target.name, target.remediation, reason,
+                            )
+                            saib_remediations_total.labels(
+                                target=target.name,
+                                action=outcome.action,
+                                ok=str(outcome.ok).lower(),
+                            ).inc()
+                        except Exception as rex:  # noqa: BLE001
+                            log.error("[SAIB-EXT] remediation error %s: %s", target.name, rex)
+                except Exception as exc:  # noqa: BLE001
+                    log.error("[SAIB-EXT] probe error %s: %s", target.name, exc)
+            await asyncio.sleep(EXTERNAL_PROBE_INTERVAL_S)
+
+
+async def peer_federation_loop():
+    if not _FEDERATION_AVAILABLE or not PEER_REGISTRY:
+        log.info("[SAIB-FED] no peers configured (set SAIB_PEERS=name1=url,...)")
+        return
+    interval = peer_poll_interval_s()
+    self_name = peer_self_name()
+    log.info("[SAIB-FED] peer mesh active as %s with %d peers", self_name, len(PEER_REGISTRY))
+    await asyncio.sleep(25)
+    async with httpx.AsyncClient() as client:
+        while True:
+            for peer in list(PEER_REGISTRY.values()):
+                try:
+                    await poll_peer(client, peer)
+                except Exception as exc:  # noqa: BLE001
+                    log.error("[SAIB-FED] poll error %s: %s", peer.name, exc)
+            online = sum(1 for p in PEER_REGISTRY.values() if not p.offline)
+            saib_peers_online.set(online)
+            await asyncio.sleep(interval)
+
+
 # ── GitHub Self-Awareness Engine ───────────────────────────────────────────────
 
 # In-memory store for what SAIB has learned from the repo
@@ -1614,6 +1728,9 @@ async def startup():
     # ── Apex Quantum Brain background loops (code + image scanning) ──────────
     asyncio.create_task(quantum_code_scan_loop())
     asyncio.create_task(quantum_image_scan_loop())
+    # ── External + Federation loops (mainnet ecosystem-wide reach) ───────────
+    asyncio.create_task(external_probe_loop())
+    asyncio.create_task(peer_federation_loop())
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -1692,6 +1809,32 @@ async def status():
 @app.get("/metrics", response_class=PlainTextResponse)
 async def metrics():
     return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+@app.get("/external")
+async def external_status():
+    """Externally hosted mainnet platforms SAIB watches but does not own."""
+    if not _FEDERATION_AVAILABLE:
+        return {"enabled": False, "reason": "federation modules not loaded"}
+    healthy = sum(1 for r in EXTERNAL_PROBE_RESULTS.values() if r.get("healthy"))
+    return {
+        "enabled": True,
+        "total_targets": len(EXTERNAL_TARGETS),
+        "healthy_targets": healthy,
+        "results": EXTERNAL_PROBE_RESULTS,
+        "remediation_cooldown_s": float(os.getenv("SAIB_REMEDIATION_COOLDOWN_S", "900")),
+    }
+
+
+@app.get("/federation")
+async def federation_status():
+    """Mesh of SAIB peers: 2 Docker Desktops + central/supernode SAIB + K8s."""
+    if not _FEDERATION_AVAILABLE:
+        return {"enabled": False, "reason": "federation modules not loaded"}
+    if not PEER_REGISTRY:
+        return {"enabled": True, "self": peer_self_name(), "peer_count": 0,
+                "hint": "set SAIB_PEERS=name1=https://host:8099,name2=...,central=https://central:8099"}
+    return federation_summary(PEER_REGISTRY)
 
 @app.get("/loopholes")
 async def loopholes(category: str = ""):

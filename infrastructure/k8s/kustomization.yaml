@@ -9,6 +9,7 @@ resources:
   - 04-redis-statefulset.yaml
   - 05-apex-services-deployment.yaml
   - 06-nginx-ingress.yaml
+  - 07-saib-federation.yaml
 commonLabels:
   app.kubernetes.io/part-of: triumph-synergy
   app.kubernetes.io/managed-by: kustomize
