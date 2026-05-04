@@ -1,7 +1,8 @@
 {
   "version": 1,
-  "server": "stellar-core triumph-synergy-testnet v22.1.0",
+  "server": "stellar-core triumph-synergy-mainnet v23.0.0",
+  "protocolVersion": 23,
   "currentLedger": 0,
-  "networkPassphrase": "Pi Testnet",
+  "networkPassphrase": "Pi Network",
   "currentBuckets": []
 }

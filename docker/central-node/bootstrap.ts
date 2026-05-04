@@ -182,8 +182,12 @@ function supernodeTopology() {
     },
     consensus: {
       protocol: "Stellar SCP",
-      protocol_version: "scp-v23",
+      protocol_version: Number(process.env.PI_PROTOCOL_VERSION ?? 23),
+      protocol_version_label: `scp-v${process.env.PI_PROTOCOL_VERSION ?? 23}`,
+      stellar_core_version: process.env.STELLAR_CORE_VERSION ?? "v23.0.0",
+      auto_protocol_update: true,
       horizon_url: HORIZON_URL,
+      network: "mainnet",
       network_passphrase: process.env.STELLAR_NETWORK_PASSPHRASE || "Pi Network",
       local_horizon_preferred: HORIZON_URL.startsWith("http://"),
       pq_required: process.env.SCP_REQUIRE_PQ_SIGNATURE === "true",

@@ -62,11 +62,6 @@ const PI_PLATFORMS = [
     capabilities: ["ledger-stream", "account-query", "tx-submit", "trade-aggregation"],
   },
   {
-    name: "Pi Testnet Horizon",
-    url: "https://api.testnet.minepi.com",
-    capabilities: ["ledger-stream", "account-query", "tx-submit", "trade-aggregation"],
-  },
-  {
     name: "Pi Platform API",
     url: "https://api.minepi.com",
     capabilities: ["auth", "payment-approve", "payment-complete", "kyc", "app-registry"],
@@ -82,9 +77,9 @@ const PI_PLATFORMS = [
     capabilities: ["app-manifest", "domain-verification", "webhook-delivery"],
   },
   {
-    name: "Local Pi Node (testnet2)",
-    url: "http://testnet2:8000",
-    capabilities: ["local-horizon", "peer-network", "stellar-core-http"],
+    name: "Local Pi Mainnet Supernode",
+    url: process.env.PI_LOCAL_HORIZON || "http://triumph-pi-mainnet-node:8000",
+    capabilities: ["local-horizon", "peer-network", "stellar-core-http", "protocol-23"],
   },
   {
     name: "Triumph Central Node",

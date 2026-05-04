@@ -1,14 +1,20 @@
 # SEP-1 stellar.toml — Triumph Synergy
-# Pi Network Testnet Validator
-# Served from: https://triumph-synergy-testnet.vercel.app/.well-known/stellar.toml
+# Pi Network MAINNET Validator (Stellar Protocol 23)
+# Served from: https://triumph-synergy.vercel.app/.well-known/stellar.toml
 
-VERSION="2.6.0"
-NETWORK_PASSPHRASE="Pi Testnet"
-HORIZON_URL="https://api.testnet.minepi.com"
+VERSION="2.7.0"
+NETWORK_PASSPHRASE="Pi Network"
+HORIZON_URL="https://api.mainnet.minepi.com"
+
+# Protocol advertisement — kept in sync by
+# .github/workflows/protocol-version-watcher.yml
+PROTOCOL_VERSION="23"
+MIN_PROTOCOL_VERSION="22"
+STELLAR_CORE_VERSION="v23.0.0"
 
 # Federation / auth not provided yet. Add when ready:
-# FEDERATION_SERVER="https://triumph-synergy-testnet.vercel.app/federation"
-# AUTH_SERVER="https://triumph-synergy-testnet.vercel.app/auth"
+# FEDERATION_SERVER="https://triumph-synergy.vercel.app/federation"
+# AUTH_SERVER="https://triumph-synergy.vercel.app/auth"
 
 ACCOUNTS=[
   "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
@@ -20,7 +26,7 @@ ORG_NAME="Triumph Synergy"
 ORG_DBA="Triumph Synergy Digital Financial Ecosystem"
 ORG_URL="https://triumph-synergy.vercel.app"
 ORG_LOGO="https://triumph-synergy.vercel.app/logo.png"
-ORG_DESCRIPTION="Triumph Synergy operates the Triumph Synergy Digital Financial Ecosystem, providing payment, settlement and ecosystem services on the Pi Network. We run a Pi Testnet validator (testnet2) integrated with our governance-shield central node."
+ORG_DESCRIPTION="Triumph Synergy operates the Triumph Synergy Digital Financial Ecosystem on Pi Network mainnet. We run a Pi mainnet supernode validator (stellar-core v23.0.0, Stellar Protocol 23) integrated with our governance-shield central node, ingesting the live Pi mainnet Horizon ledger and transmitting real-world data to the network."
 ORG_OFFICIAL_EMAIL="ops@triumph-synergy.vercel.app"
 ORG_GITHUB="jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem"
 ORG_KEYBASE=""
@@ -28,12 +34,12 @@ ORG_TWITTER=""
 
 # ── Validator declaration ────────────────────────────────────────────────────
 [[VALIDATORS]]
-ALIAS="triumph-synergy-testnet"
-DISPLAY_NAME="Triumph Synergy Testnet Validator"
-HOST="triumph-synergy-testnet.vercel.app:31402"
+ALIAS="triumph-synergy-mainnet"
+DISPLAY_NAME="Triumph Synergy Mainnet Validator"
+HOST="triumph-synergy.vercel.app:11625"
 PUBLIC_KEY="GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
 # History archive — must be a real, publicly-readable URL containing
-# /.well-known/stellar-history.json + history files. Update when archive is hosted:
+# /.well-known/stellar-history.json + history files.
 HISTORY="https://history.triumph-synergy.vercel.app/"
 
 # ── Principals (operators) ───────────────────────────────────────────────────
