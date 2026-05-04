@@ -23,14 +23,14 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir httpx==0.27.2 docker==7.1.0 kubernetes==31.0.0
 
-COPY watchdog.py /app/watchdog.py
+COPY saib-watchdog/watchdog.py /app/watchdog.py
 
 # Run as root so the docker.sock group membership works on every host
 # (the watchdog ONLY talks to docker.sock; no other privilege required).
 
 LABEL org.triumph.pod="saib-watchdog" \
-      org.triumph.purpose="self-resurrection-sidecar" \
-      org.triumph.mainnet-only="true"
+    org.triumph.purpose="self-resurrection-sidecar" \
+    org.triumph.mainnet-only="true"
 
 HEALTHCHECK --interval=60s --timeout=10s --retries=5 --start-period=30s \
     CMD python -c "import os; assert os.path.exists('/var/run/docker.sock')" || exit 1

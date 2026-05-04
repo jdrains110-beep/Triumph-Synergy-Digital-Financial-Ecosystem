@@ -6,11 +6,11 @@ FROM python:3.13-slim
 RUN useradd -m -u 1010 -s /bin/sh gaming
 
 WORKDIR /app
-COPY requirements.txt .
+COPY sovereign-gaming-nexus/requirements.txt .
 RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py .
+COPY sovereign-gaming-nexus/main.py .
 
 USER gaming
 
