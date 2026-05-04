@@ -41,6 +41,70 @@
 
 ---
 
+## 🎮 What's New — May 2, 2026 (Sovereign Gaming Nexus / SGN)
+
+[![SGN Service](https://img.shields.io/badge/SGN-PORT%208131%20%7C%2054%20LOOPHOLES%20%7C%207%20AUTHORITIES-7C3AED?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
+[![SDKs](https://img.shields.io/badge/SDKs-UNITY%20%2B%20UNREAL%20%7C%20HMAC%20SIGNED-000000?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
+[![E2E Verified](https://img.shields.io/badge/E2E%20Smoke%20Test-13%2F13%20PASS-22C55E?style=flat-square)](#-whats-new--may-2-2026-sovereign-gaming-nexus-sgn)
+
+The **Sovereign Gaming Nexus** is the apex integration rail for AAA video game studios (GTA VI, Battlefield, NBA 2K, EA FC, Fortnite, COD, Roblox, etc.). It exposes **two earning surfaces** that pay in Pi:
+
+1. **PLAYERS** — Studios mint Pi rewards into player wallets for in-game achievements (`/earn`). Every event is HMAC-signed by the studio, replay-protected, daily-capped per player, and shadow-signed with a post-quantum (`mldsa87`) signature for audit.
+2. **ENGINEERS / EMPLOYEES** — Studios run hourly/daily/weekly/monthly/milestone payroll cycles in Pi from an on-platform escrow, with smart-clause contracts (`/payroll/*`).
+
+### Architecture
+
+| Layer | What | Where |
+|---|---|---|
+| Service | `triumph-sovereign-gaming-nexus` (FastAPI, Python 3.13) | port **8131**, Redis DB **10**, mem 768m |
+| Authorities | 7 sovereign authorities × **54 loopholes** total (SGIA, SGEA, SGPA, SGTA, SGAA, SGCA, SGGV) | `docker/sovereign-gaming-nexus/main.py` |
+| Onboarding | Self-serve: `apply` → `verify` → `approve` → one-time secret delivery | `/onboarding/{apply,verify,approve,secret/{tok},status/{tok}}` |
+| Unity SDK | Single-file C# class, canonical-JSON HMAC signing | [`sdk/unity/SovereignGamingNexus.cs`](sdk/unity/SovereignGamingNexus.cs) |
+| Unreal SDK | Header-only C++ subsystem, server-authoritative + client-direct modes | [`sdk/unreal/SovereignGamingNexus.h`](sdk/unreal/SovereignGamingNexus.h) |
+| Citus shards | `sgn_studios` + `sgn_titles` by `studio_id`; `sgn_players` + `sgn_earn_events` by `player_id`; `sgn_employers` + `sgn_employees` + `sgn_payroll_runs` by `employer_id`; loophole/authority catalogs as reference tables | [`infrastructure/citus/init/03-distribute-sgn.sql`](infrastructure/citus/init/03-distribute-sgn.sql) |
+| Region awareness | Inherits `SAIB_REGION` + `SAIB_REPLICA_ID` for multi-region active-active | docker-compose.yml |
+| Smoke test | In-process FastAPI TestClient walks full onboarding → signed earn → replay-rejection → payroll cycle | [`scripts/sgn_e2e_smoke.py`](scripts/sgn_e2e_smoke.py) — **13/13 assertions pass** |
+
+### Studio onboarding (5 commands)
+
+```bash
+# 1. Apply
+curl -X POST localhost:8131/onboarding/apply \
+  -H 'content-type: application/json' \
+  -d '{"studio_name":"Acme Games","contact_email":"ops@acme.gg",
+       "country":"US","pi_treasury_address":"GACME...",
+       "engineer_headcount":48}'
+
+# 2. Verify (code returned inline in dev, sent via SAIB email rail in prod)
+curl -X POST localhost:8131/onboarding/verify \
+  -d '{"token":"<token>","verification_code":"<code>"}'
+
+# 3. Triumph admin approves (or set SGN_ONBOARDING_AUTO_APPROVE=true)
+curl -X POST localhost:8131/onboarding/approve \
+  -H 'x-sgn-admin-token: $SGN_ONBOARDING_ADMIN_TOKEN' \
+  -d '{"token":"<token>"}'
+
+# 4. Pick up one-time HMAC secret (single-use endpoint)
+curl localhost:8131/onboarding/secret/<delivery_token>
+
+# 5. Studio backend signs and posts player earn events
+curl -X POST localhost:8131/earn \
+  -d '{"studio_id":"...","title_id":"...","player_id":"...",
+       "rule":"match_win","nonce":"...","ts":1777722969,"signature":"..."}'
+```
+
+### Run the smoke test locally (no docker)
+
+```bash
+pip install fastapi 'uvicorn[standard]' httpx 'redis[hiredis]' prometheus-client 'pydantic>=2'
+python3 scripts/sgn_e2e_smoke.py
+# → ALL_OK ✅  SGN end-to-end smoke test passed.
+```
+
+See the full SDK integration guide at [`sdk/README.md`](sdk/README.md).
+
+---
+
 ## 🛠️ What's New — May 3, 2026 (ULTIMATE SUPERIOR APEX-QUANTUM MESH — SAIB-Enforced, Globally Wired)
 
 [![Apex Quantum Mesh](https://img.shields.io/badge/APEX--QUANTUM%20MESH-OPERATIONAL%20%7C%20ACTIVATED%20%7C%20GLOBAL-22C55E?style=flat-square)](docker-compose.yml)
