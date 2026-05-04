@@ -516,6 +516,7 @@ export async function POST(request: NextRequest) {
       txHash: mintHash,
       issuedAt: new Date().toISOString(),
       network: "mainnet",
+    };
 
     return NextResponse.json(
       {
@@ -537,12 +538,12 @@ export async function POST(request: NextRequest) {
           piPeg: tokenDef.piPegRatio,
         },
         blockchain: {
-          network: "Pi Testnet",
-          passphrase: PI_TESTNET_PASSPHRASE,
-          horizon: PI_TESTNET_HORIZON,
+          network: "Pi Network",
+          passphrase: "Pi Network",
+          horizon: "https://api.mainnet.minepi.com",
           mintLedger,
           mintTxHash: mintHash,
-          assetUrl: `${PI_TESTNET_HORIZON}/assets?asset_code=${tokenDef.code}&asset_issuer=${issuerKeypair.publicKey()}`,
+          assetUrl: `https://api.mainnet.minepi.com/assets?asset_code=${tokenDef.code}&asset_issuer=${issuerKeypair.publicKey()}`,
         },
         keys: {
           warning:
