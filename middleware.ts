@@ -143,9 +143,9 @@ export const config = {
   matcher: [
     /*
      * Match routes that need preview blocking logic
-     * Static files pass through automatically
+     * Static files and health check endpoints pass through automatically
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|html|txt|xml|json)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|html|txt|xml|json)$).*)",
   ],
 };
 

@@ -199,7 +199,7 @@ services:
       retries: 5
       # Cold Python imports on Docker Desktop (Mac VM) take ~60s; allow ample
       # start_period so slow first-boot doesn't get marked unhealthy.
-      start_period: 120s
+      start_period: 300s
 
   # ========================================================================
   # PI CENTRAL NODE — Stellar Core Integration
@@ -245,11 +245,11 @@ services:
       - triumph-net
       - pi-bridge
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health/check"]
       interval: 20s
-      timeout: 10s
+      timeout: 30s
       retries: 5
-      start_period: 60s
+      start_period: 120s
 
   # ========================================================================
   # PI TRANSACTION ENGINE — High-Throughput Processing
@@ -700,6 +700,9 @@ services:
           - triumph-sovereign-insurance
           - triumph-sovereign-utilities
           - triumph-sovereign-gateway
+      # Step 5: Redis Cluster — join the cluster network so SAIB can reach
+      # redis-node-{1-6} by hostname when REDIS_CLUSTER_NODES is set.
+      redis-cluster-net: {}
     depends_on:
       redis:
         condition: service_healthy
@@ -1241,6 +1244,10 @@ networks:
   pi-bridge:
     name: pi-bridge
     driver: bridge
+  # Step 5: Redis Cluster network — external (created by docker-compose.redis-cluster.yml)
+  redis-cluster-net:
+    name: triumph-redis-cluster-net
+    external: true
 
 # ==========================================================================
 # SECRETS — mounted into containers at /run/secrets/<name>
