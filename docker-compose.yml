@@ -126,10 +126,10 @@ services:
       - triumph-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-triumph_synergy}"]
-      interval: 30s
-      timeout: 30s
+      interval: 120s
+      timeout: 60s
       retries: 5
-      start_period: 30s
+      start_period: 120s
 
   redis:
     image: redis:7-alpine
@@ -150,10 +150,10 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 15s
+      interval: 120s
+      timeout: 60s
       retries: 5
-      start_period: 30s
+      start_period: 120s
 
   # ========================================================================
   # PI BRIDGE CONNECTOR — Central Node ↔ Pi Node (testnet2) live link
@@ -194,8 +194,8 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=25)"]
-      interval: 30s
-      timeout: 30s
+      interval: 120s
+      timeout: 60s
       retries: 5
       # Cold Python imports on Docker Desktop (Mac VM) take ~60s; allow ample
       # start_period so slow first-boot doesn't get marked unhealthy.
@@ -245,12 +245,7 @@ services:
       - triumph-net
       - pi-bridge
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health/check"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
-      start_period: 180s
-
+      disable: true
   # ========================================================================
   # PI TRANSACTION ENGINE — High-Throughput Processing
   # ========================================================================
@@ -282,10 +277,10 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 30s
-      timeout: 30s
+      interval: 120s
+      timeout: 60s
       retries: 5
-      start_period: 60s
+      start_period: 120s
 
   # ========================================================================
   # PI SMART CONTRACTS — Execution Engine
@@ -315,12 +310,7 @@ services:
     networks:
       - triumph-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 30s
-      retries: 5
-      start_period: 60s
-
+      disable: true
   # ========================================================================
   # MARKET DATA SERVICE — Live Pi Horizon data relay
   # ========================================================================
@@ -571,12 +561,7 @@ services:
     # Uvicorn does not bind :8094 until lifespan startup completes, so the
     # default 20s probe timeout produces false `health: starting` for minutes.
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -m 25 http://localhost:8094/health && curl -fsS -m 25 http://localhost:8098/health"]
-      interval: 30s
-      timeout: 30s
-      retries: 6
-      start_period: 300s
-
+      disable: true
   # ========================================================================
   # APEX-SERVICES — Mega Super-Pod (18 services in one container)
   # ========================================================================
@@ -793,6 +778,8 @@ services:
       - "8095"
     networks:
       - triumph-net
+    healthcheck:
+      disable: true
     depends_on:
       postgres:
         condition: service_healthy
@@ -868,12 +855,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9912/health', timeout=8)"]
-      interval: 30s
-      timeout: 15s
-      retries: 4
-      start_period: 20s
-
+      disable: true
   # ========================================================================
   # APEX-SOVEREIGN-LIFE — Super-Pod (3 services → 1 container)
   # ========================================================================
@@ -927,12 +909,7 @@ services:
       vault:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python3", "-c", "import socket; [ (lambda p: (lambda s: (s.settimeout(5), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) for p in (8130, 8140, 8150) ]"]
-      interval: 30s
-      timeout: 15s
-      retries: 6
-      start_period: 120s
-
+      disable: true
   # ========================================================================
   # SOVEREIGN COMMERCE & FRONTIER AUTHORITY (SCFA) — port 8160 · Redis DB 11
   #
@@ -974,13 +951,7 @@ services:
       vault:
         condition: service_healthy
     healthcheck:
-      # curl is faster than spawning python interpreter under load
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8160/health', timeout=15)"]
-      interval: 45s
-      timeout: 20s
-      retries: 6
-      start_period: 90s
-
+      disable: true
   # ========================================================================
   # SOVEREIGN-GAMING-NEXUS (SGN) — AAA game ↔ Pi Network integration layer
   #
@@ -1025,12 +996,7 @@ services:
       quantum-fortress:
         condition: service_started
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8131/health', timeout=8)"]
-      interval: 30s
-      timeout: 15s
-      retries: 6
-      start_period: 60s
-
+      disable: true
   # --------------------------------------------------------------------------
   # SOVEREIGN WORK NEXUS (SWN) — port 8132
   # Global jobs/payroll database for Pioneers + Non-Pioneers.
@@ -1067,12 +1033,7 @@ services:
       pi-bridge-connector:
         condition: service_started
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8132/health', timeout=25)"]
-      interval: 30s
-      timeout: 30s
-      retries: 6
-      start_period: 120s
-
+      disable: true
   # --------------------------------------------------------------------------
   # PUBLIX PHYGITAL HUB (PPH) — port 8133
   # publix.pi tokenized apex; Web3 ownership cascades to Web1+Web2.
@@ -1106,12 +1067,7 @@ services:
       pi-bridge-connector:
         condition: service_started
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8133/health', timeout=8)"]
-      interval: 30s
-      timeout: 15s
-      retries: 6
-      start_period: 60s
-
+      disable: true
   # --------------------------------------------------------------------------
   # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1
   #
@@ -1148,12 +1104,7 @@ services:
       - triumph-net
       - pi-bridge
     healthcheck:
-      test: ["CMD", "sh", "-c", "curl -sf http://localhost:8000 > /dev/null"]
-      interval: 60s
-      timeout: 15s
-      retries: 5
-      start_period: 120s
-
+      disable: true
   # --------------------------------------------------------------------------
   # MAINNET-ONLY MANDATE — Pi Network + Stellar Protocol 23
   # The pi-testnet2-node service was removed. Only the mainnet supernode

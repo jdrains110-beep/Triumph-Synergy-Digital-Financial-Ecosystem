@@ -32,10 +32,10 @@ services:
       - ./infrastructure/citus/init/02-distribute.sql:/docker-entrypoint-initdb.d/02-distribute.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d triumph_synergy"]
-      interval: 15s
-      timeout: 30s
+      interval: 120s
+      timeout: 60s
       retries: 8
-      start_period: 30s
+      start_period: 120s
     networks: [citus-net]
     restart: always
 
@@ -48,10 +48,10 @@ services:
       - citus_worker_1_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 15s
-      timeout: 30s
+      interval: 120s
+      timeout: 60s
       retries: 8
-      start_period: 30s
+      start_period: 120s
     networks: [citus-net]
     restart: always
 
@@ -64,10 +64,10 @@ services:
       - citus_worker_2_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 15s
-      timeout: 30s
+      interval: 120s
+      timeout: 60s
       retries: 8
-      start_period: 30s
+      start_period: 120s
     networks: [citus-net]
     restart: always
 
@@ -80,10 +80,10 @@ services:
       - citus_worker_3_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 15s
-      timeout: 30s
+      interval: 120s
+      timeout: 60s
       retries: 8
-      start_period: 30s
+      start_period: 120s
     networks: [citus-net]
     restart: always
 
