@@ -39,9 +39,10 @@ x-redis-base: &redis-base
     - "allkeys-lru"
   healthcheck:
     test: ["CMD", "redis-cli", "-p", "6379", "ping"]
-    interval: 5s
-    timeout: 3s
+    interval: 15s
+    timeout: 10s
     retries: 10
+    start_period: 30s
   networks: [redis-cluster-net]
   restart: always
 
