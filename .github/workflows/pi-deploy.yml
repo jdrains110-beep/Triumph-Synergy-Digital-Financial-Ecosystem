@@ -52,7 +52,13 @@ jobs:
             - name: Install dependencies
               run: |
                   for attempt in 1 2 3; do
-                    yarn install --frozen-lockfile --network-timeout 300000 && break
+                    if yarn install --frozen-lockfile --network-timeout 600000 --ignore-engines; then
+                      break
+                    fi
+                    if [ "$attempt" = "3" ]; then
+                      echo "❌ All yarn install attempts failed — aborting"
+                      exit 1
+                    fi
                     echo "⚠️ Attempt $attempt failed — retrying in 15s..."
                     sleep 15
                   done
@@ -116,7 +122,13 @@ jobs:
             - name: Install dependencies
               run: |
                   for attempt in 1 2 3; do
-                    yarn install --frozen-lockfile --network-timeout 300000 && break
+                    if yarn install --frozen-lockfile --network-timeout 600000 --ignore-engines; then
+                      break
+                    fi
+                    if [ "$attempt" = "3" ]; then
+                      echo "❌ All yarn install attempts failed — aborting"
+                      exit 1
+                    fi
                     echo "⚠️ Attempt $attempt failed — retrying in 15s..."
                     sleep 15
                   done
@@ -196,7 +208,13 @@ jobs:
             - name: Install dependencies
               run: |
                   for attempt in 1 2 3; do
-                    yarn install --frozen-lockfile --network-timeout 300000 && break
+                    if yarn install --frozen-lockfile --network-timeout 600000 --ignore-engines; then
+                      break
+                    fi
+                    if [ "$attempt" = "3" ]; then
+                      echo "❌ All yarn install attempts failed — aborting"
+                      exit 1
+                    fi
                     echo "⚠️ Attempt $attempt failed — retrying in 15s..."
                     sleep 15
                   done
