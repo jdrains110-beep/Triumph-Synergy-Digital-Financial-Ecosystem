@@ -126,10 +126,10 @@ services:
       - triumph-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-triumph_synergy}"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 30s
       retries: 5
-      start_period: 15s
+      start_period: 30s
 
   redis:
     image: redis:7-alpine
@@ -150,10 +150,10 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
-      start_period: 10s
+      start_period: 30s
 
   # ========================================================================
   # PI BRIDGE CONNECTOR — Central Node ↔ Pi Node (testnet2) live link
@@ -193,9 +193,9 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=10)"]
-      interval: 15s
-      timeout: 15s
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=25)"]
+      interval: 30s
+      timeout: 30s
       retries: 5
       # Cold Python imports on Docker Desktop (Mac VM) take ~60s; allow ample
       # start_period so slow first-boot doesn't get marked unhealthy.
@@ -246,10 +246,10 @@ services:
       - pi-bridge
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health/check"]
-      interval: 20s
-      timeout: 30s
+      interval: 30s
+      timeout: 60s
       retries: 5
-      start_period: 120s
+      start_period: 180s
 
   # ========================================================================
   # PI TRANSACTION ENGINE — High-Throughput Processing
@@ -282,10 +282,10 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 15s
-      timeout: 10s
+      interval: 30s
+      timeout: 30s
       retries: 5
-      start_period: 30s
+      start_period: 60s
 
   # ========================================================================
   # PI SMART CONTRACTS — Execution Engine
@@ -316,10 +316,10 @@ services:
       - triumph-net
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:80/health"]
-      interval: 15s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
 
   # ========================================================================
   # MARKET DATA SERVICE — Live Pi Horizon data relay
@@ -1067,11 +1067,11 @@ services:
       pi-bridge-connector:
         condition: service_started
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8132/health', timeout=8)"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8132/health', timeout=25)"]
       interval: 30s
-      timeout: 15s
+      timeout: 30s
       retries: 6
-      start_period: 60s
+      start_period: 120s
 
   # --------------------------------------------------------------------------
   # PUBLIX PHYGITAL HUB (PPH) — port 8133
