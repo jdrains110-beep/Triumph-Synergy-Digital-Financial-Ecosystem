@@ -1597,7 +1597,7 @@ async def startup():
     log.info("Security: %s", SECURITY_LEVEL)
     log.info("Port: %d | Reserve: %.0f%% | Loan Rate: %.1f%% | APY: %.1f%%",
              PORT, RESERVE_RATIO * 100, LOAN_INTEREST_RATE * 100, SAVINGS_APY * 100)
-    log.info("Pi rates: $%.3f/π (external) | $%,.0f/π (internal)", PI_RATE_EXTERNAL, PI_RATE_INTERNAL)
+    log.info("Pi rates: $%.3f/π (external) | $%.0f/π (internal)", PI_RATE_EXTERNAL, PI_RATE_INTERNAL)
     log.info("Vault: %s", VAULT_URL)
     log.info("Charter: SERVES PIONEERS — NOT CARTELS — NOT 13 FAMILIES — NOT CORRUPT OFFICIALS")
     log.info("=" * 72)

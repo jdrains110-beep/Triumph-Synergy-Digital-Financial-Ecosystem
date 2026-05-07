@@ -51,6 +51,8 @@ DOMAINS = [
     "appleandeve.pi",
     "seprod.pi",
     "jamrockmart.pi",
+    "spirit.pi",
+    "wawa.pi",
 ]
 
 # Cascade map: web3 → web2/web1 surfaces this domain projects priority over.
@@ -74,6 +76,8 @@ CASCADE = {
     "appleandeve.pi":                 ["appleandeve.com"],
     "seprod.pi":                      ["seprod.com"],
     "jamrockmart.pi":                 ["jamrockmart.com"],
+    "spirit.pi":                      ["spirit.com", "spirit.airlines", "stores.spirit.com", "checkin.spirit.com"],
+    "wawa.pi":                        ["wawa.com", "wawainc.com", "myperks.wawa.com"],
 }
 
 # Default valuation per founder-acquired domain.

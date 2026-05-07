@@ -33,6 +33,7 @@ DOMAINS = [
     "daytonainternationalspeedway.pi", "gracekennedy.pi", "winnebago.pi",
     "palatkaha.pi", "circuit7.pi", "magellanjets.pi", "rulonco.pi",
     "appleandeve.pi", "seprod.pi", "jamrockmart.pi",
+    "spirit.pi", "wawa.pi",
 ]
 
 CASCADE = {
@@ -54,8 +55,8 @@ CASCADE = {
     "rulonco.pi":                     ["rulonco.com"],
     "appleandeve.pi":                 ["appleandeve.com"],
     "seprod.pi":                      ["seprod.com"],
-    "jamrockmart.pi":                 ["jamrockmart.com"],
-}
+    "jamrockmart.pi":                 ["jamrockmart.com"],    "spirit.pi":                       ["spirit.com", "spirit.airlines", "stores.spirit.com", "checkin.spirit.com"],
+    "wawa.pi":                         ["wawa.com", "wawainc.com", "myperks.wawa.com"],}
 
 VALUATION_PI = os.environ.get("FOUNDER_DOMAIN_VALUATION_PI", "1")
 

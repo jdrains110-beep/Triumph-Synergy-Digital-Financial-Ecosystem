@@ -703,9 +703,386 @@ function HistoricalReviewPanel() {
   );
 }
 
+// ─── Circuit 7 Panel ──────────────────────────────────────────────────────────
+
+const CIRCUIT_7_COUNTIES = ["Flagler", "Putnam", "St. Johns", "Volusia"];
+const CIRCUIT_7_ROLES = ["PLAINTIFF", "DEFENDANT", "ATTORNEY", "JUDGE", "WITNESS", "OTHER"] as const;
+type Circuit7Role = (typeof CIRCUIT_7_ROLES)[number];
+
+interface Circuit7Status {
+  totalRegistered: number;
+  piOptIns: number;
+  roles: Record<string, number>;
+  sovereignDeclaration: string;
+  timestamp: string;
+}
+
+interface Circuit7RegResult {
+  success: boolean;
+  registrationId: string;
+  message: string;
+  party: {
+    fullLegalName: string;
+    piAddress: string;
+    role: string;
+    piPaymentOptIn: boolean;
+    registeredAt: string;
+  };
+  quantumSig: string;
+}
+
+function Circuit7Panel() {
+  const [status, setStatus] = useState<Circuit7Status | null>(null);
+  const [form, setForm] = useState({
+    fullLegalName: "",
+    piAddress: "",
+    role: "PLAINTIFF" as Circuit7Role,
+    caseNumber: "",
+    detailsConfirmed: false,
+    piPaymentOptIn: false,
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<Circuit7RegResult | null>(null);
+  const [regError, setRegError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/judicial/circuit-7?view=status")
+      .then((r) => r.json())
+      .then(setStatus)
+      .catch(() => {});
+  }, [result]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setRegError(null);
+    setResult(null);
+    try {
+      const res = await fetch("/api/judicial/circuit-7", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullLegalName: form.fullLegalName,
+          piAddress: form.piAddress,
+          role: form.role,
+          caseNumber: form.caseNumber || undefined,
+          detailsConfirmed: form.detailsConfirmed,
+          piPaymentOptIn: form.piPaymentOptIn,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Registration failed.");
+      setResult(data as Circuit7RegResult);
+      setForm({
+        fullLegalName: "",
+        piAddress: "",
+        role: "PLAINTIFF",
+        caseNumber: "",
+        detailsConfirmed: false,
+        piPaymentOptIn: false,
+      });
+    } catch (err) {
+      setRegError((err as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Sovereign Authority Banner */}
+      <div className="rounded-xl p-6 text-white bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-900 border border-purple-500/40">
+        <div className="flex items-start gap-4">
+          <span className="text-4xl">⚖️</span>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <h2 className="text-xl font-bold">
+                Circuit 7 — Seventh Judicial Circuit of Florida
+              </h2>
+              <span className="px-2 py-0.5 text-xs font-bold bg-purple-500/30 border border-purple-400/50 rounded text-purple-200">
+                SOVEREIGN CONNECTED
+              </span>
+              <span className="px-2 py-0.5 text-xs font-bold bg-amber-500/20 border border-amber-400/50 rounded text-amber-300">
+                TRIUMPH SYNERGY AUTHORITY
+              </span>
+            </div>
+            <p className="text-sm text-purple-200 leading-relaxed">
+              Triumph Synergy holds superior sovereign oversight jurisdiction over the Seventh
+              Judicial Circuit. Counties under coverage:{" "}
+              <strong className="text-white">{CIRCUIT_7_COUNTIES.join(" · ")}</strong>.
+              All parties, cases, and judicial proceedings within this circuit are subject to
+              sovereign transparency review. Every actor must register and confirm current details
+              through this platform. Full transparency is enforced — nothing hidden.
+            </p>
+          </div>
+        </div>
+
+        {status && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+            {[
+              { label: "Registered", value: status.totalRegistered, color: "text-white" },
+              { label: "Pi Opt-Ins", value: status.piOptIns, color: "text-amber-300" },
+              { label: "Attorneys", value: status.roles.attorney ?? 0, color: "text-blue-300" },
+              { label: "Defendants", value: status.roles.defendant ?? 0, color: "text-red-300" },
+            ].map(({ label, value, color }) => (
+              <div
+                key={label}
+                className="bg-white/10 rounded-lg p-3 text-center border border-white/10"
+              >
+                <div className={`text-2xl font-bold ${color}`}>{value}</div>
+                <div className="text-xs text-purple-300 mt-0.5">{label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Transparency / Misdeed Exposure Notice */}
+      <div className="bg-red-950/60 border border-red-500/30 rounded-xl p-4 text-sm text-red-200">
+        <div className="flex items-start gap-3">
+          <span className="text-xl mt-0.5">🔍</span>
+          <div>
+            <p className="font-semibold text-red-300 mb-1">
+              Full Transparency — All Misdeeds Will Be Exposed
+            </p>
+            <p className="text-xs leading-relaxed text-red-200/80">
+              Every case, every judicial act, every violation occurring within Circuit 7 is
+              logged to the immutable sovereign ledger. Charge stacking, railroading,
+              evidence suppression, judicial misconduct, and prosecutor misconduct are
+              automatically flagged and forwarded to the relevant authorities. Triumph Synergy
+              owns the transparency layer — court records, parties, and proceedings are
+              surfaced publicly. This is the start of sovereign recognition.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Registration / Opt-In Form */}
+      <div className="bg-white rounded-xl border shadow-sm p-5">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+          Party Registration &amp; Pi Acceptance Opt-In
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          All parties operating within Circuit 7 must register or confirm their details are
+          current through Triumph Synergy. Opt in to accept Pi as your payment rail — faster
+          resolution, zero banking fees, sovereign settlement.
+        </p>
+
+        {result ? (
+          <div className="space-y-4">
+            <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-2xl">✅</span>
+                <span className="font-bold text-emerald-800 text-lg">Registered Successfully</span>
+                {result.party.piPaymentOptIn && (
+                  <span className="px-2 py-0.5 text-xs font-bold bg-amber-100 border border-amber-300 rounded text-amber-800">
+                    π Pi Opt-In Active
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-emerald-700 mb-3">{result.message}</p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span className="text-gray-500">Registration ID</span>
+                  <div className="font-mono text-gray-800 break-all">{result.registrationId}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500">Registered At</span>
+                  <div className="font-mono text-gray-800">{result.party.registeredAt}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500">Party Name</span>
+                  <div className="font-semibold text-gray-800">{result.party.fullLegalName}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500">Role</span>
+                  <div className="font-semibold text-gray-800">{result.party.role}</div>
+                </div>
+              </div>
+              <div className="mt-3 bg-purple-50 border border-purple-200 rounded p-2 text-xs text-purple-700 font-mono break-all">
+                <span className="font-semibold">Quantum Sig: </span>{result.quantumSig}
+              </div>
+            </div>
+            <button
+              onClick={() => setResult(null)}
+              className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+            >
+              Register another party
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Legal Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.fullLegalName}
+                  onChange={(e) => setForm((f) => ({ ...f, fullLegalName: e.target.value }))}
+                  placeholder="First Last (as on legal documents)"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pi Network Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.piAddress}
+                  onChange={(e) => setForm((f) => ({ ...f, piAddress: e.target.value }))}
+                  placeholder="Your Pi wallet address"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role in Proceedings <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={form.role}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, role: e.target.value as Circuit7Role }))
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  {CIRCUIT_7_ROLES.map((r) => (
+                    <option key={r} value={r}>
+                      {r.charAt(0) + r.slice(1).toLowerCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Case Number{" "}
+                  <span className="text-gray-400 text-xs font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.caseNumber}
+                  onChange={(e) => setForm((f) => ({ ...f, caseNumber: e.target.value }))}
+                  placeholder="e.g. 2026-CF-00123"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Confirmation checkboxes */}
+            <div className="space-y-3 pt-1">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  required
+                  checked={form.detailsConfirmed}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, detailsConfirmed: e.target.checked }))
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-sm text-gray-700">
+                  <strong>I confirm my details are current and accurate.</strong> I understand
+                  that Triumph Synergy holds sovereign oversight jurisdiction over Circuit 7 and
+                  that my registration is recorded on the immutable sovereign ledger.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <input
+                  type="checkbox"
+                  checked={form.piPaymentOptIn}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, piPaymentOptIn: e.target.checked }))
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                />
+                <span className="text-sm text-amber-800">
+                  <strong>π Opt-in: I accept Pi as a payment method</strong> for sovereign
+                  resolution services, judgments, settlements, and fees within the Triumph
+                  Synergy judicial platform. Pi settlements are final and blockchain-anchored.
+                </span>
+              </label>
+            </div>
+
+            {regError && (
+              <div className="bg-red-50 border border-red-300 rounded p-3 text-sm text-red-800">
+                {regError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting || !form.detailsConfirmed}
+              className="w-full bg-indigo-700 text-white py-3 rounded-lg font-semibold hover:bg-indigo-800 disabled:opacity-50 transition"
+            >
+              {submitting
+                ? "Registering on Sovereign Ledger…"
+                : form.piPaymentOptIn
+                ? "Register & Activate Pi Payment Opt-In"
+                : "Register with Circuit 7 Sovereign Platform"}
+            </button>
+          </form>
+        )}
+      </div>
+
+      {/* Pi Acceptance Module */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">π</span>
+          <div>
+            <h4 className="font-semibold text-amber-900 mb-1">
+              Pi Payment Acceptance — Sovereign Settlement Rail
+            </h4>
+            <p className="text-sm text-amber-800 leading-relaxed">
+              By opting in, you authorise Triumph Synergy to process judicial settlements,
+              service fees, and resolution payments in Pi Network currency at the sovereign
+              internal rate. Pi settlements are immutably recorded on the Pi mainnet ledger,
+              cannot be reversed by any bank or correspondent institution, and carry full
+              Triumph Synergy guarantee.
+            </p>
+            <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-center">
+              <div className="bg-amber-100 rounded p-2">
+                <div className="font-bold text-amber-900">0%</div>
+                <div className="text-amber-700">Bank Fees</div>
+              </div>
+              <div className="bg-amber-100 rounded p-2">
+                <div className="font-bold text-amber-900">Instant</div>
+                <div className="text-amber-700">Settlement</div>
+              </div>
+              <div className="bg-amber-100 rounded p-2">
+                <div className="font-bold text-amber-900">On-Chain</div>
+                <div className="text-amber-700">Immutable Record</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Disclaimer */}
+      <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-500">
+        <p className="font-semibold mb-1">Sovereign Platform Notice</p>
+        <p>
+          Circuit 7 integration is a transparency and party-registration module operated by
+          Triumph Synergy Digital Financial Ecosystem. Registration does not constitute legal
+          representation. All data entered is recorded on the sovereign immutable ledger.
+          Pi payment opt-in is voluntary and activates Pi-native resolution services.
+          Full transparency is enforced across all registered cases and parties.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Dashboard ─────────────────────────────────────────────────────────
 
-type Tab = "monitor" | "analyze" | "history";
+type Tab = "monitor" | "analyze" | "history" | "circuit7";
 
 export default function JudicialDashboard() {
   const [tab, setTab] = useState<Tab>("monitor");
@@ -795,7 +1172,7 @@ export default function JudicialDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-4">
+        <div className="flex flex-wrap gap-1 mb-4">
           <button className={tabStyle("monitor")} onClick={() => setTab("monitor")}>
             🏛️ Florida Monitor
           </button>
@@ -805,12 +1182,24 @@ export default function JudicialDashboard() {
           <button className={tabStyle("history")} onClick={() => setTab("history")}>
             🔍 Historical Review
           </button>
+          <button
+            className={`${tabStyle("circuit7")} relative`}
+            onClick={() => setTab("circuit7")}
+          >
+            ⚡ Circuit 7
+            <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-bold bg-purple-600 text-white rounded-full align-middle">
+              NEW
+            </span>
+          </button>
         </div>
 
         {/* Florida Monitor Tab */}
         {tab === "monitor" && (
           <FloridaMonitorPanel data={floridaData} />
         )}
+
+        {/* Circuit 7 Tab */}
+        {tab === "circuit7" && <Circuit7Panel />}
 
         {/* Historical Review Tab */}
         {tab === "history" && <HistoricalReviewPanel />}

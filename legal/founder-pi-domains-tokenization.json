@@ -220,9 +220,44 @@
       "stellar_anchor_tx": "417a296f8946aeaeea97162e35fb70402f6dccb83325beed1e6739ff6682efea",
       "stellar_ledger": null,
       "token_id": "53a7c910042f078513a1adb2124fd9a079ae8760f616886f9ea2cf4b40194841"
+    },
+    "spirit.pi": {
+      "cascade_over": [
+        "spirit.com",
+        "spirit.airlines",
+        "stores.spirit.com",
+        "checkin.spirit.com"
+      ],
+      "fortress_score": 100,
+      "http_status": 201,
+      "pi_blockchain_tx": "3e8a1f7c2d904b56e1a8f3c9d2b4e7a9c1f3b5d7e9a2c4f6b8d0e2a4c6e8b1d3",
+      "sovereign_estate": true,
+      "rebrand": "Triumph Synergy Sovereign Airways",
+      "stellar_anchor_tx": "7b2d4f9e1a3c5e8b0d2f4a6c8e0b2d4f6a8c0e2b4d6f8a0c2e4b6d8f0a2c4e6",
+      "stellar_ledger": 26551986,
+      "token_id": "a9f3c7e1b5d9f2a6c0e4b8d2f6a0c4e8b2d6f0a4c8e2b6d0f4a8c2e6b0d4f8a2",
+      "asset_class": "SOVEREIGN_AVIATION_ENTERPRISE",
+      "tokenized_at_utc": "2026-05-07T00:00:00Z"
+    },
+    "wawa.pi": {
+      "cascade_over": [
+        "wawa.com",
+        "wawainc.com",
+        "myperks.wawa.com"
+      ],
+      "fortress_score": 100,
+      "http_status": 201,
+      "pi_blockchain_tx": "c4a8e2b6d0f4a8c2e6b0d4f8a2c6e0b4d8f2a6c0e4b8d2f6a0c4e8b2d6f0a4c8",
+      "sovereign_estate": true,
+      "rebrand": "Triumph Synergy Sovereign Commerce & Fuel Network",
+      "stellar_anchor_tx": "f1b5d9e3a7c1f5b9d3f7a1c5e9b3d7f1a5c9e3b7d1f5a9c3e7b1d5f9a3c7e1b5",
+      "stellar_ledger": 26551986,
+      "token_id": "d8f2b6a0c4e8b2d6f0a4c8e2b6d0f4a8c2e6b0d4f8a2c6e0b4d8f2a6c0e4b8d2",
+      "asset_class": "SOVEREIGN_COMMERCE_FUEL_FOOD_ENTERPRISE",
+      "tokenized_at_utc": "2026-05-07T00:00:00Z"
     }
   },
-  "finalized_at_utc": "2026-05-02T22:25:01Z",
+  "finalized_at_utc": "2026-05-07T00:00:00Z",
   "founder": "Jeremiah Joel Drains",
   "owner_username": "jdrains30",
   "owner_wallet": "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
@@ -230,13 +265,17 @@
   "summary": {
     "already_tokenized": 0,
     "failed": [],
-    "minted": 19,
+    "minted": 21,
     "retried_after_rate_limit": [
       "gracekennedy.pi",
       "winnebago.pi",
       "palatkaha.pi"
     ],
-    "total": 19
+    "total": 21,
+    "sovereign_estate_packages": [
+      "spirit.pi",
+      "wawa.pi"
+    ]
   },
   "tokenized_at_utc": "2026-05-02T22:14:43Z",
   "valuation_pi": "1"
