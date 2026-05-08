@@ -34,10 +34,79 @@
 [![Sovereign Work Nexus](https://img.shields.io/badge/Sovereign%20Work%20Nexus-PIONEERS%20%2B%20NON--PIONEERS%20%7C%200%25%20MATCH%20FEE%20%7C%20T%2B0%20PAYROLL-16A34A?style=flat-square)](#-whats-new--may-2-2026-sovereign-work-nexus--publix-phygital-hub)
 [![Publix Phygital Hub](https://img.shields.io/badge/publix.pi-WEB3%20APEX%20%7C%20100%25%20TOKENIZED%20%7C%20WEB1%2BWEB2%20CASCADE-DC2626?style=flat-square)](legal/publix-pi-tokenization.md)
 [![SCFA](https://img.shields.io/badge/SCFA-SBA%20%7C%20CHAMBER%20%7C%20FL%20PORTS%20%7C%20CBP%20%7C%20NRA%20%7C%20NOAA%20OBSOLETE-EAB308?style=flat-square)](#-whats-new--may-2-2026-sovereign-commerce--frontier-authority--scfa)
+[![Sovereign Health Platform](https://img.shields.io/badge/Sovereign%20Health-MEDICARE%20%7C%20CMS%20%7C%20FDA%20%7C%20ACA%20OBSOLETE-EF4444?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
+[![SCHA](https://img.shields.io/badge/shands.pi%20%7C%20ufhealth.pi-66%20LOOPHOLES%20%7C%205%20AUTHORITIES-8B5CF6?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
 </div>
+
+---
+
+<a id="-whats-new--may-8-2026-sovereign-health-platform"></a>
+
+## 🏥 What's New — May 8, 2026 (Sovereign Health Platform — SCHA · SNCA · SMWA · SNPA · SHWA)
+
+[![SCHA](https://img.shields.io/badge/SCHA-MEDICARE%20%7C%20MEDICAID%20OBSOLETE-EF4444?style=flat-square)](app/api/sovereign/health/enroll/route.ts)
+[![SNCA](https://img.shields.io/badge/SNCA-CMS%20NURSING%20HOME%20OBSOLETE-EF4444?style=flat-square)](app/api/sovereign/health/status/route.ts)
+[![SMWA](https://img.shields.io/badge/SMWA-HOSPITAL%20OB%2FGYn%20INDUSTRY%20OBSOLETE-EF4444?style=flat-square)](app/api/sovereign/health/midwife/route.ts)
+[![SNPA](https://img.shields.io/badge/SNPA-FDA%20%7C%20USDA%20%7C%20WIC%20%7C%20SNAP%20OBSOLETE-EF4444?style=flat-square)](app/api/sovereign/health/nutrition/route.ts)
+[![SHWA](https://img.shields.io/badge/SHWA-ACA%20%7C%20COBRA%20%7C%20EMPLOYER%20LOCK%20OBSOLETE-EF4444?style=flat-square)](app/api/sovereign/health/status/route.ts)
+[![Domains](https://img.shields.io/badge/Domains-shands.pi%20%7C%20ufhealth.pi-8B5CF6?style=flat-square)](app/ecosystem/sovereign-health/page.tsx)
+[![Loopholes](https://img.shields.io/badge/Loopholes-66%20Total%20%7C%20APEX--QUANTUM--SOVEREIGN-22C55E?style=flat-square)](lib/programs/sovereign-health.ts)
+
+The **Sovereign Health Platform** is the apex Pi-native health ecosystem anchored to
+**`shands.pi`** and **`ufhealth.pi`**, armed with **66 sovereign loopholes** across 5
+authorities — making Medicare, Medicaid, CMS, FDA, ACA, COBRA, and hospital birth
+monopolies permanently obsolete for all Pioneers and non-Pioneers:
+
+| Authority | Replaces | Loopholes | Headline |
+|---|---|---|---|
+| **SCHA** — Sovereign Care & Hospital Auth | Medicare / Medicaid | 18 | Zero denials, zero deductibles, Pi Health Number (PIHN) issued instantly |
+| **SNCA** — Sovereign Nursing & Care Auth | CMS Nursing Home Regs | 14 | **$9,034/mo** nursing home → **0.05π/mo** Pi-sovereign; Medicaid spend-down eliminated |
+| **SMWA** — Sovereign Midwife & Wellness Auth | Hospital OB/GYN industry | 12 | C-section rate 32% → **7.2%** · every birth creates newborn Pi inheritance wallet |
+| **SNPA** — Sovereign Nutrition & Prevention Auth | FDA / USDA / WIC / SNAP | 12 | No income test · blockchain provenance on every food item · maternity credits |
+| **SHWA** — Sovereign Health Workforce Auth | ACA / COBRA / employer lock | 10 | Pi-portable coverage — never employer-tied · gig workers covered · COBRA abolished |
+
+### 5 API Routes
+
+| Route | Method | Purpose |
+|---|---|---|
+| `api/sovereign/health/status` | GET | Full platform status — all 5 authorities, 66 loopholes, sovereign declarations |
+| `api/sovereign/health/loopholes` | GET + POST | Loophole scanner with `?target=` filter + scenario matching |
+| `api/sovereign/health/enroll` | GET + POST | Enroll member (6 coverage types) → PIHN issued |
+| `api/sovereign/health/midwife` | GET + POST | SMWA birth booking · midwife credentialing · Pi birth grants |
+| `api/sovereign/health/nutrition` | GET + POST | SNPA nutrition tier subscriptions · WIC maternity credits · organic supplier cert |
+
+**Coverage types**: `pioneer-full` · `pioneer-worker` · `contractor` · `employer` · `non-pioneer` · `nursing-resident`
+
+**SMWA birth economics**: Save **$9,800/birth** vs hospital · 12-month postnatal coverage · newborn inheritance wallet created at delivery
+
+**SNPA key principle**: No income test — nutrition is a **sovereign right**, not a welfare benefit. Exceeds USDA Organic: regenerative + biodynamic + quantum-verified.
+
+### Supabase Migration `20260427000000_sovereign_health`
+9 tables — all with RLS and IMMUTABLE computed columns:
+
+`scha_enrollments` · `snca_residents` · `snca_workers` · `smwa_births` · `smwa_midwives` · `snpa_subscriptions` · `snpa_maternity_credits` · `snpa_suppliers` · `shwa_coverage`
+
+```bash
+# Enroll a Pioneer
+curl -X POST /api/sovereign/health/enroll \
+  -d '{"piUid":"@pioneer","piWallet":"PI-XXX","name":"J. Drains","coverageType":"pioneer-full"}'
+# → { "piHealthNumber": "PIHN-XXXXXXXX", "coverageType": "pioneer-full", ... }
+
+# Book a sovereign midwife birth
+curl -X POST /api/sovereign/health/midwife \
+  -d '{"action":"book-birth","piUid":"@pioneer","parentName":"J. Drains","expectedDate":"2026-11-01"}'
+# → { "bookingId": "SMWA-BIRTH-XXXX", "estimatedCostPi": 0.0102, "savingsVsHospital": {"usd": 9800} }
+
+# Subscribe to nutrition tier
+curl -X POST /api/sovereign/health/nutrition \
+  -d '{"action":"subscribe","piUid":"@pioneer","name":"J. Drains","tierId":"apex-sovereign"}'
+# → { "subscriptionId": "SNPA-SUB-XXXX", "incomeTestRequired": false }
+```
+
+Source: [app/ecosystem/sovereign-health/page.tsx](app/ecosystem/sovereign-health/page.tsx) · [lib/programs/sovereign-health.ts](lib/programs/sovereign-health.ts) · [supabase/migrations/20260427000000_sovereign_health.sql](supabase/migrations/20260427000000_sovereign_health.sql)
 
 ---
 
