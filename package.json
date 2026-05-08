@@ -102,7 +102,7 @@
     "@vercel/blob": "^2.3.3",
     "@vercel/functions": "^2.0.0",
     "ai": "6.0.5",
-    "axios": "^1.15.0",
+    "axios": "^1.15.2",
     "bcrypt-ts": "^8.0.0",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
