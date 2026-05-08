@@ -106,10 +106,10 @@ const DEMO_CASE: Case = {
     },
   ],
   parties: [
-    { role: "DEFENDANT",        id: "P-001", name: "John Doe" },
-    { role: "PROSECUTOR",       id: "P-002", name: "A. Smith", barNumber: "FL-BAR-12345", jurisdiction: "Florida" },
+    { role: "DEFENDANT", id: "P-001", name: "John Doe" },
+    { role: "PROSECUTOR", id: "P-002", name: "A. Smith", barNumber: "FL-BAR-12345", jurisdiction: "Florida" },
     { role: "DEFENSE_ATTORNEY", id: "P-003", name: "B. Jones", barNumber: "FL-BAR-67890" },
-    { role: "JUDGE",            id: "P-004", name: "Hon. C. Williams", jurisdiction: "11th Judicial Circuit" },
+    { role: "JUDGE", id: "P-004", name: "Hon. C. Williams", jurisdiction: "11th Judicial Circuit" },
   ],
   precedentCases: [
     "Blockburger v. United States, 284 U.S. 299 (1932)",
@@ -321,17 +321,15 @@ function LoopholePanel({ summary }: { summary: LoopholeSummary }) {
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setSide("defense")}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-            side === "defense" ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${side === "defense" ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
         >
           🛡️ Defense Loopholes ({summary.defenseLoopholes.length})
         </button>
         <button
           onClick={() => setSide("prosecution")}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-            side === "prosecution" ? "bg-red-700 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${side === "prosecution" ? "bg-red-700 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
         >
           ⚠️ Prosecution Abuses ({summary.prosecutionLoopholes.length})
         </button>
@@ -559,9 +557,8 @@ function HistoricalReviewPanel() {
             <div className="flex gap-2">
               {([1, 2, 3, 4, 5] as const).map((y) => (
                 <button key={y} onClick={() => setYearsBack(y)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${
-                    yearsBack === y ? "bg-blue-700 text-white border-blue-700" : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100"
-                  }`}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${yearsBack === y ? "bg-blue-700 text-white border-blue-700" : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100"
+                    }`}
                 >{y}y</button>
               ))}
             </div>
@@ -610,9 +607,8 @@ function HistoricalReviewPanel() {
           <div className="flex gap-2">
             {(["alerts", "flags", "actors", "cases", "loopholes"] as const).map((s) => (
               <button key={s} onClick={() => setActiveSection(s)}
-                className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                  activeSection === s ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}>
+                className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${activeSection === s ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}>
                 {s === "alerts" && `📢 Public Alerts (${result.publicInterestAlerts.length})`}
                 {s === "flags" && `🚩 GOB Flags (${result.goodOleBoyFlags.length})`}
                 {s === "actors" && `👤 Actor Profiles (${result.actorProfiles.length})`}
@@ -627,8 +623,8 @@ function HistoricalReviewPanel() {
               {result.publicInterestAlerts.length === 0
                 ? <div className="bg-green-50 border border-green-300 rounded-lg p-4 text-green-800 text-sm">No public interest alerts generated.</div>
                 : result.publicInterestAlerts.map((alert, i) => (
-                    <div key={i} className="bg-white border rounded-xl p-4 shadow-sm text-sm text-gray-800">{alert}</div>
-                  ))
+                  <div key={i} className="bg-white border rounded-xl p-4 shadow-sm text-sm text-gray-800">{alert}</div>
+                ))
               }
             </div>
           )}
@@ -656,11 +652,10 @@ function HistoricalReviewPanel() {
                     <span className="font-semibold text-sm text-gray-900">{r.caseId}</span>
                     <div className="flex items-center gap-2">
                       <RiskBadge level={r.riskLevel} />
-                      <span className={`text-xs px-2 py-0.5 rounded font-semibold ${
-                        r.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL" ? "bg-red-100 text-red-800"
-                        : r.overallVerdict === "VIOLATIONS_FOUND" ? "bg-orange-100 text-orange-800"
-                        : "bg-green-100 text-green-800"
-                      }`}>{r.overallVerdict.replace(/_/g, " ")}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded font-semibold ${r.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL" ? "bg-red-100 text-red-800"
+                          : r.overallVerdict === "VIOLATIONS_FOUND" ? "bg-orange-100 text-orange-800"
+                            : "bg-green-100 text-green-800"
+                        }`}>{r.overallVerdict.replace(/_/g, " ")}</span>
                     </div>
                   </div>
                   <p className="text-xs text-gray-600">{r.summary}</p>
@@ -749,7 +744,7 @@ function Circuit7Panel() {
     fetch("/api/judicial/circuit-7?view=status")
       .then((r) => r.json())
       .then(setStatus)
-      .catch(() => {});
+      .catch(() => { });
   }, [result]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -1025,8 +1020,8 @@ function Circuit7Panel() {
               {submitting
                 ? "Registering on Sovereign Ledger…"
                 : form.piPaymentOptIn
-                ? "Register & Activate Pi Payment Opt-In"
-                : "Register with Circuit 7 Sovereign Platform"}
+                  ? "Register & Activate Pi Payment Opt-In"
+                  : "Register with Circuit 7 Sovereign Platform"}
             </button>
           </form>
         )}
@@ -1096,14 +1091,14 @@ export default function JudicialDashboard() {
     try {
       const res = await fetch("/api/judicial?view=florida");
       if (res.ok) setFloridaData(await res.json());
-    } catch {}
+    } catch { }
   }, []);
 
   const fetchHealth = useCallback(async () => {
     try {
       const res = await fetch("/api/judicial?view=health");
       if (res.ok) setServiceHealth(await res.json());
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -1143,10 +1138,9 @@ export default function JudicialDashboard() {
   }
 
   const tabStyle = (t: Tab) =>
-    `px-4 py-2 rounded-t-lg font-semibold text-sm transition ${
-      tab === t
-        ? "bg-white text-blue-800 border-b-2 border-blue-700"
-        : "bg-gray-100 text-gray-500 hover:text-gray-800"
+    `px-4 py-2 rounded-t-lg font-semibold text-sm transition ${tab === t
+      ? "bg-white text-blue-800 border-b-2 border-blue-700"
+      : "bg-gray-100 text-gray-500 hover:text-gray-800"
     }`;
 
   return (
@@ -1260,21 +1254,20 @@ export default function JudicialDashboard() {
               <div className="space-y-6 mt-2">
                 {/* Verdict banner */}
                 <div
-                  className={`rounded-xl p-5 text-white ${
-                    report.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL"
+                  className={`rounded-xl p-5 text-white ${report.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL"
                       ? "bg-red-700"
                       : report.overallVerdict === "VIOLATIONS_FOUND"
-                      ? "bg-orange-600"
-                      : "bg-green-700"
-                  }`}
+                        ? "bg-orange-600"
+                        : "bg-green-700"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">
                       {report.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL"
                         ? "⚖️"
                         : report.overallVerdict === "VIOLATIONS_FOUND"
-                        ? "⚠️"
-                        : "✅"}
+                          ? "⚠️"
+                          : "✅"}
                     </span>
                     <div>
                       <p className="font-bold text-lg">
@@ -1296,13 +1289,12 @@ export default function JudicialDashboard() {
                   <div className="flex items-center gap-4 mb-3">
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
                       <div
-                        className={`h-4 rounded-full transition-all duration-500 ${
-                          report.factScore.factualScore >= 70
+                        className={`h-4 rounded-full transition-all duration-500 ${report.factScore.factualScore >= 70
                             ? "bg-green-500"
                             : report.factScore.factualScore >= 50
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                          }`}
                         style={{ width: `${report.factScore.factualScore}%` }}
                       />
                     </div>
@@ -1374,13 +1366,12 @@ export default function JudicialDashboard() {
                     </h2>
                     <div className="flex items-center gap-3 mb-3">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          report.representationAudit.overallRating === "ADEQUATE"
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${report.representationAudit.overallRating === "ADEQUATE"
                             ? "bg-green-100 text-green-800"
                             : report.representationAudit.overallRating === "DEFICIENT"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
                       >
                         {report.representationAudit.overallRating}
                       </span>

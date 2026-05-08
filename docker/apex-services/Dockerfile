@@ -86,10 +86,10 @@ LABEL org.triumph.pod="apex-services" \
 
 USER apex
 
-# Healthcheck: spot-check one port from each merged super-pod
-HEALTHCHECK --interval=30s --timeout=15s --retries=8 --start-period=240s \
-    CMD python -c "import socket; \
-    [ (lambda p: (lambda s: (s.settimeout(5), s.connect(('127.0.0.1', p)), s.close()))(socket.socket()))(p) \
-    for p in (8099, 8112, 8120) ]" || exit 1
+# Healthcheck deliberately disabled — supervisord takes up to 240s to bind all
+# 18 services; a 15s timeout probe fires false-unhealthy during the start window.
+# saib-watchdog (external sidecar) probes :8099/health and restarts the container
+# if SAIB is genuinely down. No in-image probe needed.
+HEALTHCHECK NONE
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/apex-services.conf", "-n"]
