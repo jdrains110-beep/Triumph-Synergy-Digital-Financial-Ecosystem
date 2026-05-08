@@ -75,6 +75,18 @@ CREATE INDEX idx_sha_jurisdiction   ON sha_housing_profiles (jurisdiction);
 CREATE INDEX idx_sha_property_type  ON sha_housing_profiles (property_type);
 CREATE INDEX idx_sha_score          ON sha_housing_profiles (pi_property_score);
 
+-- ── Helper: immutable month-addition for GENERATED ALWAYS AS columns ─────────
+-- timestamptz + interval is STABLE (respects TimeZone GUC), so it cannot be
+-- used directly in a generated column.  Wrapping it in an IMMUTABLE function
+-- is the standard PostgreSQL pattern for month-granularity expiry dates where
+-- DST effects are irrelevant.
+CREATE OR REPLACE FUNCTION sphvp_add_months(base_ts TIMESTAMPTZ, months INT)
+  RETURNS TIMESTAMPTZ
+  LANGUAGE SQL IMMUTABLE STRICT
+AS $$
+  SELECT base_ts + make_interval(months => months)
+$$;
+
 -- ── Table: sphvp_vouchers (Section 8 rival) ─────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS sphvp_vouchers (
@@ -90,7 +102,7 @@ CREATE TABLE IF NOT EXISTS sphvp_vouchers (
   quantum_signature   TEXT             NOT NULL,
   status              sphvp_voucher_status NOT NULL DEFAULT 'active',
   issued_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
-  expires_at          TIMESTAMPTZ      NOT NULL GENERATED ALWAYS AS (issued_at + make_interval(months => coverage_months)) STORED
+  expires_at          TIMESTAMPTZ      NOT NULL GENERATED ALWAYS AS (sphvp_add_months(issued_at, coverage_months)) STORED
 );
 
 ALTER TABLE sphvp_vouchers ENABLE ROW LEVEL SECURITY;
