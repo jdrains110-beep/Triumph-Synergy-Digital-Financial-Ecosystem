@@ -644,7 +644,7 @@
 "@icons-pack/react-simple-icons@^13.7.0", "@icons-pack/react-simple-icons@13.7.0":
   version "13.7.0"
   resolved "https://registry.npmjs.org/@icons-pack/react-simple-icons/-/react-simple-icons-13.7.0.tgz"
-  integrity sha512-HikaFzwXRvsTnhEh1htJhpJWbP/7x5ZiMDpz7n5JD9Ox3Tczq8zXWr7JvB5Bg1+CxrFJskmECKRd70MHijujg==
+  integrity sha512-Vx5mnIm/3gD/9dpCfw/EdCXwzCswmvWnvMjL6zUJTbpk2PuyCdx5zSfiX8KQKYszD/1Z2mfaiBtqCxlHuDcpuA==
 
 "@img/colour@^1.0.0":
   version "1.1.0"
