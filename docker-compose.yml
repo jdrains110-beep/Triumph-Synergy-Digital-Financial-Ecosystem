@@ -497,6 +497,8 @@ services:
         condition: service_healthy
       governance-shield:
         condition: service_started
+    healthcheck:
+      disable: true
 
   # ========================================================================
   # FINANCIAL-INTEL — Super-Pod
