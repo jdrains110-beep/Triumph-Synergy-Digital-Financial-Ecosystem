@@ -46,7 +46,16 @@ jobs:
                   node-version: ${{ env.NODE_VERSION }}
 
             - name: Install dependencies
-              run: npm install --legacy-peer-deps
+              env:
+                  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+                  NODE_OPTIONS: --max-old-space-size=4096
+              run: |
+                  npm install --legacy-peer-deps --no-audit --no-fund 2>&1 | tee /tmp/install.log
+                  exit_code=${PIPESTATUS[0]}
+                  if [ $exit_code -ne 0 ]; then
+                    echo "::error title=npm install failed::$(tail -20 /tmp/install.log | tr '\n' '|')"
+                    exit $exit_code
+                  fi
 
             - name: Verify Pi SDK Files
               id: check
@@ -102,7 +111,16 @@ jobs:
                   node-version: ${{ env.NODE_VERSION }}
 
             - name: Install dependencies
-              run: npm install --legacy-peer-deps
+              env:
+                  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+                  NODE_OPTIONS: --max-old-space-size=4096
+              run: |
+                  npm install --legacy-peer-deps --no-audit --no-fund 2>&1 | tee /tmp/install.log
+                  exit_code=${PIPESTATUS[0]}
+                  if [ $exit_code -ne 0 ]; then
+                    echo "::error title=npm install failed::$(tail -20 /tmp/install.log | tr '\n' '|')"
+                    exit $exit_code
+                  fi
 
             - name: Run Security Audit (advisory)
               run: |
@@ -161,7 +179,16 @@ jobs:
                   restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('package.json') }}-
 
             - name: Install dependencies
-              run: npm install --legacy-peer-deps
+              env:
+                  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+                  NODE_OPTIONS: --max-old-space-size=4096
+              run: |
+                  npm install --legacy-peer-deps --no-audit --no-fund 2>&1 | tee /tmp/install.log
+                  exit_code=${PIPESTATUS[0]}
+                  if [ $exit_code -ne 0 ]; then
+                    echo "::error title=npm install failed::$(tail -20 /tmp/install.log | tr '\n' '|')"
+                    exit $exit_code
+                  fi
 
             - name: Build Next.js Application
               env:
