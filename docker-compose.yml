@@ -700,6 +700,11 @@ services:
         condition: service_started
       settlement-core:
         condition: service_started
+    # Dockerfile has HEALTHCHECK that probes 8099/8112/8120; disable in compose
+    # so a slow supervisord startup doesn't trigger false (unhealthy).
+    # saib-watchdog handles SAIB health and resurrection externally.
+    healthcheck:
+      disable: true
 
   # ========================================================================
   # HORIZON-STREAM — Super-Pod
@@ -1096,6 +1101,7 @@ services:
     container_name: triumph-pi-mainnet-node
     restart: always
     profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
+    shm_size: 256m   # stellar-core uses /dev/shm for SCP consensus buffers; default 64MB causes SIGABRT
     mem_limit: 4g
     mem_reservation: 1536m
     cpus: 1.5
