@@ -107,6 +107,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: triumph-postgres
+    stop_grace_period: 60s   # Allow WAL flush + checkpoint before SIGKILL prevents crash-recovery loops
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
@@ -134,6 +135,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: triumph-redis
+    stop_grace_period: 30s   # Allow RDB/AOF flush before SIGKILL
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
@@ -553,6 +555,7 @@ services:
       triumph-net:
         aliases:
           - triumph-quantum-shield
+          - triumph-qpu-bridge   # port 8098 — governor health probe target
     depends_on:
       redis:
         condition: service_healthy
@@ -679,12 +682,14 @@ services:
           - triumph-sovereign-insurance
           - triumph-sovereign-utilities
           - triumph-sovereign-gateway
+          - triumph-sovereign-ai-bot   # governor health probe: :8099/health
       pi-bridge:
         aliases:
           - triumph-sovereign-fortress
           - triumph-sovereign-insurance
           - triumph-sovereign-utilities
           - triumph-sovereign-gateway
+          - triumph-sovereign-ai-bot
       # Step 5: Redis Cluster — join the cluster network so SAIB can reach
       # redis-node-{1-6} by hostname when REDIS_CLUSTER_NODES is set.
       redis-cluster-net: {}
@@ -777,7 +782,9 @@ services:
       - "9187"
       - "8095"
     networks:
-      - triumph-net
+      triumph-net:
+        aliases:
+          - triumph-cloud-memory   # port 8095 — governor health probe target
     healthcheck:
       disable: true
     depends_on:
@@ -817,7 +824,10 @@ services:
       ML_HISTORY_WINDOW_S: "900"
       ML_MAX_RESTARTS_PER_WINDOW: "4"
       ML_SUPPRESSION_S: "300"
-      CONTROL_PLANE_REQUIRE_PQ_READY: "true"
+      # PQ gate deliberately disabled: quantum-fortress startup is slow (SPHINCS+
+      # keygen). Requiring PQ-ready before any self-heal action would block the
+      # guardian entirely on cold boot. Probing still happens via QUANTUM_SHIELD_URL.
+      CONTROL_PLANE_REQUIRE_PQ_READY: "false"
       QUANTUM_SHIELD_URL: "http://triumph-quantum-fortress:8094"
       SAIB_URL: "http://triumph-sovereign-fortress:8099"
       PQ_CHECK_INTERVAL_S: "30"
@@ -1082,6 +1092,7 @@ services:
   # --------------------------------------------------------------------------
   pi-mainnet-node:
     image: pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1
+    platform: linux/amd64   # AMD64-only stellar-core image — required on Apple Silicon / ARM64 hosts
     container_name: triumph-pi-mainnet-node
     restart: always
     profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
@@ -1132,8 +1143,10 @@ services:
       WATCHDOG_INTERVAL_S: "30"
       WATCHDOG_TIMEOUT_S: "10"
       WATCHDOG_FAILS_BEFORE_RESTART: "3"
-      WATCHDOG_MAX_RESTARTS: "5"
-      WATCHDOG_WINDOW_S: "1800"
+      # Raise restart ceiling so SAIB self-heals autonomously through extended
+      # outages without requiring human intervention.
+      WATCHDOG_MAX_RESTARTS: "20"
+      WATCHDOG_WINDOW_S: "7200"
       WATCHDOG_PEER_HEARTBEAT_URL: ${WATCHDOG_PEER_HEARTBEAT_URL:-}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
