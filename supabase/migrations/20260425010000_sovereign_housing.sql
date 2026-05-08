@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS sphvp_vouchers (
   quantum_signature   TEXT             NOT NULL,
   status              sphvp_voucher_status NOT NULL DEFAULT 'active',
   issued_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
-  expires_at          TIMESTAMPTZ      NOT NULL GENERATED ALWAYS AS (issued_at + (coverage_months || ' months')::INTERVAL) STORED
+  expires_at          TIMESTAMPTZ      NOT NULL GENERATED ALWAYS AS (issued_at + make_interval(months => coverage_months)) STORED
 );
 
 ALTER TABLE sphvp_vouchers ENABLE ROW LEVEL SECURITY;

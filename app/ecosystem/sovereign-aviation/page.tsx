@@ -246,8 +246,8 @@ export default function SovereignAviationPage() {
                                 key={svc.id}
                                 onClick={() => setActiveService(activeService === svc.id ? null : svc.id)}
                                 className={`rounded-xl border p-4 cursor-pointer transition-all ${activeService === svc.id
-                                        ? "border-yellow-400/50 bg-yellow-500/5"
-                                        : "border-white/10 bg-white/3 hover:border-white/20"
+                                    ? "border-yellow-400/50 bg-yellow-500/5"
+                                    : "border-white/10 bg-white/3 hover:border-white/20"
                                     }`}
                             >
                                 <div className="flex items-start gap-3">
@@ -313,8 +313,8 @@ export default function SovereignAviationPage() {
                                     <span className="font-semibold text-white text-sm">{l.title}</span>
                                     <span
                                         className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full ${l.score >= 97
-                                                ? "bg-emerald-500/20 text-emerald-300"
-                                                : "bg-yellow-500/20 text-yellow-300"
+                                            ? "bg-emerald-500/20 text-emerald-300"
+                                            : "bg-yellow-500/20 text-yellow-300"
                                             }`}
                                     >
                                         {l.score}/100

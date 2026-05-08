@@ -1,0 +1,14 @@
+# Cloudflare Worker – Triumph Synergy Digital Financial Ecosystem
+# Root wrangler config used by the Cloudflare Workers GitHub App build check.
+# KV namespace IDs and secrets are bound in the Cloudflare dashboard.
+
+name               = "triumphsynergydigitalfinancialecosystem"
+main               = "infrastructure/cloudflare/workers/saib-edge.js"
+compatibility_date = "2026-04-01"
+account_id         = "5d6f808f4561a69a80490838b28cd9ed"
+
+[vars]
+ORIGIN = "https://triumphsynergy.app"
+
+[observability]
+enabled = true
