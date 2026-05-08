@@ -25,7 +25,7 @@ jobs:
         run: npm install -g yarn@1.22.22
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-timeout 600000 --ignore-engines
+        run: yarn install --network-timeout 600000 --ignore-engines --non-interactive
 
       - name: Check Node version
         run: |
