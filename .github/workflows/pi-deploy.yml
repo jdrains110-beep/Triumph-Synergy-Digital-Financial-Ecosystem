@@ -27,7 +27,6 @@ permissions:
 
 env:
     NODE_VERSION: "24"
-    YARN_VERSION: "1.22.22"
 
 jobs:
     # ============================================================================
@@ -46,11 +45,8 @@ jobs:
               with:
                   node-version: ${{ env.NODE_VERSION }}
 
-            - name: Install Yarn
-              run: npm install -g yarn@${{ env.YARN_VERSION }}
-
             - name: Install dependencies
-              run: yarn install --network-timeout 600000 --ignore-engines --non-interactive
+              run: npm install --legacy-peer-deps
 
             - name: Verify Pi SDK Files
               id: check
@@ -88,7 +84,7 @@ jobs:
               continue-on-error: true
               run: |
                   echo "🔍 Checking Pi SDK TypeScript types..."
-                  yarn tsc --noEmit --skipLibCheck 2>&1 | head -50 || true
+                  npx tsc --noEmit --skipLibCheck 2>&1 | head -50 || true
                   echo "✅ Type check complete"
 
     # ============================================================================
@@ -105,18 +101,15 @@ jobs:
               with:
                   node-version: ${{ env.NODE_VERSION }}
 
-            - name: Install Yarn
-              run: npm install -g yarn@${{ env.YARN_VERSION }}
-
             - name: Install dependencies
-              run: yarn install --network-timeout 600000 --ignore-engines --non-interactive
+              run: npm install --legacy-peer-deps
 
             - name: Run Security Audit (advisory)
               run: |
                   echo "🔒 Running security audit (--level high)..."
-                  # yarn audit exits non-zero on any finding; treat as advisory.
+                  # npm audit exits non-zero on any finding; treat as advisory.
                   # Transitive dependency vulns should not block deployments.
-                  yarn audit --level high || echo "⚠️ yarn audit found high/critical issues — review recommended"
+                  npm audit --audit-level=high --legacy-peer-deps 2>&1 || echo "⚠️ npm audit found high/critical issues — review recommended"
                   echo "✅ Security audit step complete"
 
             - name: Check for Sensitive Data
@@ -126,22 +119,16 @@ jobs:
 
             - name: OWASP dependency check (critical CVEs)
               run: |
-                  echo "🛡️ Checking for critical CVEs via yarn audit --json..."
-                  # yarn audit --json emits one JSON object per line; sum high+critical counts.
-                  CRITICAL=$(yarn audit --json 2>/dev/null | node -e "
+                  echo "🛡️ Checking for critical CVEs via npm audit..."
+                  CRITICAL=$(npm audit --json --legacy-peer-deps 2>/dev/null | node -e "
                     let data=''; process.stdin.on('data',d=>data+=d);
                     process.stdin.on('end',()=>{
-                      let total=0;
-                      data.split('\n').forEach(line=>{
-                        if(!line.trim()) return;
-                        try {
-                          const j=JSON.parse(line);
-                          if(j.type==='auditSummary'){
-                            total+=(j.data?.vulnerabilities?.high||0)+(j.data?.vulnerabilities?.critical||0);
-                          }
-                        } catch {}
-                      });
-                      console.log(total);
+                      try {
+                        const j=JSON.parse(data);
+                        const vulns=j.metadata?.vulnerabilities||{};
+                        const total=(vulns.high||0)+(vulns.critical||0);
+                        console.log(total);
+                      } catch { console.log(0); }
                     });
                   " 2>/dev/null || echo "0")
                   if [ "$CRITICAL" -gt "0" ]; then
@@ -166,32 +153,22 @@ jobs:
               with:
                   node-version: ${{ env.NODE_VERSION }}
 
-            - name: Install Yarn
-              run: npm install -g yarn@${{ env.YARN_VERSION }}
-
-            - name: Cache Yarn cache
-              uses: actions/cache@v4
-              with:
-                  path: ~/.yarn/cache
-                  key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-                  restore-keys: yarn-${{ runner.os }}-
-
             - name: Cache Next.js build
               uses: actions/cache@v4
               with:
                   path: .next/cache
-                  key: nextjs-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
-                  restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-
+                  key: nextjs-${{ runner.os }}-${{ hashFiles('package.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+                  restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('package.json') }}-
 
             - name: Install dependencies
-              run: yarn install --network-timeout 600000 --ignore-engines --non-interactive
+              run: npm install --legacy-peer-deps
 
             - name: Build Next.js Application
               env:
                   NEXT_PUBLIC_PI_SANDBOX: "false"
                   NEXT_PUBLIC_PI_APP_ID: "triumph-synergy"
                   SKIP_ENV_VALIDATION: "true"
-              run: yarn build
+              run: npm run build
 
             - name: Verify build output
               run: |
