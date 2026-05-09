@@ -1,0 +1,20 @@
+# ==============================================================================
+# QUANTUM-INTEL-FORTRESS — Merged requirements
+# financial-intel (credit/ml/dual-value) + quantum-fortress (quantum-shield/qpu-bridge)
+# ==============================================================================
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+httpx>=0.28.0
+redis[asyncio]>=5.2.0
+prometheus-client>=0.21.0
+# ── Scientific stack (financial-intel) ─────────────────────────────────────
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.5.0
+scipy>=1.13.0
+statsmodels>=0.14.0
+stellar-sdk>=13.0.0
+python-dotenv>=1.2.0
+# ── Post-quantum crypto (quantum-fortress) ──────────────────────────────────
+# oqs installed separately from compiled liboqs; cryptography used by qpu-bridge
+cryptography>=44.0.0

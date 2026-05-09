@@ -307,7 +307,7 @@ services:
     depends_on:
       app:
         condition: service_started
-      quantum-fortress:
+      quantum-intel-fortress:
         condition: service_started
     networks:
       - triumph-net
@@ -500,71 +500,57 @@ services:
     healthcheck:
       disable: true
 
-  # ========================================================================
-  # FINANCIAL-INTEL — Super-Pod
-  # credit-engine + ml-engine + dual-value-engine
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
+  # QUANTUM-INTEL-FORTRESS — Apex Super-Pod (5 services → 1 container)
+  #
+  # Consolidates financial-intel + quantum-fortress to reduce daemon load:
+  #   ml-engine          (8090) — scikit-learn / statsmodels predictions
+  #   credit-engine      (8091) — PiCredit Score™
+  #   dual-value-engine  (8093) — internal/external Pi valuation
+  #   quantum-shield     (8094) — ML-KEM-1024 + ML-DSA-87 + SPHINCS+
+  #   qpu-bridge         (8098) — QPU interface bridge
+  #
+  # Legacy hostnames preserved as network aliases — zero downstream config changes.
+  # RAM: 1280m (saves ~256m vs 2 separate container overheads)
+  # ════════════════════════════════════════════════════════════════════════
 
-  financial-intel:
+  quantum-intel-fortress:
     build:
       context: docker
-      dockerfile: financial-intel/Dockerfile
-    container_name: triumph-financial-intel
+      dockerfile: quantum-intel-fortress/Dockerfile
+    container_name: triumph-quantum-intel-fortress
     <<: *common
-    mem_limit: 1024m
-    mem_reservation: 512m
-    cpus: 0.60
+    mem_limit: 1280m
+    mem_reservation: 640m
+    cpus: 0.80
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
+      PORT: "8094"
+      QPU_PORT: "8098"
     expose:
       - "8090"
       - "8091"
       - "8093"
-    networks:
-      triumph-net:
-        aliases:
-          - triumph-credit-engine
-          - triumph-ml-engine
-          - triumph-dual-value-engine
-    depends_on:
-      redis:
-        condition: service_healthy
-
-  # ========================================================================
-  # QUANTUM-FORTRESS — Super-Pod
-  # quantum-shield + qpu-bridge  [ML-KEM-1024 + ML-DSA-87 + SPHINCS+]
-  # ========================================================================
-
-  quantum-fortress:
-    build:
-      context: docker
-      dockerfile: quantum-fortress/Dockerfile
-    container_name: triumph-quantum-fortress
-    <<: *common
-    mem_limit: 512m
-    mem_reservation: 256m
-    cpus: 0.30
-    environment:
-      <<: [*db-env, *pi-env]
-      PORT: "8094"
-      QPU_PORT: "8098"
-    expose:
       - "8094"
       - "8098"
     networks:
       triumph-net:
         aliases:
+          # financial-intel legacy aliases
+          - triumph-credit-engine
+          - triumph-ml-engine
+          - triumph-dual-value-engine
+          - triumph-financial-intel       # backward-compat: ML_ENGINE_URL references
+          # quantum-fortress legacy aliases
           - triumph-quantum-shield
-          - triumph-qpu-bridge   # port 8098 — governor health probe target
+          - triumph-qpu-bridge            # port 8098 — governor health probe target
+          - triumph-quantum-fortress      # backward-compat: QUANTUM_SHIELD_URL references
     depends_on:
       redis:
         condition: service_healthy
-    # Override Dockerfile healthcheck: SPHINCS+-SHAKE-256f keypair generation
-    # at startup is genuinely slow on Docker Desktop Mac VM (cold ~5 min).
-    # Uvicorn does not bind :8094 until lifespan startup completes, so the
-    # default 20s probe timeout produces false `health: starting` for minutes.
+    # SPHINCS+ keygen is slow on Docker Desktop Mac VM — disable healthcheck
     healthcheck:
       disable: true
   # ========================================================================
@@ -698,7 +684,7 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      quantum-fortress:
+      quantum-intel-fortress:
         condition: service_started
       settlement-core:
         condition: service_started
@@ -806,16 +792,31 @@ services:
   # supervisord manages all three watchdogs with independent restart policies
   # ========================================================================
 
-  ecosystem-guardian:
+  # ════════════════════════════════════════════════════════════════════════
+  # GUARDIAN-WATCHDOG-NEXUS — Apex Super-Pod (5 processes → 1 container)
+  #
+  # Consolidates ecosystem-guardian + saib-watchdog to reduce daemon load:
+  #   governor      (9912) — container memory & health watchdog
+  #   sentinel      (9913) — multi-WAN network monitor
+  #   hg-watchdog   (none) — Pi node horizon shell guardian
+  #   hg-metrics    (9911) — metrics HTTP server for guardian
+  #   saib-watchdog (none) — SAIB self-resurrection sidecar
+  #
+  # Both services share Python 3.13-slim + docker.sock — natural merge.
+  # ════════════════════════════════════════════════════════════════════════
+
+  guardian-watchdog-nexus:
     build:
-      context: docker/ecosystem-guardian
-    container_name: triumph-ecosystem-guardian
+      context: .
+      dockerfile: docker/guardian-watchdog-nexus/Dockerfile
+    container_name: triumph-guardian-watchdog-nexus
     <<: *common
-    restart: on-failure:10
-    mem_limit: 256m
-    mem_reservation: 96m
-    cpus: 0.20
+    restart: always
+    mem_limit: 320m
+    mem_reservation: 128m
+    cpus: 0.25
     environment:
+      # ── ecosystem-guardian env vars ─────────────────────────────────────
       GOVERNOR_INTERVAL_S: "30"
       MEMORY_WARN_PCT: "80"
       MEMORY_KILL_PCT: "101"
@@ -831,9 +832,6 @@ services:
       ML_HISTORY_WINDOW_S: "900"
       ML_MAX_RESTARTS_PER_WINDOW: "4"
       ML_SUPPRESSION_S: "300"
-      # PQ gate deliberately disabled: quantum-fortress startup is slow (SPHINCS+
-      # keygen). Requiring PQ-ready before any self-heal action would block the
-      # guardian entirely on cold boot. Probing still happens via QUANTUM_SHIELD_URL.
       CONTROL_PLANE_REQUIRE_PQ_READY: "false"
       QUANTUM_SHIELD_URL: "http://triumph-quantum-fortress:8094"
       SAIB_URL: "http://triumph-sovereign-fortress:8099"
@@ -855,6 +853,15 @@ services:
       GUARD_INTERVAL_S: "20"
       GUARDIAN_METRICS_PORT: "9911"
       PI_BRIDGE_NETWORK: pi-bridge
+      # ── saib-watchdog env vars ───────────────────────────────────────────
+      WATCHDOG_TARGET: triumph-apex-services
+      WATCHDOG_TARGET_HEALTH_URL: http://triumph-apex-services:8099/health
+      WATCHDOG_INTERVAL_S: "30"
+      WATCHDOG_TIMEOUT_S: "10"
+      WATCHDOG_FAILS_BEFORE_RESTART: "3"
+      WATCHDOG_MAX_RESTARTS: "20"
+      WATCHDOG_WINDOW_S: "7200"
+      WATCHDOG_PEER_HEARTBEAT_URL: ${WATCHDOG_PEER_HEARTBEAT_URL:-}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
@@ -867,10 +874,13 @@ services:
           - triumph-health-governor
           - triumph-network-sentinel
           - triumph-horizon-guardian
+          - triumph-ecosystem-guardian    # backward-compat alias
       pi-bridge: {}
     depends_on:
       redis:
         condition: service_healthy
+      apex-services:
+        condition: service_started
     healthcheck:
       disable: true
   # ========================================================================
@@ -1007,7 +1017,7 @@ services:
         condition: service_healthy
       pi-bridge-connector:
         condition: service_started
-      quantum-fortress:
+      quantum-intel-fortress:
         condition: service_started
     healthcheck:
       disable: true
@@ -1056,38 +1066,7 @@ services:
   # is permitted to run inside the ecosystem.
   # --------------------------------------------------------------------------
 
-  # --------------------------------------------------------------------------
-  # SAIB-WATCHDOG — Self-resurrection sidecar
-  # Tiny independent container that restarts apex-services if SAIB itself
-  # dies. SAIB cannot restart its own container from inside, so this
-  # watchdog is the external resurrection authority. Mainnet-only.
-  # --------------------------------------------------------------------------
-  saib-watchdog:
-    build:
-      context: docker
-      dockerfile: saib-watchdog/Dockerfile
-    container_name: triumph-saib-watchdog
-    restart: always
-    mem_limit: 128m
-    mem_reservation: 32m
-    cpus: 0.10
-    environment:
-      WATCHDOG_TARGET: triumph-apex-services
-      WATCHDOG_TARGET_HEALTH_URL: http://triumph-apex-services:8099/health
-      WATCHDOG_INTERVAL_S: "30"
-      WATCHDOG_TIMEOUT_S: "10"
-      WATCHDOG_FAILS_BEFORE_RESTART: "3"
-      # Raise restart ceiling so SAIB self-heals autonomously through extended
-      # outages without requiring human intervention.
-      WATCHDOG_MAX_RESTARTS: "20"
-      WATCHDOG_WINDOW_S: "7200"
-      WATCHDOG_PEER_HEARTBEAT_URL: ${WATCHDOG_PEER_HEARTBEAT_URL:-}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - triumph-net
-    depends_on:
-      - apex-services
+  # saib-watchdog merged into guardian-watchdog-nexus (see above)
 
 # ==========================================================================
 # VOLUMES — Persistent Data
