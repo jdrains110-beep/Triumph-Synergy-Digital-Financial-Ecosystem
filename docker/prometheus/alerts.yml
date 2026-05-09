@@ -55,7 +55,7 @@ groups:
           severity: warning
         annotations:
           summary: "Horizon guardian performed a recovery"
-          description: "The horizon-guardian restarted or attempted to restart Horizon inside testnet2 within the last 10 minutes."
+          description: "The horizon-guardian restarted or attempted to restart Horizon inside triumph-pi-mainnet-node within the last 10 minutes."
 
       - alert: HorizonGuardianRecoveryStorm
         expr: increase(triumph_horizon_guardian_recoveries_total[10m]) >= 3

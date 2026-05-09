@@ -48,10 +48,8 @@ services:
   settlement-core:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  financial-intel:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  quantum-fortress:
+  # quantum-intel-fortress replaces financial-intel + quantum-fortress (May 9, 2026)
+  quantum-intel-fortress:
     <<: [ *platform, *init, *grace, *ulimits ]
 
   horizon-stream:
@@ -67,10 +65,15 @@ services:
         soft: 131072
         hard: 131072
 
-  ecosystem-guardian:
+  # guardian-watchdog-nexus replaces ecosystem-guardian + saib-watchdog (May 9, 2026)
+  guardian-watchdog-nexus:
     <<: [ *platform, *init, *grace, *ulimits ]
 
   apex-services:
+    <<: [ *platform, *init, *grace, *ulimits ]
+
+  # apex-sovereign-nexus replaces sovereign-commerce/work/gaming/publix (May 9, 2026)
+  apex-sovereign-nexus:
     <<: [ *platform, *init, *grace, *ulimits ]
 
   # APEX-SOVEREIGN-LIFE — bank + education + telecom consolidated

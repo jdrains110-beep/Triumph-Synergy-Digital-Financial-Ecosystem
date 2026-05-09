@@ -185,7 +185,7 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
-  # Pi Bridge Connector — Central Node <-> Pi Node (testnet2) live bridge
+  # Pi Bridge Connector — Central Node <-> Pi Mainnet Node live bridge
   # ==========================================================================
   - job_name: 'triumph-pi-bridge-connector'
     static_configs:
@@ -198,7 +198,7 @@ scrape_configs:
     scrape_interval: 10s
 
   # ==========================================================================
-  # Horizon Guardian — auto-recovers Pi Horizon inside testnet2
+  # Horizon Guardian — auto-recovers Pi Horizon inside triumph-pi-mainnet-node
   # ==========================================================================
   - job_name: 'triumph-horizon-guardian'
     static_configs:

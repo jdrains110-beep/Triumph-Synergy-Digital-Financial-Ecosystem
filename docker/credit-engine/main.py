@@ -65,7 +65,7 @@ FOUNDER_NAME      = os.getenv("TRIUMPH_FOUNDER_NAME",         "Jeremiah Joel Dra
 FOUNDER_ORG       = os.getenv("TRIUMPH_FOUNDATION_ORG",       "Triumph-Synergy Digital Financial Ecosystem")
 FOUNDER_AUTHORITY = os.getenv("TRIUMPH_FOUNDER_AUTHORITY",    "owner-approved")
 FOUNDER_ADDRESS   = os.getenv("TRIUMPH_FOUNDER_ADDRESS",      "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
-# Payment wallet — all Pi fee receipts go here (mainnet + testnet)
+# Payment wallet — all Pi fee receipts go here (mainnet)
 PAYMENT_WALLET    = os.getenv("PAYMENT_WALLET_ADDRESS",        "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF")
 FOUNDER_TITLE     = os.getenv("TRIUMPH_FOUNDER_TITLE",        "Sovereign Owner and Creator")
 FOUNDER_SOVEREIGN = os.getenv("TRIUMPH_FOUNDER_SOVEREIGN_STATUS", "NESARA_GESARA_COMPLIANT")
@@ -876,7 +876,6 @@ _CORS_ORIGINS = [
               "https://triumphsynergy7386.pinet.com,"
               "https://triumphsynergy1991.pinet.com,"
               "https://triumph-synergy.vercel.app,"
-              "https://triumph-synergy-testnet.vercel.app,"
               "http://localhost:3000,"
               "http://127.0.0.1:3000").split(",")
     if o.strip()
