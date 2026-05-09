@@ -164,11 +164,10 @@ export default function ApplicationsPage() {
               </p>
             </div>
             <span
-              className={`rounded-full px-3 py-1 font-semibold text-xs ${
-                backbone?.status.connected
+              className={`rounded-full px-3 py-1 font-semibold text-xs ${backbone?.status.connected
                   ? "bg-green-100 text-green-800"
                   : "bg-red-100 text-red-800"
-              }`}
+                }`}
             >
               {backbone?.status.connected ? "CONNECTED" : "DISCONNECTED"}
             </span>
@@ -211,8 +210,8 @@ export default function ApplicationsPage() {
                 <p className="text-gray-700">
                   {backbone.status.session_key_rotated_at
                     ? new Date(
-                        backbone.status.session_key_rotated_at * 1000
-                      ).toLocaleString()
+                      backbone.status.session_key_rotated_at * 1000
+                    ).toLocaleString()
                     : "Not available"}
                 </p>
               </div>
@@ -248,11 +247,10 @@ export default function ApplicationsPage() {
           <div className="space-y-4">
             {applications.map((app) => (
               <Card
-                className={`border-l-4 p-6 ${
-                  app.enabled
+                className={`border-l-4 p-6 ${app.enabled
                     ? "border-l-green-500 bg-green-50"
                     : "border-l-gray-300"
-                }`}
+                  }`}
                 key={app.id}
               >
                 <div className="flex items-start justify-between">
@@ -301,9 +299,8 @@ export default function ApplicationsPage() {
                   {/* Status Badge */}
                   <div className="ml-4 flex flex-col items-center gap-2">
                     <div
-                      className={`h-4 w-4 rounded-full ${
-                        app.enabled ? "bg-green-500" : "bg-gray-300"
-                      }`}
+                      className={`h-4 w-4 rounded-full ${app.enabled ? "bg-green-500" : "bg-gray-300"
+                        }`}
                     />
                     <span className="font-semibold text-gray-600 text-xs">
                       {app.enabled ? "ACTIVE" : "INACTIVE"}

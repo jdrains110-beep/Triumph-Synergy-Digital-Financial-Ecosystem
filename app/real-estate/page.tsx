@@ -750,8 +750,8 @@ export default function SovereignRealEstatePage() {
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSelectedListing(null); }}
               className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
-                  ? "bg-yellow-500 text-black"
-                  : "text-gray-400 hover:text-white hover:bg-white/10"
+                ? "bg-yellow-500 text-black"
+                : "text-gray-400 hover:text-white hover:bg-white/10"
                 }`}
             >
               <span>{tab.icon}</span>

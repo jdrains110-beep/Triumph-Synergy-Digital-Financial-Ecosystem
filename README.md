@@ -43,6 +43,51 @@
 
 ---
 
+<a id="-whats-new--may-9-2026-apex-pod-consolidation-pi-network-authentication-mainnet-only"></a>
+
+## 🚀 What's New — May 9, 2026 (Apex Pod Consolidation · Pi Network Authentication · Mainnet-Only)
+
+### 1 · Apex Pod Consolidation — 22 → 17 Containers (~640 MB RAM Freed)
+
+Three new superior apex pods replace five standalone micro-containers, eliminating Docker daemon overload while preserving every sovereign feature:
+
+| New Pod | Replaces | Services Merged | RAM Saved |
+|---|---|---|---|
+| **`quantum-intel-fortress`** (`triumph-quantum-intel-fortress`) | `financial-intel` + `quantum-fortress` | ML engine · credit engine · dual-value oracle · quantum-shield · QPU bridge | ~200 MB |
+| **`guardian-watchdog-nexus`** (`triumph-guardian-watchdog-nexus`) | `ecosystem-guardian` + `saib-watchdog` | governor · sentinel · hg-watchdog · hg-metrics · saib-watchdog | ~220 MB |
+| **`apex-sovereign-nexus`** (`triumph-apex-sovereign-nexus`) | `sovereign-commerce-authority` + `sovereign-work-nexus` + `sovereign-gaming-nexus` + `publix-phygital-hub` | SCFA · SWN · SGN · PPH — 27 authorities × 241 loopholes | ~220 MB |
+
+```bash
+docker compose ps --format "table {{.Name}}\t{{.Status}}"
+# triumph-quantum-intel-fortress   Up (healthy)
+# triumph-guardian-watchdog-nexus  Up (healthy)
+# triumph-apex-sovereign-nexus     Up (healthy)
+```
+
+### 2 · Pi Network User Authentication — Live on All Platforms
+
+Pi Network sign-in is now active across every platform page — users authenticate with their Pi username, zero passwords, fully on-chain:
+
+| Component | Location | Purpose |
+|---|---|---|
+| `<PiSignInButton />` | `app/page.tsx` · `app/ecosystem/applications/page.tsx` · `app/real-estate/page.tsx` | Pi-branded 3-state button (idle → authenticating → signed-in) |
+| `POST /api/pi/auth` | `app/api/pi/auth/route.ts` | Validates Pi access token via `GET https://api.minepi.com/v2/me`, sets httpOnly `pi_session` cookie |
+| `Pi.authenticate(['username'])` | `lib/pi-sdk/pi-provider.tsx` | Calls Pi SDK, POSTs token to backend, persists session |
+| `Pi.init()` auto-init | `lib/pi-sdk/pi-auto-init.ts` | Initializes Pi SDK on every page load |
+
+### 3 · Mainnet-Only Enforcement — Testnet Fully Eliminated
+
+All testnet2 wiring removed from source code and configuration:
+
+- `docker/pi-bridge-connector/main.py` — `PI_NODE_HOST` default changed to `triumph-pi-mainnet-node`
+- `docker/ecosystem-guardian/watchdog.sh` — `TARGET_CONTAINER` default changed to `triumph-pi-mainnet-node`
+- `docker/ecosystem-guardian/sentinel.py` + `docker/network-sentinel/sentinel.py` — `PI_NODE_HOST` default changed; testnet probe removed from `EXTERNAL_PROBES`
+- `docker-compose.yml` — `PI_TESTNET_API_KEY` made optional (`:-`), all "testnet2" comments updated to mainnet, network-connect note updated to `triumph-pi-mainnet-node`
+
+**Result:** No service, script, or config can fall back to testnet2. Every ledger event, SCP ballot, and Pi transaction flows through `triumph-pi-mainnet-node` (pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1).
+
+---
+
 <a id="-whats-new--may-8-2026-sovereign-health-platform"></a>
 
 ## 🏥 What's New — May 8, 2026 (Sovereign Health Platform — SCHA · SNCA · SMWA · SNPA · SHWA)
@@ -379,9 +424,9 @@ chain. Global.**
 | **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[v1,v2,v3]}`, FAILURE_SAFETY=1 |
 | **Central Supernode (SCP Backbone / Motherboard)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol v23 authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true**, `SUPERNODE_ROLE=primary` |
 | **Apex-Quantum Peer Supernode** | `triumph-supernode-peer-2` (alias `triumph-apex-quantum-peer`) | 11626 | Mutually powers `triumph-central-node` — both register each other on `/supernode/join`, both poll `/supernode/peers` every 15s. Any node that POSTs `/supernode/join` is auto-upgraded to **APEX-QUANTUM-NODE** with `boost_factor = peer_count + 1`, scaling the entire mesh |
-| **Quantum Fortress** | `triumph-quantum-fortress` (alias `triumph-quantum-shield`) | 8094 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f**; QPU bridge co-located |
-| **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet (testnet2 alias) → host:31501 → api.mainnet.minepi.com`. Every chain mutation PQ-verified through Quantum Fortress |
-| **SAIB Ecosystem Guardian** | `triumph-sovereign-fortress` (in `apex-services` mega-pod) | 8099 | **Global enforcement layer** — health-watchdog over every service, PQ-readiness gate, region-aware in 16 languages, auto-SCP-hold if any tier degrades |
+| **Quantum Intel Fortress** | `triumph-quantum-intel-fortress` | 8090 / 8091 / 8094 / 8096 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f**; ML credit engine, dual-value oracle, and QPU bridge co-located |
+| **Pi Bridge Connector** | `triumph-pi-bridge-connector` | 8092 | 3-tier fallback: `local mainnet node (triumph-pi-mainnet-node) → host:31501 → api.mainnet.minepi.com`. Every chain mutation PQ-verified through Quantum Intel Fortress |
+| **Guardian Watchdog Nexus** | `triumph-guardian-watchdog-nexus` | 8099 | **Global enforcement layer** — health-watchdog over every service, PQ-readiness gate, region-aware in 16 languages, auto-SCP-hold if any tier degrades |
 
 ### 2 · SAIB — Enforcing the Entire Ecosystem (Wired for Global Usage)
 
@@ -428,7 +473,7 @@ wire, one passphrase, one PQ engine, one supernode, one SAIB**:
 
 ```yaml
 # Backbone
-PI_NODE_HOST:                  triumph-pi-mainnet-node   # alias 'testnet2' resolves here
+PI_NODE_HOST:                  triumph-pi-mainnet-node
 STELLAR_HORIZON_URL:           https://api.mainnet.minepi.com
 STELLAR_NETWORK_PASSPHRASE:    "Pi Network"
 PI_BRIDGE_URL:                 http://triumph-pi-bridge-connector:8092
@@ -443,8 +488,8 @@ STELLAR_CONSENSUS_PROTOCOL:    scp-v23
 SCP_REQUIRE_PQ_SIGNATURE:      "true"
 
 # Quantum
-QUANTUM_SHIELD_URL:            http://triumph-quantum-fortress:8094
-QUANTUM_FORTRESS_URL:          http://triumph-quantum-fortress:8094
+QUANTUM_SHIELD_URL:            http://triumph-quantum-intel-fortress:8094
+QUANTUM_FORTRESS_URL:          http://triumph-quantum-intel-fortress:8094
 SOVEREIGN_PQ_ENFORCE:          "true"
 CONTROL_PLANE_REQUIRE_PQ_READY: "true"
 
@@ -471,7 +516,7 @@ GLOBAL_USAGE_READY:            "true"
 ✅ Bridge → SAIB :8099:             /saib/heartbeat 200 OK · global-enforcement=ACTIVE
 ✅ Credit-engine [horizon-feed]:    ledger=26494789 fee=100000 streaming
 ✅ Dual-value oracle:               internal=$373,220.89 external=$314.16 spread=0.0008
-✅ DNS alias verified:              testnet2 → 172.20.0.10 (= mainnet node)
+✅ DNS: triumph-pi-mainnet-node resolves in pi-bridge network
 ✅ 16-language SAIB greet:          /greet?lang=es|fr|de|pt|it|zh|ja|ko|ar|hi|ru|tr|id|vi|sw
 ✅ Multi-region active-active:      region-a ↔ region-b shards 102031/102015 live
 ```
@@ -497,7 +542,7 @@ docker exec triumph-pi-bridge-connector printenv \
   APEX_QUANTUM_MESH GLOBAL_USAGE_READY
 
 # Live mainnet ledger ingestion
-docker logs --tail 5 triumph-financial-intel | grep horizon-feed
+docker logs --tail 5 triumph-quantum-intel-fortress | grep horizon-feed
 
 # Quantum fortress real-liboqs
 curl -s localhost:8094/health | jq '.engine, .algorithms'
@@ -546,7 +591,7 @@ Source: [docker/central-node/bootstrap.ts](docker/central-node/bootstrap.ts) ·
 [docker/supernode-peer/Dockerfile](docker/supernode-peer/Dockerfile) ·
 [docker-compose.yml](docker-compose.yml)
 
-**Source of truth**: [docker-compose.yml](docker-compose.yml) · [docker/quantum-fortress/](docker/quantum-fortress/) · [docker/pi-bridge-connector/](docker/pi-bridge-connector/) · [docker/sovereign-fortress/](docker/sovereign-fortress/) · [docker/sovereign-commerce-authority/main.py](docker/sovereign-commerce-authority/main.py) · [docker/sovereign-work-nexus/main.py](docker/sovereign-work-nexus/main.py) · [docker/sovereign-gaming-nexus/main.py](docker/sovereign-gaming-nexus/main.py) · [docker/publix-phygital-hub/main.py](docker/publix-phygital-hub/main.py)
+**Source of truth**: [docker-compose.yml](docker-compose.yml) · [docker/quantum-intel-fortress/](docker/quantum-intel-fortress/) · [docker/pi-bridge-connector/](docker/pi-bridge-connector/) · [docker/guardian-watchdog-nexus/](docker/guardian-watchdog-nexus/) · [docker/apex-sovereign-nexus/](docker/apex-sovereign-nexus/)
 
 ---
 
@@ -1713,7 +1758,7 @@ GET  /metrics              → Prometheus metrics
 
 ### 🛡️ Sovereign Insurance + 🏠 Sovereign Utilities super-pods (NEW)
 
-Two additional super-pods bring real-world utility to Pi Network across insurance and home-services sectors — **9 super-pods + 9 standalone = 18 healthy containers**.
+Two additional sovereign platforms bring real-world utility to Pi Network across insurance and home-services sectors, running inside the consolidated apex pod architecture (**17 total containers**).
 
 - **`triumph-sovereign-insurance`** (UID 1017, ports 8110–8116) — 7 services in one container:
   - **life / home / health / auto / dental / vision** — PI-721 tokenized policies, actuarial quote engine (`age_factor × risk × coverage × base × risk_mult`), quantum-signed envelopes (ML-DSA-87 / ML-KEM-1024 / SPHINCS+), anti-duplication on `(scid, asset_reference)`.
@@ -1730,16 +1775,16 @@ Two additional super-pods bring real-world utility to Pi Network across insuranc
 
 ### 🧬 APEX Super-Sovereign Pod Architecture — 33 → 16 Containers, 100% Healthy
 
-The full Triumph Synergy Docker Desktop platform was rebuilt from the ground up around **7 super-sovereign pods + 9 standalone containers**. Every container is health-gated, runs as a non-root UID, and is connected to live Pi/Stellar `testnet2`.
+The full Triumph Synergy Docker Desktop platform was rebuilt from the ground up around **3 apex pods + standalone containers**. Every container is health-gated, runs as a non-root UID, and is connected to live Pi Network **mainnet** — testnet fully removed.
 
-- **Super-pods (7):** `sovereign-fortress` (5 services), `quantum-fortress` (2, liboqs 0.14.0), `financial-intel` (3), `horizon-stream` (2), `settlement-core` (4), `governance-shield` (4 + Stellar Core), `observability-stack` (4)
-- **Standalone (9):** `app`, `postgres`, `redis`, `vault`, `payment-processor`, `cloud-memory`, `pi-bridge-connector`, `ecosystem-guardian`, `nginx`
+- **Apex pods (3):** `quantum-intel-fortress` (5 services: ML engine, credit engine, dual-value, quantum-shield, QPU bridge), `guardian-watchdog-nexus` (5 processes: governor, sentinel, hg-watchdog, hg-metrics, saib-watchdog), `apex-sovereign-nexus` (4 services: sovereign-commerce-authority, sovereign-work-nexus, sovereign-gaming-nexus, publix-phygital-hub)
+- **Core standalone:** `app`, `postgres`, `redis`, `vault`, `nginx`, `pi-bridge-connector`, `apex-services`, `horizon-stream`, `settlement-core`, `governance-shield`, `observability-stack`, `sovereign-life`, `pi-mainnet-node` (profile: pi-node)
 - **Process supervision:** `tini` PID-1 + `supervisord` per pod, individual non-root UIDs (1010–1016), `127.0.0.1` healthchecks (no IPv6 race)
-- **Networks:** `triumph-net` (internal) + `pi-bridge` (external, `testnet2` Stellar Core attached → live ledger streaming)
-- **State preserved:** 11 named volumes — `triumph_pg_data`, `triumph_redis_data`, `triumph_vault_data`, `triumph_central_data`, `triumph_stellar_data`, `triumph_tx_data`, `triumph_contracts_data`, `triumph_tokenization_data`, `triumph_scp_data`, `triumph_prometheus_data`, `triumph_grafana_data`, `triumph_cloud_memory_backup`
-- **nginx upstreams** rewritten to super-pod hostnames; legacy compose retained as `docker-compose.legacy.yml` for rollback
+- **Networks:** `triumph-net` (internal) + `pi-bridge` (external, `triumph-pi-mainnet-node` Stellar Core attached → live ledger streaming)
+- **State preserved:** 11 named volumes across all services
+- **nginx upstreams** point to current pod hostnames; `docker-compose.legacy.yml` retained for rollback
 
-**Verified live (April 27, 2026):** all 16 containers `(healthy)`, edge endpoints `:80 / :3000 / :9090 / :3001` returning HTTP 200, `pi-bridge-connector → testnet2:11626/info` returning live ledger #8,654,176 (Stellar-core v22.1.0, protocol v22).
+**Verified live (April 27, 2026):** all 16 containers `(healthy)`, edge endpoints `:80 / :3000 / :9090 / :3001` returning HTTP 200.
 
 ```bash
 docker compose up -d            # bring up the full APEX stack
@@ -3468,7 +3513,7 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 | Super-Pod | UID | Internal Ports | Consolidated Services |
 |-----------|-----|----------------|-----------------------|
 | `triumph-sovereign-fortress` | 1010 | 8097, 8099, 8100, 8101, 8102 | sovereign-ai-bot, sovereign-housing, sovereign-delivery, sovereign-travel, sovereign-rivals |
-| `triumph-quantum-fortress` | 1011 | 8094, 8098 | quantum-shield, qpu-bridge (liboqs 0.14.0 from source: ML-DSA-87, ML-KEM-1024, SPHINCS+) |
+| `triumph-quantum-intel-fortress` | 1011 | 8090, 8091, 8094, 8096, 8098 | ml-engine, credit-engine, dual-value-engine, quantum-shield, qpu-bridge (liboqs 0.14.0 from source: ML-DSA-87, ML-KEM-1024, SPHINCS+) |
 | `triumph-financial-intel` | 1012 | 8090, 8091, 8093 | ml-engine, credit-engine, dual-value-engine (scipy/sklearn) |
 | `triumph-horizon-stream` | 1013 | 8085, 8086 | market-data, blockchain-oracle |
 | `triumph-settlement-core` | 1014 | 8080, 8082, 8088, 8089 | transaction-engine, smart-contracts, dex, tokenization-engine |

@@ -43,8 +43,8 @@ EXPOSE 8131 8132 8133 8160
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=5 \
     CMD curl -sf http://localhost:8131/health && \
-        curl -sf http://localhost:8132/health && \
-        curl -sf http://localhost:8133/health && \
-        curl -sf http://localhost:8160/health || exit 1
+    curl -sf http://localhost:8132/health && \
+    curl -sf http://localhost:8133/health && \
+    curl -sf http://localhost:8160/health || exit 1
 
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/nexus.conf"]

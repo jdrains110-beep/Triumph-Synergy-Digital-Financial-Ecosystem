@@ -41,7 +41,7 @@ from typing import Any
 PROBE_INTERVAL = int(os.environ.get("PROBE_INTERVAL_S", "15"))
 METRICS_PORT = int(os.environ.get("METRICS_PORT", "9913"))
 REDIS_URL = os.environ.get("REDIS_URL", "redis://triumph-redis:6379")
-PI_NODE_HOST = os.environ.get("PI_NODE_HOST", "testnet2")
+PI_NODE_HOST = os.environ.get("PI_NODE_HOST", "triumph-pi-mainnet-node")
 PI_NODE_PEER_PORT = int(os.environ.get("PI_NODE_PEER_PORT", "31402"))
 PI_HORIZON_URL = os.environ.get("PI_HORIZON_URL", f"http://{PI_NODE_HOST}:8000")
 PI_BRIDGE_URL = os.environ.get("PI_BRIDGE_URL", "http://triumph-pi-bridge-connector:8092")
@@ -56,7 +56,6 @@ PQ_CHECK_INTERVAL_S = int(os.environ.get("PQ_CHECK_INTERVAL_S", "30"))
 # External probes — diverse endpoints to detect real connectivity
 EXTERNAL_PROBES = [
     ("pi_mainnet", "https://api.mainnet.minepi.com/"),
-    ("pi_testnet", "https://api.testnet.minepi.com/"),
     ("dns_google", "https://dns.google/resolve?name=minepi.com&type=A"),
     ("cloudflare", "https://1.1.1.1/cdn-cgi/trace"),
 ]

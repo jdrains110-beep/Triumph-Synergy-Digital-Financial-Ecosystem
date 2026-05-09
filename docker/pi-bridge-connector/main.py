@@ -3,9 +3,9 @@
 """
 Pi Bridge Connector — triumph-synergy
 =====================================
-Bridges triumph-central-node ↔ testnet2 Pi node (Horizon + stellar-core)
+Bridges triumph-central-node ↔ Pi mainnet node (Horizon + stellar-core)
 
-- Polls testnet2:8000 (Horizon) for ledger and transaction data
+- Polls Pi mainnet node:8000 (Horizon) for ledger and transaction data
 - Publishes ledger updates to Redis pub/sub (channel: pi:ledger)
 - Routes XDR transaction submissions through the Pi node
 - Exposes a unified REST API that makes BOTH nodes appear as one superior platform
@@ -33,7 +33,7 @@ from prometheus_client import (
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-PI_NODE_HOST     = os.getenv("PI_NODE_HOST",     "testnet2")
+PI_NODE_HOST     = os.getenv("PI_NODE_HOST",     "triumph-pi-mainnet-node")
 PI_NODE_API_PORT = int(os.getenv("PI_NODE_API_PORT", "8000"))
 PI_NODE_PEER_PORT= int(os.getenv("PI_NODE_PEER_PORT", "31402"))
 STELLAR_CORE_PORT= int(os.getenv("STELLAR_CORE_PORT", "1570"))
@@ -552,7 +552,7 @@ async def bridge_status():
             "scp_bridge_active":        state["pi_node_reachable"] and state["central_node_reachable"],
             "networks_connected":       ["triumph-net", "pi-bridge"],
             "description": (
-                "Triumph Central Node (GA6Z5S...) ↔ Pi Node (testnet2) are bridged. "
+                "Triumph Central Node (GA6Z5S...) ↔ Pi Mainnet Node are bridged. "
                 "Ledger state flows from Pi Node → Redis pub/sub → all ecosystem services. "
                 "Transactions submitted through Pi Node Horizon for on-chain confirmation."
             ),

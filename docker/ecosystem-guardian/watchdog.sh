@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-TARGET_CONTAINER="${TARGET_CONTAINER:-testnet2}"
+TARGET_CONTAINER="${TARGET_CONTAINER:-triumph-pi-mainnet-node}"
 TARGET_PROCESS="${TARGET_PROCESS:-horizon}"
 TARGET_URL="${TARGET_URL:-http://localhost:8000/}"
 GUARD_INTERVAL_S="${GUARD_INTERVAL_S:-20}"
@@ -35,10 +35,10 @@ triumph_horizon_guardian_last_http_code ${2}
 # HELP triumph_horizon_guardian_last_recovery_epoch_seconds Unix epoch timestamp of the last guardian recovery attempt.
 # TYPE triumph_horizon_guardian_last_recovery_epoch_seconds gauge
 triumph_horizon_guardian_last_recovery_epoch_seconds ${last_recovery_epoch}
-# HELP triumph_horizon_guardian_network_reconnects_total Times testnet2 was reconnected to pi-bridge network.
+# HELP triumph_horizon_guardian_network_reconnects_total Times Pi mainnet node was reconnected to pi-bridge network.
 # TYPE triumph_horizon_guardian_network_reconnects_total counter
-triumph_horizon_guardian_network_reconnects_total ${network_reconnects}
-# HELP triumph_horizon_guardian_container_starts_total Times testnet2 was auto-started by guardian.
+triump_horizon_guardian_network_reconnects_total ${network_reconnects}
+# HELP triumph_horizon_guardian_container_starts_total Times Pi mainnet node was auto-started by guardian.
 # TYPE triumph_horizon_guardian_container_starts_total counter
 triumph_horizon_guardian_container_starts_total ${container_starts}
 EOF
@@ -57,7 +57,7 @@ start_horizon() {
 }
 
 # ── Pi-bridge network connectivity check ──
-# Ensures testnet2 is ALWAYS connected to the pi-bridge Docker network
+# Ensures triumph-pi-mainnet-node is ALWAYS connected to the pi-bridge Docker network
 # so Triumph Synergy services can reach it by hostname
 ensure_pi_bridge_connected() {
   # Check if testnet2 is on pi-bridge by inspecting network members
@@ -74,7 +74,7 @@ ensure_pi_bridge_connected() {
   fi
 }
 
-# ── Ensure testnet2 container is running ──
+# ── Ensure Pi mainnet node container is running ──
 ensure_container_running() {
   local container_status
   container_status="$(docker inspect --format '{{.State.Status}}' "$TARGET_CONTAINER" 2>/dev/null || echo "missing")"
@@ -104,7 +104,7 @@ mkdir -p "$METRICS_DIR"
 write_metrics "" 0
 
 while true; do
-  # Phase 1: Ensure testnet2 container is running
+  # Phase 1: Ensure Pi mainnet node container is running
   if ! ensure_container_running; then
     log "container not running — skipping Horizon checks this cycle"
     write_metrics "" 0
@@ -112,7 +112,7 @@ while true; do
     continue
   fi
 
-  # Phase 2: Ensure testnet2 is on pi-bridge network
+  # Phase 2: Ensure Pi mainnet node is on pi-bridge network
   ensure_pi_bridge_connected
 
   # Phase 3: Check Horizon process and API

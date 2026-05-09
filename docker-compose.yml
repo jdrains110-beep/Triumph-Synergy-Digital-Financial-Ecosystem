@@ -6,7 +6,6 @@
 #
 # USAGE:
 #   Mainnet:  docker compose up -d
-#   Testnet:  docker compose --env-file .env.testnet up -d
 #   Upgrade:  docker compose pull; docker compose up -d --build
 #   Logs:     docker compose logs -f
 #   Stop:     docker compose down
@@ -57,7 +56,7 @@ x-pi-env: &pi-env
   PI_INTERNAL_API_KEY: ${PI_INTERNAL_API_KEY:?PI_INTERNAL_API_KEY required}
   # Both keys embedded so network-aware services can select the right one at runtime
   PI_MAINNET_API_KEY: ${PI_MAINNET_API_KEY:?PI_MAINNET_API_KEY required}
-  PI_TESTNET_API_KEY: ${PI_TESTNET_API_KEY:?PI_TESTNET_API_KEY required}
+  PI_TESTNET_API_KEY: ${PI_TESTNET_API_KEY:-}
   PI_API_SECRET: ${PI_API_SECRET:?PI_API_SECRET required}
   PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
   NEXT_PUBLIC_PI_APP_ID: ${NEXT_PUBLIC_PI_APP_ID:-triumph-synergy}
@@ -69,8 +68,8 @@ x-pi-env: &pi-env
   CENTRAL_NODE_URL: http://triumph-central-node:11626
   CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
   # Pi Node accessible via pi-bridge network (container name) and host.
-  # Default target is the new self-hosted MAINNET node (triumph-pi-mainnet-node).
-  # Override PI_NODE_CONTAINER=testnet2 in .env to switch back to the testnet node.
+  # Default target is the self-hosted MAINNET node (triumph-pi-mainnet-node).
+  # Override PI_NODE_CONTAINER in .env to change the Pi node target.
   PI_NODE_HOST: ${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}
   PI_NODE_PORT: ${PI_NODE_PORT:-31502}
   PI_NODE_API_PORT: ${PI_NODE_API_PORT:-8000}
@@ -158,8 +157,8 @@ services:
       start_period: 120s
 
   # ========================================================================
-  # PI BRIDGE CONNECTOR — Central Node ↔ Pi Node (testnet2) live link
-  # Polls testnet2:8000 (Horizon) every 5s, publishes to Redis, routes txs
+  # PI BRIDGE CONNECTOR — Central Node ↔ Pi Mainnet Node live link
+  # Polls triumph-pi-mainnet-node:8000 (Horizon) every 5s, publishes to Redis, routes txs
   # ========================================================================
 
   pi-bridge-connector:
@@ -177,7 +176,7 @@ services:
       PI_NODE_HOST: ${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}
       PI_NODE_API_PORT: 8000
       PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31502}
-      # Fallback chain: local mainnet host port → testnet2 host port → public mainnet API
+      # Fallback chain: local mainnet host port → public mainnet API
       PI_NODE_FALLBACK_URL: ${PI_NODE_FALLBACK_URL:-http://host.docker.internal:31501}
       PI_NODE_PUBLIC_FALLBACK_URL: ${PI_NODE_PUBLIC_FALLBACK_URL:-https://api.mainnet.minepi.com}
       PI_POLL_RETRIES: "4"
@@ -361,7 +360,7 @@ services:
       VERSION_CHECK_INTERVAL_MS: 60000
       PARAMETER_SYNC_INTERVAL_MS: 30000
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
-      PI_TESTNET_HORIZON: https://api.testnet.minepi.com
+      PI_TESTNET_HORIZON: https://api.testnet.minepi.com  # reference constant — mainnet-only deployment, not active
       PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}:${PI_NODE_API_PORT:-8000}
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
@@ -1109,8 +1108,8 @@ volumes:
 # NETWORK — Shared with Pi Network node for direct communication
 # ==========================================================================
 #
-# After starting:  docker network connect pi-bridge testnet2
-# This connects the Pi Node container to the ecosystem so central-node
+# After starting:  docker network connect pi-bridge triumph-pi-mainnet-node
+# This connects the Pi Mainnet Node container to the ecosystem so central-node
 # can communicate with it directly.
 # ==========================================================================
 
