@@ -122,14 +122,33 @@ export function getPiInitializationScript(): string {
         // In production, you would send this to your backend to recover
       }
 
-      // Step 4: Call Pi.authenticate() with payments scope
-      // THIS IS THE CRITICAL STEP THAT WAS MISSING!
-      console.log('[Pi SDK Auto-Init] Step 4: Calling Pi.authenticate([\\"payments\\"])...');
+      // Step 4: Call Pi.authenticate() with username scope.
+      // Per Pi SDK docs: await Pi.init() fully before calling Pi.authenticate().
+      // Using 'username' scope per platform requirement; 'payments' added only
+      // when a payment flow is explicitly triggered.
+      console.log('[Pi SDK Auto-Init] Step 4: Calling Pi.authenticate([\\"username\\"])...');
       
       const auth = await window.Pi.authenticate(
-        ['payments'],  // REQUIRED: Ask for payments permission
+        ['username'],  // username scope for identity; payments scope added on-demand
         handleIncompletePayment
       );
+
+      // Step 4b: Send accessToken to backend for server-side validation via /v2/me
+      console.log('[Pi SDK Auto-Init] Step 4b: Validating token server-side...');
+      try {
+        const res = await fetch('/api/pi/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken: auth.accessToken }),
+        });
+        if (res.ok) {
+          console.log('[Pi SDK Auto-Init] ✓ Server-side token validation succeeded');
+        } else {
+          console.warn('[Pi SDK Auto-Init] ⚠ Server-side validation returned', res.status, '— continuing');
+        }
+      } catch (valErr) {
+        console.warn('[Pi SDK Auto-Init] ⚠ Server-side validation network error:', valErr, '— continuing');
+      }
 
       console.log('[Pi SDK Auto-Init] ✓ Pi.authenticate() succeeded');
       console.log('[Pi SDK Auto-Init] Authenticated user:', auth.user.uid);

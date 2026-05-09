@@ -190,8 +190,10 @@ export function PiProvider({ children }: { children: ReactNode }) {
 
       console.log(`[Pi SDK] Authenticating on ${networkConfig.description}...`);
 
+      // Per Pi SDK docs: use 'username' scope for identity.
+      // 'payments' scope is requested only when a payment flow is explicitly triggered.
       const authResult = await Pi.authenticate(
-        ["username", "payments"],
+        ["username"],
         async (payment: any) => {
           // Incomplete payment callback
           console.log("[Pi SDK] Incomplete payment found:", payment);
@@ -200,6 +202,23 @@ export function PiProvider({ children }: { children: ReactNode }) {
       );
 
       console.log("[Pi SDK] User authenticated:", authResult);
+
+      // Server-side token validation via GET /v2/me — establishes secure session
+      try {
+        const valRes = await fetch("/api/pi/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken: authResult.accessToken }),
+        });
+        if (!valRes.ok) {
+          console.warn("[Pi SDK] Server-side token validation failed:", valRes.status, "— continuing");
+        } else {
+          console.log("[Pi SDK] ✓ Server-side token validation succeeded");
+        }
+      } catch (valErr) {
+        console.warn("[Pi SDK] ⚠ Server-side validation network error:", valErr, "— continuing");
+      }
+
       setIsAuthenticated(true);
       setUser({
         uid: authResult.user.uid,

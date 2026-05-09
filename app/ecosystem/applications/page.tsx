@@ -9,6 +9,7 @@ import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 type Application = {
   id: string;
@@ -108,14 +109,17 @@ export default function ApplicationsPage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-bold text-4xl text-gray-900">
-            Integrated Applications
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Manage and monitor applications connected to Triumph Synergy
-            ecosystem
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="font-bold text-4xl text-gray-900">
+              Integrated Applications
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Manage and monitor applications connected to Triumph Synergy
+              ecosystem
+            </p>
+          </div>
+          <PiSignInButton />
         </div>
 
         {/* Summary Cards */}

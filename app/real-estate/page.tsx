@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 import type {
   SovereignListing,
   SovereignPropertyToken,
@@ -708,13 +709,16 @@ export default function SovereignRealEstatePage() {
                 </div>
               </div>
             </div>
-            {stats && (
-              <div className="hidden sm:flex items-center gap-4 text-xs text-gray-400">
-                <span>{stats.totalListings} listings</span>
-                <span>{stats.totalTokenizedProperties} tokenized</span>
-                <span className="text-yellow-400">{fmtUsd(stats.totalValueTokenizedUsd)} TVL</span>
-              </div>
-            )}
+            <div className="flex items-center gap-4">
+              {stats && (
+                <div className="hidden sm:flex items-center gap-4 text-xs text-gray-400">
+                  <span>{stats.totalListings} listings</span>
+                  <span>{stats.totalTokenizedProperties} tokenized</span>
+                  <span className="text-yellow-400">{fmtUsd(stats.totalValueTokenizedUsd)} TVL</span>
+                </div>
+              )}
+              <PiSignInButton />
+            </div>
           </div>
         </div>
       </header>

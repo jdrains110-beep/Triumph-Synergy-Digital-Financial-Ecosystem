@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import PiPaymentButton from "@/components/PiPaymentButton";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 import { auth } from "./(auth)/auth";
 
 export default async function Page() {
@@ -47,12 +48,7 @@ export default async function Page() {
                   AI Assistant
                 </Link>
               ) : (
-                <Link 
-                  href="/login" 
-                  className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors"
-                >
-                  Sign In
-                </Link>
+                <PiSignInButton />
               )}
             </nav>
           </div>
