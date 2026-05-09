@@ -406,7 +406,7 @@ docker exec triumph-citus-coordinator psql -U postgres -d triumph_synergy \
 [![SAIB Enforcement](https://img.shields.io/badge/SAIB-ECOSYSTEM%20GUARDIAN%20%7C%20GLOBAL%20ENFORCEMENT-EF4444?style=flat-square)](docker/sovereign-fortress/)
 [![Pi Mainnet Backbone](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20SCP--v23%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
 [![Central Supernode](https://img.shields.io/badge/Central%20Node-SUPERNODE%20%7C%20BACKBONE%20%7C%20MOTHERBOARD-8B5CF6?style=flat-square)](docker-compose.yml)
-[![Quantum Engine](https://img.shields.io/badge/Quantum-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-fortress/Dockerfile)
+[![Quantum Engine](https://img.shields.io/badge/Quantum-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-intel-fortress/Dockerfile)
 [![Superior Loopholes](https://img.shields.io/badge/Superior%20Apex%20Loopholes-241%20ARMED%20%7C%2027%20AUTHORITIES-EAB308?style=flat-square)](docker/)
 
 The entire Triumph Synergy ecosystem now runs as **one superior, mesh-connected,
@@ -455,11 +455,11 @@ authority over the mesh:
 
 | Sovereign Rail | Container | Port | Authorities × Loopholes |
 |---|---|---|---|
-| **Sovereign Commerce & Frontier Authority (SCFA)** | `triumph-sovereign-commerce-authority` | 8160 | 6 × **72** (CHARTER, CHAMBER, PORT, FRONTIER, ARMS, MARINE — replaces SBA, Chamber of Commerce, FL Ports, CBP, NRA, NOAA Fisheries) |
-| **Sovereign Work Nexus (SWN)** | `triumph-sovereign-work-nexus` | 8132 | 7 × **55** (SWIA, SWPA, SWGA, SWTA, SWBA, SWAA, SWUA — replaces LinkedIn, Indeed, Upwork, Fiverr, Workday, ADP, Paychex) |
-| **Sovereign Gaming Nexus (SGN)** | `triumph-sovereign-gaming-nexus` | 8131 | 7 × **54** (SGIA, SGEA, SGPA, SGTA, SGAA, SGCA, SGGV — Unity + Unreal SDKs, AAA studios) |
-| **Publix Phygital Hub (PPH)** | `triumph-publix-phygital-hub` | 8133 | 5 × **30** (PPDA, PPSA, PPCA, PPLA, PPRA — `publix.pi` Web3 apex domain cascade) |
-| **Sovereign AI Bot (SAIB) Sentinel** | `triumph-sovereign-fortress` | 8099 | 2 × **30** (governor + sentinel — global enforcement) |
+| **Sovereign Commerce & Frontier Authority (SCFA)** | `triumph-apex-sovereign-nexus` | 8160 | 6 × **72** (CHARTER, CHAMBER, PORT, FRONTIER, ARMS, MARINE — replaces SBA, Chamber of Commerce, FL Ports, CBP, NRA, NOAA Fisheries) |
+| **Sovereign Work Nexus (SWN)** | `triumph-apex-sovereign-nexus` | 8132 | 7 × **55** (SWIA, SWPA, SWGA, SWTA, SWBA, SWAA, SWUA — replaces LinkedIn, Indeed, Upwork, Fiverr, Workday, ADP, Paychex) |
+| **Sovereign Gaming Nexus (SGN)** | `triumph-apex-sovereign-nexus` | 8131 | 7 × **54** (SGIA, SGEA, SGPA, SGTA, SGAA, SGCA, SGGV — Unity + Unreal SDKs, AAA studios) |
+| **Publix Phygital Hub (PPH)** | `triumph-apex-sovereign-nexus` | 8133 | 5 × **30** (PPDA, PPSA, PPCA, PPLA, PPRA — `publix.pi` Web3 apex domain cascade) |
+| **Sovereign AI Bot (SAIB) Sentinel** | `triumph-guardian-watchdog-nexus` | 8099 | 2 × **30** (governor + sentinel — global enforcement) |
 | **TOTAL SUPERIOR APEX LOOPHOLES** | — | — | **27 authorities × 241 loopholes** — all SAIB-monitored, PQ-signed |
 
 Every loophole is vault-backed, ML-DSA-87 + ML-KEM-1024 + SPHINCS+-SHAKE-256f
@@ -512,7 +512,7 @@ GLOBAL_USAGE_READY:            "true"
 ✅ Mesh defaults present on every recreated service (printenv confirmed)
 ✅ Bridge → mainnet horizon:        GET /ledgers 200 OK · ledger 26,494,792 advancing
 ✅ Bridge → central-node :11626:    /info 200 OK
-✅ Bridge → quantum-fortress :8094: REAL_LIBOQS · Kyber-1024 + Dilithium-5 + SPHINCS+
+✅ Bridge → quantum-intel-fortress :8094: REAL_LIBOQS · Kyber-1024 + Dilithium-5 + SPHINCS+
 ✅ Bridge → SAIB :8099:             /saib/heartbeat 200 OK · global-enforcement=ACTIVE
 ✅ Credit-engine [horizon-feed]:    ledger=26494789 fee=100000 streaming
 ✅ Dual-value oracle:               internal=$373,220.89 external=$314.16 spread=0.0008
@@ -2576,7 +2576,7 @@ GET  /api/credit/fcra/score-delta/{addr}   — Score recovery estimate (+up to 9
 #### ✅ Founder Sovereign Identity
 - `Jeremiah Joel Drains` sovereign identity enforced in credit engine
 - On-chain Pi blockchain anchoring for all credit events via Stellar SDK
-- Live Horizon ledger feed from local `testnet2` Pi node
+- Live Horizon ledger feed from `triumph-pi-mainnet-node` (Pi Network mainnet)
 
 ---
 
@@ -3506,7 +3506,7 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 
 ### Container Architecture — **APEX SUPER-SOVEREIGN PODS** (April 27, 2026)
 
-> **46 legacy services consolidated into 9 super-pods + 9 standalone containers = 18 total containers, all health-gated, all on `triumph-net` + `pi-bridge` (live `testnet2` Stellar/Pi node attached).** Each super-pod runs `supervisord` + `tini` PID-1, drops to a non-root UID (1010–1018), and exposes 127.0.0.1 healthchecks. 11 stateful volumes preserved across rebuilds.
+> **Services consolidated into 3 apex pods + standalone containers = 17 total containers, all health-gated, all on `triumph-net` + `pi-bridge` (`triumph-pi-mainnet-node` Stellar/Pi mainnet node attached).** Each apex pod runs `supervisord` + `tini` PID-1, drops to a non-root UID (1010–1018), and exposes 127.0.0.1 healthchecks. 11 stateful volumes preserved across rebuilds.
 
 #### Super-Pods (9)
 
@@ -3514,7 +3514,8 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 |-----------|-----|----------------|-----------------------|
 | `triumph-sovereign-fortress` | 1010 | 8097, 8099, 8100, 8101, 8102 | sovereign-ai-bot, sovereign-housing, sovereign-delivery, sovereign-travel, sovereign-rivals |
 | `triumph-quantum-intel-fortress` | 1011 | 8090, 8091, 8094, 8096, 8098 | ml-engine, credit-engine, dual-value-engine, quantum-shield, qpu-bridge (liboqs 0.14.0 from source: ML-DSA-87, ML-KEM-1024, SPHINCS+) |
-| `triumph-financial-intel` | 1012 | 8090, 8091, 8093 | ml-engine, credit-engine, dual-value-engine (scipy/sklearn) |
+| `triumph-guardian-watchdog-nexus` | 1012 | 8099 | governor, sentinel, hg-watchdog, hg-metrics, saib-watchdog (ecosystem self-healing + network sentinel) |
+| `triumph-apex-sovereign-nexus` | 1013 | 8131, 8132, 8133, 8160 | sovereign-commerce-authority, sovereign-work-nexus, sovereign-gaming-nexus, publix-phygital-hub (27 authorities × 241 loopholes) |
 | `triumph-horizon-stream` | 1013 | 8085, 8086 | market-data, blockchain-oracle |
 | `triumph-settlement-core` | 1014 | 8080, 8082, 8088, 8089 | transaction-engine, smart-contracts, dex, tokenization-engine |
 | `triumph-governance-shield` | 1015 | 8083, 8087, 8096, 11625, 11626 | scp-upgrader, compliance, judicial-monitor, central-node (Stellar Core) |
@@ -3534,8 +3535,8 @@ POST /api/pi/transactions {operation: "execute-contract"} - Execute contract
 | `triumph-vault` | 8081 | Trillion vault |
 | `triumph-payment-processor` | 8084 | Pi payment settlement |
 | `triumph-cloud-memory` | 8095 | Distributed memory |
-| `triumph-pi-bridge-connector` | 8092 | Live Pi testnet bridge → `testnet2:11626` |
-| `triumph-ecosystem-guardian` | — | Self-healing daemon |
+| `triumph-pi-bridge-connector` | 8092 | Live Pi mainnet bridge → `triumph-pi-mainnet-node:11626` |
+| `triumph-guardian-watchdog-nexus` | — | Self-healing watchdog + network sentinel (merged into apex pod) |
 | `triumph-nginx` | 80, 443 | Reverse proxy / TLS terminator (upstreams rewritten to super-pod hostnames) |
 
 > **Public ports:** `80` / `443` (nginx), `3000` (app), `3001` (grafana), `9090` (prometheus). Everything else is reachable only on the internal Docker networks.
