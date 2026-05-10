@@ -105,13 +105,21 @@ services:
     command:
       - |
         set -e
-        # If cluster is already formed (nodes know each other), skip
+        # Check if cluster is already healthy (all slots ok, 6 nodes)
         KNOWN=$$(redis-cli -h redis-node-1 -p 6379 cluster info | grep cluster_known_nodes | tr -d '\r' | cut -d: -f2)
-        if [ "$$KNOWN" = "6" ]; then
-          echo "✓ Redis cluster already formed (6 known nodes)"
+        STATE=$$(redis-cli -h redis-node-1 -p 6379 cluster info | grep cluster_state | tr -d '\r' | cut -d: -f2)
+        if [ "$$KNOWN" = "6" ] && [ "$$STATE" = "ok" ]; then
+          echo "✓ Redis cluster already healthy (6 known nodes, state=ok)"
           redis-cli -h redis-node-1 -p 6379 cluster info
           exit 0
         fi
+        echo "→ Cluster state=$$STATE, known_nodes=$$KNOWN — resetting all nodes and re-forming cluster"
+        # CLUSTER RESET on all nodes (flush if needed)
+        for n in redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6; do
+          redis-cli -h $$n -p 6379 FLUSHALL 2>/dev/null || true
+          redis-cli -h $$n -p 6379 CLUSTER RESET HARD
+        done
+        sleep 1
         echo "→ Forming Redis cluster: 3 masters + 3 replicas"
         # Resolve hostnames to IPs (redis-cli --cluster create requires IPs)
         IPS=""

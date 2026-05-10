@@ -38,6 +38,7 @@ COPY sovereign-ai-bot/main.py                /app/fortress/ai_bot.py
 COPY sovereign-ai-bot/external_probes.py     /app/fortress/external_probes.py
 COPY sovereign-ai-bot/peer_federation.py     /app/fortress/peer_federation.py
 COPY sovereign-ai-bot/external_remediation.py /app/fortress/external_remediation.py
+COPY sovereign-ai-bot/quantum_brain.py        /app/fortress/quantum_brain.py
 COPY sovereign-gateway/main.py               /app/fortress/gateway.py
 COPY sovereign-delivery-engine/main.py       /app/fortress/delivery.py
 COPY sovereign-pidex-engine/main.py          /app/fortress/pidex.py
