@@ -79,8 +79,8 @@ x-pi-env: &pi-env
   # the entire ecosystem speaks one language: SCP-v23 + PQ-required +
   # SAIB-enforced + Pi mainnet supernode backbone.
   PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
-  QUANTUM_SHIELD_URL: http://triumph-quantum-fortress:8094
-  QUANTUM_FORTRESS_URL: http://triumph-quantum-fortress:8094
+  QUANTUM_SHIELD_URL: http://triumph-quantum-intel-fortress:8094
+  QUANTUM_FORTRESS_URL: http://triumph-quantum-intel-fortress:8094
   SAIB_URL: http://triumph-sovereign-fortress:8099
   SAIB_ENFORCE: "true"
   SAIB_GLOBAL_ENFORCEMENT: "true"
@@ -394,6 +394,12 @@ services:
         condition: service_healthy
       pi-bridge-connector:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8083/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   # ========================================================================
   # SUPERNODE-PEER-2 — Apex-Quantum peer supernode
@@ -431,6 +437,12 @@ services:
     depends_on:
       pi-bridge-connector:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:11626/info"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   # ========================================================================
   # SETTLEMENT-CORE — Super-Pod
@@ -727,6 +739,12 @@ services:
         condition: service_healthy
       pi-bridge-connector:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8085/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   # ========================================================================
   # OBSERVABILITY-STACK — Super-Pod
