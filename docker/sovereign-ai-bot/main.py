@@ -1341,6 +1341,7 @@ async def _pg_connect():
             )
         _pg_pool = await asyncpg.create_pool(
             dsn=POSTGRES_URL, min_size=1, max_size=4, command_timeout=10,
+            timeout=15,  # max seconds to wait for each connection in the pool
             init=_init_conn,
         )
         async with _pg_pool.acquire() as con:
@@ -1718,8 +1719,10 @@ async def saib_cache_headers(request, call_next):
 
 @app.on_event("startup")
 async def startup():
-    # Load persisted state BEFORE launching loops, so loops resume from history
-    await saib_state_load()
+    # Load persisted state as a background task so uvicorn binds the port immediately.
+    # The loops start with fresh in-memory state and the snapshot is applied once Postgres
+    # responds (usually within a few seconds).
+    asyncio.create_task(saib_state_load())
     asyncio.create_task(pulse_loop())
     asyncio.create_task(github_sync_loop())
     asyncio.create_task(network_watch_loop())
