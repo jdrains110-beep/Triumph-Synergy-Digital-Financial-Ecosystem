@@ -3,16 +3,16 @@
 FROM python:3.13-slim
 
 LABEL maintainer="Jeremiah Joel Drains <triumph-synergy>" \
-      org.triumph.service="sovereign-military-bridge" \
-      org.triumph.crypto.standard="CNSA-Suite-2.0" \
-      org.triumph.encryption="AES-256-GCM+ECDH-P384+RSA-3072+Kyber-1024+Dilithium-5" \
-      org.triumph.network.architecture="ARPANET+NSFNet+DARPA+Interspace"
+    org.triumph.service="sovereign-military-bridge" \
+    org.triumph.crypto.standard="CNSA-Suite-2.0" \
+    org.triumph.encryption="AES-256-GCM+ECDH-P384+RSA-3072+Kyber-1024+Dilithium-5" \
+    org.triumph.network.architecture="ARPANET+NSFNet+DARPA+Interspace"
 
 # Build deps for cryptography package (libgcc-s1, libffi)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        gcc \
-        libffi-dev \
-        build-essential \
+    gcc \
+    libffi-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

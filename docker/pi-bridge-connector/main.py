@@ -171,6 +171,12 @@ async def _fetch_horizon_snapshot(c: httpx.AsyncClient, base_url: str) -> tuple[
     records = ledger_r.json().get("_embedded", {}).get("records", [])
     ledger = records[0] if records else None
 
+    # Treat empty records as a failure — forces fallback to next candidate
+    # (host.docker.internal:31401, then api.mainnet.minepi.com) so we always
+    # serve real ledger data even while the local node is still syncing.
+    if ledger is None:
+        raise ValueError(f"Horizon at {base_url} returned 200 but no ledger records (node still syncing)")
+
     root: dict[str, Any] = {}
     try:
         root_r = await c.get(f"{base_url}/")
@@ -341,7 +347,25 @@ async def pi_node_status():
 async def pi_node_ledger():
     """Latest ledger record from the Pi node."""
     if not state["latest_ledger"]:
-        raise HTTPException(503, "Pi node ledger not yet available")
+        uptime = round(time.time() - state["started_at"], 1)
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "ledger_syncing",
+                "message": "Pi node ledger not yet available — node still syncing with Pi mainnet",
+                "pi_node_reachable": state["pi_node_reachable"],
+                "latest_ledger_seq": state["latest_ledger_seq"],
+                "active_horizon_url": state["active_horizon_url"],
+                "syncing": True,
+                "uptime_seconds": uptime,
+                "last_error": state["last_error"],
+                "hint": (
+                    "The fallback chain (local node → host port → api.mainnet.minepi.com) "
+                    "is being tried. This resolves automatically once any Horizon source "
+                    "returns ledger records."
+                ),
+            },
+        )
     return state["latest_ledger"]
 
 

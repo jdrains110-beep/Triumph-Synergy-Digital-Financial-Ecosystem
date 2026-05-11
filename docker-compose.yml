@@ -166,8 +166,8 @@ services:
       context: docker/pi-bridge-connector
     container_name: triumph-pi-bridge-connector
     <<: *common
-    mem_limit: 192m
-    mem_reservation: 96m
+    mem_limit: 288m
+    mem_reservation: 144m
     cpus: 0.3
     environment:
       <<: [*db-env, *pi-env]
@@ -179,11 +179,12 @@ services:
       # Fallback chain: local mainnet host port → public mainnet API
       PI_NODE_FALLBACK_URL: ${PI_NODE_FALLBACK_URL:-http://host.docker.internal:31501}
       PI_NODE_PUBLIC_FALLBACK_URL: ${PI_NODE_PUBLIC_FALLBACK_URL:-https://api.mainnet.minepi.com}
-      PI_POLL_RETRIES: "4"
-      PI_POLL_RETRY_DELAY_S: "1.5"
-      POLL_INTERVAL_S: "6"
+      PI_POLL_RETRIES: "3"
+      PI_POLL_RETRY_DELAY_S: "2.0"
+      POLL_INTERVAL_S: "15"
       CENTRAL_NODE_URL: http://triumph-central-node:11626
-      QUANTUM_SHIELD_URL: http://triumph-quantum-shield:8094
+      # Direct container name — not alias — avoids DNS resolution failure if alias not ready
+      QUANTUM_SHIELD_URL: http://triumph-quantum-intel-fortress:8094
       SOVEREIGN_PQ_ENFORCE: "true"
     expose:
       - "8092"
