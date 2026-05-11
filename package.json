@@ -225,6 +225,8 @@
     "cookie": ">=0.7.0",
     "micromatch": ">=4.0.8",
     "braces": ">=3.0.3",
-    "serialize-javascript": ">=6.0.2"
+    "serialize-javascript": ">=6.0.2",
+    "esbuild": ">=0.25.0",
+    "next>postcss": ">=8.5.10"
   }
 }
