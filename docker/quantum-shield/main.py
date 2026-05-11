@@ -788,6 +788,40 @@ async def quantum_audit():
     }
 
 
+@app.post("/quantum/audit")
+async def quantum_audit_event(payload: dict):
+    """Accept SAIB sentinel heal/event notifications for quantum audit trail."""
+    service  = payload.get("service", "unknown")
+    event    = payload.get("event",   "unknown")
+    reason   = payload.get("reason",  "")
+    mode     = payload.get("mode",    "")
+    sig      = payload.get("sig",     "")
+    ts       = time.time()
+
+    log.info("[SAIB-EVENT] service=%s event=%s reason=%s mode=%s", service, event, reason, mode)
+
+    if redis_client:
+        entry = json.dumps({
+            "timestamp": ts,
+            "service":   service,
+            "event":     event,
+            "reason":    reason,
+            "mode":      mode,
+            "sig":       sig,
+        })
+        await redis_client.lpush("quantum:saib_heal_log", entry)
+        await redis_client.ltrim("quantum:saib_heal_log", 0, 499)
+        await redis_client.publish("quantum:saib_events", entry)
+
+    return {
+        "acknowledged": True,
+        "service":      service,
+        "event":        event,
+        "timestamp":    ts,
+        "quantum_posture": state.get("quantum_posture", "HARDENED"),
+    }
+
+
 @app.get("/quantum/status")
 async def quantum_status():
     """Full quantum posture — keys, algorithms, ecosystem status."""

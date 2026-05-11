@@ -348,7 +348,7 @@ services:
     <<: *common
     mem_limit: 768m
     mem_reservation: 384m
-    cpus: 0.50
+    cpus: 0.30  # CPU-optimized: reduced from 0.50
     environment:
       <<: [*db-env, *pi-env]
       NODE_TYPE: central
@@ -357,8 +357,8 @@ services:
       AUTO_UPGRADE: "true"
       ZERO_DOWNTIME: "true"
       ROLLBACK_ON_FAILURE: "true"
-      VERSION_CHECK_INTERVAL_MS: 60000
-      PARAMETER_SYNC_INTERVAL_MS: 30000
+      VERSION_CHECK_INTERVAL_MS: 300000  # CPU-optimized: was 60000
+      PARAMETER_SYNC_INTERVAL_MS: 120000  # CPU-optimized: was 30000
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
       PI_TESTNET_HORIZON: https://api.testnet.minepi.com  # reference constant — mainnet-only deployment, not active
       PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}:${PI_NODE_API_PORT:-8000}
@@ -587,7 +587,7 @@ services:
     <<: *common
     mem_limit: 4g
     mem_reservation: 2048m
-    cpus: 4.00
+    cpus: 2.00  # CPU-optimized: was 4.00; arm64 native rebuild handles the rest
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
@@ -625,8 +625,8 @@ services:
       SAIB_REGION_PEERS: ${SAIB_REGION_PEERS:-}
       # ── SAIB Apex Supreme Quantum Brain ──────────────────────────────
       SAIB_QUANTUM_BRAIN_ENABLED: "true"
-      SAIB_QUANTUM_CODE_SCAN_INTERVAL_S: "1800"   # 30 min
-      SAIB_QUANTUM_IMAGE_SCAN_INTERVAL_S: "3600"  # 60 min
+      SAIB_QUANTUM_CODE_SCAN_INTERVAL_S: "3600"   # 60 min (CPU-optimized: was 30 min)
+      SAIB_QUANTUM_IMAGE_SCAN_INTERVAL_S: "7200"  # 120 min (CPU-optimized: was 60 min)
       SAIB_QUANTUM_AUTO_BUILD: "false"            # set true to auto-rebuild vulnerable images
       SAIB_QUANTUM_AUTO_COMMIT: "false"
       SAIB_CODEBASE_SCAN_PATH: "/workspace"
@@ -1061,7 +1061,7 @@ services:
     shm_size: 256m   # stellar-core uses /dev/shm for SCP consensus buffers; default 64MB causes SIGABRT
     mem_limit: 4g
     mem_reservation: 1536m
-    cpus: 1.5
+    cpus: 1.0  # CPU-optimized: was 1.5
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
       NODE_PRIVATE_KEY:  ${PI_NODE_PRIVATE_KEY:-}   # auto-generated if blank
@@ -1086,6 +1086,66 @@ services:
   # --------------------------------------------------------------------------
 
   # saib-watchdog merged into guardian-watchdog-nexus (see above)
+
+  # ========================================================================
+  # SOVEREIGN MILITARY BRIDGE — Port 8199
+  # CNSA Suite 2.0 · ARPANET multi-path routing · NSFNet backbone ·
+  # DARPA autonomous healing · Interspace inter-network bridging
+  #
+  # Encryption: AES-256-GCM + ECDH P-384 + RSA-3072 + Kyber-1024 + Dilithium-5
+  # NSA CISA Commercial National Security Algorithm Suite 2.0 (CNSA 2.0)
+  # ========================================================================
+
+  sovereign-military-bridge:
+    build:
+      context: docker/sovereign-military-bridge
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-military-bridge
+    <<: *common
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.30
+    environment:
+      PORT: "8199"
+      REDIS_URL: redis://triumph-redis:6379/14
+      QUANTUM_SHIELD_URL: http://triumph-quantum-intel-fortress:8094
+      SAIB_URL: http://triumph-sovereign-fortress:8099
+      CNSA_ENFORCEMENT: "true"
+      SOVEREIGN_ROUTING_ENABLED: "true"
+      ARPANET_MULTIPATH_ENABLED: "true"
+      SMB_HEAL_INTERVAL_S: "60"
+      SMB_PROBE_TIMEOUT_S: "5"
+      PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+      GOVERNANCE_URL: http://triumph-central-node:11626
+      SETTLEMENT_URL: http://triumph-settlement-core:8080
+      VAULT_URL: http://triumph-vault:8081
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      OBS_URL: http://triumph-cloud-memory:8095
+      BANK_URL: http://triumph-sovereign-bank:8150
+      NEXUS_URL: http://triumph-sovereign-commerce-authority:8160
+    expose:
+      - "8199"
+    networks:
+      triumph-net:
+        aliases:
+          - triumph-sovereign-military-bridge
+          - triumph-cnsa-bridge
+          - triumph-military-bridge
+      pi-bridge:
+        aliases:
+          - triumph-sovereign-military-bridge
+    depends_on:
+      redis:
+        condition: service_healthy
+      quantum-intel-fortress:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8199/health', timeout=10)"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 90s
 
 # ==========================================================================
 # VOLUMES — Persistent Data
