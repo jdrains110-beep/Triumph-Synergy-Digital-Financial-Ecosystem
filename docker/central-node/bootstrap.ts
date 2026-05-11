@@ -200,7 +200,7 @@ let chainError: string | null = null;
 
 async function refreshChainState() {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), 20_000); // Pi node can be slow under load
   try {
     const accountPath = USING_BRIDGE_PROXY
       ? `/account/${CENTRAL_KEY}`
@@ -263,9 +263,10 @@ async function refreshChainState() {
   }
 }
 
-// Refresh chain state every 30 seconds
+// Refresh chain state every 60 seconds — Pi mainnet node is slow to respond under load;
+// cached data is sufficient for status endpoints.
 refreshChainState();
-const chainRefreshInterval = setInterval(refreshChainState, 30_000);
+const chainRefreshInterval = setInterval(refreshChainState, 60_000);
 chainRefreshInterval.unref();
 
 // BigInt-safe JSON serializer — prevents "Do not know how to serialize a BigInt" crash

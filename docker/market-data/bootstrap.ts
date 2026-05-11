@@ -123,7 +123,7 @@ async function ensureTable() {
 async function fetchJSON(path: string): Promise<unknown> {
   const res = await fetch(`${HORIZON_URL}${path}`, {
     headers: horizonHeaders(),
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(20_000), // Pi mainnet node can be slow under load
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${path}`);
   return res.json();

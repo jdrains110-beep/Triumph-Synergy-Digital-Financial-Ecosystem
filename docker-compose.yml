@@ -168,7 +168,7 @@ services:
     <<: *common
     mem_limit: 288m
     mem_reservation: 144m
-    cpus: 0.3
+    cpus: 0.50  # raised: bridge polls Pi node + Redis pub/sub; 0.30 was too low
     environment:
       <<: [*db-env, *pi-env]
       PYTHONUNBUFFERED: "1"
@@ -195,12 +195,10 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=25)"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=40)"]
       interval: 120s
-      timeout: 60s
+      timeout: 90s   # Docker Desktop Mac VM: Python cold-start + urllib can take >60s
       retries: 5
-      # Cold Python imports on Docker Desktop (Mac VM) take ~60s; allow ample
-      # start_period so slow first-boot doesn't get marked unhealthy.
       start_period: 300s
 
   # ========================================================================
@@ -417,7 +415,7 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
-    cpus: 0.30
+    cpus: 0.45  # raised: SCP consensus protocol needs consistent headroom
     environment:
       <<: *pi-env
       SUPERNODE_ROLE: peer
@@ -458,7 +456,7 @@ services:
     <<: *common
     mem_limit: 768m
     mem_reservation: 384m
-    cpus: 0.50
+    cpus: 0.75  # raised: 4-service super-pod (tx-engine+contracts+tokenization+dex)
     environment:
       <<: [*db-env, *pi-env]
       ENGINE_MODE: hyper
@@ -588,7 +586,7 @@ services:
     <<: *common
     mem_limit: 4g
     mem_reservation: 2048m
-    cpus: 2.00  # CPU-optimized: was 4.00; arm64 native rebuild handles the rest
+    cpus: 1.50  # CPU-optimized: reduced from 2.00; 18-service pod still fits within budget
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
@@ -761,7 +759,7 @@ services:
     <<: *common
     mem_limit: 1024m
     mem_reservation: 512m
-    cpus: 0.40
+    cpus: 0.60  # raised: Prometheus scrape + Grafana + exporters exceeded 0.40
     ports:
       - "3001:3000"
       - "9090:9090"

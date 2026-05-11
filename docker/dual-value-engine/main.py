@@ -189,7 +189,7 @@ async def _refresh() -> None:
                     state["ml_price_usd"]  = d.get("piPriceUsd", state["ml_price_usd"])
 
                     # Get utility index if available
-                    ru = await c.get(f"{ML_ENGINE_URL}/api/utility-index",
+                    ru = await c.get(f"{ML_ENGINE_URL}/api/ml/utility-index",
                                      params={"address": HQ_ADDRESS})
                     if ru.status_code == 200:
                         du = ru.json()

@@ -323,7 +323,7 @@ async function fetchLedger(): Promise<number> {
   try {
     const res = await fetch(`${HORIZON}/ledgers?order=desc&limit=1`, {
       headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(8_000),
+      signal: AbortSignal.timeout(20_000), // Pi mainnet node can be slow under load
     }) as Response;
     if (!res.ok) throw new Error(`${res.status}`);
     const json = await res.json() as { _embedded?: { records?: Array<{ sequence: number }> } };

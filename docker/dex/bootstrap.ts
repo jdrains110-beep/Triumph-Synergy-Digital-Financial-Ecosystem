@@ -120,7 +120,7 @@ async function refreshPriceFromHorizon() {
     const url = `${HORIZON}/order_book?selling_asset_type=native&buying_asset_type=credit_alphanum4&buying_asset_code=USD&buying_asset_issuer=GDUKMGUGDZQK6YHYA5Z6AY2G4XDSZPSZ3SW5UN3ARVMU6WUVHR4U2ZQ&limit=10`;
     const res = await fetch(url, {
       headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(20_000), // Pi mainnet node can be slow under load
     });
     if (!res.ok) return;
     const data = await res.json() as any;
