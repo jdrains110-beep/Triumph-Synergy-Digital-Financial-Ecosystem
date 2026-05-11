@@ -18,22 +18,25 @@ RUN apk add --no-cache curl tini wget && \
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat python3 make g++
+# libc6-compat, python3, make, g++ — standard native build tools
+# libusb-dev + eudev-dev — required by node-hid (transitive dep of @ledgerhq/hw-transport-node-hid)
+RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers
 WORKDIR /app
 
 # Copy package files
 COPY package.json yarn.lock ./
 # BuildKit cache mount — yarn packages cached in a Docker volume.
-# Cache ID bumped to v2 to avoid the corrupted @stellar/stellar-sdk entry.
-# yarn cache clean runs first to evict any corrupt tarballs from the volume.
+# Cache ID bumped to v3 to start with a clean slate (v2 had stale partial downloads).
+# DO NOT run yarn cache clean here — it defeats the cache and forces full re-download every build.
 # network-timeout 600000 = 10 min per package (handles slow registry responses)
-# network-concurrency 1 serialises fetches to avoid simultaneous TLS timeouts
-RUN --mount=type=cache,id=triumph-yarn-cache-v2,target=/usr/local/share/.cache/yarn \
-    yarn cache clean --cache-folder /usr/local/share/.cache/yarn 2>/dev/null || true && \
+# network-concurrency 4 allows parallel fetches; concurrency 1 caused single-package stalls
+# --prefer-offline uses cached tarballs where available, network only for missing packages
+RUN --mount=type=cache,id=triumph-yarn-cache-v3,target=/usr/local/share/.cache/yarn \
     yarn config set network-timeout 600000 && \
     yarn install --frozen-lockfile \
     --network-timeout 600000 \
-    --network-concurrency 1 \
+    --network-concurrency 4 \
+    --prefer-offline \
     --cache-folder /usr/local/share/.cache/yarn
 
 # Rebuild the source code only when needed

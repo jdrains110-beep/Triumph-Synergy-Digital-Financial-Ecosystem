@@ -57,15 +57,18 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field, asdict
 from typing import Any, Optional
 
+docker_sdk: Any = None
 try:
     import docker as docker_sdk
     _DOCKER_SDK_AVAILABLE = True
 except ImportError:
     _DOCKER_SDK_AVAILABLE = False
 
+
 _docker_client = None
 DOCKER_RESTART_ENABLED = False  # set True lazily on first successful connect
 
+_GithubSDK: Any = None
 try:
     from github import Github as _GithubSDK
     _GITHUB_ENABLED = True
@@ -80,11 +83,13 @@ from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
 
+asyncpg: Any = None
 try:
     import asyncpg
     _PG_SDK_AVAILABLE = True
 except ImportError:
     _PG_SDK_AVAILABLE = False
+
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -552,6 +557,7 @@ async def heal_service(client: httpx.AsyncClient, name: str, reason: str) -> dic
         ok, latency = False, -1.0
 
     # ── MAXIMUM AUTHORITY: Docker container restart if service still down ────
+    heal_record: dict = {}
     if not ok and _DOCKER_SDK_AVAILABLE:
         # Lazy-connect to Docker socket on first use
         global _docker_client, DOCKER_RESTART_ENABLED
@@ -618,6 +624,7 @@ async def heal_service(client: httpx.AsyncClient, name: str, reason: str) -> dic
                     heal_record["docker_restart_error"] = str(_de)
 
     heal_record = {
+        **heal_record,  # preserve docker_restart / container / docker_restart_error
         "healed": ok,
         "service": name,
         "reason": reason,
@@ -788,6 +795,14 @@ async def pulse_loop():
 # These give SAIB awareness beyond local Docker: Vercel, PiNet, Pi mainnet,
 # Stellar Protocol 23 horizon, plus other SAIB instances (e.g. two Triumph
 # Synergy Docker Desktop platforms + the central/supernode SAIB).
+build_external_targets: Any = None
+probe_external: Any = None
+build_peer_registry: Any = None
+federation_summary: Any = None
+peer_poll_interval_s: Any = None
+peer_self_name: Any = None
+poll_peer: Any = None
+remediate: Any = None
 try:
     from external_probes import build_external_targets, probe_external
     from peer_federation import (
@@ -1049,7 +1064,7 @@ async def _check_and_switch_network():
     ratio = healthy / total
     loop  = asyncio.get_event_loop()
 
-    if ratio < 0.5 and _network_state["active_network"] == "triumph-net" and BACKUP_NETWORKS:
+    if ratio < 0.5 and _network_state["active_network"] == "triumph-net" and BACKUP_NETWORKS and _docker_client is not None:
         backup = BACKUP_NETWORKS[0]
         log.warning("[SAIB-NET] Primary network degraded (%.0f%% healthy) — switching to %s",
                     ratio * 100, backup)
@@ -1288,6 +1303,8 @@ def _guess_lang_from_text(text: str) -> str | None:
 
 # Step 5: Redis Cluster — when REDIS_CLUSTER_NODES is set, use cluster client
 # with hash-slot routing across N masters; falls back to single-node REDIS_URL.
+_RedisCluster: Any = None
+_ClusterNode: Any = None
 try:
     from redis.asyncio.cluster import RedisCluster as _RedisCluster
     from redis.cluster import ClusterNode as _ClusterNode
@@ -1366,6 +1383,15 @@ async def _pg_connect():
                 await con.execute("ALTER TABLE saib_state ALTER COLUMN replica_id SET NOT NULL;")
             except Exception as _mig_e:
                 log.debug("[SAIB-PERSIST] migration step skipped (likely Citus-distributed): %s", _mig_e)
+            # Ensure composite unique constraint exists so ON CONFLICT (replica_id, key) works.
+            # Pre-v4 tables had PRIMARY KEY (key) only; this adds the needed composite index.
+            try:
+                await con.execute(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS uq_saib_state_replica_key "
+                    "ON saib_state (replica_id, key)"
+                )
+            except Exception as _idx_e:
+                log.debug("[SAIB-PERSIST] composite unique index migration skipped: %s", _idx_e)
         _persist_state["enabled"] = True
         log.info("[SAIB-PERSIST] Postgres connected; saib_state table ready")
         return _pg_pool
@@ -2063,10 +2089,9 @@ async def submit_feedback(body: dict):
     saib_human_interactions.labels(type=feedback_type).inc()
 
     tier_upgraded = state.brain.intelligence_level != prev_level
+    _milestone_by_cap = {v: k for k, v in _CAPABILITY_MILESTONES.items()}
     new_caps = [c for c in state.brain.capability_unlocks
-                if c not in _CAPABILITY_MILESTONES or
-                _CAPABILITY_MILESTONES.get(list(_CAPABILITY_MILESTONES.keys())[
-                    list(_CAPABILITY_MILESTONES.values()).index(c)], 0) > prev_total]
+                if _milestone_by_cap.get(c, 0) > prev_total]
 
     sig = quantum_sign(
         f"feedback:{feedback_type}:{hashlib.shake_256(content.encode()).hexdigest(16)}"
@@ -2429,7 +2454,7 @@ async def region_status():
         "peers":          peer_health,
         "citus_shared":   _persist_state["enabled"],
         "redis_shared":   bool(REDIS_CLUSTER_NODES) and _REDIS_CLUSTER_AVAILABLE,
-        "uptime_s":       round(time.time() - START_TIME, 1) if 'START_TIME' in globals() else None,
+        "uptime_s":       round(time.time() - state.started_at, 1),
         "quantum_sig":    quantum_sign("region"),
     }
 

@@ -582,11 +582,12 @@ services:
     build:
       context: docker
       dockerfile: apex-services/Dockerfile
+    platform: linux/arm64
     container_name: triumph-apex-services
     <<: *common
-    mem_limit: 2048m
-    mem_reservation: 1024m
-    cpus: 2.00
+    mem_limit: 4g
+    mem_reservation: 2048m
+    cpus: 4.00
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
@@ -878,6 +879,7 @@ services:
       WATCHDOG_FAILS_BEFORE_RESTART: "3"
       WATCHDOG_MAX_RESTARTS: "20"
       WATCHDOG_WINDOW_S: "7200"
+      WATCHDOG_START_DELAY_S: "1800"
       WATCHDOG_PEER_HEARTBEAT_URL: ${WATCHDOG_PEER_HEARTBEAT_URL:-}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

@@ -31,7 +31,9 @@ import time
 from collections import deque
 
 import httpx
+from typing import Any
 
+docker_sdk: Any = None
 try:
     import docker as docker_sdk
     _DOCKER_OK = True
@@ -41,6 +43,8 @@ except Exception:  # noqa: BLE001
 # Optional Kubernetes client (lazy) — only loaded when WATCHDOG_K8S_MODE=true
 _K8S_OK = False
 _k8s_core = None
+_k8s_client_mod: Any = None
+_k8s_config_mod: Any = None
 try:
     from kubernetes import client as _k8s_client_mod, config as _k8s_config_mod  # type: ignore
     _K8S_OK = True
@@ -63,6 +67,10 @@ TIMEOUT_S = float(os.getenv("WATCHDOG_TIMEOUT_S", "10"))
 FAILS_BEFORE_RESTART = int(os.getenv("WATCHDOG_FAILS_BEFORE_RESTART", "3"))
 MAX_RESTARTS = int(os.getenv("WATCHDOG_MAX_RESTARTS", "5"))
 WINDOW_S = float(os.getenv("WATCHDOG_WINDOW_S", "1800"))  # 30 min
+# Grace period after container start/restart before probing begins (seconds).
+# apex-services runs 18 supervisord sub-processes under QEMU and needs ~240s
+# to fully bind all ports.  Probing before that causes a restart storm.
+START_DELAY_S = float(os.getenv("WATCHDOG_START_DELAY_S", "270"))
 PEER_HEARTBEAT_URL = os.getenv("WATCHDOG_PEER_HEARTBEAT_URL", "").strip()
 K8S_MODE = os.getenv("WATCHDOG_K8S_MODE", "false").lower() == "true"
 K8S_NAMESPACE = os.getenv("WATCHDOG_K8S_NAMESPACE", "triumph")
@@ -96,6 +104,26 @@ def container_running(client, name: str) -> bool:
     except Exception as exc:  # noqa: BLE001
         log.warning("container lookup failed for %s: %s", name, exc)
         return False
+
+
+def container_started_at(client, name: str) -> float:
+    """Return the Unix timestamp when the container last started, or 0.0 on error."""
+    if K8S_MODE:
+        return 0.0
+    try:
+        c = client.containers.get(name)
+        c.reload()
+        started = c.attrs.get("State", {}).get("StartedAt", "")
+        if started:
+            # Docker returns RFC3339 nanoseconds: "2026-05-11T08:01:52.123456789Z"
+            # Truncate to microseconds so fromisoformat handles it.
+            started = started[:26].rstrip("Z")
+            from datetime import datetime, timezone
+            dt = datetime.fromisoformat(started).replace(tzinfo=timezone.utc)
+            return dt.timestamp()
+    except Exception as exc:  # noqa: BLE001
+        log.debug("container_started_at failed for %s: %s", name, exc)
+    return 0.0
 
 
 def _k8s_pod_running() -> bool:
@@ -182,9 +210,38 @@ def main() -> None:
     client = None if K8S_MODE else docker_client()
     consecutive_fails = 0
     restart_times: deque[float] = deque(maxlen=MAX_RESTARTS * 4)
+    # Seed last_restart_time from the container's actual StartedAt so the grace
+    # period is correct even when the watchdog starts long after the container.
+    _initial_started = 0.0 if K8S_MODE else container_started_at(client, TARGET_CONTAINER)
+    last_restart_time = _initial_started if _initial_started > 0 else time.time()
+    log.info("initial container StartedAt=%.0f (grace expires in %.0fs)",
+             last_restart_time, max(0, START_DELAY_S - (time.time() - last_restart_time)))
 
     while True:
         try:
+            # Sync last_restart_time with the container's actual StartedAt.
+            # This handles external restarts (Docker daemon, user, other tools)
+            # so the grace period resets correctly regardless of restart source.
+            if not K8S_MODE:
+                actual_started = container_started_at(client, TARGET_CONTAINER)
+                if actual_started > last_restart_time:
+                    log.info("%s restarted externally at %.0f — resetting grace period",
+                             TARGET_CONTAINER, actual_started)
+                    last_restart_time = actual_started
+                    consecutive_fails = 0
+
+            # Skip probing during startup / post-restart grace period so that
+            # slow-starting containers (e.g. apex-services with 18 sub-processes
+            # under QEMU) are not restarted before they have bound their ports.
+            grace_remaining = START_DELAY_S - (time.time() - last_restart_time)
+            if grace_remaining > 0:
+                log.info(
+                    "%s in startup grace period — %.0fs remaining, skipping probe",
+                    TARGET_CONTAINER, grace_remaining,
+                )
+                time.sleep(min(INTERVAL_S, grace_remaining))
+                continue
+
             running = container_running(client, TARGET_CONTAINER)
             healthy = running and http_healthy(TARGET_HEALTH_URL)
 
@@ -213,6 +270,7 @@ def main() -> None:
                     else:
                         if restart_container(client, TARGET_CONTAINER):
                             restart_times.append(now)
+                            last_restart_time = time.time()
                         consecutive_fails = 0
 
             heartbeat()
