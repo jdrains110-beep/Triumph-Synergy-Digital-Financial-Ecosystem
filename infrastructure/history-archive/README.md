@@ -1,4 +1,4 @@
-# Triumph Synergy — Pi Testnet History Archive
+# Triumph Synergy — Pi Mainnet History Archive
 
 `stellar-core` validators must publish a public, append-only history archive
 so other nodes can catch up from us. SEP-1 references this in the `HISTORY`

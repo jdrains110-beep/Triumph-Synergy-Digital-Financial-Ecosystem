@@ -37,10 +37,95 @@
 [![SCFA](https://img.shields.io/badge/SCFA-SBA%20%7C%20CHAMBER%20%7C%20FL%20PORTS%20%7C%20CBP%20%7C%20NRA%20%7C%20NOAA%20OBSOLETE-EAB308?style=flat-square)](#-whats-new--may-2-2026-sovereign-commerce--frontier-authority--scfa)
 [![Sovereign Health Platform](https://img.shields.io/badge/Sovereign%20Health-MEDICARE%20%7C%20CMS%20%7C%20FDA%20%7C%20ACA%20OBSOLETE-EF4444?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
 [![SCHA](https://img.shields.io/badge/shands.pi%20%7C%20ufhealth.pi-66%20LOOPHOLES%20%7C%205%20AUTHORITIES-8B5CF6?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
+[![Sovereign Mesh Network](https://img.shields.io/badge/Sovereign%20Mesh-WireGuard%20%7C%20ChaCha20--Poly1305%20%7C%205--Layer%20Encryption-00D4AA?style=flat-square)](#-whats-new--may-12-2026-sovereign-mesh-network)
 
 [**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
 </div>
+
+---
+
+<a id="-whats-new--may-12-2026-sovereign-mesh-network"></a>
+
+## 🔐 What's New — May 12, 2026 (Triumph Sovereign Mesh Network — 5-Layer Encrypted Private Network)
+
+[![Sovereign Mesh](https://img.shields.io/badge/Sovereign%20Mesh-WireGuard%20%2B%20ChaCha20--Poly1305%20%2B%20Curve25519-00D4AA?style=flat-square)](docker/sovereign-mesh/mesh_hub.py)
+[![Encryption Layers](https://img.shields.io/badge/Encryption-5%20Layers%20%7C%20WireGuard%20%7C%20PSK%20%7C%20TLS%201.3%20%7C%20CNSA%202.0%20%7C%20ML--KEM--1024-7C3AED?style=flat-square)](docker/sovereign-mesh/)
+[![Mesh API](https://img.shields.io/badge/Mesh%20API-:8200%20%7C%20Topology%20%7C%20Peer%20Registry%20%7C%20Prometheus-0EA5E9?style=flat-square)](docker/sovereign-mesh/mesh_hub.py)
+
+New service: `triumph-sovereign-mesh-hub` — a WireGuard-based encrypted private mesh network connecting every service in the Triumph ecosystem over an isolated sovereign subnet (`10.13.37.0/24`). This is the network-level security layer that rivals ARPANET, NSFNet, and DARPA in distributed, resilient design — now with post-quantum encryption.
+
+**Architecture:**
+
+- **Hub-and-spoke topology** — `triumph-sovereign-mesh-hub` (`.1`) acts as the encrypted routing core
+- **Dedicated Docker network** — `triumph-sovereign-mesh` (10.13.37.0/24) — completely isolated from the internet
+- **Static IP assignment** — every service has a fixed mesh IP, deterministic routing
+- **Mesh management API** — FastAPI service on port `:8200` with full topology visualization, peer registration, and Prometheus metrics
+
+**5-Layer Encryption Stack:**
+
+| Layer | Technology | Standard |
+|---|---|---|
+| 1 — Transport | WireGuard — ChaCha20-Poly1305 | RFC 7748 / WireGuard whitepaper |
+| 2 — Key Exchange | Curve25519 ECDH | RFC 7748 |
+| 3 — Per-Peer PSK | 256-bit pre-shared key per node | WireGuard PSK extension |
+| 4 — Inter-service API | TLS 1.3 — AES-256-GCM | NIST SP 800-52r2 |
+| 5 — Application | CNSA Suite 2.0 + ML-KEM-1024 | NSA/CISA CNSA 2.0 + NIST FIPS 203 |
+
+**Mesh IP Plan:**
+
+| Mesh IP | Service | Role |
+|---|---|---|
+| `10.13.37.1` | `triumph-sovereign-mesh-hub` | Hub / encrypted router |
+| `10.13.37.10` | `triumph-app` | Next.js application |
+| `10.13.37.11` | `triumph-nginx` | Reverse proxy / gateway |
+| `10.13.37.12` | `triumph-apex-services` | Apex sovereign services |
+| `10.13.37.13` | `triumph-sovereign-military-bridge` | CNSA 2.0 military crypto |
+| `10.13.37.14` | `triumph-quantum-intel-fortress` | ML-KEM-1024 / ML-DSA-87 |
+| `10.13.37.15` | `triumph-settlement-core` | Stellar payment settlement |
+| `10.13.37.16` | `triumph-pi-mainnet-node` | Pi Network blockchain node |
+| `10.13.37.17` | `triumph-governance-shield` | Sovereign governance layer |
+| `10.13.37.18` | `triumph-vault` | Secrets / key vault |
+
+**Files:**
+
+| File | Purpose |
+|---|---|
+| [docker/sovereign-mesh/Dockerfile](docker/sovereign-mesh/Dockerfile) | WireGuard hub container — `python:3.13-slim` + `wireguard-tools` |
+| [docker/sovereign-mesh/entrypoint.sh](docker/sovereign-mesh/entrypoint.sh) | Keygen on first boot, interface setup, mesh API launch |
+| [docker/sovereign-mesh/mesh_hub.py](docker/sovereign-mesh/mesh_hub.py) | FastAPI: `/health`, `/mesh/status`, `/mesh/topology`, `/mesh/peers`, `/mesh/register`, `/metrics` |
+| [docker/sovereign-mesh/wg_keygen.py](docker/sovereign-mesh/wg_keygen.py) | Curve25519 keypair + PSK generator for all 10 nodes |
+| [scripts/generate-mesh-keys.sh](scripts/generate-mesh-keys.sh) | Offline key generation — produces hub config + per-node client configs |
+| [docker/wireguard/wg0.conf.template](docker/wireguard/wg0.conf.template) | WireGuard client config template for external nodes |
+
+**Quick start:**
+
+```bash
+# Start the mesh hub (builds + launches automatically)
+docker compose up -d sovereign-mesh-hub
+
+# Check mesh status + all peer connections
+curl http://localhost:8200/mesh/status
+
+# View full network topology (nodes + edges + latency)
+curl http://localhost:8200/mesh/topology
+
+# Get hub public key (for configuring external peers)
+curl http://localhost:8200/mesh/keys/public
+
+# Register a new external node
+curl -X POST http://localhost:8200/mesh/register \
+  -H "Content-Type: application/json" \
+  -d '{"peer_name": "my-node", "peer_public_key": "<pubkey>", "mesh_ip": "10.13.37.20"}'
+
+# Prometheus metrics
+curl http://localhost:8200/metrics
+
+# Generate all keypairs offline (before first launch)
+./scripts/generate-mesh-keys.sh
+```
+
+**Container capabilities required:** `NET_ADMIN` + `SYS_MODULE` (for WireGuard kernel interface). Set automatically in `docker-compose.yml`. On macOS Docker Desktop, WireGuard runs in userspace mode automatically.
 
 ---
 
@@ -4112,6 +4197,8 @@ See also: [Apache License](LICENSE)
 **Central Node:** `GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`
 
 **Maximum Quantum Setup:** `ML-KEM-1024 (MAX) • ML-DSA-87 (MAX) • SHAKE-256+SHA3-512 • SPHINCS+ • AES-256-GCM`
+
+**Sovereign Mesh Network:** `WireGuard ChaCha20-Poly1305 • Curve25519 ECDH • Per-Peer PSK • TLS 1.3 • CNSA Suite 2.0 • ML-KEM-1024 — 5-Layer Encrypted`
 
 **Pi DEX SDK:** `github.com/kosasih/pidexsdk` ✅ INTEGRATED
 
