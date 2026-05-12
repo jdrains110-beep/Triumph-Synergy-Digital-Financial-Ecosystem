@@ -7,7 +7,7 @@
 # Consolidates THREE watchdog services into ONE container:
 #   health-governor   → port 9912  (container memory + health watchdog)
 #   network-sentinel  → port 9913  (multi-WAN connectivity monitor)
-#   horizon-guardian  → port 9911  (testnet2/Horizon process guardian)
+#   horizon-guardian  → port 9911  (mainnet/Horizon process guardian)
 #
 # Uses supervisord to manage all four processes with individual restart
 # policies — one container crash cannot take down another watchdog.

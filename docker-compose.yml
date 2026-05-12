@@ -51,12 +51,10 @@ x-db-env: &db-env
 
 x-pi-env: &pi-env
   PI_NETWORK_MODE: ${PI_NETWORK_MODE:-mainnet}
-  # Active key resolves to mainnet or testnet depending on PI_NETWORK_MODE
+  # Mainnet-only ecosystem — no testnet keys
   PI_API_KEY: ${PI_API_KEY:?PI_API_KEY required}
   PI_INTERNAL_API_KEY: ${PI_INTERNAL_API_KEY:?PI_INTERNAL_API_KEY required}
-  # Both keys embedded so network-aware services can select the right one at runtime
   PI_MAINNET_API_KEY: ${PI_MAINNET_API_KEY:?PI_MAINNET_API_KEY required}
-  PI_TESTNET_API_KEY: ${PI_TESTNET_API_KEY:-}
   PI_API_SECRET: ${PI_API_SECRET:?PI_API_SECRET required}
   PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
   NEXT_PUBLIC_PI_APP_ID: ${NEXT_PUBLIC_PI_APP_ID:-triumph-synergy}
@@ -359,7 +357,6 @@ services:
       VERSION_CHECK_INTERVAL_MS: 300000  # CPU-optimized: was 60000
       PARAMETER_SYNC_INTERVAL_MS: 120000  # CPU-optimized: was 30000
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
-      PI_TESTNET_HORIZON: https://api.testnet.minepi.com  # reference constant — mainnet-only deployment, not active
       PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}:${PI_NODE_API_PORT:-8000}
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
@@ -473,8 +470,6 @@ services:
       # ─── Stellar / Pi on-chain broadcaster ─────────────────────────────
       # Default OFF until a STELLAR_SECRET_KEY is provided in .env.
       # Set STELLAR_BROADCAST_ENABLED=true to submit real transactions.
-      # For testnet: STELLAR_HORIZON_URL=https://api.testnet.minepi.com
-      #              STELLAR_NETWORK_PASSPHRASE=Pi Testnet
       STELLAR_BROADCAST_ENABLED: ${STELLAR_BROADCAST_ENABLED:-false}
       STELLAR_SECRET_KEY: ${STELLAR_SECRET_KEY:-}
       STELLAR_TREASURY_ADDRESS: ${STELLAR_TREASURY_ADDRESS:-}
@@ -1079,9 +1074,8 @@ services:
     healthcheck:
       disable: true
   # --------------------------------------------------------------------------
-  # MAINNET-ONLY MANDATE — Pi Network + Stellar Protocol 23
-  # The pi-testnet2-node service was removed. Only the mainnet supernode
-  # is permitted to run inside the ecosystem.
+  # MAINNET-ONLY — Pi Network + Stellar Protocol 23
+  # triumph-pi-mainnet-node is the sole blockchain node for this ecosystem.
   # --------------------------------------------------------------------------
 
   # saib-watchdog merged into guardian-watchdog-nexus (see above)

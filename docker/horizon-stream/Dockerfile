@@ -3,7 +3,7 @@
 # ==============================================================================
 # Merges:
 #   blockchain-oracle (8086) — Stellar/Pi ledger oracle
-#   market-data       (8085) — Pi market data feed (testnet2)
+#   market-data       (8085) — Pi market data feed (mainnet)
 # Shared Node 20 + @stellar/stellar-sdk + redis + pg
 # Build context: REPO ROOT (needs docker/, lib/, tsconfig.docker.json)
 # ==============================================================================

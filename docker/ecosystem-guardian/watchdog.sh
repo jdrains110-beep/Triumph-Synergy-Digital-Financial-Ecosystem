@@ -60,7 +60,7 @@ start_horizon() {
 # Ensures triumph-pi-mainnet-node is ALWAYS connected to the pi-bridge Docker network
 # so Triumph Synergy services can reach it by hostname
 ensure_pi_bridge_connected() {
-  # Check if testnet2 is on pi-bridge by inspecting network members
+  # Check if mainnet node is on pi-bridge by inspecting network members
   if docker network inspect "$PI_BRIDGE_NETWORK" --format '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null | grep -q "$TARGET_CONTAINER"; then
     return 0  # already connected
   fi
