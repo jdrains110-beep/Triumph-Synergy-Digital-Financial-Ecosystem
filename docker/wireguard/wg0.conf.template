@@ -1,36 +1,60 @@
 # ═══════════════════════════════════════════════════════════════════════
-# WireGuard Configuration Template for Triumph Synergy
+# Triumph Synergy — Sovereign Mesh Network Client Config Template
 # ═══════════════════════════════════════════════════════════════════════
 #
-# Replace the values below with your VPN provider's WireGuard config.
-# 
-# Recommended providers (all support WireGuard):
-#   • Mullvad (https://mullvad.net) — privacy-focused, no account needed
-#   • IVPN (https://ivpn.net)      — audited, no-log
-#   • Self-hosted                   — run your own on a VPS for fixed IP
+# This config connects a node (service or remote machine) to the
+# Triumph Synergy Sovereign Mesh Hub (triumph-sovereign-mesh-hub).
 #
-# After filling in, rename this file to wg0.conf
+# Encryption:
+#   Transport  — ChaCha20-Poly1305 (authenticated encryption)
+#   Key Exchange — Curve25519 ECDH (forward secrecy per session)
+#   PSK Layer  — 256-bit pre-shared key (additional symmetric layer per peer)
+#
+# Mesh address space: 10.13.37.0/24
+#   .1   Sovereign Mesh Hub
+#   .10  triumph-app
+#   .11  triumph-nginx
+#   .12  triumph-apex-services
+#   .13  triumph-sovereign-military-bridge
+#   .14  triumph-quantum-intel-fortress
+#   .15  triumph-settlement-core
+#   .16  triumph-pi-mainnet-node
+#   .17  triumph-governance-shield
+#   .18  triumph-vault
+#
+# To generate your node's private/public keypair:
+#   wg genkey | tee private.key | wg pubkey > public.key
+#
+# Then register with the hub:
+#   POST http://triumph-sovereign-mesh-hub:8200/mesh/register
+#   {"peer_name": "<your-node>", "peer_public_key": "<public.key>", "mesh_ip": "10.13.37.X"}
+#
+# After registering, fill in this template and save as wg-sovereign.conf
 # ═══════════════════════════════════════════════════════════════════════
 
 [Interface]
-# Your WireGuard private key (from your VPN provider)
-PrivateKey = YOUR_PRIVATE_KEY_HERE
+# This node's WireGuard private key (generate with: wg genkey)
+PrivateKey = YOUR_NODE_PRIVATE_KEY_HERE
 
-# The IP address assigned to you by the VPN provider
-Address = 10.x.x.x/32
+# Mesh IP assigned to this node (see table above)
+Address = 10.13.37.X/24
 
-# DNS servers (Cloudflare + Google fallback)
-DNS = 1.1.1.1, 8.8.8.8
+# Resolve mesh hostnames via hub DNS
+DNS = 10.13.37.1
 
 [Peer]
-# VPN server's public key
-PublicKey = SERVER_PUBLIC_KEY_HERE
+# Triumph Sovereign Mesh Hub public key
+# Retrieve from: GET http://triumph-sovereign-mesh-hub:8200/mesh/keys/public
+PublicKey = HUB_PUBLIC_KEY_HERE
 
-# Route all traffic through the tunnel
-AllowedIPs = 0.0.0.0/0
+# Pre-shared key (provided by hub during /mesh/register — 256-bit symmetric)
+PresharedKey = YOUR_PSK_HERE
 
-# VPN server endpoint (replace with provider's server)
-Endpoint = vpn-server.example.com:51820
+# Only route sovereign mesh traffic through tunnel (not all internet traffic)
+AllowedIPs = 10.13.37.0/24
 
-# Keep connection alive (important for Starlink satellite handoffs)
+# Hub endpoint — use Docker service name inside compose, or host IP externally
+Endpoint = triumph-sovereign-mesh-hub:51820
+
+# Keep tunnel alive (25s is optimal for NAT traversal + Starlink handoffs)
 PersistentKeepalive = 25

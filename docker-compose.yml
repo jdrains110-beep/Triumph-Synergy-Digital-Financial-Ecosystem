@@ -1141,6 +1141,57 @@ services:
       retries: 3
       start_period: 90s
 
+  # ==========================================================================
+  # SOVEREIGN MESH HUB — Encrypted Private Network (WireGuard)
+  # ==========================================================================
+  # ChaCha20-Poly1305 transport + Curve25519 ECDH + per-peer 256-bit PSK
+  # Mesh subnet: 10.13.37.0/24
+  # Hub API: :8200  |  WireGuard: :51820/udp
+  # ==========================================================================
+
+  sovereign-mesh-hub:
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-hub
+    <<: *common
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.25
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.src_valid_mark: "1"
+    environment:
+      PORT: "8200"
+      WG_INTERFACE: "wg-sovereign"
+      WG_LISTEN_PORT: "51820"
+      HUB_IP: "10.13.37.1"
+      MESH_SUBNET: "10.13.37.0/24"
+    ports:
+      - "8200:8200"
+      - "51820:51820/udp"
+    volumes:
+      - triumph_mesh_keys:/app/keys
+    networks:
+      triumph-net:
+        aliases:
+          - triumph-sovereign-mesh-hub
+      pi-bridge:
+        aliases:
+          - triumph-sovereign-mesh-hub
+      sovereign-mesh:
+        ipv4_address: 10.13.37.1
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8200/health', timeout=10)"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+
 # ==========================================================================
 # VOLUMES — Persistent Data
 # ==========================================================================
@@ -1177,6 +1228,8 @@ volumes:
     name: pi_mainnet_logs
   pi_mainnet_history:
     name: pi_mainnet_history
+  triumph_mesh_keys:
+    name: triumph_mesh_keys
 
 # ==========================================================================
 # NETWORK — Shared with Pi Network node for direct communication
@@ -1198,6 +1251,13 @@ networks:
   redis-cluster-net:
     name: triumph-redis-cluster-net
     external: true
+  # Sovereign encrypted mesh network — WireGuard encrypted, static IPs
+  sovereign-mesh:
+    name: triumph-sovereign-mesh
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.13.37.0/24
 
 # ==========================================================================
 # SECRETS — mounted into containers at /run/secrets/<name>
