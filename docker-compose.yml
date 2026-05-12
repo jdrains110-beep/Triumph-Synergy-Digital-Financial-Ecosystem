@@ -1052,10 +1052,10 @@ services:
     container_name: triumph-pi-mainnet-node
     restart: always
     profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
-    shm_size: 256m   # stellar-core uses /dev/shm for SCP consensus buffers; default 64MB causes SIGABRT
-    mem_limit: 4g
-    mem_reservation: 1536m
-    cpus: 1.0  # CPU-optimized: was 1.5
+    shm_size: 512m   # stellar-core uses /dev/shm for SCP bucket merges; 256m causes SIGABRT during catchup
+    mem_limit: 7g    # raised from 4g: catchup on AMD64 emulation spikes 5-6GB during bucket merge
+    mem_reservation: 2g
+    cpus: 2.0  # raised from 1.0: AMD64 emulation on Apple Silicon needs headroom to avoid assertion timeouts
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
       NODE_PRIVATE_KEY:  ${PI_NODE_PRIVATE_KEY:-}   # auto-generated if blank
@@ -1064,9 +1064,10 @@ services:
       - pi_mainnet_logs:/var/log/supervisor
       - pi_mainnet_history:/history
     ports:
-      - "${PI_NODE_HORIZON_PORT:-31401}:8000"    # Horizon HTTP API
-      - "${PI_NODE_PEER_PORT:-31402}:31402"       # stellar-core peer
-      - "${PI_NODE_HISTORY_PORT:-31403}:1570"     # local history server
+      - "31500:11626"                              # stellar-core HTTP info/admin
+      - "${PI_NODE_HORIZON_PORT:-31501}:8000"    # Horizon HTTP API
+      - "${PI_NODE_PEER_PORT:-31502}:31402"       # stellar-core peer
+      - "${PI_NODE_HISTORY_PORT:-31503}:1570"     # local history server
     command: ["--mainnet"]
     networks:
       - triumph-net
