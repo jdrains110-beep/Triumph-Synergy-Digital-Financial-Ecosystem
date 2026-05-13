@@ -63,11 +63,14 @@ if (!process.env.SUPERNODE_JOIN_SECRET && process.env.NODE_ENV === "production")
   process.exit(1);
 }
 
-// Prevents timing-oracle attacks where an attacker can infer a correct token
-// prefix by measuring how long the comparison takes.
+// ── Timing-safe secret comparison ───────────────────────────────────────────
+// Hashes both strings to SHA-256 digests (constant length) before comparing
+// with timingSafeEqual, so neither the secret length nor a mismatch position
+// is leaked via timing.
 function timingSafeSecretEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  const ha = crypto.createHash("sha256").update(a).digest();
+  const hb = crypto.createHash("sha256").update(b).digest();
+  return crypto.timingSafeEqual(ha, hb);
 }
 
 

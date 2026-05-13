@@ -65,9 +65,9 @@ function bodyFingerprint(body: string): string {
 async function redisGet(key: string): Promise<CachedResponse | null> {
   try {
     const { redis } = await import("@/lib/redis");
-    const raw = await redis.get(`idem:${key}`);
-    if (!raw) return null;
-    return JSON.parse(raw) as CachedResponse;
+    const cachedJson = await redis.get(`idem:${key}`);
+    if (!cachedJson) return null;
+    return JSON.parse(cachedJson) as CachedResponse;
   } catch {
     return null;
   }
