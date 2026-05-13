@@ -4,8 +4,17 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimitByIPAsync, safeErrorResponse } from "@/lib/security/api-guard";
+import { appendAuditEvent } from "@/lib/security/audit-chain";
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 liquidity additions per minute per IP (Redis-backed, distributed)
+  const rl = await rateLimitByIPAsync(request, "dex-liquidity-add", 20, 60_000);
+  if (!rl.allowed) {
+    void appendAuditEvent("ratelimit.tripped", { route: "dex-liquidity-add" });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     const { tokenAId, tokenBId, amountA, amountB } = await request.json();
 
@@ -57,8 +66,8 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json(lpPosition, { status: 201 });
-  } catch (error) {
-    console.error("Add liquidity error:", error);
+  } catch (err) {
+    console.error("Add liquidity error:", safeErrorResponse(err));
     return NextResponse.json(
       { error: "Failed to add liquidity" },
       { status: 500 }
