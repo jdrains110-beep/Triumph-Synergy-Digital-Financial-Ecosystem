@@ -13,6 +13,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createMiddlewareSupabase } from "@/lib/supabase";
 
+// Stellar public key format: 'G' + 55 uppercase base32 chars (A-Z, 2-7), 56 total.
+// Used to validate X-Wallet-PublicKey before propagating it to API routes.
+const STELLAR_KEY_RE = /^G[A-Z2-7]{55}$/;
+
 /**
  * Main middleware function
  */
@@ -129,13 +133,18 @@ export async function middleware(request: NextRequest) {
   response.headers.set("X-Web3-Protocol", "triumph-synergy/1.0");
   response.headers.set("X-Chain", "pi-network");
 
-  // Propagate wallet identity from client to API routes
+  // Propagate wallet identity from client to API routes.
+  // Only forward keys that match the Stellar public key format (G + 55 base32
+  // uppercase chars, 56 total) to prevent arbitrary header injection.
+  // Note: this validates format only; signature verification is the
+  // responsibility of each API route that consumes the header.
   const walletKey = request.headers.get("x-wallet-publickey");
-  if (walletKey) {
+  if (walletKey && STELLAR_KEY_RE.test(walletKey)) {
     response.headers.set("X-Wallet-PublicKey", walletKey);
     const did = request.headers.get("x-wallet-did") || `did:pi:${walletKey}`;
     response.headers.set("X-Wallet-DID", did);
   }
+  // Keys that fail format validation are silently dropped (not propagated)
 
   return response;
 }

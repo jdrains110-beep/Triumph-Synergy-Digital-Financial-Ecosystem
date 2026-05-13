@@ -505,9 +505,27 @@ export class IAMService {
     return true;
   }
 
-  private async getUserRoles(_userId: string): Promise<string[]> {
-    // Implementation would fetch from database
-    return ["customer"];
+  private async getUserRoles(userId: string): Promise<string[]> {
+    try {
+      // Dynamic import keeps Supabase out of client bundles — this method is
+      // only reached from async server-side code paths (API routes, RSC).
+      const { getSupabaseAdmin } = await import("@/lib/supabase");
+      const admin = getSupabaseAdmin();
+      const { data, error } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      if (error) {
+        // Supabase reachable but returned an error — least-privilege default
+        console.warn("[IAM] getUserRoles error:", error.message);
+        return ["customer"];
+      }
+      if (!data?.length) return ["customer"];
+      return data.map((r: { role: string }) => r.role);
+    } catch {
+      // Supabase not configured or network unreachable — default to least privilege
+      return ["customer"];
+    }
   }
 
   // Generate API key

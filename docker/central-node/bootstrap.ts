@@ -50,7 +50,19 @@ const CENTRAL_KEY = process.env.CENTRAL_NODE_PUBLIC_KEY || "GA6Z5STFJZPBDQT5VZSD
 
 console.log(`[Central Node] Horizon URL: ${HORIZON_URL} (PI_NODE_HOST=${PI_NODE_HOST ?? "unset"})`);
 
-// ── Timing-safe secret comparison ───────────────────────────────────────────
+// ── Production guard: refuse to start without a join secret ─────────────────
+// An unguarded /supernode/join endpoint in a live deployment lets any caller
+// self-register as an APEX-QUANTUM-NODE.  Fail loudly so operators are forced
+// to configure the secret before traffic reaches the service.
+if (!process.env.SUPERNODE_JOIN_SECRET && process.env.NODE_ENV === "production") {
+  console.error(
+    "❌ FATAL: SUPERNODE_JOIN_SECRET must be set in production. " +
+    "An unset secret leaves /supernode/join unauthenticated. " +
+    "Generate one with:  openssl rand -hex 32"
+  );
+  process.exit(1);
+}
+
 // Prevents timing-oracle attacks where an attacker can infer a correct token
 // prefix by measuring how long the comparison takes.
 function timingSafeSecretEqual(a: string, b: string): boolean {
