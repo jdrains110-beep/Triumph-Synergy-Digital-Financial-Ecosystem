@@ -75,7 +75,9 @@ def _check_api_key(authorization: Optional[str]) -> None:
     token = ""
     if authorization and authorization.startswith("Bearer "):
         token = authorization[7:]
-    if not secrets.compare_digest(token, MESH_API_KEY):
+    # secrets.compare_digest requires both args to be str (or both bytes).
+    # Ensure we always pass str values to avoid a TypeError on type mismatch.
+    if not isinstance(token, str) or not secrets.compare_digest(token, MESH_API_KEY):
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 # ── Mesh peer registry ────────────────────────────────────────────────────────

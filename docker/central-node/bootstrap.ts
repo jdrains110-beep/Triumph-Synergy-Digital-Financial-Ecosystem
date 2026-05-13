@@ -50,7 +50,15 @@ const CENTRAL_KEY = process.env.CENTRAL_NODE_PUBLIC_KEY || "GA6Z5STFJZPBDQT5VZSD
 
 console.log(`[Central Node] Horizon URL: ${HORIZON_URL} (PI_NODE_HOST=${PI_NODE_HOST ?? "unset"})`);
 
-// ── APEX-QUANTUM PEER SUPERNODE MESH ───────────────────────────────────────
+// ── Timing-safe secret comparison ───────────────────────────────────────────
+// Prevents timing-oracle attacks where an attacker can infer a correct token
+// prefix by measuring how long the comparison takes.
+function timingSafeSecretEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
+
 // Multi-supernode topology: this node + N peer supernodes that mutually
 // power each other. Any node that connects via /supernode/join is upgraded
 // to apex-quantum status and added to the peer registry, boosting the mesh.
@@ -421,13 +429,7 @@ const server = http.createServer((req, res) => {
     if (JOIN_SECRET) {
       const authHeader = req.headers["authorization"] || "";
       const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-      // Use timingSafeEqual to prevent timing-based token oracle attacks
-      const secretBuf = Buffer.from(JOIN_SECRET);
-      const tokenBuf  = Buffer.allocUnsafe(secretBuf.length).fill(0);
-      if (token) Buffer.from(token).copy(tokenBuf, 0, 0, Math.min(token.length, tokenBuf.length));
-      const lengthMismatch = token.length !== JOIN_SECRET.length;
-      const bytesMismatch  = !crypto.timingSafeEqual(secretBuf, tokenBuf);
-      if (lengthMismatch || bytesMismatch) {
+      if (!timingSafeSecretEqual(token, JOIN_SECRET)) {
         res.writeHead(401);
         res.end('{"error":"unauthorized"}');
         return;

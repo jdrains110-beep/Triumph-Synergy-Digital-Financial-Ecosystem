@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://sdk.minepi.com https://app-cdn.minepi.com",
+      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://sdk.minepi.com https://app-cdn.minepi.com`,
       "script-src-attr 'none'",
       // 'unsafe-inline' in style-src is intentional and safe: styles cannot
       // execute JavaScript, so XSS via injected styles is not possible.
