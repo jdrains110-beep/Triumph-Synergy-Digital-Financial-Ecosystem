@@ -389,13 +389,18 @@ export const securityConfig = {
     csp: {
       enabled: true,
       directives: {
+        // NOTE: these directives document intent only. The enforced CSP is
+        // set per-request in middleware.ts with a random nonce.
+        // 'unsafe-inline' is NOT present in script-src — nonce + strict-dynamic
+        // is used instead. See middleware.ts for the live policy.
         "default-src": ["'self'"],
-        "script-src": ["'self'", "'unsafe-inline'"],
+        "script-src": ["'self'", "'nonce-<per-request>'", "'strict-dynamic'"],
         "style-src": ["'self'", "'unsafe-inline'"],
         "img-src": ["'self'", "data:", "https:"],
         "font-src": ["'self'", "data:"],
         "connect-src": ["'self'"],
         "frame-ancestors": ["'none'"],
+        "script-src-attr": ["'none'"],
       },
     },
 

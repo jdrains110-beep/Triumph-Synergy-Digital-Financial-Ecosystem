@@ -123,14 +123,17 @@ async function pollAllPeers(): Promise<void> {
 // Mutually announce ourselves to seed peers — they'll register us back
 async function announceToPeers(): Promise<void> {
   const selfUrl = process.env.SUPERNODE_SELF_URL || `http://${process.env.HOSTNAME || SUPERNODE_ID}:11626`;
+  const JOIN_SECRET = process.env.SUPERNODE_JOIN_SECRET;
   for (const peer of peerRegistry.values()) {
     if (peer.role !== "peer") continue;
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 5_000);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (JOIN_SECRET) headers["Authorization"] = `Bearer ${JOIN_SECRET}`;
       await fetch(`${peer.url.replace(/\/$/, "")}/supernode/join`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         signal: ctrl.signal,
         body: JSON.stringify({
           id: SUPERNODE_ID, url: selfUrl, role: SUPERNODE_ROLE,
@@ -409,6 +412,20 @@ const server = http.createServer((req, res) => {
       peers: [...peerRegistry.values()],
     }, 2));
   } else if (url === "/supernode/join" && req.method === "POST") {
+    // ── Auth guard ────────────────────────────────────────────────────────────
+    // If SUPERNODE_JOIN_SECRET is set, require a matching Bearer token so that
+    // only trusted peers can self-register. Without a secret the endpoint is
+    // unrestricted (backwards-compatible for single-host dev setups).
+    const JOIN_SECRET = process.env.SUPERNODE_JOIN_SECRET;
+    if (JOIN_SECRET) {
+      const authHeader = req.headers["authorization"] || "";
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+      if (!token || token !== JOIN_SECRET) {
+        res.writeHead(401);
+        res.end('{"error":"unauthorized"}');
+        return;
+      }
+    }
     let body = "";
     req.on("data", (c) => { body += c; if (body.length > 8192) req.destroy(); });
     req.on("end", () => {
@@ -431,9 +448,10 @@ const server = http.createServer((req, res) => {
           assigned: entry,
           mesh_size: peerRegistry.size + 1,
         }, 2));
-      } catch (e) {
+      } catch {
+        // Return a generic error — never leak internal exception details
         res.writeHead(400);
-        res.end(`{"error":"invalid json: ${(e as Error).message}"}`);
+        res.end('{"error":"invalid request body"}');
       }
     });
   } else if (url === "/metrics") {

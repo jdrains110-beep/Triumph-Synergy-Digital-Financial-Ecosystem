@@ -366,6 +366,9 @@ services:
       SUPERNODE_ROLE: primary
       SUPERNODE_ID: triumph-central-node
       SUPERNODE_SELF_URL: http://triumph-central-node:11626
+      # Shared secret for /supernode/join — prevents unauthenticated peer escalation.
+      # Must match SUPERNODE_JOIN_SECRET on all peer supernodes.
+      SUPERNODE_JOIN_SECRET: ${SUPERNODE_JOIN_SECRET:-}
     volumes:
       - triumph_central_data:/app/data/central
       - triumph_scp_data:/app/data/scp
@@ -422,6 +425,7 @@ services:
       APEX_AUTO_UPGRADE: "true"
       PI_NETWORK_MODE: ${PI_NETWORK_MODE:-mainnet}
       SCP_REQUIRE_PQ_SIGNATURE: "true"
+      SUPERNODE_JOIN_SECRET: ${SUPERNODE_JOIN_SECRET:-}
     expose:
       - "11626"
     networks:
@@ -1170,6 +1174,9 @@ services:
       WG_LISTEN_PORT: "51820"
       HUB_IP: "10.13.37.1"
       MESH_SUBNET: "10.13.37.0/24"
+      # API key required for sensitive mutation endpoints (/mesh/register).
+      # Set a strong random value in production.
+      MESH_API_KEY: ${MESH_API_KEY:-}
     ports:
       - "8200:8200"
       - "51820:51820/udp"

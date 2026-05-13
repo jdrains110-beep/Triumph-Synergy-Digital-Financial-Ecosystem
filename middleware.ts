@@ -99,9 +99,14 @@ export async function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://sdk.minepi.com https://app-cdn.minepi.com`,
+      "script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://sdk.minepi.com https://app-cdn.minepi.com",
       "script-src-attr 'none'",
-      "style-src 'self' 'unsafe-inline'",
+      // 'unsafe-inline' in style-src is intentional and safe: styles cannot
+      // execute JavaScript, so XSS via injected styles is not possible.
+      // It is retained because Next.js injects critical CSS as inline <style>
+      // tags at render time — removing it breaks the initial page render.
+      // The nonce covers any first-party <style> blocks we add explicitly.
+      `style-src 'self' 'unsafe-inline' 'nonce-${nonce}'`,
       "img-src 'self' data: blob: https://*.minepi.com https://developer-assets.minepi.com",
       "connect-src 'self' https://api.minepi.com https://*.minepi.com https://horizon.pi.network https://api.mainnet.minepi.com https://*.supabase.co wss://*.supabase.co",
       "frame-src 'self' https://sdk.minepi.com",

@@ -822,7 +822,7 @@ Important legal note: public source visibility on GitHub does not waive ownershi
 
 The entire ecosystem is wrapped in a defense-in-depth envelope enforced as code, not aspiration:
 
-- **Hardened CSP3** — per-request nonces + `strict-dynamic`, `script-src-attr 'none'`, `'unsafe-inline'` fully removed (`middleware.ts`)
+- **Hardened CSP3** — per-request nonces + `strict-dynamic`, `script-src-attr 'none'`, `'unsafe-inline'` removed from `script-src`; `style-src` retains `'unsafe-inline'` (required by Next.js critical CSS injection — styles cannot execute JavaScript) plus a per-request nonce for explicit style blocks (`middleware.ts`)
 - **Cross-Origin isolation** — COOP `same-origin` + COEP `credentialless` + CORP `same-origin` (Spectre / side-channel mitigation)
 - **HSTS preload (2y)**, NEL + Report-To, expanded Permissions-Policy
 - **Mandatory Idempotency-Key** on every mutating sensitive route — body-fingerprint conflict (409), 24h TTL ([`lib/security/idempotency.ts`](lib/security/idempotency.ts))
@@ -833,6 +833,8 @@ The entire ecosystem is wrapped in a defense-in-depth envelope enforced as code,
 - **Sovereign key custody** — `scripts/rotate-secrets.sh` generates 256-bit entropy for `PQ_RECEIPT_SEED`, Stellar seed, NextAuth secret, internal HMAC; optional `--push vercel`
 - **CSP violation sink** — browser reports auto-appended to audit chain (`/api/security/csp-report`)
 - **Boot wiring** — [`lib/security/boot.ts`](lib/security/boot.ts) wires audit chain to Supabase service-role client on every server process
+- **Supernode join auth** — `SUPERNODE_JOIN_SECRET` Bearer token gates `/supernode/join`; prevents unauthenticated escalation to APEX-QUANTUM-NODE ([`docker/central-node/bootstrap.ts`](docker/central-node/bootstrap.ts))
+- **Mesh register auth** — `MESH_API_KEY` Bearer token gates `/mesh/register`; prevents unauthenticated WireGuard peer registration and PSK retrieval ([`docker/sovereign-mesh/mesh_hub.py`](docker/sovereign-mesh/mesh_hub.py))
 
 **What an attacker must defeat to forge a single fraudulent receipt:**
 1. Steal `PQ_RECEIPT_SEED` (rotated quarterly) **AND**

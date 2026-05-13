@@ -38,11 +38,12 @@ import asyncio
 import json
 import logging
 import os
+import secrets
 import subprocess
 import time
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import PlainTextResponse, JSONResponse
 from prometheus_client import Counter, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from pydantic import BaseModel
@@ -60,6 +61,22 @@ MESH_SUBNET  = os.getenv("MESH_SUBNET", "10.13.37.0/24")
 KEY_DIR      = "/app/keys"
 PORT         = int(os.getenv("PORT", "8200"))
 START_TIME   = time.time()
+
+# API key for sensitive mutation endpoints (register, rotate-psk).
+# If MESH_API_KEY is not set the endpoints are protected only by network isolation.
+# In production, always set a strong random value.
+MESH_API_KEY = os.getenv("MESH_API_KEY", "")
+
+
+def _check_api_key(authorization: Optional[str]) -> None:
+    """Raise HTTP 401 if MESH_API_KEY is set and the Authorization header doesn't match."""
+    if not MESH_API_KEY:
+        return  # no key configured — rely on network isolation
+    token = ""
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]
+    if not secrets.compare_digest(token, MESH_API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 # ── Mesh peer registry ────────────────────────────────────────────────────────
 MESH_PEERS = {
@@ -296,11 +313,13 @@ class PeerRegistration(BaseModel):
 
 
 @app.post("/mesh/register")
-async def register_peer(reg: PeerRegistration):
+async def register_peer(reg: PeerRegistration, authorization: Optional[str] = Header(default=None)):
     """
     Register a new peer and return its WireGuard client config.
+    Requires Authorization: Bearer <MESH_API_KEY> when MESH_API_KEY is set.
     The client config includes hub public key + assigned mesh IP.
     """
+    _check_api_key(authorization)
     mesh_requests.labels(endpoint="/mesh/register").inc()
     hub_pub = _read_key("hub_public.key")
     if not hub_pub:
