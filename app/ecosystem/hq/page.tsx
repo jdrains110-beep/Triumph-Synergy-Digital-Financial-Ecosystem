@@ -16,6 +16,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 import {
   HQ_DEED_NUMBER,
   HQ_GENESIS_DEED,
@@ -43,12 +44,15 @@ export default function HQDeedPage() {
     <div className="mx-auto max-w-3xl space-y-6 p-4 md:p-8">
 
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Building2 className="h-6 w-6 text-violet-400 shrink-0" />
-        <div>
-          <h1 className="text-xl font-bold">Triumph Synergy HQ</h1>
-          <p className="text-sm text-muted-foreground">Allodial Deed — Public Broadcast</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Building2 className="h-6 w-6 text-violet-400 shrink-0" />
+          <div>
+            <h1 className="text-xl font-bold">Triumph Synergy HQ</h1>
+            <p className="text-sm text-muted-foreground">Allodial Deed — Public Broadcast</p>
+          </div>
         </div>
+        <PiSignInButton />
       </div>
 
       {/* Status Badges */}

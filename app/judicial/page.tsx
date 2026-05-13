@@ -3,6 +3,7 @@
 // Superior Judicial Analysis Dashboard — Florida Courtroom Monitoring & Transparency
 
 import React, { useState, useEffect, useCallback } from "react";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 import type {
   Case,
   JudicialAnalysisReport,
@@ -1158,7 +1159,10 @@ export default function JudicialDashboard() {
                 evidence accountability • immutable ledger
               </p>
             </div>
-            <ServiceHealth health={serviceHealth} />
+            <div className="flex items-center gap-3">
+              <PiSignInButton />
+              <ServiceHealth health={serviceHealth} />
+            </div>
           </div>
           <p className="text-xs text-gray-400 mt-2">
             Powered by Triumph Synergy • Florida-first deployment • Nothing hidden — full transparency enforced

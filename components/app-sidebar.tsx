@@ -12,6 +12,7 @@ import {
   getChatHistoryPaginationKey,
   SidebarHistory,
 } from "@/components/sidebar-history";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { Button } from "@/components/ui/button";
 import {
@@ -118,7 +119,12 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarContent>
           <SidebarHistory user={user} />
         </SidebarContent>
-        <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+        <SidebarFooter>
+          <div className="px-2 pb-1">
+            <PiSignInButton className="w-full justify-center" />
+          </div>
+          {user && <SidebarUserNav user={user} />}
+        </SidebarFooter>
       </Sidebar>
 
       <AlertDialog

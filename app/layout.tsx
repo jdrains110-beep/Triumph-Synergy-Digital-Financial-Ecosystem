@@ -181,10 +181,11 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
             console.log('[Pi SDK] Pi.init() completed');
             window.__piInitialization.status = 'initialized';
             
-            // Try to authenticate if in Pi context
+            // Auto-authenticate on load if in Pi Browser context.
+            // Use 'username' scope only — 'payments' is requested at payment time.
             if (isPiBrowser) {
-              return window.Pi.authenticate(['username', 'payments'], function(payment) {
-                console.log('[Pi SDK] Incomplete payment:', payment);
+              return window.Pi.authenticate(['username'], function(payment) {
+                console.log('[Pi SDK] Incomplete payment found during init:', payment);
               });
             }
             return Promise.resolve(null);
@@ -196,6 +197,18 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
               window.__piInitialization.user = auth.user;
               window.__piInitialization.status = 'ready';
               window.dispatchEvent(new CustomEvent('piReady', { detail: auth }));
+              // Establish a server-side session so backend routes can trust this Pioneer.
+              // GET /v2/me validation happens inside /api/pi/auth — no API key required.
+              fetch('/api/pi/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accessToken: auth.accessToken }),
+              }).then(function(r) {
+                if (r.ok) console.log('[Pi SDK] \u2713 Backend session established for', auth.user ? auth.user.username : 'user');
+                else console.warn('[Pi SDK] \u26a0 Backend session failed:', r.status);
+              }).catch(function(e) {
+                console.warn('[Pi SDK] \u26a0 Backend session network error:', e);
+              });
             } else {
               console.log('[Pi SDK] Initialized (not authenticated - expected in non-Pi contexts)');
               window.__piInitialization.status = 'ready';

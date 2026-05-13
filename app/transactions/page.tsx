@@ -2,6 +2,7 @@
 // Transaction Processing Page - User-to-App Payments
 
 import type { Metadata } from "next";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 import { TransactionProcessor } from "@/components/transaction-processor";
 
 export const metadata: Metadata = {
@@ -15,12 +16,17 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="space-y-2">
-            <h1 className="font-bold text-4xl">Transaction Processing</h1>
-            <p className="text-blue-100">
-              Process user-to-app payments with server-side approval and
-              blockchain settlement
-            </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="font-bold text-4xl">Transaction Processing</h1>
+              <p className="text-blue-100">
+                Process user-to-app payments with server-side approval and
+                blockchain settlement
+              </p>
+            </div>
+            <div className="shrink-0 pt-1">
+              <PiSignInButton />
+            </div>
           </div>
         </div>
       </div>

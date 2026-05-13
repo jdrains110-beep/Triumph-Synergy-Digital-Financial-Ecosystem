@@ -54,6 +54,7 @@ import {
     buildPositionStats,
     type SovereignSector,
 } from "@/lib/programs/sovereign-positions";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -163,6 +164,7 @@ export default function SovereignPositionsPage() {
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         <h1 className="text-2xl font-bold">Sovereign Positions Registry</h1>
+                        <PiSignInButton />
                         <Badge variant="outline" className="border-red-500/50 text-red-400 text-xs">APEX QUANTUM</Badge>
                         <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-xs">PI KYC REQUIRED</Badge>
                         <Badge variant="outline" className="border-amber-500/50 text-amber-400 text-xs">{stats.totalOpen.toLocaleString()} OPEN SLOTS</Badge>

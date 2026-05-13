@@ -50,6 +50,7 @@ import {
     PI_RATE_INTERNAL,
     SECTION8_WAIT_YEARS_AVG,
 } from "@/lib/programs/sovereign-housing";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -320,6 +321,7 @@ export default function SovereignHousingPage() {
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         <h1 className="text-2xl font-bold">Sovereign Housing Platform</h1>
+                        <PiSignInButton />
                         <Badge variant="outline" className="border-red-500/50 text-red-400 text-xs">APEX QUANTUM</Badge>
                         <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-xs">5 RIVALS LIVE</Badge>
                         <Badge variant="outline" className="border-amber-500/50 text-amber-400 text-xs">{totalLoopholes} LOOPHOLES</Badge>

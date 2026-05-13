@@ -70,6 +70,7 @@ import {
   SHIFTSMART_PLATFORM_FEE_PCT,
   PARTSGEEK_MARKUP_AVG_PCT,
 } from "@/lib/programs/sovereign-delivery";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -258,6 +259,7 @@ export default function SovereignDeliveryPage() {
           <h1 className="bg-gradient-to-r from-orange-400 via-yellow-300 to-orange-400 bg-clip-text text-4xl font-black text-transparent sm:text-5xl">
             Sovereign Delivery &amp; Gig Economy Platform
           </h1>
+          <PiSignInButton />
           <p className="mt-2 text-lg font-semibold text-orange-200">
             SPA · SLMN · SFDA · SRA · SPSA · SHHA · SSLA · SGDA
           </p>

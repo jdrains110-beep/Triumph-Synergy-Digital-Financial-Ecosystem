@@ -89,6 +89,7 @@ import {
     SEED_PARTICIPANTS,
     buildSportsHubStats,
 } from "@/lib/programs/sovereign-sports";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -279,6 +280,7 @@ export default function SovereignSportsHubPage() {
                     <h1 className="mb-2 text-5xl font-black tracking-tight">
                         <span className="text-green-400">Sovereign Sports Hub</span>
                     </h1>
+                    <PiSignInButton />
                     <p className="text-2xl font-bold text-green-300/80 mb-3">
                         The Ultimate Global Sports Platform — YouTube · TikTok · Ticketmaster · ESPN · CAA · Wall Street — ALL OBSOLETE
                     </p>

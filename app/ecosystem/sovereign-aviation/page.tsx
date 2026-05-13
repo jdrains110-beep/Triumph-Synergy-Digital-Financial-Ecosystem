@@ -22,6 +22,7 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -198,6 +199,7 @@ export default function SovereignAviationPage() {
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <span className="text-3xl">✈️</span>
                                 <h1 className="text-2xl font-extrabold text-white">{BRAND_NAME}</h1>
+                                <PiSignInButton />
                                 <Badge className="bg-yellow-500/20 border-yellow-400/40 text-yellow-300 text-xs">
                                     spirit.pi
                                 </Badge>

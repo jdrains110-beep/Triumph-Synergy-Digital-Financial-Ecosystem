@@ -79,6 +79,7 @@ import {
     AMM_PLATFORM_FEE_PCT,
     AMM_LP_FEE_PCT,
 } from "@/lib/programs/sovereign-pidex";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -255,6 +256,7 @@ export default function SovereignPiDexPage() {
                     <h1 className="mb-2 text-5xl font-black tracking-tight">
                         <span className="text-yellow-400">Sovereign Pi-DEX</span>
                     </h1>
+                    <PiSignInButton />
                     <p className="text-2xl font-bold text-yellow-300/80 mb-3">
                         The Ultimate Decentralized Exchange — Superior to Wall Street, NYSE, Binance & All CEXs
                     </p>

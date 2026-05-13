@@ -23,6 +23,7 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -211,6 +212,7 @@ export default function SovereignWawaPage() {
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <span className="text-3xl">⛽</span>
                                 <h1 className="text-2xl font-extrabold text-white">{BRAND_NAME}</h1>
+                                <PiSignInButton />
                                 <Badge className="bg-red-500/20 border-red-400/40 text-red-300 text-xs">
                                     wawa.pi
                                 </Badge>

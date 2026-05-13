@@ -36,6 +36,7 @@ import {
     RefreshCw,
     BrainCircuit,
 } from "lucide-react";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 // ── Docker SAIB Status Type ───────────────────────────────────────────────────
 
@@ -297,6 +298,7 @@ export default function SovereignAIBotPage() {
                             <h1 className="text-lg font-bold text-white tracking-tight">
                                 Triumph Synergy Sovereign AI Bot
                             </h1>
+                            <PiSignInButton />
                             <p className="text-xs text-neutral-500 font-mono">
                                 SAIB • TRIUMPH-SAIB-v1 •{" "}
                                 <span className="text-red-400 font-bold">

@@ -7,6 +7,7 @@ import { CreditDashboard } from "@/components/credit-dashboard";
 import { DualValueDashboard } from "@/components/dual-value-dashboard";
 import { SustainedValueDashboard } from "@/components/sustained-value-dashboard";
 import { TokenizationDashboard } from "@/components/tokenization-dashboard";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 export default function TokenizationPage() {
   return (

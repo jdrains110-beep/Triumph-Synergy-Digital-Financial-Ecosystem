@@ -74,6 +74,7 @@ import {
     MPAA_CINEMA_TICKET_INFLATION_2005_2026,
     AVG_LAND_ZONING_COST_USD,
 } from "@/lib/programs/sovereign-commerce-regulation";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -167,6 +168,7 @@ export default function SovereignCommerceRegulationPage() {
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         <h1 className="text-2xl font-bold">Sovereign Commerce Regulation Authority</h1>
+                        <PiSignInButton />
                         <Badge variant="outline" className="border-red-500/50 text-red-400 text-xs">APEX QUANTUM</Badge>
                         <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-xs">8 SECTORS LIVE</Badge>
                         <Badge variant="outline" className="border-amber-500/50 text-amber-400 text-xs">{ALL_COMMERCE_LOOPHOLES.length} LOOPHOLES</Badge>

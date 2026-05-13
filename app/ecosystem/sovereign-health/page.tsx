@@ -66,6 +66,7 @@ import {
     MIDWIFE_COST_USD,
     MEDICARE_WAIT_DAYS_AVG,
 } from "@/lib/programs/sovereign-health";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 // ── Program registry ───────────────────────────────────────────────────────────
 
@@ -310,6 +311,7 @@ export default function SovereignHealthPage() {
                         <br />
                         <span className="text-white">Hospital Platform</span>
                     </h1>
+                    <PiSignInButton />
                     <p className="text-white/60 max-w-3xl text-sm sm:text-base leading-relaxed mb-6">
                         Five Pi-powered sovereign authorities rendering Medicare, Medicaid, CMS nursing homes, the hospital
                         birth industry, FDA nutrition gatekeeping, and employer-tied health insurance permanently obsolete.

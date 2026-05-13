@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { PiPaymentButton } from "@/components/PiPaymentButton";
 import { PAYMENT_WALLET_ADDRESS } from "@/lib/tokenization/hq-genesis-deed";
+import { PiSignInButton } from "@/components/pi-sign-in-button";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -193,6 +194,7 @@ export default function CreditDisputePage() {
         <div className="flex items-center gap-2">
           <Scale className="h-6 w-6 text-amber-400 shrink-0" />
           <h1 className="text-xl font-bold">Superior FCRA §611 Dispute</h1>
+          <PiSignInButton />
         </div>
         <p className="text-sm text-muted-foreground">
           File legally superior bureau disputes backed by the Trump Digital Finance Legislative Stack.
