@@ -1258,6 +1258,7 @@ networks:
     ipam:
       config:
         - subnet: 10.13.37.0/24
+          gateway: 10.13.37.254
 
 # ==========================================================================
 # SECRETS — mounted into containers at /run/secrets/<name>
