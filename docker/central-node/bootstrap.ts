@@ -12,6 +12,7 @@
 // License: PiOS
 
 import http from "node:http";
+import crypto from "node:crypto";
 import { initializePiTransactionSystem, getPiTransactionSystemStatus, shutdownPiTransactionSystem } from "../../lib/pi-transaction/index";
 
 const HEALTH_PORT = 11626;
@@ -49,7 +50,30 @@ const CENTRAL_KEY = process.env.CENTRAL_NODE_PUBLIC_KEY || "GA6Z5STFJZPBDQT5VZSD
 
 console.log(`[Central Node] Horizon URL: ${HORIZON_URL} (PI_NODE_HOST=${PI_NODE_HOST ?? "unset"})`);
 
-// ── APEX-QUANTUM PEER SUPERNODE MESH ───────────────────────────────────────
+// ── Production guard: refuse to start without a join secret ─────────────────
+// An unguarded /supernode/join endpoint in a live deployment lets any caller
+// self-register as an APEX-QUANTUM-NODE.  Fail loudly so operators are forced
+// to configure the secret before traffic reaches the service.
+if (!process.env.SUPERNODE_JOIN_SECRET && process.env.NODE_ENV === "production") {
+  console.error(
+    "❌ FATAL: SUPERNODE_JOIN_SECRET must be set in production. " +
+    "An unset secret leaves /supernode/join unauthenticated. " +
+    "Generate one with:  openssl rand -hex 32"
+  );
+  process.exit(1);
+}
+
+// ── Timing-safe secret comparison ───────────────────────────────────────────
+// Hashes both strings to SHA-256 digests (constant length) before comparing
+// with timingSafeEqual, so neither the secret length nor a mismatch position
+// is leaked via timing.
+function timingSafeSecretEqual(a: string, b: string): boolean {
+  const ha = crypto.createHash("sha256").update(a).digest();
+  const hb = crypto.createHash("sha256").update(b).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
+
 // Multi-supernode topology: this node + N peer supernodes that mutually
 // power each other. Any node that connects via /supernode/join is upgraded
 // to apex-quantum status and added to the peer registry, boosting the mesh.
@@ -123,14 +147,17 @@ async function pollAllPeers(): Promise<void> {
 // Mutually announce ourselves to seed peers — they'll register us back
 async function announceToPeers(): Promise<void> {
   const selfUrl = process.env.SUPERNODE_SELF_URL || `http://${process.env.HOSTNAME || SUPERNODE_ID}:11626`;
+  const JOIN_SECRET = process.env.SUPERNODE_JOIN_SECRET;
   for (const peer of peerRegistry.values()) {
     if (peer.role !== "peer") continue;
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 5_000);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (JOIN_SECRET) headers["Authorization"] = `Bearer ${JOIN_SECRET}`;
       await fetch(`${peer.url.replace(/\/$/, "")}/supernode/join`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         signal: ctrl.signal,
         body: JSON.stringify({
           id: SUPERNODE_ID, url: selfUrl, role: SUPERNODE_ROLE,
@@ -409,6 +436,20 @@ const server = http.createServer((req, res) => {
       peers: [...peerRegistry.values()],
     }, 2));
   } else if (url === "/supernode/join" && req.method === "POST") {
+    // ── Auth guard ────────────────────────────────────────────────────────────
+    // If SUPERNODE_JOIN_SECRET is set, require a matching Bearer token so that
+    // only trusted peers can self-register. Without a secret the endpoint is
+    // unrestricted (backwards-compatible for single-host dev setups).
+    const JOIN_SECRET = process.env.SUPERNODE_JOIN_SECRET;
+    if (JOIN_SECRET) {
+      const authHeader = req.headers["authorization"] || "";
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+      if (!timingSafeSecretEqual(token, JOIN_SECRET)) {
+        res.writeHead(401);
+        res.end('{"error":"unauthorized"}');
+        return;
+      }
+    }
     let body = "";
     req.on("data", (c) => { body += c; if (body.length > 8192) req.destroy(); });
     req.on("end", () => {
@@ -431,9 +472,10 @@ const server = http.createServer((req, res) => {
           assigned: entry,
           mesh_size: peerRegistry.size + 1,
         }, 2));
-      } catch (e) {
+      } catch {
+        // Return a generic error — never leak internal exception details
         res.writeHead(400);
-        res.end(`{"error":"invalid json: ${(e as Error).message}"}`);
+        res.end('{"error":"invalid request body"}');
       }
     });
   } else if (url === "/metrics") {

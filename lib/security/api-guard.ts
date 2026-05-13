@@ -104,7 +104,7 @@ export async function secureRoute(
 
   // Rate limiting
   if (rl) {
-    const { allowed, remaining } = rateLimitByIP(request, rl.endpoint, rl.max, rl.windowMs);
+    const { allowed, remaining } = await rateLimitByIPAsync(request, rl.endpoint, rl.max, rl.windowMs);
     if (!allowed) {
       return NextResponse.json(
         { error: "Too many requests" },
@@ -172,6 +172,56 @@ export function rateLimitByIP(
     request.headers.get("x-real-ip") ||
     "unknown";
   return rateLimit(`${endpoint}:${ip}`, maxRequests, windowMs);
+}
+
+// ============================================================================
+// RATE LIMITING — Redis-backed (distributed, multi-instance safe)
+//
+// Uses Redis INCR + PEXPIRE to implement an atomic fixed-window counter that
+// is shared across all app instances.  Falls back transparently to the
+// in-memory version when Redis is unavailable.
+// ============================================================================
+
+/**
+ * Async rate-limit check backed by Redis.
+ * Falls back to the in-memory store if Redis throws.
+ */
+export async function rateLimitAsync(
+  key: string,
+  maxRequests: number,
+  windowMs: number,
+): Promise<{ allowed: boolean; remaining: number }> {
+  try {
+    const { redis } = await import("@/lib/redis");
+    const redisKey = `rl:${key}`;
+    const count = await redis.incr(redisKey);
+    if (count === 1) {
+      // First hit in a new window — set TTL (fire-and-forget; incr already ran)
+      await redis.pExpire(redisKey, windowMs);
+    }
+    const remaining = Math.max(0, maxRequests - count);
+    return { allowed: count <= maxRequests, remaining };
+  } catch {
+    // Redis unavailable — fall back to per-instance in-memory counter
+    return rateLimit(key, maxRequests, windowMs);
+  }
+}
+
+/**
+ * Async per-IP rate-limit check backed by Redis (with in-memory fallback).
+ * Use this in async route handlers instead of the synchronous `rateLimitByIP`.
+ */
+export async function rateLimitByIPAsync(
+  request: NextRequest,
+  endpoint: string,
+  maxRequests = 60,
+  windowMs = 60_000,
+): Promise<{ allowed: boolean; remaining: number }> {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  return rateLimitAsync(`${endpoint}:${ip}`, maxRequests, windowMs);
 }
 
 // ============================================================================

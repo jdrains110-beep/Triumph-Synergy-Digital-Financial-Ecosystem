@@ -4,8 +4,17 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimitByIPAsync, safeErrorResponse } from "@/lib/security/api-guard";
+import { appendAuditEvent } from "@/lib/security/audit-chain";
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 30 swaps per minute per IP (Redis-backed, distributed)
+  const rl = await rateLimitByIPAsync(request, "dex-swap", 30, 60_000);
+  if (!rl.allowed) {
+    void appendAuditEvent("ratelimit.tripped", { route: "dex-swap" });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     const { tokenAId, tokenBId, amountA, minAmountOut } = await request.json();
 
@@ -66,8 +75,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Swap error:", error);
+  } catch (err) {
+    console.error("Swap error:", safeErrorResponse(err));
     return NextResponse.json({ error: "Swap failed" }, { status: 500 });
   }
 }

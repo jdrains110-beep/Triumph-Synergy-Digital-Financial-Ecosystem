@@ -5,6 +5,7 @@
 
 import crypto from "crypto";
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimitByIPAsync } from "@/lib/security/api-guard";
 
 // ============================================================================
 // TYPES
@@ -134,6 +135,12 @@ async function processPaymentCompletion(
 // ============================================================================
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // Rate limit: 120 webhook deliveries per minute per IP (protects against floods)
+  const rl = await rateLimitByIPAsync(request, "webhook-pi", 120, 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     const payload = await request.text();
     const signature = request.headers.get("x-pi-signature") || "";

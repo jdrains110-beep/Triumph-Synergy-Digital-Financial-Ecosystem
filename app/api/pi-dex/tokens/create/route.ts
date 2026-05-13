@@ -4,8 +4,17 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimitByIPAsync, safeErrorResponse } from "@/lib/security/api-guard";
+import { appendAuditEvent } from "@/lib/security/audit-chain";
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 10 token creations per minute per IP (Redis-backed, distributed)
+  const rl = await rateLimitByIPAsync(request, "dex-tokens-create", 10, 60_000);
+  if (!rl.allowed) {
+    void appendAuditEvent("ratelimit.tripped", { route: "dex-tokens-create" });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     const {
       name,
@@ -53,8 +62,8 @@ export async function POST(request: NextRequest) {
     // const savedToken = await db.tokens.create(token);
 
     return NextResponse.json(token, { status: 201 });
-  } catch (error) {
-    console.error("Token creation error:", error);
+  } catch (err) {
+    console.error("Token creation error:", safeErrorResponse(err));
     return NextResponse.json(
       { error: "Failed to create token" },
       { status: 500 }

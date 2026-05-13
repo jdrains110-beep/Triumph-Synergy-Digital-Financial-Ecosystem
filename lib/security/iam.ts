@@ -389,13 +389,17 @@ export const securityConfig = {
     csp: {
       enabled: true,
       directives: {
+        // Documentation-only snapshot of the policy enforced in middleware.ts.
+        // The actual nonce is generated per-request there; the string below is
+        // a placeholder comment, not a value that gets applied directly.
         "default-src": ["'self'"],
-        "script-src": ["'self'", "'unsafe-inline'"],
+        "script-src": ["'self'", "'nonce-GENERATED_PER_REQUEST'", "'strict-dynamic'"],
         "style-src": ["'self'", "'unsafe-inline'"],
         "img-src": ["'self'", "data:", "https:"],
         "font-src": ["'self'", "data:"],
         "connect-src": ["'self'"],
         "frame-ancestors": ["'none'"],
+        "script-src-attr": ["'none'"],
       },
     },
 
@@ -501,9 +505,27 @@ export class IAMService {
     return true;
   }
 
-  private async getUserRoles(_userId: string): Promise<string[]> {
-    // Implementation would fetch from database
-    return ["customer"];
+  private async getUserRoles(userId: string): Promise<string[]> {
+    try {
+      // Dynamic import keeps Supabase out of client bundles — this method is
+      // only reached from async server-side code paths (API routes, RSC).
+      const { getSupabaseAdmin } = await import("@/lib/supabase");
+      const admin = getSupabaseAdmin();
+      const { data, error } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      if (error) {
+        // Supabase reachable but returned an error — least-privilege default
+        console.warn("[IAM] getUserRoles error:", error.message);
+        return ["customer"];
+      }
+      if (!data?.length) return ["customer"];
+      return data.map((r: { role: string }) => r.role);
+    } catch {
+      // Supabase not configured or network unreachable — default to least privilege
+      return ["customer"];
+    }
   }
 
   // Generate API key

@@ -24,6 +24,8 @@ the codebase as enforced code, not aspiration.
 | L6 — Tamper evidence | SHA-256 hash chain over all security events; append-only via DB trigger; verifiable end-to-end | `lib/security/audit-chain.ts` |
 | L7 — Anomaly detection | Rolling-window counters → webhook on auth-burst, ratelimit-storm, replay-block, amount-mismatch, CSP-violation flood | `lib/security/anomaly-monitor.ts` |
 | L8 — Key custody | Rotation script generates 256-bit entropy for PQ seed, Stellar seed, NextAuth secret, internal HMAC; Vercel push optional | `scripts/rotate-secrets.sh` |
+| L9 — Supernode auth | `SUPERNODE_JOIN_SECRET` Bearer token gates `/supernode/join` — prevents unauthenticated peer escalation to APEX-QUANTUM-NODE status | `docker/central-node/bootstrap.ts` |
+| L10 — Mesh auth | `MESH_API_KEY` Bearer token gates `/mesh/register` — prevents unauthenticated WireGuard peer registration and PSK retrieval | `docker/sovereign-mesh/mesh_hub.py` |
 
 ---
 

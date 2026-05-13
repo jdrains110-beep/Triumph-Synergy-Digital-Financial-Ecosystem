@@ -8,10 +8,13 @@
  *   - replay attacks across compromised TLS sessions
  *   - duplicate Stellar tx submissions
  *
- * Storage tier: in-memory cache (per-instance) with optional Supabase
- * write-through for cross-instance coherence. The header MUST be a UUIDv4
- * or 32+ hex chars; otherwise a 400 is returned (forces clients to be
- * deterministic).
+ * Storage tier: Redis primary (shared across all app instances) with automatic
+ * in-memory fallback when Redis is unavailable. The Redis key is the same
+ * SHA-256-namespaced hash as the in-memory key, stored as a JSON blob with
+ * EX ttl so it self-expires without a GC loop.
+ *
+ * The Idempotency-Key header MUST be a UUIDv4 or 32+ hex chars; otherwise a
+ * 400 is returned (forces clients to be deterministic).
  */
 
 import { createHash } from "node:crypto";
@@ -25,22 +28,23 @@ interface CachedResponse {
   bodyHash: string;
 }
 
-const CACHE = new Map<string, CachedResponse>();
+// In-memory fallback — used when Redis is unavailable
+const FALLBACK_CACHE = new Map<string, CachedResponse>();
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000; // 24h
-const MAX_CACHE_ENTRIES = 10_000;
+const MAX_FALLBACK_ENTRIES = 10_000;
 const KEY_PATTERN = /^[a-zA-Z0-9_\-]{16,128}$/;
 
-// Periodic GC
+// Periodic GC for the in-memory fallback only
 if (typeof globalThis !== "undefined" && !(globalThis as any).__idem_gc) {
   (globalThis as any).__idem_gc = setInterval(() => {
     const now = Date.now();
-    for (const [k, v] of CACHE) if (v.expiresAt < now) CACHE.delete(k);
-    if (CACHE.size > MAX_CACHE_ENTRIES) {
-      const excess = CACHE.size - MAX_CACHE_ENTRIES;
+    for (const [k, v] of FALLBACK_CACHE) if (v.expiresAt < now) FALLBACK_CACHE.delete(k);
+    if (FALLBACK_CACHE.size > MAX_FALLBACK_ENTRIES) {
+      const excess = FALLBACK_CACHE.size - MAX_FALLBACK_ENTRIES;
       let i = 0;
-      for (const k of CACHE.keys()) {
+      for (const k of FALLBACK_CACHE.keys()) {
         if (i++ >= excess) break;
-        CACHE.delete(k);
+        FALLBACK_CACHE.delete(k);
       }
     }
   }, 60_000);
@@ -56,6 +60,33 @@ function bodyFingerprint(body: string): string {
   return createHash("sha256").update(body).digest("hex");
 }
 
+// ── Redis helpers (fail-safe) ──────────────────────────────────────────────
+
+async function redisGet(key: string): Promise<CachedResponse | null> {
+  try {
+    const { redis } = await import("@/lib/redis");
+    const cachedJson = await redis.get(`idem:${key}`);
+    if (!cachedJson) return null;
+    return JSON.parse(cachedJson) as CachedResponse;
+  } catch {
+    return null;
+  }
+}
+
+async function redisSet(
+  key: string,
+  value: CachedResponse,
+  ttlMs: number,
+): Promise<void> {
+  try {
+    const { redis } = await import("@/lib/redis");
+    const ttlSec = Math.max(1, Math.ceil(ttlMs / 1000));
+    await redis.set(`idem:${key}`, JSON.stringify(value), { EX: ttlSec });
+  } catch {
+    // Redis unavailable — value was already written to FALLBACK_CACHE
+  }
+}
+
 export interface IdempotencyOptions {
   ttlMs?: number;
   /** Stable scope per caller (user id, wallet, or IP). Default: anon. */
@@ -68,6 +99,9 @@ export interface IdempotencyOptions {
  * Wrap a Next.js route handler in idempotency protection.
  * The handler is only invoked on first call; subsequent calls within TTL
  * return the cached response.
+ *
+ * Redis is the primary store (shared across instances).  Falls back to an
+ * in-memory Map when Redis is unreachable so the API keeps working.
  */
 export async function withIdempotency(
   request: Request,
@@ -104,9 +138,13 @@ export async function withIdempotency(
   const fp = bodyFingerprint(rawBody);
 
   const cacheKey = namespacedKey(route, key, scope);
-  const cached = CACHE.get(cacheKey);
+  const now = Date.now();
 
-  if (cached && cached.expiresAt > Date.now()) {
+  // ── Cache lookup: Redis first, then in-memory fallback ────────────────────
+  let cached: CachedResponse | null = await redisGet(cacheKey);
+  if (!cached) cached = FALLBACK_CACHE.get(cacheKey) ?? null;
+
+  if (cached && cached.expiresAt > now) {
     if (strict && cached.bodyHash !== fp) {
       return NextResponse.json(
         {
@@ -137,13 +175,16 @@ export async function withIdempotency(
 
   // Only cache 2xx and 4xx (not 5xx — those should be retryable)
   if (response.status < 500) {
-    CACHE.set(cacheKey, {
+    const entry: CachedResponse = {
       status: response.status,
       body: text,
       headers: headersObj,
-      expiresAt: Date.now() + ttl,
+      expiresAt: now + ttl,
       bodyHash: fp,
-    });
+    };
+    // Write to both stores — Redis is primary; fallback covers Redis outages
+    FALLBACK_CACHE.set(cacheKey, entry);
+    await redisSet(cacheKey, entry, ttl);
   }
 
   return new Response(text, {
@@ -155,3 +196,4 @@ export async function withIdempotency(
     },
   });
 }
+

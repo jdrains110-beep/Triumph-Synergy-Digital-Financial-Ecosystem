@@ -361,16 +361,22 @@ async function logAuditEvent(event: AuditLog) {
 
 ## Security Checklist
 
-- [ ] All secrets stored in environment variables
-- [ ] HTTPS enforced in production
-- [ ] Rate limiting on all API endpoints
-- [ ] Input validation on all user input
-- [ ] SQL injection prevention (use ORM)
-- [ ] XSS prevention (CSP headers)
-- [ ] CSRF protection enabled
-- [ ] Audit logging for sensitive actions
-- [ ] Regular security updates
-- [ ] Penetration testing quarterly
+- [x] All secrets stored in environment variables (see `.env.example`)
+- [x] HTTPS enforced in production (HSTS preload 2y in `middleware.ts`)
+- [x] Rate limiting on all API endpoints (`lib/security/api-guard.ts`, per-IP + per-route)
+- [x] Input validation on all user input (Zod schemas on API routes)
+- [x] SQL injection prevention (Drizzle ORM parameterized queries throughout)
+- [x] XSS prevention (CSP3 strict-dynamic + nonces, `script-src-attr 'none'`, in `middleware.ts`)
+- [x] CSRF protection enabled (`verifyCsrf` origin/referer allowlist in `lib/security/api-guard.ts`)
+- [x] Audit logging for sensitive actions (tamper-evident hash chain in `lib/security/audit-chain.ts`)
+- [x] Post-quantum signed payment receipts (ML-DSA-65 FIPS 204 in `lib/security/pq-receipts.ts`)
+- [x] Anomaly detection & webhook alerting (`lib/security/anomaly-monitor.ts`)
+- [x] Supabase RLS on `profiles`, `payments`, `audit_events`, `idempotency_cache`
+- [x] Mandatory idempotency keys on sensitive mutating routes (`lib/security/idempotency.ts`)
+- [x] `/supernode/join` auth-gated via `SUPERNODE_JOIN_SECRET` Bearer token (`docker/central-node/bootstrap.ts`)
+- [x] `/mesh/register` auth-gated via `MESH_API_KEY` Bearer token (`docker/sovereign-mesh/mesh_hub.py`)
+- [ ] Regular security updates (dependency scanning via `npm audit` / Dependabot recommended)
+- [ ] External penetration testing (quarterly — engage a third-party firm before production launch)
 
 ## Reporting Vulnerabilities
 

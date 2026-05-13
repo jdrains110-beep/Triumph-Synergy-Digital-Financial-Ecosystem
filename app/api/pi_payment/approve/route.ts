@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { rateLimitByIP, isValidId, safeErrorResponse } from "@/lib/security/api-guard";
+import { rateLimitByIPAsync, isValidId, safeErrorResponse } from "@/lib/security/api-guard";
 import { withIdempotency } from "@/lib/security/idempotency";
 import { signReceipt } from "@/lib/security/pq-receipts";
 import { appendAuditEvent } from "@/lib/security/audit-chain";
@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
 
 async function handle(req: NextRequest) {
   try {
-    // Rate limit: 30 approvals per minute per IP
-    const rl = rateLimitByIP(req, "pi-payment-approve", 30, 60_000);
+    // Rate limit: 30 approvals per minute per IP (Redis-backed, distributed)
+    const rl = await rateLimitByIPAsync(req, "pi-payment-approve", 30, 60_000);
     if (!rl.allowed) {
       void appendAuditEvent("ratelimit.tripped", { route: "approve" });
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
