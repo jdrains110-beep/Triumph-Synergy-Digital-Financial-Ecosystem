@@ -66,7 +66,7 @@ export const realPi = {
       // Create payment - this opens Pi Browser wallet dialog
       return new Promise((resolve) => {
         // ============================================
-        // MAINNET-ONLY MANDATE — Pi Network + Protocol 23
+        // MAINNET-ONLY MANDATE — Pi Network + Protocol 24
         // Every accepted production hostname maps to mainnet.
         // Unknown hostnames also default to mainnet so payments
         // never route through testnet rails.

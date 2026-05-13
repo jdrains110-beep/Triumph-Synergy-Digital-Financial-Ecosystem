@@ -6,7 +6,7 @@
 # alive. SAIB cannot restart its own container from inside, so this
 # watchdog acts as the external resurrection authority.
 #
-# Mainnet-only mandate — Pi Network + Stellar Protocol 23.
+# Mainnet-only mandate — Pi Network + Stellar Protocol 24.
 # ==============================================================================
 FROM python:3.13-slim
 

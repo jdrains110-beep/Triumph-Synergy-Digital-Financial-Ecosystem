@@ -11,7 +11,7 @@
 #   • Vercel + GitHub auto-remediation credentials
 #   • Self-resurrection sidecar Deployment (saib-watchdog)
 #
-# Mainnet-only mandate: Pi Network + Stellar Protocol 23. The single
+# Mainnet-only mandate: Pi Network + Stellar Protocol 24. The single
 # permitted testnet artifact in the entire ecosystem is the Pi App Studio
 # testnet validation key served from app/validation-key-testnet.txt.
 # =============================================================================

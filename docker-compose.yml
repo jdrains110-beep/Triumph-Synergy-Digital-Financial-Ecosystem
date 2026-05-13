@@ -86,7 +86,7 @@ x-pi-env: &pi-env
   SOVEREIGN_PQ_ENFORCE: "true"
   CONTROL_PLANE_REQUIRE_PQ_READY: "true"
   SCP_REQUIRE_PQ_SIGNATURE: "true"
-  STELLAR_CONSENSUS_PROTOCOL: scp-v23
+  STELLAR_CONSENSUS_PROTOCOL: scp-v24
   CENTRAL_NODE_ROLE: supernode
   CENTRAL_NODE_BACKBONE: "true"
   APEX_QUANTUM_MESH: "true"
@@ -1039,9 +1039,9 @@ services:
     healthcheck:
       disable: true
   # --------------------------------------------------------------------------
-  # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1
+  # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0-RC1
   #
-  # Official Pi Network full node (stellar-core v23.0.1 + horizon v23.0.0 +
+  # Official Pi Network full node (stellar-core v24.0.0 + horizon v24.0.0 +
   # PostgreSQL 16, Ubuntu 24.04).  This is the sovereign on-chain anchor for
   # the Triumph Synergy ecosystem — all Pi payment rails, settlement-core,
   # pi-bridge-connector, tokenization-engine, and SWN/PPH payroll settle
@@ -1051,7 +1051,7 @@ services:
   # Upstream: https://github.com/PiCoreTeam/pi-node-docker
   # --------------------------------------------------------------------------
   pi-mainnet-node:
-    image: pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1
+    image: pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0-RC1
     platform: linux/amd64   # AMD64-only stellar-core image — required on Apple Silicon / ARM64 hosts
     container_name: triumph-pi-mainnet-node
     restart: always
@@ -1079,7 +1079,7 @@ services:
     healthcheck:
       disable: true
   # --------------------------------------------------------------------------
-  # MAINNET-ONLY — Pi Network + Stellar Protocol 23
+  # MAINNET-ONLY — Pi Network + Stellar Protocol 24
   # triumph-pi-mainnet-node is the sole blockchain node for this ecosystem.
   # --------------------------------------------------------------------------
 

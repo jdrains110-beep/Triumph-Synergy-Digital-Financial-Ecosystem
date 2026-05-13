@@ -1,6 +1,6 @@
 /**
  * Mainnet Guard — runtime enforcement for the
- * "Pi Network mainnet + Stellar Protocol 23" mandate.
+ * "Pi Network mainnet + Stellar Protocol 24" mandate.
  *
  * The ONLY testnet artifact preserved across the ecosystem is the
  * static testnet validation key served from
@@ -81,4 +81,4 @@ export function assertMainnetNetwork(network: string, context?: string): void {
 }
 
 export const MAINNET_GUARD_PURPOSE =
-  "Pi mainnet + Stellar Protocol 23 only — testnet validation key is the sole permitted testnet artifact";
+  "Pi mainnet + Stellar Protocol 24 only — testnet validation key is the sole permitted testnet artifact";

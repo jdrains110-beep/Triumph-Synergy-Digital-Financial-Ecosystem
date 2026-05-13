@@ -8,7 +8,7 @@ import http from "node:http";
 import { PiSmartContractEngine } from "../../lib/pi-transaction/pi-smart-contracts";
 
 const PORT = 8082;
-const networkType = "mainnet" as const; // mainnet-only mandate (Pi Network + Stellar Protocol 23)
+const networkType = "mainnet" as const; // mainnet-only mandate (Pi Network + Stellar Protocol 24)
 const PI_BRIDGE_URL = process.env.PI_BRIDGE_URL || "http://triumph-pi-bridge-connector:8092";
 const CENTRAL_NODE_URL = process.env.CENTRAL_NODE_URL || "http://triumph-central-node:11626";
 const CENTRAL_NODE_PUBLIC_KEY = process.env.CENTRAL_NODE_PUBLIC_KEY || "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";

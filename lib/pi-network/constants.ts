@@ -32,14 +32,14 @@ export const PI_MAINNET_RPC = "https://api.mainnet.minepi.com" as const;
  * opens a PR bumping this constant when Pi advances.
  */
 export const PI_PROTOCOL_VERSION = Number(
-  process.env.PI_PROTOCOL_VERSION ?? 23,
+  process.env.PI_PROTOCOL_VERSION ?? 24,
 );
 
 /** Minimum protocol version this build is known to be safe with. */
-export const PI_MIN_SUPPORTED_PROTOCOL = 22 as const;
+export const PI_MIN_SUPPORTED_PROTOCOL = 23 as const;
 
-/** Stellar-core release line that ships Protocol 23 support. */
-export const STELLAR_CORE_VERSION = "v23.0.0" as const;
+/** Stellar-core release line that ships Protocol 24 support. */
+export const STELLAR_CORE_VERSION = "v24.0.0" as const;
 
 /** Server identifier advertised by our supernode / history archive. */
 export const TRIUMPH_NODE_SERVER_ID =

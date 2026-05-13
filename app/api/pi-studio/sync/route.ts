@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const hostname = request.nextUrl.hostname.toLowerCase();
   const origin = request.headers.get("origin") || "";
 
-  // Mainnet-only mandate — Pi Network + Stellar Protocol 23.
+  // Mainnet-only mandate — Pi Network + Stellar Protocol 24.
   // No testnet domains are permitted on the runtime sync path.
   const PI_STUDIO_SYNCED_DOMAINS = {
     mainnet: [
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
   // Pi Studio can POST to verify sync status
   const hostname = request.nextUrl.hostname.toLowerCase();
   
-  // Mainnet-only mandate — Pi Network + Stellar Protocol 23.
+  // Mainnet-only mandate — Pi Network + Stellar Protocol 24.
   const piStudioSyncedDomains = [
     "triumph-synergy.vercel.app",
     "triumphsynergy0576.pinet.com",

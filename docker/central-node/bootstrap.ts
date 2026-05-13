@@ -16,7 +16,7 @@ import crypto from "node:crypto";
 import { initializePiTransactionSystem, getPiTransactionSystemStatus, shutdownPiTransactionSystem } from "../../lib/pi-transaction/index";
 
 const HEALTH_PORT = 11626;
-const networkType = "mainnet" as const; // mainnet-only mandate (Pi Network + Stellar Protocol 23)
+const networkType = "mainnet" as const; // mainnet-only mandate (Pi Network + Stellar Protocol 24)
 const startedAt = new Date().toISOString();
 let systemReady = false;
 let shuttingDown = false;
@@ -207,9 +207,9 @@ function supernodeTopology() {
     },
     consensus: {
       protocol: "Stellar SCP",
-      protocol_version: Number(process.env.PI_PROTOCOL_VERSION ?? 23),
-      protocol_version_label: `scp-v${process.env.PI_PROTOCOL_VERSION ?? 23}`,
-      stellar_core_version: process.env.STELLAR_CORE_VERSION ?? "v23.0.0",
+      protocol_version: Number(process.env.PI_PROTOCOL_VERSION ?? 24),
+      protocol_version_label: `scp-v${process.env.PI_PROTOCOL_VERSION ?? 24}`,
+      stellar_core_version: process.env.STELLAR_CORE_VERSION ?? "v24.0.0",
       auto_protocol_update: true,
       horizon_url: HORIZON_URL,
       network: "mainnet",

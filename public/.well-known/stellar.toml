@@ -1,5 +1,5 @@
 # SEP-1 stellar.toml — Triumph Synergy
-# Pi Network MAINNET Validator (Stellar Protocol 23)
+# Pi Network MAINNET Validator (Stellar Protocol 24)
 # Served from: https://triumph-synergy.vercel.app/.well-known/stellar.toml
 
 VERSION="2.7.0"
@@ -8,8 +8,8 @@ HORIZON_URL="https://api.mainnet.minepi.com"
 
 # Protocol advertisement — kept in sync by
 # .github/workflows/protocol-version-watcher.yml
-PROTOCOL_VERSION="23"
-MIN_PROTOCOL_VERSION="22"
+PROTOCOL_VERSION="24"
+MIN_PROTOCOL_VERSION="23"
 STELLAR_CORE_VERSION="v23.0.0"
 
 # Federation / auth not provided yet. Add when ready:
@@ -26,7 +26,7 @@ ORG_NAME="Triumph Synergy"
 ORG_DBA="Triumph Synergy Digital Financial Ecosystem"
 ORG_URL="https://triumph-synergy.vercel.app"
 ORG_LOGO="https://triumph-synergy.vercel.app/logo.png"
-ORG_DESCRIPTION="Triumph Synergy operates the Triumph Synergy Digital Financial Ecosystem on Pi Network mainnet. We run a Pi mainnet supernode validator (stellar-core v23.0.0, Stellar Protocol 23) integrated with our governance-shield central node, ingesting the live Pi mainnet Horizon ledger and transmitting real-world data to the network."
+ORG_DESCRIPTION="Triumph Synergy operates the Triumph Synergy Digital Financial Ecosystem on Pi Network mainnet. We run a Pi mainnet supernode validator (stellar-core v24.0.0, Stellar Protocol 24) integrated with our governance-shield central node, ingesting the live Pi mainnet Horizon ledger and transmitting real-world data to the network."
 ORG_OFFICIAL_EMAIL="ops@triumph-synergy.vercel.app"
 ORG_GITHUB="jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem"
 ORG_KEYBASE=""

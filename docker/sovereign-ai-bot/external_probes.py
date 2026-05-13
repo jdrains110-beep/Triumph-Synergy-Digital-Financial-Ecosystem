@@ -8,7 +8,7 @@ Extends SAIB's monitoring beyond local Docker into the wider ecosystem:
   • PiNet mainnet apps               (triumphsynergy0576.pinet.com,
                                       triumphsynergy7386.pinet.com)
   • Pi Network mainnet API           (api.mainnet.minepi.com)
-  • Stellar Protocol 23 horizon      (api.mainnet.minepi.com/ledgers)
+  • Stellar Protocol 24 horizon      (api.mainnet.minepi.com/ledgers)
 
 These targets cannot be `docker restart`'d — they're external. So each
 probe records availability, raises a Prometheus signal, and (when wired

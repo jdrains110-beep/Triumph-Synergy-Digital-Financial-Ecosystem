@@ -536,7 +536,7 @@ def _anchor_to_chain(memo_text: str, ref_id: str, pi_address: str) -> dict | Non
         # Hash the memo text so it fits in 28 bytes
         content_hash = hashlib.sha256(memo_text.encode()).hexdigest()[:28]
         horizon_url = HORIZON.rstrip("/")
-        # Mainnet-only mandate: Pi Network passphrase always (Stellar Protocol 23).
+        # Mainnet-only mandate: Pi Network passphrase always (Stellar Protocol 24).
         network_passphrase = "Pi Network"
         keypair   = Keypair.from_secret(ANCHOR_SECRET_SEED)
         server    = Server(horizon_url=horizon_url)

@@ -10,7 +10,7 @@
  */
 
 // Domain configuration — MAINNET-ONLY MANDATE
-// (Pi Network + Stellar Protocol 23). The testnet validation key is
+// (Pi Network + Stellar Protocol 24). The testnet validation key is
 // served separately from /validation-key-testnet.txt and is the ONLY
 // permitted testnet artifact in the ecosystem.
 const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
