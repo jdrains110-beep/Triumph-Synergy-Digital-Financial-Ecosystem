@@ -395,10 +395,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8083/health"]
-      interval: 60s
-      timeout: 30s
+      interval: 90s
+      timeout: 45s
       retries: 5
-      start_period: 120s
+      start_period: 180s
 
   # ========================================================================
   # SUPERNODE-PEER-2 — Apex-Quantum peer supernode
@@ -439,10 +439,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:11626/info"]
-      interval: 60s
-      timeout: 30s
+      interval: 90s
+      timeout: 45s
       retries: 5
-      start_period: 120s
+      start_period: 180s
 
   # ========================================================================
   # SETTLEMENT-CORE — Super-Pod
@@ -1059,7 +1059,7 @@ services:
     shm_size: 512m   # stellar-core uses /dev/shm for SCP bucket merges; 256m causes SIGABRT during catchup
     mem_limit: 7g    # raised from 4g: catchup on AMD64 emulation spikes 5-6GB during bucket merge
     mem_reservation: 2g
-    cpus: 2.0  # raised from 1.0: AMD64 emulation on Apple Silicon needs headroom to avoid assertion timeouts
+    cpus: 1.5  # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
       NODE_PRIVATE_KEY:  ${PI_NODE_PRIVATE_KEY:-}   # auto-generated if blank
@@ -1139,11 +1139,11 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD", "python", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8199/health', timeout=10)"]
-      interval: 60s
-      timeout: 15s
+             "import urllib.request; urllib.request.urlopen('http://localhost:8199/health', timeout=25)"]
+      interval: 90s
+      timeout: 30s
       retries: 3
-      start_period: 90s
+      start_period: 120s
 
   # ==========================================================================
   # SOVEREIGN MESH HUB — Encrypted Private Network (WireGuard)
@@ -1193,11 +1193,11 @@ services:
         ipv4_address: 10.13.37.1
     healthcheck:
       test: ["CMD", "python", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8200/health', timeout=10)"]
-      interval: 60s
-      timeout: 15s
+             "import urllib.request; urllib.request.urlopen('http://localhost:8200/health', timeout=25)"]
+      interval: 90s
+      timeout: 30s
       retries: 3
-      start_period: 45s
+      start_period: 120s
 
 # ==========================================================================
 # VOLUMES — Persistent Data
