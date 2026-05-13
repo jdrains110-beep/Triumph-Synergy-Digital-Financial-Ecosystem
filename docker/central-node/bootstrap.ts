@@ -12,6 +12,7 @@
 // License: PiOS
 
 import http from "node:http";
+import crypto from "node:crypto";
 import { initializePiTransactionSystem, getPiTransactionSystemStatus, shutdownPiTransactionSystem } from "../../lib/pi-transaction/index";
 
 const HEALTH_PORT = 11626;
@@ -420,7 +421,13 @@ const server = http.createServer((req, res) => {
     if (JOIN_SECRET) {
       const authHeader = req.headers["authorization"] || "";
       const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-      if (!token || token !== JOIN_SECRET) {
+      // Use timingSafeEqual to prevent timing-based token oracle attacks
+      const secretBuf = Buffer.from(JOIN_SECRET);
+      const tokenBuf  = Buffer.allocUnsafe(secretBuf.length).fill(0);
+      if (token) Buffer.from(token).copy(tokenBuf, 0, 0, Math.min(token.length, tokenBuf.length));
+      const lengthMismatch = token.length !== JOIN_SECRET.length;
+      const bytesMismatch  = !crypto.timingSafeEqual(secretBuf, tokenBuf);
+      if (lengthMismatch || bytesMismatch) {
         res.writeHead(401);
         res.end('{"error":"unauthorized"}');
         return;
