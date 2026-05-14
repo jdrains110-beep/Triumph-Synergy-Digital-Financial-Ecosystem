@@ -12,6 +12,15 @@
   resolved "https://registry.npmjs.org/@adobe/css-tools/-/css-tools-4.4.4.tgz"
   integrity sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==
 
+"@ai-sdk/gateway@3.0.114", "@ai-sdk/gateway@^3.0.4":
+  version "3.0.114"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-3.0.114.tgz#9f9dbe10c07215dd89520b96b87e9a3f3a5074c5"
+  integrity sha512-MqkZ5sd+qiq6RgIxELkoFQXg2/JwK+WCMaot7U+rtrZpWJl3fSyYvc28SC03b256o4F7OXjQtdjTqs81B2w+dA==
+  dependencies:
+    "@ai-sdk/provider" "3.0.10"
+    "@ai-sdk/provider-utils" "4.0.27"
+    "@vercel/oidc" "3.2.0"
+
 "@ai-sdk/gateway@3.0.2":
   version "3.0.2"
   resolved "https://registry.npmjs.org/@ai-sdk/gateway/-/gateway-3.0.2.tgz"
@@ -20,24 +29,6 @@
     "@ai-sdk/provider" "3.0.0"
     "@ai-sdk/provider-utils" "4.0.1"
     "@vercel/oidc" "3.0.5"
-
-"@ai-sdk/gateway@3.0.4":
-  version "3.0.4"
-  resolved "https://registry.npmjs.org/@ai-sdk/gateway/-/gateway-3.0.4.tgz"
-  integrity sha512-OlccjNYZ5+4FaNyvs0kb3N5H6U/QCKlKPTGsgUo8IZkqfMQu8ALI1XD6l/BCuTKto+OO9xUPObT/W7JhbqJ5nA==
-  dependencies:
-    "@ai-sdk/provider" "3.0.1"
-    "@ai-sdk/provider-utils" "4.0.2"
-    "@vercel/oidc" "3.0.5"
-
-"@ai-sdk/gateway@^3.0.4":
-  version "3.0.84"
-  resolved "https://registry.npmjs.org/@ai-sdk/gateway/-/gateway-3.0.84.tgz"
-  integrity sha512-RnUw6UNvkaw9MEaJU9cIjA+WBP+ZR5+M/9nfbfJHcGKtTbcWXijJuYKx9nYRnm+qU+iiakb0XvQA/vvho6lTsw==
-  dependencies:
-    "@ai-sdk/provider" "3.0.8"
-    "@ai-sdk/provider-utils" "4.0.21"
-    "@vercel/oidc" "3.1.0"
 
 "@ai-sdk/openai-compatible@2.0.2":
   version "2.0.2"
@@ -65,14 +56,14 @@
     "@standard-schema/spec" "^1.1.0"
     eventsource-parser "^3.0.6"
 
-"@ai-sdk/provider-utils@4.0.21":
-  version "4.0.21"
-  resolved "https://registry.npmjs.org/@ai-sdk/provider-utils/-/provider-utils-4.0.21.tgz"
-  integrity sha512-MtFUYI1/8mgDvRmaBDjbLJPFFrMG777AvSgyIFQtZHIMzm88R/12vYBBpnk7pfiWLFE1DSZzY4WDYzGbKAcmiw==
+"@ai-sdk/provider-utils@4.0.27":
+  version "4.0.27"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-4.0.27.tgz#d2183685768626bcf1c968b7d73ea2b974da59b9"
+  integrity sha512-ubkAJ+xODouwtmN1tYlvTPphH1hPOBfZaEQe8U7skGvFAnIRs9PPpsq57bC2+Ky/MB4yzhd6YOsxTAx9sGpazw==
   dependencies:
-    "@ai-sdk/provider" "3.0.8"
+    "@ai-sdk/provider" "3.0.10"
     "@standard-schema/spec" "^1.1.0"
-    eventsource-parser "^3.0.6"
+    eventsource-parser "^3.0.8"
 
 "@ai-sdk/provider@2.0.0":
   version "2.0.0"
@@ -95,10 +86,10 @@
   dependencies:
     json-schema "^0.4.0"
 
-"@ai-sdk/provider@3.0.8":
-  version "3.0.8"
-  resolved "https://registry.npmjs.org/@ai-sdk/provider/-/provider-3.0.8.tgz"
-  integrity sha512-oGMAgGoQdBXbZqNG0Ze56CHjDZ1IDYOwGYxYjO5KLSlz5HiNQ9udIXsPZ61VWaHGZ5XW/jyjmr6t2xz2jGVwbQ==
+"@ai-sdk/provider@3.0.10":
+  version "3.0.10"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-3.0.10.tgz#abfb6776f699951f9b8ac20cf1d42a3fc7d79752"
+  integrity sha512-Q3BZ27qfpYqnCYGvE3vt+Qi6LGOF9R5Nmzn+9JoM1lCRsD9mYaIhfJLkSunN48nfGXJ6n+XNV0J/XVpqGQl7Dw==
   dependencies:
     json-schema "^0.4.0"
 
@@ -177,59 +168,59 @@
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.2.tgz"
   integrity sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==
 
-"@biomejs/biome@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.npmjs.org/@biomejs/biome/-/biome-2.3.13.tgz"
-  integrity sha512-Fw7UsV0UAtWIBIm0M7g5CRerpu1eKyKAXIazzxhbXYUyMkwNrkX/KLkGI7b+uVDQ5cLUMfOC9vR60q9IDYDstA==
+"@biomejs/biome@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/biome/-/biome-2.4.13.tgz#0b2aba2e7da656e89101ad640ec8609230cfa846"
+  integrity sha512-gLXOwkOBBg0tr7bDsqlkIh4uFeKuMjxvqsrb1Tukww1iDmHcfr4Uu8MoQxp0Rcte+69+osRNWXwHsu/zxT6XqA==
   optionalDependencies:
-    "@biomejs/cli-darwin-arm64" "2.3.13"
-    "@biomejs/cli-darwin-x64" "2.3.13"
-    "@biomejs/cli-linux-arm64" "2.3.13"
-    "@biomejs/cli-linux-arm64-musl" "2.3.13"
-    "@biomejs/cli-linux-x64" "2.3.13"
-    "@biomejs/cli-linux-x64-musl" "2.3.13"
-    "@biomejs/cli-win32-arm64" "2.3.13"
-    "@biomejs/cli-win32-x64" "2.3.13"
+    "@biomejs/cli-darwin-arm64" "2.4.13"
+    "@biomejs/cli-darwin-x64" "2.4.13"
+    "@biomejs/cli-linux-arm64" "2.4.13"
+    "@biomejs/cli-linux-arm64-musl" "2.4.13"
+    "@biomejs/cli-linux-x64" "2.4.13"
+    "@biomejs/cli-linux-x64-musl" "2.4.13"
+    "@biomejs/cli-win32-arm64" "2.4.13"
+    "@biomejs/cli-win32-x64" "2.4.13"
 
-"@biomejs/cli-darwin-arm64@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/@biomejs/cli-darwin-arm64/-/cli-darwin-arm64-2.3.13.tgz#417fab5e8b2facf7e289f91d4bbe4275eb2dbbe8"
-  integrity sha512-0OCwP0/BoKzyJHnFdaTk/i7hIP9JHH9oJJq6hrSCPmJPo8JWcJhprK4gQlhFzrwdTBAW4Bjt/RmCf3ZZe59gwQ==
+"@biomejs/cli-darwin-arm64@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-darwin-arm64/-/cli-darwin-arm64-2.4.13.tgz#3873a231d78f219fff4d4ae427232eb347e49574"
+  integrity sha512-2KImO1jhNFBa2oWConyr0x6flxbQpGKv6902uGXpYM62Xyem8U80j441SyUJ8KyngsmKbQjeIv1q2CQfDkNnYg==
 
-"@biomejs/cli-darwin-x64@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/@biomejs/cli-darwin-x64/-/cli-darwin-x64-2.3.13.tgz#05abe14ced10125091f68da38ec070f7827b6758"
-  integrity sha512-AGr8OoemT/ejynbIu56qeil2+F2WLkIjn2d8jGK1JkchxnMUhYOfnqc9sVzcRxpG9Ycvw4weQ5sprRvtb7Yhcw==
+"@biomejs/cli-darwin-x64@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-darwin-x64/-/cli-darwin-x64-2.4.13.tgz#dea76c1bbff010e85835cfa4d1e272ccf6b32a2f"
+  integrity sha512-BKrJklbaFN4p1Ts4kPBczo+PkbsHQg57kmJ+vON9u2t6uN5okYHaSr7h/MutPCWQgg2lglaWoSmm+zhYW+oOkg==
 
-"@biomejs/cli-linux-arm64-musl@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.3.13.tgz#aa715dbaf3d4cc97682bcb7357f0e15220321eea"
-  integrity sha512-TUdDCSY+Eo/EHjhJz7P2GnWwfqet+lFxBZzGHldrvULr59AgahamLs/N85SC4+bdF86EhqDuuw9rYLvLFWWlXA==
+"@biomejs/cli-linux-arm64-musl@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.4.13.tgz#03911f80fedc202e5b96363e7f4582752c1cbc3f"
+  integrity sha512-U5MsuBQW25dXaYtqWWSPM3P96H6Y+fHuja3TQpMNnylocHW0tEbtFTDlUj6oM+YJLntvEkQy4grBvQNUD4+RCg==
 
-"@biomejs/cli-linux-arm64@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-arm64/-/cli-linux-arm64-2.3.13.tgz#e3463498bc23ddba306de3e45d8f9722179065e9"
-  integrity sha512-xvOiFkrDNu607MPMBUQ6huHmBG1PZLOrqhtK6pXJW3GjfVqJg0Z/qpTdhXfcqWdSZHcT+Nct2fOgewZvytESkw==
+"@biomejs/cli-linux-arm64@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-arm64/-/cli-linux-arm64-2.4.13.tgz#51aad20b4df93c08225f4627da9cfd7408e2affc"
+  integrity sha512-NzkUDSqfvMBrPplKgVr3aXLHZ2NEELvvF4vZxXulEylKWIGqlvNEcwUcj9OLrn75TD3lJ/GIqCVlBwd1MZCuYQ==
 
-"@biomejs/cli-linux-x64-musl@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-x64-musl/-/cli-linux-x64-musl-2.3.13.tgz#579e81f862272ca5a2b9860a2204382767966b7d"
-  integrity sha512-0bdwFVSbbM//Sds6OjtnmQGp4eUjOTt6kHvR/1P0ieR9GcTUAlPNvPC3DiavTqq302W34Ae2T6u5VVNGuQtGlQ==
+"@biomejs/cli-linux-x64-musl@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-x64-musl/-/cli-linux-x64-musl-2.4.13.tgz#24b61df96b9593662955183d94480dfcccf70aba"
+  integrity sha512-Z601MienRgTBDza/+u2CH3RSrWoXo9rtr8NK6A4KJzqGgfxx+H3VlyLgTJ4sRo40T3pIsqpTmiOQEvYzQvBRvQ==
 
-"@biomejs/cli-linux-x64@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-x64/-/cli-linux-x64-2.3.13.tgz#fa22633de6effcd571fa2b7983cec98b9fce6383"
-  integrity sha512-s+YsZlgiXNq8XkgHs6xdvKDFOj/bwTEevqEY6rC2I3cBHbxXYU1LOZstH3Ffw9hE5tE1sqT7U23C00MzkXztMw==
+"@biomejs/cli-linux-x64@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-linux-x64/-/cli-linux-x64-2.4.13.tgz#aa80440a42000b1757bfd0af7ffe77becc219042"
+  integrity sha512-Az3ZZedYRBo9EQzNnD9SxFcR1G5QsGo6VEc2hIyVPZ1rdKwee/7E9oeBBZFpE8Z44ekxsDQBqbiWGW5ShOhUSQ==
 
-"@biomejs/cli-win32-arm64@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/@biomejs/cli-win32-arm64/-/cli-win32-arm64-2.3.13.tgz#06dd89ec17b897e0c774612fbe83a19fabbb949e"
-  integrity sha512-QweDxY89fq0VvrxME+wS/BXKmqMrOTZlN9SqQ79kQSIc3FrEwvW/PvUegQF6XIVaekncDykB5dzPqjbwSKs9DA==
+"@biomejs/cli-win32-arm64@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-win32-arm64/-/cli-win32-arm64-2.4.13.tgz#8fdaa4cfe0ea479e220541a4fd7e7fd83718b465"
+  integrity sha512-Px9PS2B5/Q183bUwy/5VHqp3J2lzdOCeVGzMpphYfl8oSa7VDCqenBdqWpy6DCy/en4Rbf/Y1RieZF6dJPcc9A==
 
-"@biomejs/cli-win32-x64@2.3.13":
-  version "2.3.13"
-  resolved "https://registry.npmjs.org/@biomejs/cli-win32-x64/-/cli-win32-x64-2.3.13.tgz"
-  integrity sha512-trDw2ogdM2lyav9WFQsdsfdVy1dvZALymRpgmWsvSez0BJzBjulhOT/t+wyKeh3pZWvwP3VMs1SoOKwO3wecMQ==
+"@biomejs/cli-win32-x64@2.4.13":
+  version "2.4.13"
+  resolved "https://registry.yarnpkg.com/@biomejs/cli-win32-x64/-/cli-win32-x64-2.4.13.tgz#e3ae4900abd495160c460da02ed4f9a01f29f7c7"
+  integrity sha512-tTcMkXyBrmHi9BfrD2VNHs/5rYIUKETqsBlYOvSAABwBkJhSDVb5e7wPukftsQbO3WzQkXe6kaztC6WtUOXSoQ==
 
 "@braintree/sanitize-url@^7.1.1":
   version "7.1.2"
@@ -2662,10 +2653,10 @@
   resolved "https://registry.npmjs.org/@vercel/oidc/-/oidc-3.0.5.tgz"
   integrity sha512-fnYhv671l+eTTp48gB4zEsTW/YtRgRPnkI2nT7x6qw5rkI1Lq2hTmQIpHPgyThI0znLK+vX2n9XxKdXZ7BUbbw==
 
-"@vercel/oidc@3.1.0":
-  version "3.1.0"
-  resolved "https://registry.npmjs.org/@vercel/oidc/-/oidc-3.1.0.tgz"
-  integrity sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w==
+"@vercel/oidc@3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@vercel/oidc/-/oidc-3.2.0.tgz#5782a4d4904443f015808705b5537cf9c3b68528"
+  integrity sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==
 
 "@vitest/expect@3.2.4":
   version "3.2.4"
@@ -2798,6 +2789,16 @@ agent-base@^7.1.0, agent-base@^7.1.2:
   resolved "https://registry.npmjs.org/agent-base/-/agent-base-7.1.4.tgz"
   integrity sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==
 
+ai@6.0.182:
+  version "6.0.182"
+  resolved "https://registry.yarnpkg.com/ai/-/ai-6.0.182.tgz#8957e44e5c5ff8b1c54dee89e701f85e9f8b93ed"
+  integrity sha512-ooJdziFjYrYRcsCx107roqA8gDTI3P82nUfroNWIhVvwrkYzEN3W1l50YK+XNqkUew8AiimaW0/SLBewRXMuHQ==
+  dependencies:
+    "@ai-sdk/gateway" "3.0.114"
+    "@ai-sdk/provider" "3.0.10"
+    "@ai-sdk/provider-utils" "4.0.27"
+    "@opentelemetry/api" "^1.9.0"
+
 ai@6.0.3:
   version "6.0.3"
   resolved "https://registry.npmjs.org/ai/-/ai-6.0.3.tgz"
@@ -2806,16 +2807,6 @@ ai@6.0.3:
     "@ai-sdk/gateway" "3.0.2"
     "@ai-sdk/provider" "3.0.0"
     "@ai-sdk/provider-utils" "4.0.1"
-    "@opentelemetry/api" "1.9.0"
-
-ai@6.0.5:
-  version "6.0.5"
-  resolved "https://registry.npmjs.org/ai/-/ai-6.0.5.tgz"
-  integrity sha512-CKL3dDHedWskC6EY67LrULonZBU9vL+Bwa+xQEcprBhJfxpogntG3utjiAkYuy5ZQatyWk+SmWG8HLvcnhvbRg==
-  dependencies:
-    "@ai-sdk/gateway" "3.0.4"
-    "@ai-sdk/provider" "3.0.1"
-    "@ai-sdk/provider-utils" "4.0.2"
     "@opentelemetry/api" "1.9.0"
 
 argparse@^2.0.1:
@@ -3798,6 +3789,11 @@ eventsource-parser@^3.0.6:
   version "3.0.6"
   resolved "https://registry.npmjs.org/eventsource-parser/-/eventsource-parser-3.0.6.tgz"
   integrity sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==
+
+eventsource-parser@^3.0.8:
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/eventsource-parser/-/eventsource-parser-3.0.8.tgz#1c792503e4080455d00701bb1f7a1d60734d0e58"
+  integrity sha512-70QWGkr4snxr0OXLRWsFLeRBIRPuQOvt4s8QYjmUlmlkyTZkRqS7EDVRZtzU3TiyDbXSzaOeF0XUKy8PchzukQ==
 
 eventsource@^2.0.2:
   version "2.0.2"
