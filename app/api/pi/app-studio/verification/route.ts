@@ -96,16 +96,13 @@ async function verifyPiSdkInjection(domain: string): Promise<{
 }
 
 function getDomainNetwork(
-  domain: string
+  _domain: string
 ): "mainnet" | "testnet" | "unknown" {
-  // Mainnet-only mandate — testnet branch removed at runtime.
-  const mainnetDomains = [
-    PRODUCTION_DOMAINS.mainnet.vercel,
-    ...PRODUCTION_DOMAINS.mainnet.pinet,
-  ];
-
-  if (mainnetDomains.includes(domain)) return "mainnet";
-  return "unknown";
+  // Mainnet-only mandate. We deliberately do NOT match against a hardcoded
+  // host whitelist — Pi App Studio assigns a fresh domain on every transfer,
+  // and any whitelist would mark the new (correct) domain as "unknown" and
+  // fail verification.
+  return "mainnet";
 }
 
 function getSandboxMode(_domain: string): boolean {

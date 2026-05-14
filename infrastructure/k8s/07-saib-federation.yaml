@@ -23,8 +23,12 @@ metadata:
   namespace: triumph
 data:
   # ── External probes ────────────────────────────────────────────────────────
-  SAIB_VERCEL_HOSTS: "triumph-synergy.vercel.app"
-  SAIB_PINET_HOSTS: "triumphsynergy0576.pinet.com,triumphsynergy7386.pinet.com"
+  # Set these at apply time via kustomize/helm to the current canonical hosts.
+  # No hardcoded defaults — Pi App Studio rotates the app's public hostname
+  # on every fresh transfer, and a stale value would have SAIB probing a
+  # domain that no longer belongs to this app.
+  SAIB_VERCEL_HOSTS: ""
+  SAIB_PINET_HOSTS: ""
   SAIB_EXTERNAL_PROBE_INTERVAL_S: "60"
   SAIB_REMEDIATION_COOLDOWN_S: "900"
 

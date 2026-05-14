@@ -15,8 +15,12 @@ import "@/lib/security/boot";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Canonical URL is driven entirely by NEXT_PUBLIC_APP_URL at deploy time.
+  // We do NOT hardcode a previous Pi App Studio domain because that domain
+  // changes on every fresh app transfer; using a stale value would advertise
+  // the wrong canonical host to crawlers and break verification.
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy0576.pinet.com"
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
   title: "Triumph Synergy - Pi App Studio",
   description:
@@ -30,7 +34,7 @@ export const metadata: Metadata = {
     title: "Triumph Synergy - Pi App Studio",
     description: "Advanced payment routing with compliance automation",
     url:
-      process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy0576.pinet.com",
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     siteName: "Triumph Synergy",
     type: "website",
   },
@@ -121,27 +125,17 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
   var hostname = window.location.hostname.toLowerCase();
   var ua = navigator.userAgent || '';
   var uaLower = ua.toLowerCase();
-  
-  // Domain-based network detection
-  var sandbox = true; // Default to sandbox for safety
-  
-  // PINET domains
-  if (hostname === 'triumphsynergy1991.pinet.com') {
-    sandbox = true; // TESTNET
-  } else if (hostname === 'triumphsynergy7386.pinet.com' || hostname === 'triumphsynergy0576.pinet.com') {
-    sandbox = false; // MAINNET
-  }
-  // VERCEL domains  
-  else if (hostname === 'triumph-synergy.vercel.app') {
-    sandbox = false; // MAINNET
-  } else if (hostname === 'triumph-synergy-testnet.vercel.app') {
-    sandbox = true; // TESTNET
-  }
-  // localhost = testnet
-  else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+
+  // Network selection is driven by build-time env, NOT a hardcoded host
+  // whitelist. Pi App Studio assigns each app a fresh hostname on transfer,
+  // so any hardcoded check would mis-classify the new domain and break
+  // verification. NEXT_PUBLIC_PI_SANDBOX="true" => testnet, otherwise mainnet.
+  // Localhost always falls back to sandbox for safe local dev.
+  var sandbox = ${process.env.NEXT_PUBLIC_PI_SANDBOX === "true" ? "true" : "false"};
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
     sandbox = true;
   }
-  
+
   var appId = '${process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy"}';
   console.log('[Pi SDK] Configuration: domain=' + hostname + ', sandbox=' + sandbox + ', appId=' + appId);
 

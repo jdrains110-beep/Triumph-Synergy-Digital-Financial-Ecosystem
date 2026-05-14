@@ -21,28 +21,12 @@ const STELLAR_KEY_RE = /^G[A-Z2-7]{55}$/;
  * Main middleware function
  */
 export async function middleware(request: NextRequest) {
-  const hostname = request.nextUrl.hostname.toLowerCase();
-
-  // PRODUCTION DOMAINS
-  const PRODUCTION_DOMAINS = [
-    "triumphsynergy1991.pinet.com", // PINET DEV
-    "triumphsynergy7386.pinet.com", // PINET MAINNET
-    "triumphsynergy0576.pinet.com", // PINET PRIMARY
-    "localhost",
-    "127.0.0.1",
-  ];
-
-  // BLOCK non-sovereign preview deployments
-  if (
-    hostname.includes(".vercel.app") ||
-    hostname.includes("-jeremiah-drains-projects.vercel.app") ||
-    hostname.includes("-git-")
-  ) {
-    // Redirect to sovereign Pi Network domain
-    const redirectUrl = new URL(request.nextUrl);
-    redirectUrl.hostname = "triumphsynergy0576.pinet.com";
-    return NextResponse.redirect(redirectUrl, 307);
-  }
+  // NOTE: Pi App Studio assigns each app a fresh hostname on (re)transfer.
+  // We must NOT hard-code or filter on hostnames here, otherwise the verifier
+  // (or a freshly-issued domain) gets redirected away before the app can call
+  // Pi.authenticate(), causing "We didn't detect a Pi sign-in." Hostnames are
+  // configured at deploy time via env (NEXT_PUBLIC_APP_URL) and validated by
+  // Pi App Studio itself; this edge layer treats every host as legitimate.
 
   // Create response and refresh Supabase auth session.
   // Generate per-request nonce up front so we can forward it to the server
