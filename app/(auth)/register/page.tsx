@@ -44,7 +44,7 @@ export default function Page() {
       window.addEventListener("piReady", onReady, { once: true });
       return () => window.removeEventListener("piReady", onReady);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Once Pi auth succeeds, redirect — Pi identity doubles as registration.

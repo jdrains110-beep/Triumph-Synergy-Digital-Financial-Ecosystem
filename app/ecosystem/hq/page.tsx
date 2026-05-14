@@ -29,12 +29,12 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export const metadata = {
-  title:       "Triumph Synergy HQ — Allodial Deed",
+  title: "Triumph Synergy HQ — Allodial Deed",
   description: `Public broadcast of Deed ${HQ_DEED_NUMBER} for ${HQ_OWNER_NAME}. ALLODIAL PERFECTED. DEBT FREE.`,
 };
 
 export default function HQDeedPage() {
-  const deed     = HQ_GENESIS_DEED;
+  const deed = HQ_GENESIS_DEED;
   const property = deed.property;
   const recorded = new Date(HQ_RECORDED_DATE).toLocaleDateString("en-US", {
     year: "numeric", month: "long", day: "numeric",
@@ -73,11 +73,11 @@ export default function HQDeedPage() {
         </div>
         <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           {[
-            ["Legal Name",       HQ_OWNER_NAME],
-            ["Owner Type",       "Individual · Allodial Sovereign"],
-            ["Domain",           "triumph-synergy.pi"],
-            ["Authority Level",  "Supreme Authority · Owner-Creator"],
-            ["Pi Address",       HQ_PI_ADDRESS],
+            ["Legal Name", HQ_OWNER_NAME],
+            ["Owner Type", "Individual · Allodial Sovereign"],
+            ["Domain", "triumph-synergy.pi"],
+            ["Authority Level", "Supreme Authority · Owner-Creator"],
+            ["Pi Address", HQ_PI_ADDRESS],
             ["Financial Status", "DEBT FREE · TRUE FINANCIAL FREEDOM"],
           ].map(([label, val]) => (
             <div key={label}>
@@ -97,11 +97,11 @@ export default function HQDeedPage() {
         <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           {[
             ["Street Address", property.streetAddress],
-            ["City / State",   `${property.city}, ${property.state} ${property.postalCode}`],
-            ["County",         property.county],
-            ["Coordinates",    property.coordinates ? `${property.coordinates.lat}, ${property.coordinates.lng}` : "—"],
-            ["Property Type",  property.propertyType],
-            ["APN",            property.apn],
+            ["City / State", `${property.city}, ${property.state} ${property.postalCode}`],
+            ["County", property.county],
+            ["Coordinates", property.coordinates ? `${property.coordinates.lat}, ${property.coordinates.lng}` : "—"],
+            ["Property Type", property.propertyType],
+            ["APN", property.apn],
           ].map(([label, val]) => (
             <div key={label}>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
@@ -123,13 +123,13 @@ export default function HQDeedPage() {
         </div>
         <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           {[
-            ["Deed Number",    deed.deedNumber],
-            ["Title Type",     deed.titleType ?? "—"],
+            ["Deed Number", deed.deedNumber],
+            ["Title Type", deed.titleType ?? "—"],
             ["Token Standard", deed.standard],
-            ["Network",        deed.network],
-            ["Recorded Date",  recorded],
-            ["Encumbrances",   !deed.encumbrances || deed.encumbrances.length === 0 ? "NONE" : deed.encumbrances.join(", ")],
-            ["Status",         deed.status],
+            ["Network", deed.network],
+            ["Recorded Date", recorded],
+            ["Encumbrances", !deed.encumbrances || deed.encumbrances.length === 0 ? "NONE" : deed.encumbrances.join(", ")],
+            ["Status", deed.status],
             ["Valuation (Pi)", `${deed.valuationPi} π`],
           ].map(([label, val]) => (
             <div key={label}>
@@ -148,12 +148,12 @@ export default function HQDeedPage() {
         </div>
         <div className="space-y-2 text-xs">
           {[
-            ["Network",      deed.piBlockchainAnchor?.network ?? "—"],
-            ["Ledger",       String(deed.piBlockchainAnchor?.ledger ?? "—")],
-            ["Pi Tx Hash",   deed.piBlockchainAnchor?.txHash ?? "—"],
+            ["Network", deed.piBlockchainAnchor?.network ?? "—"],
+            ["Ledger", String(deed.piBlockchainAnchor?.ledger ?? "—")],
+            ["Pi Tx Hash", deed.piBlockchainAnchor?.txHash ?? "—"],
             ["Stellar Hash", deed.stellarAnchor?.txHash ?? "—"],
-            ["Asset Code",   deed.stellarAnchor?.assetCode ?? "—"],
-            ["Integrity",    deed.integrityHash ?? "—"],
+            ["Asset Code", deed.stellarAnchor?.assetCode ?? "—"],
+            ["Integrity", deed.integrityHash ?? "—"],
           ].map(([label, val]) => (
             <div key={label} className="flex flex-col sm:flex-row sm:gap-3">
               <span className="w-28 shrink-0 text-muted-foreground uppercase text-[10px] tracking-wide">{label}</span>

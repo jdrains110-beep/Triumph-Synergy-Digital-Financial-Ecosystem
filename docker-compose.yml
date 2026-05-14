@@ -74,7 +74,7 @@ x-pi-env: &pi-env
   PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31502}
   # ── ULTIMATE SUPERIOR APEX-QUANTUM MESH (May 3, 2026) ──────────────────
   # Auto-injected into every chain-touching service via `<<: *pi-env` so
-  # the entire ecosystem speaks one language: SCP-v23 + PQ-required +
+  # the entire ecosystem speaks one language: SCP-v24 + PQ-required +
   # SAIB-enforced + Pi mainnet supernode backbone.
   PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
   QUANTUM_SHIELD_URL: http://triumph-quantum-intel-fortress:8094

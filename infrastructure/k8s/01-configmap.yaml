@@ -9,7 +9,7 @@ data:
   REDIS_URL: "redis://triumph-redis:6379"
   PI_NETWORK: "mainnet"
   PI_NETWORK_MODE: "mainnet"
-  PI_PROTOCOL_VERSION: "23"
+  PI_PROTOCOL_VERSION: "24"
   STELLAR_HORIZON_URL: "https://api.mainnet.minepi.com"
   STELLAR_NETWORK_PASSPHRASE: "Pi Network"
   SAIB_INTELLIGENCE_MODE: "sentinel"

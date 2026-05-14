@@ -654,8 +654,8 @@ function HistoricalReviewPanel() {
                     <div className="flex items-center gap-2">
                       <RiskBadge level={r.riskLevel} />
                       <span className={`text-xs px-2 py-0.5 rounded font-semibold ${r.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL" ? "bg-red-100 text-red-800"
-                          : r.overallVerdict === "VIOLATIONS_FOUND" ? "bg-orange-100 text-orange-800"
-                            : "bg-green-100 text-green-800"
+                        : r.overallVerdict === "VIOLATIONS_FOUND" ? "bg-orange-100 text-orange-800"
+                          : "bg-green-100 text-green-800"
                         }`}>{r.overallVerdict.replace(/_/g, " ")}</span>
                     </div>
                   </div>
@@ -1259,10 +1259,10 @@ export default function JudicialDashboard() {
                 {/* Verdict banner */}
                 <div
                   className={`rounded-xl p-5 text-white ${report.overallVerdict === "CASE_RECOMMENDED_FOR_DISMISSAL"
-                      ? "bg-red-700"
-                      : report.overallVerdict === "VIOLATIONS_FOUND"
-                        ? "bg-orange-600"
-                        : "bg-green-700"
+                    ? "bg-red-700"
+                    : report.overallVerdict === "VIOLATIONS_FOUND"
+                      ? "bg-orange-600"
+                      : "bg-green-700"
                     }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1294,10 +1294,10 @@ export default function JudicialDashboard() {
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
                       <div
                         className={`h-4 rounded-full transition-all duration-500 ${report.factScore.factualScore >= 70
-                            ? "bg-green-500"
-                            : report.factScore.factualScore >= 50
-                              ? "bg-yellow-500"
-                              : "bg-red-500"
+                          ? "bg-green-500"
+                          : report.factScore.factualScore >= 50
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
                           }`}
                         style={{ width: `${report.factScore.factualScore}%` }}
                       />
@@ -1371,10 +1371,10 @@ export default function JudicialDashboard() {
                     <div className="flex items-center gap-3 mb-3">
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-semibold ${report.representationAudit.overallRating === "ADEQUATE"
-                            ? "bg-green-100 text-green-800"
-                            : report.representationAudit.overallRating === "DEFICIENT"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
+                          ? "bg-green-100 text-green-800"
+                          : report.representationAudit.overallRating === "DEFICIENT"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
                           }`}
                       >
                         {report.representationAudit.overallRating}

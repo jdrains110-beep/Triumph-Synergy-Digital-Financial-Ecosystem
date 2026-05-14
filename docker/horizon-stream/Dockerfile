@@ -4,10 +4,10 @@
 # Merges:
 #   blockchain-oracle (8086) — Stellar/Pi ledger oracle
 #   market-data       (8085) — Pi market data feed (mainnet)
-# Shared Node 20 + @stellar/stellar-sdk + redis + pg
+# Shared Node 24 + @stellar/stellar-sdk + redis + pg
 # Build context: REPO ROOT (needs docker/, lib/, tsconfig.docker.json)
 # ==============================================================================
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 RUN apk upgrade --no-cache
 RUN apk add --no-cache curl tini bash supervisor
 

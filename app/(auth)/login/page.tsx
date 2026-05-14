@@ -49,8 +49,8 @@ export default function Page() {
       window.addEventListener("piReady", onReady, { once: true });
       return () => window.removeEventListener("piReady", onReady);
     }
-  // authenticate is stable (defined outside component), safe to include.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // authenticate is stable (defined outside component), safe to include.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Once Pi auth succeeds, refresh the Next-Auth session so the rest of the

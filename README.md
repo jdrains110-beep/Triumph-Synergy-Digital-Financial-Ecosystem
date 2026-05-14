@@ -282,7 +282,7 @@ All testnet2 wiring removed from source code and configuration:
 - `docker/ecosystem-guardian/sentinel.py` + `docker/network-sentinel/sentinel.py` — `PI_NODE_HOST` default changed; testnet probe removed from `EXTERNAL_PROBES`
 - `docker-compose.yml` — `PI_TESTNET_API_KEY` made optional (`:-`), all "testnet2" comments updated to mainnet, network-connect note updated to `triumph-pi-mainnet-node`
 
-**Result:** No service, script, or config can fall back to testnet2. Every ledger event, SCP ballot, and Pi transaction flows through `triumph-pi-mainnet-node` (pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1).
+**Result:** No service, script, or config can fall back to testnet2. Every ledger event, SCP ballot, and Pi transaction flows through `triumph-pi-mainnet-node` (pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0-RC1).
 
 ---
 
@@ -602,7 +602,7 @@ docker exec triumph-citus-coordinator psql -U postgres -d triumph_synergy \
 
 [![Apex Quantum Mesh](https://img.shields.io/badge/APEX--QUANTUM%20MESH-OPERATIONAL%20%7C%20ACTIVATED%20%7C%20GLOBAL-22C55E?style=flat-square)](docker-compose.yml)
 [![SAIB Enforcement](https://img.shields.io/badge/SAIB-ECOSYSTEM%20GUARDIAN%20%7C%20GLOBAL%20ENFORCEMENT-EF4444?style=flat-square)](docker/sovereign-fortress/)
-[![Pi Mainnet Backbone](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20SCP--v23%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
+[![Pi Mainnet Backbone](https://img.shields.io/badge/Pi%20Mainnet-LIVE%20%7C%20SCP--v24%20%7C%20Quorum%20%7Bt%3A2%2C%20v%3A3%7D-22C55E?style=flat-square)](docker-compose.yml)
 [![Central Supernode](https://img.shields.io/badge/Central%20Node-SUPERNODE%20%7C%20BACKBONE%20%7C%20MOTHERBOARD-8B5CF6?style=flat-square)](docker-compose.yml)
 [![Quantum Engine](https://img.shields.io/badge/Quantum-ML--KEM--1024%20%2B%20ML--DSA--87%20%2B%20SPHINCS%2B%20%7C%20REAL%20liboqs-7C3AED?style=flat-square)](docker/quantum-intel-fortress/Dockerfile)
 [![Superior Loopholes](https://img.shields.io/badge/Superior%20Apex%20Loopholes-241%20ARMED%20%7C%2027%20AUTHORITIES-EAB308?style=flat-square)](docker/)
@@ -619,7 +619,7 @@ chain. Global.**
 
 | Tier | Container | Port(s) | Role in Mesh |
 |---|---|---|---|
-| **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p23.0.1` — Stellar-Core v23.0.1 + Horizon v23.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[v1,v2,v3]}`, FAILURE_SAFETY=1 |
+| **Pi Mainnet Anchor** | `triumph-pi-mainnet-node` | 31501 / 31502 / 31503 | Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0-RC1` — Stellar-Core v24.0.0 + Horizon v24.0.0, network passphrase **`Pi Network`**, quorum `{t:2, v:[v1,v2,v3]}`, FAILURE_SAFETY=1 |
 | **Central Supernode (SCP Backbone / Motherboard)** | `triumph-central-node` (alias of `triumph-governance-shield`) | 11625 / 11626 | Stellar Consensus Protocol v23 authority — public key `GA6Z5...IZCGL7V`, role=`supernode`, backbone=`true`, **SCP_REQUIRE_PQ_SIGNATURE=true**, `SUPERNODE_ROLE=primary` |
 | **Apex-Quantum Peer Supernode** | `triumph-supernode-peer-2` (alias `triumph-apex-quantum-peer`) | 11626 | Mutually powers `triumph-central-node` — both register each other on `/supernode/join`, both poll `/supernode/peers` every 15s. Any node that POSTs `/supernode/join` is auto-upgraded to **APEX-QUANTUM-NODE** with `boost_factor = peer_count + 1`, scaling the entire mesh |
 | **Quantum Intel Fortress** | `triumph-quantum-intel-fortress` | 8090 / 8091 / 8094 / 8096 / 8098 | Real `liboqs` PQ engine — **CRYSTALS-Kyber-1024 (ML-KEM-1024) + CRYSTALS-Dilithium-5 (ML-DSA-87) + SPHINCS+-SHAKE-256f**; ML credit engine, dual-value oracle, and QPU bridge co-located |
@@ -682,7 +682,7 @@ CENTRAL_NODE_PUBLIC_KEY:       GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKP
 CENTRAL_NODE_ROLE:             supernode
 CENTRAL_NODE_BACKBONE:         "true"
 PI_SUPERNODE_MODE:             "true"
-STELLAR_CONSENSUS_PROTOCOL:    scp-v23
+STELLAR_CONSENSUS_PROTOCOL:    scp-v24
 SCP_REQUIRE_PQ_SIGNATURE:      "true"
 
 # Quantum
