@@ -39,9 +39,24 @@ PI_NODE_PEER_PORT= int(os.getenv("PI_NODE_PEER_PORT", "31402"))
 STELLAR_CORE_PORT= int(os.getenv("STELLAR_CORE_PORT", "1570"))
 STELLAR_CORE_URL = os.getenv("STELLAR_CORE_URL", f"http://{PI_NODE_HOST}:{STELLAR_CORE_PORT}")
 
+# Network-aware default for the host-side Pi Desktop fallback.
+# Pi Desktop testnet2 publishes Horizon on host port 31401; Pi Desktop
+# mainnet publishes Horizon on host port 31501. Picking the wrong one made
+# the bridge silently fall through to the public api.mainnet.minepi.com
+# endpoint and report 'reachable' even when the local node was healthy.
+PI_NETWORK_MODE  = os.getenv("PI_NETWORK_MODE", "mainnet").lower()
+_DEFAULT_HOST_FALLBACK_PORT = 31501 if PI_NETWORK_MODE == "mainnet" else 31401
+_DEFAULT_PUBLIC_FALLBACK = (
+    "https://api.mainnet.minepi.com" if PI_NETWORK_MODE == "mainnet"
+    else "https://api.testnet.minepi.com"
+)
+
 HORIZON_URL      = f"http://{PI_NODE_HOST}:{PI_NODE_API_PORT}"
-HORIZON_FALLBACK_URL = os.getenv("PI_NODE_FALLBACK_URL", "http://host.docker.internal:31401")
-HORIZON_PUBLIC_FALLBACK_URL = os.getenv("PI_NODE_PUBLIC_FALLBACK_URL", "https://api.mainnet.minepi.com")
+HORIZON_FALLBACK_URL = os.getenv(
+    "PI_NODE_FALLBACK_URL",
+    f"http://host.docker.internal:{_DEFAULT_HOST_FALLBACK_PORT}",
+)
+HORIZON_PUBLIC_FALLBACK_URL = os.getenv("PI_NODE_PUBLIC_FALLBACK_URL", _DEFAULT_PUBLIC_FALLBACK)
 CENTRAL_NODE_URL = os.getenv("CENTRAL_NODE_URL", "http://triumph-central-node:11626")
 REDIS_URL        = os.getenv("REDIS_URL",        "redis://triumph-redis:6379")
 POLL_INTERVAL    = float(os.getenv("POLL_INTERVAL_S", "5"))

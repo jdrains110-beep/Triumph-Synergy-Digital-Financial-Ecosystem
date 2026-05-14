@@ -34,10 +34,12 @@ data:
 
   # ── Peer mesh ──────────────────────────────────────────────────────────────
   # Format: name1=https://host:8099,name2=https://host:8099,...
-  # Replace the public hostnames below with whatever you publish your two
-  # Triumph Synergy Docker Desktop instances on (e.g. via Cloudflare Tunnel
-  # or Tailscale) so the central K8s SAIB can reach them.
-  SAIB_PEERS: "docker-desktop-a=https://saib-desktop-a.triumphsynergy.example:8099,docker-desktop-b=https://saib-desktop-b.triumphsynergy.example:8099"
+  # Default to the in-cluster apex/sovereign-fortress services so peering
+  # works out-of-the-box when only the central K8s cluster is deployed.
+  # Override at apply time to add external Docker Desktop peers reachable
+  # via Cloudflare Tunnel / Tailscale, e.g.:
+  #   SAIB_PEERS="central=http://triumph-sovereign-fortress.triumph.svc.cluster.local:8099,desktop-a=https://<your-tunnel-a>:8099"
+  SAIB_PEERS: "central=http://triumph-sovereign-fortress.triumph.svc.cluster.local:8099,apex=http://triumph-apex-services.triumph.svc.cluster.local:8099"
   SAIB_PEER_NAME: "central-supernode"
   SAIB_PEER_POLL_S: "30"
   SAIB_PEER_OFFLINE_S: "120"

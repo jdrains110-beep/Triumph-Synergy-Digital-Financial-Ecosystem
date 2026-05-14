@@ -72,6 +72,14 @@ x-pi-env: &pi-env
   PI_NODE_PORT: ${PI_NODE_PORT:-31502}
   PI_NODE_API_PORT: ${PI_NODE_API_PORT:-8000}
   PI_NODE_PEER_PORT: ${PI_NODE_PEER_PORT:-31502}
+  # ── App-layer node addressing (lib/pi-node/registry.ts) ──
+  # Defaults to the in-compose mainnet node container; override to
+  # host.docker.internal when running against a host-side Pi Desktop node,
+  # or to the public mainnet API for cloud-only deploys.
+  PI_NODE_ROOT_HOST: ${PI_NODE_ROOT_HOST:-triumph-pi-mainnet-node}
+  PI_NODE_ROOT_REGION: ${PI_NODE_ROOT_REGION:-us-east-1}
+  PI_NODE_VERSION_DISPLAY: ${PI_NODE_VERSION_DISPLAY:-5.4}
+  PI_NODE_ROOT_PORTS: ${PI_NODE_ROOT_PORTS:-31501,31502,31503,31500,31404,31405,31406,31407,31408,31409}
   # ── ULTIMATE SUPERIOR APEX-QUANTUM MESH (May 3, 2026) ──────────────────
   # Auto-injected into every chain-touching service via `<<: *pi-env` so
   # the entire ecosystem speaks one language: SCP-v24 + PQ-required +
@@ -1060,9 +1068,9 @@ services:
     container_name: triumph-pi-mainnet-node
     restart: always
     profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
-    shm_size: 512m   # stellar-core uses /dev/shm for SCP bucket merges; 256m causes SIGABRT during catchup
-    mem_limit: 7g    # raised from 4g: catchup on AMD64 emulation spikes 5-6GB during bucket merge
-    mem_reservation: 2g
+    shm_size: 1g     # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during P24 catchup on AMD64 emulation
+    mem_limit: 8g    # raised from 7g: P24 catchup on AMD64 emulation occasionally peaks ~7.4GB during bucket-list rebuild
+    mem_reservation: 3g
     cpus: 1.5  # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
