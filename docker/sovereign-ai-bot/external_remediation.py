@@ -157,6 +157,30 @@ async def _github_open_issue(client, target_name: str, reason: str) -> Remediati
         )
 
     title = f"[SAIB] external target degraded: {target_name}"
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json",
+    }
+
+    # DEDUP: bail out if an open issue with the same title already exists.
+    # Survives SAIB restart unlike the in-memory cooldown.
+    try:
+        owner_repo = GITHUB_REPO
+        search_q = f'repo:{owner_repo} is:issue is:open in:title "{title}"'
+        search_url = f"https://api.github.com/search/issues?q={search_q}"
+        sresp = await client.get(search_url, headers=headers, timeout=15.0)
+        if sresp.status_code == 200:
+            items = sresp.json().get("items", [])
+            for it in items:
+                if it.get("title") == title:
+                    return RemediationOutcome(
+                        target=target_name, action="github-issue", ok=True,
+                        detail=f"existing open issue #{it.get('number')} (dedup)",
+                        skipped=True,
+                    )
+    except Exception as exc:  # noqa: BLE001
+        log.warning("[SAIB-REMEDIATION] dedup search failed for %s: %s", target_name, exc)
+
     body = (
         "SAIB external probe flagged a degraded mainnet platform.\n\n"
         f"- target: `{target_name}`\n"
@@ -167,10 +191,6 @@ async def _github_open_issue(client, target_name: str, reason: str) -> Remediati
         "the sole permitted testnet artifact and is unaffected by this alert."
     )
     url = f"https://api.github.com/repos/{GITHUB_REPO}/issues"
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github+json",
-    }
     payload = {"title": title, "body": body, "labels": [ISSUE_LABEL]}
     try:
         resp = await client.post(url, headers=headers, json=payload, timeout=15.0)

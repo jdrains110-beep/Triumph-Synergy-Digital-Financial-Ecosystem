@@ -227,6 +227,8 @@
     "braces": ">=3.0.3",
     "serialize-javascript": ">=6.0.2",
     "esbuild": ">=0.25.0",
-    "next>postcss": ">=8.5.10"
+    "next": {
+      "postcss": ">=8.5.10"
+    }
   }
 }

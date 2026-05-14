@@ -48,6 +48,8 @@ jobs:
           export PI_INTERNAL_API_KEY=dummy
           export PI_MAINNET_API_KEY=dummy
           export PI_API_SECRET=dummy
+          export AUTH_SECRET=dummy
+          export NEXTAUTH_SECRET=dummy
           docker compose config --quiet
           echo "✅ docker-compose.yml is valid"
 
