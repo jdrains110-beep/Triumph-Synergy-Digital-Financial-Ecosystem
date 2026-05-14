@@ -44,8 +44,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, 307);
   }
 
-  // Create response and refresh Supabase auth session
-  const response = NextResponse.next();
+  // Create response and refresh Supabase auth session.
+  // Generate per-request nonce up front so we can forward it to the server
+  // component tree (via x-csp-nonce request header) and also emit it on the
+  // response CSP. This lets the root layout attach `nonce={...}` to the Pi SDK
+  // <script> tags so they pass strict CSP even with 'strict-dynamic'.
+  const nonce = crypto
+    .getRandomValues(new Uint8Array(16))
+    .reduce((acc, b) => acc + b.toString(16).padStart(2, "0"), "");
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-csp-nonce", nonce);
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   try {
     const supabase = createMiddlewareSupabase(request, response);
@@ -94,10 +107,8 @@ export async function middleware(request: NextRequest) {
     "Cache-Control",
     "private, no-store, no-cache, must-revalidate, max-age=0"
   );
-  // Generate per-request nonce for inline scripts (CSP3)
-  const nonce = crypto
-    .getRandomValues(new Uint8Array(16))
-    .reduce((acc, b) => acc + b.toString(16).padStart(2, "0"), "");
+  // Generate per-request nonce for inline scripts (CSP3) — forwarded via
+  // request header above so the layout can attach nonce={...} to <script> tags.
   response.headers.set("X-CSP-Nonce", nonce);
   response.headers.set(
     "Content-Security-Policy",

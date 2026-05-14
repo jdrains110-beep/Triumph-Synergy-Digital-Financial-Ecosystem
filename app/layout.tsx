@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import { Toaster } from "sonner";
 import { LocaleProvider } from "@/components/locale-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -77,6 +78,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getRequestLocale();
+  // Read per-request CSP nonce forwarded by middleware so that the Pi SDK
+  // <script> tags pass `script-src 'strict-dynamic' 'nonce-...'`.
+  const nonce = (await headers()).get("x-csp-nonce") ?? undefined;
 
   return (
     <html
@@ -90,6 +94,7 @@ export default async function RootLayout({
     >
       <head>
         <script
+          nonce={nonce}
           // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
@@ -97,6 +102,7 @@ export default async function RootLayout({
         />
 
         <script
+          nonce={nonce}
           crossOrigin="anonymous"
           src="https://sdk.minepi.com/pi-sdk.js"
           type="text/javascript"
@@ -104,6 +110,7 @@ export default async function RootLayout({
 
         {/* Pi SDK Initialization - Works in all contexts (Pi Browser, Pi App Studio, regular browser) */}
         <script
+          nonce={nonce}
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Pi SDK initialization
           dangerouslySetInnerHTML={{
             __html: `
@@ -148,6 +155,14 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
   
   console.log('[Pi SDK] In Pi Browser:', isPiBrowser, 'User-Agent:', ua.substring(0, 80));
 
+  // Pi App Studio's verification crawler does not advertise a Pi Browser UA,
+  // so we cannot gate authenticate() on isPiBrowser. Instead, we always attempt
+  // Pi.authenticate(['username']) once Pi.init() resolves — Pi.init() only
+  // resolves successfully when window.Pi is genuinely present (Pi Browser /
+  // Pi App Studio webview), and Pi.authenticate() will safely reject in any
+  // other context.
+  var shouldAutoAuth = true;
+
   var maxTries = 50;
   var tries = 0;
   var initAttempted = false;
@@ -181,9 +196,11 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
             console.log('[Pi SDK] Pi.init() completed');
             window.__piInitialization.status = 'initialized';
             
-            // Auto-authenticate on load if in Pi Browser context.
-            // Use 'username' scope only — 'payments' is requested at payment time.
-            if (isPiBrowser) {
+            // Auto-authenticate on load whenever Pi.init() succeeded. Pi.init()
+            // only resolves when window.Pi is genuinely available, so this gate
+            // is sufficient — and it is what Pi App Studio's verifier expects
+            // to observe to mark the app as "Pi sign-in detected".
+            if (shouldAutoAuth) {
               return window.Pi.authenticate(['username'], function(payment) {
                 console.log('[Pi SDK] Incomplete payment found during init:', payment);
               });
