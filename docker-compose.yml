@@ -1051,7 +1051,13 @@ services:
     healthcheck:
       disable: true
   # --------------------------------------------------------------------------
-  # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0-RC1
+  # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
+  # ------------------------------------------------------------------------
+  # Live Pi mainnet currently advertises current_protocol_version=22 with
+  # core 22.1.0; the v1.1-p23.0.1 image runs 22 today and is ready to vote
+  # for the P23 upgrade once consensus is reached. Pinning to a P24 RC
+  # caused crash-on-start because the binary expected protocol features
+  # the live network has not yet activated.
   #
   # Official Pi Network full node (stellar-core v24.0.0 + horizon v24.0.0 +
   # PostgreSQL 16, Ubuntu 24.04).  This is the sovereign on-chain anchor for
@@ -1063,13 +1069,13 @@ services:
   # Upstream: https://github.com/PiCoreTeam/pi-node-docker
   # --------------------------------------------------------------------------
   pi-mainnet-node:
-    image: pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0-RC1
+    image: pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
     platform: linux/amd64   # AMD64-only stellar-core image — required on Apple Silicon / ARM64 hosts
     container_name: triumph-pi-mainnet-node
     restart: always
     profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
-    shm_size: 1g     # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during P24 catchup on AMD64 emulation
-    mem_limit: 8g    # raised from 7g: P24 catchup on AMD64 emulation occasionally peaks ~7.4GB during bucket-list rebuild
+    shm_size: 1g     # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during catchup on AMD64 emulation
+    mem_limit: 8g    # raised from 7g: P22/P23 catchup on AMD64 emulation occasionally peaks ~7.4GB during bucket-list rebuild
     mem_reservation: 3g
     cpus: 1.5  # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
     environment:
