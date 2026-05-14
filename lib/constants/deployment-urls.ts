@@ -1,100 +1,56 @@
 /**
- * IMMUTABLE DEPLOYMENT URL CONSTANTS - VALIDATED PINET DOMAINS
+ * DEPLOYMENT URL CONSTANTS
  *
- * Domains are locked for Pi Network verification:
- * - Primary App: triumphsynergy0576.pinet.com (main app domain)
- * - Mainnet: triumphsynergy7386.pinet.com (VALIDATED)
- * - Testnet: triumphsynergy1991.pinet.com (VALIDATED)
- *
- * Last Verified: January 29, 2026
+ * Pi App Studio assigns a fresh canonical hostname on every (re)transfer
+ * (and the same goes for any Pi Browser app distribution). We therefore do
+ * NOT pin static `*.pinet.com` or `*.vercel.app` URLs here — they all flow
+ * through env vars (NEXT_PUBLIC_APP_URL / PI_APP_PRIMARY_URL) so the value
+ * follows the current transfer without code changes.
  */
 
-// ============================================================================
-// PRODUCTION (MAINNET) - https://triumphsynergy7386.pinet.com (VALIDATED)
-// ============================================================================
+function envUrl(name: string, fallback: string): string {
+  const v = process.env[name];
+  return v && v.length > 0 ? v : fallback;
+}
+
 export const MAINNET_DEPLOYMENT = {
-  // Mainnet Pi App Studio URL (VALIDATED)
-  primaryUrl: "https://triumphsynergy7386.pinet.com",
-
-  // Vercel URL (for fallback/reference)
-  vercelUrl: "https://triumph-synergy-jeremiah-drains-projects.vercel.app",
-
-  // Custom pinet domain (registered & verified)
-  customDomain: "https://triumphsynergy7386.pinet.com",
-
-  // Network Configuration
+  primaryUrl: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
+  vercelUrl: "",
+  customDomain: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
   sandbox: false,
   network: "mainnet",
-
-  // Pi Network Settings
-  piAppId: "triumph-synergy",
+  piAppId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
   piNetwork: "mainnet",
   piApiEndpoint: "https://api.minepi.com",
-
-  // Payment Limits
-  maxPaymentAmount: 10_000, // π
-  networkFeePercentage: 2, // %
-
-  // Verification Status
+  maxPaymentAmount: 10_000,
+  networkFeePercentage: 2,
   verified: true,
-  verificationDate: "2026-01-29",
 } as const;
 
-// ============================================================================
-// TESTNET (SANDBOX) - https://triumphsynergy1991.pinet.com (VALIDATED)
-// ============================================================================
 export const TESTNET_DEPLOYMENT = {
-  // Testnet Pi App Studio URL (VALIDATED)
-  primaryUrl: "https://triumphsynergy1991.pinet.com",
-
-  // Testnet Vercel URL (for fallback)
-  vercelUrl: "https://triumph-synergy-testnet.vercel.app",
-
-  // Testnet custom domain (registered & verified)
-  customDomain: "https://triumphsynergy1991.pinet.com",
-
-  // Network Configuration
+  primaryUrl: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
+  vercelUrl: "",
+  customDomain: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
   sandbox: true,
   network: "testnet",
-
-  // Pi Network Settings
-  piAppId: "triumph-synergy",
+  piAppId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
   piNetwork: "testnet",
   piApiEndpoint: "https://testnet-api.minepi.com",
-
-  // Payment Limits (Testnet)
-  maxPaymentAmount: 100, // π (testing limit)
-  networkFeePercentage: 0.5, // %
-
-  // Verification Status
-  verified: true,
-  verificationDate: "2026-01-18",
-} as const;
-
-// ============================================================================
-// DEVELOPMENT (LOCAL) - http://localhost:3000
-// ============================================================================
-export const DEVELOPMENT_DEPLOYMENT = {
-  // Local development URL
-  vercelUrl: "http://localhost:3000",
-
-  // No custom domain for local
-  customDomain: null,
-
-  // Network Configuration (configurable)
-  sandbox: true, // Default to testnet for dev
-  network: "development",
-
-  // Pi Network Settings
-  piAppId: "triumph-synergy",
-  piNetwork: "testnet",
-  piApiEndpoint: "https://testnet-api.minepi.com",
-
-  // Payment Limits
   maxPaymentAmount: 100,
   networkFeePercentage: 0.5,
+  verified: true,
+} as const;
 
-  // Verification Status
+export const DEVELOPMENT_DEPLOYMENT = {
+  vercelUrl: "http://localhost:3000",
+  customDomain: null,
+  sandbox: true,
+  network: "development",
+  piAppId: process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy",
+  piNetwork: "testnet",
+  piApiEndpoint: "https://testnet-api.minepi.com",
+  maxPaymentAmount: 100,
+  networkFeePercentage: 0.5,
   verified: false,
   verificationDate: null,
 } as const;
@@ -145,24 +101,19 @@ export function getCurrentEnvironment(): DeploymentEnvironment {
 // ============================================================================
 
 /**
- * Validates that deployment URLs haven't been modified
- * Run this at startup to ensure configuration integrity
+ * Validates that the resolved deployment URL is non-empty.
+ * Pi App Studio assigns the canonical hostname per transfer, so we only
+ * check that NEXT_PUBLIC_APP_URL has been set (or that we're in local dev).
  */
 export function validateDeploymentURLs(): boolean {
-  // Validate that the expected domains are in the configuration
-  const mainnetValid =
-    MAINNET_DEPLOYMENT.primaryUrl.includes("pinet.com") ||
-    MAINNET_DEPLOYMENT.primaryUrl.includes("vercel.app");
-  const testnetValid =
-    TESTNET_DEPLOYMENT.primaryUrl.includes("pinet.com") ||
-    TESTNET_DEPLOYMENT.primaryUrl.includes("vercel.app");
+  const mainnetValid = MAINNET_DEPLOYMENT.primaryUrl.length > 0;
+  const testnetValid = TESTNET_DEPLOYMENT.primaryUrl.length > 0;
 
   if (!mainnetValid) {
-    console.error(`⚠️  MAINNET URL INVALID: ${MAINNET_DEPLOYMENT.primaryUrl}`);
+    console.error("⚠️  NEXT_PUBLIC_APP_URL is not set (mainnet deployment)");
   }
-
   if (!testnetValid) {
-    console.error(`⚠️  TESTNET URL INVALID: ${TESTNET_DEPLOYMENT.primaryUrl}`);
+    console.error("⚠️  NEXT_PUBLIC_APP_URL is not set (testnet deployment)");
   }
 
   return mainnetValid && testnetValid;

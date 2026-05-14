@@ -8,18 +8,14 @@ export const PI_NODE_TCP_PORTS = Array.from({ length: 10 }, (_, index) =>
   Number(31400 + index)
 );
 
-// Supported domains for Pi App Studio integration
+// Pi App Studio assigns a fresh canonical hostname on every transfer, so
+// we no longer maintain a hardcoded SUPPORTED_DOMAINS map. The runtime
+// host (window.location.hostname / request.headers.host) is the source of
+// truth; PI_NODE_ROOT_HOST env var overrides for the pi-node root URL.
 export const SUPPORTED_DOMAINS = {
-  mainnet: {
-    app: "triumph-synergy.vercel.app",
-    dev: "triumphsynergy0576.pinet.com",
-    alt: "triumphsynergy7386.pinet.com",
-  },
-  testnet: {
-    app: "triumph-synergy-testnet.vercel.app",
-    dev: "triumphsynergy1991.pinet.com",
-  },
-};
+  mainnet: { app: "", dev: "", alt: "" },
+  testnet: { app: "", dev: "" },
+} as const;
 
 const capabilitiesSchema = z.object({
   consensus: z.boolean().optional(),
@@ -105,7 +101,10 @@ function getDefaultCapabilities(role: string): PiNodeCapabilities {
 }
 
 function buildRootNode(): PiNode {
-  const host = process.env.PI_NODE_ROOT_HOST || "triumph-synergy.vercel.app";
+  // No hardcoded fallback — set PI_NODE_ROOT_HOST to the current Pi App
+  // Studio domain at deploy time. Empty host marks the node "unconfigured"
+  // (handled by the status check below).
+  const host = process.env.PI_NODE_ROOT_HOST || "";
   const ports = parseEnvPorts();
 
   return {

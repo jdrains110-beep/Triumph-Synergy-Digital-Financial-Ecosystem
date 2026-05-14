@@ -143,12 +143,12 @@
   },
 
   "urls": {
-    "production": "https://triumph-synergy.vercel.app",
-    "development_mainnet": "https://triumphsynergy0576.pinet.com",
-    "staging": "https://triumph-synergy-staging.vercel.app",
+    "production": "",
+    "development_mainnet": "",
+    "staging": "",
     "development": "http://localhost:3000",
-    "documentation": "https://github.com/jdrains110-beep/triumph-synergy/tree/main/docs",
-    "support": "https://github.com/jdrains110-beep/triumph-synergy/issues",
+    "documentation": "https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem/tree/main/docs",
+    "support": "https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem/issues",
     "privacy_policy": "/legal/privacy",
     "terms_of_service": "/legal/terms"
   },
@@ -156,7 +156,7 @@
   "platform_bridge": {
     "enabled": true,
     "version": "2.0.0",
-    "primary_domain": "https://triumphsynergy0576.pinet.com",
+    "primary_domain": "",
     "description": "Superior platform bridge connecting Pi Desktop and Pi App Studio to Docker Desktop ecosystem",
     "discovery": "/api/pi/platform",
     "handshake": "/api/pi/platform/handshake",

@@ -1,12 +1,11 @@
 # Pi Domain Verification
-# This file verifies domain ownership for Pi Network
-# Generated for Triumph Synergy
-
-Domain: triumph-synergy.vercel.app
-Domain: triumphsynergy0576.pinet.com
-Domain: triumphsynergy7386.pinet.com
-Domain: triumphsynergy1991.pinet.com
-Domain: triumph-synergy-testnet.vercel.app
+# Pi App Studio assigns this app a fresh canonical hostname on every transfer.
+# The runtime hostname is the source of truth; we no longer pin a static list
+# here. Pi App Studio's own verifier validates ownership via:
+#   - /validation-key.txt
+#   - /validation-key-mainnet.txt
+#   - /validation-key-testnet.txt
+#   - /api/pi-verification
 
 App: triumph-synergy
 Version: 1.0.0

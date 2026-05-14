@@ -42,33 +42,20 @@ export function getVerifiedDeploymentURLs() {
 }
 
 /**
- * Checks if running on verified mainnet deployment
- * Validated mainnet domain: triumphsynergy7386.pinet.com
+ * Network-mode helpers driven entirely by NEXT_PUBLIC_PI_SANDBOX. Pi App
+ * Studio rotates the canonical hostname on every fresh transfer, so we no
+ * longer compare against any hardcoded domain.
  */
 export function isMainnetDeployment(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  const currentUrl = window.location.origin;
-  const expectedMainnetUrl = "https://triumphsynergy7386.pinet.com";
-
-  return currentUrl === expectedMainnetUrl;
+  if (typeof window === "undefined") return false;
+  if (isDevelopmentDeployment()) return false;
+  return process.env.NEXT_PUBLIC_PI_SANDBOX !== "true";
 }
 
-/**
- * Checks if running on verified testnet deployment
- * Validated testnet domain: triumphsynergy1991.pinet.com
- */
 export function isTestnetDeployment(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  const currentUrl = window.location.origin;
-  const expectedTestnetUrl = "https://triumphsynergy1991.pinet.com";
-
-  return currentUrl === expectedTestnetUrl;
+  if (typeof window === "undefined") return false;
+  if (isDevelopmentDeployment()) return false;
+  return process.env.NEXT_PUBLIC_PI_SANDBOX === "true";
 }
 
 /**

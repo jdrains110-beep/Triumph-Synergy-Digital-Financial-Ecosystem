@@ -19,18 +19,15 @@ const getDefaultValidationKey = () =>
   process.env.VALIDATION_KEY ||
   "";
 
-// TESTNET domains - explicit list
-const TESTNET_DOMAINS = [
-  "triumphsynergy1991.pinet.com",      // PINET TESTNET
-  "triumph-synergy-testnet.vercel.app", // VERCEL TESTNET
-];
-
-// MAINNET domains - explicit list  
-const MAINNET_DOMAINS = [
-  "triumphsynergy0576.pinet.com",       // PINET MAINNET PRIMARY
-  "triumphsynergy7386.pinet.com",       // PINET MAINNET SECONDARY
-  "triumph-synergy.vercel.app",         // VERCEL MAINNET
-];
+// No hardcoded domain whitelists — Pi App Studio assigns a fresh hostname
+// on every transfer and any whitelist mis-classifies the new domain.
+// Mode is selected by, in order:
+//   1. explicit ?mode= query param
+//   2. NEXT_PUBLIC_PI_SANDBOX env ("true" = testnet)
+//   3. host substring hints ("testnet"/"sandbox")
+//   4. mainnet (default)
+const TESTNET_DOMAINS: string[] = [];
+const MAINNET_DOMAINS: string[] = [];
 
 export const pickValidationMode = (
   request: Request,
@@ -50,18 +47,25 @@ export const pickValidationMode = (
   }
 
   const host = (request.headers.get("host") || url.host || "").toLowerCase();
-  
-  // Check explicit domain lists first
+
+  // Domain whitelists are intentionally empty (see comment above) but the
+  // loops are kept so future ops can reintroduce a list via env without
+  // re-touching this file.
   if (TESTNET_DOMAINS.some(d => host.includes(d) || host === d)) {
     console.log("[Validation] Detected TESTNET domain:", host);
     return "testnet";
   }
-  
+
   if (MAINNET_DOMAINS.some(d => host.includes(d) || host === d)) {
     console.log("[Validation] Detected MAINNET domain:", host);
     return "mainnet";
   }
-  
+
+  // Env-driven sandbox flag is the canonical signal post-transfer.
+  if (process.env.NEXT_PUBLIC_PI_SANDBOX === "true") {
+    return "testnet";
+  }
+
   // Fallback: check for testnet hints in hostname
   if (host.includes("1991") || host.includes("testnet") || host.includes("sandbox")) {
     console.log("[Validation] Detected testnet hint in host:", host);

@@ -89,10 +89,12 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           {
+            // No hardcoded origin pin — Pi App Studio rotates the canonical
+            // hostname on every fresh app transfer. Configure via
+            // PI_ACAO_ORIGIN at deploy time, or fall back to wildcard so a
+            // freshly-issued domain is never blocked.
             key: "Access-Control-Allow-Origin",
-            value: process.env.NODE_ENV === "production"
-              ? "https://triumphsynergy0576.pinet.com"
-              : "*",
+            value: process.env.PI_ACAO_ORIGIN || "*",
           },
           // Remove restrictive COOP/COEP headers that interfere with Pi Browser
           // {
