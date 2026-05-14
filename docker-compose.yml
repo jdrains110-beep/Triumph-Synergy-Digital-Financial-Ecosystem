@@ -63,7 +63,7 @@ x-pi-env: &pi-env
   PI_SUPERNODE_MODE: "true"
   STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.mainnet.minepi.com}
   STELLAR_NETWORK_PASSPHRASE: ${STELLAR_NETWORK_PASSPHRASE:-Pi Network}
-  CENTRAL_NODE_URL: http://triumph-central-node:11626
+  CENTRAL_NODE_URL: http://triumph-central-node:8083
   CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
   # Pi Node accessible via pi-bridge network (container name) and host.
   # Default target is the self-hosted MAINNET node (triumph-pi-mainnet-node).
@@ -188,7 +188,7 @@ services:
       PI_POLL_RETRIES: "3"
       PI_POLL_RETRY_DELAY_S: "2.0"
       POLL_INTERVAL_S: "15"
-      CENTRAL_NODE_URL: http://triumph-central-node:11626
+      CENTRAL_NODE_URL: http://triumph-central-node:8083
       # Direct container name — not alias — avoids DNS resolution failure if alias not ready
       QUANTUM_SHIELD_URL: http://triumph-quantum-intel-fortress:8094
       SOVEREIGN_PQ_ENFORCE: "true"
@@ -1075,8 +1075,12 @@ services:
     restart: always
     profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
     shm_size: 1g     # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during catchup on AMD64 emulation
-    mem_limit: 8g    # raised from 7g: P22/P23 catchup on AMD64 emulation occasionally peaks ~7.4GB during bucket-list rebuild
-    mem_reservation: 3g
+    # Docker Desktop on Apple Silicon typically allocates 6-8 GB; cap mainnet-node at 4.5g
+    # so postgres/redis/bridge/governance-shield can coexist. The trade-off is slower
+    # initial catchup (it'll evict bucket pages instead of holding them in RAM); the
+    # node still syncs and serves Horizon. Bump to 7g+ if you raise Docker Desktop RAM.
+    mem_limit: 4500m
+    mem_reservation: 2g
     cpus: 1.5  # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}

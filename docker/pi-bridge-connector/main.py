@@ -57,7 +57,7 @@ HORIZON_FALLBACK_URL = os.getenv(
     f"http://host.docker.internal:{_DEFAULT_HOST_FALLBACK_PORT}",
 )
 HORIZON_PUBLIC_FALLBACK_URL = os.getenv("PI_NODE_PUBLIC_FALLBACK_URL", _DEFAULT_PUBLIC_FALLBACK)
-CENTRAL_NODE_URL = os.getenv("CENTRAL_NODE_URL", "http://triumph-central-node:11626")
+CENTRAL_NODE_URL = os.getenv("CENTRAL_NODE_URL", "http://triumph-central-node:8083")
 REDIS_URL        = os.getenv("REDIS_URL",        "redis://triumph-redis:6379")
 POLL_INTERVAL    = float(os.getenv("POLL_INTERVAL_S", "5"))
 POLL_RETRIES     = int(os.getenv("PI_POLL_RETRIES", "2"))
@@ -276,17 +276,29 @@ async def _poll_pi_node() -> None:
 
 
 async def _poll_central_node() -> None:
-    """Check central node liveness."""
+    """Check central node liveness.
+
+    The central/supernode service (governance-shield) does not embed its own
+    stellar-core; it consumes ledger state via this bridge. Probe its
+    application /health endpoint, falling back to stellar-core /info for
+    deployments that do embed core.
+    """
     async with _client() as c:
-        try:
-            r = await c.get(f"{CENTRAL_NODE_URL}/info")
-            state["central_node_reachable"] = r.status_code == 200
-            if r.status_code == 200:
-                state["central_node_info"] = r.json()
-            central_sync_gauge.set(1 if r.status_code == 200 else 0)
-        except Exception:
-            state["central_node_reachable"] = False
-            central_sync_gauge.set(0)
+        for path in ("/health", "/info"):
+            try:
+                r = await c.get(f"{CENTRAL_NODE_URL}{path}")
+                if r.status_code == 200:
+                    state["central_node_reachable"] = True
+                    try:
+                        state["central_node_info"] = r.json()
+                    except Exception:
+                        state["central_node_info"] = {"endpoint": path, "status": "ok"}
+                    central_sync_gauge.set(1)
+                    return
+            except Exception:
+                continue
+        state["central_node_reachable"] = False
+        central_sync_gauge.set(0)
 
 
 async def _background_poll() -> None:
