@@ -17,9 +17,9 @@ const APP_ID = process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy";
 const PLATFORM_VERSION = "2.0.0";
 
 const DOMAIN_MAP = {
-  primary: "triumphsynergy0576.pinet.com",
-  testnet: "triumphsynergy1991.pinet.com",
-  vercel: "triumph-synergy.vercel.app",
+  primary: "triumphsynergyab2099.pinet.com",
+  testnet: "triumphsynergyab2099.pinet.com",
+  vercel: "triumphsynergyab2099.pinet.com",
 };
 
 /** In-memory session store (ephemeral — survives container lifetime). */

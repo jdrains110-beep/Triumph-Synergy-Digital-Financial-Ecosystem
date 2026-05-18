@@ -24,43 +24,24 @@ export function getPiInitializationScript(): string {
     startTime: Date.now()
   };
 
-  // Helper to get domain info with FULL DOMAIN URL MATCHING
+  // Helper to get domain info with canonical domain mapping
   function getDomainInfo() {
     const hostname = window.location.hostname;
     let isSandbox = false;
     let network = 'mainnet';
     
-    // ============================================
-    // EXPLICIT FULL DOMAIN URL MATCHING
-    // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
-    // ============================================
-    
-    // PINET TESTNET
-    if (hostname === 'triumphsynergy1991.pinet.com') {
+    // MAINNET (Pi Network primary)
+    if (hostname === 'triumphsynergyab2099.pinet.com') {
+      isSandbox = false;
+      network = 'mainnet';
+    }
+    // TESTNET / STAGING (Replit)
+    else if (hostname === 'triumph-synergy.replit.app') {
       isSandbox = true;
       network = 'testnet';
     }
-    // PINET MAINNET
-    else if (hostname === 'triumphsynergy7386.pinet.com') {
-      isSandbox = false;
-      network = 'mainnet';
-    }
-    else if (hostname === 'triumphsynergy0576.pinet.com') {
-      isSandbox = false;
-      network = 'mainnet';
-    }
-    // VERCEL MAINNET
-    else if (hostname === 'triumph-synergy.vercel.app') {
-      isSandbox = false;
-      network = 'mainnet';
-    }
-    // VERCEL TESTNET (EXPLICIT)
-    else if (hostname === 'triumph-synergy-testnet.vercel.app') {
-      isSandbox = true;
-      network = 'testnet';
-    }
-    // Fallback: Other vercel.app = testnet
-    else if (hostname.endsWith('.vercel.app')) {
+    // Fallback: Other .replit.app / .vercel.app = testnet (preview/staging)
+    else if (hostname.endsWith('.replit.app') || hostname.endsWith('.vercel.app')) {
       isSandbox = true;
       network = 'testnet';
     }

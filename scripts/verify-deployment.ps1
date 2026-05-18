@@ -15,7 +15,7 @@ Write-Host "══════════════════════�
 Write-Host ""
 
 # Configuration
-$VERCEL_URL = "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app"
+$VERCEL_URL = "https://triumphsynergyab2099.pinet.com"
 $GITHUB_REPO = "jdrains110-beep/triumph-synergy"
 $SUPABASE_URL = "https://triumph-synergy.supabase.co"
 $STELLAR_URL = "https://horizon.stellar.org"
@@ -284,7 +284,7 @@ if ($integrationPercentage -eq 100 -and $results.Vercel.Status -like "*✅*") {
     Write-Host ""
     Write-Host "Next Steps:" -ForegroundColor Cyan
     Write-Host "  1. Check GitHub Actions: https://github.com/$GITHUB_REPO/actions" -ForegroundColor Cyan
-    Write-Host "  2. Check Vercel Dashboard: https://vercel.com/projects/triumph-synergy" -ForegroundColor Cyan
+    Write-Host "  2. Check Replit Dashboard: https://Triumph-Synergy.replit.app" -ForegroundColor Cyan
     Write-Host "  3. Verify environment variables are set in Vercel" -ForegroundColor Cyan
     exit 1
 } else {

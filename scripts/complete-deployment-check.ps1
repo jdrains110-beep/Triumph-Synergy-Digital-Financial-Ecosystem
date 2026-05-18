@@ -43,7 +43,7 @@ Write-Host ""
 Write-Host "━━━ 2. VERCEL DEPLOYMENT STATUS ━━━" -ForegroundColor Yellow
 Write-Host ""
 
-$vercelUrl = "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app"
+$vercelUrl = "https://triumphsynergyab2099.pinet.com"
 $healthUrl = "$vercelUrl/api/health"
 
 Write-Host "Checking: $vercelUrl" -ForegroundColor Cyan
@@ -252,8 +252,8 @@ if ($issues.Count -eq 0) {
     Write-Host ""
     
     if ($issues -contains "HTTP 500 Error on main URL") {
-        Write-Host "1. Set Environment Variables in Vercel Dashboard:" -ForegroundColor Cyan
-        Write-Host "   https://vercel.com/projects/triumph-synergy/settings/environment-variables" -ForegroundColor White
+        Write-Host "1. Set Environment Variables in Replit Dashboard:" -ForegroundColor Cyan
+        Write-Host "   https://Triumph-Synergy.replit.app" -ForegroundColor White
         Write-Host ""
         Write-Host "   Required secrets:" -ForegroundColor White
         Write-Host "   - PI_API_KEY" -ForegroundColor Gray
@@ -294,12 +294,12 @@ Write-Host "🔗 GitHub Actions:" -ForegroundColor Cyan
 Write-Host "   https://github.com/jdrains110-beep/triumph-synergy/actions" -ForegroundColor White
 Write-Host ""
 
-Write-Host "🔗 Vercel Dashboard:" -ForegroundColor Cyan
-Write-Host "   https://vercel.com/projects/triumph-synergy" -ForegroundColor White
+Write-Host "🔗 Replit Dashboard:" -ForegroundColor Cyan
+Write-Host "   https://Triumph-Synergy.replit.app" -ForegroundColor White
 Write-Host ""
 
 Write-Host "🔗 Vercel Environment Variables:" -ForegroundColor Cyan
-Write-Host "   https://vercel.com/projects/triumph-synergy/settings/environment-variables" -ForegroundColor White
+Write-Host "   https://Triumph-Synergy.replit.app" -ForegroundColor White
 Write-Host ""
 
 Write-Host "🔗 App URL:" -ForegroundColor Cyan

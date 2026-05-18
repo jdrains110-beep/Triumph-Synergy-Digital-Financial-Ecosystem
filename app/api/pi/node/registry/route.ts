@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
     domains: SUPPORTED_DOMAINS,
     piAppStudio: {
       appId: "triumph-synergy",
-      mainnetApp: "triumph-synergy.vercel.app",
-      mainnetDev: "triumphsynergy0576.pinet.com",
+      mainnetApp: "triumphsynergyab2099.pinet.com",
+      mainnetDev: "triumphsynergyab2099.pinet.com",
     },
   }, {
     headers: {

@@ -17,8 +17,8 @@ export async function GET() {
       pi: {
         sdk: "loaded",
         verification: {
-          domain_testnet: "triumph-synergy-testnet.vercel.app ✅",
-          domain_mainnet: "triumph-synergy.vercel.app ✅",
+          domain_testnet: "Triumph-Synergy.replit.app ✅",
+          domain_mainnet: "triumphsynergyab2099.pinet.com ✅",
         },
       },
       vercel: {

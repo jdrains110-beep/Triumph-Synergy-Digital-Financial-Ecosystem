@@ -130,15 +130,15 @@ export const PI_APP_CONFIG: PiAppConfig = {
   // ============================================
   urls: {
     // PINET DOMAINS
-    pinetTestnet: "https://triumphsynergy1991.pinet.com",
-    pinetMainnet: "https://triumphsynergy7386.pinet.com",
-    pinetPrimary: "https://triumphsynergy0576.pinet.com",
+    pinetTestnet: "https://triumphsynergyab2099.pinet.com",
+    pinetMainnet: "https://triumphsynergyab2099.pinet.com",
+    pinetPrimary: "https://triumphsynergyab2099.pinet.com",
     // VERCEL DOMAINS
-    vercelMainnet: "https://triumph-synergy.vercel.app",
-    vercelTestnet: "https://triumph-synergy-testnet.vercel.app",
+    vercelMainnet: "https://triumphsynergyab2099.pinet.com",
+    vercelTestnet: "https://Triumph-Synergy.replit.app",
     // Legacy aliases
-    production: "https://triumphsynergy0576.pinet.com",
-    staging: "https://triumph-synergy-testnet.vercel.app",
+    production: "https://triumphsynergyab2099.pinet.com",
+    staging: "https://Triumph-Synergy.replit.app",
     development: "http://localhost:3000",
   },
 };

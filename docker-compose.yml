@@ -194,9 +194,9 @@ services:
       context: docker/pi-bridge-connector
     container_name: triumph-pi-bridge-connector
     <<: *common
-    mem_limit: 256m
-    mem_reservation: 96m
-    cpus: 0.30  # quantum-managed: T5 mesh peer (bridge poller)
+    mem_limit: 384m
+    mem_reservation: 128m
+    cpus: 0.60  # quantum-managed: T5 mesh peer (bridge poller) — bumped for httpx+SSE+push loops
     environment:
       <<: [*db-env, *pi-env]
       PYTHONUNBUFFERED: "1"
@@ -214,6 +214,12 @@ services:
       # Direct container name — not alias — avoids DNS resolution failure if alias not ready
       QUANTUM_SHIELD_URL: http://triumph-quantum-intel-fortress:8094
       SOVEREIGN_PQ_ENFORCE: "true"
+      # ── Public-site bridge (Docker <-> triumphsynergyab2099.pinet.com / Triumph-Synergy.replit.app)
+      # Outbound only — works behind NAT/CGNAT. Set PUBLIC_BRIDGE_TOKEN to enable.
+      PUBLIC_BRIDGE_URLS: ${PUBLIC_BRIDGE_URLS:-https://triumphsynergyab2099.pinet.com,https://Triumph-Synergy.replit.app}
+      PUBLIC_BRIDGE_TOKEN: ${PUBLIC_BRIDGE_TOKEN:-}
+      PUBLIC_BRIDGE_NODE_ID: ${PUBLIC_BRIDGE_NODE_ID:-docker-desktop-primary}
+      PUBLIC_BRIDGE_PUSH_INTERVAL_S: ${PUBLIC_BRIDGE_PUSH_INTERVAL_S:-10}
     expose:
       - "8092"
     networks:

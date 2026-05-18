@@ -31,6 +31,13 @@ from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
 
+from public_bridge import (
+    is_enabled as _public_bridge_enabled,
+    public_bridge_push_loop,
+    public_bridge_stream_loop,
+    PUBLIC_BRIDGE_URLS,
+)
+
 # ── Config ─────────────────────────────────────────────────────────────────────
 
 PI_NODE_HOST     = os.getenv("PI_NODE_HOST",     "triumph-pi-mainnet-node")
@@ -319,6 +326,58 @@ async def _background_poll() -> None:
 @app.on_event("startup")
 async def _startup() -> None:
     asyncio.create_task(_background_poll())
+    if _public_bridge_enabled():
+        log.info(
+            "[bridge] public-bridge ENABLED for %s",
+            ", ".join(PUBLIC_BRIDGE_URLS),
+        )
+        asyncio.create_task(public_bridge_push_loop(_public_bridge_snapshot))
+        asyncio.create_task(public_bridge_stream_loop(_public_bridge_command_handler))
+    else:
+        log.info(
+            "[bridge] public-bridge disabled "
+            "(set PUBLIC_BRIDGE_TOKEN + PUBLIC_BRIDGE_URLS to enable)"
+        )
+
+
+def _public_bridge_snapshot() -> dict[str, Any]:
+    """Snapshot of current node state for outbound push to public sites."""
+    lag = time.time() - state["last_polled"] if state["last_polled"] else None
+    return {
+        "pi_node_reachable":     state["pi_node_reachable"],
+        "central_node_reachable": state["central_node_reachable"],
+        "active_horizon_url":    state["active_horizon_url"],
+        "horizon_version":       state["horizon_version"],
+        "core_version":          state["core_version"],
+        "network_passphrase":    state["network_passphrase"],
+        "ingest_latest_ledger":  state["ingest_latest_ledger"],
+        "protocol_version":      state["protocol_version"],
+        "latest_ledger_seq":     state["latest_ledger_seq"],
+        "latest_ledger_hash":    state["latest_ledger_hash"],
+        "latest_ledger_closed":  state["latest_ledger_closed"],
+        "sync_lag_seconds":      round(lag, 1) if lag is not None else None,
+        "last_transactions":     state["last_transactions"][:10],
+        "uptime_seconds":        round(time.time() - state["started_at"], 1),
+        "network_mode":          PI_NETWORK_MODE,
+    }
+
+
+async def _public_bridge_command_handler(envelope: dict[str, Any]) -> None:
+    """Receive a command from a public site and re-publish on Redis for the stack."""
+    log.info(
+        "[bridge] public command from %s: event=%s data=%s",
+        envelope.get("source"), envelope.get("event"),
+        json.dumps(envelope.get("data"))[:200],
+    )
+    if redis_client is None:
+        return
+    try:
+        await redis_client.publish(
+            "triumph:public-bridge:commands",
+            json.dumps(envelope, separators=(",", ":")),
+        )
+    except Exception as e:
+        log.warning("[bridge] failed to relay public command to Redis: %s", e)
 
 
 # ── Routes ─────────────────────────────────────────────────────────────────────

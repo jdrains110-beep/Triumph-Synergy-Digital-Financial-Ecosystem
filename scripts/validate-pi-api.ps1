@@ -7,9 +7,9 @@ param(
 )
 
 # Configuration
-$TESTNET_DOMAIN = "triumphsynergy0576.pinet.com"
-$MAINNET_DOMAIN = "triumphsynergy7386.pinet.com"
-$FALLBACK_DOMAIN = "triumph-synergy.vercel.app"
+$TESTNET_DOMAIN = "triumphsynergyab2099.pinet.com"
+$MAINNET_DOMAIN = "triumphsynergyab2099.pinet.com"
+$FALLBACK_DOMAIN = "triumphsynergyab2099.pinet.com"
 
 # API Endpoints
 $ENDPOINTS = @(

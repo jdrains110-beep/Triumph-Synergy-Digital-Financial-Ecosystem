@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Decode the pathname
     const pathname = decodeURIComponent(encodedPathname);
-    const baseUrl = "https://triumphsynergy0576.pinet.com";
+    const baseUrl = "https://triumphsynergyab2099.pinet.com";
 
     // Base metadata for Triumph Synergy
     const baseMetadata = {
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       card: "summary_large_image",
       title: pageMetadata.title || baseMetadata.title,
       description: pageMetadata.description || baseMetadata.description,
-      images: ["https://triumphsynergy0576.pinet.com/og-image.png"],
+      images: ["https://triumphsynergyab2099.pinet.com/og-image.png"],
       site: "@triumphsynergy",
     };
 

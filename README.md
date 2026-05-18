@@ -39,7 +39,7 @@
 [![SCHA](https://img.shields.io/badge/shands.pi%20%7C%20ufhealth.pi-66%20LOOPHOLES%20%7C%205%20AUTHORITIES-8B5CF6?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
 [![Sovereign Mesh Network](https://img.shields.io/badge/Sovereign%20Mesh-WireGuard%20%7C%20ChaCha20--Poly1305%20%7C%205--Layer%20Encryption-00D4AA?style=flat-square)](#-whats-new--may-12-2026-sovereign-mesh-network)
 
-[**Live Demo**](https://triumph-synergy.vercel.app) • [**Pi Browser**](https://triumphsynergy0576.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
+[**Live Demo**](https://triumphsynergyab2099.pinet.com) • [**Pi Browser**](https://triumphsynergyab2099.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
 </div>
 
@@ -3030,7 +3030,7 @@ GET  /api/gateway/reserve    — Global Reserve Protocol status
 ### Quantum Fortress API
 ```bash
 # Validate token quantum resistance
-curl -X POST https://triumph-synergy.vercel.app/api/quantum-fortress \
+curl -X POST https://triumphsynergyab2099.pinet.com/api/quantum-fortress \
   -H "Content-Type: application/json" \
   -d '{"action": "validate-token", "tokenAddress": "quantum_pi_token", "tokenSymbol": "QPI"}'
 
@@ -3062,12 +3062,12 @@ curl -X POST https://triumph-synergy.vercel.app/api/quantum-fortress \
 ### Pi DEX SDK API
 ```bash
 # Integrate Pi DEX smart contracts
-curl -X POST https://triumph-synergy.vercel.app/api/smart-contracts \
+curl -X POST https://triumphsynergyab2099.pinet.com/api/smart-contracts \
   -H "Content-Type: application/json" \
   -d '{"action": "integrate-pi-dex"}'
 
 # Connect to kosasih/pidexsdk repository
-curl -X POST https://triumph-synergy.vercel.app/api/smart-contracts \
+curl -X POST https://triumphsynergyab2099.pinet.com/api/smart-contracts \
   -H "Content-Type: application/json" \
   -d '{"action": "connect-pi-dex-sdk", "repo": "kosasih/pidexsdk"}'
 ```
@@ -3992,10 +3992,10 @@ SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/
 
 | Network | URL |
 |---------|-----|
-| **Mainnet (Vercel)** | https://triumph-synergy.vercel.app |
-| **Testnet (Vercel)** | https://triumph-synergy-testnet.vercel.app |
-| **Pi Browser Mainnet** | https://triumphsynergy0576.pinet.com |
-| **Pi Browser Testnet** | https://triumphsynergy1991.pinet.com |
+| **Mainnet (Vercel)** | https://triumphsynergyab2099.pinet.com |
+| **Testnet (Vercel)** | https://Triumph-Synergy.replit.app |
+| **Pi Browser Mainnet** | https://triumphsynergyab2099.pinet.com |
+| **Pi Browser Testnet** | https://triumphsynergyab2099.pinet.com |
 
 ### Vercel Deployment
 

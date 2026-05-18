@@ -57,7 +57,7 @@ bucket, and `S3_ENDPOINT` set to the regional endpoint
 R2:
 ```bash
 # in Cloudflare dashboard: R2 -> bucket -> Settings -> Public Access -> Enable
-# attach a custom domain: history.triumph-synergy.vercel.app
+# attach a custom domain: history.triumphsynergyab2099.pinet.com
 ```
 
 S3:
@@ -103,7 +103,7 @@ Add this block to:
 ```ini
 # History archive — read + write our own published archive
 [HISTORY.local]
-get="curl -sf https://history.triumph-synergy.vercel.app/{0} -o {1}"
+get="curl -sf https://history.triumphsynergyab2099.pinet.com/{0} -o {1}"
 put="aws --endpoint-url https://<account_id>.r2.cloudflarestorage.com s3 cp {0} s3://triumph-synergy-history/{1} --acl public-read"
 mkdir="aws --endpoint-url https://<account_id>.r2.cloudflarestorage.com s3api put-object --bucket triumph-synergy-history --key {0}/ --acl public-read"
 ```
@@ -118,12 +118,12 @@ add `pip install awscli` to a startup hook, or build a custom Pi Core image.
 docker restart testnet2
 sleep 60
 docker exec testnet2 sh -c 'tail -30 /tmp/stellar-core.log | grep -iE "history|publish"'
-curl -s https://history.triumph-synergy.vercel.app/.well-known/stellar-history.json | python3 -m json.tool
+curl -s https://history.triumphsynergyab2099.pinet.com/.well-known/stellar-history.json | python3 -m json.tool
 ```
 
-## Custom domain — `history.triumph-synergy.vercel.app`
+## Custom domain — `history.triumphsynergyab2099.pinet.com`
 
-`*.vercel.app` subdomains can't point at R2/S3. Instead, use one of:
+`*.replit.app` subdomains can't point at R2/S3 directly. Instead, use one of:
 
 1. Buy a domain (e.g. `triumphsynergy.io`), add `history` CNAME -> R2 public URL.
    Update `stellar.toml` HISTORY field to the new domain.

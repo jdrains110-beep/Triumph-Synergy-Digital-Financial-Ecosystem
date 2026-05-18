@@ -270,7 +270,7 @@ Write-Host ""
 switch ($Target) {
     'vercel' {
         Write-Host "Vercel URLs:" -ForegroundColor Cyan
-        Write-Host "  Production: https://triumph-synergy-jeremiah-drains-projects.vercel.app" -ForegroundColor White
+        Write-Host "  Production: https://triumphsynergyab2099.pinet.com" -ForegroundColor White
     }
     'docker' {
         Write-Host "Docker URLs:" -ForegroundColor Cyan

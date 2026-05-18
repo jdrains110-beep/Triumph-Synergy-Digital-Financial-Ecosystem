@@ -1,7 +1,7 @@
 /**
  * Pi Platform Bridge — Master Discovery Endpoint
  * ================================================
- * Primary URL: https://triumphsynergy0576.pinet.com/api/pi/platform
+ * Primary URL: https://triumphsynergyab2099.pinet.com/api/pi/platform
  *
  * This is the SUPERIOR platform bridge that Pi Desktop and Pi App Studio
  * discover to communicate with the Docker Desktop ecosystem.
@@ -18,13 +18,13 @@ const PLATFORM_VERSION = "2.0.0";
 
 const DOMAIN_MAP = {
   mainnet: {
-    pinet: "triumphsynergy0576.pinet.com",
-    pinetAlt: "triumphsynergy7386.pinet.com",
-    vercel: "triumph-synergy.vercel.app",
+    pinet: "triumphsynergyab2099.pinet.com",
+    pinetAlt: "triumphsynergyab2099.pinet.com",
+    vercel: "triumphsynergyab2099.pinet.com",
   },
   testnet: {
-    pinet: "triumphsynergy1991.pinet.com",
-    vercel: "triumph-synergy-testnet.vercel.app",
+    pinet: "triumphsynergyab2099.pinet.com",
+    vercel: "Triumph-Synergy.replit.app",
   },
 } as const;
 

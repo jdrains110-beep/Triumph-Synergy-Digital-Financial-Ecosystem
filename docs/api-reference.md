@@ -6,7 +6,7 @@ Triumph-Synergy provides a comprehensive REST API for payment processing, ecosys
 
 ## Base URL
 
-- **Production**: `https://triumph-synergy.vercel.app/api`
+- **Production**: `https://triumphsynergyab2099.pinet.com/api`
 - **Development**: `http://localhost:3000/api`
 
 ## Authentication

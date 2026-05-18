@@ -14,7 +14,7 @@ Request: Add Triumph Synergy testnet validator to Pi Testnet quorum
 Hi Pi Core Team,
 
 We operate **Triumph Synergy**, a Pi Network ecosystem application
-(`triumph-synergy.vercel.app`, app id `triumph-synergy`) and have been running a
+(`triumphsynergyab2099.pinet.com`, app id `triumph-synergy`) and have been running a
 full Pi Stellar Core node ("testnet2", build v22.1.0) on Pi Testnet as part of
 our integration. We have promoted it from watcher to validator and would like
 to request consideration for inclusion in the Pi Testnet validator quorum.
@@ -28,10 +28,10 @@ to request consideration for inclusion in the Pi Testnet validator quorum.
 | **Public key**    | `GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V` |
 | **Network**       | Pi Testnet (`Pi Testnet`) |
 | **Build**         | stellar-core v22.1.0, Pi distribution |
-| **Home domain**   | `triumph-synergy-testnet.vercel.app` |
-| **stellar.toml**  | https://triumph-synergy-testnet.vercel.app/.well-known/stellar.toml |
-| **Peer address**  | `triumph-synergy-testnet.vercel.app:31402` (NAT, currently outbound-only — port-forward in progress) |
-| **History archive** | https://history.triumph-synergy.vercel.app/ (provisioning) |
+| **Home domain**   | `Triumph-Synergy.replit.app` |
+| **stellar.toml**  | https://Triumph-Synergy.replit.app/.well-known/stellar.toml |
+| **Peer address**  | `Triumph-Synergy.replit.app:31402` (NAT, currently outbound-only — port-forward in progress) |
+| **History archive** | https://history.triumphsynergyab2099.pinet.com/ (provisioning) |
 
 ### Current quorum slice
 
@@ -62,7 +62,7 @@ and we are voting in SCP (`EXTERNALIZE` phase observed on every ledger).
 ### What we are asking
 
 1. Acceptance of `GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`
-   into the Pi Testnet validator set, with `HOME_DOMAIN=triumph-synergy-testnet.vercel.app`
+   into the Pi Testnet validator set, with `HOME_DOMAIN=Triumph-Synergy.replit.app`
    and an appropriate `QUALITY` tier.
 2. Guidance on:
    - Required SLA for QUALITY=LOW vs MEDIUM tiers.
@@ -74,7 +74,7 @@ and we are voting in SCP (`EXTERNALIZE` phase observed on every ledger).
 ### Contact
 
 - GitHub: https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem
-- Email: ops@triumph-synergy.vercel.app
+- Email: ops@triumphsynergyab2099.pinet.com
 
 Happy to provide logs, peer counts, sync metrics, or do a live walkthrough.
 
@@ -119,7 +119,7 @@ GET http://triumph-pi-bridge-connector:8092/health
 ## Appendix C — Submission checklist (for the operator)
 
 - [ ] Open issue / DM via Pi Core Discord using the **Subject** + **Body** above.
-- [ ] Attach link to the public stellar.toml once `triumph-synergy-testnet.vercel.app/.well-known/stellar.toml` is live.
+- [ ] Attach link to the public stellar.toml once `Triumph-Synergy.replit.app/.well-known/stellar.toml` is live.
 - [ ] Provide the requested SLA tier (LOW vs MEDIUM).
 - [ ] If asked, port-forward TCP `:31402` and confirm inbound reachability.
 - [ ] Provision the public history archive (see `infrastructure/history-archive/README.md`) and update the URL in this document.

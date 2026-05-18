@@ -122,7 +122,7 @@ try {
 
 # Display API endpoints
 Write-Host "`n📡 API Endpoints Available:" -ForegroundColor Cyan
-Write-Host "  Production: https://triumph-synergy-jeremiah-drains-projects.vercel.app" -ForegroundColor Gray
+Write-Host "  Production: https://triumphsynergyab2099.pinet.com" -ForegroundColor Gray
 Write-Host "  Local (when running): http://localhost:3000`n" -ForegroundColor Gray
 
 Write-Host "  🔷 Pi Value Differentiation:" -ForegroundColor Yellow
@@ -153,7 +153,7 @@ Write-Host "   - GITHUB_WEBHOOK_SECRET=<random-secret-string>`n" -ForegroundColo
 Write-Host "2. 🌐 Configure GitHub Webhook:" -ForegroundColor Yellow
 Write-Host "   Go to: https://github.com/[your-repo]/settings/hooks" -ForegroundColor Gray
 Write-Host "   Add webhook:" -ForegroundColor Gray
-Write-Host "   - URL: https://triumph-synergy-jeremiah-drains-projects.vercel.app/api/contracts/webhook" -ForegroundColor Gray
+Write-Host "   - URL: https://triumphsynergyab2099.pinet.com/api/contracts/webhook" -ForegroundColor Gray
 Write-Host "   - Content type: application/json" -ForegroundColor Gray
 Write-Host "   - Secret: <GITHUB_WEBHOOK_SECRET from .env.local>`n" -ForegroundColor Gray
 
@@ -161,8 +161,8 @@ Write-Host "3. 🚀 Deploy to Production:" -ForegroundColor Yellow
 Write-Host "   Run: vercel --prod`n" -ForegroundColor Gray
 
 Write-Host "4. 📊 Monitor System:" -ForegroundColor Yellow
-Write-Host "   Check Stellar Consensus: curl https://triumph-synergy-jeremiah-drains-projects.vercel.app/api/stellar/consensus" -ForegroundColor Gray
-Write-Host "   Test Pi Value Calc: curl 'https://triumph-synergy-jeremiah-drains-projects.vercel.app/api/pi/value?amount=100'`n" -ForegroundColor Gray
+Write-Host "   Check Stellar Consensus: curl https://triumphsynergyab2099.pinet.com/api/stellar/consensus" -ForegroundColor Gray
+Write-Host "   Test Pi Value Calc: curl 'https://triumphsynergyab2099.pinet.com/api/pi/value?amount=100'`n" -ForegroundColor Gray
 
 Write-Host "5. 📖 Read Documentation:" -ForegroundColor Yellow
 Write-Host "   - DOCKER_INTEGRATION.md - Full Docker setup guide" -ForegroundColor Gray

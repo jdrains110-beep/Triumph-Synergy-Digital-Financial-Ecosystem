@@ -7,10 +7,10 @@ export default function DiagnosticPage() {
   return (
     <div style={{ padding: "40px", fontFamily: "monospace" }}>
       <h1>Triumph Synergy - Deployment Diagnostic</h1>
-      
-      <div style={{ 
-        backgroundColor: "#f0f0f0", 
-        padding: "20px", 
+
+      <div style={{
+        backgroundColor: "#f0f0f0",
+        padding: "20px",
         borderRadius: "8px",
         marginBottom: "20px"
       }}>
@@ -20,9 +20,9 @@ export default function DiagnosticPage() {
         <p><strong>App Version:</strong> 1.0.0</p>
       </div>
 
-      <div style={{ 
-        backgroundColor: "#e8f5e9", 
-        padding: "20px", 
+      <div style={{
+        backgroundColor: "#e8f5e9",
+        padding: "20px",
         borderRadius: "8px",
         marginBottom: "20px"
       }}>
@@ -31,9 +31,9 @@ export default function DiagnosticPage() {
         <p>If you can read this, the deployment is working.</p>
       </div>
 
-      <div style={{ 
-        backgroundColor: "#fff3cd", 
-        padding: "20px", 
+      <div style={{
+        backgroundColor: "#fff3cd",
+        padding: "20px",
         borderRadius: "8px",
         marginBottom: "20px"
       }}>
@@ -46,9 +46,9 @@ export default function DiagnosticPage() {
         </ul>
       </div>
 
-      <div style={{ 
-        backgroundColor: "#e3f2fd", 
-        padding: "20px", 
+      <div style={{
+        backgroundColor: "#e3f2fd",
+        padding: "20px",
         borderRadius: "8px"
       }}>
         <h2>Navigation:</h2>
@@ -72,11 +72,10 @@ export default function DiagnosticPage() {
 
       <div style={{ marginTop: "40px", color: "#666" }}>
         <small>
-          If you're seeing this page on a preview URL like 
-          "triumph-synergy-c7e0nr7u6-jeremiah-drains-projects.vercel.app",
+          If you're seeing this page on a staging URL (e.g. a *.replit.app preview),
           visit the main production domain instead:
           <br />
-          <strong>https://triumph-synergy.vercel.app</strong>
+          <strong>https://triumphsynergyab2099.pinet.com</strong>
         </small>
       </div>
     </div>

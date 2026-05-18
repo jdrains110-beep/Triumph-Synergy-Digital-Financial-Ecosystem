@@ -1030,7 +1030,7 @@ const SECTORS: Record<string, SectorDef> = {
       honors:          b.honors ?? null,
       credentialId:    `TS-EDU-${sha256(`${b.institution}:${b.program}:${b.ownerAddress}`).slice(0, 10).toUpperCase()}`,
       transferable:    false,     // Soulbound — non-transferable NFT
-      verifiableUrl:   `https://triumph-synergy.vercel.app/verify/edu/${sha256(`${b.institution}:${b.ownerAddress}`).slice(0, 12)}`,
+      verifiableUrl:   `https://triumphsynergyab2099.pinet.com/verify/edu/${sha256(`${b.institution}:${b.ownerAddress}`).slice(0, 12)}`,
       accreditationHash: sha256(`accredit:${b.institution}:${b.program}`),
     }),
   },

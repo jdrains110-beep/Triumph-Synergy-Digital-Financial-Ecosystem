@@ -872,10 +872,10 @@ app = FastAPI(
 _CORS_ORIGINS = [
     o.strip() for o in
     os.getenv("CORS_ALLOWED_ORIGINS",
-              "https://triumphsynergy0576.pinet.com,"
-              "https://triumphsynergy7386.pinet.com,"
-              "https://triumphsynergy1991.pinet.com,"
-              "https://triumph-synergy.vercel.app,"
+              "https://triumphsynergyab2099.pinet.com,"
+              "https://triumphsynergyab2099.pinet.com,"
+              "https://triumphsynergyab2099.pinet.com,"
+              "https://triumphsynergyab2099.pinet.com,"
               "http://localhost:3000,"
               "http://127.0.0.1:3000").split(",")
     if o.strip()

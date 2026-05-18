@@ -4,9 +4,9 @@ SAIB External Probe Registry
 
 Extends SAIB's monitoring beyond local Docker into the wider ecosystem:
 
-  • Vercel mainnet deployment        (triumph-synergy.vercel.app)
-  • PiNet mainnet apps               (triumphsynergy0576.pinet.com,
-                                      triumphsynergy7386.pinet.com)
+  • Vercel mainnet deployment        (triumphsynergyab2099.pinet.com)
+  • PiNet mainnet apps               (triumphsynergyab2099.pinet.com,
+                                      triumphsynergyab2099.pinet.com)
   • Pi Network mainnet API           (api.mainnet.minepi.com)
   • Stellar Protocol 24 horizon      (api.mainnet.minepi.com/ledgers)
 
@@ -47,11 +47,11 @@ def build_external_targets() -> list[ExternalTarget]:
 
     vercel_hosts = _env_csv(
         "SAIB_VERCEL_HOSTS",
-        "triumph-synergy.vercel.app",
+        "triumphsynergyab2099.pinet.com",
     )
     pinet_hosts = _env_csv(
         "SAIB_PINET_HOSTS",
-        "triumphsynergy0576.pinet.com,triumphsynergy7386.pinet.com",
+        "triumphsynergyab2099.pinet.com,triumphsynergyab2099.pinet.com",
     )
 
     targets: list[ExternalTarget] = []

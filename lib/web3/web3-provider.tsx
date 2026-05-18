@@ -57,7 +57,7 @@ function detectNetwork(): "mainnet" | "testnet" {
   const hostname = window.location.hostname;
   if (
     hostname.includes("mainnet") ||
-    hostname === "triumph-synergy.vercel.app" ||
+    hostname === "triumphsynergyab2099.pinet.com" ||
     hostname.includes("7386.pinet.com")
   ) {
     return "mainnet";

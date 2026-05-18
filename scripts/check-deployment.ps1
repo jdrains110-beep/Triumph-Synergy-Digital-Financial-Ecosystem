@@ -8,7 +8,7 @@ Write-Host "  TRIUMPH SYNERGY - DEPLOYMENT VERIFICATION" -ForegroundColor Cyan
 Write-Host "══════════════════════════════════════════════════════" -ForegroundColor Cyan
 Write-Host ""
 
-$VERCEL_URL = "https://triumph-synergy-f4s4h76l1-jeremiah-drains-projects.vercel.app"
+$VERCEL_URL = "https://triumphsynergyab2099.pinet.com"
 $SUPABASE_URL = "https://triumph-synergy.supabase.co"
 $STELLAR_URL = "https://horizon.stellar.org"
 
@@ -130,7 +130,7 @@ if ($percentage -eq 100) {
     Write-Host "Next Steps:" -ForegroundColor Cyan
     Write-Host "1. Wait 5-10 minutes for deployment" -ForegroundColor Cyan
     Write-Host "2. Check: https://github.com/jdrains110-beep/triumph-synergy/actions" -ForegroundColor Cyan
-    Write-Host "3. Check: https://vercel.com/projects/triumph-synergy" -ForegroundColor Cyan
+    Write-Host "3. Check: https://Triumph-Synergy.replit.app" -ForegroundColor Cyan
     Write-Host "4. Set environment variables in Vercel if not done" -ForegroundColor Cyan
     exit 1
 } else {

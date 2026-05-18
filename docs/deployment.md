@@ -6,16 +6,15 @@ This guide covers deploying Triumph-Synergy to various environments.
 
 ## Quick Deploy
 
-### Vercel (Recommended)
+### Replit (Staging)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/jdrains110-beep/triumph-synergy)
+Deploy to staging via Replit: <https://Triumph-Synergy.replit.app>
 
-1. Click the deploy button
-2. Connect your GitHub account
-3. Configure environment variables
-4. Deploy!
+1. Fork / import the repository into Replit
+2. Configure environment variables in the Replit Secrets pane
+3. Run the development server and promote to deploy
 
-### Manual Vercel Deploy
+### Manual Deploy
 
 ```bash
 # Install Vercel CLI

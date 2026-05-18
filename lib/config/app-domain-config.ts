@@ -15,31 +15,21 @@ function getCanonicalAppUrl(): string {
     return `${window.location.protocol}//${window.location.host}`;
   }
 
-  // If running on Vercel, use VERCEL_URL with FULL DOMAIN URL detection
+  // If running on Vercel/Replit/etc, use VERCEL_URL / env hostname with canonical domain mapping
   if (process.env.VERCEL_URL) {
     // ============================================
-    // EXPLICIT FULL DOMAIN URL MATCHING
-    // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
+    // CANONICAL DOMAIN MAPPING
     // ============================================
     const hostname = process.env.VERCEL_URL.toLowerCase();
 
-    // PINET DOMAINS
-    if (hostname === "triumphsynergy1991.pinet.com") {
-      return "https://triumphsynergy1991.pinet.com";
-    }
-    if (hostname === "triumphsynergy7386.pinet.com") {
-      return "https://triumphsynergy7386.pinet.com";
-    }
-    if (hostname === "triumphsynergy0576.pinet.com") {
-      return "https://triumphsynergy0576.pinet.com";
+    // MAINNET (Pi Network primary)
+    if (hostname === "triumphsynergyab2099.pinet.com") {
+      return "https://triumphsynergyab2099.pinet.com";
     }
 
-    // VERCEL DOMAINS
-    if (hostname === "triumph-synergy.vercel.app") {
-      return "https://triumph-synergy.vercel.app";
-    }
-    if (hostname === "triumph-synergy-testnet.vercel.app") {
-      return "https://triumph-synergy-testnet.vercel.app";
+    // TESTNET / STAGING (Replit)
+    if (hostname === "triumph-synergy.replit.app") {
+      return "https://Triumph-Synergy.replit.app";
     }
 
     return `https://${process.env.VERCEL_URL}`;
@@ -51,7 +41,7 @@ function getCanonicalAppUrl(): string {
   }
 
   // Fallback for server-side without env vars
-  return "https://triumphsynergy0576.pinet.com";
+  return "https://triumphsynergyab2099.pinet.com";
 }
 
 /**
@@ -73,54 +63,35 @@ function getActualHostname(): string {
     try {
       return new URL(process.env.NEXT_PUBLIC_APP_URL).hostname;
     } catch {
-      return "triumphsynergy0576.pinet.com";
+      return "triumphsynergyab2099.pinet.com";
     }
   }
 
-  return "triumphsynergy0576.pinet.com";
+  return "triumphsynergyab2099.pinet.com";
 }
 
 /**
- * Detect if this is testnet or mainnet based on hostname
- * Domain mapping:
- *   0576 = Primary app domain (mainnet)
- *   1991 = Testnet (development/testing) ← ALWAYS testnet
- *   7386 = Mainnet (production)
+ * Detect if this is testnet or mainnet based on hostname.
+ * Canonical mapping:
+ *   triumphsynergyab2099.pinet.com   → mainnet (Pi Network primary)
+ *   triumph-synergy.replit.app       → testnet (staging)
+ *   localhost / 127.0.0.1            → testnet (dev)
  */
 function getEnvironmentNetwork(): "testnet" | "mainnet" {
   const hostname = getActualHostname().toLowerCase();
 
-  // ============================================
-  // EXPLICIT FULL DOMAIN URL MATCHING
-  // ALL 5 PRODUCTION DOMAINS LISTED EXPLICITLY
-  // ============================================
+  // MAINNET (Pi Network primary)
+  if (hostname === "triumphsynergyab2099.pinet.com") {
+    return "mainnet";
+  }
 
-  // PINET TESTNET
-  if (hostname === "triumphsynergy1991.pinet.com") {
+  // TESTNET / STAGING (Replit)
+  if (hostname === "triumph-synergy.replit.app") {
     return "testnet";
   }
 
-  // PINET MAINNET
-  if (hostname === "triumphsynergy7386.pinet.com") {
-    return "mainnet";
-  }
-
-  if (hostname === "triumphsynergy0576.pinet.com") {
-    return "mainnet";
-  }
-
-  // VERCEL MAINNET
-  if (hostname === "triumph-synergy.vercel.app") {
-    return "mainnet";
-  }
-
-  // VERCEL TESTNET (EXPLICIT)
-  if (hostname === "triumph-synergy-testnet.vercel.app") {
-    return "testnet";
-  }
-
-  // Fallback: Other vercel.app = testnet
-  if (hostname.endsWith(".vercel.app")) {
+  // Fallback: any other .replit.app or .vercel.app = testnet (preview/staging)
+  if (hostname.endsWith(".replit.app") || hostname.endsWith(".vercel.app")) {
     return "testnet";
   }
 

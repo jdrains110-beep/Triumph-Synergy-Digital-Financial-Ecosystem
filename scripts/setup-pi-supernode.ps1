@@ -284,8 +284,8 @@ $piNodeConfig = @{
     }
     triumph_synergy = @{
         project_root = $ProjectRoot
-        frontend_url = "https://triumphsynergy0576.pinet.com"
-        backend_url  = "https://triumphsynergy0576.pinet.com/api"
+        frontend_url = "https://triumphsynergyab2099.pinet.com"
+        backend_url  = "https://triumphsynergyab2099.pinet.com/api"
     }
     created         = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
 }

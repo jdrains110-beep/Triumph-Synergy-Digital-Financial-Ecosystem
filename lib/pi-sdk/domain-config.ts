@@ -6,18 +6,15 @@
  * ALL Pi SDK initialization MUST use this module for domain detection.
  * DO NOT use process.env for sandbox mode - use this runtime detection.
  *
- * Domain Mapping (as of January 2026):
+ * Domain Mapping (canonical):
  * =====================================
  *
- * TESTNET DOMAINS (sandbox: true):
- *   - triumphsynergy1991.pinet.com   → Development URL for testnet
- *   - triumph-synergy-testnet.vercel.app → Vercel testnet deployment
- *   - localhost / 127.0.0.1          → Local development
- *
  * MAINNET DOMAINS (sandbox: false):
- *   - triumphsynergy7386.pinet.com   → Development URL for mainnet
- *   - triumphsynergy0576.pinet.com   → Primary production pinet domain
- *   - triumph-synergy.vercel.app     → Vercel mainnet deployment
+ *   - triumphsynergyab2099.pinet.com → Primary production (Pi Network)
+ *
+ * TESTNET DOMAINS (sandbox: true):
+ *   - Triumph-Synergy.replit.app     → Staging / testnet deployment
+ *   - localhost / 127.0.0.1          → Local development
  */
 
 export type NetworkConfig = {
@@ -37,17 +34,21 @@ const DOMAIN_CONFIG: Record<
   Omit<NetworkConfig, "hostname" | "appId">
 > = {
   // ==========================================
-  // TESTNET DOMAINS
+  // MAINNET DOMAINS
   // ==========================================
-  "triumphsynergy1991.pinet.com": {
-    network: "testnet",
-    sandbox: true,
-    description: "Pi Network Testnet (pinet.com development URL)",
+  "triumphsynergyab2099.pinet.com": {
+    network: "mainnet",
+    sandbox: false,
+    description: "Pi Network Mainnet Primary (pinet.com)",
   },
-  "triumph-synergy-testnet.vercel.app": {
+
+  // ==========================================
+  // TESTNET / STAGING DOMAINS
+  // ==========================================
+  "triumph-synergy.replit.app": {
     network: "testnet",
     sandbox: true,
-    description: "Vercel Testnet Deployment",
+    description: "Replit Staging / Testnet Deployment",
   },
   localhost: {
     network: "testnet",
@@ -58,25 +59,6 @@ const DOMAIN_CONFIG: Record<
     network: "testnet",
     sandbox: true,
     description: "Local Development (testnet)",
-  },
-
-  // ==========================================
-  // MAINNET DOMAINS
-  // ==========================================
-  "triumphsynergy7386.pinet.com": {
-    network: "mainnet",
-    sandbox: false,
-    description: "Pi Network Mainnet (pinet.com development URL)",
-  },
-  "triumphsynergy0576.pinet.com": {
-    network: "mainnet",
-    sandbox: false,
-    description: "Pi Network Mainnet Primary (pinet.com)",
-  },
-  "triumph-synergy.vercel.app": {
-    network: "mainnet",
-    sandbox: false,
-    description: "Vercel Mainnet Production",
   },
 };
 
@@ -116,17 +98,17 @@ export function getNetworkConfig(): NetworkConfig {
   }
 
   // Fallback patterns for unknown domains
-  // Any .vercel.app domain not explicitly listed = testnet (preview deployments)
-  if (hostname.endsWith(".vercel.app")) {
+  // Any .replit.app or .vercel.app domain not explicitly listed = testnet (preview/staging)
+  if (hostname.endsWith(".replit.app") || hostname.endsWith(".vercel.app")) {
     console.warn(
-      `[Pi Domain Config] Unknown vercel domain: ${hostname} - defaulting to testnet`
+      `[Pi Domain Config] Unknown staging domain: ${hostname} - defaulting to testnet`
     );
     return {
       network: "testnet",
       sandbox: true,
       hostname,
       appId: PI_APP_ID,
-      description: `Unknown Vercel domain (${hostname}) - testnet fallback`,
+      description: `Unknown staging domain (${hostname}) - testnet fallback`,
     };
   }
 
@@ -221,22 +203,19 @@ export function generatePiInitScript(): string {
   function getNetworkConfig(hostname) {
     // EXPLICIT DOMAIN MAPPING - SINGLE SOURCE OF TRUTH
     var domains = {
-      // TESTNET
-      'triumphsynergy1991.pinet.com': { network: 'testnet', sandbox: true },
-      'triumph-synergy-testnet.vercel.app': { network: 'testnet', sandbox: true },
-      'localhost': { network: 'testnet', sandbox: true },
-      '127.0.0.1': { network: 'testnet', sandbox: true },
       // MAINNET
-      'triumphsynergy7386.pinet.com': { network: 'mainnet', sandbox: false },
-      'triumphsynergy0576.pinet.com': { network: 'mainnet', sandbox: false },
-      'triumph-synergy.vercel.app': { network: 'mainnet', sandbox: false }
+      'triumphsynergyab2099.pinet.com': { network: 'mainnet', sandbox: false },
+      // TESTNET / STAGING
+      'triumph-synergy.replit.app': { network: 'testnet', sandbox: true },
+      'localhost': { network: 'testnet', sandbox: true },
+      '127.0.0.1': { network: 'testnet', sandbox: true }
     };
 
     var config = domains[hostname];
     if (config) return config;
 
     // Fallback patterns
-    if (hostname.endsWith('.vercel.app')) {
+    if (hostname.endsWith('.replit.app') || hostname.endsWith('.vercel.app')) {
       return { network: 'testnet', sandbox: true };
     }
     if (hostname.endsWith('.pinet.com')) {
