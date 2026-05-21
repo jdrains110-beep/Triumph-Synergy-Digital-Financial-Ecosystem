@@ -10,3 +10,4 @@ pydantic==2.10.4
 docker==7.1.0
 PyGithub==2.6.1
 asyncpg==0.30.0
+cryptography>=42.0.0

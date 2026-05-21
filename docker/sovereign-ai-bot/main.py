@@ -403,6 +403,55 @@ for svc_name in SERVICES:
     state.learning[svc_name] = ServiceLearning(name=svc_name)
     state.service_health[svc_name] = {"status": "unknown", "last_checked": None, "latency_ms": None}
 
+# ── SAIB Sovereign Identity (Ed25519) ──────────────────────────────────────────
+# Distinct from quantum-shield's PQ keys: this is *SAIB's own* signing identity,
+# used to prove "this message originated from this SAIB instance" to peer SAIBs,
+# the GitHub federation, and the apex ecosystem. Seed lives at
+# /run/saib-secrets/saib-signing.seed (chmod 600, read-only mount).
+SAIB_SIGNING_SEED_PATH = os.getenv(
+    "SAIB_SIGNING_SEED_PATH", "/run/saib-secrets/saib-signing.seed"
+)
+_saib_signing_sk: Any = None
+_saib_signing_pk_hex: str = ""
+_saib_signing_key_id: str = ""
+_saib_signing_alg: str = "none"
+
+try:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives import serialization as _ed_ser
+    if os.path.exists(SAIB_SIGNING_SEED_PATH):
+        with open(SAIB_SIGNING_SEED_PATH, "rb") as _f:
+            _seed_bytes = _f.read().strip()
+        if len(_seed_bytes) == 32:
+            _saib_signing_sk = Ed25519PrivateKey.from_private_bytes(_seed_bytes)
+            _pk = _saib_signing_sk.public_key().public_bytes(
+                encoding=_ed_ser.Encoding.Raw, format=_ed_ser.PublicFormat.Raw,
+            )
+            _saib_signing_pk_hex = _pk.hex()
+            _saib_signing_key_id = hashlib.sha256(_pk).hexdigest()[:16]
+            _saib_signing_alg = "Ed25519"
+except Exception as _e:
+    # Library missing or seed unreadable — SAIB falls back to delegated signing only.
+    _saib_signing_sk = None
+
+def saib_identity_sign(data: str) -> dict:
+    """Sign `data` with SAIB's *own* sovereign Ed25519 key.
+    Returns {alg, key_id, pub, sig, ts}. If no key is loaded, returns {alg:"none"}.
+    """
+    if _saib_signing_sk is None:
+        return {"alg": "none", "sig": "", "key_id": "", "pub": "", "ts": int(time.time())}
+    ts  = int(time.time() * 1000)
+    msg = f"{_saib_signing_key_id}|{ts}|{data}".encode()
+    sig = _saib_signing_sk.sign(msg).hex()
+    return {
+        "alg":    _saib_signing_alg,
+        "key_id": _saib_signing_key_id,
+        "pub":    _saib_signing_pk_hex,
+        "ts":     ts,
+        "sig":    sig,
+        # Note: verifier must reconstruct msg = f"{key_id}|{ts}|{data}" before verifying.
+    }
+
 # ── Quantum Crypto (simulated — real ops go through triumph-quantum-shield) ────
 
 def quantum_sign(data: str) -> str:
@@ -1796,7 +1845,31 @@ async def health():
         "lockdown":             state.lockdown,
         "quantum_anchor":       SOVEREIGN_ANCHOR,
         "quantum_signature":    quantum_sign("health"),
+        "saib_identity":        {"alg": _saib_signing_alg, "key_id": _saib_signing_key_id},
     }
+
+@app.get("/saib/identity")
+async def saib_identity():
+    """Public SAIB sovereign identity — peers use this to verify saib_identity_sign() outputs."""
+    return {
+        "alg":     _saib_signing_alg,
+        "key_id":  _saib_signing_key_id,
+        "pub_hex": _saib_signing_pk_hex,
+        "loaded":  _saib_signing_sk is not None,
+        "anchor":  SOVEREIGN_ANCHOR,
+        "verify_recipe": "msg = f'{key_id}|{ts}|{data}'.encode(); Ed25519PublicKey.from_public_bytes(bytes.fromhex(pub_hex)).verify(bytes.fromhex(sig), msg)",
+    }
+
+@app.post("/saib/sign")
+async def saib_sign_endpoint(request: Request):
+    """Sign arbitrary data with SAIB's sovereign Ed25519 identity."""
+    if _saib_signing_sk is None:
+        raise HTTPException(status_code=503, detail="SAIB signing key not loaded")
+    body = await request.json()
+    data = body.get("data")
+    if not isinstance(data, str):
+        raise HTTPException(status_code=400, detail="'data' must be a string")
+    return saib_identity_sign(data)
 
 @app.get("/status")
 async def status():
