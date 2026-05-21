@@ -1,0 +1,143 @@
+# Docker Compose CPU Affinity Override
+# Quantum CPU Management — Pin services to specific cores for maximum efficiency
+# 
+# Architecture:
+#   Core 0-1: Redis + Pi bridge (I/O bound, low contention)
+#   Core 1-2: Quantum-Intel-Fortress (CPU intensive, ML ops)
+#   Core 2-3: Governance-Shield (SCP consensus, high priority)
+#   Core 0-3: Apex-Services (all cores, 18 services mega-pod)
+#   Core 1-3: Observability (monitoring, low-medium priority)
+#   Core 0-1: Vault + Nginx (sidekicks, spare capacity)
+
+version: '3.9'
+
+services:
+  app:
+    cpuset_cpus: "0,1"
+    cpu_shares: 512
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: "--max-old-space-size=512"
+
+  apex-services:
+    cpuset_cpus: "0-3"
+    cpu_shares: 1024
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=1024"
+      SAIB_QUANTUM_CODE_SCAN_INTERVAL_S: "7200"
+      SAIB_QUANTUM_IMAGE_SCAN_INTERVAL_S: "14400"
+
+  apex-sovereign-nexus:
+    cpuset_cpus: "1,2"
+    cpu_shares: 614
+    environment:
+      SAIB_QUANTUM_BRAIN_ENABLED: "true"
+
+  guardian-watchdog-nexus:
+    cpuset_cpus: "3"
+    cpu_shares: 307
+    environment:
+      GOVERNOR_INTERVAL_S: "45"
+      PROBE_INTERVAL_S: "20"
+      ML_HISTORY_WINDOW_S: "1800"
+
+  sovereign-life:
+    cpuset_cpus: "0,1"
+    cpu_shares: 307
+    environment:
+      REDIS_SOCKET_POOL_SIZE: "5"
+
+  quantum-intel-fortress:
+    cpuset_cpus: "1-2"
+    cpu_shares: 512
+    environment:
+      OMP_NUM_THREADS: "2"
+      SPHINCS_THREADS: "2"
+
+  governance-shield:
+    cpuset_cpus: "2-3"
+    cpu_shares: 819
+    environment:
+      VERSION_CHECK_INTERVAL_MS: "600000"
+      PARAMETER_SYNC_INTERVAL_MS: "300000"
+
+  observability-stack:
+    cpuset_cpus: "1,3"
+    cpu_shares: 563
+    environment:
+      PROMETHEUS_SCRAPE_INTERVAL: "120s"
+      PROMETHEUS_EVALUATION_INTERVAL: "120s"
+
+  redis:
+    cpuset_cpus: "0"
+    cpu_shares: 512
+    environment:
+      REDIS_TCP_KEEPALIVE: "300"
+
+  pi-bridge-connector:
+    cpuset_cpus: "0,1"
+    cpu_shares: 614
+    environment:
+      POLL_INTERVAL_S: "20"
+
+  settlement-core:
+    cpuset_cpus: "1,2"
+    cpu_shares: 460
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=384"
+
+  vault:
+    cpuset_cpus: "0"
+    cpu_shares: 204
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=96"
+
+  nginx:
+    cpuset_cpus: "3"
+    cpu_shares: 204
+    environment: {}
+
+  postgres:
+    cpuset_cpus: "2,3"
+    cpu_shares: 512
+    environment:
+      max_parallel_workers_per_gather: "2"
+      max_worker_processes: "2"
+      shared_buffers: "256MB"
+
+  pi-mainnet-node:
+    cpuset_cpus: "0-3"
+    cpu_shares: 1536
+    environment:
+      STELLAR_CORE_THREADS: "4"
+
+  supernode-peer-2:
+    cpuset_cpus: "1,2"
+    cpu_shares: 358
+    environment:
+      SCP_TICKER_MS: "1000"
+
+  sovereign-military-bridge:
+    cpuset_cpus: "0,3"
+    cpu_shares: 512
+    environment:
+      SMB_HEAL_INTERVAL_S: "120"
+
+  sovereign-mesh-hub:
+    cpuset_cpus: "2"
+    cpu_shares: 409
+    environment:
+      WG_ALLOWED_IPS_CACHE_TTL: "3600"
+
+  horizon-stream:
+    cpuset_cpus: "1"
+    cpu_shares: 256
+    environment:
+      MARKET_POLL_MS: "10000"
+      ORACLE_POLL_MS: "10000"
+
+  testnet2:
+    cpuset_cpus: "3"
+    cpu_shares: 1024
+    environment:
+      STELLAR_CORE_THREADS: "2"
