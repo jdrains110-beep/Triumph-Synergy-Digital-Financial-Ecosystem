@@ -136,9 +136,6 @@ services:
     container_name: triumph-postgres
     stop_grace_period: 60s   # Allow WAL flush + checkpoint before SIGKILL prevents crash-recovery loops
     <<: *common
-    mem_limit: 256m
-    mem_reservation: 128m
-    cpus: 0.5
     oom_score_adj: -500          # Protect database — last to OOM-kill
     deploy:
       resources:
@@ -173,9 +170,6 @@ services:
     container_name: triumph-redis
     stop_grace_period: 30s   # Allow RDB/AOF flush before SIGKILL
     <<: *common
-    mem_limit: 128m
-    mem_reservation: 64m
-    cpus: 0.3
     oom_score_adj: -500          # Protect cache — last to OOM-kill
     deploy:
       resources:
@@ -212,9 +206,6 @@ services:
       context: docker/pi-bridge-connector
     container_name: triumph-pi-bridge-connector
     <<: *common
-    mem_limit: 384m
-    mem_reservation: 128m
-    cpus: 0.60  # quantum-managed: T5 mesh peer (bridge poller) — bumped for httpx+SSE+push loops
     environment:
       <<: [*db-env, *pi-env]
       PYTHONUNBUFFERED: "1"
@@ -265,9 +256,6 @@ services:
       dockerfile: Dockerfile
     container_name: triumph-app
     <<: *common
-    mem_limit: 512m
-    mem_reservation: 192m
-    cpus: 0.50  # quantum-managed: T5 Next.js app
     ports:
       - "3000:3000"
     environment:
@@ -310,9 +298,6 @@ services:
       dockerfile: docker/vault/Dockerfile
     container_name: triumph-vault
     <<: *common
-    mem_limit: 96m
-    mem_reservation: 48m
-    cpus: 0.20  # quantum-managed: T6 sidekick (vault)
     environment:
       <<: [*db-env, *pi-env]
       VAULT_MODE: trillion
@@ -346,9 +331,6 @@ services:
     image: nginx:alpine
     container_name: triumph-nginx
     <<: *common
-    mem_limit: 96m
-    mem_reservation: 32m
-    cpus: 0.20  # quantum-managed: T6 sidekick (nginx proxy)
     ports:
       - "80:80"
     volumes:
@@ -397,9 +379,6 @@ services:
       dockerfile: docker/governance-shield/Dockerfile
     container_name: triumph-governance-shield
     <<: *common
-    mem_limit: 768m
-    mem_reservation: 384m
-    cpus: 0.80  # quantum-managed: T4 governance-shield (central node) — bumped after OOM
     deploy:
       resources:
         limits:
@@ -475,9 +454,6 @@ services:
       dockerfile: docker/supernode-peer/Dockerfile
     container_name: triumph-supernode-peer-2
     <<: *common
-    mem_limit: 256m
-    mem_reservation: 128m
-    cpus: 0.35  # quantum-managed: T4 supernode-peer-2 (SCP)
     environment:
       <<: *pi-env
       SUPERNODE_ROLE: peer
@@ -517,9 +493,6 @@ services:
       dockerfile: docker/settlement-core/Dockerfile
     container_name: triumph-settlement-core
     <<: *common
-    mem_limit: 384m
-    mem_reservation: 192m
-    cpus: 0.45  # quantum-managed: T4 settlement-core (4-svc super-pod)
     environment:
       <<: [*db-env, *pi-env]
       ENGINE_MODE: hyper
@@ -591,9 +564,6 @@ services:
       dockerfile: quantum-intel-fortress/Dockerfile
     container_name: triumph-quantum-intel-fortress
     <<: *common
-    mem_limit: 640m
-    mem_reservation: 320m
-    cpus: 0.50  # quantum-managed: T4 quantum-intel-fortress — bumped for stability
     deploy:
       resources:
         limits:
@@ -653,9 +623,6 @@ services:
     platform: linux/arm64
     container_name: triumph-apex-services
     <<: *common
-    mem_limit: 1024m
-    mem_reservation: 512m
-    cpus: 1.25  # quantum-managed: T2 apex-services (18-svc mega-pod) — bumped for headroom
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
@@ -793,9 +760,6 @@ services:
       dockerfile: docker/horizon-stream/Dockerfile
     container_name: triumph-horizon-stream
     <<: *common
-    mem_limit: 256m
-    mem_reservation: 128m
-    cpus: 0.25  # quantum-managed: T5 horizon-stream
     environment:
       <<: [*db-env, *pi-env]
       MARKET_POLL_MS: 5000
@@ -834,9 +798,6 @@ services:
       dockerfile: observability-stack/Dockerfile
     container_name: triumph-observability-stack
     <<: *common
-    mem_limit: 640m
-    mem_reservation: 320m
-    cpus: 0.55  # quantum-managed: T3 observability-stack — bumped (was 61% over limit)
     ports:
       - "3001:3000"
       - "9090:9090"
@@ -906,9 +867,6 @@ services:
     container_name: triumph-guardian-watchdog-nexus
     <<: *common
     restart: always
-    mem_limit: 256m
-    mem_reservation: 128m
-    cpus: 0.30  # quantum-managed: T6 guardian-watchdog-nexus — bumped (was at 87% of 128m)
     environment:
       # ── ecosystem-guardian env vars ─────────────────────────────────────
       GOVERNOR_INTERVAL_S: "30"
@@ -996,9 +954,6 @@ services:
       dockerfile: sovereign-life/Dockerfile
     container_name: triumph-sovereign-life
     <<: *common
-    mem_limit: 256m
-    mem_reservation: 128m
-    cpus: 0.30  # quantum-managed: T5 sovereign-life
     environment:
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
@@ -1064,9 +1019,6 @@ services:
       dockerfile: apex-sovereign-nexus/Dockerfile
     container_name: triumph-apex-sovereign-nexus
     <<: *common
-    mem_limit: 384m
-    mem_reservation: 192m
-    cpus: 0.60  # quantum-managed: T3 apex-sovereign-nexus (sentinel) — trimmed (live ~100MB)
     environment:
       # Commerce Authority (8160)
       REDIS_URL: redis://triumph-redis:6379/11
@@ -1145,9 +1097,6 @@ services:
     # so postgres/redis/bridge/governance-shield can coexist. The trade-off is slower
     # initial catchup (it'll evict bucket pages instead of holding them in RAM); the
     # node still syncs and serves Horizon. Bump to 7g+ if you raise Docker Desktop RAM.
-    mem_limit: 3500m
-    mem_reservation: 1500m
-    cpus: 1.5  # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
     deploy:
       resources:
         limits:
@@ -1197,9 +1146,6 @@ services:
       dockerfile: Dockerfile
     container_name: triumph-sovereign-military-bridge
     <<: *common
-    mem_limit: 512m
-    mem_reservation: 256m
-    cpus: 0.50  # quantum-managed: T5 sovereign-military-bridge — bumped after OOM
     environment:
       PORT: "8199"
       REDIS_URL: redis://triumph-redis:6379/14
@@ -1256,9 +1202,6 @@ services:
       dockerfile: Dockerfile
     container_name: triumph-sovereign-mesh-hub
     <<: *common
-    mem_limit: 384m
-    mem_reservation: 192m
-    cpus: 0.40  # quantum-managed: T6 sovereign-mesh-hub — bumped after OOM
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
