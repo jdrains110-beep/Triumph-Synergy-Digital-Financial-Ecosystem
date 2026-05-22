@@ -8,7 +8,7 @@ HORIZON_URL="https://api.mainnet.minepi.com"
 
 # Protocol advertisement — kept in sync by
 # .github/workflows/protocol-version-watcher.yml
-PROTOCOL_VERSION="22"
+PROTOCOL_VERSION="23"
 MIN_PROTOCOL_VERSION="22"
 STELLAR_CORE_VERSION="v22.1.0"
 

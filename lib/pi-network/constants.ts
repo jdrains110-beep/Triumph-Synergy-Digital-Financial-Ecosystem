@@ -32,7 +32,7 @@ export const PI_MAINNET_RPC = "https://api.mainnet.minepi.com" as const;
  * opens a PR bumping this constant when Pi advances.
  */
 export const PI_PROTOCOL_VERSION = Number(
-  process.env.PI_PROTOCOL_VERSION ?? 22,
+  process.env.PI_PROTOCOL_VERSION ?? 23,
 );
 
 /** Minimum protocol version this build is known to be safe with. */
