@@ -140,6 +140,14 @@ services:
     mem_reservation: 128m
     cpus: 0.5
     oom_score_adj: -500          # Protect database — last to OOM-kill
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
       POSTGRES_USER: postgres
@@ -158,6 +166,7 @@ services:
       timeout: 60s
       retries: 5
       start_period: 120s
+    restart: on-failure:5
 
   redis:
     image: redis:7-alpine
@@ -168,6 +177,14 @@ services:
     mem_reservation: 64m
     cpus: 0.3
     oom_score_adj: -500          # Protect cache — last to OOM-kill
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.3'
+          memory: 128M
     # Internal only — no host port exposure
     expose:
       - "6379"
@@ -183,6 +200,7 @@ services:
       timeout: 60s
       retries: 5
       start_period: 120s
+    restart: on-failure:5
 
   # ========================================================================
   # PI BRIDGE CONNECTOR — Central Node ↔ Pi Mainnet Node live link
@@ -382,6 +400,14 @@ services:
     mem_limit: 768m
     mem_reservation: 384m
     cpus: 0.80  # quantum-managed: T4 governance-shield (central node) — bumped after OOM
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1.5G
+        reservations:
+          cpus: '0.8'
+          memory: 768M
     environment:
       <<: [*db-env, *pi-env]
       NODE_TYPE: central
@@ -568,6 +594,14 @@ services:
     mem_limit: 640m
     mem_reservation: 320m
     cpus: 0.50  # quantum-managed: T4 quantum-intel-fortress — bumped for stability
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 640M
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
@@ -1114,6 +1148,14 @@ services:
     mem_limit: 3500m
     mem_reservation: 1500m
     cpus: 1.5  # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
+    deploy:
+      resources:
+        limits:
+          cpus: '3.0'
+          memory: 4G
+        reservations:
+          cpus: '1.5'
+          memory: 3.5G
     cpu_shares: 1536
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
