@@ -6,6 +6,8 @@
 
 *Powered by Pi Network • Real-World Utility Across 20+ Sectors • Every Financial System Attaches to Pi to Survive*
 
+[![TRISYN Token](https://img.shields.io/badge/TRISYN-APEX%20%7C%20QUANTUM--MAX%20%7C%201%3A1%20Pi%20PEG%20%7C%20100B%20MAX%20%7C%20100K%20PIONEER%20AIRDROP-EAB308?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
+[![TRISYN Quantum](https://img.shields.io/badge/TRISYN%20Crypto-ML--KEM--1024%20%7C%20ML--DSA--87%20%7C%20SLH--DSA--256%20%7C%20CNSA%202.0-FF0000?style=flat-square)](#%EF%B8%8F-apex-quantum-maximum-security-stack)
 [![Pi Network](https://img.shields.io/badge/Pi%20Network-SOVEREIGN-8B5CF6?style=flat-square)](https://minepi.com)
 [![Stellar](https://img.shields.io/badge/Stellar-Settlement-00B4E6?style=flat-square)](https://stellar.org)
 [![QFS](https://img.shields.io/badge/QFS-IMMORTAL-gold?style=flat-square)](https://github.com/jdrains110-beep/triumph-synergy)
@@ -42,6 +44,100 @@
 [**Live Demo**](https://triumphsynergyab2099.pinet.com) • [**Pi Browser**](https://triumphsynergyab2099.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
 
 </div>
+
+---
+
+<a id="-whats-new--may-24-2026-trisyn-utility-token"></a>
+
+## 🪙 What's New — May 24, 2026 (TRISYN Utility Token — Dual-Value, Pi-Pegged, Multi-Platform Redeemable)
+
+[![TRISYN Token](https://img.shields.io/badge/TRISYN-DUAL%20VALUE%20%7C%201%3A1%20Pi%20PEG%20%2B%20REAL--WORLD%20UTILITY-EAB308?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
+[![Max Supply](https://img.shields.io/badge/Max%20Supply-100%2C000%2C000%2C000%20TRISYN-8B5CF6?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
+[![Settlement](https://img.shields.io/badge/Settlement-Pi%20Mainnet%20%2B%20Testnet%20%2B%20Stellar%20SDEX-00B4E6?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
+[![Airdrop](https://img.shields.io/badge/Pioneer%20Airdrop-First%20100K%20%7C%20Tiered%20Decay-22C55E?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
+[![Audit Anchor](https://img.shields.io/badge/Audit%20Anchor-GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V-7C3AED?style=flat-square)](https://stellar.expert/explorer/public/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V)
+
+**TRISYN** is the native utility token of the Triumph Synergy ecosystem — a **dual-value, hard-pegged, real-world-backed** asset that pioneers can earn, spend, trade, and redeem across every Sovereign platform. Engineered at **APEX tier** with **maximum quantum-resistant security** — every mint, redeem, transfer, and audit anchor is protected by **CNSA Suite 2.0 + ML-KEM-1024 + ML-DSA-87 + SLH-DSA-256** post-quantum cryptography, settled across the 5-layer encrypted Sovereign Mesh, and signed by the SAIB Ed25519 sovereign identity.
+
+### 🛡️ APEX Quantum-Maximum Security Stack
+
+| Layer | Protection | Standard |
+|---|---|---|
+| **Issuance signing** | ML-DSA-87 (Dilithium) + Ed25519 SAIB identity | NIST FIPS 204 + RFC 8032 |
+| **Key encapsulation** | ML-KEM-1024 (Kyber) | NIST FIPS 203 |
+| **Hash-based backup** | SLH-DSA-256 (SPHINCS+) | NIST FIPS 205 |
+| **Transport** | TLS 1.3 + WireGuard ChaCha20-Poly1305 | RFC 8446 + RFC 7748 |
+| **Audit anchor signing** | CNSA Suite 2.0 (AES-256-GCM + SHA-384 + ECDSA P-384) | NSA/CISA CNSA 2.0 |
+| **Mesh routing** | 5-layer encrypted Sovereign Mesh (10.13.37.0/24) | Triumph Sovereign Mesh |
+| **Reserve attestation** | Stellar SDEX anchor + on-chain Pi receipts + SAIB-signed JSON | Sovereign Quantum Fortress |
+
+All TRISYN supply, reserves, mints, and redemptions are **quantum-resistant signed**, **cross-rail anchored** (Pi mainnet + Pi testnet + Stellar SDEX), and **publicly auditable in real time**.
+
+### 💎 Dual-Value Model
+
+TRISYN carries **two simultaneous values**:
+
+1. **Hard Peg — 1 TRISYN = 1 π** (mint/redeem at the issuer, both internal and external markets).
+2. **Real-World Utility Value** — backed by goods, services, and settlement across 10+ Sovereign platforms (housing, health, delivery, commerce, credit, travel, aviation, gaming, banking, jobs — and growing).
+
+This means TRISYN never floats away from π, but always carries a **second layer of intrinsic value** through the real economy it powers.
+
+### 🛒 Redeemable Across the Sovereign Ecosystem
+
+TRISYN is accepted, earned, and redeemable across every Sovereign platform — and the list keeps growing as the ecosystem expands:
+
+| # | Platform | Sector |
+|---|---|---|
+| 1 | **Sovereign Housing** | HUD / S8 / USDA obsolescence |
+| 2 | **Sovereign Health** | Medicare / CMS / FDA / ACA obsolescence |
+| 3 | **Sovereign Delivery** | UPS / DoorDash / Uber / Instawork obsolescence |
+| 4 | **Sovereign Commerce Regulation** | Dealers / Oil / Amazon / Ticketmaster obsolescence |
+| 5 | **Credit Dispute Platform** | Equifax / Experian / TransUnion obsolescence |
+| 6 | **Sovereign Travel** | OTA / Airlines / Airbnb obsolescence |
+| 7 | **Sovereign Aviation** | FAA-bridged sovereign airspace settlement |
+| 8 | **Gaming Marketplace (SGN)** | AAA studios + player/engineer payroll |
+| 9 | **Sovereign Pi-Bank** | Retail + sovereign banking rail |
+| 10 | **Jobs & Applications (SWN)** | Pioneer + Non-Pioneer payroll, 0% match fee, T+0 |
+| ∞ | **…and more** | The ecosystem keeps growing |
+
+### 🎁 Pioneer Airdrop — First 100,000 Users
+
+Every new user who authenticates with **Pi Network** automatically receives a TRISYN airdrop, distributed using a **structured tiered-decay model** so that early pioneers receive the largest allocation and later cohorts still receive a meaningful onboarding grant.
+
+- **Eligibility:** Pi authentication (KYC-verified Pioneer)
+- **Cap:** First **100,000 Pioneers** worldwide
+- **Distribution curve:** Tiered decay — allocation per user decreases as the cohort fills, ensuring early-adopter rewards while preserving runway for the full 100K
+- **Settlement:** Direct to the user's Pi wallet on the next tick after authentication
+
+### 📊 Token Economics
+
+| Parameter | Value |
+|---|---|
+| **Symbol** | TRISYN |
+| **Max Supply** | **100,000,000,000** (one hundred billion) |
+| **Peg** | 1 TRISYN ⇄ 1 π (hard, mint/redeem at issuer) |
+| **Backing** | Pi reserves (internal) + Real-world utility (external) across 10+ platforms |
+| **Settlement Rails** | **Pi Mainnet**, **Pi Testnet**, **Stellar SDEX** |
+| **Audit Anchor (Stellar)** | [`GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`](https://stellar.expert/explorer/public/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V) |
+| **Tradeable Pair** | TRISYN/π on Sovereign Pi-DEX and Stellar SDEX |
+| **Redemption** | TRISYN → π at hard peg, any time, settles next tick |
+
+### 🔁 How It Works
+
+**1. Earn or Mint**
+Earn TRISYN from gameplay (SGN), payroll (SWN), or marketplace sales across any Sovereign platform. Or mint TRISYN by depositing **π 1:1** with the issuer.
+
+**2. Spend Anywhere**
+Pay for housing, health, delivery, commerce, gaming, travel, credit, aviation, banking, or jobs — settle in **TRISYN or π**, interchangeably, at every Sovereign endpoint.
+
+**3. Redeem for π**
+Redeem TRISYN back to π at any time at the **hard peg**. Settles to your Pi wallet on the next tick — no slippage, no spread, no waiting period.
+
+### 🌐 Settlement & Audit
+
+- **Pi Mainnet + Testnet** — primary settlement rail; every mint, redeem, and transfer recorded on-chain.
+- **Stellar SDEX** — secondary deep-liquidity rail; TRISYN/π and TRISYN/XLM pairs.
+- **Audit Anchor `GA6Z5ST…GL7V`** — public Stellar account where every issuance, reserve, and redemption is anchored for transparent third-party audit. Anyone can verify reserves and supply in real time on [Stellar Expert](https://stellar.expert/explorer/public/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V).
 
 ---
 
