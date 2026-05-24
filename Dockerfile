@@ -58,16 +58,19 @@ RUN yarn build && \
     (echo "FATAL: .next/standalone/server.js missing or empty — build failed" && exit 1)
 
 # Production image, copy all the files and run next
-FROM base AS runner
+FROM alpine:latest AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Install Node.js and tini
+RUN apk add --no-cache nodejs npm tini
+
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy built application
+# Copy built application from builder stage
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
@@ -82,5 +85,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "server.js"]
