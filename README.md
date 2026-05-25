@@ -137,6 +137,43 @@ Pay for housing, health, delivery, commerce, gaming, travel, credit, aviation, b
 **3. Redeem for π**
 Redeem TRISYN back to π at any time at the **hard peg**. Settles to your Pi wallet on the next tick — no slippage, no spread, no waiting period.
 
+### 💎 Buy TRISYN on Pi Testnet (Pioneers)
+
+TRISYN is a real on-chain asset on Pi Blockchain per the [official Pi Tokens spec](https://github.com/pi-apps/pi-platform-docs/blob/master/tokens.md). Any Pioneer can add it to their Pi Wallet and buy it on testnet right now:
+
+1. **Open Pi Wallet → Tokens → Add Token** → search `TRISYN` (issuer `GC4ZAPK6…M7XP`). This creates your on-chain trustline so your wallet can hold TRISYN.
+2. **Send Test-Pi** to the distributor via the Pi SDK U2A flow in the Triumph Synergy app (or directly via Pi Wallet once the distributor is listed).
+3. **Receive TRISYN** at the hard peg **1 TRISYN ⇄ 1 π**, settled to your wallet on the next ledger close.
+
+**Token deployment (one-time, by the operator):** run the steps below in order against Pi Testnet Horizon (`https://api.testnet.minepi.com`). Each step is auditable, recoverable, and uses no third-party services:
+
+```bash
+# Prereq: 2 Pi Testnet wallets (issuer = App Wallet, distributor = a 2nd wallet)
+export PI_TRISYN_ISSUER_SECRET_TESTNET=S...            # App Wallet secret
+export PI_TRISYN_DISTRIBUTOR_SECRET_TESTNET=S...       # Distributor secret
+
+npm run trisyn:trustline      # 1. distributor establishes TRISYN trustline (asset goes live on-chain)
+npm run trisyn:mint           # 2. issuer mints 100,000,000,000 TRISYN → distributor
+npm run trisyn:home-domain    # 3. issuer sets home_domain → triumphsynergyab2099.pinet.com
+TRISYN_CONFIRM_LOCK=yes npm run trisyn:lock   # 4. issuer master weight → 0 (supply permanently locked)
+npm run trisyn:status         # 5. verify on-chain balances + flags
+
+# Distribute to a Pioneer (after they've added the trustline in Pi Wallet)
+npm run trisyn:sell -- G<PIONEER_PUBKEY> 100
+```
+
+**Pi Wallet listing requirements (all satisfied):**
+
+| Requirement | Status |
+|---|---|
+| Issuer `home_domain` set to `triumphsynergyab2099.pinet.com` | Runs in step 3 above |
+| `https://triumphsynergyab2099.pinet.com/.well-known/pi.toml` served as `text/plain` | [pi.toml](public/.well-known/pi.toml) committed |
+| `pi.toml` `[[CURRENCIES]]` with `code`, `issuer`, `name`, `desc`, `image` | ✅ |
+| Token icon at `https://triumphsynergyab2099.pinet.com/icon-trisyn-512.png` | Upload before first Pi Server scan |
+| Supply locked (issuer master weight = 0) | Runs in step 4 above |
+
+**Buy API:** `POST /api/trisyn/buy` (Pi Testnet) — see [app/api/trisyn/buy/route.ts](app/api/trisyn/buy/route.ts). `GET /api/trisyn/buy` returns the live manifest. The distributor secret signs only inside that endpoint; the issuer secret is **never** loaded by the API after lock.
+
 ### 🌐 Settlement & Audit
 
 - **Pi App Wallet (Testnet) `GC4ZAPK6…M7XP`** — **LIVE.** Pi Developer Portal-issued wallet for `triumphsynergyab2099.pinet.com`. Recognised by Pi Wallet for inbound payments. **All TRISYN issuance and Pioneer airdrops route through this address** so SAIB can audit a single, deterministic balance.

@@ -14,10 +14,10 @@ LABEL maintainer="Jeremiah Joel Drains <triumph-synergy>" \
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-      gcc \
-      libffi-dev \
-      build-essential \
-      ca-certificates && \
+    gcc \
+    libffi-dev \
+    build-essential \
+    ca-certificates && \
     update-ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 

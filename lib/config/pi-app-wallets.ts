@@ -55,12 +55,24 @@ export const FOUNDER_WALLET =
  * ONLY currently-active runtime payment destination on Pi Testnet.
  *
  * Recognised by Pi Wallet for inbound payments. Used as:
- *   • TRISYN issuer (testnet)
+ *   • TRISYN issuer (testnet) — the on-chain token issuer account
  *   • Pioneer airdrop source (testnet)
  *   • A2U / U2A settlement endpoint (testnet)
  */
 export const APP_WALLET_PI_TESTNET =
   "GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP";
+
+/**
+ * TRISYN Distributor wallet (Pi Testnet) — the second Pi Wallet required
+ * by the Pi Tokens spec. The distributor holds the minted supply and
+ * settles outbound payments to Pioneers who have established a trustline.
+ *
+ * Populated via PI_TRISYN_DISTRIBUTOR_TESTNET. The issuer (App Wallet)
+ * MUST NOT hold supply after mainnet promotion — master weight gets set
+ * to 0 to lock supply at the configured maximum.
+ */
+export const TRISYN_DISTRIBUTOR_TESTNET =
+  process.env.PI_TRISYN_DISTRIBUTOR_TESTNET?.trim() || "";
 
 /**
  * Pi Mainnet App Wallet — populated after mainnet promotion in the Pi
@@ -87,6 +99,31 @@ export const TRISYN_ISSUER_MAINNET = APP_WALLET_PI_MAINNET;
 /** Pioneer airdrop source — every new Pioneer's airdrop is paid from here. */
 export const PIONEER_AIRDROP_SOURCE_TESTNET = APP_WALLET_PI_TESTNET;
 export const PIONEER_AIRDROP_SOURCE_MAINNET = APP_WALLET_PI_MAINNET;
+
+// ── TRISYN on-chain asset metadata (Pi Tokens spec) ─────────────────────────
+
+/**
+ * On-chain asset code. Up to 12 alphanumeric characters, case-sensitive.
+ * `TRISYN` is a credit_alphanum12 asset on Pi Blockchain.
+ */
+export const TRISYN_ASSET_CODE = "TRISYN";
+
+/** Fixed supply minted by the issuer to the distributor at deployment. */
+export const TRISYN_MAX_SUPPLY = "100000000000"; // 100 billion (string for SDK)
+
+/** Pi Testnet Horizon endpoint per https://github.com/pi-apps/pi-platform-docs/blob/master/tokens.md */
+export const PI_TESTNET_HORIZON = "https://api.testnet.minepi.com";
+export const PI_TESTNET_PASSPHRASE = "Pi Testnet";
+
+/** Pi Mainnet Horizon endpoint. */
+export const PI_MAINNET_HORIZON = "https://api.mainnet.minepi.com";
+export const PI_MAINNET_PASSPHRASE = "Pi Network";
+
+/**
+ * Home domain set on the issuer account so Pi Wallet can discover
+ * `https://<HOME_DOMAIN>/.well-known/pi.toml` and list TRISYN.
+ */
+export const TRISYN_HOME_DOMAIN = "triumphsynergyab2099.pinet.com";
 
 // ── SAIB enforcement set ─────────────────────────────────────────────────────
 

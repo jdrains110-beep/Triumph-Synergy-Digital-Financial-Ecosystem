@@ -55,7 +55,13 @@
     "test": "cross-env RUN_MIGRATIONS=true PLAYWRIGHT=True tsx scripts/run-migrations-if-present.ts && cross-env PLAYWRIGHT=True npm exec playwright test",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "trisyn:trustline": "node scripts/trisyn-issue-testnet.mjs trustline",
+    "trisyn:mint": "node scripts/trisyn-issue-testnet.mjs mint",
+    "trisyn:home-domain": "node scripts/trisyn-issue-testnet.mjs home-domain",
+    "trisyn:lock": "node scripts/trisyn-issue-testnet.mjs lock",
+    "trisyn:sell": "node scripts/trisyn-issue-testnet.mjs sell",
+    "trisyn:status": "node scripts/trisyn-issue-testnet.mjs status"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.4",
