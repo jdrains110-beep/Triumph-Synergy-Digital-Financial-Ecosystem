@@ -184,8 +184,12 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
       window.__piInitialization.status = 'initializing';
       
       try {
-        // Perform initialization
-        window.Pi.init({ version: '2.0', sandbox: sandbox, appId: appId })
+        // Per Pi SDK Authentication docs (https://pi-apps.github.io/pi-sdk-docs/quick-start/genai/Authentication)
+        // Pi.init() takes ONLY { version, sandbox }. The appId is resolved
+        // server-side at authenticate() time from the request origin. Passing
+        // an unexpected appId field caused Pi.init() to never resolve, which
+        // broke Pi App Studio verification.
+        window.Pi.init({ version: '2.0', sandbox: sandbox })
           .then(function() {
             console.log('[Pi SDK] Pi.init() completed');
             window.__piInitialization.status = 'initialized';
