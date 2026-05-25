@@ -67,6 +67,33 @@ FOUNDER_AUTHORITY = os.getenv("TRIUMPH_FOUNDER_AUTHORITY",    "owner-approved")
 FOUNDER_ADDRESS   = os.getenv("TRIUMPH_FOUNDER_ADDRESS",      "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V")
 # Payment wallet — all Pi fee receipts go here (mainnet)
 PAYMENT_WALLET    = os.getenv("PAYMENT_WALLET_ADDRESS",        "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF")
+# ── Pi App Wallet (Pi Developer Portal-issued) ──────────────────────────────
+# Canonical TRISYN issuer + Pioneer airdrop source on Pi Testnet. This is
+# the address Pi Wallet recognises for inbound app payments and the only
+# permitted runtime payment destination on testnet. Founder address above
+# is identity-only (legal attestations); it is NEVER used as a payment
+# endpoint. SAIB enforces this separation in
+# lib/config/pi-app-wallets.ts.
+APP_WALLET_TESTNET = os.getenv("PI_APP_WALLET_TESTNET",        "GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP")
+APP_WALLET_MAINNET = os.getenv("PI_APP_WALLET_MAINNET",        "").strip()
+TRISYN_ISSUER      = APP_WALLET_MAINNET if (NETWORK == "mainnet" and APP_WALLET_MAINNET) else APP_WALLET_TESTNET
+PIONEER_AIRDROP_SOURCE = TRISYN_ISSUER
+
+# SAIB-enforced authorised payment destination allowlist. Any outbound
+# Pi/TRISYN payment whose destination is not in this set MUST be rejected.
+AUTHORIZED_PAYMENT_DESTINATIONS = {
+    addr for addr in (APP_WALLET_TESTNET, APP_WALLET_MAINNET) if addr
+}
+
+def enforce_authorized_destination(address: str) -> None:
+    """SAIB guard — refuse payments to addresses outside the allowlist."""
+    if address not in AUTHORIZED_PAYMENT_DESTINATIONS:
+        raise ValueError(
+            f"[SAIB] Refusing payment to unauthorised destination {address}. "
+            f"Only registered Pi App Wallets may receive runtime payments. "
+            f"Founder wallet {FOUNDER_ADDRESS} is identity-only."
+        )
+
 FOUNDER_TITLE     = os.getenv("TRIUMPH_FOUNDER_TITLE",        "Sovereign Owner and Creator")
 FOUNDER_SOVEREIGN = os.getenv("TRIUMPH_FOUNDER_SOVEREIGN_STATUS", "NESARA_GESARA_COMPLIANT")
 GLOBAL_PROVIDERS = [

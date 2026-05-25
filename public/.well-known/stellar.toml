@@ -15,7 +15,11 @@ STELLAR_CORE_VERSION="v22.1.0"
 # Federation / auth not provided yet. Wire to the runtime app origin when ready.
 
 ACCOUNTS=[
-  "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
+  # Founder / sovereign identity anchor (legal attestations only).
+  "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
+  # Pi App Wallet — Pi Developer Portal-issued for triumphsynergyab2099.pinet.com
+  # ACTIVE on Pi Testnet. Canonical TRISYN issuer and Pioneer airdrop source.
+  "GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP"
 ]
 
 # ── Organization ─────────────────────────────────────────────────────────────
@@ -45,3 +49,21 @@ HISTORY=""
 name="Jeremiah Drains"
 email=""
 github="jdrains110-beep"
+
+# ── Currencies (TRISYN — Triumph Synergy Utility Token) ──────────────────────
+# Issued from the Pi Developer Portal-registered App Wallet for
+# triumphsynergyab2099.pinet.com. ACTIVE on Pi Testnet; mainnet issuance
+# begins after Pi Developer Portal mainnet promotion.
+[[CURRENCIES]]
+code="TRISYN"
+issuer="GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP"
+display_decimals=7
+name="Triumph Synergy Utility Token"
+desc="Utility + value token redeemable 1:1 for Pi at the issuer, accepted across all Sovereign platforms. Source of every Pioneer airdrop."
+conditions="Hard peg 1 TRISYN ⇄ 1 π; max supply 100,000,000,000; Pioneer airdrop tier-decay for first 100,000 KYC-verified Pi Pioneers."
+image=""
+fixed_number=100000000000
+is_asset_anchored=true
+anchor_asset_type="crypto"
+anchor_asset="PI"
+status="live"

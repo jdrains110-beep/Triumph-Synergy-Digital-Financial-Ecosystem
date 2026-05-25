@@ -32,10 +32,22 @@
  * Algorithms: ML-DSA-87 MAX (sig) · ML-KEM-1024 MAX (enc) · SHAKE-256 + SHA3-512 (hash) · SPHINCS+ (backup)
  * FIPS:       FIPS 204 Level 5 · FIPS 203 Level 5 · FIPS 202 · FIPS 205
  * Pi anchor:  $314.159/π external · $314,159/π internal
- * Anchor:     GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
+ * Founder:    GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V (identity only)
+ * App Wallet: GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP (Pi Testnet — TRISYN issuer + Pioneer airdrop source)
  */
 
 import { randomUUID } from "crypto";
+import {
+  APP_WALLET_PI_TESTNET,
+  AUTHORIZED_PAYMENT_DESTINATIONS,
+  FOUNDER_WALLET,
+  PIONEER_AIRDROP_SOURCE_TESTNET,
+  TRISYN_ISSUER_TESTNET,
+  enforceAuthorizedDestination,
+  isPiMainnetActivated,
+  resolvePioneerAirdropSource,
+  resolveTrisynIssuer,
+} from "../config/pi-app-wallets";
 
 // ── Core Constants ────────────────────────────────────────────────────────────
 
@@ -45,7 +57,26 @@ export const APEX_SECURITY_LEVEL   = "APEX-QUANTUM-SOVEREIGN";
 export const QUANTUM_ALGO_SIG      = "ML-DSA-87 (CRYSTALS-Dilithium MAX — FIPS 204 Level 5)";
 export const QUANTUM_ALGO_ENC      = "ML-KEM-1024 (CRYSTALS-Kyber MAX — FIPS 203 Level 5)";
 export const QUANTUM_ALGO_HASH     = "SHAKE-256 + SHA3-512";
-export const SOVEREIGN_ANCHOR      = "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V";
+
+// Founder/sovereign identity (legal attestations only — NOT a payment destination)
+export const SOVEREIGN_ANCHOR      = FOUNDER_WALLET;
+
+// Live Pi Testnet App Wallet (Pi Developer Portal-issued, Pi Wallet-recognised)
+// All TRISYN issuance and Pioneer airdrops route through this address.
+export const APP_WALLET_TESTNET    = APP_WALLET_PI_TESTNET;
+export const TRISYN_ISSUER         = TRISYN_ISSUER_TESTNET;
+export const PIONEER_AIRDROP_FROM  = PIONEER_AIRDROP_SOURCE_TESTNET;
+
+// Re-export the SAIB-enforced allowlist + guard so every platform module
+// importing SAIB also gets the enforcement primitives for free.
+export {
+  AUTHORIZED_PAYMENT_DESTINATIONS,
+  enforceAuthorizedDestination,
+  isPiMainnetActivated,
+  resolvePioneerAirdropSource,
+  resolveTrisynIssuer,
+};
+
 export const PI_RATE_EXTERNAL      = 314.159;
 export const PI_RATE_INTERNAL      = 314_159;
 
@@ -568,6 +599,20 @@ export class SAIBEngine {
     payload:    Record<string, unknown>;
     priority?:  1 | 2 | 3 | 4 | 5;
   }): SAIBTask {
+    // ── SAIB enforcement: outbound Pi payments + Pioneer airdrops ──
+    // For any payment-bearing task type, the destination address inside
+    // payload.destination MUST be in AUTHORIZED_PAYMENT_DESTINATIONS.
+    // This prevents misrouted TRISYN issuance/airdrops to the founder
+    // wallet or any unregistered address.
+    if (params.taskType === "pi-payment") {
+      const dest = (params.payload?.destination ??
+        params.payload?.to ??
+        params.payload?.recipient) as string | undefined;
+      if (typeof dest === "string" && dest.length > 0) {
+        enforceAuthorizedDestination(dest);
+      }
+    }
+
     const task: SAIBTask = {
       taskId:           randomUUID(),
       taskType:         params.taskType,

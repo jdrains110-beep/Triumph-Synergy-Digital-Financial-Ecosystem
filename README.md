@@ -56,6 +56,8 @@
 [![Settlement](https://img.shields.io/badge/Settlement-Pi%20Mainnet%20%2B%20Testnet%20%2B%20Stellar%20SDEX-00B4E6?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
 [![Airdrop](https://img.shields.io/badge/Pioneer%20Airdrop-First%20100K%20%7C%20Tiered%20Decay-22C55E?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
 [![Audit Anchor](https://img.shields.io/badge/Audit%20Anchor-TESTNET%20LIVE%20%7C%20Pi%20Mainnet%20Pending-22C55E?style=flat-square)](https://stellar.expert/explorer/testnet/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V)
+[![Pi App Wallet](https://img.shields.io/badge/Pi%20App%20Wallet-TESTNET%20LIVE%20%E2%80%94%20GC4ZAPK6…M7XP-7C3AED?style=flat-square)](https://triumphsynergyab2099.pinet.com)
+[![TRISYN Issuer](https://img.shields.io/badge/TRISYN%20Issuer-Pi%20App%20Wallet%20(Testnet)-F59E0B?style=flat-square)](public/.well-known/stellar.toml)
 
 **TRISYN** is the native utility token of the Triumph Synergy ecosystem — a **dual-value, hard-pegged, real-world-backed** asset that pioneers can earn, spend, trade, and redeem across every Sovereign platform. Engineered at **APEX tier** with **maximum quantum-resistant security** — every mint, redeem, transfer, and audit anchor is protected by **CNSA Suite 2.0 + ML-KEM-1024 + ML-DSA-87 + SLH-DSA-256** post-quantum cryptography, settled across the 5-layer encrypted Sovereign Mesh, and signed by the SAIB Ed25519 sovereign identity.
 
@@ -117,8 +119,10 @@ Every new user who authenticates with **Pi Network** automatically receives a TR
 | **Max Supply** | **100,000,000,000** (one hundred billion) |
 | **Peg** | 1 TRISYN ⇄ 1 π (hard, mint/redeem at issuer) |
 | **Backing** | Pi reserves (internal) + Real-world utility (external) across 10+ platforms |
-| **Settlement Rails** | **Pi Mainnet** (primary, pending mainnet funding), **Pi Testnet** (live), **Stellar Testnet** (live — audit anchor activated), **Stellar SDEX** (planned secondary rail) |
-| **Audit Anchor** | [`GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`](https://stellar.expert/explorer/testnet/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V) — **active on Stellar Testnet** (funding tx [`097fa75d`](https://stellar.expert/explorer/testnet/tx/097fa75daa43f58ac479067a5d2c375aef3bdd482c598de98ac9082ab58773b3)); Pi Mainnet activation pending first 1π deposit |
+| **Settlement Rails** | **Pi Testnet App Wallet** (LIVE — `GC4ZAPK6…M7XP`), **Pi Mainnet** (pending Developer Portal mainnet promotion), **Stellar Testnet** (live — audit anchor activated), **Stellar SDEX** (planned secondary rail) |
+| **TRISYN Issuer** | `GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP` — Pi Developer Portal-issued App Wallet for [triumphsynergyab2099.pinet.com](https://triumphsynergyab2099.pinet.com); recognised by Pi Wallet for inbound payments |
+| **Pioneer Airdrop Source** | Same as TRISYN Issuer — every Pioneer airdrop is paid from the App Wallet so SAIB can debit a single, auditable balance |
+| **Audit Anchor (Founder Identity)** | [`GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`](https://stellar.expert/explorer/testnet/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V) — sovereign identity anchor; **active on Stellar Testnet** (funding tx [`097fa75d`](https://stellar.expert/explorer/testnet/tx/097fa75daa43f58ac479067a5d2c375aef3bdd482c598de98ac9082ab58773b3)). Identity-only — NOT a runtime payment destination |
 | **Tradeable Pair** | TRISYN/π on Sovereign Pi-DEX and Stellar SDEX |
 | **Redemption** | TRISYN → π at hard peg, any time, settles next tick |
 
@@ -135,12 +139,11 @@ Redeem TRISYN back to π at any time at the **hard peg**. Settles to your Pi wal
 
 ### 🌐 Settlement & Audit
 
-- **Pi Mainnet + Testnet** — primary settlement rail; every mint, redeem, and transfer recorded on-chain.
-- **Stellar SDEX** — planned secondary deep-liquidity rail; TRISYN/π and TRISYN/XLM pairs once mainnet anchor is funded.
-- **Audit Anchor `GA6Z5ST…GL7V`** — public account where every issuance, reserve, and redemption is anchored for transparent third-party audit.
-  - **Stellar Testnet:** [ACTIVE](https://stellar.expert/explorer/testnet/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V) — funded May 24, 2026 (tx [`097fa75d`](https://stellar.expert/explorer/testnet/tx/097fa75daa43f58ac479067a5d2c375aef3bdd482c598de98ac9082ab58773b3)). Anyone can verify keypair control and review test issuances in real time.
-  - **Pi Mainnet Horizon:** [pending funding](https://api.mainnet.minepi.com/accounts/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V) — the central node activates the moment it receives its first 1π deposit from the founder wallet. After that, every mint/redeem will be queryable at the same URL.
-  - **Stellar Public Mainnet:** planned — will be activated when bridging to Stellar SDEX goes live (requires ≥ 1.5 XLM).
+- **Pi App Wallet (Testnet) `GC4ZAPK6…M7XP`** — **LIVE.** Pi Developer Portal-issued wallet for `triumphsynergyab2099.pinet.com`. Recognised by Pi Wallet for inbound payments. **All TRISYN issuance and Pioneer airdrops route through this address** so SAIB can audit a single, deterministic balance.
+- **Pi App Wallet (Mainnet)** — activates the moment the Pi App is promoted to mainnet in the Pi Developer Portal. Until then, runtime code refuses mainnet settlement (`resolveTrisynIssuer("mainnet")` throws).
+- **Stellar SDEX** — planned secondary deep-liquidity rail; TRISYN/π and TRISYN/XLM pairs once mainnet App Wallet is provisioned.
+- **Founder Identity Anchor `GA6Z5ST…GL7V`** — sovereign identity attestation key. NOT a payment destination. Key control proven on Stellar Testnet (funded May 24, 2026, tx [`097fa75d`](https://stellar.expert/explorer/testnet/tx/097fa75daa43f58ac479067a5d2c375aef3bdd482c598de98ac9082ab58773b3)). Used only for legal attestations and HQ on-chain verification.
+- **SAIB Enforcement** — every outbound TRISYN / Pi payment passes through `enforceAuthorizedDestination()` in [`lib/config/pi-app-wallets.ts`](lib/config/pi-app-wallets.ts). Payments to any address outside the App Wallet allowlist are rejected with a `sovereign-override` alert. The founder identity anchor is **intentionally excluded** from the allowlist.
 
 ---
 
