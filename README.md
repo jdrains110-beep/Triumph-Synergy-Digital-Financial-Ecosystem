@@ -139,6 +139,17 @@ Redeem TRISYN back to π at any time at the **hard peg**. Settles to your Pi wal
 
 ### 💎 Buy TRISYN on Pi Testnet (Pioneers)
 
+> **🟢 TRISYN IS LIVE ON PI TESTNET — supply permanently locked at 100,000,000,000.**
+>
+> | Step | Tx hash | Ledger |
+> |---|---|---|
+> | Trustline opened | `0d0ac28d6b14bc4a76803ba9613deb3ae686f56469def0dd667392c1619c2094` | 24,839,628 |
+> | Supply minted (100 B → distributor) | `bfa32ddecadc4938ba51e38b10dcc4f126d5892ebaf5c05727f883b86ffd8b10` | 24,839,631 |
+> | Issuer `home_domain` set | `0cbc15fd1c4186a6371c70e2d9f3f055fc4c91639530755dba679060abef7ece` | 24,839,633 |
+> | **Issuer master weight → 0 (supply frozen forever)** | `574d3df90ed1e4f92d6b4f46ce2d618a269c3728f02d2c25fe96a25e85a9417e` | 24,839,860 |
+>
+> Issuer: [`GC4ZAPK6…M7XP`](https://api.testnet.minepi.com/accounts/GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP) · Distributor: [`GDINCI6L…VTMF`](https://api.testnet.minepi.com/accounts/GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF)
+
 TRISYN is a real on-chain asset on Pi Blockchain per the [official Pi Tokens spec](https://github.com/pi-apps/pi-platform-docs/blob/master/tokens.md). Any Pioneer can add it to their Pi Wallet and buy it on testnet right now:
 
 1. **Open Pi Wallet → Tokens → Add Token** → search `TRISYN` (issuer `GC4ZAPK6…M7XP`). This creates your on-chain trustline so your wallet can hold TRISYN.
