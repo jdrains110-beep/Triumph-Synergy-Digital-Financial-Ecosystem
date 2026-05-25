@@ -67,12 +67,15 @@ export const APP_WALLET_PI_TESTNET =
  * by the Pi Tokens spec. The distributor holds the minted supply and
  * settles outbound payments to Pioneers who have established a trustline.
  *
- * Populated via PI_TRISYN_DISTRIBUTOR_TESTNET. The issuer (App Wallet)
- * MUST NOT hold supply after mainnet promotion — master weight gets set
- * to 0 to lock supply at the configured maximum.
+ * Default value is the operator-confirmed distributor pubkey; an env
+ * override (PI_TRISYN_DISTRIBUTOR_TESTNET) is still honored so a different
+ * environment (staging, fork, replay) can swap it without a code change.
+ * The issuer (App Wallet) MUST NOT hold supply after mainnet promotion —
+ * master weight gets set to 0 to lock supply at the configured maximum.
  */
 export const TRISYN_DISTRIBUTOR_TESTNET =
-  process.env.PI_TRISYN_DISTRIBUTOR_TESTNET?.trim() || "";
+  process.env.PI_TRISYN_DISTRIBUTOR_TESTNET?.trim() ||
+  "GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF";
 
 /**
  * Pi Mainnet App Wallet — populated after mainnet promotion in the Pi
@@ -133,10 +136,15 @@ export const TRISYN_HOME_DOMAIN = "triumphsynergyab2099.pinet.com";
  * set is rejected.
  *
  * The founder wallet is INTENTIONALLY EXCLUDED — it's an identity, not
- * a payment endpoint.
+ * a payment endpoint. The TRISYN distributor IS included so Pioneers can
+ * pay Pi to it in exchange for TRISYN (U2A buy flow).
  */
 export const AUTHORIZED_PAYMENT_DESTINATIONS: ReadonlySet<string> = new Set(
-  [APP_WALLET_PI_TESTNET, APP_WALLET_PI_MAINNET].filter(Boolean),
+  [
+    APP_WALLET_PI_TESTNET,
+    APP_WALLET_PI_MAINNET,
+    TRISYN_DISTRIBUTOR_TESTNET,
+  ].filter(Boolean),
 );
 
 /** SAIB guard — call before queuing any outbound Pi payment. */

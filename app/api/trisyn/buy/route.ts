@@ -28,6 +28,7 @@ import {
   PI_TESTNET_HORIZON,
   PI_TESTNET_PASSPHRASE,
   TRISYN_ASSET_CODE,
+  TRISYN_DISTRIBUTOR_TESTNET,
 } from "@/lib/config/pi-app-wallets";
 
 export const dynamic = "force-dynamic";
@@ -57,8 +58,8 @@ export async function POST(req: Request) {
   if (!recipient || !StellarSDK.StrKey.isValidEd25519PublicKey(recipient)) {
     return badRequest("recipient must be a valid Pi public key");
   }
-  if (recipient === APP_WALLET_PI_TESTNET) {
-    return badRequest("recipient cannot be the issuer/distributor wallet");
+  if (recipient === APP_WALLET_PI_TESTNET || recipient === TRISYN_DISTRIBUTOR_TESTNET) {
+    return badRequest("recipient cannot be the issuer or distributor wallet");
   }
   const amt = Number(amount);
   if (!Number.isFinite(amt) || amt <= 0 || amt > 100_000) {
@@ -170,13 +171,14 @@ export async function GET() {
     ok: true,
     asset: TRISYN_ASSET_CODE,
     issuer: APP_WALLET_PI_TESTNET,
+    distributor: TRISYN_DISTRIBUTOR_TESTNET,
     network: "Pi Testnet",
     horizon: PI_TESTNET_HORIZON,
     peg: "1 TRISYN ⇄ 1 π",
     max_per_call: 100_000,
     instructions: [
       "1. Open Pi Wallet → Tokens → Add Token → TRISYN",
-      "2. Send Pi to the distributor address via the Pi SDK U2A flow",
+      `2. Send Pi to the distributor (${TRISYN_DISTRIBUTOR_TESTNET}) via the Pi SDK U2A flow`,
       "3. POST { recipient, amount, piPaymentId } to this endpoint",
     ],
     spec: "https://github.com/pi-apps/pi-platform-docs/blob/master/tokens.md",
