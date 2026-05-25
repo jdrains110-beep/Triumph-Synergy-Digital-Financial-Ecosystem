@@ -8,12 +8,22 @@ LABEL maintainer="Jeremiah Joel Drains <triumph-synergy>" \
     org.triumph.encryption="AES-256-GCM+ECDH-P384+RSA-3072+Kyber-1024+Dilithium-5" \
     org.triumph.network.architecture="ARPANET+NSFNet+DARPA+Interspace"
 
-# Build deps for cryptography package (libgcc-s1, libffi)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libffi-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# APEX security hardening: full apt upgrade pulls every Debian security patch
+# (closes the 90+ base-OS CVEs flagged by container scanning: ncurses, util-linux,
+# tar, glibc, xz, systemd, sqlite, zlib, perl, etc.)
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+      gcc \
+      libffi-dev \
+      build-essential \
+      ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# APEX security hardening: latest pip closes CVE-2026-6357 (arbitrary code execution
+# via malicious wheel) and CVE-2026-3219 (incorrect file installation)
+RUN pip install --no-cache-dir --upgrade 'pip>=26.1.0' setuptools wheel
 
 WORKDIR /app
 
@@ -22,7 +32,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Remove build tools after install (reduce attack surface per CNSA guidance)
-RUN apt-get purge -y --auto-remove gcc libffi-dev build-essential
+RUN apt-get purge -y --auto-remove gcc libffi-dev build-essential && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY main.py .
 
