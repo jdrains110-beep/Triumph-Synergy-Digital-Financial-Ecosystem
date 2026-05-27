@@ -195,6 +195,108 @@ npm run trisyn:sell -- G<PIONEER_PUBKEY> 100
 
 ---
 
+<a id="trisyn-tokenization-roadmap"></a>
+
+## 🗺️ TRISYN Tokenization Roadmap — Honest Status & Forward Plan
+
+> This section separates **what is verifiably on-chain right now** from **what is planned**. Every "LIVE" claim links to a Horizon endpoint or signed transaction. Every "PLANNED" claim is explicitly labeled and is **not** a current property of the token. Buyers and pioneers should make decisions only on the **LIVE** column.
+
+### ✅ Phase 0 — Live On-Chain (Verifiable Today)
+
+| Item | Status | On-Chain Proof |
+|---|---|---|
+| TRISYN asset exists on Pi Testnet | ✅ LIVE | Issuer [`GC4ZAPK6…M7XP`](https://api.testnet.minepi.com/accounts/GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP) |
+| Total supply minted: 100,000,000,000 TRISYN | ✅ LIVE | Tx `bfa32ddecadc4938ba51e38b10dcc4f126d5892ebaf5c05727f883b86ffd8b10` |
+| Supply permanently locked (issuer `master_weight = 0`) | ✅ LIVE | Tx `574d3df90ed1e4f92d6b4f46ce2d618a269c3728f02d2c25fe96a25e85a9417e` — no more TRISYN can ever be minted |
+| All 100B TRISYN held by distributor wallet | ✅ LIVE | Distributor [`GDINCI6L…VTMF`](https://api.testnet.minepi.com/accounts/GDINCI6L7M3J3YTUEMSX3SP2OD7VBJEVX6DTC3BHLD4SD4CMVQ2DVTMF) |
+| Founder identity attestation (Stellar Testnet) | ✅ LIVE | [`GA6Z5ST…GL7V`](https://stellar.expert/explorer/testnet/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V), funding tx [`097fa75d`](https://stellar.expert/explorer/testnet/tx/097fa75daa43f58ac479067a5d2c375aef3bdd482c598de98ac9082ab58773b3) |
+
+**Plain-English meaning of Phase 0:** TRISYN is a real, fixed-supply, on-chain asset on the Pi Testnet ledger. It is currently held in a single distributor wallet and has **not** yet been distributed to pioneers, **not** yet promoted to mainnet, and **not** yet collateralized. None of the planned backing, peg, or redemption mechanisms below are operative until the phases below ship.
+
+---
+
+### 🚧 Phase 1 — Pi Mainnet Promotion (Roadmap, Not Yet Done)
+
+**Trigger:** Pi Developer Portal promotes `triumph-synergy` from Testnet to Mainnet App registration. Per Pi Network policy, mainnet promotion is granted by Pi Core Team after the testnet integration meets Pi App Studio's review criteria.
+
+**Actions when triggered:**
+1. New App Wallet (mainnet) issued by Pi Developer Portal.
+2. Re-run the same on-chain sequence (trustline → mint → home_domain → master_weight 0) against Pi Mainnet Horizon.
+3. Flip `NEXT_PUBLIC_PI_SANDBOX=false` and update `lib/validation/keys.ts` picker to default mainnet.
+4. Publish the mainnet issuer key, mint tx, and lock tx in this README's Phase 0 table.
+
+**Until Phase 1 ships:** any reference in marketing material to "TRISYN on Pi Mainnet" is forward-looking. Pioneer purchases today settle on **Pi Testnet** only.
+
+---
+
+### 🚧 Phase 2 — Reserve & Collateral Model (Design, Not Yet Operative)
+
+This is the **intended** backing model. Until Phase 2 ships with published proof-of-reserve attestations, TRISYN is an **uncollateralized utility token** whose value derives solely from acceptance across Triumph Synergy platforms.
+
+**Proposed multi-tranche reserve structure:**
+
+| Tranche | Target Allocation | Asset Class | Custody Model | Status |
+|---|---|---|---|---|
+| **A. Pi Reserve** | 60–80% of circulating supply | π held in segregated reserve wallet | On-chain, publicly auditable Pi address | 🚧 NOT YET FUNDED |
+| **B. Real-World Utility Float** | 10–20% | Inventory + service capacity across Sovereign platforms (housing units, delivery capacity, marketplace credits) | Operational ledger reconciled monthly | 🚧 DESIGN STAGE |
+| **C. Sovereign Hard-Asset Reserve** | 5–15% | Allocated physical gold / silver held with a regulated bullion custodian | Vault receipts published + quarterly audit | 🚧 NOT YET ESTABLISHED — REQUIRES CUSTODIAN AGREEMENT, AUDITOR ENGAGEMENT, AND LEGAL OPINION |
+
+**Honest framing of the "gold-backed" goal:** A claim of gold backing is only credible if (a) a regulated custodian holds allocated bullion, (b) the bullion quantity is published per circulating TRISYN, (c) an independent auditor attests to the holding on a recurring schedule, and (d) holders have a contractually enforceable redemption right. Triumph Synergy intends to pursue this structure as Phase 2-C. **Until all four conditions are met and published with custodian + auditor names and vault receipts, TRISYN is not gold-backed and must not be marketed as such.**
+
+**Proposed 1:1 π peg mechanics (mint/redeem model):**
+- **Mint:** Pioneer deposits 1 π to the distributor → distributor pays 1 TRISYN from the existing 100B supply.
+- **Redeem:** Pioneer returns 1 TRISYN to the distributor → distributor pays 1 π from the Pi Reserve (Tranche A).
+- **Peg integrity condition:** Tranche A's π balance must always ≥ circulating TRISYN held by pioneers. The redemption function must refuse if the invariant would break.
+- **Live attestation endpoint (planned):** `GET /api/trisyn/reserves` returns `{circulating, reserve_pi, reserve_ratio, last_audit_tx}` signed by the SAIB Ed25519 key.
+
+Until that endpoint is live and reconciled with on-chain ledger reads, **the 1:1 peg is a stated commitment, not a mechanical guarantee**.
+
+---
+
+### 🚧 Phase 3 — `.pi` Domain Wrapping (Roadmap, Speculative)
+
+**Goal:** Allow holders of `.pi` Web3 domains to optionally wrap a domain into a transferable on-chain asset that can be listed, traded, or used as collateral within the Triumph Synergy ecosystem.
+
+**Design sketch:**
+- Each wrapped domain becomes a `credit_alphanum12` asset on Pi/Stellar, code derived from the domain hash, issued by a dedicated `domain-wrapper` issuer wallet under SAIB control.
+- Domain owner proves control via a signed TXT record at `_triumph-wrap.<domain>.pi`.
+- Wrapping is reversible: burning the wrapped asset returns control of the underlying `.pi` registration.
+- **No claim** is made that wrapping conveys allodial title, sovereign immunity, real-property rights, or exemption from any law. Wrapped domains are on-chain representations of DNS-equivalent records; they are not deeds.
+
+**Status:** NOT IMPLEMENTED. No `.pi` domain has been wrapped as of the date of this commit. Any future wrapping will be listed in a new section below this one with the same per-asset proof format used in Phase 0.
+
+---
+
+### 🚧 Phase 4 — Stellar SDEX Secondary Market (Roadmap)
+
+Once Phase 1 (mainnet) and Phase 2-A (Pi Reserve funded) are live, TRISYN/π and TRISYN/XLM pairs will be opened on Stellar SDEX as a secondary liquidity rail. Until Phase 2-A is funded, listing on a secondary market would create an arbitrage path that the issuer cannot honor, so the listing is intentionally deferred.
+
+---
+
+### 📋 Compliance Posture
+
+> **The following fields are placeholders. They must be replaced with verified entries by the project's counsel before this README is treated as a public offering document.**
+
+| Item | Status |
+|---|---|
+| Issuing entity (legal name) | _TO BE FILLED — e.g., "Triumph Synergy LLC" or sole proprietorship name_ |
+| Jurisdiction of registration | _TO BE FILLED_ |
+| Legal classification of TRISYN | **Utility token** (intended). Final classification is jurisdiction-dependent and may differ — see disclaimer below. |
+| KYC requirement to receive TRISYN | Pi Network KYC is required to authenticate via Pi SDK; pioneers are already KYC-verified by Pi Core Team |
+| KYC for fiat off-ramp | Not currently offered. Any future fiat off-ramp will require KYC/AML appropriate to the jurisdiction |
+| Securities counsel engaged | _TO BE FILLED_ |
+| Reserve auditor engaged | _TO BE FILLED — required before any "backed" claim is published_ |
+| Bullion custodian engaged | _TO BE FILLED — required before any "gold-backed" claim is published_ |
+| Terms of Service / Token Terms | _TO BE FILLED — link to executed terms_ |
+
+---
+
+### ⚠️ Disclaimer
+
+TRISYN is an early-stage utility token. The Phase 0 facts in this section are verifiable on-chain at the cited transaction hashes. **All other claims in this section are forward-looking and contingent on the operator executing the phases described.** Nothing in this section constitutes an offer to sell, a solicitation to buy, investment advice, a guarantee of redemption, a guarantee of a peg, or a representation that any reserve currently exists. Pioneers acquiring TRISYN on Pi Testnet today do so for testing and ecosystem-participation purposes; testnet assets have no monetary value. Mainnet promotion, reserve funding, audit attestation, and any redemption mechanism are subject to Pi Core Team approval, custodian agreements, regulatory clearance, and operator execution — none of which are guaranteed.
+
+---
+
 <a id="-whats-new--may-12-2026-sovereign-mesh-network"></a>
 
 ## 🔐 What's New — May 12, 2026 (Triumph Sovereign Mesh Network — 5-Layer Encrypted Private Network)
