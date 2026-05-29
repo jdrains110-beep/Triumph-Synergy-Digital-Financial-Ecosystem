@@ -41,7 +41,7 @@
 [![SCHA](https://img.shields.io/badge/shands.pi%20%7C%20ufhealth.pi-66%20LOOPHOLES%20%7C%205%20AUTHORITIES-8B5CF6?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
 [![Sovereign Mesh Network](https://img.shields.io/badge/Sovereign%20Mesh-WireGuard%20%7C%20ChaCha20--Poly1305%20%7C%205--Layer%20Encryption-00D4AA?style=flat-square)](#-whats-new--may-12-2026-sovereign-mesh-network)
 
-[**Live Demo**](https://triumphsynergyab2099.pinet.com) • [**Pi Browser**](https://triumphsynergyab2099.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
+[**Pi Browser**](https://triumphsynergyab2099.pinet.com) • [**Replit Staging**](https://Triumph-Synergy.replit.app) • [**Documentation**](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#readme)
 
 </div>
 
@@ -4310,16 +4310,16 @@ SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/
 
 | Network | URL |
 |---------|-----|
-| **Mainnet (Vercel)** | https://triumphsynergyab2099.pinet.com |
-| **Testnet (Vercel)** | https://Triumph-Synergy.replit.app |
+| **Mainnet (Pi Network)** | https://triumphsynergyab2099.pinet.com |
+| **Testnet (Replit Staging)** | https://Triumph-Synergy.replit.app |
 | **Pi Browser Mainnet** | https://triumphsynergyab2099.pinet.com |
 | **Pi Browser Testnet** | https://triumphsynergyab2099.pinet.com |
 
-### Vercel Deployment
+### Replit Deployment
 
-1. **Connect Repository**: Import from GitHub
-2. **Configure Environment**: Add Pi Network secrets
-3. **Deploy**: Push to `main` branch
+1. **Connect Repository**: Import from GitHub into Replit
+2. **Configure Environment**: Add Pi Network secrets (`PI_NETWORK_MAINNET_VALIDATION_KEY`, `PI_NETWORK_TESTNET_VALIDATION_KEY`, `PI_API_KEY`, etc.)
+3. **Deploy**: Push to `main` branch; Replit auto-builds and serves at https://Triumph-Synergy.replit.app
 
 ### GitHub Actions CI/CD
 - ✅ Pi SDK validation
