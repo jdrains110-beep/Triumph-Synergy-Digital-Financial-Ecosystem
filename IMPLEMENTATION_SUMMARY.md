@@ -56,7 +56,7 @@
   - Partner/investor talking points
   - **Perfect for**: Investor pitches, architect onboarding, integration docs
 
-- **QUANTUM_CPU_MANAGEMENT.md** (7KB):
+- **CPU_TUNING.md** (7KB):
   - CPU pinning strategy (core assignments per service)
   - Polling interval reductions (50-90% CPU savings)
   - CPU shares weighting (fair scheduling under contention)
@@ -72,7 +72,7 @@
 
 - **DEPLOYMENT.md** (11KB):
   - Quick start (development, 9 core services)
-  - Production deployment (quantum CPU tuning, Pi node sync)
+  - Production deployment (CPU tuning, Pi node sync)
   - Public access setup (TLS, nginx)
   - Monitoring commands (docker stats, health probes)
   - Troubleshooting guide (detailed playbooks)
@@ -125,7 +125,7 @@
 
 ---
 
-## Quantum CPU Optimization Applied ✅
+## CPU Tuning Applied ✅
 
 ### Metrics
 - **CPU Shares Tuning** (per-tier weighting):
@@ -161,7 +161,7 @@ docker-compose.yml
   ├─ Graceful shutdown (stop_grace_period)
   └─ OOM protection (memswap_limit=0)
 
-docker-compose.quantum-cpu.yml
+docker-compose.cpu-tuning.yml
   ├─ CPU affinity overrides (cpuset_cpus per service)
   ├─ CPU shares weighting (1024 max per core)
   ├─ Polling interval reductions (env vars)
@@ -174,7 +174,7 @@ ARCHITECTURE.md (34KB)
   ├─ Security & encryption stack
   └─ Scaling strategies + investor talking points
 
-QUANTUM_CPU_MANAGEMENT.md (7KB)
+CPU_TUNING.md (7KB)
   ├─ CPU pinning strategy
   ├─ Polling interval table (before/after savings)
   ├─ CPU shares per service
@@ -262,7 +262,7 @@ DEPLOYMENT.md (11KB)
 - Sub-100ms P99 latency (SCP consensus + tx settlement)
 
 ✅ **Documentation**
-- 4 comprehensive guides (Architecture, Security, Quantum CPU, Deployment)
+- 4 comprehensive guides (Architecture, Security, CPU Tuning, Deployment)
 - ASCII diagrams for investor presentations
 - Security audit + compliance checklist
 - Troubleshooting playbooks + incident response

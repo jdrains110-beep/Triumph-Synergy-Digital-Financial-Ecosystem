@@ -85,7 +85,7 @@ Triumph Synergy is a **sovereign, Pi-powered financial platform** built on Stell
 │  │ ├─ Credit Engine (PiCredit Score™ risk assessment)                      ││
 │  │ ├─ Dual-Value Engine (internal/external Pi rates: 314159.0 vs 314.159) ││
 │  │ ├─ Quantum-Shield (ML-KEM-1024, ML-DSA-87, SPHINCS+)                    ││
-│  │ ├─ QPU-Bridge (QPU interface for quantum operations)                    ││
+│  │ ├─ PQC-Shield (Post-Quantum Cryptography interface)                    ││
 │  │ └─ Legacy aliases: triumph-credit-engine, triumph-ml-engine, etc.       ││
 │  │                                                                          ││
 │  │ Vault (Secrets Management)  [96M, 0.2 CPU]                             ││
@@ -484,7 +484,7 @@ kubectl apply -f k8s-manifest.yaml
 - [x] OOM protection (memswap_limit=0, oom_kill_disable=false)
 - [x] Pi node: Official image + secure (no keys baked in)
 - [x] Database: Alpine minimal images, non-root user
-- [x] Quantum CPU tuning (cpu_shares, polling intervals reduced 50-90%)
+- [x] CPU tuning (cpu_shares, polling intervals reduced 50-90%)
 - [x] Observability: Prometheus + Grafana (public dashboards)
 - [x] Security: WireGuard mesh, CNSA Suite 2.0, TLS 1.3
 - [ ] CI/CD: GitHub Actions for automated image builds

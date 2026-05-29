@@ -1,4 +1,4 @@
-# Triumph Synergy Quantum CPU Management
+# Triumph Synergy CPU Tuning
 
 ## Overview
 Maximum CPU efficiency achieved through strategic core pinning and scheduling weights.
@@ -52,9 +52,9 @@ Maximum CPU efficiency achieved through strategic core pinning and scheduling we
 
 ## Deployment
 
-### Apply Quantum CPU Overrides
+### Apply CPU Tuning Overrides
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.quantum-cpu.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.cpu-tuning.yml up -d
 ```
 
 ### Monitor CPU Distribution
@@ -101,4 +101,4 @@ docker stats triumph-quantum-intel-fortress --no-stream --format "{{.Container}}
 
 ## See Also
 - docker-compose.yml: Service definitions with mem_limit, cpus
-- docker-compose.quantum-cpu.yml: CPU affinity overrides
+- docker-compose.cpu-tuning.yml: CPU affinity overrides

@@ -83,15 +83,15 @@ open http://localhost:9090/targets
 }
 ```
 
-### 2. Deploy with Quantum CPU Tuning
+### 2. Deploy with CPU Tuning
 
 ```bash
-# Use docker-compose.quantum-cpu.yml override
+# Use docker-compose.cpu-tuning.yml override
 cd /Users/jeremiahdrains/Downloads/Triumph-Synergy-Digital-Financial-Ecosystem-main
 
 docker compose \
   -f docker-compose.yml \
-  -f docker-compose.quantum-cpu.yml \
+  -f docker-compose.cpu-tuning.yml \
   up -d --remove-orphans
 ```
 
@@ -419,7 +419,7 @@ docker restart triumph-redis
 ## Support & Community
 
 - **GitHub Issues**: https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem/issues
-- **Documentation**: See ARCHITECTURE.md, QUANTUM_CPU_MANAGEMENT.md, SECURITY_AUDIT.md
+- **Documentation**: See ARCHITECTURE.md, CPU_TUNING.md, SECURITY_AUDIT.md
 - **Discord/Slack**: (add community channel link)
 - **Enterprise Support**: contact@triumph-synergy.example.com
 
@@ -430,7 +430,7 @@ docker restart triumph-redis
 - [ ] Docker Desktop configured (16GB RAM, 6+ cores, 100GB disk)
 - [ ] .env file created with secrets (PI_API_KEY, POSTGRES_PASSWORD, etc.)
 - [ ] docker-compose.yml verified (all services, healthchecks, limits)
-- [ ] docker-compose.quantum-cpu.yml applied (CPU tuning)
+- [ ] docker-compose.cpu-tuning.yml applied (CPU tuning)
 - [ ] 9 core services building & starting
 - [ ] Pi node optional (add --profile pi-node)
 - [ ] Grafana dashboards accessible (http://localhost:3001)
