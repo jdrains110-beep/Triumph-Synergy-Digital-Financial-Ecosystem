@@ -11,11 +11,13 @@ from .reddit import RedditSource
 from .web_crawler import WebCrawlerSource
 from .discord_src import DiscordSource
 from .x_twitter import XTwitterSource
+from .github_events import GitHubEventsSource
 
 REGISTRY: list[type[IngestionSource]] = [
     StackOverflowSource,
     RedditSource,
     WebCrawlerSource,
+    GitHubEventsSource,
     DiscordSource,
     XTwitterSource,
 ]
