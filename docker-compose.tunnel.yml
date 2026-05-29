@@ -53,21 +53,34 @@ services:
       retries: 3
       start_period: 15s
 
-  # ── Option B: Cloudflare WARP (Zero-config encrypted tunnel) ──────────
-  # Free tier, no account needed, encrypted tunnel with Cloudflare edge
-  # Good for: encrypting all traffic, bypassing ISP throttling
-  # Does NOT give a fixed public IP (use WireGuard for that)
+  # ── Option B: Cloudflare Quick Tunnel ─────────────────────────────────
+  # Zero-config public ingress. Cloudflare hands us a free
+  # https://<random>.trycloudflare.com URL that proxies straight to nginx.
+  # Pull the URL from logs:  docker logs triumph-cloudflared 2>&1 | grep trycloudflare
+  # Hit /services/military-bridge/* on that URL from Replit.
   #
-  # cloudflare-warp:
-  #   image: cloudflare/cloudflared:latest
-  #   container_name: triumph-cloudflare-warp
-  #   command: tunnel --no-autoupdate
-  #   mem_limit: 48m
-  #   mem_reservation: 16m
-  #   cpus: 0.1
-  #   networks:
-  #     - triumph-net
-  #   restart: unless-stopped
+  # If TUNNEL_TOKEN is set, runs as a named tunnel (stable hostname);
+  # otherwise falls back to a quick tunnel (ephemeral hostname).
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: triumph-cloudflared
+    # Quick tunnel: ephemeral https://<random>.trycloudflare.com URL → nginx.
+    # For a stable named tunnel, replace command with:
+    #   ["tunnel", "--no-autoupdate", "run", "--token", "${CLOUDFLARE_TUNNEL_TOKEN}"]
+    command: ["tunnel", "--no-autoupdate", "--url", "http://nginx:80"]
+    environment:
+      TUNNEL_METRICS: 0.0.0.0:2000
+    mem_limit: 96m
+    mem_reservation: 32m
+    cpus: 0.15
+    networks:
+      - triumph-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cloudflared", "--version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 networks:
   triumph-net:
