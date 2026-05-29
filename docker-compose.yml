@@ -690,6 +690,29 @@ services:
       SAIB_PEER_NAME: ${SAIB_PEER_NAME:-docker-desktop-primary}
       SAIB_PEER_POLL_S: "30"
       SAIB_PEER_OFFLINE_S: "120"
+      # ── SAIB External-Learning Ingestion (Stack Overflow, Reddit, Web, Discord, X) ──
+      # Free / anonymous sources are ON by default; paid/API-key sources stay dormant
+      # until credentials are supplied. Each source can be disabled individually with
+      # SAIB_<NAME>_ENABLED=false (e.g. SAIB_STACKOVERFLOW_ENABLED=false).
+      SAIB_STACKOVERFLOW_ENABLED: "${SAIB_STACKOVERFLOW_ENABLED:-true}"
+      SAIB_REDDIT_ENABLED: "${SAIB_REDDIT_ENABLED:-true}"
+      SAIB_WEB_CRAWLER_ENABLED: "${SAIB_WEB_CRAWLER_ENABLED:-true}"
+      SAIB_SO_TAGS: "${SAIB_SO_TAGS:-pi-network,stellar,blockchain,fastapi,nextjs}"
+      SAIB_REDDIT_SUBREDDITS: "${SAIB_REDDIT_SUBREDDITS:-PiNetwork,Stellar,CryptoCurrency,fastapi,nextjs}"
+      SAIB_REDDIT_KEYWORDS: "${SAIB_REDDIT_KEYWORDS:-}"
+      SAIB_CRAWLER_SEEDS: "${SAIB_CRAWLER_SEEDS:-https://minepi.com/blog,https://developers.minepi.com,https://stellar.org/blog}"
+      # Dormant unless creds present
+      DISCORD_BOT_TOKEN: "${DISCORD_BOT_TOKEN:-}"
+      DISCORD_GUILD_IDS: "${DISCORD_GUILD_IDS:-}"
+      X_BEARER_TOKEN: "${X_BEARER_TOKEN:-}"
+      SAIB_X_QUERY: "${SAIB_X_QUERY:-(#TriumphSynergy OR #PiNetwork OR @TriumphSynergy) -is:retweet lang:en}"
+      # ── SAIB RAG (pgvector + embeddings) ──────────────────────────────
+      SAIB_RAG_ENABLED: "${SAIB_RAG_ENABLED:-true}"
+      SAIB_RAG_DSN: "${SAIB_RAG_DSN:-postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}}"
+      SAIB_RAG_TABLE: "${SAIB_RAG_TABLE:-saib_knowledge_chunks}"
+      SAIB_EMBED_MODEL: "${SAIB_EMBED_MODEL:-all-MiniLM-L6-v2}"
+      SAIB_EMBED_DIM: "${SAIB_EMBED_DIM:-384}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
     secrets:
       - github_token
     volumes:

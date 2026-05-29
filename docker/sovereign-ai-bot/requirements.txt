@@ -10,3 +10,12 @@ docker>=7.1.0
 PyGithub>=2.3.0
 cryptography>=46.0.7
 
+# External-learning ingestion + RAG
+beautifulsoup4>=4.12.3
+lxml>=5.3.0
+asyncpg>=0.30.0
+# Optional — install in image if you want full RAG / Discord / sentence-transformer support:
+# sentence-transformers>=3.0.0
+# discord.py>=2.4.0
+# praw>=7.7.0
+
