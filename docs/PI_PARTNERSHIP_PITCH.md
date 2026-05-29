@@ -10,7 +10,7 @@ Triumph Synergy operates a **production-grade financial ecosystem natively built
 ## What is live today
 | Component | Status | Purpose |
 |---|---|---|
-| **Pi Mainnet validator** (`pi-node-docker organization-mainnet v1.1-p23.0.1`) | `Synced!` on `mainnet` | Native Pi consensus participation; immutable identity `GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V` |
+| **Pi Mainnet validator** (`pi-node-docker organization-mainnet v1.1-p24.0.0`) | `Synced!` on `mainnet`, **Protocol 24** | Native Pi consensus participation; immutable identity `GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V` |
 | **Pi Bridge Connector** | Healthy, advancing ledgers | FastAPI service brokering ledger/account/payment calls against local node with auto-fallback to `api.mainnet.minepi.com` |
 | **Governance Shield (central node)** | Synced, 3 validators in quorum | Policy-enforced ingress to Pi network |
 | **Horizon Stream + Supernode peer** | Live | Horizon API + peer redundancy |
@@ -55,8 +55,39 @@ Every module is provider-pluggable. The mock providers run without any third-par
 ## Why now
 Pi’s Open Mainnet needs **infrastructure partners who ship, not promise**. The Triumph stack is already running, already arm64-native, already bridged to Pi Mainnet, already publishing healthchecks. We are ready to scale Pioneer-facing services the moment Pi Core greenlights deeper integration.
 
+## Testnet / Mainnet switching
+The application is **dual-network aware** end-to-end. A single environment variable flips the entire stack between Pi Testnet2 and Pi Mainnet — no code change, no rebuild required for runtime config.
+
+| Layer | Variable | Testnet value | Mainnet value |
+|---|---|---|---|
+| Pi SDK (`lib/pi/network.ts`) | `NEXT_PUBLIC_PI_NETWORK` | `Pi Testnet` | `Pi Network` |
+| Pi API base | `PI_API_BASE` | `https://api.testnet.minepi.com` | `https://api.mainnet.minepi.com` |
+| Horizon / bridge | `PI_HORIZON_URL` | `https://api.testnet.minepi.com` | `https://api.mainnet.minepi.com` |
+| Stellar passphrase | `PI_NETWORK_PASSPHRASE` | `Pi Testnet` | `Pi Network` |
+| App-Studio verification | `app/api/.well-known/pi-app-verification` | testnet key | mainnet key |
+| Compliance gates | `PI_KYC_BYPASS_NETWORKS` | `testnet` (bypass on) | empty (strict) |
+| Sanctions / Travel-Rule | `PI_SANCTIONS_ENABLED` / `TRAVEL_RULE_TRANSPORT` | optional / `mock` | required / `trp` |
+
+**How it works at runtime:**
+- `lib/pi/network.ts` exports `getPiNetwork()` which reads `NEXT_PUBLIC_PI_NETWORK` and returns the canonical network object consumed by `Pi.init({ version: '2.0', sandbox: isTestnet, ... })`.
+- The Pi Browser banner (`components/pi-environment-banner.tsx`) renders the current network so Pioneers always see whether they are on testnet or mainnet.
+- Server-side, `requireKycLevel(uid, minLevel, network)` honors `PI_KYC_BYPASS_NETWORKS` so testnet flows can exercise the full payment pipeline without a real KYC, while mainnet always enforces.
+- The validator node has **both** `pi-mainnet-node` (consensus on Mainnet) and a `pi-testnet2-bridge` attachment, so payments, KYC, and DvP can be smoke-tested on testnet against the same governance shield that gates mainnet.
+- Validation keys are served by Next route handlers (`app/.well-known/pi.toml/route.ts`, `app/.well-known/stellar.toml/route.ts`) and the network-specific verification key is selected by the same env var — no static-file shadowing, no stale keys.
+
+**Switching is one command:**
+```bash
+# Flip to mainnet
+NEXT_PUBLIC_PI_NETWORK="Pi Network" PI_API_BASE="https://api.mainnet.minepi.com" PI_NETWORK_PASSPHRASE="Pi Network" PI_KYC_BYPASS_NETWORKS="" yarn start
+
+# Flip to testnet
+NEXT_PUBLIC_PI_NETWORK="Pi Testnet" PI_API_BASE="https://api.testnet.minepi.com" PI_NETWORK_PASSPHRASE="Pi Testnet" PI_KYC_BYPASS_NETWORKS="testnet" yarn start
+```
+
+This means Pi Core can hand us a testnet target for review, then promote the exact same artifact to mainnet — zero rebuild, zero divergence between staging and production.
+
 ## Contact
 **Project:** Triumph Synergy — Digital Financial Ecosystem
 **Repo:** `Triumph-Synergy-Digital-Financial-Ecosystem`
 **Pi Validator Key:** `GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`
-**Network:** Pi Mainnet (`organization-mainnet v1.1-p23.0.1`)
+**Network:** Pi Mainnet (`organization-mainnet v1.1-p24.0.0`, **Protocol 24**) + Pi Testnet2 bridge attached
