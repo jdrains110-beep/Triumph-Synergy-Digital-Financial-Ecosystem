@@ -2,8 +2,16 @@
 # TRIUMPH SYNERGY — APEX SUPER-SOVEREIGN OVERRIDE (Docker Desktop tuning)
 # ==========================================================================
 # Auto-merged by `docker compose up -d`.
-# Adds: amd64 platform pin (Apple Silicon), tini init, graceful shutdown,
-#       elevated ulimits/nofile for the 7 super-pods + standalone services.
+# Adds: amd64 platform pin (ONLY for stellar-core dependents — others run
+#       native arm64 on Apple Silicon for ~6x faster boot under Rosetta),
+#       tini init, graceful shutdown, elevated ulimits/nofile.
+#
+# AMD64-PINNED (stellar-core / stellar-sdk amd64-only wheels):
+#   vault, governance-shield, settlement-core, horizon-stream
+#
+# NATIVE arm64 (pure Python/Node — runs ~6x faster on M-series, no Rosetta):
+#   apex-services, apex-sovereign-nexus, sovereign-life,
+#   guardian-watchdog-nexus, quantum-intel-fortress, pi-bridge-connector, app
 # ==========================================================================
 
 name: triumph-synergy
@@ -33,27 +41,29 @@ services:
         soft: 65536
         hard: 65536
 
+  # ──── amd64-pinned (stellar-core dependents) ────────────────────────────
   vault:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  pi-bridge-connector:
     <<: [ *platform, *init, *grace, *ulimits ]
 
   governance-shield:
     <<: [ *platform, *init, *grace, *ulimits ]
 
-  app:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
   settlement-core:
-    <<: [ *platform, *init, *grace, *ulimits ]
-
-  # quantum-intel-fortress replaces financial-intel + quantum-fortress (May 9, 2026)
-  quantum-intel-fortress:
     <<: [ *platform, *init, *grace, *ulimits ]
 
   horizon-stream:
     <<: [ *platform, *init, *grace, *ulimits ]
+
+  # ──── Native arm64 on Apple Silicon (pure Python/Node) ──────────────────
+  pi-bridge-connector:
+    <<: [ *init, *grace, *ulimits ]
+
+  app:
+    <<: [ *init, *grace, *ulimits ]
+
+  # quantum-intel-fortress replaces financial-intel + quantum-fortress (May 9, 2026)
+  quantum-intel-fortress:
+    <<: [ *init, *grace, *ulimits ]
 
   observability-stack:
     <<: [ *init, *grace, *ulimits ]
@@ -67,15 +77,15 @@ services:
 
   # guardian-watchdog-nexus replaces ecosystem-guardian + saib-watchdog (May 9, 2026)
   guardian-watchdog-nexus:
-    <<: [ *platform, *init, *grace, *ulimits ]
+    <<: [ *init, *grace, *ulimits ]
 
   apex-services:
-    <<: [ *platform, *init, *grace, *ulimits ]
+    <<: [ *init, *grace, *ulimits ]
 
   # apex-sovereign-nexus replaces sovereign-commerce/work/gaming/publix (May 9, 2026)
   apex-sovereign-nexus:
-    <<: [ *platform, *init, *grace, *ulimits ]
+    <<: [ *init, *grace, *ulimits ]
 
   # APEX-SOVEREIGN-LIFE — bank + education + telecom consolidated
   sovereign-life:
-    <<: [ *platform, *init, *grace, *ulimits ]
+    <<: [ *init, *grace, *ulimits ]
