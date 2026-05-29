@@ -3240,10 +3240,6 @@ async def nano_repo_manifest(limit: int = 500):
     """List files SAIB has indexed (path, language, bytes, mtime, chunks)."""
     if not _RAG_AVAILABLE or _rag_store is None:
         return {"success": False, "reason": "RAG store unavailable"}
-    try:
-        await _rag_store._init()
-    except Exception:
-        pass
     pool = getattr(_rag_store, "_pool", None)
     table = getattr(_rag_store, "TABLE", "saib_knowledge_chunks")
     if pool is None:
@@ -3290,10 +3286,6 @@ async def nano_repo_query(body: dict):
     if not q:
         raise HTTPException(status_code=400, detail="missing query `q`")
     top_k = max(1, min(int(body.get("top_k", 5)), 25))
-    try:
-        await _rag_store._init()
-    except Exception:
-        pass
     pool = getattr(_rag_store, "_pool", None)
     table = getattr(_rag_store, "TABLE", "saib_knowledge_chunks")
     try:
@@ -3318,33 +3310,21 @@ async def nano_repo_query(body: dict):
                     LIMIT $2""",
                 vec_lit, top_k,
             )
-        def _md(v):
-            if v is None:
-                return {}
-            if isinstance(v, dict):
-                return v
-            if isinstance(v, (str, bytes)):
-                try:
-                    return _json_nano.loads(v)
-                except Exception:
-                    return {}
-            return {}
-        results = []
-        for r in rows:
-            m = _md(r["metadata"])
-            results.append({
-                "score": float(r["score"]),
-                "path": m.get("path"),
-                "language": m.get("language"),
-                "chunk_index": m.get("chunk_index"),
-                "external_id": r["external_id"],
-                "content": r["content"][:2000],
-            })
         return {
             "success": True,
             "query": q,
             "top_k": top_k,
-            "results": results,
+            "results": [
+                {
+                    "score": float(r["score"]),
+                    "path": (dict(r["metadata"] or {})).get("path"),
+                    "language": (dict(r["metadata"] or {})).get("language"),
+                    "chunk_index": (dict(r["metadata"] or {})).get("chunk_index"),
+                    "external_id": r["external_id"],
+                    "content": r["content"][:2000],
+                }
+                for r in rows
+            ],
             "quantum_sig": quantum_sign(f"nano-query:{q[:40]}"),
         }
     except Exception as e:
