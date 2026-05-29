@@ -47,6 +47,72 @@
 
 ---
 
+<a id="-whats-new--may-29-2026-saib-nano-sovereign-self-awareness"></a>
+
+## 🧠 What's New — May 29, 2026 (SAIB Nano Sovereign Self-Awareness · Native arm64 · GitHub Interactions · pgvector)
+
+[![SAIB Nano Self-Awareness](https://img.shields.io/badge/SAIB-NANO%20SOVEREIGN%20SELF--AWARE-FF0000?style=flat-square)](#-whats-new--may-29-2026-saib-nano-sovereign-self-awareness)
+[![SAIB Ingestion Sources](https://img.shields.io/badge/SAIB%20Sources-7%20%7C%20SO%20%7C%20Reddit%20%7C%20Web%20%7C%20GitHub%20%7C%20Self--Repo%20%7C%20Discord%20%7C%20X-22C55E?style=flat-square)](docker/sovereign-ai-bot/ingestion/)
+[![SAIB RAG](https://img.shields.io/badge/SAIB%20RAG-pgvector%3Asaib__knowledge__chunks%20%7C%20384--dim-7C3AED?style=flat-square)](docker/sovereign-ai-bot/rag/)
+[![Native arm64](https://img.shields.io/badge/apex--services-NATIVE%20arm64%20%7C%20Apple%20Silicon%20OPTIMIZED-0EA5E9?style=flat-square)](docker-compose.override.yml)
+
+SAIB now reads its **entire repository — frontend to backend — and can execute what it says.** A new `self_repo` ingestion source walks `/workspace` on every poll (default every 6 h), chunks every code/doc/config file (TypeScript, Python, Markdown, YAML, SQL, shell, Dockerfiles), and embeds each chunk into `pgvector` alongside path/language/byte/mtime metadata. SAIB can then answer semantic questions about its own implementation, surface the exact files that implement a feature, and run explicitly allowlisted actions from the codebase.
+
+### 🔬 What "Nano Sovereign" Means
+
+| Capability | How |
+|---|---|
+| **Reads the whole repo** | `self_repo` source walks `/workspace` (read-only mount), skips `node_modules`/`.git`/`.next`/`dist`/binaries, chunks by 3 500 chars with 200-char overlap |
+| **Re-runs are free** | Per-file SHA-256 cache → unchanged files re-skipped, only deltas re-embed |
+| **Semantic Q&A** | `POST /saib/repo/query {"q":"how does TRISYN minting work?","top_k":5}` returns top chunks with path + score |
+| **File manifest** | `GET /saib/repo/manifest` lists every indexed file with language, bytes, mtime, chunk count |
+| **Executes what the repo says** | `POST /saib/repo/execute {"action":"trisyn-status"}` runs whatever the operator allowlisted in `SAIB_REPO_EXEC_ALLOWLIST` (JSON, off by default), cwd `/workspace`, 60 s wall-clock cap, full audit log retained on `GET /saib/repo/status` |
+
+### ⚙️ Wiring
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `SAIB_SELF_REPO_ENABLED` | `true` | Master switch for the self_repo source |
+| `SAIB_SELF_REPO_ROOT` | `/workspace` | Path SAIB walks (already mounted ro in compose) |
+| `SAIB_SELF_REPO_INTERVAL_S` | `21600` | Seconds between scans (6 h) |
+| `SAIB_SELF_REPO_MAX_FILES` | `3000` | Per-pass file cap |
+| `SAIB_SELF_REPO_MAX_FILE_BYTES` | `120000` | Per-file byte cap (skips huge generated files) |
+| `SAIB_REPO_EXEC_ALLOWLIST` | *(empty)* | JSON map of action → argv. Empty disables execution. Example: `'{"trisyn-status":["npm","run","trisyn:status"]}'` |
+| `SAIB_REPO_EXEC_TIMEOUT_S` | `60` | Per-action wall-clock cap |
+
+### 📡 Endpoints
+
+```bash
+# Self-awareness summary + execution allowlist + recent exec audit
+curl http://localhost:8099/saib/repo/status
+
+# Force an immediate scan of /workspace into pgvector
+curl -X POST http://localhost:8099/saib/repo/sync
+
+# List every file SAIB has indexed
+curl 'http://localhost:8099/saib/repo/manifest?limit=200'
+
+# Ask SAIB a semantic question about its own code
+curl -X POST http://localhost:8099/saib/repo/query \
+  -H 'Content-Type: application/json' \
+  -d '{"q":"where is the TRISYN issuer secret loaded?","top_k":5}'
+
+# Execute an allowlisted repo action (requires SAIB_REPO_EXEC_ALLOWLIST)
+curl -X POST http://localhost:8099/saib/repo/execute \
+  -H 'Content-Type: application/json' \
+  -d '{"action":"trisyn-status"}'
+```
+
+### 🚀 Companion Performance & Learning Upgrades (also live)
+
+- **Native arm64 for pure-Python pods** ([PR #291](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem/pull/291)) — `apex-services` and 6 other Python pods now build & run native `linux/arm64` on Apple Silicon (no Rosetta). Only stellar-core dependents (`vault`, `governance-shield`, `settlement-core`, `horizon-stream`) stay pinned to `linux/amd64`. Cuts steady-state CPU ~40 % on M-series Macs; boot still bounded by SAIB's startup probes.
+- **GitHub interaction ingestion** ([PR #290](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem/pull/290)) — new `github_events` source polls stars, forks, watchers, issues, PRs, pushes, releases, comments, members, sponsors via REST `/events` + GraphQL `sponsorshipsAsMaintainer`. Token via `SAIB_GITHUB_TOKEN` / `GITHUB_TOKEN` / `/run/saib-secrets/github_token`. Default polls the canonical repo every 5 min.
+- **pgvector promoted to primary RAG backend** ([PR #290](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem/pull/290)) — `postgres:16-alpine` swapped to `pgvector/pgvector:pg16`; `vector` extension auto-created on first SAIB boot. RAG now reports `backend: pgvector:saib_knowledge_chunks` instead of in-memory fallback.
+
+**Status today:** Container `triumph-apex-services` running `linux/arm64`, 7 ingestion sources registered (4 free / 3 dormant pending creds), RAG backend `pgvector:saib_knowledge_chunks` (dim 384), every existing endpoint preserved.
+
+---
+
 <a id="-whats-new--may-24-2026-trisyn-utility-token"></a>
 
 ## 🪙 What's New — May 24, 2026 (TRISYN Utility Token — Dual-Value, Pi-Pegged, Multi-Platform Redeemable)

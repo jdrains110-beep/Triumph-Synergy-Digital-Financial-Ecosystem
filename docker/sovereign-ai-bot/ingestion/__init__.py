@@ -12,12 +12,14 @@ from .web_crawler import WebCrawlerSource
 from .discord_src import DiscordSource
 from .x_twitter import XTwitterSource
 from .github_events import GitHubEventsSource
+from .self_repo import SelfRepoSource
 
 REGISTRY: list[type[IngestionSource]] = [
     StackOverflowSource,
     RedditSource,
     WebCrawlerSource,
     GitHubEventsSource,
+    SelfRepoSource,
     DiscordSource,
     XTwitterSource,
 ]

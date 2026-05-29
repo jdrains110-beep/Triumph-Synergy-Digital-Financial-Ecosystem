@@ -3126,3 +3126,235 @@ async def rag_stats():
         return {"success": False, "reason": "RAG store unavailable"}
     s = await _rag_store.stats()
     return {"success": True, "saib_version": SAIB_VERSION, **s}
+
+
+# ── Nano Sovereign Self-Awareness ─────────────────────────────────────────────
+# Lets SAIB read its own repository (mounted read-only at /workspace), answer
+# semantic questions about its frontend/backend implementation, and execute
+# explicitly allowlisted commands. Execution is OFF by default — operators
+# opt in via SAIB_REPO_EXEC_ALLOWLIST (JSON object: {"name": ["bin","args"...]}).
+
+import asyncio as _asyncio_nano  # noqa: E402
+import json as _json_nano        # noqa: E402
+import shlex as _shlex_nano      # noqa: E402
+
+_NANO_ROOT = os.getenv("SAIB_SELF_REPO_ROOT", "/workspace")
+_NANO_AUDIT: list[dict[str, Any]] = []
+_NANO_AUDIT_CAP = 200
+
+
+def _nano_load_allowlist() -> dict[str, list[str]]:
+    raw = os.getenv("SAIB_REPO_EXEC_ALLOWLIST", "").strip()
+    if not raw:
+        return {}
+    try:
+        data = _json_nano.loads(raw)
+        out: dict[str, list[str]] = {}
+        for k, v in data.items():
+            if isinstance(v, str):
+                out[str(k)] = _shlex_nano.split(v)
+            elif isinstance(v, list):
+                out[str(k)] = [str(x) for x in v]
+        return out
+    except Exception:
+        return {}
+
+
+@app.get("/saib/repo/status")
+async def nano_repo_status():
+    """Self-awareness summary: workspace mount, source state, exec allowlist."""
+    src = next((s for s in _INGEST_SOURCES if getattr(s, "name", "") == "self_repo"), None)
+    allowlist = _nano_load_allowlist()
+    return {
+        "saib_version": SAIB_VERSION,
+        "workspace_root": _NANO_ROOT,
+        "workspace_mounted": os.path.isdir(_NANO_ROOT),
+        "self_repo_source": src.status() if src is not None else None,
+        "exec_allowlist": sorted(allowlist.keys()),
+        "exec_audit_recent": _NANO_AUDIT[-10:],
+        "quantum_sig": quantum_sign("nano-repo-status"),
+    }
+
+
+@app.post("/saib/repo/sync")
+async def nano_repo_sync():
+    """Force an immediate scan of /workspace into the RAG store."""
+    src = next((s for s in _INGEST_SOURCES if getattr(s, "name", "") == "self_repo"), None)
+    if src is None:
+        raise HTTPException(status_code=503, detail="self_repo source not registered")
+    if not src.enabled:
+        raise HTTPException(status_code=503, detail="self_repo source disabled (set SAIB_SELF_REPO_ENABLED=true)")
+    try:
+        from ingestion.base import push_to_brain, push_to_rag  # type: ignore
+        items = await src.poll()
+        items = src.dedupe(items)
+        src.last_poll_at = time.time()
+        src.last_count = len(items)
+        src.total_ingested += len(items)
+        rag_n = await push_to_rag(items)
+        return {
+            "success": True,
+            "chunks_ingested": len(items),
+            "indexed_in_rag": rag_n,
+            "status": src.status(),
+            "quantum_sig": quantum_sign("nano-repo-sync"),
+        }
+    except Exception as e:
+        src.last_error = str(e)[:200]
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/saib/repo/manifest")
+async def nano_repo_manifest(limit: int = 500):
+    """List files SAIB has indexed (path, language, bytes, mtime, chunks)."""
+    if not _RAG_AVAILABLE or _rag_store is None:
+        return {"success": False, "reason": "RAG store unavailable"}
+    pool = getattr(_rag_store, "_pool", None)
+    table = getattr(_rag_store, "TABLE", "saib_knowledge_chunks")
+    if pool is None:
+        return {"success": False, "reason": "pgvector pool unavailable (in-memory fallback)"}
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                f"""SELECT metadata->>'path'      AS path,
+                           metadata->>'language'  AS language,
+                           MAX((metadata->>'bytes')::bigint)        AS bytes,
+                           MAX((metadata->>'mtime')::double precision) AS mtime,
+                           COUNT(*)               AS chunks
+                    FROM {table}
+                    WHERE source = 'self_repo'
+                    GROUP BY metadata->>'path', metadata->>'language'
+                    ORDER BY MAX((metadata->>'mtime')::double precision) DESC NULLS LAST
+                    LIMIT $1""",
+                max(1, min(limit, 5000)),
+            )
+        return {
+            "success": True,
+            "file_count": len(rows),
+            "files": [
+                {
+                    "path": r["path"],
+                    "language": r["language"],
+                    "bytes": int(r["bytes"] or 0),
+                    "mtime": float(r["mtime"] or 0.0),
+                    "chunks": int(r["chunks"] or 0),
+                }
+                for r in rows
+            ],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/saib/repo/query")
+async def nano_repo_query(body: dict):
+    """Semantic search restricted to the self_repo source. Body: {q, top_k}."""
+    if not _RAG_AVAILABLE or _rag_store is None:
+        return {"success": False, "reason": "RAG store unavailable", "results": []}
+    q = (body.get("q") or body.get("query") or "").strip()
+    if not q:
+        raise HTTPException(status_code=400, detail="missing query `q`")
+    top_k = max(1, min(int(body.get("top_k", 5)), 25))
+    pool = getattr(_rag_store, "_pool", None)
+    table = getattr(_rag_store, "TABLE", "saib_knowledge_chunks")
+    try:
+        from rag import embeddings as _emb  # type: ignore
+        qv = await _emb.embed(q)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"embed failed: {e}")
+    if pool is None:
+        # In-memory fallback: filter by source after retrieving more.
+        all_hits = await _rag_store.similarity_search(q, top_k=top_k * 4)
+        hits = [h for h in all_hits if h.get("source") == "self_repo"][:top_k]
+        return {"success": True, "query": q, "top_k": top_k, "results": hits}
+    try:
+        vec_lit = "[" + ",".join(f"{x:.6f}" for x in qv) + "]"
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                f"""SELECT external_id, content, metadata,
+                           1 - (embedding <=> $1::vector) AS score
+                    FROM {table}
+                    WHERE source = 'self_repo'
+                    ORDER BY embedding <=> $1::vector
+                    LIMIT $2""",
+                vec_lit, top_k,
+            )
+        return {
+            "success": True,
+            "query": q,
+            "top_k": top_k,
+            "results": [
+                {
+                    "score": float(r["score"]),
+                    "path": (dict(r["metadata"] or {})).get("path"),
+                    "language": (dict(r["metadata"] or {})).get("language"),
+                    "chunk_index": (dict(r["metadata"] or {})).get("chunk_index"),
+                    "external_id": r["external_id"],
+                    "content": r["content"][:2000],
+                }
+                for r in rows
+            ],
+            "quantum_sig": quantum_sign(f"nano-query:{q[:40]}"),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/saib/repo/execute")
+async def nano_repo_execute(body: dict):
+    """Execute an allowlisted action. Refuses anything outside SAIB_REPO_EXEC_ALLOWLIST.
+
+    Body: {"action": "<name>", "args": ["optional", "extra", "args"]}
+    Allowlist env var (JSON): {"trisyn-status": ["npm","run","trisyn:status"], ...}
+    Commands run with cwd=/workspace and a 60s wall-clock cap.
+    """
+    action = str(body.get("action") or "").strip()
+    extra = body.get("args") or []
+    if not action:
+        raise HTTPException(status_code=400, detail="missing `action`")
+    allowlist = _nano_load_allowlist()
+    if action not in allowlist:
+        raise HTTPException(status_code=403, detail=f"action '{action}' not in SAIB_REPO_EXEC_ALLOWLIST")
+    cmd = list(allowlist[action]) + [str(x) for x in extra if isinstance(x, (str, int, float))]
+    timeout_s = int(os.getenv("SAIB_REPO_EXEC_TIMEOUT_S", "60"))
+    started = time.time()
+    try:
+        proc = await _asyncio_nano.create_subprocess_exec(
+            *cmd,
+            cwd=_NANO_ROOT,
+            stdout=_asyncio_nano.subprocess.PIPE,
+            stderr=_asyncio_nano.subprocess.PIPE,
+        )
+        try:
+            stdout, stderr = await _asyncio_nano.wait_for(proc.communicate(), timeout=timeout_s)
+        except _asyncio_nano.TimeoutError:
+            proc.kill()
+            await proc.wait()
+            entry = {
+                "action": action, "cmd": cmd, "exit": -1, "timed_out": True,
+                "duration_s": round(time.time() - started, 2), "at": started,
+            }
+            _NANO_AUDIT.append(entry)
+            del _NANO_AUDIT[: max(0, len(_NANO_AUDIT) - _NANO_AUDIT_CAP)]
+            raise HTTPException(status_code=504, detail=f"action timed out after {timeout_s}s")
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=f"binary not found: {e}")
+    duration = round(time.time() - started, 2)
+    out = (stdout or b"").decode("utf-8", errors="replace")
+    err = (stderr or b"").decode("utf-8", errors="replace")
+    entry = {
+        "action": action, "cmd": cmd, "exit": proc.returncode,
+        "timed_out": False, "duration_s": duration, "at": started,
+    }
+    _NANO_AUDIT.append(entry)
+    del _NANO_AUDIT[: max(0, len(_NANO_AUDIT) - _NANO_AUDIT_CAP)]
+    return {
+        "success": proc.returncode == 0,
+        "action": action,
+        "cmd": cmd,
+        "exit_code": proc.returncode,
+        "duration_s": duration,
+        "stdout": out[-6000:],
+        "stderr": err[-3000:],
+        "quantum_sig": quantum_sign(f"nano-exec:{action}"),
+    }
