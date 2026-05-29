@@ -22,7 +22,7 @@ interface VerificationResult {
   piAppStudioIntegration?: {
     primaryDomain: string;
     isTrueMainnet: boolean;
-    vercelMainnetConnectsToMainnet: boolean;
+    replitMainnetConnectsToMainnet: boolean;
     piSdkVersion: string;
     appId: string;
   };
@@ -98,8 +98,8 @@ export default function VerificationDashboard() {
             </h2>
             <p className={isValid ? 'text-green-700' : 'text-red-700'}>
               {isValid
-                ? 'Vercel deployment properly connected to Pi App Studio'
-                : 'Vercel deployment NOT properly displaying/connecting to Pi App Studio'}
+                ? 'Replit deployment properly connected to Pi App Studio'
+                : 'Replit deployment NOT properly displaying/connecting to Pi App Studio'}
             </p>
           </div>
           <div className="text-right">
@@ -179,9 +179,9 @@ export default function VerificationDashboard() {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Vercel Mainnet Connects to Mainnet</span>
+              <span>Replit Mainnet Connects to Mainnet</span>
               <span>
-                {result.piAppStudioIntegration.vercelMainnetConnectsToMainnet
+                {result.piAppStudioIntegration.replitMainnetConnectsToMainnet
                   ? '✅'
                   : '❌'}
               </span>

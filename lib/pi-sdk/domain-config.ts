@@ -98,8 +98,8 @@ export function getNetworkConfig(): NetworkConfig {
   }
 
   // Fallback patterns for unknown domains
-  // Any .replit.app or .vercel.app domain not explicitly listed = testnet (preview/staging)
-  if (hostname.endsWith(".replit.app") || hostname.endsWith(".vercel.app")) {
+  // Any .replit.app domain not explicitly listed = testnet (preview/staging)
+  if (hostname.endsWith(".replit.app")) {
     console.warn(
       `[Pi Domain Config] Unknown staging domain: ${hostname} - defaulting to testnet`
     );
@@ -215,7 +215,7 @@ export function generatePiInitScript(): string {
     if (config) return config;
 
     // Fallback patterns
-    if (hostname.endsWith('.replit.app') || hostname.endsWith('.vercel.app')) {
+    if (hostname.endsWith('.replit.app')) {
       return { network: 'testnet', sandbox: true };
     }
     if (hostname.endsWith('.pinet.com')) {

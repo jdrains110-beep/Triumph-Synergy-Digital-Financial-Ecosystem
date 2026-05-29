@@ -148,7 +148,7 @@ pnpm db:studio    # Open Drizzle Studio
 | Network Security | WireGuard (sovereign mesh), TLS 1.3, CNSA Suite 2.0 |
 | Post-Quantum Crypto | ML-KEM-1024, ML-DSA-87, SPHINCS+ (liboqs) |
 | Testing | Vitest, Playwright |
-| Deployment | Vercel, Docker |
+| Deployment | Replit, Docker |
 
 ## Service Ports
 

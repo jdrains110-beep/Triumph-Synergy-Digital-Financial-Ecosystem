@@ -319,7 +319,7 @@ export class KYCAMLGDPRComplianceService {
       consentRecords: personalData.consent,
       accessLogs: personalData.accessLogs,
       thirdPartyProcessors: [
-        "Vercel (Frontend CDN)",
+        "Replit (Frontend hosting)",
         "GCP (Backend)",
         "AWS (Backup)",
         "OFAC Screening (Third-party)",

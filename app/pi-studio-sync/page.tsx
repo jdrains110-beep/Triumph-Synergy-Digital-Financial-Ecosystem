@@ -2,7 +2,7 @@
  * app/pi-studio-sync/page.tsx
  * 
  * Pi Studio Sync Verification Page
- * Shows synchronization status between this Vercel deployment and Pi Studio
+ * Shows synchronization status between this Replit deployment and Pi Studio
  * Pi Studio accesses this to verify the deployment is production-ready
  */
 

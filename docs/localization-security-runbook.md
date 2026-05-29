@@ -22,5 +22,5 @@
 - docker-compose: `no-new-privileges` on app service, healthcheck for app, nginx waits for healthy app.
 
 ## Deployment Notes
-- Ensure `VERCEL_TOKEN` optional path is still respected (workflow already conditional).
+- Ensure optional deploy push secrets are still respected (workflow already conditional).
 - For further hardening: integrate image signing (cosign), SBOM generation, and runtime seccomp/apparmor profiles.

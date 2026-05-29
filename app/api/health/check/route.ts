@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 /**
- * Vercel Deployment Health Check
+ * Replit Deployment Health Check
  * Simple endpoint to verify the app is properly deployed
  * Accessed at: /.well-known/health or /api/health/check
  */
@@ -21,9 +21,10 @@ export async function GET() {
           domain_mainnet: "triumphsynergyab2099.pinet.com ✅",
         },
       },
-      vercel: {
-        region: process.env.VERCEL_REGION || "unknown",
-        environment: process.env.VERCEL_ENV || "unknown",
+      replit: {
+        slug: process.env.REPL_SLUG || process.env.REPLIT_SLUG || "unknown",
+        owner: process.env.REPL_OWNER || process.env.REPLIT_OWNER || "unknown",
+        environment: process.env.REPLIT_DEPLOYMENT || process.env.REPL_ID || "unknown",
         deployed: "✅",
       },
     },

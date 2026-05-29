@@ -3,7 +3,7 @@
  *
  * Pi App Studio assigns a fresh canonical hostname on every (re)transfer
  * (and the same goes for any Pi Browser app distribution). We therefore do
- * NOT pin static `*.pinet.com` or `*.vercel.app` URLs here — they all flow
+ * NOT pin static `*.pinet.com` or `*.replit.app` URLs here — they all flow
  * through env vars (NEXT_PUBLIC_APP_URL / PI_APP_PRIMARY_URL) so the value
  * follows the current transfer without code changes.
  */
@@ -15,7 +15,7 @@ function envUrl(name: string, fallback: string): string {
 
 export const MAINNET_DEPLOYMENT = {
   primaryUrl: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
-  vercelUrl: "",
+  replitUrl: "",
   customDomain: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
   sandbox: false,
   network: "mainnet",
@@ -29,7 +29,7 @@ export const MAINNET_DEPLOYMENT = {
 
 export const TESTNET_DEPLOYMENT = {
   primaryUrl: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
-  vercelUrl: "",
+  replitUrl: "",
   customDomain: envUrl("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
   sandbox: true,
   network: "testnet",
@@ -42,7 +42,7 @@ export const TESTNET_DEPLOYMENT = {
 } as const;
 
 export const DEVELOPMENT_DEPLOYMENT = {
-  vercelUrl: "http://localhost:3000",
+  replitUrl: "http://localhost:3000",
   customDomain: null,
   sandbox: true,
   network: "development",
@@ -75,7 +75,7 @@ export function getDeploymentConfig(env?: DeploymentEnvironment) {
 }
 
 export function getCurrentEnvironment(): DeploymentEnvironment {
-  // Check environment variables set by Vercel
+  // Check environment variables set by Replit
   const nextPublicAppUrl = process.env.NEXT_PUBLIC_APP_URL || "";
   const sandbox = process.env.NEXT_PUBLIC_PI_SANDBOX;
 
@@ -84,7 +84,7 @@ export function getCurrentEnvironment(): DeploymentEnvironment {
     return "development";
   }
 
-  // Detect from Vercel URL or env var
+  // Detect from app URL or env var
   if (nextPublicAppUrl.includes("localhost")) {
     return "development";
   }
@@ -124,7 +124,7 @@ export function validateDeploymentURLs(): boolean {
  */
 export function getAppURL(): string {
   const config = getDeploymentConfig();
-  return config.vercelUrl;
+  return config.replitUrl;
 }
 
 /**
@@ -158,7 +158,7 @@ export function getNetworkFeePercentage(): number {
 export const DEPLOYMENT_URLS = {
   mainnet: MAINNET_DEPLOYMENT.primaryUrl,
   testnet: TESTNET_DEPLOYMENT.primaryUrl,
-  development: DEVELOPMENT_DEPLOYMENT.vercelUrl,
+  development: DEVELOPMENT_DEPLOYMENT.replitUrl,
 } as const;
 
 export const DEPLOYMENT_CONFIG = {

@@ -120,7 +120,7 @@ Environmental sustainability and low-carbon operations.
 **Renewable Energy:**
 - GCP (primary): 82% renewable
 - AWS (secondary): 90% renewable
-- Vercel CDN: 82% renewable
+- Replit / Cloudflare CDN: 82% renewable
 - **Portfolio average: 85% renewable** ✅
 
 **Sustainability Initiatives:**
@@ -177,7 +177,7 @@ Environmental sustainability and low-carbon operations.
 **Infrastructure:**
 - Google Cloud Platform (primary)
 - AWS (secondary/backup)
-- Vercel CDN (content delivery)
+- Replit / Cloudflare CDN (content delivery)
 - All 82-90% renewable energy
 
 **Security:**

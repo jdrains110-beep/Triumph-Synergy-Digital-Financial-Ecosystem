@@ -82,7 +82,7 @@ export class EnergyEfficiencyComplianceService {
       infrastructure: {
         gcp: 2500, // kg CO2 (GCP 82% renewable)
         aws: 1500, // kg CO2 (AWS backup)
-        cdn: 800, // kg CO2 (Vercel CDN)
+        cdn: 800, // kg CO2 (Replit / Cloudflare CDN)
         total: 4800,
       },
       operations: {
@@ -361,7 +361,7 @@ export class EnergyEfficiencyComplianceService {
         status: "Carbon Neutral by 2025",
       },
       {
-        platform: "Vercel (Frontend CDN)",
+        platform: "Replit (Frontend hosting)",
         location: "Global CDN (82% renewable)",
         renewablePercentage: 82,
         carbonIntensity: "Equivalent to GCP",

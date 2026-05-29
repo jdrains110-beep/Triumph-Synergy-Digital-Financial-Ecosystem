@@ -40,8 +40,8 @@ export function getPiInitializationScript(): string {
       isSandbox = true;
       network = 'testnet';
     }
-    // Fallback: Other .replit.app / .vercel.app = testnet (preview/staging)
-    else if (hostname.endsWith('.replit.app') || hostname.endsWith('.vercel.app')) {
+    // Fallback: Other .replit.app = testnet (preview/staging)
+    else if (hostname.endsWith('.replit.app')) {
       isSandbox = true;
       network = 'testnet';
     }

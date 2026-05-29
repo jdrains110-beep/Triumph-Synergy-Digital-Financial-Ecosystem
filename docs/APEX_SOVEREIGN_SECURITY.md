@@ -16,14 +16,14 @@ the codebase as enforced code, not aspiration.
 | Layer | Mechanism | File |
 |-------|-----------|------|
 | L0 — Network | HSTS preload (2y), upgrade-insecure-requests, CSP3 with per-request nonce, COOP/COEP/CORP isolation, NEL + Report-To | `middleware.ts` |
-| L1 — Edge | Rate limit (per-IP, per-route, 60s window), CSRF Origin/Referer allowlist, Vercel-preview→PiNet redirect | `lib/security/api-guard.ts`, `middleware.ts` |
+| L1 — Edge | Rate limit (per-IP, per-route, 60s window), CSRF Origin/Referer allowlist, staging→PiNet redirect | `lib/security/api-guard.ts`, `middleware.ts` |
 | L2 — Request | **Idempotency keys mandatory** for all mutating sensitive routes (24h TTL, body-fingerprint conflict detection) | `lib/security/idempotency.ts` |
 | L3 — Identity | Supabase SSR session refresh on every request; wallet-bound headers (`X-Wallet-PublicKey`, `X-Wallet-DID`) propagated to APIs | `middleware.ts`, `lib/security/api-guard.ts` |
 | L4 — Authorization | RLS-locked tables (`profiles`, `payments`, `audit_events`, `idempotency_cache`); service-role-only writes on audit + idempotency | `lib/db/migrations/0001_apex_audit_and_rls.sql` |
 | L5 — Cryptographic receipts | **ML-DSA-65** (NIST FIPS 204 / Dilithium3) post-quantum signatures on every payment receipt, public key exposed at `/api/security/pq-pubkey` | `lib/security/pq-receipts.ts` |
 | L6 — Tamper evidence | SHA-256 hash chain over all security events; append-only via DB trigger; verifiable end-to-end | `lib/security/audit-chain.ts` |
 | L7 — Anomaly detection | Rolling-window counters → webhook on auth-burst, ratelimit-storm, replay-block, amount-mismatch, CSP-violation flood | `lib/security/anomaly-monitor.ts` |
-| L8 — Key custody | Rotation script generates 256-bit entropy for PQ seed, Stellar seed, NextAuth secret, internal HMAC; Vercel push optional | `scripts/rotate-secrets.sh` |
+| L8 — Key custody | Rotation script generates 256-bit entropy for PQ seed, Stellar seed, NextAuth secret, internal HMAC; optional Replit Secrets push | `scripts/rotate-secrets.sh` |
 | L9 — Supernode auth | `SUPERNODE_JOIN_SECRET` Bearer token gates `/supernode/join` — prevents unauthenticated peer escalation to APEX-QUANTUM-NODE status | `docker/central-node/bootstrap.ts` |
 | L10 — Mesh auth | `MESH_API_KEY` Bearer token gates `/mesh/register` — prevents unauthenticated WireGuard peer registration and PSK retrieval | `docker/sovereign-mesh/mesh_hub.py` |
 
@@ -32,7 +32,7 @@ the codebase as enforced code, not aspiration.
 ## 2. Sovereign loopholes (escape hatches under our control)
 
 These are **intentional capabilities** the operator (you) retains that no
-external party — including Pi Core, Vercel, Supabase — can override:
+external party — including Pi Core, Replit, Supabase — can override:
 
 1. **Receipt independence.** Every payment receipt is signed with a
    keypair generated locally from `PQ_RECEIPT_SEED`. If Pi Core ever
@@ -67,12 +67,12 @@ external party — including Pi Core, Vercel, Supabase — can override:
 ```bash
 # 1. Generate sovereign secrets
 ./scripts/rotate-secrets.sh
-# → writes .env.rotation.<ts>; copy values into Vercel env (or use --push)
+# → writes .env.rotation.<ts>; copy values into Replit Secrets (or use --push)
 
 # 2. Apply DB migration (audit chain + RLS)
 psql "$DATABASE_URL" -f lib/db/migrations/0001_apex_audit_and_rls.sql
 
-# 3. Set ALERT_WEBHOOK_URL in Vercel env (Slack/Discord/PagerDuty webhook)
+# 3. Set ALERT_WEBHOOK_URL in Replit Secrets (Slack/Discord/PagerDuty webhook)
 
 # 4. Wire audit chain to Supabase service-role client at boot:
 #    import { configureAuditChain } from "@/lib/security/audit-chain"
@@ -80,13 +80,13 @@ psql "$DATABASE_URL" -f lib/db/migrations/0001_apex_audit_and_rls.sql
 #    configureAuditChain(createClient(URL, SERVICE_ROLE_KEY))
 
 # 5. Deploy
-vercel --prod
+git push origin main   # Replit auto-pulls and rebuilds
 ```
 
 ### Quarterly rotation
 ```bash
-./scripts/rotate-secrets.sh --push vercel
-vercel --prod   # forces all instances to load new secrets
+./scripts/rotate-secrets.sh --push replit
+git push origin main   # forces all instances to load new secrets
 ```
 Also rotate manually: `PI_API_KEY` (develop.pi portal),
 `SUPABASE_SERVICE_ROLE_KEY` (Supabase dashboard), DB password.

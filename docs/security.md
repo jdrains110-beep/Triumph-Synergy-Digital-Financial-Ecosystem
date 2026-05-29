@@ -153,7 +153,7 @@ const unsafe = await db.execute(`SELECT * FROM users WHERE id = '${userId}'`);
 
 - PostgreSQL with encrypted columns for PII
 - Redis with TLS and authentication
-- Vercel Blob with server-side encryption
+- Object storage with server-side encryption
 
 ### Data in Transit
 

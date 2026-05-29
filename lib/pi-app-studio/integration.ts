@@ -1,6 +1,6 @@
 /**
  * Pi App Studio Integration
- * Complete integration for Pi Network, Vercel, and GitHub
+ * Complete integration for Pi Network, Replit, and GitHub
  *
  * This module provides a unified interface for:
  * - Pi SDK initialization and management
@@ -54,8 +54,8 @@ export type PiAppConfig = {
     pinetTestnet?: string;
     pinetMainnet?: string;
     pinetPrimary?: string;
-    vercelMainnet?: string;
-    vercelTestnet?: string;
+    replitMainnet?: string;
+    replitTestnet?: string;
   };
 };
 
@@ -133,9 +133,9 @@ export const PI_APP_CONFIG: PiAppConfig = {
     pinetTestnet: "https://triumphsynergyab2099.pinet.com",
     pinetMainnet: "https://triumphsynergyab2099.pinet.com",
     pinetPrimary: "https://triumphsynergyab2099.pinet.com",
-    // VERCEL DOMAINS
-    vercelMainnet: "https://triumphsynergyab2099.pinet.com",
-    vercelTestnet: "https://Triumph-Synergy.replit.app",
+    // REPLIT ORIGINS
+    replitMainnet: "https://Triumph-Synergy.replit.app",
+    replitTestnet: "https://Triumph-Synergy.replit.app",
     // Legacy aliases
     production: "https://triumphsynergyab2099.pinet.com",
     staging: "https://Triumph-Synergy.replit.app",
@@ -425,12 +425,12 @@ export function isInPiBrowser(): boolean {
 }
 
 // ============================================================================
-// VERCEL INTEGRATION
+// REPLIT INTEGRATION
 // ============================================================================
 
-export const VERCEL_CONFIG = {
+export const REPLIT_CONFIG = {
   projectUrl: PI_APP_CONFIG.urls.production,
-  regions: ["iad1", "sfo1", "lhr1"],
+  origin: "https://Triumph-Synergy.replit.app",
   functions: {
     piApprove: {
       path: "/api/pi/approve",
@@ -469,7 +469,6 @@ export const GITHUB_CONFIG = {
     "PI_API_KEY",
     "PI_API_SECRET",
     "PI_INTERNAL_API_KEY",
-    "VERCEL_TOKEN",
     "STELLAR_PAYMENT_ACCOUNT",
     "STELLAR_PAYMENT_SECRET",
   ],
@@ -489,6 +488,6 @@ export default {
   getStatus: getPiAppStatus,
   isInPiBrowser,
   getCurrentUser,
-  vercel: VERCEL_CONFIG,
+  replit: REPLIT_CONFIG,
   github: GITHUB_CONFIG,
 };

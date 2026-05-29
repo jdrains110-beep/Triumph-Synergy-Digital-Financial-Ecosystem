@@ -1148,7 +1148,7 @@ The entire ecosystem is wrapped in a defense-in-depth envelope enforced as code,
 - **Tamper-evident audit hash chain** — SHA-256 chain over all security events, append-only DB trigger, end-to-end verifiable ([`lib/security/audit-chain.ts`](lib/security/audit-chain.ts))
 - **Anomaly monitor** — rolling-window thresholds → `ALERT_WEBHOOK_URL` POST on auth-burst, ratelimit-storm, replay-block, amount-mismatch, CSP-violation flood ([`lib/security/anomaly-monitor.ts`](lib/security/anomaly-monitor.ts))
 - **Supabase RLS** — per-user row access on `profiles`, `payments`, `audit_events`, `idempotency_cache`; service-role-only writes on audit + idempotency ([`lib/db/migrations/0001_apex_audit_and_rls.sql`](lib/db/migrations/0001_apex_audit_and_rls.sql))
-- **Sovereign key custody** — `scripts/rotate-secrets.sh` generates 256-bit entropy for `PQ_RECEIPT_SEED`, Stellar seed, NextAuth secret, internal HMAC; optional `--push vercel`
+- **Sovereign key custody** — `scripts/rotate-secrets.sh` generates 256-bit entropy for `PQ_RECEIPT_SEED`, Stellar seed, NextAuth secret, internal HMAC; optional `--push replit`
 - **CSP violation sink** — browser reports auto-appended to audit chain (`/api/security/csp-report`)
 - **Boot wiring** — [`lib/security/boot.ts`](lib/security/boot.ts) wires audit chain to Supabase service-role client on every server process
 - **Supernode join auth** — `SUPERNODE_JOIN_SECRET` Bearer token gates `/supernode/join`; prevents unauthenticated escalation to APEX-QUANTUM-NODE ([`docker/central-node/bootstrap.ts`](docker/central-node/bootstrap.ts))
@@ -4134,7 +4134,7 @@ Official PiNetwork/PiRC integration for enhanced Pi ecosystem connectivity.
 | Cache | Redis |
 | Blockchain | Stellar SDK + Pi Network |
 | Security | Quantum-Resistant Encryption |
-| Hosting | Vercel + Docker |
+| Hosting | Replit + Docker |
 
 ---
 

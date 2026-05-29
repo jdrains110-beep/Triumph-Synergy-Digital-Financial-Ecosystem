@@ -4,16 +4,15 @@ SAIB External Probe Registry
 
 Extends SAIB's monitoring beyond local Docker into the wider ecosystem:
 
-  • Vercel mainnet deployment        (triumphsynergyab2099.pinet.com)
-  • PiNet mainnet apps               (triumphsynergyab2099.pinet.com,
-                                      triumphsynergyab2099.pinet.com)
-  • Pi Network mainnet API           (api.mainnet.minepi.com)
-  • Stellar Protocol 24 horizon      (api.mainnet.minepi.com/ledgers)
+  • Replit production deployment    (Triumph-Synergy.replit.app)
+  • PiNet mainnet apps              (triumphsynergyab2099.pinet.com)
+  • Pi Network mainnet API          (api.mainnet.minepi.com)
+  • Stellar Protocol 24 horizon     (api.mainnet.minepi.com/ledgers)
 
 These targets cannot be `docker restart`'d — they're external. So each
 probe records availability, raises a Prometheus signal, and (when wired
-to remediation) triggers redeploys / GitHub issues instead of container
-restarts. SAIB therefore *sees* every platform in the ecosystem even
+to remediation) opens a GitHub issue instead of attempting a container
+restart. SAIB therefore *sees* every platform in the ecosystem even
 when it can't directly fix them.
 
 Mainnet-only mandate: no testnet probes are emitted from this registry.
@@ -31,8 +30,8 @@ class ExternalTarget:
 
     name: str
     url: str
-    kind: str            # "vercel" | "pinet" | "pi-mainnet" | "stellar-mainnet"
-    remediation: str     # "vercel-redeploy" | "github-issue" | "alert-only"
+    kind: str            # "replit" | "pinet" | "pi-mainnet" | "stellar-mainnet"
+    remediation: str     # "github-issue" | "alert-only"
     timeout_s: float = 10.0
     expect_status: tuple[int, ...] = (200, 204)
 
@@ -45,24 +44,24 @@ def _env_csv(name: str, default: str) -> list[str]:
 def build_external_targets() -> list[ExternalTarget]:
     """Return the canonical list of external targets SAIB watches."""
 
-    vercel_hosts = _env_csv(
-        "SAIB_VERCEL_HOSTS",
-        "triumphsynergyab2099.pinet.com",
+    replit_hosts = _env_csv(
+        "SAIB_REPLIT_HOSTS",
+        "Triumph-Synergy.replit.app",
     )
     pinet_hosts = _env_csv(
         "SAIB_PINET_HOSTS",
-        "triumphsynergyab2099.pinet.com,triumphsynergyab2099.pinet.com",
+        "triumphsynergyab2099.pinet.com",
     )
 
     targets: list[ExternalTarget] = []
 
-    for host in vercel_hosts:
+    for host in replit_hosts:
         targets.append(
             ExternalTarget(
-                name=f"vercel:{host}",
+                name=f"replit:{host}",
                 url=f"https://{host}/api/health",
-                kind="vercel",
-                remediation="vercel-redeploy",
+                kind="replit",
+                remediation="github-issue",
             )
         )
 

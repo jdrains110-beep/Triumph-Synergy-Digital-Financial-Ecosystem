@@ -860,7 +860,7 @@ async def pulse_loop():
 
 
 # ── External Probes + Peer Federation (mainnet-only ecosystem reach) ──────────
-# These give SAIB awareness beyond local Docker: Vercel, PiNet, Pi mainnet,
+# These give SAIB awareness beyond local Docker: Replit, PiNet, Pi mainnet,
 # Stellar Protocol 24 horizon, plus other SAIB instances (e.g. two Triumph
 # Synergy Docker Desktop platforms + the central/supernode SAIB).
 build_external_targets: Any = None

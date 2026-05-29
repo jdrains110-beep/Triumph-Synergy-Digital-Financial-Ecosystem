@@ -17,14 +17,15 @@ Deploy to staging via Replit: <https://Triumph-Synergy.replit.app>
 ### Manual Deploy
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Pull latest main inside the Replit container
+git reset --hard origin/main
 
-# Login
-vercel login
+# Install + build (use yarn since lockfile is yarn)
+yarn install --frozen-lockfile
+yarn build
 
-# Deploy
-vercel --prod
+# Start (Replit auto-runs `yarn start` when configured)
+yarn start
 ```
 
 ## Environment Configuration
@@ -62,7 +63,7 @@ EXTERNAL_PI_MIN_VALUE=1.0
 ```bash
 # Monitoring
 SENTRY_DSN=https://...
-VERCEL_ANALYTICS_ID=...
+VERCEL_ANALYTICS_ID=...  # removed—analytics now via /api/health/check + GitHub Actions monitoring
 
 # Email (optional)
 SMTP_HOST=smtp.example.com
@@ -224,21 +225,19 @@ jobs:
       - run: pnpm test:unit
       - run: pnpm build
       
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+      - name: Notify Replit Deploy
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Replit auto-pulls main; nothing to push here."
+          echo "Production URL: https://Triumph-Synergy.replit.app"
 ```
 
 ### Required Secrets
 
 Add to GitHub repo Settings > Secrets:
 
-- `VERCEL_TOKEN`: Your Vercel API token
-- `VERCEL_ORG_ID`: Your Vercel organization ID
-- `VERCEL_PROJECT_ID`: Your Vercel project ID
+- `GITHUB_TOKEN`: provided automatically by Actions; used by SAIB external remediation
+- `POSTGRES_PASSWORD`: production Postgres password set in Replit Secrets too
 
 ## Health Checks
 
@@ -265,9 +264,9 @@ curl https://your-domain.com/api/health
 
 ## Monitoring
 
-### Vercel Analytics
+### Replit Built-in Logs
 
-Automatically enabled for Vercel deployments.
+Replit captures stdout/stderr automatically; pair with `/api/health/check` polling for liveness alerting.
 
 ### Custom Monitoring
 
@@ -284,11 +283,10 @@ export async function trackMetric(name: string, value: number) {
 
 ## Scaling
 
-### Vercel
+### Replit
 
-- Automatic scaling built-in
-- Edge functions for low-latency
-- Serverless functions auto-scale
+- Manual scale via Replit plan tier
+- Add a Cloudflare proxy in front for caching and DDoS protection
 
 ### Self-Hosted
 
@@ -321,14 +319,12 @@ spec:
 
 ## Rollback
 
-### Vercel
+### Replit
 
 ```bash
-# List deployments
-vercel list
-
-# Rollback to previous
-vercel rollback
+# Revert to a known-good commit and let Replit redeploy
+git reset --hard <good-sha>
+git push --force-with-lease origin main
 ```
 
 ### Docker

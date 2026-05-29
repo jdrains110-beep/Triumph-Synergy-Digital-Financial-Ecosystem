@@ -16,9 +16,8 @@
 const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
   // PINET MAINNET DOMAINS
   "triumphsynergyab2099.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  "triumphsynergyab2099.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  // VERCEL MAINNET DOMAIN
-  "triumphsynergyab2099.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
+  // REPLIT MAINNET ORIGIN
+  "triumph-synergy.replit.app": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
 };
 
 // Default validation key (mainnet). Testnet key is intentionally not
@@ -89,8 +88,7 @@ export async function GET(request: Request) {
     // App URLs (mainnet-only)
     urls: {
       mainnet_pinet: "https://triumphsynergyab2099.pinet.com",
-      mainnet_pinet_alt: "https://triumphsynergyab2099.pinet.com",
-      mainnet_vercel: "https://triumphsynergyab2099.pinet.com",
+      mainnet_replit: "https://Triumph-Synergy.replit.app",
       current_host: hostname,
     },
 

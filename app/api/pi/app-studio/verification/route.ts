@@ -3,7 +3,7 @@
  *
  * Comprehensive verification endpoint for Pi App Studio integration
  * Verifies:
- * 1. Vercel deployment is live and accessible
+ * 1. Replit deployment is live and accessible
  * 2. Pi SDK is properly injected in all domains
  * 3. Domain mappings are correct (testnet vs mainnet)
  * 4. Connection to PINET primary domain (triumphsynergyab2099.pinet.com)
@@ -14,13 +14,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PRODUCTION_DOMAINS = {
   mainnet: {
-    vercel: "triumphsynergyab2099.pinet.com",
+    replit: "Triumph-Synergy.replit.app",
     pinet: ["triumphsynergyab2099.pinet.com", "triumphsynergyab2099.pinet.com"],
   },
   // Mainnet-only mandate — testnet domains intentionally empty so the
   // verification path can never resolve to a testnet network.
   testnet: {
-    vercel: "",
+    replit: "",
     pinet: [] as string[],
   },
 };
@@ -185,16 +185,16 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const mainnetVercelAccessible = await verifyDomainAccessibility(
-      PRODUCTION_DOMAINS.mainnet.vercel
+    const mainnetReplitAccessible = await verifyDomainAccessibility(
+      PRODUCTION_DOMAINS.mainnet.replit
     );
-    const mainnetVercelSdk = await verifyPiSdkInjection(
-      PRODUCTION_DOMAINS.mainnet.vercel
+    const mainnetReplitSdk = await verifyPiSdkInjection(
+      PRODUCTION_DOMAINS.mainnet.replit
     );
 
-    if (!mainnetVercelAccessible.accessible) {
+    if (!mainnetReplitAccessible.accessible) {
       (verification.issues as string[]).push(
-        `Vercel mainnet domain unreachable: ${mainnetVercelAccessible.error}`
+        `Replit mainnet origin unreachable: ${mainnetReplitAccessible.error}`
       );
     }
 
@@ -202,11 +202,11 @@ export async function GET(request: NextRequest) {
       Object.assign(
         (verification.allDomains as Record<string, unknown>).mainnet || {},
         {
-          [PRODUCTION_DOMAINS.mainnet.vercel]: {
-            accessible: mainnetVercelAccessible.accessible,
-            sdkInjected: mainnetVercelSdk.injected,
-            responseTime: mainnetVercelAccessible.responseTime,
-            statusCode: mainnetVercelAccessible.statusCode,
+          [PRODUCTION_DOMAINS.mainnet.replit]: {
+            accessible: mainnetReplitAccessible.accessible,
+            sdkInjected: mainnetReplitSdk.injected,
+            responseTime: mainnetReplitAccessible.responseTime,
+            statusCode: mainnetReplitAccessible.statusCode,
           },
         }
       );
@@ -218,8 +218,8 @@ export async function GET(request: NextRequest) {
     isTrueMainnet:
       currentNetwork === "mainnet" &&
       (hostname === PRIMARY_MAINNET_DOMAIN ||
-        hostname === PRODUCTION_DOMAINS.mainnet.vercel),
-    vercelMainnetConnectsToMainnet: currentNetwork === "mainnet",
+        hostname === PRODUCTION_DOMAINS.mainnet.replit),
+    replitMainnetConnectsToMainnet: currentNetwork === "mainnet",
     piSdkVersion: "2.0",
     appId: "triumph-synergy",
   };
@@ -240,20 +240,20 @@ export async function GET(request: NextRequest) {
 
   // Determine if false setup (not displaying mainnet domain correctly)
   if (
-    hostname === PRODUCTION_DOMAINS.mainnet.vercel &&
+    hostname === PRODUCTION_DOMAINS.mainnet.replit &&
     currentNetwork !== "mainnet"
   ) {
     (verification.issues as string[]).push(
-      `FALSE SETUP: Vercel mainnet domain not recognized as mainnet. Detected as: ${currentNetwork}`
+      `FALSE SETUP: Replit mainnet origin not recognized as mainnet. Detected as: ${currentNetwork}`
     );
   }
 
   if (
-    hostname === PRODUCTION_DOMAINS.mainnet.vercel &&
+    hostname === PRODUCTION_DOMAINS.mainnet.replit &&
     !currentSdkInjected.injected
   ) {
     (verification.issues as string[]).push(
-      `FALSE SETUP: Vercel mainnet not displaying Pi SDK initialization`
+      `FALSE SETUP: Replit mainnet not displaying Pi SDK initialization`
     );
   }
 
@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
     sandbox: getSandboxMode(hostname),
     message: `Pi App Studio verification point for ${hostname}`,
     primaryMainnet: PRIMARY_MAINNET_DOMAIN,
-    vercelMainnet: PRODUCTION_DOMAINS.mainnet.vercel,
+    replitMainnet: PRODUCTION_DOMAINS.mainnet.replit,
   };
 
   const accessible = await verifyDomainAccessibility(hostname);

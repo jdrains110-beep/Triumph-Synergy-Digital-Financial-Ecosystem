@@ -66,7 +66,7 @@ Triumph-Synergy is built as a modular, scalable financial ecosystem with Pi Netw
 │                    DATA LAYER                                    │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
-│  │ PostgreSQL  │  │   Redis     │  │    Vercel Blob          │  │
+│  │ PostgreSQL  │  │   Redis     │  │    Object Storage        │  │
 │  │ - Users     │  │ - Sessions  │  │ - Media Files           │  │
 │  │ - Payments  │  │ - Cache     │  │ - Documents             │  │
 │  │ - Contracts │  │ - Rate Limit│  │ - User Uploads          │  │
@@ -185,7 +185,7 @@ lib/
 
 ### Monitoring
 
-- Vercel Analytics for performance metrics
+- Replit metrics + GitHub Actions monitoring for performance
 - OpenTelemetry for distributed tracing
 - Custom logging for audit trails
 
@@ -194,7 +194,7 @@ lib/
 ### Defense in Depth
 
 ```
-Layer 1: Edge (Cloudflare/Vercel)
+Layer 1: Edge (Cloudflare in front of Replit)
 ├── DDoS protection
 ├── WAF rules
 └── Rate limiting
@@ -222,11 +222,11 @@ Layer 5: Data
 
 ## Deployment Architecture
 
-### Production (Vercel)
+### Production (Replit)
 
 ```
 ┌───────────────────────────────────────┐
-│           Vercel Edge Network          │
+│           Replit App Hosting          │
 ├───────────────────────────────────────┤
 │  ┌─────────┐  ┌─────────┐  ┌───────┐ │
 │  │ Edge    │  │ Serverless│  │ Static│ │

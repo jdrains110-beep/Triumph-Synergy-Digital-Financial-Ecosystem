@@ -256,9 +256,9 @@
       "branch": "main",
       "ci_cd": true
     },
-    "vercel": {
-      "project": "triumph-synergy",
-      "team": "jeremiah-drains-projects",
+    "replit": {
+      "project": "Triumph-Synergy",
+      "owner": "jdrains110-beep",
       "auto_deploy": true
     },
     "stellar": {
@@ -273,9 +273,9 @@
   },
 
   "deployment": {
-    "provider": "vercel",
-    "regions": ["iad1"],
-    "edge_functions": true,
+    "provider": "replit",
+    "regions": ["us-east"],
+    "edge_functions": false,
     "serverless_functions": {
       "max_duration": 30,
       "memory": 1024
