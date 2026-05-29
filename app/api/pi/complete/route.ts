@@ -1,19 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-
-// Pi Network API Configuration
-const PI_API_KEY = process.env.PI_API_KEY || "";
-const PI_APP_ID = process.env.PI_APP_ID || "";
+import { completePayment, verifyPayment } from "@/lib/pi/server";
 
 /**
- * Pi Payment Completion Endpoint
- * POST /api/pi/complete
+ * Pi Payment Completion Endpoint — POST /api/pi/complete
  *
- * Server-side completion of Pi payments as required by Pi Platform docs
+ * Network resolution mirrors /api/pi/approve.
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { paymentId, txid } = body;
+    const { paymentId, txid } = (await req.json()) as {
+      paymentId?: string;
+      txid?: string;
+    };
 
     if (!paymentId || !txid) {
       return NextResponse.json(
@@ -21,105 +19,67 @@ export async function POST(req: NextRequest) {
           error: "Payment ID and transaction ID required",
           code: "MISSING_PARAMETERS",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    console.log("[Pi API] Completing payment:", { paymentId, txid });
-
-    // Verify payment exists and is approved
-    const verifyResponse = await fetch(
-      `https://api.minepi.com/v2/payments/${paymentId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Key ${PI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (!verifyResponse.ok) {
-      console.error(
-        "[Pi API] Payment verification failed:",
-        verifyResponse.status
-      );
+    const verified = await verifyPayment(paymentId, req);
+    if ("error" in verified) {
       return NextResponse.json(
         {
           error: "Payment verification failed",
           code: "PAYMENT_NOT_FOUND",
-          details: "Invalid payment ID",
+          network: verified.network,
+          details: verified.error,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
+    const { payment, resolved } = verified;
 
-    const paymentData = await verifyResponse.json();
-    console.log("[Pi API] Payment data verified:", paymentData);
-
-    // Check if payment is approved
-    if (!paymentData.status?.developer_approved) {
+    if (!payment.status?.developer_approved) {
       return NextResponse.json(
         {
           error: "Payment not approved",
           code: "PAYMENT_NOT_APPROVED",
+          network: resolved.network,
           details: "Payment must be approved before completion",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // Check if payment is already completed
-    if (paymentData.status?.developer_completed) {
+    if (payment.status?.developer_completed) {
       return NextResponse.json({
         success: true,
         paymentId,
         txid,
+        network: resolved.network,
         status: "already_completed",
         message: "Payment was already completed",
       });
     }
 
-    // Complete the payment using Pi Platform API
-    const completeResponse = await fetch(
-      `https://api.minepi.com/v2/payments/${paymentId}/complete`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Key ${PI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          txid,
-        }),
-      }
-    );
-
-    if (!completeResponse.ok) {
-      console.error(
-        "[Pi API] Payment completion failed:",
-        completeResponse.status
-      );
-      const errorText = await completeResponse.text();
+    const completed = await completePayment(paymentId, txid, resolved);
+    if (!completed.ok) {
       return NextResponse.json(
         {
           error: "Payment completion failed",
           code: "COMPLETION_FAILED",
-          details: errorText,
+          network: resolved.network,
+          details: completed.error,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
-    const completionData = await completeResponse.json();
-    console.log("[Pi API] Payment completed successfully:", completionData);
 
     return NextResponse.json({
       success: true,
       paymentId,
       txid,
+      network: resolved.network,
       status: "completed",
-      data: completionData,
+      data: completed.data,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -130,7 +90,7 @@ export async function POST(req: NextRequest) {
         code: "INTERNAL_ERROR",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
