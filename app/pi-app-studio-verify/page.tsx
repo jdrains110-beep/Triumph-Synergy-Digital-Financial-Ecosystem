@@ -85,11 +85,10 @@ export default function VerificationDashboard() {
 
       {/* Overall Status */}
       <div
-        className={`p-6 rounded-lg border-2 ${
-          isValid
+        className={`p-6 rounded-lg border-2 ${isValid
             ? 'border-green-500 bg-green-50'
             : 'border-red-500 bg-red-50'
-        }`}
+          }`}
       >
         <div className="flex items-center justify-between">
           <div>
