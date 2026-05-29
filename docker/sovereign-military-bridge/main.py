@@ -51,7 +51,7 @@ from typing import Any, Optional
 
 import httpx
 import redis.asyncio as aioredis
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.responses import PlainTextResponse
 from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
@@ -74,6 +74,30 @@ HQ_ADDRESS          = os.getenv("PI_SUPERNODE_ADDRESS",
 BACKBONE_PEERS_RAW  = os.getenv("SMB_BACKBONE_PEERS",  "")
 HEAL_INTERVAL_S     = float(os.getenv("SMB_HEAL_INTERVAL_S",    "60"))
 PROBE_TIMEOUT_S     = float(os.getenv("SMB_PROBE_TIMEOUT_S",    "5"))
+PEER_TRUST_ANCHORS  = os.getenv("SMB_PEER_TRUST_ANCHORS", "/run/secrets/peer_pubkeys")
+NODE_ID             = os.getenv("SMB_NODE_ID", os.getenv("HOSTNAME", "triumph-smb"))
+FEDERATION_OPEN     = os.getenv("SMB_FEDERATION_OPEN", "false").lower() == "true"  # TOFU mode (dangerous)
+FEDERATION_JOIN_INTERVAL_S = float(os.getenv("SMB_FEDERATION_JOIN_INTERVAL_S", "300"))
+
+
+def _load_bridge_token() -> str:
+    """Load shared bearer token for external bridge clients (Replit, partner stacks).
+    Priority: env var > file at /run/secrets/public_bridge_token > empty (= auth disabled)."""
+    tok = os.getenv("SMB_PUBLIC_BRIDGE_TOKEN", "").strip()
+    if tok:
+        return tok
+    for path in ("/run/secrets/public_bridge_token",
+                 "/run/secrets/public_bridge_token.txt"):
+        try:
+            with open(path) as fh:
+                return fh.read().strip()
+        except FileNotFoundError:
+            continue
+        except Exception:
+            continue
+    return ""
+
+PUBLIC_BRIDGE_TOKEN = _load_bridge_token()
 
 # ── ARPANET-style routing table: sovereign network nodes ───────────────────────
 SOVEREIGN_NODES: dict[str, str] = {
@@ -142,6 +166,45 @@ class CNSAKeyStore:
 
 _keys = CNSAKeyStore()
 
+# ── Federation trust anchors ──────────────────────────────────────────────────
+# Maps peer base URL -> {label, algorithm, public_key_pem}
+# Populated from SMB_PEER_TRUST_ANCHORS file (JSON). Empty PEM = unverified entry.
+def _load_trust_anchors() -> dict[str, dict[str, str]]:
+    path = PEER_TRUST_ANCHORS
+    try:
+        with open(path, "r") as fh:
+            data = json.load(fh)
+        peers = data.get("peers", {}) if isinstance(data, dict) else {}
+        # Normalize URLs (strip trailing slash)
+        return {k.rstrip("/"): v for k, v in peers.items() if isinstance(v, dict)}
+    except FileNotFoundError:
+        log.info("No peer trust anchor file at %s — running unauthenticated federation", path)
+        return {}
+    except Exception as exc:
+        log.warning("Failed to load peer trust anchors from %s: %s", path, exc)
+        return {}
+
+TRUST_ANCHORS: dict[str, dict[str, str]] = _load_trust_anchors()
+
+
+def require_bridge_token(authorization: Optional[str] = Header(None),
+                         x_bridge_token:  Optional[str] = Header(None)) -> None:
+    """
+    Auth guard for external-facing endpoints.
+    - If SMB_PUBLIC_BRIDGE_TOKEN is unset → endpoint is open (internal-only deployments).
+    - If set → caller must present `Authorization: Bearer <token>` or `X-Bridge-Token: <token>`.
+    Tokens are compared in constant time.
+    """
+    if not PUBLIC_BRIDGE_TOKEN:
+        return
+    presented = ""
+    if authorization and authorization.lower().startswith("bearer "):
+        presented = authorization.split(None, 1)[1].strip()
+    elif x_bridge_token:
+        presented = x_bridge_token.strip()
+    if not presented or not secrets.compare_digest(presented, PUBLIC_BRIDGE_TOKEN):
+        raise HTTPException(401, "invalid or missing bridge token")
+
 # ── State ──────────────────────────────────────────────────────────────────────
 state: dict[str, Any] = {
     "started_at":    time.time(),
@@ -151,6 +214,7 @@ state: dict[str, Any] = {
     "backbone_peers": [],
     "last_topology_refresh": 0.0,
     "routing_table": {},   # ARPANET-style: node → {url, latency_ms, hops, status}
+    "federation":    {},   # peer_url -> {trusted, last_seen, node_id, signature_verified}
 }
 
 redis_client: Optional[aioredis.Redis] = None
@@ -408,6 +472,7 @@ async def startup() -> None:
 
     # Launch background loop
     asyncio.create_task(_background_loop())
+    asyncio.create_task(_federation_join_loop())
     log.info(
         "Sovereign Military Bridge ONLINE — Port %d — CNSA Suite 2.0 ACTIVE — %d nodes in topology",
         PORT, len(SOVEREIGN_NODES),
@@ -604,7 +669,146 @@ async def sovereign_backbone() -> dict[str, Any]:
     }
 
 
-@app.post("/sovereign/route")
+# ── Federation: Mutual CNSA-2.0 Handshake ─────────────────────────────────────
+# Trust model:
+#   1. Pre-share peer RSA-3072 public keys via SMB_PEER_TRUST_ANCHORS
+#      (mounted at /run/secrets/peer_pubkeys; JSON {"peers":{url:{public_key_pem,...}}}).
+#   2. Outbound: POST /federation/announce to each configured peer with a signed
+#      payload {peer_url, node_id, ts, nonce, signature}.
+#   3. Inbound: peers POST /federation/announce here; we verify signature against
+#      TRUST_ANCHORS (or accept TOFU if SMB_FEDERATION_OPEN=true).
+#   4. Verified peers stored in state["federation"] with last_seen.
+# This lets another Triumph stack (e.g. a second MacBook) join by exposing its SMB
+# endpoint and pre-sharing its RSA-3072 public key.
+
+def _our_identity() -> dict[str, Any]:
+    return {
+        "node_id":    NODE_ID,
+        "version":    "1.0.0",
+        "cnsa":       "2.0",
+        "public_key": _keys.rsa_public_pem(),
+    }
+
+
+@app.get("/federation/identity")
+async def federation_identity() -> dict[str, Any]:
+    """Public identity: node_id + RSA-3072 public key. Share this with peers."""
+    return {**_our_identity(), "timestamp": time.time()}
+
+
+@app.post("/federation/announce", dependencies=[Depends(require_bridge_token)])
+async def federation_announce(payload: dict) -> dict[str, Any]:
+    peer_url  = (payload.get("peer_url") or "").rstrip("/")
+    node_id   = payload.get("node_id") or ""
+    ts        = float(payload.get("ts") or 0)
+    nonce     = payload.get("nonce") or ""
+    signature = payload.get("signature") or ""
+
+    if not peer_url or not signature:
+        raise HTTPException(400, "peer_url and signature required")
+    if abs(time.time() - ts) > 300:
+        raise HTTPException(400, "stale handshake (ts > 5 min skew)")
+
+    msg = f"{peer_url}|{node_id}|{ts}|{nonce}"
+    anchor = TRUST_ANCHORS.get(peer_url, {})
+    anchor_pem = anchor.get("public_key_pem", "")
+
+    verified = False
+    mode = "trust-anchor"
+    if anchor_pem:
+        verified = cnsa_verify(msg, signature, anchor_pem)
+    elif FEDERATION_OPEN:
+        claimed = payload.get("public_key", "")
+        if claimed and cnsa_verify(msg, signature, claimed):
+            verified = True
+            mode = "TOFU"
+            TRUST_ANCHORS[peer_url] = {
+                "label": f"TOFU-{node_id}",
+                "algorithm": "RSA-3072",
+                "public_key_pem": claimed,
+            }
+
+    if not verified:
+        raise HTTPException(401, "signature verification failed — peer not in trust anchors")
+
+    state["federation"][peer_url] = {
+        "node_id":   node_id,
+        "last_seen": time.time(),
+        "verified":  True,
+        "mode":      mode,
+    }
+    log.info("Federation peer joined: %s (node_id=%s, mode=%s)", peer_url, node_id, mode)
+    return {
+        "accepted":     True,
+        "our_identity": _our_identity(),
+        "mode":         mode,
+        "timestamp":    time.time(),
+    }
+
+
+async def _outbound_join(peer_url: str) -> dict[str, Any]:
+    peer_url = peer_url.rstrip("/")
+    ts = time.time()
+    nonce = secrets.token_hex(16)
+    our_url = os.getenv("SMB_PUBLIC_URL", f"http://{NODE_ID}:{PORT}").rstrip("/")
+    msg = f"{our_url}|{NODE_ID}|{ts}|{nonce}"
+    sig = cnsa_sign(msg)["signature"]
+    body = {
+        "peer_url":   our_url,
+        "node_id":    NODE_ID,
+        "ts":         ts,
+        "nonce":      nonce,
+        "signature":  sig,
+        "public_key": _keys.rsa_public_pem(),
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(peer_url + "/federation/announce", json=body,
+                                  timeout=PROBE_TIMEOUT_S * 2)
+        if r.status_code == 200:
+            data = r.json()
+            return {"peer": peer_url, "status": "JOINED", "mode": data.get("mode"),
+                    "remote_node_id": data.get("our_identity", {}).get("node_id")}
+        return {"peer": peer_url, "status": "REJECTED", "code": r.status_code,
+                "body": r.text[:200]}
+    except Exception as exc:
+        return {"peer": peer_url, "status": "UNREACHABLE", "error": str(exc)[:200]}
+
+
+@app.post("/federation/join", dependencies=[Depends(require_bridge_token)])
+async def federation_join_all() -> dict[str, Any]:
+    """Announce ourselves to every configured backbone peer."""
+    peers = [p.strip() for p in BACKBONE_PEERS_RAW.split(",") if p.strip()]
+    results = [await _outbound_join(p) for p in peers]
+    return {"announced_to": len(peers), "results": results, "timestamp": time.time()}
+
+
+@app.get("/federation/status", dependencies=[Depends(require_bridge_token)])
+async def federation_status() -> dict[str, Any]:
+    return {
+        "node_id":            NODE_ID,
+        "configured_peers":   [p.strip() for p in BACKBONE_PEERS_RAW.split(",") if p.strip()],
+        "trust_anchors":      {url: {k: v for k, v in a.items() if k != "public_key_pem"}
+                               for url, a in TRUST_ANCHORS.items()},
+        "trust_anchor_count": sum(1 for a in TRUST_ANCHORS.values() if a.get("public_key_pem")),
+        "verified_peers":     state["federation"],
+        "open_federation":    FEDERATION_OPEN,
+        "timestamp":          time.time(),
+    }
+
+
+async def _federation_join_loop() -> None:
+    while True:
+        try:
+            peers = [p.strip() for p in BACKBONE_PEERS_RAW.split(",") if p.strip()]
+            for p in peers:
+                await _outbound_join(p)
+        except Exception as exc:
+            log.warning("Federation join loop error: %s", exc)
+        await asyncio.sleep(FEDERATION_JOIN_INTERVAL_S)
+
+
+@app.post("/sovereign/route", dependencies=[Depends(require_bridge_token)])
 async def sovereign_route(payload: dict) -> dict[str, Any]:
     """Route a message through the sovereign network (ARPANET multi-path)."""
     target  = payload.get("target", "")
@@ -644,7 +848,7 @@ async def sovereign_route(payload: dict) -> dict[str, Any]:
     }
 
 
-@app.post("/sovereign/heal")
+@app.post("/sovereign/heal", dependencies=[Depends(require_bridge_token)])
 async def sovereign_heal_trigger() -> dict[str, Any]:
     """Manually trigger DARPA-style autonomous network healing."""
     healed = await autonomous_heal()
