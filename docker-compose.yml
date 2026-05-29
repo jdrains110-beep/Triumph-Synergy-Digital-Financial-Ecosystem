@@ -139,7 +139,9 @@ services:
   # ========================================================================
 
   postgres:
-    image: postgres:16-alpine
+    # pgvector/pgvector:pg16 — official pgvector image, drop-in compatible with postgres:16,
+    # adds the `vector` extension SAIB RAG needs for similarity search.
+    image: pgvector/pgvector:pg16
     container_name: triumph-postgres
     stop_grace_period: 60s   # Allow WAL flush + checkpoint before SIGKILL prevents crash-recovery loops
     <<: *common
@@ -706,6 +708,12 @@ services:
       DISCORD_GUILD_IDS: "${DISCORD_GUILD_IDS:-}"
       X_BEARER_TOKEN: "${X_BEARER_TOKEN:-}"
       SAIB_X_QUERY: "${SAIB_X_QUERY:-(#TriumphSynergy OR #PiNetwork OR @TriumphSynergy) -is:retweet lang:en}"
+      # ── GitHub interaction ingestion (stars, forks, watchers, issues, PRs, sponsors) ──
+      SAIB_GITHUB_EVENTS_ENABLED: "${SAIB_GITHUB_EVENTS_ENABLED:-true}"
+      SAIB_GITHUB_REPO: "${SAIB_GITHUB_REPO:-jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem}"
+      SAIB_GITHUB_EXTRA_REPOS: "${SAIB_GITHUB_EXTRA_REPOS:-}"
+      SAIB_GITHUB_OWNERS: "${SAIB_GITHUB_OWNERS:-jdrains110-beep}"
+      SAIB_GITHUB_EVENTS_INTERVAL_S: "${SAIB_GITHUB_EVENTS_INTERVAL_S:-300}"
       # ── SAIB RAG (pgvector + embeddings) ──────────────────────────────
       SAIB_RAG_ENABLED: "${SAIB_RAG_ENABLED:-true}"
       SAIB_RAG_DSN: "${SAIB_RAG_DSN:-postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}}"
