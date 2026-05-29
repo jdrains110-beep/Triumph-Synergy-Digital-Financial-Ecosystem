@@ -19,7 +19,7 @@ const PLATFORM_VERSION = "2.0.0";
 const DOMAIN_MAP = {
   primary: "triumphsynergyab2099.pinet.com",
   testnet: "triumphsynergyab2099.pinet.com",
-  vercel: "triumphsynergyab2099.pinet.com",
+  replit: "Triumph-Synergy.replit.app",
 };
 
 /** In-memory session store (ephemeral — survives container lifetime). */
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     const hostname = request.nextUrl.hostname.toLowerCase();
     const isMainnet =
       hostname === DOMAIN_MAP.primary ||
-      hostname === DOMAIN_MAP.vercel ||
+      hostname === DOMAIN_MAP.replit ||
       hostname.includes("triumphsynergy0576") ||
       hostname.includes("triumphsynergy7386");
 
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
         dockerServiceCount = 18; // Known Docker service count
       }
     } catch {
-      // Running on Vercel or Docker is down
+      // Running on cloud-only platform or Docker is down
     }
 
     // Build negotiated capabilities
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
         description: dockerAvailable
           ? "Docker Desktop ecosystem online — 29 containers operational, " +
             "Pi Node (testnet2) bridged via triumph-pi-bridge-connector"
-          : "Running on cloud platform (Vercel). Docker services unavailable from this endpoint.",
+          : "Running on cloud platform (Replit). Docker services unavailable from this endpoint.",
       },
 
       // Negotiated capabilities — what this session can do

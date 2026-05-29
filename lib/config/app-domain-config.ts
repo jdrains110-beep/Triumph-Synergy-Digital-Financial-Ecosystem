@@ -1,7 +1,7 @@
 /**
  * Triumph-Synergy Application Domain Configuration
  *
- * Dynamic configuration that works across testnet, mainnet, and Vercel
+ * Dynamic configuration that works across testnet, mainnet, and Replit
  * Loads from environment variables or detects from hostname
  */
 
@@ -15,12 +15,13 @@ function getCanonicalAppUrl(): string {
     return `${window.location.protocol}//${window.location.host}`;
   }
 
-  // If running on Vercel/Replit/etc, use VERCEL_URL / env hostname with canonical domain mapping
-  if (process.env.VERCEL_URL) {
+  // If running on Replit, use REPLIT_DEV_DOMAIN with canonical mapping
+  const replitHost = process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0];
+  if (replitHost) {
     // ============================================
     // CANONICAL DOMAIN MAPPING
     // ============================================
-    const hostname = process.env.VERCEL_URL.toLowerCase();
+    const hostname = replitHost.toLowerCase();
 
     // MAINNET (Pi Network primary)
     if (hostname === "triumphsynergyab2099.pinet.com") {
@@ -32,7 +33,7 @@ function getCanonicalAppUrl(): string {
       return "https://Triumph-Synergy.replit.app";
     }
 
-    return `https://${process.env.VERCEL_URL}`;
+    return `https://${replitHost}`;
   }
 
   // If explicitly set in environment (legacy)
@@ -53,9 +54,10 @@ function getActualHostname(): string {
     return window.location.hostname;
   }
 
-  // If in server context with VERCEL_URL
-  if (process.env.VERCEL_URL) {
-    return process.env.VERCEL_URL;
+  // If in server context with Replit env vars
+  const replitHost = process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0];
+  if (replitHost) {
+    return replitHost;
   }
 
   // Extract from NEXT_PUBLIC_APP_URL
@@ -90,8 +92,8 @@ function getEnvironmentNetwork(): "testnet" | "mainnet" {
     return "testnet";
   }
 
-  // Fallback: any other .replit.app or .vercel.app = testnet (preview/staging)
-  if (hostname.endsWith(".replit.app") || hostname.endsWith(".vercel.app")) {
+  // Fallback: any other .replit.app = testnet (preview/staging)
+  if (hostname.endsWith(".replit.app")) {
     return "testnet";
   }
 

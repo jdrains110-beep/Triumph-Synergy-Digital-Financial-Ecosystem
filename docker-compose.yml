@@ -674,18 +674,15 @@ services:
       SAIB_QUANTUM_AUTO_COMMIT: "false"
       SAIB_CODEBASE_SCAN_PATH: "/workspace"
       SAIB_DOCKER_BUILD_CONTEXT: "/workspace/docker"
-      # ── External mainnet probes (Vercel + PiNet + Pi mainnet API) ─────
+      # ── External mainnet probes (Replit + PiNet + Pi mainnet API) ────
       # No hardcoded host defaults — Pi App Studio assigns a fresh hostname
-      # on every app transfer. Set SAIB_VERCEL_HOSTS / SAIB_PINET_HOSTS in
+      # on every app transfer. Set SAIB_REPLIT_HOSTS / SAIB_PINET_HOSTS in
       # your environment to point at the current canonical domain(s); leaving
       # them empty disables those probes.
-      SAIB_VERCEL_HOSTS: ${SAIB_VERCEL_HOSTS:-}
+      SAIB_REPLIT_HOSTS: ${SAIB_REPLIT_HOSTS:-}
       SAIB_PINET_HOSTS: ${SAIB_PINET_HOSTS:-}
       SAIB_EXTERNAL_PROBE_INTERVAL_S: "60"
       SAIB_REMEDIATION_COOLDOWN_S: "900"
-      VERCEL_TOKEN: ${VERCEL_TOKEN:-}
-      VERCEL_PROJECT_ID: ${VERCEL_PROJECT_ID:-}
-      VERCEL_TEAM_ID: ${VERCEL_TEAM_ID:-}
       # ── Peer federation (2 Docker Desktops + central/supernode SAIB) ──
       # Format: name1=https://host:8099,name2=https://host:8099,central=https://...
       SAIB_PEERS: ${SAIB_PEERS:-}

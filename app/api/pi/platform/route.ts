@@ -20,11 +20,11 @@ const DOMAIN_MAP = {
   mainnet: {
     pinet: "triumphsynergyab2099.pinet.com",
     pinetAlt: "triumphsynergyab2099.pinet.com",
-    vercel: "triumphsynergyab2099.pinet.com",
+    replit: "Triumph-Synergy.replit.app",
   },
   testnet: {
     pinet: "triumphsynergyab2099.pinet.com",
-    vercel: "Triumph-Synergy.replit.app",
+    replit: "Triumph-Synergy.replit.app",
   },
 } as const;
 
@@ -93,7 +93,7 @@ function detectPlatformContext(req: NextRequest) {
   const isMainnetDomain =
     hostname === DOMAIN_MAP.mainnet.pinet ||
     hostname === DOMAIN_MAP.mainnet.pinetAlt ||
-    hostname === DOMAIN_MAP.mainnet.vercel;
+    hostname === DOMAIN_MAP.mainnet.replit;
 
   return {
     platform: isPiDesktop

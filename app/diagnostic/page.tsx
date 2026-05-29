@@ -1,6 +1,6 @@
 /**
  * app/diagnostic/page.tsx
- * Diagnostic page to verify Vercel deployment is serving correct content
+ * Diagnostic page to verify the Replit deployment is serving correct content
  */
 
 export default function DiagnosticPage() {
@@ -27,7 +27,7 @@ export default function DiagnosticPage() {
         marginBottom: "20px"
       }}>
         <h2>✅ Deployment Status: SUCCESSFUL</h2>
-        <p>This page proves Vercel is correctly serving the Next.js app.</p>
+        <p>This page proves Replit is correctly serving the Next.js app.</p>
         <p>If you can read this, the deployment is working.</p>
       </div>
 
@@ -37,12 +37,12 @@ export default function DiagnosticPage() {
         borderRadius: "8px",
         marginBottom: "20px"
       }}>
-        <h2>⚠️ If you see the Vercel default page instead:</h2>
+        <h2>⚠️ If you see a default placeholder page instead:</h2>
         <ul>
           <li>Clear browser cache (Ctrl+Shift+Delete)</li>
           <li>Try incognito/private window</li>
           <li>Check DNS hasn't cached old deployment</li>
-          <li>Vercel build logs for errors</li>
+          <li>Check the Replit deployment logs for errors</li>
         </ul>
       </div>
 
@@ -65,7 +65,7 @@ export default function DiagnosticPage() {
       <h2>Verification Checklist:</h2>
       <ul>
         <li>✅ Next.js 16.1.5 is deployed</li>
-        <li>✅ App is being served from Vercel</li>
+        <li>✅ App is being served from Replit</li>
         <li>✅ Routes are working</li>
         <li>✅ You can see this diagnostic page</li>
       </ul>

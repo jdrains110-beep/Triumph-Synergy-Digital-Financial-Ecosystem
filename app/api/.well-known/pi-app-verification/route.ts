@@ -11,12 +11,9 @@ import { type NextRequest, NextResponse } from "next/server";
 // Domain configuration - ALL 5 PRODUCTION DOMAINS
 const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
   // PINET DOMAINS
-  "triumphsynergyab2099.pinet.com": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
   "triumphsynergyab2099.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  "triumphsynergyab2099.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  // VERCEL DOMAINS
-  "triumphsynergyab2099.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  "Triumph-Synergy.replit.app": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
+  // REPLIT ORIGIN (staging serves testnet key; production routes through pinet)
+  "triumph-synergy.replit.app": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
 };
 
 export async function GET(request: NextRequest) {

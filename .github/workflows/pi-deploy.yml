@@ -1,4 +1,4 @@
-# Pi App Studio + Vercel + GitHub Complete Integration
+# Pi App Studio + Replit + GitHub Complete Integration
 # Triumph-Synergy Superior Deployment Pipeline
 
 name: 🥧 Pi App Studio Deploy
@@ -215,10 +215,10 @@ jobs:
                   retention-days: 1
 
     # ============================================================================
-    # PHASE 4: Deploy to Vercel
+    # PHASE 4: Deploy to Replit
     # ============================================================================
-    deploy-vercel:
-        name: 🚀 Deploy to Vercel
+    deploy-replit:
+        name: 🚀 Notify Replit Deployment
         runs-on: ubuntu-latest
         needs: [build]
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -228,12 +228,13 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Deploy via Vercel GitHub Integration
+            - name: Announce Replit Deploy Target
               run: |
-                  echo "🚀 Deployment triggered via Vercel GitHub integration"
-                  echo "📍 Vercel will auto-deploy this commit"
-                  echo "🔗 Production: https://triumphsynergyab2099.pinet.com"
-                  echo "✅ Deployment queued on Vercel"
+                  echo "🚀 Replit is the sole production deploy target"
+                  echo "📍 Replit auto-pulls main on push when the repo is connected"
+                  echo "🔗 Production: https://triumphsynergyab2099.pinet.com (Pi Browser)"
+                  echo "🔗 Origin:     https://Triumph-Synergy.replit.app"
+                  echo "✅ Deployment trigger acknowledged"
 
     # ============================================================================
     # PHASE 5: Pi App Studio Registration
@@ -324,7 +325,7 @@ jobs:
                     ],
                     "integrations": {
                       "github": "jdrains110-beep/triumph-synergy",
-                      "vercel": "triumph-synergy",
+                      "replit": "Triumph-Synergy",
                       "stellar": "mainnet"
                     }
                   }
@@ -343,7 +344,7 @@ jobs:
     verify-deployment:
         name: ✅ Verify Deployment
         runs-on: ubuntu-latest
-        needs: [deploy-vercel, register-pi-app]
+        needs: [deploy-replit, register-pi-app]
         if: always()
         steps:
             - name: Health Check

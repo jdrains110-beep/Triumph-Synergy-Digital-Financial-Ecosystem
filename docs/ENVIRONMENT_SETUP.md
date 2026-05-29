@@ -227,24 +227,25 @@ ALLOWED_ORIGINS=https://triumph-synergy.com,https://www.triumph-synergy.com
 
 3. Never commit `.env.local` to version control
 
-### Vercel Deployment
+### Replit Deployment
 
-1. Via Vercel Dashboard:
-   - Go to Project Settings → Environment Variables
+1. Via Replit Secrets pane:
+   - Open the Repl, click the lock icon (Secrets)
    - Add each variable individually
-   - Set scope (Production, Preview, Development)
+   - Replit injects them into the process environment on every run
 
-2. Via Vercel CLI:
+2. Via Replit CLI (`replit` CLI or REST API):
    ```bash
-   vercel env add VARIABLE_NAME production
+   # store a secret
+   replit secrets set VARIABLE_NAME "value"
    ```
 
 3. Via API:
    ```bash
-   curl -X POST "https://api.vercel.com/v9/projects/$PROJECT_ID/env" \
-     -H "Authorization: Bearer $VERCEL_TOKEN" \
+   curl -X POST "https://replit.com/api/v0/repls/$REPL_ID/secrets" \
+     -H "Authorization: Bearer $REPLIT_TOKEN" \
      -H "Content-Type: application/json" \
-     -d '{"key":"VARIABLE_NAME","value":"value","type":"encrypted","target":["production"]}'
+     -d '{"key":"VARIABLE_NAME","value":"value"}'
    ```
 
 ### Docker Compose

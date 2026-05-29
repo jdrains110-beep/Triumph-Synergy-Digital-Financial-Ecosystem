@@ -148,15 +148,17 @@ pnpm start
 
 ## Deployment Options
 
-### Vercel (Recommended)
+### Replit (Recommended)
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
+# Pull the repo into a Replit project, then in the Repl shell:
+yarn install --frozen-lockfile
+yarn build
+yarn start
 ```
+
+Replit auto-pulls `main` when the repo is connected; set production secrets
+under the Repl's Secrets pane.
 
 ### Docker
 

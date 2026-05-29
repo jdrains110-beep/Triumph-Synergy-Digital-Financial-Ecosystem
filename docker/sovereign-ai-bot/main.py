@@ -673,8 +673,39 @@ async def heal_service(client: httpx.AsyncClient, name: str, reason: str) -> dic
                 "triumph-redis-exporter":       "triumph-observability-stack",
             }
             actual_container = _CONTAINER_MAP.get(name, container_name)
+            # Sub-process services that share a supervisord-managed parent —
+            # restart the specific program instead of the whole container so
+            # we don't cascade-fail the parent's other healthy children.
+            _SUPERVISOR_PROGRAMS = {
+                "triumph-grafana":              ("triumph-observability-stack", "grafana"),
+                "triumph-postgres-exporter":    ("triumph-observability-stack", "postgres-exporter"),
+                "triumph-redis-exporter":       ("triumph-observability-stack", "redis-exporter"),
+                "triumph-cloud-memory":         ("triumph-observability-stack", "cloud-memory"),
+            }
             # Never restart SAIB's own container (apex-services)
-            if actual_container != "triumph-apex-services":
+            if name in _SUPERVISOR_PROGRAMS:
+                parent, program = _SUPERVISOR_PROGRAMS[name]
+                try:
+                    container = _docker_client.containers.get(parent)
+                    exec_res = container.exec_run(
+                        ["supervisorctl", "restart", program],
+                        demux=False,
+                    )
+                    log.warning("[SAIB-AUTHORITY] supervisorctl restart %s in %s (exit=%s)",
+                                program, parent, exec_res.exit_code)
+                    heal_record["supervisor_restart"] = True
+                    heal_record["container"] = parent
+                    heal_record["program"] = program
+                    # Grafana/exporters need ~15s warm-up
+                    await asyncio.sleep(15.0)
+                    ok, latency = await probe_service(client, name, url)
+                    heal_record["healed"] = ok
+                    heal_record["latency_ms"] = latency
+                except Exception as _se:
+                    log.error("[SAIB-AUTHORITY] supervisorctl restart failed for %s/%s: %s",
+                              parent, program, _se)
+                    heal_record["supervisor_restart_error"] = str(_se)
+            elif actual_container != "triumph-apex-services":
                 try:
                     container = _docker_client.containers.get(actual_container)
                     container.restart(timeout=10)
@@ -860,7 +891,7 @@ async def pulse_loop():
 
 
 # ── External Probes + Peer Federation (mainnet-only ecosystem reach) ──────────
-# These give SAIB awareness beyond local Docker: Vercel, PiNet, Pi mainnet,
+# These give SAIB awareness beyond local Docker: Replit, PiNet, Pi mainnet,
 # Stellar Protocol 24 horizon, plus other SAIB instances (e.g. two Triumph
 # Synergy Docker Desktop platforms + the central/supernode SAIB).
 build_external_targets: Any = None

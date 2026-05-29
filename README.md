@@ -41,7 +41,7 @@
 [![SCHA](https://img.shields.io/badge/shands.pi%20%7C%20ufhealth.pi-66%20LOOPHOLES%20%7C%205%20AUTHORITIES-8B5CF6?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
 [![Sovereign Mesh Network](https://img.shields.io/badge/Sovereign%20Mesh-WireGuard%20%7C%20ChaCha20--Poly1305%20%7C%205--Layer%20Encryption-00D4AA?style=flat-square)](#-whats-new--may-12-2026-sovereign-mesh-network)
 
-[**Live Demo**](https://triumphsynergyab2099.pinet.com) • [**Pi Browser**](https://triumphsynergyab2099.pinet.com) • [**Documentation**](https://github.com/jdrains110-beep/triumph-synergy/wiki)
+[**Pi Browser**](https://triumphsynergyab2099.pinet.com) • [**Replit Staging**](https://Triumph-Synergy.replit.app) • [**Documentation**](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#readme)
 
 </div>
 
@@ -1148,7 +1148,7 @@ The entire ecosystem is wrapped in a defense-in-depth envelope enforced as code,
 - **Tamper-evident audit hash chain** — SHA-256 chain over all security events, append-only DB trigger, end-to-end verifiable ([`lib/security/audit-chain.ts`](lib/security/audit-chain.ts))
 - **Anomaly monitor** — rolling-window thresholds → `ALERT_WEBHOOK_URL` POST on auth-burst, ratelimit-storm, replay-block, amount-mismatch, CSP-violation flood ([`lib/security/anomaly-monitor.ts`](lib/security/anomaly-monitor.ts))
 - **Supabase RLS** — per-user row access on `profiles`, `payments`, `audit_events`, `idempotency_cache`; service-role-only writes on audit + idempotency ([`lib/db/migrations/0001_apex_audit_and_rls.sql`](lib/db/migrations/0001_apex_audit_and_rls.sql))
-- **Sovereign key custody** — `scripts/rotate-secrets.sh` generates 256-bit entropy for `PQ_RECEIPT_SEED`, Stellar seed, NextAuth secret, internal HMAC; optional `--push vercel`
+- **Sovereign key custody** — `scripts/rotate-secrets.sh` generates 256-bit entropy for `PQ_RECEIPT_SEED`, Stellar seed, NextAuth secret, internal HMAC; optional `--push replit`
 - **CSP violation sink** — browser reports auto-appended to audit chain (`/api/security/csp-report`)
 - **Boot wiring** — [`lib/security/boot.ts`](lib/security/boot.ts) wires audit chain to Supabase service-role client on every server process
 - **Supernode join auth** — `SUPERNODE_JOIN_SECRET` Bearer token gates `/supernode/join`; prevents unauthenticated escalation to APEX-QUANTUM-NODE ([`docker/central-node/bootstrap.ts`](docker/central-node/bootstrap.ts))
@@ -4134,7 +4134,7 @@ Official PiNetwork/PiRC integration for enhanced Pi ecosystem connectivity.
 | Cache | Redis |
 | Blockchain | Stellar SDK + Pi Network |
 | Security | Quantum-Resistant Encryption |
-| Hosting | Vercel + Docker |
+| Hosting | Replit + Docker |
 
 ---
 
@@ -4310,16 +4310,16 @@ SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/
 
 | Network | URL |
 |---------|-----|
-| **Mainnet (Vercel)** | https://triumphsynergyab2099.pinet.com |
-| **Testnet (Vercel)** | https://Triumph-Synergy.replit.app |
+| **Mainnet (Pi Network)** | https://triumphsynergyab2099.pinet.com |
+| **Testnet (Replit Staging)** | https://Triumph-Synergy.replit.app |
 | **Pi Browser Mainnet** | https://triumphsynergyab2099.pinet.com |
 | **Pi Browser Testnet** | https://triumphsynergyab2099.pinet.com |
 
-### Vercel Deployment
+### Replit Deployment
 
-1. **Connect Repository**: Import from GitHub
-2. **Configure Environment**: Add Pi Network secrets
-3. **Deploy**: Push to `main` branch
+1. **Connect Repository**: Import from GitHub into Replit
+2. **Configure Environment**: Add Pi Network secrets (`PI_NETWORK_MAINNET_VALIDATION_KEY`, `PI_NETWORK_TESTNET_VALIDATION_KEY`, `PI_API_KEY`, etc.)
+3. **Deploy**: Push to `main` branch; Replit auto-builds and serves at https://Triumph-Synergy.replit.app
 
 ### GitHub Actions CI/CD
 - ✅ Pi SDK validation

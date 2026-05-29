@@ -5,11 +5,11 @@
 #          PQ_RECEIPT_SEED, STELLAR_SIGNING_SEED, NEXTAUTH_SECRET
 #
 # Generates fresh entropy locally, prints to stdout AND writes to
-# .env.rotation.<timestamp> for atomic Vercel sync.
+# .env.rotation.<timestamp> for atomic Replit Secrets sync.
 #
 # Usage:
 #   ./scripts/rotate-secrets.sh                # generate
-#   ./scripts/rotate-secrets.sh --push vercel  # generate + push to Vercel envs
+#   ./scripts/rotate-secrets.sh --push replit  # generate + push to Replit Secrets
 # ─────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -43,15 +43,24 @@ echo "  - SUPABASE_SERVICE_ROLE_KEY (Supabase dashboard → Settings → API)"
 echo "  - DATABASE_URL password"
 echo
 
-if [[ "${1:-}" == "--push" && "${2:-}" == "vercel" ]]; then
-  if ! command -v vercel >/dev/null 2>&1; then
-    echo "❌ vercel CLI not installed (npm i -g vercel)"
+if [[ "${1:-}" == "--push" && "${2:-}" == "replit" ]]; then
+  if [[ -z "${REPLIT_TOKEN:-}" || -z "${REPL_ID:-}" ]]; then
+    echo "❌ REPLIT_TOKEN and REPL_ID env vars must be set to push secrets"
+    echo "   Generate a token at https://replit.com/account#api and find REPL_ID in repl URL"
+    exit 1
+  fi
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "❌ curl not installed"
     exit 1
   fi
   while IFS='=' read -r k v; do
     [[ -z "$k" || "$k" =~ ^# ]] && continue
-    echo "→ pushing $k to Vercel (production)"
-    printf '%s' "$v" | vercel env add "$k" production --force >/dev/null
+    echo "→ pushing $k to Replit (production)"
+    curl -sS -X POST "https://replit.com/api/v0/repls/${REPL_ID}/secrets" \
+      -H "Authorization: Bearer ${REPLIT_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "$(printf '{"key":"%s","value":%s}' "$k" "$(printf '%s' "$v" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')")" \
+      >/dev/null
   done < "${OUT}"
-  echo "✅ Vercel env updated. Trigger a redeploy: vercel --prod"
+  echo "✅ Replit Secrets updated. Replit will rebuild on next push to main."
 fi

@@ -40,7 +40,7 @@ type PiIntegrationStatus = {
 
   // Integration Status
   integrations: {
-    vercel: boolean;
+    replit: boolean;
     github: boolean;
     stellar: boolean;
     supabase: boolean;
@@ -102,7 +102,7 @@ export async function GET(): Promise<NextResponse<PiIntegrationStatus>> {
     },
 
     integrations: {
-      vercel: isProduction || !!process.env.VERCEL,
+      replit: isProduction || !!process.env.REPL_ID || !!process.env.REPLIT_DEPLOYMENT,
       github: true, // Always connected via CI/CD
       stellar: !!process.env.STELLAR_HORIZON_URL,
       supabase: !!process.env.SUPABASE_URL,

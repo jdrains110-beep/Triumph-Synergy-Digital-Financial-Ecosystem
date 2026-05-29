@@ -35,14 +35,14 @@ Pi Network typically requires ONE of these methods:
    <meta name="pi-domain-verification" content="YOUR_TOKEN_HERE" />
    ```
 2. Add this to your app/layout.tsx in the `<head>` section
-3. Deploy to Vercel
+3. Deploy to Replit (push to `main` — Replit auto-pulls)
 4. Return to Pi Portal and click "Verify"
 
 #### Option B: Verification File
 1. Pi Portal will give you a verification token
 2. Create file: `public/.well-known/pi-domain-verification.txt`
 3. Add the token to this file
-4. Deploy to Vercel
+4. Deploy to Replit (push to `main`)
 5. Return to Pi Portal and click "Verify"
 
 #### Option C: DNS Record
@@ -55,19 +55,19 @@ Pi Network typically requires ONE of these methods:
 After domain verification, ensure your App ID matches:
 
 ```bash
-# Add to Vercel environment variables
+# Add to Replit Secrets pane
 NEXT_PUBLIC_PI_APP_ID=your-verified-app-id-here
 PI_APP_ID=your-verified-app-id-here
 PI_API_KEY=your-api-key-here
 PI_DOMAIN_VERIFICATION_TOKEN=your-verification-token
 ```
 
-Update on Vercel:
+Update on Replit (Secrets pane or CLI):
 ```bash
-vercel env add NEXT_PUBLIC_PI_APP_ID
-vercel env add PI_APP_ID
-vercel env add PI_API_KEY
-vercel env add PI_DOMAIN_VERIFICATION_TOKEN
+replit secrets set NEXT_PUBLIC_PI_APP_ID "..."
+replit secrets set PI_APP_ID "..."
+replit secrets set PI_API_KEY "..."
+replit secrets set PI_DOMAIN_VERIFICATION_TOKEN "..."
 ```
 
 ### 5. Verify Both Environments
@@ -108,15 +108,15 @@ Once you get your verification token from Pi Portal:
 2. **app/layout.tsx** (if using meta tag method)
    - Add the meta tag to `<head>`
 
-3. **Environment Variables on Vercel**
+3. **Environment Variables on Replit**
    - Ensure all Pi-related variables are set correctly
 
 ### 9. Deploy & Verify
 
 ```bash
 # Build and deploy
-pnpm build
-vercel --prod
+yarn build
+git push origin main   # Replit pulls automatically
 
 # Test the verification endpoint
 curl https://triumphsynergyab2099.pinet.com/.well-known/pi-domain-verification.txt
