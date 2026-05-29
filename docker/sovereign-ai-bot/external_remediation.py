@@ -29,8 +29,10 @@ GITHUB_REPO = os.getenv(
     "GITHUB_REPO",
     "jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem",
 )
-REMEDIATION_COOLDOWN_S = float(os.getenv("SAIB_REMEDIATION_COOLDOWN_S", "900"))  # 15 min
+REMEDIATION_COOLDOWN_S = float(os.getenv("SAIB_REMEDIATION_COOLDOWN_S", "86400"))  # 24h
+DEDUP_LOOKBACK_S = float(os.getenv("SAIB_REMEDIATION_DEDUP_LOOKBACK_S", "604800"))  # 7d
 ISSUE_LABEL = "saib-auto"
+COOLDOWN_STATE_PATH = os.getenv("SAIB_REMEDIATION_STATE_PATH", "/data/saib/remediation_cooldown.json")
 
 
 @dataclass
@@ -45,6 +47,29 @@ class RemediationOutcome:
 class _RateLimiter:
     def __init__(self) -> None:
         self._last: dict[tuple[str, str], float] = {}
+        self._load()
+
+    def _load(self) -> None:
+        try:
+            import json
+            with open(COOLDOWN_STATE_PATH, "r", encoding="utf-8") as fh:
+                raw = json.load(fh)
+            for k, v in raw.items():
+                target, _, action = k.partition("|")
+                if target and action:
+                    self._last[(target, action)] = float(v)
+        except (OSError, ValueError):
+            pass
+
+    def _save(self) -> None:
+        try:
+            import json
+            os.makedirs(os.path.dirname(COOLDOWN_STATE_PATH), exist_ok=True)
+            data = {f"{t}|{a}": ts for (t, a), ts in self._last.items()}
+            with open(COOLDOWN_STATE_PATH, "w", encoding="utf-8") as fh:
+                json.dump(data, fh)
+        except OSError as exc:
+            log.debug("[SAIB-REMEDIATION] cooldown save failed: %s", exc)
 
     def allow(self, target: str, action: str) -> bool:
         key = (target, action)
@@ -53,6 +78,7 @@ class _RateLimiter:
         if now - last < REMEDIATION_COOLDOWN_S:
             return False
         self._last[key] = now
+        self._save()
         return True
 
 
@@ -93,24 +119,34 @@ async def _github_open_issue(client, target_name: str, reason: str) -> Remediati
         "Accept": "application/vnd.github+json",
     }
 
-    # DEDUP: bail out if an open issue with the same title already exists.
-    # Survives SAIB restart unlike the in-memory cooldown.
+    # DEDUP: bail out if an issue with the same title was opened (open OR
+    # recently closed) so SAIB doesn't refile right after an operator closes.
     try:
-        owner_repo = GITHUB_REPO
-        search_q = f'repo:{owner_repo} is:issue is:open in:title "{title}"'
-        search_url = f"https://api.github.com/search/issues?q={search_q}"
-        sresp = await client.get(search_url, headers=headers, timeout=15.0)
-        if sresp.status_code == 200:
-            items = sresp.json().get("items", [])
-            for it in items:
-                if it.get("title") == title:
+        list_url = (
+            f"https://api.github.com/repos/{GITHUB_REPO}/issues"
+            f"?state=all&labels={ISSUE_LABEL}&per_page=100&sort=created&direction=desc"
+        )
+        lresp = await client.get(list_url, headers=headers, timeout=15.0)
+        if lresp.status_code == 200:
+            cutoff = time.time() - DEDUP_LOOKBACK_S
+            for it in lresp.json():
+                if it.get("title") != title:
+                    continue
+                # parse created_at
+                created = it.get("created_at", "")
+                try:
+                    from datetime import datetime, timezone
+                    ts = datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+                except ValueError:
+                    ts = time.time()
+                if it.get("state") == "open" or ts >= cutoff:
                     return RemediationOutcome(
                         target=target_name, action="github-issue", ok=True,
-                        detail=f"existing open issue #{it.get('number')} (dedup)",
+                        detail=f"dedup: matching issue #{it.get('number')} state={it.get('state')}",
                         skipped=True,
                     )
     except Exception as exc:  # noqa: BLE001
-        log.warning("[SAIB-REMEDIATION] dedup search failed for %s: %s", target_name, exc)
+        log.warning("[SAIB-REMEDIATION] dedup list failed for %s: %s", target_name, exc)
 
     body = (
         "SAIB external probe flagged a degraded mainnet platform.\n\n"
