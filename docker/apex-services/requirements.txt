@@ -13,3 +13,6 @@ docker>=7.1.0
 PyGithub>=2.6.1
 asyncpg>=0.30.0
 cryptography>=46.0.7
+# SAIB external-learning ingestion + RAG
+beautifulsoup4>=4.12.3
+lxml>=5.3.0
