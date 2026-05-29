@@ -90,6 +90,25 @@ try:
 except ImportError:
     _PG_SDK_AVAILABLE = False
 
+# ── External-learning ingestion framework (Stack Overflow, Reddit, Web, Discord, X) ──
+_INGEST_SOURCES: list[Any] = []
+_run_source_loop: Any = None
+_rag_store: Any = None
+try:
+    from ingestion import REGISTRY as _INGEST_REGISTRY
+    from ingestion.base import run_source_loop as _run_source_loop
+    _INGEST_SOURCES = [cls() for cls in _INGEST_REGISTRY]
+    _INGEST_AVAILABLE = True
+except Exception as _ie:
+    _INGEST_AVAILABLE = False
+    logging.getLogger("saib").warning("[SAIB-INGEST] framework unavailable: %s", _ie)
+
+try:
+    from rag import store as _rag_store  # type: ignore
+    _RAG_AVAILABLE = True
+except Exception:
+    _RAG_AVAILABLE = False
+
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -1809,6 +1828,15 @@ async def startup():
     # ── External + Federation loops (mainnet ecosystem-wide reach) ───────────
     asyncio.create_task(external_probe_loop())
     asyncio.create_task(peer_federation_loop())
+    # ── External-learning ingestion loops (Stack Overflow, Reddit, Web, Discord, X) ──
+    try:
+        for _src in _INGEST_SOURCES:
+            asyncio.create_task(_run_source_loop(_src))
+        log.info("[SAIB-INGEST] launched %d sources (%d active)",
+                 len(_INGEST_SOURCES),
+                 sum(1 for s in _INGEST_SOURCES if s.enabled))
+    except Exception as _e:
+        log.error("[SAIB-INGEST] launch failed: %s", _e)
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -3033,3 +3061,68 @@ async def list_scan_patterns():
         ],
         "quantum_sig": quantum_sign("scan-patterns"),
     }
+
+
+# ── External-learning ingestion + RAG endpoints ───────────────────────────────
+
+@app.get("/ingest/sources")
+async def ingest_sources():
+    """List every external-learning source SAIB knows about + its status."""
+    return {
+        "saib_version": SAIB_VERSION,
+        "framework_available": _INGEST_AVAILABLE,
+        "rag_available": _RAG_AVAILABLE,
+        "sources": [s.status() for s in _INGEST_SOURCES],
+        "quantum_sig": quantum_sign("ingest-sources"),
+    }
+
+
+@app.post("/ingest/poll/{source_name}")
+async def ingest_poll(source_name: str):
+    """Trigger an immediate poll of one source. Useful for ops + testing."""
+    src = next((s for s in _INGEST_SOURCES if s.name == source_name), None)
+    if src is None:
+        raise HTTPException(status_code=404, detail=f"unknown source: {source_name}")
+    if not src.enabled:
+        return {"success": False, "reason": "source dormant (no credentials / disabled)",
+                "status": src.status()}
+    try:
+        from ingestion.base import push_to_brain, push_to_rag  # type: ignore
+        items = await src.poll()
+        items = src.dedupe(items)
+        src.last_poll_at = time.time()
+        src.last_count = len(items)
+        src.total_ingested += len(items)
+        brain_n = await push_to_brain(items)
+        rag_n = await push_to_rag(items)
+        return {"success": True, "ingested": len(items), "fed_to_brain": brain_n,
+                "indexed_in_rag": rag_n, "status": src.status()}
+    except Exception as e:
+        src.last_error = str(e)[:200]
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/rag/search")
+async def rag_search(q: str, k: int = 5):
+    """Retrieve top-k similar chunks from SAIB's accumulated external knowledge."""
+    if not _RAG_AVAILABLE or _rag_store is None:
+        return {"success": False, "reason": "RAG store unavailable", "results": []}
+    if not q:
+        raise HTTPException(status_code=400, detail="query parameter `q` is required")
+    results = await _rag_store.similarity_search(q, top_k=max(1, min(k, 25)))
+    return {
+        "success": True,
+        "query": q,
+        "top_k": k,
+        "results": results,
+        "quantum_sig": quantum_sign(f"rag:{q[:40]}"),
+    }
+
+
+@app.get("/rag/stats")
+async def rag_stats():
+    """Backend, embedding model, total chunks, and per-source counts."""
+    if not _RAG_AVAILABLE or _rag_store is None:
+        return {"success": False, "reason": "RAG store unavailable"}
+    s = await _rag_store.stats()
+    return {"success": True, "saib_version": SAIB_VERSION, **s}
