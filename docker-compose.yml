@@ -714,6 +714,18 @@ services:
       SAIB_GITHUB_EXTRA_REPOS: "${SAIB_GITHUB_EXTRA_REPOS:-}"
       SAIB_GITHUB_OWNERS: "${SAIB_GITHUB_OWNERS:-jdrains110-beep}"
       SAIB_GITHUB_EVENTS_INTERVAL_S: "${SAIB_GITHUB_EVENTS_INTERVAL_S:-300}"
+      # ── Nano Sovereign Self-Awareness (walk /workspace into pgvector RAG) ──
+      # SAIB reads the entire repo (frontend → backend) so it can answer
+      # semantic questions about its own implementation via /saib/repo/query.
+      SAIB_SELF_REPO_ENABLED: "${SAIB_SELF_REPO_ENABLED:-true}"
+      SAIB_SELF_REPO_ROOT: "${SAIB_SELF_REPO_ROOT:-/workspace}"
+      SAIB_SELF_REPO_INTERVAL_S: "${SAIB_SELF_REPO_INTERVAL_S:-21600}"
+      SAIB_SELF_REPO_MAX_FILES: "${SAIB_SELF_REPO_MAX_FILES:-3000}"
+      SAIB_SELF_REPO_MAX_FILE_BYTES: "${SAIB_SELF_REPO_MAX_FILE_BYTES:-120000}"
+      # Execution is OFF by default. Opt in with a JSON allowlist:
+      #   SAIB_REPO_EXEC_ALLOWLIST='{"trisyn-status":["npm","run","trisyn:status"]}'
+      SAIB_REPO_EXEC_ALLOWLIST: "${SAIB_REPO_EXEC_ALLOWLIST:-}"
+      SAIB_REPO_EXEC_TIMEOUT_S: "${SAIB_REPO_EXEC_TIMEOUT_S:-60}"
       # ── SAIB RAG (pgvector + embeddings) ──────────────────────────────
       SAIB_RAG_ENABLED: "${SAIB_RAG_ENABLED:-true}"
       SAIB_RAG_DSN: "${SAIB_RAG_DSN:-postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}}"
