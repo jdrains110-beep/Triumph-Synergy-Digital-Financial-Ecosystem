@@ -350,6 +350,8 @@ services:
         condition: service_started
       quantum-intel-fortress:
         condition: service_started
+      sovereign-military-bridge:
+        condition: service_started
     networks:
       - triumph-net
     healthcheck:
@@ -1210,6 +1212,12 @@ services:
       ARPANET_MULTIPATH_ENABLED: "true"
       SMB_HEAL_INTERVAL_S: "60"
       SMB_PROBE_TIMEOUT_S: "5"
+      # Federation mesh — comma-separated peer SMB base URLs. Override via .env:
+      #   SMB_BACKBONE_PEERS=https://smb.real-partner-a.tld,https://smb.real-partner-b.tld
+      SMB_BACKBONE_PEERS: "${SMB_BACKBONE_PEERS:-https://smb.partnerA.example,https://smb.partnerB.example}"
+      SMB_PEER_TRUST_ANCHORS: "/run/secrets/peer_pubkeys"
+      # Public bridge bearer token — required by /federation/* and /sovereign/route
+      # Loaded from /run/secrets/public_bridge_token (file) by default.
       PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
       GOVERNANCE_URL: http://triumph-central-node:11626
       SETTLEMENT_URL: http://triumph-settlement-core:8080
@@ -1220,6 +1228,9 @@ services:
       NEXUS_URL: http://triumph-sovereign-commerce-authority:8160
     expose:
       - "8199"
+    secrets:
+      - peer_pubkeys
+      - public_bridge_token
     networks:
       triumph-net:
         aliases:
@@ -1373,3 +1384,7 @@ networks:
 secrets:
   github_token:
     file: ./secrets/github_token.txt
+  peer_pubkeys:
+    file: ./secrets/peer_pubkeys.json
+  public_bridge_token:
+    file: ./secrets/public_bridge_token.txt
