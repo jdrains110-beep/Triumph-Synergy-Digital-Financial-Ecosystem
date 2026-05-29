@@ -1,5 +1,5 @@
 # Docker Compose CPU Affinity Override
-# Quantum CPU Management — Pin services to specific cores for maximum efficiency
+# CPU Resource Management — Pin services to specific cores for maximum efficiency
 # 
 # Architecture:
 #   Core 0-1: Redis + Pi bridge (I/O bound, low contention)

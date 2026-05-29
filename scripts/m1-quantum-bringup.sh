@@ -137,7 +137,7 @@ compose_base=(
   --env-file "$ENV_FILE"
   -f docker-compose.yml
   -f docker-compose.override.yml
-  -f docker-compose.quantum-cpu.yml
+  -f docker-compose.cpu-tuning.yml
 )
 
 if [[ "$WITH_PI_NODE" == "true" ]]; then

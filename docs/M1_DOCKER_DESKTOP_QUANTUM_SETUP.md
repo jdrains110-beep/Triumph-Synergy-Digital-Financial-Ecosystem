@@ -91,7 +91,7 @@ What this script enforces:
 - Uses all three compose layers:
   - docker-compose.yml
   - docker-compose.override.yml
-  - docker-compose.quantum-cpu.yml
+  - docker-compose.cpu-tuning.yml
 - Starts services in phases, not all-at-once
 - Waits each service for running plus health (or running when no healthcheck exists)
 - Optionally fails on startup warnings/errors in logs
@@ -102,7 +102,7 @@ What this script enforces:
 ## 6) Post-Startup Validation
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.quantum-cpu.yml ps
+docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.cpu-tuning.yml ps
 docker stats --no-stream
 curl -fsS http://localhost:3000/api/health
 ```
