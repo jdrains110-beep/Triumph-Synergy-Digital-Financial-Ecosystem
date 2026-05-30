@@ -10,6 +10,16 @@ METRICS_PORT = int(os.getenv("METRICS_PORT", "9911"))
 
 
 class Handler(BaseHTTPRequestHandler):
+    def handle_error(self, request, client_address):
+        # Silently discard BrokenPipeError — happens when Prometheus or a
+        # health-check client disconnects before the response completes.
+        # All other errors fall through to the default stderr handler.
+        import sys
+        exc_type = sys.exc_info()[0]
+        if exc_type is BrokenPipeError:
+            return
+        super().handle_error(request, client_address)
+
     def do_GET(self):
         if self.path == "/health":
             body = b'{"status":"healthy","service":"horizon-guardian"}'

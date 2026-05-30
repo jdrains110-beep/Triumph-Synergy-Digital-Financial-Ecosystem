@@ -917,9 +917,9 @@ services:
     container_name: triumph-guardian-watchdog-nexus
     <<: *common
     restart: always
-    mem_limit: 128m
-    mem_reservation: 112m
-    cpus: 0.35  # quantum-managed: T6 guardian-watchdog-nexus — bumped: live 85% mem / 26% CPU
+    mem_limit: 192m
+    mem_reservation: 144m
+    cpus: 0.35  # quantum-managed: T6 guardian-watchdog-nexus — mem raised 128m→192m (was at 99.9%)
     environment:
       # ── ecosystem-guardian env vars ─────────────────────────────────────
       GOVERNOR_INTERVAL_S: "30"
