@@ -10,3 +10,5 @@ numpy>=1.26.4,<3
 websockets>=14.1
 networkx>=3.3
 scipy>=1.13.0
+# v3 connector layer
+aiofiles>=23.2.1

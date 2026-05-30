@@ -1,6 +1,7 @@
 """
-Sovereign Nano SAIB — Apex Warp Mesh v2.0
-13-engine sovereign defense, intelligence, and execution platform.
+Sovereign Nano SAIB — Apex Sovereign Connector Mesh v3.0
+19-engine + 6-connector sovereign defense, intelligence, execution,
+and autonomous action platform.
 
 Core engines (v1):
   Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge
@@ -42,6 +43,29 @@ Endpoints — all auth-gated except /health, /ws/threat-graph, /mesh/gossip:
   GET  /enforcer/audit
   GET  /enforcer/stats
   WS   /ws/threat-graph          — Unreal Engine live feed (public)
+  --- Connectors v3 ---
+  GET  /connectors/status        — all connector health
+  GET  /connectors/pi/stats      — Pi Network connector
+  POST /connectors/pi/payment/approve
+  POST /connectors/pi/payment/complete
+  POST /connectors/pi/payment/cancel
+  GET  /connectors/pi/payment/{payment_id}
+  POST /connectors/pi/wallet/register
+  GET  /connectors/db/query      — Triumph DB read-only query
+  GET  /connectors/knowledge/facts
+  GET  /connectors/knowledge/threats
+  GET  /connectors/founder/status
+  GET  /connectors/founder/events
+  POST /connectors/founder/ack/{event_id}
+  GET  /connectors/autonomous/decisions
+  GET  /connectors/autonomous/pending
+  POST /connectors/autonomous/approve/{decision_id}
+  POST /connectors/autonomous/reject/{decision_id}
+  POST /connectors/actions/discord
+  POST /connectors/actions/slack
+  POST /connectors/actions/webhook
+  POST /connectors/actions/enforce
+  GET  /connectors/actions/audit
 """
 from __future__ import annotations
 
@@ -73,6 +97,9 @@ from .mesh         import SaibMesh
 from .guardian     import FounderGuardian, ThreatIndicator, ProtectionCategory
 from .enforcer     import SovereignEnforcer
 
+# ── v3 connector layer ────────────────────────────────────────────────────────
+from .connectors.orchestrator import orchestrator as conn_orchestrator
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -81,7 +108,7 @@ if not BRIDGE_TOKEN and os.path.exists(_secret_path):
     BRIDGE_TOKEN = open(_secret_path).read().strip()
 
 START_TIME = time.time()
-VERSION    = "2.0.0"
+VERSION    = "3.0.0"
 
 # ──────────────────────────────────────────────────────────────── engines ──
 # v1
@@ -146,17 +173,27 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(ue_bridge.broadcast_loop())
     mesh.start()
     brainstorm.start_background()
+    # ── boot v3 connector layer ──
+    conn_orchestrator.boot(
+        intel      = intel,
+        guardian   = guardian,
+        enforcer   = enforcer,
+        brainstorm = brainstorm,
+        warp       = warp,
+        mesh       = mesh,
+    )
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
-        "Engines v2: Quantum | Intelligence | WarpSpeed | Brainstorm | Mesh | Guardian | Enforcer"
+        "Engines v2: Quantum | Intelligence | WarpSpeed | Brainstorm | Mesh | Guardian | Enforcer\n"
+        "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions"
     )
     yield
 
 
 # ─────────────────────────────────────────────────────────────── app ──
 app = FastAPI(
-    title="Sovereign Nano SAIB — Apex Warp Mesh",
+    title="Sovereign Nano SAIB — Apex Sovereign Connector Mesh",
     version=VERSION,
     lifespan=lifespan,
 )
@@ -231,6 +268,54 @@ class EnforcerEvalRequest(BaseModel):
     intel_class:   str = ""
 
 
+# ── Connector request models ──────────────────────────────────────────────────
+
+class PiPaymentApproveRequest(BaseModel):
+    payment_id: str
+
+class PiPaymentCompleteRequest(BaseModel):
+    payment_id: str
+    txid:       str
+
+class PiWalletRegisterRequest(BaseModel):
+    address: str
+
+class DBQueryRequest(BaseModel):
+    table:   str
+    select:  str  = "*"
+    filters: dict = {}
+    limit:   int  = 50
+
+class KnowledgeFactsRequest(BaseModel):
+    domain:  Optional[str] = None
+    min_sev: float = 0.0
+    limit:   int   = 50
+
+class DiscordAlertRequest(BaseModel):
+    title:   str
+    message: str
+    level:   str = "ALERT"
+
+class SlackAlertRequest(BaseModel):
+    title:   str
+    message: str
+    level:   str = "ALERT"
+
+class WebhookFireRequest(BaseModel):
+    url:     str
+    payload: dict
+    headers: dict = {}
+    method:  str  = "POST"
+
+class EnforceEntityRequest(BaseModel):
+    entity_id: str
+    action:    str = "freeze_wallet"
+    reason:    str = ""
+
+class RejectDecisionRequest(BaseModel):
+    reason: str = ""
+
+
 # ═══════════════════════════════════════════════════ v1 endpoints (unchanged) ══
 
 @app.get("/health")
@@ -257,6 +342,7 @@ def health():
             "guardian":     guardian.summary(),
             "enforcer":     enforcer.stats(),
         },
+        "connectors_v3": conn_orchestrator.status() if conn_orchestrator._is_running else "booting",
     }
 
 
@@ -565,4 +651,229 @@ def enforcer_stats():
 @app.websocket("/ws/threat-graph")
 async def ws_threat_graph(ws: WebSocket):
     await ue_bridge.handle(ws)
+
+
+# ══════════════════════════════════════════════ CONNECTORS v3 ══════════════════
+
+# ── Connector status ──────────────────────────────────────────────────────────
+
+@app.get("/connectors/status", dependencies=[Depends(_require_token)])
+def connectors_status():
+    return conn_orchestrator.status()
+
+
+# ── Pi Network ────────────────────────────────────────────────────────────────
+
+@app.get("/connectors/pi/stats", dependencies=[Depends(_require_token)])
+def pi_stats():
+    return conn_orchestrator.pi.stats() if conn_orchestrator.pi else {"error": "not started"}
+
+
+@app.post("/connectors/pi/wallet/register", dependencies=[Depends(_require_token)])
+def pi_wallet_register(req: PiWalletRegisterRequest):
+    conn_orchestrator.pi.register_wallet(req.address)
+    return {"registered": req.address}
+
+
+@app.post("/connectors/pi/payment/approve", dependencies=[Depends(_require_token)])
+async def pi_payment_approve(req: PiPaymentApproveRequest):
+    result = await conn_orchestrator.pi.approve_payment(req.payment_id)
+    return result
+
+
+@app.post("/connectors/pi/payment/complete", dependencies=[Depends(_require_token)])
+async def pi_payment_complete(req: PiPaymentCompleteRequest):
+    result = await conn_orchestrator.pi.complete_payment(req.payment_id, req.txid)
+    return result
+
+
+@app.post("/connectors/pi/payment/cancel", dependencies=[Depends(_require_token)])
+async def pi_payment_cancel(req: PiPaymentApproveRequest):
+    result = await conn_orchestrator.pi.cancel_payment(req.payment_id)
+    return result
+
+
+@app.get("/connectors/pi/payment/{payment_id}", dependencies=[Depends(_require_token)])
+async def pi_payment_get(payment_id: str):
+    result = await conn_orchestrator.pi.get_payment(payment_id)
+    return result
+
+
+# ── Triumph DB ────────────────────────────────────────────────────────────────
+
+@app.post("/connectors/db/query", dependencies=[Depends(_require_token)])
+async def db_query(req: DBQueryRequest):
+    """Read-only query into the Triumph Synergy Supabase database."""
+    rows = await conn_orchestrator.db.query(
+        table=req.table,
+        select=req.select,
+        filters=req.filters or None,
+        limit=min(req.limit, 200),
+    )
+    return {"rows": rows, "count": len(rows)}
+
+
+@app.get("/connectors/db/stats", dependencies=[Depends(_require_token)])
+def db_stats():
+    return conn_orchestrator.db.stats() if conn_orchestrator.db else {}
+
+
+# ── Knowledge Feed ────────────────────────────────────────────────────────────
+
+@app.post("/connectors/knowledge/facts", dependencies=[Depends(_require_token)])
+def knowledge_facts(req: KnowledgeFactsRequest):
+    facts = conn_orchestrator.knowledge.get_facts(
+        domain=req.domain,
+        min_sev=req.min_sev,
+        limit=min(req.limit, 200),
+    )
+    return {"facts": [f.__dict__ for f in facts], "count": len(facts)}
+
+
+@app.get("/connectors/knowledge/threats", dependencies=[Depends(_require_token)])
+def knowledge_threats(n: int = 10):
+    facts = conn_orchestrator.knowledge.top_threats(min(n, 50))
+    return {"threats": [f.__dict__ for f in facts]}
+
+
+@app.get("/connectors/knowledge/stats", dependencies=[Depends(_require_token)])
+def knowledge_stats():
+    return conn_orchestrator.knowledge.stats() if conn_orchestrator.knowledge else {}
+
+
+# ── Founder Watch ─────────────────────────────────────────────────────────────
+
+@app.get("/connectors/founder/status", dependencies=[Depends(_require_token)])
+def founder_status():
+    fw = conn_orchestrator.founder
+    if not fw:
+        return {"error": "not started"}
+    return {
+        "stats":  fw.stats(),
+        "profile": {
+            "threat_score":      fw.profile.threat_score,
+            "current_level":     fw.profile.current_level.name,
+            "wallet_balance":    fw.profile.wallet_balance,
+            "wallet_velocity":   fw.profile.wallet_velocity,
+            "active_sessions":   fw.profile.active_sessions,
+            "countries_seen":    fw.profile.countries_seen,
+            "last_seen_country": fw.profile.last_seen_country,
+        },
+    }
+
+
+@app.get("/connectors/founder/events", dependencies=[Depends(_require_token)])
+def founder_events(min_level: int = 1):
+    fw = conn_orchestrator.founder
+    if not fw:
+        return {"events": []}
+    from .connectors.founder_watch import FounderAlertLevel
+    try:
+        level = FounderAlertLevel(min_level)
+    except ValueError:
+        level = FounderAlertLevel.WATCH
+    events = fw.active_events(level)
+    return {
+        "events": [
+            {
+                "event_id":    e.event_id,
+                "category":    e.category,
+                "level":       e.level.name,
+                "title":       e.title,
+                "description": e.description,
+                "evidence":    e.evidence,
+                "ts":          e.ts,
+            }
+            for e in events
+        ],
+        "count": len(events),
+    }
+
+
+@app.post("/connectors/founder/ack/{event_id}", dependencies=[Depends(_require_token)])
+def founder_ack(event_id: str):
+    fw = conn_orchestrator.founder
+    if not fw:
+        raise HTTPException(status_code=503, detail="FounderWatch not started")
+    ok = fw.acknowledge(event_id)
+    return {"acknowledged": ok, "event_id": event_id}
+
+
+# ── Autonomous Decisions ──────────────────────────────────────────────────────
+
+@app.get("/connectors/autonomous/decisions", dependencies=[Depends(_require_token)])
+def autonomous_decisions(n: int = 50):
+    ad = conn_orchestrator.autonomous
+    return {
+        "history": ad.history(min(n, 200)) if ad else [],
+        "stats":   ad.stats() if ad else {},
+    }
+
+
+@app.get("/connectors/autonomous/pending", dependencies=[Depends(_require_token)])
+def autonomous_pending():
+    ad = conn_orchestrator.autonomous
+    return {
+        "pending": ad.pending_review() if ad else [],
+    }
+
+
+@app.post("/connectors/autonomous/approve/{decision_id}", dependencies=[Depends(_require_token)])
+def autonomous_approve(decision_id: str):
+    ad = conn_orchestrator.autonomous
+    if not ad:
+        raise HTTPException(status_code=503, detail="AutonomousDecisions not started")
+    ok = ad.approve(decision_id)
+    return {"approved": ok, "decision_id": decision_id}
+
+
+@app.post("/connectors/autonomous/reject/{decision_id}", dependencies=[Depends(_require_token)])
+def autonomous_reject(decision_id: str, req: RejectDecisionRequest):
+    ad = conn_orchestrator.autonomous
+    if not ad:
+        raise HTTPException(status_code=503, detail="AutonomousDecisions not started")
+    ok = ad.reject(decision_id, req.reason)
+    return {"rejected": ok, "decision_id": decision_id}
+
+
+# ── Outbound Actions ──────────────────────────────────────────────────────────
+
+@app.post("/connectors/actions/discord", dependencies=[Depends(_require_token)])
+async def actions_discord(req: DiscordAlertRequest):
+    result = await conn_orchestrator.actions.discord_alert(
+        title=req.title, message=req.message, level=req.level
+    )
+    return result.__dict__
+
+
+@app.post("/connectors/actions/slack", dependencies=[Depends(_require_token)])
+async def actions_slack(req: SlackAlertRequest):
+    result = await conn_orchestrator.actions.slack_alert(
+        title=req.title, message=req.message, level=req.level
+    )
+    return result.__dict__
+
+
+@app.post("/connectors/actions/webhook", dependencies=[Depends(_require_token)])
+async def actions_webhook(req: WebhookFireRequest):
+    result = await conn_orchestrator.actions.webhook_fire(
+        url=req.url, payload=req.payload, headers=req.headers, method=req.method
+    )
+    return result.__dict__
+
+
+@app.post("/connectors/actions/enforce", dependencies=[Depends(_require_token)])
+async def actions_enforce(req: EnforceEntityRequest):
+    result = await conn_orchestrator.actions.enforce_entity(
+        entity_id=req.entity_id, action=req.action, reason=req.reason
+    )
+    return result.__dict__
+
+
+@app.get("/connectors/actions/audit", dependencies=[Depends(_require_token)])
+def actions_audit(n: int = 50):
+    return {
+        "audit": conn_orchestrator.actions.audit_trail(min(n, 200)) if conn_orchestrator.actions else [],
+        "stats": conn_orchestrator.actions.stats() if conn_orchestrator.actions else {},
+    }
 
