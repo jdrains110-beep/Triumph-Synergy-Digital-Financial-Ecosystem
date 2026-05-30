@@ -12,3 +12,5 @@ networkx>=3.3
 scipy>=1.13.0
 # v3 connector layer
 aiofiles>=23.2.1
+# v4 apex engines
+aiohttp>=3.10.0
