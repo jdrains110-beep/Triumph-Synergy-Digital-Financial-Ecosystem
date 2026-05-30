@@ -1268,7 +1268,21 @@ services:
     mem_reservation: 256m
     cpus: 0.75 # quantum-managed: nano-saib v5 (sovereign apex — registry+logs+code+fix+MCP+tenants+k8s)
     environment:
-      - "8201"
+      PORT: "8201"
+      # Pi Network — mainnet billing (Pi payments + founder split)
+      PI_API_KEY: "${PI_API_KEY:-}"
+      PI_APP_ID: "${PI_APP_ID:-}"
+      SAIB_TREASURY_WALLET: "${SAIB_TREASURY_WALLET:-}"
+      SAIB_FOUNDER_WALLET: "${SAIB_FOUNDER_WALLET:-}"
+      SAIB_FOUNDER_PI_UID: "${SAIB_FOUNDER_PI_UID:-}"
+      SAIB_FOUNDER_SPLIT_PCT: "${SAIB_FOUNDER_SPLIT_PCT:-15}"
+      # Stripe — USD billing (global + regional methods)
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET:-}"
+      # SAIB public base URL (for Stripe redirect URLs)
+      SAIB_BASE_URL: "${SAIB_BASE_URL:-https://saib.triumphsynergy.io}"
+      # Grok / xAI inference
+      XAI_API_KEY: "${XAI_API_KEY:-}"
     secrets:
       - public_bridge_token
     networks:
