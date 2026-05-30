@@ -66,6 +66,15 @@ Endpoints — all auth-gated except /health, /ws/threat-graph, /mesh/gossip:
   POST /connectors/actions/webhook
   POST /connectors/actions/enforce
   GET  /connectors/actions/audit
+  --- X Social v3 ---
+  GET  /connectors/x/stats           — @jaymoney0300 monitor stats
+  GET  /connectors/x/mentions        — recent @jaymoney0300 mentions
+  GET  /connectors/x/threats         — hostile / impersonation mentions
+  GET  /connectors/x/search          — recent Triumph Synergy search hits
+  GET  /connectors/x/timeline        — @jaymoney0300 recent tweets
+  POST /connectors/x/tweet           — post tweet as @jaymoney0300
+  POST /connectors/x/reply           — reply to a tweet as @jaymoney0300
+  POST /connectors/x/quote           — quote-tweet as @jaymoney0300
 """
 from __future__ import annotations
 
@@ -186,7 +195,7 @@ async def lifespan(app: FastAPI):
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
         "Engines v2: Quantum | Intelligence | WarpSpeed | Brainstorm | Mesh | Guardian | Enforcer\n"
-        "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions"
+        "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300)"
     )
     yield
 
@@ -314,6 +323,17 @@ class EnforceEntityRequest(BaseModel):
 
 class RejectDecisionRequest(BaseModel):
     reason: str = ""
+
+class XPostTweetRequest(BaseModel):
+    text: str
+
+class XReplyRequest(BaseModel):
+    text:           str
+    reply_to_id:    str
+
+class XQuoteRequest(BaseModel):
+    text:           str
+    quote_tweet_id: str
 
 
 # ═══════════════════════════════════════════════════ v1 endpoints (unchanged) ══
@@ -908,4 +928,66 @@ def actions_audit(n: int = 50):
         "audit": conn_orchestrator.actions.audit_trail(min(n, 200)) if conn_orchestrator.actions else [],
         "stats": conn_orchestrator.actions.stats() if conn_orchestrator.actions else {},
     }
+
+
+# ── X Social (@jaymoney0300 + Triumph Synergy) ────────────────────────────────
+
+def _x() -> Any:
+    """Shorthand: returns the live X social connector or raises 503."""
+    c = conn_orchestrator.x_social
+    if not c:
+        raise HTTPException(status_code=503, detail="X social connector not started")
+    return c
+
+
+@app.get("/connectors/x/stats", dependencies=[Depends(_require_token)])
+def x_stats():
+    """Live stats: @jaymoney0300 mention counts, threat counts, poll health."""
+    return _x().stats()
+
+
+@app.get("/connectors/x/mentions", dependencies=[Depends(_require_token)])
+def x_mentions(n: int = 20):
+    """Recent @jaymoney0300 mentions with sentiment scores."""
+    return {"mentions": _x().recent_mentions(min(n, 100))}
+
+
+@app.get("/connectors/x/threats", dependencies=[Depends(_require_token)])
+def x_threats(n: int = 20):
+    """Hostile or impersonation mentions that triggered Intel / Guardian alerts."""
+    return {"threats": _x().recent_threats(min(n, 100))}
+
+
+@app.get("/connectors/x/search", dependencies=[Depends(_require_token)])
+def x_search_hits(n: int = 20):
+    """Recent tweets matching Triumph Synergy / Pi Network search terms."""
+    return {"search_hits": _x().recent_search_hits(min(n, 100))}
+
+
+@app.get("/connectors/x/timeline", dependencies=[Depends(_require_token)])
+async def x_timeline(n: int = 10):
+    """@jaymoney0300's own recent tweets."""
+    tweets = await _x().get_timeline(max_results=min(n, 20))
+    return {"tweets": tweets, "username": "jaymoney0300"}
+
+
+@app.post("/connectors/x/tweet", dependencies=[Depends(_require_token)])
+async def x_post_tweet(req: XPostTweetRequest):
+    """Post a tweet as @jaymoney0300. Requires X OAuth 1.0a credentials."""
+    result = await _x().post_tweet(req.text)
+    return result
+
+
+@app.post("/connectors/x/reply", dependencies=[Depends(_require_token)])
+async def x_reply(req: XReplyRequest):
+    """Reply to a specific tweet as @jaymoney0300."""
+    result = await _x().reply_tweet(req.text, req.reply_to_id)
+    return result
+
+
+@app.post("/connectors/x/quote", dependencies=[Depends(_require_token)])
+async def x_quote(req: XQuoteRequest):
+    """Quote-tweet as @jaymoney0300."""
+    result = await _x().quote_tweet(req.text, req.quote_tweet_id)
+    return result
 
