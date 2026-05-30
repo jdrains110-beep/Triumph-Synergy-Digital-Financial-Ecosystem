@@ -46,6 +46,13 @@ _secret_path         = "/run/secrets/public_bridge_token"
 if not PUBLIC_BRIDGE_TOKEN and os.path.exists(_secret_path):
     PUBLIC_BRIDGE_TOKEN = open(_secret_path).read().strip()
 
+# Dedicated M2M token for HSM signing, wallet ops, and task execution.
+# Must match SAIB_SERVICE_TOKEN in the Next.js app.  Never reuse PUBLIC_BRIDGE_TOKEN.
+SAIB_SERVICE_TOKEN   = os.getenv("SAIB_SERVICE_TOKEN", "")
+_svc_secret_path     = "/run/secrets/saib_service_token"
+if not SAIB_SERVICE_TOKEN and os.path.exists(_svc_secret_path):
+    SAIB_SERVICE_TOKEN = open(_svc_secret_path).read().strip()
+
 TRIUMPH_INTERNAL_URL = os.getenv("TRIUMPH_INTERNAL_URL", "http://triumph-app:3000")
 TRIUMPH_ADMIN_KEY    = os.getenv("TRIUMPH_ADMIN_KEY", "")
 
@@ -366,6 +373,113 @@ class OutboundActionsConnector:
             "source":    "saib_enforcer",
             "ts":        time.time(),
         })
+
+    # ── HSM / wallet M2M helpers (use SAIB_SERVICE_TOKEN, NOT bridge token) ──
+
+    async def hsm_sign(self, account_id: str, xdr: str, passphrase: str) -> ActionResult:
+        """Sign an XDR transaction via the Triumph HSM endpoint."""
+        if not SAIB_SERVICE_TOKEN:
+            return ActionResult("hsm_sign", False, message="SAIB_SERVICE_TOKEN not configured")
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                resp = await client.post(
+                    f"{TRIUMPH_INTERNAL_URL}/api/pi/hsm/sign",
+                    headers={
+                        "Authorization": f"Bearer {SAIB_SERVICE_TOKEN}",
+                        "Content-Type":  "application/json",
+                        "X-SAIB-Source": "sovereign-nano-saib",
+                    },
+                    json={"accountId": account_id, "xdr": xdr, "networkPassphrase": passphrase},
+                )
+                ok = 200 <= resp.status_code < 300
+                result = ActionResult("hsm_sign", ok, status=resp.status_code,
+                                      message=resp.text[:300])
+        except Exception as exc:
+            result = ActionResult("hsm_sign", False, message=str(exc))
+        self._record(result, {"accountId": account_id[:8] + "…"})
+        return result
+
+    async def hsm_dvp_submit(self, xdr: str, passphrase: str, network: str,
+                             required_signers: list) -> ActionResult:
+        """Sign + submit a DVP transaction via the Triumph HSM-submit endpoint."""
+        if not SAIB_SERVICE_TOKEN:
+            return ActionResult("hsm_dvp_submit", False, message="SAIB_SERVICE_TOKEN not configured")
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(
+                    f"{TRIUMPH_INTERNAL_URL}/api/pi/dvp/hsm-submit",
+                    headers={
+                        "Authorization": f"Bearer {SAIB_SERVICE_TOKEN}",
+                        "Content-Type":  "application/json",
+                        "X-SAIB-Source": "sovereign-nano-saib",
+                    },
+                    json={"unsigned": {
+                        "xdr": xdr,
+                        "passphrase": passphrase,
+                        "network": network,
+                        "requiredSigners": required_signers,
+                    }},
+                )
+                ok = 200 <= resp.status_code < 300
+                result = ActionResult("hsm_dvp_submit", ok, status=resp.status_code,
+                                      message=resp.text[:300])
+        except Exception as exc:
+            result = ActionResult("hsm_dvp_submit", False, message=str(exc))
+        self._record(result, {"signerCount": len(required_signers)})
+        return result
+
+    async def wallet_multisig(self, action: str, params: dict) -> ActionResult:
+        """Call the Triumph multi-sig wallet endpoint."""
+        if not SAIB_SERVICE_TOKEN:
+            return ActionResult("wallet_multisig", False, message="SAIB_SERVICE_TOKEN not configured")
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                resp = await client.post(
+                    f"{TRIUMPH_INTERNAL_URL}/api/pi/wallet/multisig",
+                    headers={
+                        "Authorization": f"Bearer {SAIB_SERVICE_TOKEN}",
+                        "Content-Type":  "application/json",
+                        "X-SAIB-Source": "sovereign-nano-saib",
+                    },
+                    json={"action": action, **params},
+                )
+                ok = 200 <= resp.status_code < 300
+                result = ActionResult("wallet_multisig", ok, status=resp.status_code,
+                                      message=resp.text[:300])
+        except Exception as exc:
+            result = ActionResult("wallet_multisig", False, message=str(exc))
+        self._record(result, {"action": action})
+        return result
+
+    async def saib_execute_task(self, task_type: str, pi_uid: str,
+                                 pi_wallet: str, payload: dict = {}) -> ActionResult:
+        """Queue and execute a sovereign AI-bot task via the Triumph execute endpoint."""
+        if not SAIB_SERVICE_TOKEN:
+            return ActionResult("saib_execute", False, message="SAIB_SERVICE_TOKEN not configured")
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(
+                    f"{TRIUMPH_INTERNAL_URL}/api/sovereign/ai-bot/execute",
+                    headers={
+                        "Authorization": f"Bearer {SAIB_SERVICE_TOKEN}",
+                        "Content-Type":  "application/json",
+                        "X-SAIB-Source": "sovereign-nano-saib",
+                    },
+                    json={
+                        "taskType":   task_type,
+                        "platformId": "SAIB-INTERNAL",
+                        "piUid":      pi_uid,
+                        "piWallet":   pi_wallet,
+                        "payload":    payload,
+                    },
+                )
+                ok = 200 <= resp.status_code < 300
+                result = ActionResult("saib_execute", ok, status=resp.status_code,
+                                      message=resp.text[:300])
+        except Exception as exc:
+            result = ActionResult("saib_execute", False, message=str(exc))
+        self._record(result, {"taskType": task_type})
+        return result
 
     # ── internal helpers ──────────────────────────────────────────────────
 

@@ -1283,6 +1283,11 @@ services:
       SAIB_BASE_URL: "${SAIB_BASE_URL:-https://saib.triumphsynergy.io}"
       # Grok / xAI inference (set XAI_API_KEY in .env)
       XAI_API_KEY: "${XAI_API_KEY:-}"
+      # Dedicated M2M service token for HSM signing, wallet ops, and task execution.
+      # Must match SAIB_SERVICE_TOKEN set in the Next.js app environment (Replit Secrets).
+      # Generate with: openssl rand -hex 32   — never commit the value.
+      SAIB_SERVICE_TOKEN: "${SAIB_SERVICE_TOKEN:-}"
+      TRIUMPH_INTERNAL_URL: "${TRIUMPH_INTERNAL_URL:-http://triumph-app:3000}"
     secrets:
       - public_bridge_token
     networks:

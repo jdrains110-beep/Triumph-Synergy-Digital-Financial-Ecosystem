@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { Horizon, TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
 import { getSigner } from "@/lib/pi/hsm";
 import { resolvePiNetwork, type PiNetwork } from "@/lib/pi/network";
+import { verifySaibToken } from "@/lib/api/verify-saib-token";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,8 +13,11 @@ export const dynamic = "force-dynamic";
  *
  * Signs each required account via the HSM adapter, then submits to Horizon.
  * No secrets ever cross the wire.
+ * Requires: Authorization: Bearer <SAIB_SERVICE_TOKEN>  or  X-SAIB-Token header
  */
 export async function POST(req: NextRequest) {
+  const authErr = verifySaibToken(req);
+  if (authErr) return authErr;
   try {
     const { unsigned } = (await req.json()) as {
       unsigned: { xdr: string; network: PiNetwork; passphrase: string; requiredSigners: string[] };
