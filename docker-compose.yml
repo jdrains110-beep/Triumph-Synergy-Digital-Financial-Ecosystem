@@ -502,9 +502,9 @@ services:
       dockerfile: docker/settlement-core/Dockerfile
     container_name: triumph-settlement-core
     <<: *common
-    mem_limit: 384m
+    mem_limit: 512m
     mem_reservation: 192m
-    cpus: 0.45  # quantum-managed: T4 settlement-core (4-svc super-pod)
+    cpus: 0.65  # quantum-managed: T4 settlement-core — bumped: live 59% CPU
     environment:
       <<: [*db-env, *pi-env]
       ENGINE_MODE: hyper
@@ -577,8 +577,8 @@ services:
     container_name: triumph-quantum-intel-fortress
     <<: *common
     mem_limit: 512m
-    mem_reservation: 256m
-    cpus: 0.40  # quantum-managed: T4 quantum-intel-fortress
+    mem_reservation: 280m
+    cpus: 0.60  # quantum-managed: T4 quantum-intel-fortress — bumped: live 53% CPU / 268MB
     environment:
       <<: [*db-env, *pi-env]
       PI_INTERNAL_RATE: "314159.0"
@@ -845,9 +845,9 @@ services:
       dockerfile: observability-stack/Dockerfile
     container_name: triumph-observability-stack
     <<: *common
-    mem_limit: 512m
-    mem_reservation: 256m
-    cpus: 0.50  # quantum-managed: T3 observability-stack — trimmed (live ~425MB)
+    mem_limit: 640m
+    mem_reservation: 440m
+    cpus: 0.70  # quantum-managed: T3 observability-stack — bumped: live 67% CPU / 428MB
     ports:
       - "3001:3000"
       - "9090:9090"
@@ -917,9 +917,9 @@ services:
     container_name: triumph-guardian-watchdog-nexus
     <<: *common
     restart: always
-    mem_limit: 256m
-    mem_reservation: 128m
-    cpus: 0.30  # quantum-managed: T6 guardian-watchdog-nexus — bumped (was at 87% of 128m)
+    mem_limit: 128m
+    mem_reservation: 112m
+    cpus: 0.35  # quantum-managed: T6 guardian-watchdog-nexus — bumped: live 85% mem / 26% CPU
     environment:
       # ── ecosystem-guardian env vars ─────────────────────────────────────
       GOVERNOR_INTERVAL_S: "30"
@@ -1266,9 +1266,7 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 256m
-    cpus: 0.50
-    environment:
-      PORT: "8201"
+    cpus: 0.75  # quantum-managed: nano-saib v4 (healer+botdefense apex engines)
       SMB_URL: "http://triumph-sovereign-military-bridge:8199"
     expose:
       - "8201"
