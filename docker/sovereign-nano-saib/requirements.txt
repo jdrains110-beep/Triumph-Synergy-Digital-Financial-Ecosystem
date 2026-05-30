@@ -14,3 +14,5 @@ scipy>=1.13.0
 aiofiles>=23.2.1
 # v4 apex engines
 aiohttp>=3.10.0
+# v5 sovereign apex engines
+PyJWT>=2.8.0

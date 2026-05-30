@@ -121,6 +121,16 @@ from .connectors.orchestrator import orchestrator as conn_orchestrator
 from .healer     import healer     as _healer_engine
 from .bot_defense import bot_defense as _bot_defense_engine
 
+# ── v5 sovereign apex engines ────────────────────────────────────────────────
+from .external_registry import external_registry, ExternalServiceSpec
+from .log_ingestion     import pull_logs_for_service, start_syslog_receiver
+from .code_analyzer     import analyse_code
+from .fix_engine        import generate_fix, deliver_github_pr, deliver_gitlab_mr, deliver_webhook
+from .mcp_server        import mcp_server
+from .tenant_auth       import tenant_auth
+from .k8s_adapter       import k8s_adapter
+from .external_registry import LogSourceType, StackType
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -129,7 +139,7 @@ if not BRIDGE_TOKEN and os.path.exists(_secret_path):
     BRIDGE_TOKEN = open(_secret_path).read().strip()
 
 START_TIME = time.time()
-VERSION    = "3.0.0"
+VERSION    = "5.0.0"
 
 # ──────────────────────────────────────────────────────────────── engines ──
 # v1
@@ -206,14 +216,29 @@ async def lifespan(app: FastAPI):
     # ── boot v4 apex engines ──
     _grok_ref = conn_orchestrator.grok
     _x_ref    = conn_orchestrator.x_social
-    _healer_engine.boot(grok=_grok_ref, warp=warp, guardian=guardian)
+    _healer_engine.boot(
+        grok         = _grok_ref,
+        warp         = warp,
+        guardian     = guardian,
+        # v5 modules
+        registry     = external_registry,
+        log_ingest   = pull_logs_for_service,
+        code_analyzer = analyse_code,
+        fix_engine   = True,   # signals fix_engine is available
+        k8s_adapter  = k8s_adapter,
+    )
     _bot_defense_engine.boot(grok=_grok_ref, x_social=_x_ref, guardian=guardian)
+    # ── boot v5 sovereign apex engines ──
+    k8s_adapter.boot()
+    mcp_server.boot(healer=_healer_engine, registry=external_registry, grok=_grok_ref)
+    start_syslog_receiver(port=9514)
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
         "Engines v2: Quantum | Intelligence | WarpSpeed | Brainstorm | Mesh | Guardian | Enforcer\n"
         "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300) | GrokAI(xAI)\n"
-        "Apex v4: SovereignHealer(auto-heal all services) | BotDefense(scammer/bot detection+block)"
+        "Apex v4: SovereignHealer(auto-heal all services) | BotDefense(scammer/bot detection+block)\n"
+        "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s"
     )
     yield
 
@@ -1195,5 +1220,369 @@ def botdefense_thresholds(req: BotThresholdRequest):
     return {
         "block_threshold":  _bot_defense_engine.BLOCK_THRESHOLD,
         "report_threshold": _bot_defense_engine.REPORT_THRESHOLD,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SAIB v5 — Sovereign Apex Intelligent Brain v5 endpoints
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── v5 request/response models ────────────────────────────────────────────────
+
+class V5RegisterServiceRequest(BaseModel):
+    name:          str
+    health_url:    str
+    log_source:    str = "http_endpoint"
+    stack_type:    str = "generic"
+    criticality:   float = 0.5
+    log_config:    dict = {}
+    repo_url:      str  = ""
+    repo_token:    str  = ""
+    repo_provider: str  = "github"
+    k8s_namespace: str  = ""
+    k8s_label:     str  = ""
+
+class V5LogIngestRequest(BaseModel):
+    service_id: str
+    signature:  str = ""
+    payload:    dict = {}
+
+class V5AnalyzeCodeRequest(BaseModel):
+    code:       str
+    language:   str = "generic"
+    context:    str = ""
+
+class V5AnalyzeLogsRequest(BaseModel):
+    service_id: str
+    tenant_token: str = ""
+
+class V5FixGenerateRequest(BaseModel):
+    service_id:    str
+    error_type:    str
+    error_message: str
+    code_snippet:  str
+    language:      str  = "generic"
+    root_cause:    str  = ""
+
+class V5FixPRRequest(BaseModel):
+    fix_id:      str     # returned by /v5/fix/generate — NOTE: stateless; pass fix data instead
+    service_id:  str
+    error_type:  str
+    explanation: str
+    diff:        str
+    original_code: str
+    fixed_code:    str
+    confidence:    float
+    repo_url:    str
+    repo_token:  str
+    repo_provider: str = "github"
+
+class V5TenantCreateRequest(BaseModel):
+    name:         str
+    plan:         str = "free"
+    admin_token:  str = ""
+
+class V5TenantTokenRequest(BaseModel):
+    tenant_id: str
+    api_key:   str
+    ttl_s:     int = 3600
+
+
+# ── v5 tenant management ─────────────────────────────────────────────────────
+
+@app.post("/v5/tenants/create", dependencies=[Depends(_require_token)])
+async def v5_tenant_create(req: V5TenantCreateRequest):
+    """Admin: create a new tenant (requires master bridge token)."""
+    try:
+        creds = tenant_auth.create_tenant(
+            name        = req.name,
+            plan        = req.plan,
+            admin_token = req.admin_token or BRIDGE_TOKEN,
+        )
+        # issue a registry token for the new tenant automatically
+        registry_token = external_registry.issue_token(
+            tenant_id = creds.tenant_id,
+            scopes    = ["register", "read", "approve_heal", "fix"],
+            label     = f"{req.name}-default",
+        )
+        return {
+            "tenant_id":      creds.tenant_id,
+            "api_key":        creds.api_key,
+            "plan":           creds.plan,
+            "registry_token": registry_token,
+            "note":           "Store these credentials securely — api_key shown once",
+        }
+    except (PermissionError, ValueError) as e:
+        raise HTTPException(status_code=403, detail=str(e))
+
+
+@app.post("/v5/tenants/token", dependencies=[Depends(_require_token)])
+async def v5_tenant_issue_jwt(req: V5TenantTokenRequest):
+    """Issue a short-lived JWT for a tenant."""
+    token = tenant_auth.issue_jwt(req.tenant_id, req.api_key, req.ttl_s)
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid tenant credentials")
+    return {"jwt": token, "expires_in_s": req.ttl_s}
+
+
+@app.get("/v5/tenants/list", dependencies=[Depends(_require_token)])
+async def v5_tenant_list():
+    """Admin: list all tenants."""
+    return {"tenants": tenant_auth.list_tenants(admin_token=BRIDGE_TOKEN), "stats": tenant_auth.stats()}
+
+
+# ── v5 external service registry ─────────────────────────────────────────────
+
+@app.post("/v5/services/register", dependencies=[Depends(_require_token)])
+async def v5_register_service(req: V5RegisterServiceRequest):
+    """Register an external service for sovereign monitoring."""
+    try:
+        spec = await external_registry.register(
+            tenant_id    = "__master__",  # master token in-band registration
+            name         = req.name,
+            health_url   = req.health_url,
+            log_source   = LogSourceType(req.log_source),
+            stack_type   = StackType(req.stack_type),
+            criticality  = req.criticality,
+            log_config   = req.log_config,
+            repo_url     = req.repo_url,
+            repo_token   = req.repo_token,
+            repo_provider = req.repo_provider,
+            k8s_namespace = req.k8s_namespace,
+            k8s_label     = req.k8s_label,
+        )
+        return {
+            "service_id":     spec.service_id,
+            "name":           spec.name,
+            "webhook_secret": spec.webhook_secret,
+            "log_push_url":   f"/v5/logs/ingest?service_id={spec.service_id}",
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/v5/services/{service_id}", dependencies=[Depends(_require_token)])
+async def v5_deregister_service(service_id: str):
+    ok = external_registry.deregister(service_id, "__master__")
+    if not ok:
+        raise HTTPException(status_code=404, detail="Service not found")
+    return {"deregistered": service_id}
+
+
+@app.get("/v5/services", dependencies=[Depends(_require_token)])
+async def v5_list_services():
+    svcs = external_registry.list_services("__master__")
+    return {
+        "services": [
+            {
+                "service_id":  s.service_id,
+                "name":        s.name,
+                "health_url":  s.health_url,
+                "log_source":  s.log_source,
+                "stack_type":  s.stack_type,
+                "criticality": s.criticality,
+                "repo_url":    s.repo_url,
+            }
+            for s in svcs
+        ],
+        "stats": external_registry.stats(),
+    }
+
+
+# ── v5 log ingestion ──────────────────────────────────────────────────────────
+
+@app.post("/v5/logs/ingest")
+async def v5_log_ingest(req: V5LogIngestRequest):
+    """
+    Push-based log ingestion. External services POST log events here.
+    No auth required (signature verified by webhook_secret per service).
+    """
+    ok = external_registry.ingest_webhook(
+        service_id = req.service_id,
+        payload    = req.payload,
+        signature  = req.signature,
+    )
+    if not ok:
+        raise HTTPException(status_code=400, detail="Invalid service_id or signature mismatch")
+    return {"ingested": True}
+
+
+@app.get("/v5/logs/{service_id}", dependencies=[Depends(_require_token)])
+async def v5_get_logs(service_id: str, tail: int = 100):
+    """Fetch buffered log events for a registered service."""
+    events = external_registry.get_log_buffer(service_id, "__master__", n=tail)
+    return {"service_id": service_id, "events": events, "count": len(events)}
+
+
+# ── v5 analysis ───────────────────────────────────────────────────────────────
+
+@app.post("/v5/analyze/code", dependencies=[Depends(_require_token)])
+async def v5_analyze_code(req: V5AnalyzeCodeRequest):
+    """Analyze a code snippet / stack trace for bugs via Grok + stack parsers."""
+    from .log_ingestion import NormalisedLogEvent
+    import time as _time
+    mock_events = [
+        NormalisedLogEvent(
+            service_id = "api-direct",
+            ts         = _time.time(),
+            level      = "error",
+            message    = line,
+        )
+        for line in req.code.splitlines()
+        if line.strip()
+    ]
+    ctx = await analyse_code(
+        service_id = "api-direct",
+        log_events = mock_events,
+        stack_type = req.language,
+    )
+    if not ctx:
+        return {"frames": [], "error_type": "none", "note": "No stack trace detected"}
+    return {
+        "error_type":    ctx.error_type,
+        "error_message": ctx.error_message,
+        "primary_frame": {"file": ctx.primary_frame.file, "line": ctx.primary_frame.line, "symbol": ctx.primary_frame.symbol} if ctx.primary_frame else None,
+        "frame_count":   len(ctx.stack_frames),
+        "snippet":       ctx.snippet,
+        "language":      ctx.language,
+    }
+
+
+@app.post("/v5/analyze/logs", dependencies=[Depends(_require_token)])
+async def v5_analyze_logs(req: V5AnalyzeLogsRequest):
+    """Run full 8-layer sovereign diagnosis on a registered service."""
+    spec = external_registry.get_service(req.service_id, "__master__")
+    if not spec:
+        raise HTTPException(status_code=404, detail="Service not found")
+    result = await _healer_engine.diagnose_single(spec)
+    return result
+
+
+@app.get("/v5/health/external", dependencies=[Depends(_require_token)])
+async def v5_health_external():
+    """Scan all externally registered services health."""
+    import aiohttp as _aio
+    results = {}
+    svcs = external_registry.list_services("__master__")
+    async with _aio.ClientSession(timeout=_aio.ClientTimeout(total=5)) as sess:
+        for svc in svcs:
+            try:
+                async with sess.get(svc.health_url) as r:
+                    results[svc.name] = {"status": r.status, "ok": r.status == 200}
+            except Exception as exc:
+                results[svc.name] = {"status": 0, "ok": False, "error": str(exc)[:100]}
+    return {"services": results, "count": len(svcs)}
+
+
+# ── v5 fix engine ─────────────────────────────────────────────────────────────
+
+@app.post("/v5/fix/generate", dependencies=[Depends(_require_token)])
+async def v5_fix_generate(req: V5FixGenerateRequest):
+    """Generate an AI code fix from a known error context."""
+    from .log_ingestion import NormalisedLogEvent
+    from .code_analyzer import CodeContext, StackFrame
+    import time as _time
+
+    mock_frame = StackFrame(file="unknown", line=0, symbol=req.error_type)
+    mock_ctx   = CodeContext(
+        service_id           = req.service_id,
+        stack_frames         = [mock_frame],
+        primary_frame        = mock_frame,
+        file_path            = "unknown",
+        start_line           = 0,
+        end_line             = 0,
+        language             = req.language,
+        snippet              = req.code_snippet,
+        error_type           = req.error_type,
+        error_message        = req.error_message,
+        full_trace           = req.code_snippet,
+        grok_prompt_fragment = (
+            f"Stack type: {req.language}\n"
+            f"Error: {req.error_type}: {req.error_message}\n"
+            f"Code:\n{req.code_snippet[:2000]}"
+        ),
+    )
+    _grok_ref = conn_orchestrator.grok
+    fix = await generate_fix(grok=_grok_ref, code_ctx=mock_ctx, root_cause=req.root_cause)
+    if not fix:
+        raise HTTPException(status_code=500, detail="Fix generation failed")
+    return {
+        "fix_id":        fix.id,
+        "original_code": fix.original_code,
+        "fixed_code":    fix.fixed_code,
+        "explanation":   fix.explanation,
+        "diff":          fix.diff,
+        "confidence":    fix.confidence,
+    }
+
+
+@app.post("/v5/fix/pr", dependencies=[Depends(_require_token)])
+async def v5_fix_deliver_pr(req: V5FixPRRequest):
+    """Deliver a fix proposal as a GitHub/GitLab PR/MR."""
+    from .fix_engine import FixProposal
+    import time as _time
+
+    fp = FixProposal(
+        id            = req.fix_id,
+        service_id    = req.service_id,
+        file_path     = "",
+        error_type    = req.error_type,
+        error_message = "",
+        original_code = req.original_code,
+        fixed_code    = req.fixed_code,
+        explanation   = req.explanation,
+        diff          = req.diff,
+        confidence    = req.confidence,
+        language      = "generic",
+    )
+    if req.repo_provider == "github":
+        url = await deliver_github_pr(fp, req.repo_url, req.repo_token)
+    else:
+        url = await deliver_gitlab_mr(fp, req.repo_url, req.repo_token)
+
+    if not url:
+        raise HTTPException(status_code=500, detail="PR/MR creation failed — check repo_url and repo_token")
+    return {"url": url, "provider": req.repo_provider}
+
+
+# ── v5 K8s ───────────────────────────────────────────────────────────────────
+
+@app.get("/v5/k8s/events", dependencies=[Depends(_require_token)])
+async def v5_k8s_events(severity: str = ""):
+    """Return buffered K8s critical/high events from in-cluster watcher."""
+    return {
+        "events": k8s_adapter.get_buffered_events(severity=severity.upper() if severity else ""),
+        "stats":  k8s_adapter.stats(),
+    }
+
+
+# ── v5 MCP endpoint ───────────────────────────────────────────────────────────
+
+@app.post("/mcp")
+async def mcp_jsonrpc(body: dict):
+    """
+    MCP JSON-RPC 2.0 endpoint. SAIB as a sovereign AI diagnostic tool server.
+    Compatible with Claude, GitHub Copilot, Cursor, and any MCP-aware client.
+    No auth required at transport level — tools enforce tenant_token internally.
+    """
+    return await mcp_server.handle_request(body)
+
+
+@app.get("/mcp/tools/list")
+async def mcp_tools_list():
+    """MCP tool discovery — returns all available SAIB tools."""
+    return mcp_server.get_tools_manifest()
+
+
+@app.get("/v5/stats", dependencies=[Depends(_require_token)])
+async def v5_stats():
+    """Full v5 ecosystem stats."""
+    return {
+        "saib_version":    VERSION,
+        "registry":        external_registry.stats(),
+        "tenant_auth":     tenant_auth.stats(),
+        "k8s":             k8s_adapter.stats(),
+        "healer":          _healer_engine.stats(),
+        "uptime_s":        round(time.time() - START_TIME, 1),
     }
 
