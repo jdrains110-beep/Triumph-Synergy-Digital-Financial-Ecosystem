@@ -1,0 +1,17 @@
+modules = ["nodejs-22:v8"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+PORT = "3000"
+NODE_ENV = "development"
+
+[deployment]
+run = ["sh", "-c", "yarn start"]
+build = ["sh", "-c", "yarn install --frozen-lockfile && yarn build"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 3000
+externalPort = 80
