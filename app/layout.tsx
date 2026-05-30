@@ -14,29 +14,97 @@ import "@/lib/security/boot";
 
 import "./globals.css";
 
+const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.replit.app";
+
 export const metadata: Metadata = {
-  // Canonical URL is driven entirely by NEXT_PUBLIC_APP_URL at deploy time.
-  // We do NOT hardcode a previous Pi App Studio domain because that domain
-  // changes on every fresh app transfer; using a stale value would advertise
-  // the wrong canonical host to crawlers and break verification.
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  ),
-  title: "Triumph Synergy - Pi App Studio",
+  // Canonical URL driven by NEXT_PUBLIC_APP_URL at deploy time.
+  metadataBase: new URL(APP_URL),
+
+  title: {
+    default: "Triumph Synergy · Sovereign Digital Financial Ecosystem",
+    template: "%s · Triumph Synergy",
+  },
   description:
-    "Triumph Synergy: Advanced payment routing, compliance automation, and AI-powered financial services powered by Pi Network.",
+    "Triumph Synergy is a sovereign digital financial ecosystem powered by Pi Network — 41 authorities, quantum-grade ML-DSA-87 security, NESARA/GESARA compliance, Pi-DEX, Pi-Bank, UBI engine, and SAIB v3 sentinel. Founder-pinned by Jeremiah Joel Drains (KING_QUEEN).",
+
+  applicationName: "Triumph Synergy",
+  creator: "Jeremiah Joel Drains",
+  authors: [{ name: "Jeremiah Joel Drains", url: APP_URL }],
+  category: "Finance",
+
+  keywords: [
+    "Pi Network",
+    "Pi cryptocurrency",
+    "sovereign finance",
+    "digital financial ecosystem",
+    "NESARA GESARA",
+    "Pi DEX",
+    "Pi Bank",
+    "Pi payments",
+    "UBI Pi Network",
+    "blockchain finance",
+    "quantum finance",
+    "ML-DSA-87",
+    "SAIB AI",
+    "Triumph Synergy",
+    "Pi Network payments",
+    "DeFi Pi",
+    "sovereign AI bot",
+    "Pi real estate",
+    "Pi credit dispute",
+    "FCRA §611",
+    "Pi tokenization",
+    "Pi Network mainnet",
+    "Jeremiah Joel Drains",
+  ],
+
   icons: {
     icon: "/favicon.ico",
+    apple: "/icon-trisyn-512.png",
   },
-  keywords: ["Pi Network", "Payment Processing", "Compliance", "Fintech", "AI"],
-  authors: [{ name: "Triumph Synergy Team" }],
+
   openGraph: {
-    title: "Triumph Synergy - Pi App Studio",
-    description: "Advanced payment routing with compliance automation",
-    url:
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    title: "Triumph Synergy · Sovereign Digital Financial Ecosystem",
+    description:
+      "41 sovereign authorities powered by Pi Network. Pi-DEX, Pi-Bank, NESARA, UBI, SAIB v3, quantum ML-DSA-87 security. Founder: Jeremiah Joel Drains.",
+    url: APP_URL,
     siteName: "Triumph Synergy",
     type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Triumph Synergy — Sovereign Digital Financial Ecosystem powered by Pi Network",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Triumph Synergy · Sovereign Digital Financial Ecosystem",
+    description:
+      "41 sovereign authorities on Pi Network. Pi-DEX, Pi-Bank, NESARA, UBI, SAIB v3, ML-DSA-87 quantum security.",
+    images: ["/twitter-image.png"],
+    creator: "@TriumphSynergy",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
+  alternates: {
+    canonical: APP_URL,
   },
 };
 
