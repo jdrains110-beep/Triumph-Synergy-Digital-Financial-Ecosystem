@@ -98,8 +98,12 @@ class SovereignConnectorOrchestrator:
         ))
         _pi.on_payment_update(lambda pmt: asyncio.create_task(
             self._pi_payment_to_intel(intel, pmt)
+        ))        # Protocol upgrade — entire sovereign stack reacts immediately
+        _pi.on_protocol_upgrade(lambda info: asyncio.create_task(
+            self._pi_protocol_upgrade_to_all(
+                intel, guardian, _actions, _autonomous, info
+            )
         ))
-
         # ── wire DB callbacks ─────────────────────────────────────────────
         _db.on_anomaly(lambda atype, detail: asyncio.create_task(
             self._db_anomaly_to_intel(intel, guardian, atype, detail)
@@ -156,8 +160,9 @@ class SovereignConnectorOrchestrator:
             "Sovereign Connector Orchestrator ONLINE\n"
             "Connectors: PiNetwork | TriumphDB | OutboundActions | "
             "KnowledgeFeed | FounderWatch | AutonomousDecisions\n"
-            "Cross-wiring: Pi→Intel | Pi→Guardian | DB→Intel | DB→Guardian | "
-            "Knowledge→Intel | FounderWatch→Guardian | Autonomous→All"
+            "Cross-wiring: Pi→Intel | Pi→Guardian | Pi→ProtocolUpgrade | "
+            "DB→Intel | DB→Guardian | Knowledge→Intel | "
+            "FounderWatch→Guardian | Autonomous→All"
         )
 
     # ── status ────────────────────────────────────────────────────────────
@@ -366,6 +371,101 @@ class SovereignConnectorOrchestrator:
             guardian.ingest(ind)
         except Exception as exc:
             log.debug("FounderWatch → guardian error: %s", exc)
+
+    @staticmethod
+    async def _pi_protocol_upgrade_to_all(
+        intel, guardian, actions, autonomous, info: dict
+    ) -> None:
+        """
+        Fired whenever Pi Network upgrades its stellar-core, Horizon, or
+        ledger protocol version.  Propagates a HIGH-severity signal to
+        every layer of the sovereign stack so the ecosystem reacts in sync.
+        """
+        changes   = info.get("changes", {})
+        prev      = info.get("previous", {})
+        net_proto = info.get("network_protocol", 0)
+        core_ver  = info.get("core_version", "")
+        horizon_v = info.get("horizon_version", "")
+
+        # Build a human-readable summary of what changed
+        parts: list[str] = []
+        if "core" in changes:
+            c = changes["core"]
+            parts.append(f"stellar-core {c['from']}→{c['to']}")
+        if "horizon" in changes:
+            c = changes["horizon"]
+            parts.append(f"Horizon {c['from']}→{c['to']}")
+        if "network_protocol" in changes:
+            c = changes["network_protocol"]
+            parts.append(f"ledger-protocol {c['from']}→{c['to']}")
+        summary = "Pi Network protocol upgraded: " + " | ".join(parts) if parts else "Pi Network version change"
+
+        log.warning("[PROTOCOL UPGRADE] %s", summary)
+
+        # 1. Intel — infrastructure-class signal, severity 0.95
+        try:
+            from ..intelligence import Signal as IntelSignal
+            sig = IntelSignal(
+                source="pi_network",
+                entity_id="pi_mainnet_protocol",
+                signal_type="protocol_upgrade",
+                value=0.95,
+                confidence=1.0,
+                metadata={
+                    "summary":          summary,
+                    "changes":          changes,
+                    "core_version":     core_ver,
+                    "horizon_version":  horizon_v,
+                    "network_protocol": net_proto,
+                    "previous":         prev,
+                },
+            )
+            intel.ingest_signal(sig)
+        except Exception as exc:
+            log.debug("Protocol upgrade → intel error: %s", exc)
+
+        # 2. Guardian — INFRASTRUCTURE category, threshold-crossing alert
+        try:
+            from ..guardian import ThreatIndicator, ProtectionCategory
+            ind = ThreatIndicator(
+                source="pi_network",
+                category=ProtectionCategory.INFRASTRUCTURE,
+                severity=0.90,
+                description=summary,
+                metadata=info,
+            )
+            guardian.ingest(ind)
+        except Exception as exc:
+            log.debug("Protocol upgrade → guardian error: %s", exc)
+
+        # 3. Outbound — broadcast critical alert to Discord / Slack
+        try:
+            await actions.broadcast_critical_alert(
+                source="pi_network",
+                title="[PI MAINNET] Protocol Upgrade Detected",
+                body=summary,
+                metadata={
+                    "changes":  changes,
+                    "previous": prev,
+                    "network_protocol": net_proto,
+                },
+            )
+        except Exception as exc:
+            log.debug("Protocol upgrade → broadcast error: %s", exc)
+
+        # 4. Autonomous decisions — inject as high-urgency strategic signal
+        try:
+            autonomous.inject(
+                source="pi_protocol_upgrade",
+                decision_type="STRATEGIC",
+                title=f"Pi Mainnet Protocol Upgrade: {summary}",
+                confidence=0.95,
+                urgency=0.90,
+                risk=0.70,
+                metadata=info,
+            )
+        except Exception as exc:
+            log.debug("Protocol upgrade → autonomous error: %s", exc)
 
 
 # ── singleton ─────────────────────────────────────────────────────────────────
