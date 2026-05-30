@@ -35,9 +35,10 @@
 
 name: triumph-synergy
 
-x-common: &common
+x-common:
   # restart: always — survives Docker Desktop restarts (unlike unless-stopped
   # which keeps containers stopped when daemon is restarted while they were down)
+  &common
   restart: always
   logging:
     driver: json-file
@@ -45,8 +46,8 @@ x-common: &common
       max-size: "5m"
       max-file: "2"
   # ── Memory overflow protection: container dies before it kills WSL2 ──
-  memswap_limit: 0           # No swap — OOM-kill the container, don't swap (prevents I/O death spiral)
-  oom_kill_disable: false     # NEVER disable OOM killer — let Docker kill runaway containers
+  memswap_limit: 0 # No swap — OOM-kill the container, don't swap (prevents I/O death spiral)
+  oom_kill_disable: false # NEVER disable OOM killer — let Docker kill runaway containers
   labels:
     org.pinetwork.project: "triumph-synergy"
     org.pinetwork.central-node: "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V"
@@ -143,12 +144,12 @@ services:
     # adds the `vector` extension SAIB RAG needs for similarity search.
     image: pgvector/pgvector:pg16
     container_name: triumph-postgres
-    stop_grace_period: 60s   # Allow WAL flush + checkpoint before SIGKILL prevents crash-recovery loops
+    stop_grace_period: 60s # Allow WAL flush + checkpoint before SIGKILL prevents crash-recovery loops
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
     cpus: 0.5
-    oom_score_adj: -500          # Protect database — last to OOM-kill
+    oom_score_adj: -500 # Protect database — last to OOM-kill
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-triumph_synergy}
       POSTGRES_USER: postgres
@@ -162,7 +163,7 @@ services:
     networks:
       - triumph-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-triumph_synergy}"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-triumph_synergy}" ]
       interval: 120s
       timeout: 60s
       retries: 5
@@ -171,12 +172,12 @@ services:
   redis:
     image: redis:7-alpine
     container_name: triumph-redis
-    stop_grace_period: 30s   # Allow RDB/AOF flush before SIGKILL
+    stop_grace_period: 30s # Allow RDB/AOF flush before SIGKILL
     <<: *common
     mem_limit: 128m
     mem_reservation: 64m
     cpus: 0.3
-    oom_score_adj: -500          # Protect cache — last to OOM-kill
+    oom_score_adj: -500 # Protect cache — last to OOM-kill
     # Internal only — no host port exposure
     expose:
       - "6379"
@@ -187,7 +188,7 @@ services:
       - triumph-net
     command: redis-server /usr/local/etc/redis/redis.conf
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 120s
       timeout: 60s
       retries: 5
@@ -205,9 +206,9 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 128m
-    cpus: 0.60  # quantum-managed: T5 mesh peer (bridge poller) — bumped for httpx+SSE+push loops
+    cpus: 0.60 # quantum-managed: T5 mesh peer (bridge poller) — bumped for httpx+SSE+push loops
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       PYTHONUNBUFFERED: "1"
       PORT: "8092"
       PI_NODE_HOST: ${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}
@@ -238,9 +239,9 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=40)"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health', timeout=40)" ]
       interval: 120s
-      timeout: 90s   # Docker Desktop Mac VM: Python cold-start + urllib can take >60s
+      timeout: 90s # Docker Desktop Mac VM: Python cold-start + urllib can take >60s
       retries: 5
       start_period: 300s
 
@@ -258,11 +259,11 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 192m
-    cpus: 0.50  # quantum-managed: T5 Next.js app
+    cpus: 0.50 # quantum-managed: T5 Next.js app
     ports:
       - "3000:3000"
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       NODE_ENV: production
       DOCKER_BUILD: "true"
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET required}
@@ -303,9 +304,9 @@ services:
     <<: *common
     mem_limit: 96m
     mem_reservation: 48m
-    cpus: 0.20  # quantum-managed: T6 sidekick (vault)
+    cpus: 0.20 # quantum-managed: T6 sidekick (vault)
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       VAULT_MODE: trillion
       QUANTUM_ENCRYPTION: "true"
       NODE_OPTIONS: "--max-old-space-size=96"
@@ -319,7 +320,7 @@ services:
       governance-shield:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/health" ]
       interval: 120s
       timeout: 60s
       retries: 5
@@ -339,7 +340,7 @@ services:
     <<: *common
     mem_limit: 96m
     mem_reservation: 32m
-    cpus: 0.20  # quantum-managed: T6 sidekick (nginx proxy)
+    cpus: 0.20 # quantum-managed: T6 sidekick (nginx proxy)
     ports:
       - "80:80"
     volumes:
@@ -392,17 +393,17 @@ services:
     <<: *common
     mem_limit: 768m
     mem_reservation: 384m
-    cpus: 0.80  # quantum-managed: T4 governance-shield (central node) — bumped after OOM
+    cpus: 0.80 # quantum-managed: T4 governance-shield (central node) — bumped after OOM
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       NODE_TYPE: central
       NODE_PRIORITY: supreme
       STELLAR_CORE_HTTP_PORT: 11626
       AUTO_UPGRADE: "true"
       ZERO_DOWNTIME: "true"
       ROLLBACK_ON_FAILURE: "true"
-      VERSION_CHECK_INTERVAL_MS: 300000  # CPU-optimized: was 60000
-      PARAMETER_SYNC_INTERVAL_MS: 120000  # CPU-optimized: was 30000
+      VERSION_CHECK_INTERVAL_MS: 300000 # CPU-optimized: was 60000
+      PARAMETER_SYNC_INTERVAL_MS: 120000 # CPU-optimized: was 30000
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
       PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}:${PI_NODE_API_PORT:-8000}
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
@@ -441,7 +442,7 @@ services:
       pi-bridge-connector:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8083/health"]
+      test: [ "CMD", "curl", "-sf", "http://localhost:8083/health" ]
       interval: 90s
       timeout: 45s
       retries: 5
@@ -462,7 +463,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.35  # quantum-managed: T4 supernode-peer-2 (SCP)
+    cpus: 0.35 # quantum-managed: T4 supernode-peer-2 (SCP)
     environment:
       <<: *pi-env
       SUPERNODE_ROLE: peer
@@ -485,7 +486,7 @@ services:
       pi-bridge-connector:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:11626/info"]
+      test: [ "CMD", "curl", "-sf", "http://localhost:11626/info" ]
       interval: 90s
       timeout: 45s
       retries: 5
@@ -504,9 +505,9 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 192m
-    cpus: 0.65  # quantum-managed: T4 settlement-core — bumped: live 59% CPU
+    cpus: 0.65 # quantum-managed: T4 settlement-core — bumped: live 59% CPU
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       ENGINE_MODE: hyper
       NODE_OPTIONS: "--max-old-space-size=512"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
@@ -578,9 +579,9 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 280m
-    cpus: 0.60  # quantum-managed: T4 quantum-intel-fortress — bumped: live 53% CPU / 268MB
+    cpus: 0.60 # quantum-managed: T4 quantum-intel-fortress — bumped: live 53% CPU / 268MB
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PORT: "8094"
@@ -598,11 +599,11 @@ services:
           - triumph-credit-engine
           - triumph-ml-engine
           - triumph-dual-value-engine
-          - triumph-financial-intel       # backward-compat: ML_ENGINE_URL references
+          - triumph-financial-intel # backward-compat: ML_ENGINE_URL references
           # quantum-fortress legacy aliases
           - triumph-quantum-shield
-          - triumph-qpu-bridge            # port 8098 — governor health probe target
-          - triumph-quantum-fortress      # backward-compat: QUANTUM_SHIELD_URL references
+          - triumph-qpu-bridge # port 8098 — governor health probe target
+          - triumph-quantum-fortress # backward-compat: QUANTUM_SHIELD_URL references
     depends_on:
       redis:
         condition: service_healthy
@@ -632,9 +633,9 @@ services:
     <<: *common
     mem_limit: 768m
     mem_reservation: 384m
-    cpus: 1.00  # quantum-managed: T2 apex-services (18-svc mega-pod) — trimmed to live footprint (~540MB)
+    cpus: 1.00 # quantum-managed: T2 apex-services (18-svc mega-pod) — trimmed to live footprint (~540MB)
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
       PI_INTERNAL_MULTIPLIER: "1000.0"
@@ -644,14 +645,14 @@ services:
       PAYMENT_PROCESSOR_URL: http://triumph-settlement-core:8084
       CLOUD_MEMORY_URL: http://triumph-observability-stack:8095
       # ── SAIB Docker restart authority ────────────────────────────────────
-      DOCKER_HOST: unix:///var/run/docker.sock      # ── SAIB GitHub self-awareness ─────────────────────────────────────────
+      DOCKER_HOST: unix:///var/run/docker.sock # ── SAIB GitHub self-awareness ─────────────────────────────────────────
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       GITHUB_REPO: jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem
       SAIB_GITHUB_SYNC_HOURS: "6"
       # ── SAIB GitHub visitor interaction ────────────────────────────────
       SAIB_GITHUB_INTERACT_ENABLED: "true"
-      SAIB_GITHUB_GREETING_ENABLED: "true"   # SAIB auto-greets first-time visitors
-      SAIB_GITHUB_VISITOR_PRIVACY: "partial"  # partial | full | anon
+      SAIB_GITHUB_GREETING_ENABLED: "true" # SAIB auto-greets first-time visitors
+      SAIB_GITHUB_VISITOR_PRIVACY: "partial" # partial | full | anon
       SAIB_GITHUB_VISITOR_POLL_S: "300"
       # ── SAIB network switching ────────────────────────────────────
       SAIB_NETWORK_SWITCH_ENABLED: "true"
@@ -670,9 +671,9 @@ services:
       SAIB_REGION_PEERS: ${SAIB_REGION_PEERS:-}
       # ── SAIB Apex Supreme Quantum Brain ──────────────────────────────
       SAIB_QUANTUM_BRAIN_ENABLED: "true"
-      SAIB_QUANTUM_CODE_SCAN_INTERVAL_S: "3600"   # 60 min (CPU-optimized: was 30 min)
-      SAIB_QUANTUM_IMAGE_SCAN_INTERVAL_S: "7200"  # 120 min (CPU-optimized: was 60 min)
-      SAIB_QUANTUM_AUTO_BUILD: "false"            # set true to auto-rebuild vulnerable images
+      SAIB_QUANTUM_CODE_SCAN_INTERVAL_S: "3600" # 60 min (CPU-optimized: was 30 min)
+      SAIB_QUANTUM_IMAGE_SCAN_INTERVAL_S: "7200" # 120 min (CPU-optimized: was 60 min)
+      SAIB_QUANTUM_AUTO_BUILD: "false" # set true to auto-rebuild vulnerable images
       SAIB_QUANTUM_AUTO_COMMIT: "false"
       SAIB_CODEBASE_SCAN_PATH: "/workspace"
       SAIB_DOCKER_BUILD_CONTEXT: "/workspace/docker"
@@ -769,7 +770,7 @@ services:
           - triumph-sovereign-insurance
           - triumph-sovereign-utilities
           - triumph-sovereign-gateway
-          - triumph-sovereign-ai-bot   # governor health probe: :8099/health
+          - triumph-sovereign-ai-bot # governor health probe: :8099/health
       pi-bridge:
         aliases:
           - triumph-sovereign-fortress
@@ -806,9 +807,9 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.25  # quantum-managed: T5 horizon-stream
+    cpus: 0.25 # quantum-managed: T5 horizon-stream
     environment:
-      <<: [*db-env, *pi-env]
+      <<: [ *db-env, *pi-env ]
       MARKET_POLL_MS: 5000
       ORACLE_POLL_MS: 5000
     volumes:
@@ -828,7 +829,7 @@ services:
       pi-bridge-connector:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8085/health"]
+      test: [ "CMD", "curl", "-sf", "http://localhost:8085/health" ]
       interval: 60s
       timeout: 30s
       retries: 5
@@ -847,7 +848,7 @@ services:
     <<: *common
     mem_limit: 640m
     mem_reservation: 440m
-    cpus: 0.70  # quantum-managed: T3 observability-stack — bumped: live 67% CPU / 428MB
+    cpus: 0.70 # quantum-managed: T3 observability-stack — bumped: live 67% CPU / 428MB
     ports:
       - "3001:3000"
       - "9090:9090"
@@ -882,7 +883,7 @@ services:
     networks:
       triumph-net:
         aliases:
-          - triumph-cloud-memory   # port 8095 — governor health probe target
+          - triumph-cloud-memory # port 8095 — governor health probe target
     healthcheck:
       disable: true
     depends_on:
@@ -919,7 +920,7 @@ services:
     restart: always
     mem_limit: 192m
     mem_reservation: 144m
-    cpus: 0.35  # quantum-managed: T6 guardian-watchdog-nexus — mem raised 128m→192m (was at 99.9%)
+    cpus: 0.35 # quantum-managed: T6 guardian-watchdog-nexus — mem raised 128m→192m (was at 99.9%)
     environment:
       # ── ecosystem-guardian env vars ─────────────────────────────────────
       GOVERNOR_INTERVAL_S: "30"
@@ -980,7 +981,7 @@ services:
           - triumph-health-governor
           - triumph-network-sentinel
           - triumph-horizon-guardian
-          - triumph-ecosystem-guardian    # backward-compat alias
+          - triumph-ecosystem-guardian # backward-compat alias
       pi-bridge: {}
     depends_on:
       redis:
@@ -1009,7 +1010,7 @@ services:
     <<: *common
     mem_limit: 256m
     mem_reservation: 128m
-    cpus: 0.30  # quantum-managed: T5 sovereign-life
+    cpus: 0.30 # quantum-managed: T5 sovereign-life
     environment:
       PI_INTERNAL_RATE: "314159.0"
       PI_EXTERNAL_RATE: "314.159"
@@ -1033,9 +1034,9 @@ services:
         aliases:
           # Legacy hostnames preserved for SAIB & cross-pod callers.
           # Each engine listens on its own dedicated port inside this pod.
-          - triumph-sovereign-education   # 8130
-          - triumph-sovereign-telecom     # 8140
-          - triumph-sovereign-bank        # 8150
+          - triumph-sovereign-education # 8130
+          - triumph-sovereign-telecom # 8140
+          - triumph-sovereign-bank # 8150
     depends_on:
       redis:
         condition: service_healthy
@@ -1077,7 +1078,7 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
-    cpus: 0.60  # quantum-managed: T3 apex-sovereign-nexus (sentinel) — trimmed (live ~100MB)
+    cpus: 0.60 # quantum-managed: T3 apex-sovereign-nexus (sentinel) — trimmed (live ~100MB)
     environment:
       # Commerce Authority (8160)
       REDIS_URL: redis://triumph-redis:6379/11
@@ -1147,31 +1148,31 @@ services:
   # --------------------------------------------------------------------------
   pi-mainnet-node:
     image: pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
-    platform: linux/amd64   # AMD64-only stellar-core image — required on Apple Silicon / ARM64 hosts
+    platform: linux/amd64 # AMD64-only stellar-core image — required on Apple Silicon / ARM64 hosts
     container_name: triumph-pi-mainnet-node
     restart: always
-    profiles: ["pi-node"]   # opt-in: heavy (3-5 GB RAM for stellar-core sync)
-    shm_size: 1g     # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during catchup on AMD64 emulation
+    profiles: [ "pi-node" ] # opt-in: heavy (3-5 GB RAM for stellar-core sync)
+    shm_size: 1g # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during catchup on AMD64 emulation
     # Docker Desktop on Apple Silicon typically allocates 6-8 GB; cap mainnet-node at 3.5g
     # so postgres/redis/bridge/governance-shield can coexist. The trade-off is slower
     # initial catchup (it'll evict bucket pages instead of holding them in RAM); the
     # node still syncs and serves Horizon. Bump to 7g+ if you raise Docker Desktop RAM.
     mem_limit: 3500m
     mem_reservation: 1500m
-    cpus: 1.5  # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
+    cpus: 1.5 # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
-      NODE_PRIVATE_KEY:  ${PI_NODE_PRIVATE_KEY:-}   # auto-generated if blank
+      NODE_PRIVATE_KEY: ${PI_NODE_PRIVATE_KEY:-} # auto-generated if blank
     volumes:
       - pi_mainnet_stellar:/opt/stellar
       - pi_mainnet_logs:/var/log/supervisor
       - pi_mainnet_history:/history
     ports:
-      - "31500:11626"                              # stellar-core HTTP info/admin
-      - "${PI_NODE_HORIZON_PORT:-31501}:8000"    # Horizon HTTP API
-      - "${PI_NODE_PEER_PORT:-31502}:31402"       # stellar-core peer
-      - "${PI_NODE_HISTORY_PORT:-31503}:1570"     # local history server
-    command: ["--mainnet"]
+      - "31500:11626" # stellar-core HTTP info/admin
+      - "${PI_NODE_HORIZON_PORT:-31501}:8000" # Horizon HTTP API
+      - "${PI_NODE_PEER_PORT:-31502}:31402" # stellar-core peer
+      - "${PI_NODE_HISTORY_PORT:-31503}:1570" # local history server
+    command: [ "--mainnet" ]
     networks:
       - triumph-net
       - pi-bridge
@@ -1201,7 +1202,7 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 256m
-    cpus: 0.50  # quantum-managed: T5 sovereign-military-bridge — bumped after OOM
+    cpus: 0.50 # quantum-managed: T5 sovereign-military-bridge — bumped after OOM
     environment:
       PORT: "8199"
       REDIS_URL: redis://triumph-redis:6379/14
@@ -1246,8 +1247,7 @@ services:
       quantum-intel-fortress:
         condition: service_started
     healthcheck:
-      test: ["CMD", "python", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8199/health', timeout=25)"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8199/health', timeout=25)" ]
       interval: 90s
       timeout: 30s
       retries: 3
@@ -1266,10 +1266,8 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 256m
-    cpus: 0.75  # quantum-managed: nano-saib v5 (sovereign apex — registry+logs+code+fix+MCP+tenants+k8s)
+    cpus: 0.75 # quantum-managed: nano-saib v5 (sovereign apex — registry+logs+code+fix+MCP+tenants+k8s)
     environment:
-      SMB_URL: "http://triumph-sovereign-military-bridge:8199"
-    expose:
       - "8201"
     secrets:
       - public_bridge_token
@@ -1282,8 +1280,7 @@ services:
       sovereign-military-bridge:
         condition: service_started
     healthcheck:
-      test: ["CMD", "python", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8201/health', timeout=25)"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8201/health', timeout=25)" ]
       interval: 90s
       timeout: 30s
       retries: 3
@@ -1305,7 +1302,7 @@ services:
     <<: *common
     mem_limit: 384m
     mem_reservation: 192m
-    cpus: 0.40  # quantum-managed: T6 sovereign-mesh-hub — bumped after OOM
+    cpus: 0.40 # quantum-managed: T6 sovereign-mesh-hub — bumped after OOM
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -1336,8 +1333,7 @@ services:
       sovereign-mesh:
         ipv4_address: 10.13.37.1
     healthcheck:
-      test: ["CMD", "python", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8200/health', timeout=25)"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8200/health', timeout=25)" ]
       interval: 90s
       timeout: 30s
       retries: 3

@@ -94,7 +94,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, WebSocket
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, WebSocket
 from pydantic import BaseModel
 
 # ── v1 engines ──────────────────────────────────────────────────────────────
@@ -131,6 +131,10 @@ from .tenant_auth       import tenant_auth
 from .k8s_adapter       import k8s_adapter
 from .external_registry import LogSourceType, StackType
 
+# ── v5 billing + Pi payments ─────────────────────────────────────────────────
+from .billing    import billing_engine, BillingPlan, SessionState, PLAN_CATALOG
+from .pi_payments import pi_processor
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -163,7 +167,9 @@ enforcer     = SovereignEnforcer()
 def _require_token(
     authorization:  str = Header("", alias="Authorization"),
     x_bridge_token: str = Header("", alias="X-Bridge-Token"),
+    x_saib_session: str = Header("", alias="X-SAIB-Session"),
 ) -> None:
+    # Internal bridge token — always bypasses billing
     if not BRIDGE_TOKEN:
         return
     provided = ""
@@ -171,8 +177,30 @@ def _require_token(
         provided = authorization[7:]
     elif x_bridge_token:
         provided = x_bridge_token
-    if not secrets.compare_digest(provided, BRIDGE_TOKEN):
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    if provided and secrets.compare_digest(provided, BRIDGE_TOKEN):
+        return
+    # External access via billing session token
+    if x_saib_session:
+        allowed, reason = billing_engine.check_access(x_saib_session)
+        if allowed:
+            return
+        if "expired" in reason:
+            raise HTTPException(
+                status_code=402,
+                detail={
+                    "error":   reason,
+                    "message": "Session expired — pay with Pi or USD to continue.",
+                    "plans":   "/billing/plans",
+                    "start":   "/billing/session/start",
+                },
+            )
+    raise HTTPException(
+        status_code=401,
+        detail=(
+            "Unauthorized — use bridge token or start a free session at "
+            "/billing/session/start"
+        ),
+    )
 
 
 # ──────────────────────────────────────────────────── background loops ──
@@ -232,13 +260,15 @@ async def lifespan(app: FastAPI):
     k8s_adapter.boot()
     mcp_server.boot(healer=_healer_engine, registry=external_registry, grok=_grok_ref)
     start_syslog_receiver(port=9514)
+    billing_engine.boot(pi_processor=pi_processor)
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
         "Engines v2: Quantum | Intelligence | WarpSpeed | Brainstorm | Mesh | Guardian | Enforcer\n"
         "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300) | GrokAI(xAI)\n"
         "Apex v4: SovereignHealer(auto-heal all services) | BotDefense(scammer/bot detection+block)\n"
-        "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s"
+        "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s\n"
+        "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)"
     )
     yield
 
@@ -1584,5 +1614,278 @@ async def v5_stats():
         "k8s":             k8s_adapter.stats(),
         "healer":          _healer_engine.stats(),
         "uptime_s":        round(time.time() - START_TIME, 1),
+    }
+
+
+# ═══════════════════════════════════════════════════════ BILLING v5 ════════
+# Public endpoints (no auth): /billing/session/start, /billing/plans,
+#                              /billing/pi/approve, /billing/pi/complete,
+#                              /billing/stripe/webhook
+# Session-gated endpoints:    /billing/session/status, /billing/pi/initiate,
+#                              /billing/stripe/session
+# Bridge-token endpoints:     /billing/founder/stats, /billing/stats
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class _BillingSessionStartReq(BaseModel):
+    client_id: str = ""     # optional; anonymous UUID generated if blank
+    pi_uid:    str = ""     # optional; Pi Network UID for Pi payment attribution
+
+
+class _PiInitiateReq(BaseModel):
+    session_token: str
+    plan:          str   # BillingPlan.value  e.g. "pi_paygo"
+
+
+class _PiApproveReq(BaseModel):
+    payment_id: str
+
+
+class _PiCompleteReq(BaseModel):
+    payment_id: str
+    txid:       str
+
+
+class _StripeSessionReq(BaseModel):
+    session_token: str
+    plan:          str         # BillingPlan.value  e.g. "usd_basic"
+    region:        str = "global"   # US | EU | IN | BR | MX | AU | SG | MY | NG | KE | ZA | JP | KR
+    success_url:   str = ""
+    cancel_url:    str = ""
+
+
+# ── 1. Start a free 30-minute session ────────────────────────────────────────
+
+@app.post("/billing/session/start")
+async def billing_session_start(
+    req:     _BillingSessionStartReq,
+    request: Request,
+) -> dict:
+    """
+    Start a free 30-minute SAIB session.  No payment required.
+    Returns a session_token to include as X-SAIB-Session header on all requests.
+    After 30 minutes the session expires and Pi or USD payment is required.
+    """
+    ip        = request.client.host if request.client else "0.0.0.0"
+    client_id = req.client_id.strip() or str(uuid.uuid4())
+    pi_uid    = req.pi_uid.strip() or None
+    sess      = billing_engine.start_session(client_id, ip, pi_uid)
+    now       = time.time()
+    free_left = max(0, int(sess.free_expires_at - now))
+    paid_left = max(0, int(sess.paid_expires_at - now)) if sess.paid_expires_at > now else 0
+    return {
+        "session_token":    sess.session_token,
+        "client_id":        sess.client_id,
+        "free_expires_at":  int(sess.free_expires_at),
+        "free_remaining_s": free_left,
+        "paid_remaining_s": paid_left,
+        "plan":             sess.plan.value,
+        "usage": (
+            "Add  X-SAIB-Session: <session_token>  to every request header. "
+            f"You have {free_left}s of free access remaining."
+        ),
+        "plans_url":        "/billing/plans",
+    }
+
+
+# ── 2. Check session status ───────────────────────────────────────────────────
+
+@app.get("/billing/session/status")
+async def billing_session_status(
+    x_saib_session: str = Header("", alias="X-SAIB-Session"),
+) -> dict:
+    """Return current session state, remaining time, and plan info."""
+    if not x_saib_session:
+        raise HTTPException(status_code=400, detail="X-SAIB-Session header required")
+    state, sess = billing_engine.validate_session(x_saib_session)
+    if sess is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    now = time.time()
+    return {
+        "state":            state.value,
+        "plan":             sess.plan.value,
+        "free_expires_at":  int(sess.free_expires_at),
+        "paid_expires_at":  int(sess.paid_expires_at),
+        "free_remaining_s": max(0, int(sess.free_expires_at - now)),
+        "paid_remaining_s": max(0, int(sess.paid_expires_at - now)),
+        "total_paid_pi":    sess.total_paid_pi,
+        "total_paid_usd":   sess.total_paid_usd,
+        "payment_count":    len(sess.payment_ids),
+    }
+
+
+# ── 3. List all plans ─────────────────────────────────────────────────────────
+
+@app.get("/billing/plans")
+async def billing_list_plans() -> dict:
+    """List all SAIB billing plans with Pi and USD pricing."""
+    return {
+        "plans":      billing_engine.list_plans(),
+        "pi_network": "mainnet",
+        "pi_info":    "Pi payments are real mainnet blockchain transactions creating Pi utility.",
+        "usd_info":   "USD payments via Stripe — card, UPI (IN), PIX (BR), SEPA (EU), OXXO (MX), GrabPay (MY/SG), konbini (JP) and more.",
+        "free_trial": f"{billing_engine.stats()['free_session_secs']}s free session — no payment required to start.",
+        "start_url":  "/billing/session/start",
+    }
+
+
+# ── 4. Initiate a Pi payment ──────────────────────────────────────────────────
+
+@app.post("/billing/pi/initiate")
+async def billing_pi_initiate(
+    req:            _PiInitiateReq,
+    x_saib_session: str = Header("", alias="X-SAIB-Session"),
+    authorization:  str = Header("", alias="Authorization"),
+    x_bridge_token: str = Header("", alias="X-Bridge-Token"),
+) -> dict:
+    """
+    Create a Pi mainnet payment for the requested plan.
+    Returns payment data to pass to Pi.createPayment() in the Pi Browser frontend.
+    The caller must have an active session (free or paid) OR bridge token.
+    """
+    # Validate access
+    provided = authorization[7:] if authorization.startswith("Bearer ") else x_bridge_token
+    is_internal = BRIDGE_TOKEN and provided and secrets.compare_digest(provided, BRIDGE_TOKEN)
+    if not is_internal and x_saib_session:
+        allowed, reason = billing_engine.check_access(x_saib_session)
+        if not allowed:
+            raise HTTPException(status_code=402, detail={"error": reason, "plans": "/billing/plans"})
+    elif not is_internal:
+        raise HTTPException(status_code=401, detail="X-SAIB-Session or bridge token required")
+
+    try:
+        plan = BillingPlan(req.plan)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Unknown plan '{req.plan}'. GET /billing/plans")
+
+    token = x_saib_session or req.session_token
+    try:
+        result = await billing_engine.initiate_pi_payment(token, plan)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return result
+
+
+# ── 5. Approve a Pi payment (Pi SDK → onReadyForServerApproval) ───────────────
+
+@app.post("/billing/pi/approve")
+async def billing_pi_approve(req: _PiApproveReq) -> dict:
+    """
+    Server-side approve a pending Pi payment.
+    Called by the frontend Pi SDK after onReadyForServerApproval fires.
+    No auth required — paymentId is the authenticator.
+    """
+    ok = await billing_engine.approve_pi_payment(req.payment_id)
+    return {"approved": ok, "payment_id": req.payment_id}
+
+
+# ── 6. Complete a Pi payment (Pi SDK → onReadyForServerCompletion) ────────────
+
+@app.post("/billing/pi/complete")
+async def billing_pi_complete(req: _PiCompleteReq) -> dict:
+    """
+    Complete a Pi payment after blockchain confirmation.
+    Called by the frontend Pi SDK after onReadyForServerCompletion fires.
+    Verifies the transaction on Pi mainnet Horizon and activates the subscription.
+    Automatically triggers the 15% founder split A2U to the founder wallet.
+    """
+    rec = await billing_engine.complete_pi_payment(req.payment_id, req.txid)
+    if not rec:
+        raise HTTPException(
+            status_code=422,
+            detail="Pi payment could not be completed — verify txid and payment_id",
+        )
+    return {
+        "status":         "completed",
+        "payment_id":     rec.payment_id,
+        "plan":           rec.plan.value,
+        "amount_pi":      rec.amount,
+        "txid":           rec.txid,
+        "founder_split":  rec.founder_split,
+        "founder_paid":   rec.founder_paid,
+        "message":        f"Subscription activated: {rec.plan.value}. Real Pi utility on the mainnet!",
+    }
+
+
+# ── 7. Create a Stripe checkout session ──────────────────────────────────────
+
+@app.post("/billing/stripe/session")
+async def billing_stripe_session(
+    req:            _StripeSessionReq,
+    x_saib_session: str = Header("", alias="X-SAIB-Session"),
+    authorization:  str = Header("", alias="Authorization"),
+    x_bridge_token: str = Header("", alias="X-Bridge-Token"),
+) -> dict:
+    """
+    Create a Stripe Checkout session for USD payment.
+    Region codes (optional): US, EU, UK, IN, BR, MX, AU, SG, MY, NG, KE, ZA, JP, KR.
+    Returns a checkout_url to redirect the user to Stripe's hosted payment page.
+    """
+    provided   = authorization[7:] if authorization.startswith("Bearer ") else x_bridge_token
+    is_internal = BRIDGE_TOKEN and provided and secrets.compare_digest(provided, BRIDGE_TOKEN)
+    token      = x_saib_session or req.session_token
+    if not is_internal and token:
+        allowed, reason = billing_engine.check_access(token)
+        if not allowed:
+            raise HTTPException(status_code=402, detail={"error": reason, "plans": "/billing/plans"})
+    elif not is_internal:
+        raise HTTPException(status_code=401, detail="X-SAIB-Session or bridge token required")
+
+    try:
+        plan = BillingPlan(req.plan)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Unknown plan '{req.plan}'. GET /billing/plans")
+
+    result = await billing_engine.create_stripe_session(
+        session_token = token,
+        plan          = plan,
+        region        = req.region,
+        success_url   = req.success_url or None,
+        cancel_url    = req.cancel_url or None,
+    )
+    if "error" in result:
+        raise HTTPException(status_code=503, detail=result)
+    return result
+
+
+# ── 8. Stripe webhook ─────────────────────────────────────────────────────────
+
+@app.post("/billing/stripe/webhook")
+async def billing_stripe_webhook(request: Request) -> dict:
+    """
+    Stripe webhook receiver.  No auth — Stripe signature verified internally.
+    Set this URL in your Stripe Dashboard → Webhooks.
+    Handles: checkout.session.completed, payment_intent.succeeded
+    """
+    payload    = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+    rec        = billing_engine.process_stripe_webhook(payload, sig_header)
+    if rec:
+        return {"status": "processed", "payment_id": rec.payment_id, "plan": rec.plan.value}
+    return {"status": "ignored"}
+
+
+# ── 9. Founder revenue dashboard (bridge token only) ─────────────────────────
+
+@app.get("/billing/founder/stats", dependencies=[Depends(_require_token)])
+async def billing_founder_stats() -> dict:
+    """
+    Founder revenue dashboard — Pi owed/sent + USD tracked across all payments.
+    Bridge token required.
+    """
+    return {
+        **billing_engine.founder_stats(),
+        "pi_processor": pi_processor.stats(),
+    }
+
+
+# ── 10. Billing overview (bridge token only) ──────────────────────────────────
+
+@app.get("/billing/stats", dependencies=[Depends(_require_token)])
+async def billing_stats() -> dict:
+    """Full billing engine stats. Bridge token required."""
+    return {
+        "billing":      billing_engine.stats(),
+        "pi_processor": pi_processor.stats(),
     }
 
