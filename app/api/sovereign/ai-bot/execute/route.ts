@@ -14,6 +14,7 @@ import {
   type SAIBTaskType,
   type PlatformId,
 } from "@/lib/programs/sovereign-ai-bot";
+import { verifySaibToken } from "@/lib/api/verify-saib-token";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const authErr = verifySaibToken(req);
+  if (authErr) return authErr;
+
   try {
     const body = await req.json() as {
       taskType:    SAIBTaskType;

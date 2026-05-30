@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getSigner } from "@/lib/pi/hsm";
+import { verifySaibToken } from "@/lib/api/verify-saib-token";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,8 +10,11 @@ export const dynamic = "force-dynamic";
  * body: { accountId, xdr, networkPassphrase }
  * Returns signed XDR. No secret material crosses the boundary —
  * the signer pulls the key from its configured backend.
+ * Requires: Authorization: Bearer <SAIB_SERVICE_TOKEN>  or  X-SAIB-Token header
  */
 export async function POST(req: NextRequest) {
+  const authErr = verifySaibToken(req);
+  if (authErr) return authErr;
   try {
     const { accountId, xdr, networkPassphrase } = (await req.json()) as {
       accountId?: string;

@@ -9,6 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { verifySaibToken } from "@/lib/api/verify-saib-token";
 
 const PI_TESTNET_HORIZON = "https://api.testnet.minepi.com";
 const PI_TESTNET_PASSPHRASE = "Pi Testnet";
@@ -322,6 +323,9 @@ export async function GET(request: NextRequest) {
 // ── POST: Issue token on Pi Testnet ─────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  const authErr = verifySaibToken(request);
+  if (authErr) return authErr;
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();

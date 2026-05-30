@@ -2,14 +2,18 @@
 // Pi Network Multi-Signature Wallet API
 // Enterprise-grade multi-sig wallet management
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { piMultiSigManager, piFastTrackKYB } from '@/lib/pi-kyc';
+import { verifySaibToken } from '@/lib/api/verify-saib-token';
 
 /**
  * POST /api/pi/wallet/multisig
  * Initiate multi-sig transaction
+ * Requires: Authorization: Bearer <SAIB_SERVICE_TOKEN>  or  X-SAIB-Token header
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const authErr = verifySaibToken(request);
+  if (authErr) return authErr;
   try {
     const body = await request.json();
     const { action } = body;
