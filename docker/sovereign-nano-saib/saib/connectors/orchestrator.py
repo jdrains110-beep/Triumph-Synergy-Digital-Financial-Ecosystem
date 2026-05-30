@@ -51,6 +51,7 @@ class SovereignConnectorOrchestrator:
         self.knowledge:  Any = None
         self.founder:    Any = None
         self.autonomous: Any = None
+        self.x_social:   Any = None
 
     # ── boot ──────────────────────────────────────────────────────────────
 
@@ -81,6 +82,7 @@ class SovereignConnectorOrchestrator:
         from .knowledge_feed      import knowledge_feed   as _knowledge
         from .founder_watch       import founder_watch    as _founder
         from .autonomous_decisions import autonomous      as _autonomous
+        from .x_social            import x_social        as _x
 
         self.pi         = _pi
         self.db         = _db
@@ -88,6 +90,7 @@ class SovereignConnectorOrchestrator:
         self.knowledge  = _knowledge
         self.founder    = _founder
         self.autonomous = _autonomous
+        self.x_social   = _x
 
         # ── wire Pi callbacks ─────────────────────────────────────────────
         _pi.on_transaction(lambda tx: asyncio.create_task(
@@ -120,6 +123,14 @@ class SovereignConnectorOrchestrator:
             self._fact_to_intel(intel, fact)
         ))
 
+        # ── wire X Social callbacks ───────────────────────────────────────
+        _x.on_threat(lambda mention: asyncio.create_task(
+            self._x_threat_to_all(intel, guardian, _actions, _autonomous, mention)
+        ))
+        _x.on_search_hit(lambda hit: asyncio.create_task(
+            self._x_search_to_intel(intel, hit)
+        ))
+
         # ── inject into FounderWatch ──────────────────────────────────────
         _founder.inject(
             db_connector     = _db,
@@ -140,6 +151,7 @@ class SovereignConnectorOrchestrator:
             pi         = _pi,
             db         = _db,
             knowledge  = _knowledge,
+            x_social   = _x,
         )
 
         # ── wire FounderWatch events → Guardian ──────────────────────────
@@ -154,15 +166,16 @@ class SovereignConnectorOrchestrator:
         _knowledge.start()
         _founder.start()
         _autonomous.start()
+        _x.start()
 
         self._is_running = True
         log.info(
             "Sovereign Connector Orchestrator ONLINE\n"
             "Connectors: PiNetwork | TriumphDB | OutboundActions | "
-            "KnowledgeFeed | FounderWatch | AutonomousDecisions\n"
+            "KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial\n"
             "Cross-wiring: Pi→Intel | Pi→Guardian | Pi→ProtocolUpgrade | "
             "DB→Intel | DB→Guardian | Knowledge→Intel | "
-            "FounderWatch→Guardian | Autonomous→All"
+            "FounderWatch→Guardian | X→Intel | X→Guardian | Autonomous→All"
         )
 
     # ── status ────────────────────────────────────────────────────────────
@@ -178,6 +191,7 @@ class SovereignConnectorOrchestrator:
                 "knowledge_feed":      self.knowledge.stats()  if self.knowledge  else None,
                 "founder_watch":       self.founder.stats()    if self.founder    else None,
                 "autonomous_decisions": self.autonomous.stats() if self.autonomous else None,
+                "x_social":            self.x_social.stats()   if self.x_social   else None,
             },
         }
 
@@ -466,6 +480,122 @@ class SovereignConnectorOrchestrator:
             )
         except Exception as exc:
             log.debug("Protocol upgrade → autonomous error: %s", exc)
+
+    @staticmethod
+    async def _x_threat_to_all(
+        intel, guardian, actions, autonomous, mention
+    ) -> None:
+        """
+        A hostile / impersonation mention of @jaymoney0300 propagates through
+        the full sovereign stack: Intel signal, Guardian alert, Discord ping,
+        Autonomous FOUNDER-type decision.
+        """
+        score  = mention.sentiment_score
+        is_imp = mention.is_impersonation
+        sev    = 0.95 if is_imp else min(0.95, score + 0.20)
+        author = f"@{mention.author_username}"
+        text   = mention.text[:200]
+
+        label = "IMPERSONATION" if is_imp else "HOSTILE MENTION"
+        desc  = (
+            f"X {label}: {author} — score={score:.2f} — \"{text}\""
+        )
+
+        # 1. SovereignIntelligence
+        try:
+            from ..intelligence import Signal as IntelSignal
+            sig = IntelSignal(
+                source      = "x_social",
+                entity_id   = mention.author_id or mention.author_username,
+                signal_type = "social_threat" if not is_imp else "impersonation",
+                value       = sev,
+                confidence  = 0.80,
+                metadata    = {
+                    "tweet_id":        mention.tweet_id,
+                    "author":          author,
+                    "text":            text,
+                    "threat_keywords": mention.threat_keywords,
+                    "is_impersonation": is_imp,
+                    "monitored_user":   f"@jaymoney0300",
+                },
+            )
+            intel.ingest_signal(sig)
+        except Exception as exc:
+            log.debug("X threat → intel error: %s", exc)
+
+        # 2. FounderGuardian — FOUNDER_SAFETY when targeting founder directly
+        try:
+            from ..guardian import ThreatIndicator, ProtectionCategory
+            ind = ThreatIndicator(
+                source      = "x_social",
+                category    = ProtectionCategory.FOUNDER_SAFETY,
+                severity    = sev,
+                description = desc,
+                metadata    = {
+                    "tweet_id": mention.tweet_id,
+                    "author":   author,
+                    "is_impersonation": is_imp,
+                },
+            )
+            guardian.ingest(ind)
+        except Exception as exc:
+            log.debug("X threat → guardian error: %s", exc)
+
+        # 3. Discord broadcast for impersonation or high-severity threats
+        if is_imp or score >= 0.60:
+            try:
+                title = f"[X] {'Impersonation Detected' if is_imp else 'Hostile Mention'}: {author}"
+                body  = f"{text}\n\nhttps://x.com/{mention.author_username}/status/{mention.tweet_id}"
+                await actions.discord_alert(
+                    title   = title,
+                    message = body,
+                    color   = 0xFF0000 if is_imp else 0xFF6600,
+                    level   = "CRITICAL" if is_imp else "ALERT",
+                )
+            except Exception as exc:
+                log.debug("X threat → discord error: %s", exc)
+
+        # 4. Autonomous — FOUNDER-type strategic decision
+        try:
+            autonomous.inject(
+                source        = "x_social",
+                decision_type = "FOUNDER",
+                title         = f"X {'Impersonation' if is_imp else 'Threat'}: {author}",
+                confidence    = 0.90 if is_imp else score,
+                urgency       = 0.95 if is_imp else 0.70,
+                risk          = sev,
+                metadata      = {
+                    "tweet_id":  mention.tweet_id,
+                    "author":    author,
+                    "text":      text,
+                    "is_impersonation": is_imp,
+                },
+            )
+        except Exception as exc:
+            log.debug("X threat → autonomous error: %s", exc)
+
+    @staticmethod
+    async def _x_search_to_intel(intel, hit) -> None:
+        """Feed high-severity Triumph Synergy search hits into Intel."""
+        try:
+            if hit.severity >= 0.30:
+                from ..intelligence import Signal as IntelSignal
+                sig = IntelSignal(
+                    source      = "x_social",
+                    entity_id   = hit.author_id or hit.author_username,
+                    signal_type = "social_search",
+                    value       = hit.severity,
+                    confidence  = 0.70,
+                    metadata    = {
+                        "query":      hit.query,
+                        "tweet_id":   hit.tweet_id,
+                        "author":     f"@{hit.author_username}",
+                        "text":       hit.text[:200],
+                    },
+                )
+                intel.ingest_signal(sig)
+        except Exception as exc:
+            log.debug("X search → intel error: %s", exc)
 
 
 # ── singleton ─────────────────────────────────────────────────────────────────
