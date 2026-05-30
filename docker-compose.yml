@@ -1254,6 +1254,43 @@ services:
       start_period: 120s
 
   # ==========================================================================
+  # SOVEREIGN NANO SAIB — Apex Defense Mesh
+  # Protocol obfuscation + traffic tunneling + Darktrace-superior anomaly
+  # detection + photonic scheduling + neural-logic fusion + Unreal Engine feed
+  # ==========================================================================
+  sovereign-nano-saib:
+    build:
+      context: docker/sovereign-nano-saib
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-nano-saib
+    <<: *common
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.50
+    environment:
+      PORT: "8201"
+      SMB_URL: "http://triumph-sovereign-military-bridge:8199"
+    expose:
+      - "8201"
+    secrets:
+      - public_bridge_token
+    networks:
+      triumph-net:
+        aliases:
+          - triumph-sovereign-nano-saib
+          - triumph-nano-saib
+    depends_on:
+      sovereign-military-bridge:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8201/health', timeout=25)"]
+      interval: 90s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+
+  # ==========================================================================
   # SOVEREIGN MESH HUB — Encrypted Private Network (WireGuard)
   # ==========================================================================
   # ChaCha20-Poly1305 transport + Curve25519 ECDH + per-peer 256-bit PSK
