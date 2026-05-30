@@ -1281,7 +1281,7 @@ services:
       STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET:-}"
       # SAIB public base URL (for Stripe redirect URLs)
       SAIB_BASE_URL: "${SAIB_BASE_URL:-https://saib.triumphsynergy.io}"
-      # Grok / xAI inference
+      # Grok / xAI inference (set XAI_API_KEY in .env)
       XAI_API_KEY: "${XAI_API_KEY:-}"
     secrets:
       - public_bridge_token
