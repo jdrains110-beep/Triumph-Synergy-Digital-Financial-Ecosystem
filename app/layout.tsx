@@ -150,9 +150,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getRequestLocale();
-  // Read per-request CSP nonce forwarded by middleware so that the Pi SDK
-  // <script> tags pass `script-src 'strict-dynamic' 'nonce-...'`.
-  const nonce = (await headers()).get("x-csp-nonce") ?? undefined;
+  // Read per-request CSP nonce forwarded by the proxy middleware.
+  // Must use 'x-nonce' — the standard header Next.js App Router reads to
+  // auto-apply the nonce to its own injected bootstrap scripts.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
     <html

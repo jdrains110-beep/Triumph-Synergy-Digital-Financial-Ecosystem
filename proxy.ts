@@ -38,7 +38,9 @@ export async function proxy(request: NextRequest) {
     .reduce((acc, b) => acc + b.toString(16).padStart(2, "0"), "");
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-csp-nonce", nonce);
+  // Use 'x-nonce' — the header name Next.js App Router reads to auto-apply
+  // the nonce to its own injected scripts (bootstrapper, __NEXT_DATA__, etc.).
+  requestHeaders.set("x-nonce", nonce);
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },
@@ -91,8 +93,7 @@ export async function proxy(request: NextRequest) {
     "Cache-Control",
     "private, no-store, no-cache, must-revalidate, max-age=0"
   );
-  // Generate per-request nonce for inline scripts (CSP3) — forwarded via
-  // request header above so the layout can attach nonce={...} to <script> tags.
+  // Forward nonce so the client/layout can read it via response header if needed.
   response.headers.set("X-CSP-Nonce", nonce);
   response.headers.set(
     "Content-Security-Policy",
@@ -100,12 +101,12 @@ export async function proxy(request: NextRequest) {
       "default-src 'self'",
       `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://sdk.minepi.com https://app-cdn.minepi.com`,
       "script-src-attr 'none'",
-      // 'unsafe-inline' in style-src is intentional and safe: styles cannot
-      // execute JavaScript, so XSS via injected styles is not possible.
-      // It is retained because Next.js injects critical CSS as inline <style>
-      // tags at render time — removing it breaks the initial page render.
-      // The nonce covers any first-party <style> blocks we add explicitly.
-      `style-src 'self' 'unsafe-inline' 'nonce-${nonce}'`,
+      // 'unsafe-inline' in style-src: styles cannot execute JavaScript so XSS
+      // via injected styles is not possible. Per CSP3 spec, if a nonce OR hash
+      // is also present in style-src, browsers IGNORE 'unsafe-inline', breaking
+      // all inline styles injected by Next.js and next-themes. Therefore the
+      // nonce is intentionally omitted from style-src.
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.minepi.com https://developer-assets.minepi.com",
       "connect-src 'self' https://api.minepi.com https://*.minepi.com https://horizon.pi.network https://api.mainnet.minepi.com https://*.supabase.co wss://*.supabase.co",
       "frame-src 'self' https://sdk.minepi.com",
