@@ -16,3 +16,5 @@ aiofiles>=23.2.1
 aiohttp>=3.10.0
 # v5 sovereign apex engines
 PyJWT>=2.8.0
+# v5 billing (Pi + USD Stripe)
+stripe>=7.0.0
