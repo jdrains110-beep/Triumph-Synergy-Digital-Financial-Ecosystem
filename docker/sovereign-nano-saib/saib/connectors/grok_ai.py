@@ -17,7 +17,9 @@ Capabilities
 
 Environment variables
 ──────────────────────
-  XAI_API_KEY          — xAI API key (required)
+  XAI_API_KEY          — xAI inference key (auto-provisioned from XAI_MGMT_TOKEN if absent)
+  XAI_MGMT_TOKEN       — xAI management token (allows SAIB to create/rotate its own keys)
+  XAI_TEAM_ID          — xAI team ID (default: f12d8da8-7e9f-4750-ba92-414e060e47dc)
   GROK_MODEL           — default: grok-3-mini  (also: grok-3, grok-2)
   GROK_MAX_TOKENS      — default: 1024
   GROK_TEMPERATURE     — default: 0.4
@@ -38,12 +40,15 @@ import httpx
 log = logging.getLogger("saib.connector.grok_ai")
 
 # ──────────────────────────────────── config ──
-XAI_API_KEY    = os.getenv("XAI_API_KEY", "")
-GROK_MODEL     = os.getenv("GROK_MODEL", "grok-3-mini")
-GROK_MAX_TOKENS = int(os.getenv("GROK_MAX_TOKENS", "1024"))
+XAI_API_KEY      = os.getenv("XAI_API_KEY", "")
+XAI_MGMT_TOKEN   = os.getenv("XAI_MGMT_TOKEN", "")
+XAI_TEAM_ID      = os.getenv("XAI_TEAM_ID", "f12d8da8-7e9f-4750-ba92-414e060e47dc")
+XAI_MGMT_URL     = "https://management-api.x.ai"
+GROK_MODEL       = os.getenv("GROK_MODEL", "grok-3-mini")
+GROK_MAX_TOKENS  = int(os.getenv("GROK_MAX_TOKENS", "1024"))
 GROK_TEMPERATURE = float(os.getenv("GROK_TEMPERATURE", "0.4"))
-GROK_TIMEOUT_S = float(os.getenv("GROK_TIMEOUT_S", "30"))
-GROK_BASE_URL  = "https://api.x.ai/v1"
+GROK_TIMEOUT_S   = float(os.getenv("GROK_TIMEOUT_S", "30"))
+GROK_BASE_URL    = "https://api.x.ai/v1"
 
 _DEFAULT_SYSTEM = os.getenv(
     "GROK_SYSTEM_PROMPT",
@@ -72,16 +77,81 @@ class GrokAIConnector:
     """Sovereign Grok inference connector — wraps xAI /v1/chat/completions."""
 
     def __init__(self) -> None:
-        self._api_key   = XAI_API_KEY
-        self._model     = GROK_MODEL
-        self._system    = _DEFAULT_SYSTEM
-        self._calls     = 0
-        self._errors    = 0
-        self._total_tokens = 0
-        self._last_call_at = 0.0
-        self._latency_sum  = 0.0
+        self._api_key        = XAI_API_KEY
+        self._mgmt_token     = XAI_MGMT_TOKEN
+        self._team_id        = XAI_TEAM_ID
+        self._model          = GROK_MODEL
+        self._system         = _DEFAULT_SYSTEM
+        self._calls          = 0
+        self._errors         = 0
+        self._total_tokens   = 0
+        self._last_call_at   = 0.0
+        self._latency_sum    = 0.0
+        self._provisioned_at = 0.0   # when SAIB last self-provisioned a key
+        self._key_id: str    = ""    # xAI key ID of the auto-provisioned key
 
-    # ── public helpers ────────────────────────────────────────────────────────
+    # ── self-provisioning ─────────────────────────────────────────────────────
+
+    async def provision_key(self) -> Dict[str, Any]:
+        """
+        Use the management token to create a fresh inference key and install it
+        as the active key. Old SAIB-provisioned key is deleted first.
+        Requires XAI_MGMT_TOKEN env var.
+        """
+        if not self._mgmt_token:
+            return {"ok": False, "error": "XAI_MGMT_TOKEN not set"}
+
+        headers = {
+            "Authorization": f"Bearer {self._mgmt_token}",
+            "Content-Type":  "application/json",
+        }
+        base = f"{XAI_MGMT_URL}/auth/teams/{self._team_id}/api-keys"
+
+        async with httpx.AsyncClient(timeout=15) as client:
+            # Delete existing SAIB-provisioned key if we have its ID
+            if self._key_id:
+                try:
+                    await client.delete(f"{base}/{self._key_id}", headers=headers)
+                    log.info("Grok: deleted old provisioned key %s", self._key_id)
+                except Exception as exc:
+                    log.debug("Grok: delete old key error (non-fatal): %s", exc)
+
+            # Create a new inference key
+            resp = await client.post(
+                base,
+                headers=headers,
+                json={
+                    "name":  f"SAIB-auto-{int(time.time())}",
+                    "acls":  ["api-key:model:*", "api-key:endpoint:*"],
+                    "qps":   5,
+                    "qpm":   60,
+                    "tpm":   None,
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        new_key = data.get("apiKey", "")
+        key_id  = data.get("apiKeyId", "")
+
+        if not new_key:
+            return {"ok": False, "error": "apiKey missing from response", "raw": data}
+
+        self._api_key        = new_key
+        self._key_id         = key_id
+        self._provisioned_at = time.time()
+        log.info("Grok: self-provisioned new inference key (id=%s)", key_id)
+        return {"ok": True, "key_id": key_id, "provisioned_at": self._provisioned_at}
+
+    async def ensure_key(self) -> None:
+        """Called at startup: if no API key but mgmt token exists, auto-provision."""
+        if not self._api_key and self._mgmt_token:
+            log.info("Grok: no XAI_API_KEY — auto-provisioning via management token...")
+            result = await self.provision_key()
+            if result["ok"]:
+                log.info("Grok: inference key ready (self-provisioned)")
+            else:
+                log.warning("Grok: auto-provision failed: %s", result.get("error"))
 
     async def complete(
         self,
@@ -174,6 +244,9 @@ class GrokAIConnector:
         return {
             "model":            self._model,
             "api_key_set":      bool(self._api_key),
+            "mgmt_token_set":   bool(self._mgmt_token),
+            "self_provisioned": bool(self._key_id),
+            "provisioned_at":   self._provisioned_at,
             "calls":            self._calls,
             "errors":           self._errors,
             "total_tokens":     self._total_tokens,

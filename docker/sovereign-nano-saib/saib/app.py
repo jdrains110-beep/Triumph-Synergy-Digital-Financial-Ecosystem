@@ -82,6 +82,7 @@ Endpoints — all auth-gated except /health, /ws/threat-graph, /mesh/gossip:
   POST /connectors/grok/strategic     — sovereign strategic advisory
   POST /connectors/grok/draft-tweet   — compose tweet for @jaymoney0300
   POST /connectors/grok/summarize     — condense text to key insights
+  POST /connectors/grok/provision-key  — SAIB self-provisions fresh xAI key via mgmt token
 """
 from __future__ import annotations
 
@@ -1078,4 +1079,11 @@ async def grok_summarize(req: GrokSummarizeRequest):
     result = await _grok().summarize(req.text, req.max_words)
     return {"summary": result.text, "tokens": result.total_tokens,
             "latency_ms": result.latency_ms, "error": result.error}
+
+
+@app.post("/connectors/grok/provision-key", dependencies=[Depends(_require_token)])
+async def grok_provision_key():
+    """SAIB self-provisions a fresh xAI inference key via the management token."""
+    result = await _grok().provision_key()
+    return result
 

@@ -170,7 +170,8 @@ class SovereignConnectorOrchestrator:
         _founder.start()
         _autonomous.start()
         _x.start()
-        # _grok is stateless — no background loop needed
+        # Grok: auto-provision inference key if only mgmt token is available
+        asyncio.create_task(_grok.ensure_key())
 
         self._is_running = True
         log.info(
