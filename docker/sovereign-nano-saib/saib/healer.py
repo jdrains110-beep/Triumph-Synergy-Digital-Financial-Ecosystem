@@ -39,6 +39,7 @@ class HealAction(Enum):
     QUARANTINE       = "quarantine"
     ESCALATE         = "escalate"
     WATCH            = "watch"
+    FIX_AND_PR       = "fix_and_pr"   # v5: generate code fix + open PR
 
 
 class ServiceStatus(Enum):
@@ -116,12 +117,15 @@ class SovereignHealerEngine:
       Layer 1 — Response body / JSON error fields
       Layer 2 — Stdout/stderr log stream
       Layer 3 — Structured JSON log events (if available)
-      Layer 4 — Grok AI root-cause reasoning across all layers
-      Layer 5 — Autonomous fix selection via warp dispatch
+      Layer 4 — External log ingestion (any cloud/k8s/syslog source)     [v5]
+      Layer 5 — Stack-aware code correlation (file:line pinpoint)         [v5]
+      Layer 6 — K8s pod events (CrashLoopBackOff / OOMKilled / Evicted)  [v5]
+      Layer 7 — Grok AI root-cause reasoning + fix proposal across all   [v5]
 
     Healing precision:
       • Each fix action is warp-dispatched at CRITICAL priority
       • Grok confidence score gates auto-apply (threshold 0.60)
+      • FIX_AND_PR: AI-generated code fix delivered as a GitHub/GitLab PR  [v5]
       • Failed heals escalate to FounderGuardian INFRASTRUCTURE alert
     """
 
@@ -140,22 +144,129 @@ class SovereignHealerEngine:
         self._running = False
         self._total_heals = 0
         self._total_successes = 0
-        self._grok: Any = None     # injected at boot
-        self._warp: Any = None     # injected at boot
-        self._guardian: Any = None # injected at boot
+        self._grok:      Any = None   # injected at boot
+        self._warp:      Any = None   # injected at boot
+        self._guardian:  Any = None   # injected at boot
+        # v5 modules — injected at boot
+        self._registry:  Any = None   # ExternalServiceRegistry
+        self._log_ingest: Any = None  # log_ingestion.pull_logs_for_service
+        self._code_analyzer: Any = None  # code_analyzer.analyse_code
+        self._fix_engine: Any = None  # fix_engine module
+        self._k8s:       Any = None   # K8sAdapter
         # quantum nano CPU management — semaphores throttle concurrent I/O
         self._probe_sem: asyncio.Semaphore = asyncio.Semaphore(self._PROBE_CONCURRENCY)
         self._heal_sem:  asyncio.Semaphore = asyncio.Semaphore(self._MAX_CONCURRENT_HEALS)
 
-    def boot(self, grok: Any, warp: Any, guardian: Any) -> None:
-        self._grok    = grok
-        self._warp    = warp
-        self._guardian = guardian
-        self._running  = True
+    def boot(
+        self,
+        grok:         Any,
+        warp:         Any,
+        guardian:     Any,
+        # v5 optional modules — gracefully absent if not provided
+        registry:     Any = None,
+        log_ingest:   Any = None,
+        code_analyzer: Any = None,
+        fix_engine:   Any = None,
+        k8s_adapter:  Any = None,
+    ) -> None:
+        self._grok         = grok
+        self._warp         = warp
+        self._guardian     = guardian
+        self._registry     = registry
+        self._log_ingest   = log_ingest
+        self._code_analyzer = code_analyzer
+        self._fix_engine   = fix_engine
+        self._k8s          = k8s_adapter
+        self._running      = True
+        # seed TRIUMPH_SERVICES as the default "triumph" tenant in external registry
+        if self._registry:
+            asyncio.create_task(self._seed_triumph_services())
         asyncio.create_task(self._scan_loop())
-        log.info("SovereignHealerEngine: online — monitoring %d services", len(self._states))
+        log.info(
+            "SovereignHealerEngine v5: online — %d internal + external registry attached=%s",
+            len(self._states), bool(self._registry),
+        )
+
+    # ── v5 seed ──────────────────────────────────────────────────────────────
+
+    async def _seed_triumph_services(self) -> None:
+        """Seed TRIUMPH_SERVICES into the external registry under the 'triumph' tenant."""
+        from .external_registry import LogSourceType, StackType
+        for svc in TRIUMPH_SERVICES:
+            try:
+                await self._registry.register(
+                    tenant_id   = "triumph",
+                    name        = svc.name,
+                    health_url  = svc.health_url,
+                    log_source  = LogSourceType.DOCKER,
+                    stack_type  = StackType.PYTHON,
+                    criticality = svc.criticality,
+                    log_config  = {"container": svc.log_service},
+                )
+            except ValueError:
+                pass  # already registered (e.g. plan limit — triumph tenant is admin)
 
     # ── public API ───────────────────────────────────────────────────────────
+
+    async def register_external_service(
+        self,
+        tenant_id:    str,
+        name:         str,
+        health_url:   str,
+        **kwargs: Any,
+    ) -> Optional[str]:
+        """Register an external service and return its service_id."""
+        if not self._registry:
+            return None
+        from .external_registry import LogSourceType, StackType
+        spec = await self._registry.register(
+            tenant_id  = tenant_id,
+            name       = name,
+            health_url = health_url,
+            **kwargs,
+        )
+        return spec.service_id
+
+    async def diagnose_single(
+        self,
+        spec: Any,  # ExternalServiceSpec
+    ) -> Dict[str, Any]:
+        """
+        Run a full v5 diagnosis on one registered external service.
+        Called by MCP server and /v5/analyze/logs endpoint.
+        """
+        # build a temporary ServiceState for this external service
+        profile = ServiceProfile(
+            name        = spec.name,
+            health_url  = spec.health_url,
+            log_service = spec.log_config.get("container", spec.name),
+            criticality = spec.criticality,
+        )
+        state = ServiceState(profile=profile)
+        # probe health
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as sess:
+            await self._check_service(sess, state)
+        # collect v5 evidence
+        evidence = await self._collect_layers_v5(state, spec)
+        diagnosis, actions, confidence = await self._grok_diagnose_v5(spec.name, evidence)
+        return {
+            "service_id":    spec.service_id,
+            "name":          spec.name,
+            "status":        state.status.value,
+            "diagnosis":     diagnosis,
+            "actions":       actions,
+            "confidence":    confidence,
+            "evidence_keys": list(evidence.keys()),
+        }
+
+    async def trigger_once(self) -> None:
+        """Manually trigger one heal cycle (called by MCP server)."""
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
+            tasks = [self._throttled_check(session, state) for state in self._states.values()]
+            await asyncio.gather(*tasks, return_exceptions=True)
+        for name, state in self._states.items():
+            if state.status not in (ServiceStatus.HEALTHY, ServiceStatus.QUARANTINE):
+                asyncio.create_task(self._guarded_heal(name))
 
     async def scan_all(self) -> Dict[str, Any]:
         """Full scan of all services — returns current health map."""
@@ -189,8 +300,8 @@ class SovereignHealerEngine:
         status_before = state.status
         log.info("[HEAL:%s] Starting deep heal of %s (status=%s)", event_id, service_name, status_before.value)
 
-        # ── Layer 0-3: collect all evidence ──
-        evidence = await self._collect_layers(state)
+        # ── Layer 0-7: collect all evidence (v5) ──
+        evidence = await self._collect_layers_v5(state, spec=None)
         layers_count = sum(1 for v in evidence.values() if v)
 
         # ── Layer 4: Grok root-cause reasoning ──
@@ -342,31 +453,119 @@ class SovereignHealerEngine:
             state.last_error = str(exc)[:200]
 
     async def _collect_layers(self, state: ServiceState) -> Dict[str, Any]:
-        """Collect evidence from all 4 observable layers."""
+        """Original 4-layer collection (kept for backwards compat)."""
+        return await self._collect_layers_v5(state, spec=None)
+
+    async def _collect_layers_v5(
+        self,
+        state: ServiceState,
+        spec: Any = None,  # Optional[ExternalServiceSpec]
+    ) -> Dict[str, Any]:
+        """Collect evidence from all 8 observable layers (v5)."""
         evidence: Dict[str, Any] = {
-            "layer0_health": state.last_error or "no response",
-            "layer1_status": state.status.value,
-            "layer2_logs": "",
-            "layer3_structured": [],
-            "consecutive_failures": state.consecutive_failures,
-            "heal_attempts": state.heal_attempts,
-            "service_criticality": state.profile.criticality,
+            "layer0_health":           state.last_error or "no response",
+            "layer1_status":           state.status.value,
+            "layer2_docker_logs":      "",
+            "layer3_structured":       [],
+            "layer4_external_logs":    [],
+            "layer5_code_context":     "",
+            "layer6_k8s_events":       [],
+            "consecutive_failures":    state.consecutive_failures,
+            "heal_attempts":           state.heal_attempts,
+            "service_criticality":     state.profile.criticality,
         }
 
-        # Layer 2: try to pull logs from Docker socket (if mounted)
+        # Layer 2: Docker logs
         try:
             docker_logs = await self._fetch_docker_logs(state.profile.log_service, tail=80)
             if docker_logs:
-                evidence["layer2_logs"] = docker_logs
-                # Layer 3: extract structured JSON log lines
+                evidence["layer2_docker_logs"] = docker_logs
                 structured = []
                 for line in docker_logs.split("\n"):
                     line = line.strip()
-                    if line.startswith("{") and '"level"' in line or '"error"' in line:
+                    if line.startswith("{") and ('"level"' in line or '"error"' in line):
                         structured.append(line[:300])
                 evidence["layer3_structured"] = structured[:20]
         except Exception as exc:
-            evidence["layer2_logs"] = f"log collection unavailable: {exc}"
+            evidence["layer2_docker_logs"] = f"docker log collection unavailable: {exc}"
+
+        # Layer 4: External log ingestion (v5) — pull from registered log source
+        if spec and self._log_ingest:
+            try:
+                from .log_ingestion import pull_logs_for_service
+                events = await pull_logs_for_service(spec, tail=100)
+                evidence["layer4_external_logs"] = [
+                    {"ts": e.ts, "level": e.level, "message": e.message[:300]}
+                    for e in events if e.level in ("error", "warn")
+                ][:30]
+            except Exception as exc:
+                log.debug("Layer 4 external logs: %s", exc)
+
+        # Layer 5: Code correlation (v5) — stack-aware analysis
+        if self._code_analyzer:
+            try:
+                from .log_ingestion import NormalisedLogEvent
+                all_logs = evidence["layer4_external_logs"]
+                # convert dict list back to NormalisedLogEvent for code_analyzer
+                mock_events = [
+                    NormalisedLogEvent(
+                        service_id = state.profile.name,
+                        ts         = e["ts"],
+                        level      = e["level"],
+                        message    = e["message"],
+                    )
+                    for e in all_logs
+                ]
+                if not mock_events:
+                    # fall back to docker log text
+                    docker_text = evidence["layer2_docker_logs"]
+                    mock_events = [
+                        NormalisedLogEvent(
+                            service_id = state.profile.name,
+                            ts         = __import__('time').time(),
+                            level      = "error",
+                            message    = line,
+                        )
+                        for line in docker_text.split("\n")
+                        if line.strip()
+                    ]
+                from .code_analyzer import analyse_code
+                stack_type = spec.stack_type if spec else "python"
+                repo_url   = spec.repo_url   if spec else ""
+                repo_token = spec.repo_token if spec else ""
+                repo_prov  = spec.repo_provider if spec else "github"
+                ctx = await analyse_code(
+                    service_id    = state.profile.name,
+                    log_events    = mock_events,
+                    stack_type    = str(stack_type),
+                    repo_url      = repo_url,
+                    repo_token    = repo_token,
+                    repo_provider = repo_prov,
+                )
+                if ctx:
+                    evidence["layer5_code_context"] = ctx.grok_prompt_fragment
+                    evidence["_code_ctx_obj"] = ctx  # stored for fix engine
+            except Exception as exc:
+                log.debug("Layer 5 code analysis: %s", exc)
+
+        # Layer 6: K8s events (v5)
+        if spec and self._k8s and spec.k8s_namespace:
+            try:
+                import os
+                api_server = spec.log_config.get("k8s_api", "https://kubernetes.default.svc")
+                token      = spec.log_config.get("k8s_token", self._k8s._in_cluster_token)
+                events     = await self._k8s.list_events(
+                    api_server = api_server,
+                    namespace  = spec.k8s_namespace,
+                    token      = token,
+                )
+                evidence["layer6_k8s_events"] = [
+                    {"pod": e.pod, "reason": e.reason,
+                     "message": e.message[:200], "severity": e.severity}
+                    for e in events if e.severity in ("CRITICAL", "HIGH")
+                ][:10]
+            except Exception as exc:
+                log.debug("Layer 6 K8s events: %s", exc)
 
         return evidence
 
@@ -406,22 +605,37 @@ class SovereignHealerEngine:
         service: str,
         evidence: Dict[str, Any],
     ) -> tuple[str, List[str], float]:
-        """Use Grok AI to perform 6-layer root-cause analysis and prescribe actions."""
+        """Alias to v5 diagnose (backwards compat)."""
+        return await self._grok_diagnose_v5(service, evidence)
+
+    async def _grok_diagnose_v5(
+        self,
+        service: str,
+        evidence: Dict[str, Any],
+    ) -> tuple[str, List[str], float]:
+        """Use Grok AI to perform 8-layer root-cause analysis (v5) and prescribe actions."""
         if not self._grok:
             return "Grok not available — manual inspection required", ["watch"], 0.0
 
         import json as _json
-        ev_text = _json.dumps(evidence, indent=2)[:3000]
+        # remove internal objects before serialising
+        clean_ev = {k: v for k, v in evidence.items() if not k.startswith("_")}
+        ev_text  = _json.dumps(clean_ev, indent=2)[:3500]
+
+        code_context_fragment = evidence.get("layer5_code_context", "")
+        has_code_ctx = bool(code_context_fragment)
 
         prompt = (
-            f"SOVEREIGN HEALER — ROOT CAUSE ANALYSIS\n"
+            f"SOVEREIGN HEALER v5 — QUANTUM ROOT CAUSE ANALYSIS\n"
             f"Service: {service}\n"
-            f"Evidence across all observable layers:\n{ev_text}\n\n"
-            f"Perform deep quantum root-cause analysis:\n"
-            f"1. ROOT CAUSE: What is the precise root cause? (be specific)\n"
-            f"2. LAYER: Which layer is the origin? (config/code/network/resource/dependency)\n"
+            f"Evidence across all 8 observable layers:\n{ev_text}\n\n"
+            + (f"\n{code_context_fragment}\n" if has_code_ctx else "")
+            + f"Perform surgical quantum root-cause analysis:\n"
+            f"1. ROOT CAUSE: What is the precise root cause? (be specific — file:line if available)\n"
+            f"2. LAYER: Which layer is the origin? (config/code/network/resource/dependency/k8s)\n"
             f"3. BLAST RADIUS: What other services might be affected?\n"
-            f"4. HEALING ACTIONS: List 1-3 actions from: [restart, clear_cache, reduce_load, reconfigure, quarantine, watch]\n"
+            f"4. HEALING ACTIONS: List 1-3 actions from: [restart, clear_cache, reduce_load, reconfigure, quarantine, watch{', fix_and_pr' if has_code_ctx else ''}]\n"
+            f"   Note: use fix_and_pr only if a specific code bug is identified with confidence >= 0.75\n"
             f"5. CONFIDENCE: Your confidence score (0.00-1.00)\n\n"
             f"Respond in this exact format:\n"
             f"ROOT_CAUSE: <one sentence>\n"
@@ -436,7 +650,7 @@ class SovereignHealerEngine:
                 "You are the Sovereign Healer AI — a precision root-cause analyst for "
                 "distributed microservice ecosystems. Be surgical, concise, and accurate."
             ))
-            text = result.get("content", "") if isinstance(result, dict) else str(result)
+            text = result.text if hasattr(result, "text") else (result.get("content", "") if isinstance(result, dict) else str(result))
 
             # parse structured response
             diagnosis = ""
@@ -520,7 +734,85 @@ class SovereignHealerEngine:
                 await self._escalate_to_guardian(state, state.last_diagnosis)
                 applied.append("escalate(guardian)")
 
+            elif action == HealAction.FIX_AND_PR:  # v5
+                ok = await self._generate_and_deliver_fix(state, event_id)
+                applied.append(f"fix_and_pr({'ok' if ok else 'fail'})")
+                if ok:
+                    success = True
+
         return applied, success
+
+    async def _generate_and_deliver_fix(
+        self,
+        state:    ServiceState,
+        event_id: str,
+    ) -> bool:
+        """v5: generate a code fix via fix_engine and open a GitHub/GitLab PR."""
+        if not self._fix_engine or not self._grok:
+            log.warning("[HEAL:%s] fix_engine or grok not available", event_id)
+            return False
+        # find the code context object stashed in evidence during _collect_layers_v5
+        # we need to re-run a targeted collect just for the code ctx
+        try:
+            from .fix_engine import generate_fix, deliver_github_pr, deliver_gitlab_mr
+            # check if we can find a registered spec for this service
+            spec = None
+            if self._registry:
+                svcs = self._registry.list_services("triumph")
+                for s in svcs:
+                    if s.name == state.profile.name:
+                        spec = s
+                        break
+            if not spec or not spec.repo_url:
+                log.debug("[HEAL:%s] no repo_url for %s — skip fix_and_pr", event_id, state.profile.name)
+                return False
+
+            # pull fresh logs for code analysis
+            from .log_ingestion import pull_logs_for_service
+            from .code_analyzer import analyse_code
+            events = await pull_logs_for_service(spec, tail=100)
+            ctx = await analyse_code(
+                service_id    = state.profile.name,
+                log_events    = events,
+                stack_type    = str(spec.stack_type),
+                repo_url      = spec.repo_url,
+                repo_token    = spec.repo_token,
+                repo_provider = spec.repo_provider,
+            )
+            if not ctx:
+                return False
+
+            fix = await generate_fix(
+                grok       = self._grok,
+                code_ctx   = ctx,
+                root_cause = state.last_diagnosis,
+            )
+            if not fix:
+                return False
+
+            if spec.repo_provider == "github":
+                pr_url = await deliver_github_pr(
+                    fix          = fix,
+                    repo_url     = spec.repo_url,
+                    token        = spec.repo_token,
+                    service_name = spec.name,
+                )
+                if pr_url:
+                    log.info("[HEAL:%s] PR opened: %s", event_id, pr_url)
+                    return True
+            elif spec.repo_provider in ("gitlab", "self-hosted"):
+                mr_url = await deliver_gitlab_mr(
+                    fix          = fix,
+                    repo_url     = spec.repo_url,
+                    token        = spec.repo_token,
+                    service_name = spec.name,
+                )
+                if mr_url:
+                    log.info("[HEAL:%s] MR opened: %s", event_id, mr_url)
+                    return True
+        except Exception as exc:
+            log.error("[HEAL:%s] fix_and_pr error: %s", event_id, repr(exc))
+        return False
 
     async def _restart_service(self, state: ServiceState) -> bool:
         """Restart service via Docker socket if available."""
@@ -585,6 +877,9 @@ class SovereignHealerEngine:
         except Exception as exc:
             log.warning("[HEAL] Guardian escalation failed: %s", exc)
 
+
+# ── backwards-compat alias ───────────────────────────────────────────────────
+SovereignHealerEngineV5 = SovereignHealerEngine
 
 # singleton
 healer = SovereignHealerEngine()

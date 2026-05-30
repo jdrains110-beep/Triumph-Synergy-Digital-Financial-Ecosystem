@@ -1266,7 +1266,8 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 256m
-    cpus: 0.75  # quantum-managed: nano-saib v4 (healer+botdefense apex engines)
+    cpus: 0.75  # quantum-managed: nano-saib v5 (sovereign apex — registry+logs+code+fix+MCP+tenants+k8s)
+    environment:
       SMB_URL: "http://triumph-sovereign-military-bridge:8199"
     expose:
       - "8201"
