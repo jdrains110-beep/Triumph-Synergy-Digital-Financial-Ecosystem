@@ -669,6 +669,38 @@ def pi_stats():
     return conn_orchestrator.pi.stats() if conn_orchestrator.pi else {"error": "not started"}
 
 
+@app.get("/connectors/pi/protocol", dependencies=[Depends(_require_token)])
+def pi_protocol():
+    """Current Pi Network protocol version state + upgrade history.
+
+    Returns the live stellar-core version, Horizon version, Stellar ledger
+    protocol number, and the complete history of all detected upgrades.
+    The SAIB fires alerts across Intel / Guardian / Discord the instant any
+    of these version numbers change so the ecosystem stays in sync with Pi
+    mainnet on every protocol hop (e.g. v23 → v24).
+    """
+    if not conn_orchestrator.pi:
+        return {"error": "not started"}
+    ps = conn_orchestrator.pi.get_protocol_state()
+    return {
+        "core_version":           ps.core_version,
+        "core_version_num":       ps.core_version_num,
+        "horizon_version":        ps.horizon_version,
+        "horizon_version_num":    ps.horizon_version_num,
+        "network_protocol":       ps.network_protocol,
+        "network_passphrase":     ps.network_passphrase,
+        "history_latest_ledger":  ps.history_latest,
+        "last_checked":           ps.last_checked,
+        "upgraded_at":            ps.upgraded_at,
+        "previous": {
+            "core_version_num":    ps.previous_core_num,
+            "horizon_version_num": ps.previous_horizon_num,
+            "network_protocol":    ps.previous_network_protocol,
+        },
+        "upgrade_history": ps.upgrade_history,
+    }
+
+
 @app.post("/connectors/pi/wallet/register", dependencies=[Depends(_require_token)])
 def pi_wallet_register(req: PiWalletRegisterRequest):
     conn_orchestrator.pi.register_wallet(req.address)

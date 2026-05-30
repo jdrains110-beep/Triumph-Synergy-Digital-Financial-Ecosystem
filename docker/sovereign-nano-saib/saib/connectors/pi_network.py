@@ -22,6 +22,7 @@ import hashlib
 import hmac
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -93,6 +94,47 @@ class WalletState:
         return len([t for t in self._out_times if t >= cutoff])
 
 
+# ── Protocol version state ────────────────────────────────────────────────────
+
+def _parse_version_num(raw: str) -> int:
+    """Extract leading major version integer from a version string.
+
+    Examples
+    --------
+    "stellar-core 24.0.0 (abc)"  → 24
+    "24.1.2-gitsha"              → 24
+    "23.0.0"                     → 23
+    Returns 0 when no number is found.
+    """
+    m = re.search(r'(\d+)\.', raw)
+    return int(m.group(1)) if m else 0
+
+
+@dataclass
+class ProtocolState:
+    """Snapshot of the Pi Network / Horizon protocol versions.
+
+    Updated on every health poll.  When a version number changes the
+    connector fires all ``on_protocol_upgrade`` callbacks so the rest of
+    the sovereign stack can react immediately.
+    """
+    # current values
+    core_version:          str   = ""   # raw:   "stellar-core 24.0.0 (hash)"
+    core_version_num:      int   = 0    # parsed: 24
+    horizon_version:       str   = ""   # raw:   "24.0.0-abc"
+    horizon_version_num:   int   = 0    # parsed: 24
+    network_protocol:      int   = 0    # Stellar ledger protocol (from latest ledger)
+    history_latest:        int   = 0    # ledger sequence
+    network_passphrase:    str   = ""
+    last_checked:          float = 0.0
+    # upgrade bookkeeping
+    upgraded_at:              float       = 0.0
+    previous_core_num:        int         = 0
+    previous_horizon_num:     int         = 0
+    previous_network_protocol: int        = 0
+    upgrade_history:          List[dict]  = field(default_factory=list)
+
+
 # ─────────────────────────────────────────── connector ──
 
 class PiNetworkConnector:
@@ -110,6 +152,10 @@ class PiNetworkConnector:
         self._on_tx_callbacks:   List[Callable[[PiTransaction], None]] = []
         self._on_balance_change: List[Callable[[WalletState, float], None]] = []
         self._on_payment_update: List[Callable[[dict], None]] = []
+
+        # protocol upgrade tracking
+        self._protocol_state: ProtocolState = ProtocolState()
+        self._on_protocol_upgrade_callbacks: List[Callable[[dict], None]] = []
 
         self._client:  Optional[httpx.AsyncClient] = None
         self._running: bool = False
@@ -140,6 +186,22 @@ class PiNetworkConnector:
 
     def on_payment_update(self, cb: Callable[[dict], None]) -> None:
         self._on_payment_update.append(cb)
+
+    def on_protocol_upgrade(self, cb: Callable[[dict], None]) -> None:
+        """Register a callback fired whenever Pi Network protocol version changes.
+
+        The callback receives a dict with keys:
+          changes          – dict of what changed (core / horizon / network_protocol)
+          core_version     – new raw core_version string
+          horizon_version  – new raw horizon_version string
+          network_protocol – new Stellar ledger protocol number
+          ts               – Unix timestamp of detection
+        """
+        self._on_protocol_upgrade_callbacks.append(cb)
+
+    def get_protocol_state(self) -> ProtocolState:
+        """Return the latest observed Pi Network protocol state."""
+        return self._protocol_state
 
     def start(self) -> None:
         """Spawn background polling tasks (call once in lifespan)."""
@@ -192,6 +254,7 @@ class PiNetworkConnector:
     # ── stats ─────────────────────────────────────────────────────────────
 
     def stats(self) -> dict:
+        ps = self._protocol_state
         return {
             "wallets_watched": len(self._wallets),
             "known_txids": len(self._known_txids),
@@ -199,6 +262,17 @@ class PiNetworkConnector:
             "polls": self._polls,
             "errors": self._errors,
             "network_health": self._last_network_health,
+            "protocol": {
+                "core_version":       ps.core_version,
+                "core_version_num":   ps.core_version_num,
+                "horizon_version":    ps.horizon_version,
+                "horizon_version_num": ps.horizon_version_num,
+                "network_protocol":   ps.network_protocol,
+                "network_passphrase": ps.network_passphrase,
+                "history_latest":     ps.history_latest,
+                "upgraded_at":        ps.upgraded_at,
+                "upgrade_history":    ps.upgrade_history[-10:],
+            },
             "wallet_states": {
                 addr: {
                     "balance":     ws.balance,
@@ -244,7 +318,7 @@ class PiNetworkConnector:
             await asyncio.sleep(POLL_INTERVAL_S * 2)
 
     async def _network_health_loop(self) -> None:
-        """Fetch Pi Network / Horizon health metrics."""
+        """Fetch Pi Network / Horizon health metrics and detect protocol upgrades."""
         await asyncio.sleep(10)
         horizon = os.getenv("PI_HORIZON_BASE", "https://api.mainnet.minepi.com")
         while self._running:
@@ -253,16 +327,134 @@ class PiNetworkConnector:
                     resp = await client.get(f"{horizon}/")
                     if resp.status_code == 200:
                         data = resp.json()
+
+                        core_version    = data.get("core_version", "")
+                        horizon_version = data.get("horizon_version", "")
+                        passphrase      = data.get("network_passphrase", "")
+                        history_latest  = data.get("history_latest_ledger", 0)
+
+                        core_num    = _parse_version_num(core_version)
+                        horizon_num = _parse_version_num(horizon_version)
+
+                        # ── fetch ledger protocol version ──────────────────
+                        network_protocol = self._protocol_state.network_protocol
+                        try:
+                            lr = await client.get(
+                                f"{horizon}/ledgers?order=desc&limit=1",
+                                timeout=8.0,
+                            )
+                            if lr.status_code == 200:
+                                records = lr.json().get("_embedded", {}).get("records", [])
+                                if records:
+                                    network_protocol = int(records[0].get(
+                                        "protocol_version", network_protocol
+                                    ))
+                        except Exception:
+                            pass
+
+                        # ── detect version changes ─────────────────────────
+                        prev     = self._protocol_state
+                        upgraded = False
+                        changes: dict = {}
+
+                        if prev.core_version_num > 0 and core_num != prev.core_version_num:
+                            upgraded = True
+                            changes["core"] = {
+                                "from": prev.core_version_num,
+                                "to":   core_num,
+                                "raw":  core_version,
+                            }
+                            log.warning(
+                                "Pi Network: stellar-core UPGRADED  %d → %d  (%s)",
+                                prev.core_version_num, core_num, core_version,
+                            )
+
+                        if prev.horizon_version_num > 0 and horizon_num != prev.horizon_version_num:
+                            upgraded = True
+                            changes["horizon"] = {
+                                "from": prev.horizon_version_num,
+                                "to":   horizon_num,
+                                "raw":  horizon_version,
+                            }
+                            log.warning(
+                                "Pi Network: Horizon UPGRADED  %d → %d  (%s)",
+                                prev.horizon_version_num, horizon_num, horizon_version,
+                            )
+
+                        if prev.network_protocol > 0 and network_protocol != prev.network_protocol:
+                            upgraded = True
+                            changes["network_protocol"] = {
+                                "from": prev.network_protocol,
+                                "to":   network_protocol,
+                            }
+                            log.warning(
+                                "Pi Network: LEDGER PROTOCOL UPGRADED  %d → %d",
+                                prev.network_protocol, network_protocol,
+                            )
+
+                        # ── update state ───────────────────────────────────
+                        new_history = prev.upgrade_history
+                        if upgraded:
+                            new_history = (new_history + [{
+                                "ts": time.time(),
+                                "changes": changes,
+                                "core_version": core_version,
+                                "horizon_version": horizon_version,
+                                "network_protocol": network_protocol,
+                            }])[-50:]
+
+                        self._protocol_state = ProtocolState(
+                            core_version          = core_version,
+                            core_version_num      = core_num,
+                            horizon_version       = horizon_version,
+                            horizon_version_num   = horizon_num,
+                            network_protocol      = network_protocol,
+                            network_passphrase    = passphrase,
+                            history_latest        = history_latest,
+                            last_checked          = time.time(),
+                            upgraded_at           = time.time() if upgraded else prev.upgraded_at,
+                            previous_core_num     = prev.core_version_num if upgraded else prev.previous_core_num,
+                            previous_horizon_num  = prev.horizon_version_num if upgraded else prev.previous_horizon_num,
+                            previous_network_protocol = prev.network_protocol if upgraded else prev.previous_network_protocol,
+                            upgrade_history       = new_history,
+                        )
+
                         self._last_network_health = {
-                            "core_version":    data.get("core_version", ""),
-                            "network_passphrase": data.get("network_passphrase", ""),
-                            "history_latest":  data.get("history_latest_ledger", 0),
-                            "horizon_version": data.get("horizon_version", ""),
-                            "ts":              time.time(),
+                            "core_version":        core_version,
+                            "core_version_num":    core_num,
+                            "horizon_version":     horizon_version,
+                            "horizon_version_num": horizon_num,
+                            "network_protocol":    network_protocol,
+                            "network_passphrase":  passphrase,
+                            "history_latest":      history_latest,
+                            "ts":                  time.time(),
                         }
+
+                        if upgraded:
+                            upgrade_info = {
+                                "changes":          changes,
+                                "core_version":     core_version,
+                                "horizon_version":  horizon_version,
+                                "network_protocol": network_protocol,
+                                "previous": {
+                                    "core_version_num":   prev.core_version_num,
+                                    "horizon_version_num": prev.horizon_version_num,
+                                    "network_protocol":   prev.network_protocol,
+                                },
+                                "ts": time.time(),
+                            }
+                            log.info("Pi: protocol upgrade event firing %s", changes)
+                            self._fire(self._on_protocol_upgrade_callbacks, upgrade_info)
+
+                        else:
+                            log.debug(
+                                "Pi health: core=%s horizon=%s protocol=%d ledger=%d",
+                                core_version, horizon_version, network_protocol, history_latest,
+                            )
+
             except Exception as exc:
                 log.debug("Pi horizon health check: %s", exc)
-            await asyncio.sleep(120)
+            await asyncio.sleep(60)   # check every 60 s — was 120 s
 
     async def _refresh_wallet(self, addr: str, client: httpx.AsyncClient) -> None:
         ws = self._wallets[addr]
