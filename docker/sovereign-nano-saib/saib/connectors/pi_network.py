@@ -236,8 +236,16 @@ class PiNetworkConnector:
         return await self._pi_get(f"/v2/payments/{payment_id}")
 
     async def get_incomplete_payments(self) -> List[dict]:
-        resp = await self._pi_get("/v2/payments?status=incomplete")
-        return resp.get("data", [])
+        try:
+            resp = await self._pi_get("/v2/payments?status=incomplete")
+            return resp.get("data", [])
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 404:
+                # Pi Platform does not expose a status-filter on /v2/payments;
+                # return empty — payments are surfaced via SDK callbacks instead.
+                log.debug("Pi incomplete-payments endpoint returned 404 — no server polling supported")
+                return []
+            raise
 
     # ── wallet / balance queries ──────────────────────────────────────────
 

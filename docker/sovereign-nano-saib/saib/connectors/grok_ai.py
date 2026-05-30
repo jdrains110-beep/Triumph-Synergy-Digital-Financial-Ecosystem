@@ -321,10 +321,11 @@ class GrokAIConnector:
             )
         except Exception as exc:
             self._errors += 1
-            log.error("Grok inference error: %s", exc)
+            detail = str(exc) or repr(exc)
+            log.error("Grok inference error (%s): %s", type(exc).__name__, detail)
             return GrokResult(
                 model=self._model, prompt_tokens=0, completion_tokens=0,
-                total_tokens=0, text="", latency_ms=0, error=str(exc),
+                total_tokens=0, text="", latency_ms=0, error=detail,
             )
 
 
