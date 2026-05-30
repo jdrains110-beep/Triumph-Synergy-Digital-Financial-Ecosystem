@@ -1,8 +1,8 @@
-# APEX security pins — starlette>=0.49.1 closes CVE-2025-54121 (DoS) and
-# CVE-2025-62727 (DoS via Range header merging). fastapi>=0.122.0 required
-# for compatible starlette range.
+# APEX security pins — starlette>=1.0.1 closes PYSEC-2026-161 (BadHost) +
+# CVE-2025-54121 (DoS) + CVE-2025-62727 (DoS via Range header merging).
+# fastapi>=0.122.0 required for compatible starlette range.
 fastapi>=0.122.0
-starlette>=0.49.1
+starlette>=1.0.1
 uvicorn>=0.37.0
 cryptography>=46.0.7
 httpx>=0.28.1
