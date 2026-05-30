@@ -8,3 +8,5 @@ pydantic>=2.10.4
 anyio>=4.9.0
 numpy>=1.26.4,<3
 websockets>=14.1
+networkx>=3.3
+scipy>=1.13.0
