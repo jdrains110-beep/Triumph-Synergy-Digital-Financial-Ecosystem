@@ -1,6 +1,6 @@
 /**
- * middleware.ts
- * Edge Middleware — Web3 session support + Supabase refresh + security headers
+ * proxy.ts  (replaces middleware.ts — Next.js 16 renamed the convention)
+ * Edge Proxy — Web3 session support + Supabase refresh + security headers
  *
  * Web3 Integration: Propagates wallet identity headers (X-Wallet-PublicKey,
  * X-Wallet-DID) from authenticated clients to downstream API routes.
@@ -18,9 +18,9 @@ import { createMiddlewareSupabase } from "@/lib/supabase";
 const STELLAR_KEY_RE = /^G[A-Z2-7]{55}$/;
 
 /**
- * Main middleware function
+ * Main proxy function (Next.js 16 convention — was "middleware")
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // NOTE: Pi App Studio assigns each app a fresh hostname on (re)transfer.
   // We must NOT hard-code or filter on hostnames here, otherwise the verifier
   // (or a freshly-issued domain) gets redirected away before the app can call
