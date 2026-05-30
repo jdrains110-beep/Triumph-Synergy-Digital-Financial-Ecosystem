@@ -117,6 +117,10 @@ from .enforcer     import SovereignEnforcer
 # ── v3 connector layer ────────────────────────────────────────────────────────
 from .connectors.orchestrator import orchestrator as conn_orchestrator
 
+# ── v4 apex engines ────────────────────────────────────────────────────────────
+from .healer     import healer     as _healer_engine
+from .bot_defense import bot_defense as _bot_defense_engine
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -199,11 +203,17 @@ async def lifespan(app: FastAPI):
         warp       = warp,
         mesh       = mesh,
     )
+    # ── boot v4 apex engines ──
+    _grok_ref = conn_orchestrator.grok
+    _x_ref    = conn_orchestrator.x_social
+    _healer_engine.boot(grok=_grok_ref, warp=warp, guardian=guardian)
+    _bot_defense_engine.boot(grok=_grok_ref, x_social=_x_ref, guardian=guardian)
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
         "Engines v2: Quantum | Intelligence | WarpSpeed | Brainstorm | Mesh | Guardian | Enforcer\n"
-        "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300) | GrokAI(xAI)"
+        "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300) | GrokAI(xAI)\n"
+        "Apex v4: SovereignHealer(auto-heal all services) | BotDefense(scammer/bot detection+block)"
     )
     yield
 
@@ -1086,4 +1096,104 @@ async def grok_provision_key():
     """SAIB self-provisions a fresh xAI inference key via the management token."""
     result = await _grok().provision_key()
     return result
+
+
+# ══════════════════════════════════════ APEX v4 — SOVEREIGN HEALER ═══════════
+
+class HealRequest(BaseModel):
+    service: str
+
+
+@app.get("/apex/healer/stats", dependencies=[Depends(_require_token)])
+def healer_stats():
+    """Sovereign Healer stats: service health map, heal history, success rates."""
+    return _healer_engine.stats()
+
+
+@app.get("/apex/healer/scan", dependencies=[Depends(_require_token)])
+async def healer_scan():
+    """Full scan of all Triumph ecosystem services — returns current health map."""
+    return await _healer_engine.scan_all()
+
+
+@app.post("/apex/healer/heal", dependencies=[Depends(_require_token)])
+async def healer_heal(req: HealRequest):
+    """
+    Trigger a full 6-layer root-cause analysis and warp-precision heal
+    for a specific service. Grok AI diagnoses the root cause across:
+      Layer 0: HTTP health surface
+      Layer 1: Response body error fields
+      Layer 2: Stdout/stderr log stream
+      Layer 3: Structured JSON log events
+      Layer 4: Grok AI quantum root-cause reasoning
+      Layer 5: Warp-speed autonomous fix application
+    """
+    return await _healer_engine.deep_heal(req.service)
+
+
+# ══════════════════════════════════════ APEX v4 — BOT DEFENSE ════════════════
+
+class BotAssessRequest(BaseModel):
+    account_data: dict
+
+class BotForceAssessRequest(BaseModel):
+    username: str
+
+class BotThresholdRequest(BaseModel):
+    block_threshold:  float = 0.50
+    report_threshold: float = 0.70
+
+
+@app.get("/apex/botdefense/stats", dependencies=[Depends(_require_token)])
+def botdefense_stats():
+    """Bot defense stats: scanned, blocked, reported, threat registry."""
+    return _bot_defense_engine.stats()
+
+
+@app.post("/apex/botdefense/assess", dependencies=[Depends(_require_token)])
+async def botdefense_assess(req: BotAssessRequest):
+    """
+    Multi-signal bot/scammer assessment of an X account.
+    Signals: account age, follower ratio, tweet velocity, scam phrase detection,
+    impersonation detection, Grok AI deep analysis.
+    Auto-blocks if score >= block_threshold, reports if >= report_threshold.
+    """
+    threat = await _bot_defense_engine.assess(req.account_data)
+    return {
+        "username":     threat.username,
+        "threat_class": threat.threat_class.value,
+        "score":        threat.score,
+        "signals":      threat.signals,
+        "grok_analysis": threat.grok_analysis,
+        "action_taken": threat.action_taken,
+        "blocked":      threat.blocked,
+        "reported":     threat.reported,
+    }
+
+
+@app.post("/apex/botdefense/force-assess", dependencies=[Depends(_require_token)])
+async def botdefense_force_assess(req: BotForceAssessRequest):
+    """
+    Force-assess a specific X username by fetching their profile live.
+    Will auto-block/report if score crosses thresholds.
+    """
+    return await _bot_defense_engine.force_assess(req.username)
+
+
+@app.post("/apex/botdefense/whitelist", dependencies=[Depends(_require_token)])
+def botdefense_whitelist(req: BotForceAssessRequest):
+    """Add a username to the permanent whitelist (never blocked/reported)."""
+    _bot_defense_engine._whitelist.add(req.username.lower())
+    return {"whitelisted": req.username, "whitelist": list(_bot_defense_engine._whitelist)}
+
+
+@app.post("/apex/botdefense/thresholds", dependencies=[Depends(_require_token)])
+def botdefense_thresholds(req: BotThresholdRequest):
+    """Adjust block/report score thresholds."""
+    _bot_defense_engine.BLOCK_THRESHOLD  = max(0.0, min(req.block_threshold, 1.0))
+    _bot_defense_engine.REPORT_THRESHOLD = max(0.0, min(req.report_threshold, 1.0))
+    return {
+        "block_threshold":  _bot_defense_engine.BLOCK_THRESHOLD,
+        "report_threshold": _bot_defense_engine.REPORT_THRESHOLD,
+    }
 

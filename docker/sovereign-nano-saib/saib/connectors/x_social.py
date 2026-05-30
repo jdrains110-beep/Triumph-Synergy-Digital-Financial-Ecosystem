@@ -442,6 +442,71 @@ class XSocialConnector:
         except Exception as exc:
             return {"error": str(exc)}
 
+    async def get_user_by_username(self, username: str) -> Optional[dict]:
+        """Fetch a user profile by username for bot assessment."""
+        if not X_BEARER_TOKEN:
+            return None
+        url = (
+            f"{X_API_BASE}/2/users/by/username/{username}"
+            "?user.fields=created_at,description,profile_image_url,public_metrics,name"
+        )
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as c:
+                r = await c.get(url, headers={"Authorization": f"Bearer {X_BEARER_TOKEN}"})
+                if r.status_code == 200:
+                    return r.json().get("data")
+                return None
+        except Exception as exc:
+            log.debug("X: get_user_by_username error: %s", exc)
+            return None
+
+    async def block_user(self, target_user_id: str) -> bool:
+        """Block a user account via X API v2 (requires OAuth 1.0a + founder user id)."""
+        if not self._write_ready() or not self._founder_user_id:
+            log.warning("X: block_user — OAuth not ready or founder_user_id unknown")
+            return False
+        url = f"{X_API_BASE}/2/users/{self._founder_user_id}/blocking"
+        body = {"target_user_id": target_user_id}
+        auth_header = _oauth1_header("POST", url)
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as c:
+                r = await c.post(
+                    url,
+                    headers={"Authorization": auth_header, "Content-Type": "application/json"},
+                    json=body,
+                )
+                if r.status_code in (200, 201):
+                    log.info("X: blocked user_id=%s", target_user_id)
+                    return True
+                log.warning("X: block_user %d: %s", r.status_code, r.text[:200])
+                return False
+        except Exception as exc:
+            log.debug("X: block_user error: %s", exc)
+            return False
+
+    async def report_user(self, target_user_id: str, category: str = "spam") -> bool:
+        """Report a user to X Trust & Safety via API v2."""
+        if not self._write_ready():
+            return False
+        url = f"{X_API_BASE}/2/users/{target_user_id}/report"
+        body = {"target_user_id": target_user_id, "category": category}
+        auth_header = _oauth1_header("POST", url)
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as c:
+                r = await c.post(
+                    url,
+                    headers={"Authorization": auth_header, "Content-Type": "application/json"},
+                    json=body,
+                )
+                if r.status_code in (200, 201):
+                    log.info("X: reported user_id=%s category=%s", target_user_id, category)
+                    return True
+                log.warning("X: report_user %d: %s", r.status_code, r.text[:200])
+                return False
+        except Exception as exc:
+            log.debug("X: report_user error: %s", exc)
+            return False
+
     # ── stats ─────────────────────────────────────────────────────────────
 
     def stats(self) -> dict:
