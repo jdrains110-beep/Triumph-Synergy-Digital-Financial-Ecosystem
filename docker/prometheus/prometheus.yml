@@ -5,8 +5,8 @@
 # ==============================================================================
 
 global:
-  scrape_interval: 30s   # CPU-optimized: reduced from 15s
-  evaluation_interval: 30s
+  scrape_interval: 60s   # quantum-managed: raised 30s→60s to reduce Prometheus CPU
+  evaluation_interval: 60s
   external_labels:
     monitor: 'pi-network-triumph-synergy'
     central_node: 'GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V'
@@ -40,10 +40,7 @@ scrape_configs:
           priority: 'supreme'
           public_key: 'GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V'
     metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Pi Triumph App — health check only (no Prometheus metrics endpoint)
+    scrape_interval: 60s  # quantum-managed: 15s→60s (central node) — health check only (no Prometheus metrics endpoint)
   # ==========================================================================
   # NOTE: triumph-app is a Next.js app — no native /metrics. Monitored via
   # nginx access logs and process-level metrics from the node exporter.
@@ -73,10 +70,7 @@ scrape_configs:
           type: 'vault'
           capacity: 'unlimited'
     metrics_path: /metrics
-    scrape_interval: 10s
-
-  # ==========================================================================
-  # Pi Smart Contracts
+    scrape_interval: 60s  # quantum-managed: 10s→60s (vault)
   # ==========================================================================
   - job_name: 'pi-smart-contracts'
     static_configs:
@@ -86,10 +80,7 @@ scrape_configs:
           type: 'execution-engine'
           channels: '10000'
     metrics_path: /metrics
-    scrape_interval: 10s
-
-  # ==========================================================================
-  # Pi SCP Upgrader
+    scrape_interval: 60s  # quantum-managed: 10s→60s (smart contracts)
   # ==========================================================================
   - job_name: 'pi-scp-upgrader'
     static_configs:
@@ -110,7 +101,7 @@ scrape_configs:
           service: 'postgres'
           type: 'database'
     metrics_path: /metrics
-    scrape_interval: 15s
+    scrape_interval: 60s  # quantum-managed: 15s→60s (postgres)
 
   # ==========================================================================
   # Infrastructure - Redis (via redis_exporter sidecar)
@@ -122,9 +113,7 @@ scrape_configs:
           service: 'redis'
           type: 'cache'
     metrics_path: /metrics
-    scrape_interval: 15s
-  # ==========================================================================
-  # Market Data Service
+    scrape_interval: 60s  # quantum-managed: 15s→60s (redis)
   # ==========================================================================
   - job_name: 'triumph-market-data'
     static_configs:
@@ -157,10 +146,7 @@ scrape_configs:
           service: 'compliance'
           type: 'kyc-aml'
     metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # DEX Engine
+    scrape_interval: 60s  # quantum-managed: 15s→60s (compliance)
   # ==========================================================================
   - job_name: 'triumph-dex'
     static_configs:
@@ -208,10 +194,7 @@ scrape_configs:
           type: 'recovery-watchdog'
           role: 'pi-horizon-self-heal'
     metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ========================================================================
-  # Health Governor — adaptive self-healing / restart arbitration
+    scrape_interval: 60s  # quantum-managed: 15s→60s (horizon-guardian) — adaptive self-healing / restart arbitration
   # ========================================================================
   - job_name: 'triumph-health-governor'
     static_configs:
@@ -221,10 +204,7 @@ scrape_configs:
           type: 'self-healing-control-plane'
           role: 'ml-pq-recovery-arbiter'
     metrics_path: /prometheus
-    scrape_interval: 15s
-
-  # ========================================================================
-  # Network Sentinel — connectivity anomaly detection + adaptive recovery
+    scrape_interval: 60s  # quantum-managed: 15s→60s (health-governor) — connectivity anomaly detection + adaptive recovery
   # ========================================================================
   - job_name: 'triumph-network-sentinel'
     static_configs:
@@ -234,10 +214,7 @@ scrape_configs:
           type: 'connectivity-watchdog'
           role: 'ml-anomaly-recovery'
     metrics_path: /prometheus
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Cloud Memory Platform — unified memory layer and cloud/offline sync
+    scrape_interval: 60s  # quantum-managed: 15s→60s (network-sentinel) — unified memory layer and cloud/offline sync
   # ==========================================================================
   - job_name: 'triumph-cloud-memory'
     static_configs:
@@ -247,10 +224,7 @@ scrape_configs:
           type: 'memory-fabric'
           role: 'online-offline-sync'
     metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Dual-Value Engine — Pi internal (mined) vs external (market) value
+    scrape_interval: 60s  # quantum-managed: 15s→60s (cloud-memory) — Pi internal (mined) vs external (market) value
   # ==========================================================================
   - job_name: 'triumph-dual-value-engine'
     static_configs:
@@ -262,10 +236,7 @@ scrape_configs:
           pi_internal_rate: '314159'
           pi_external_rate: '314.159'
     metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Quantum Shield Engine — NIST FIPS 203/204/205 post-quantum cryptography
+    scrape_interval: 60s  # quantum-managed: 15s→60s (dual-value) — NIST FIPS 203/204/205 post-quantum cryptography
   # ==========================================================================
   - job_name: 'triumph-quantum-shield'
     static_configs:
@@ -276,10 +247,7 @@ scrape_configs:
           algorithms: 'Kyber-1024,Dilithium-5,SPHINCS+-SHAKE-256f,AES-256-GCM'
           nist_standards: 'FIPS-203,FIPS-204,FIPS-205'
     metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Credit Engine — PiCredit Score + Bureau Integration
+    scrape_interval: 60s  # quantum-managed: 15s→60s (quantum-shield) — PiCredit Score + Bureau Integration
   # ==========================================================================
   - job_name: 'triumph-credit-engine'
     static_configs:
@@ -289,10 +257,7 @@ scrape_configs:
           type: 'credit-scoring'
           bureaus: 'equifax,experian,transunion,fico,vantagescore'
     metrics_path: /metrics
-    scrape_interval: 15s
-
-  # ==========================================================================
-  # Tokenization Engine — Pi domain + allodial deed tokenization
+    scrape_interval: 60s  # quantum-managed: 15s→60s (credit-engine) — Pi domain + allodial deed tokenization
   # ==========================================================================
   - job_name: 'triumph-tokenization-engine'
     static_configs:
@@ -302,10 +267,7 @@ scrape_configs:
           type: 'pi-domain-allodial-deed'
           token_standards: 'PI-721,PI-20,PI-1155'
     metrics_path: /metrics
-    scrape_interval: 10s
-
-  # ==========================================================================
-  # Payment Processor
+    scrape_interval: 60s  # quantum-managed: 10s→60s (tokenization)
   # ==========================================================================
   - job_name: 'triumph-payment-processor'
     static_configs:
@@ -314,4 +276,4 @@ scrape_configs:
           service: 'payment-processor'
           type: 'queue'
     metrics_path: /metrics
-    scrape_interval: 10s
+    scrape_interval: 60s  # quantum-managed: 10s→60s (payment-processor)

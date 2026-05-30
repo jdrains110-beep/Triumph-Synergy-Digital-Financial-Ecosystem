@@ -125,9 +125,11 @@ class SovereignHealerEngine:
       • Failed heals escalate to FounderGuardian INFRASTRUCTURE alert
     """
 
-    HEAL_INTERVAL_S   = 30.0   # background scan frequency
+    HEAL_INTERVAL_S   = 90.0   # background scan frequency (raised: 30→90s)
     GROK_THRESHOLD    = 0.60   # minimum Grok confidence to auto-apply
     MAX_HEAL_ATTEMPTS = 5      # quarantine after this many failed heals
+    _PROBE_CONCURRENCY = 4     # max simultaneous health-check probes (CPU lid)
+    _MAX_CONCURRENT_HEALS = 2  # max simultaneous deep-heals (CPU lid)
 
     def __init__(self) -> None:
         self._states: Dict[str, ServiceState] = {
@@ -141,6 +143,9 @@ class SovereignHealerEngine:
         self._grok: Any = None     # injected at boot
         self._warp: Any = None     # injected at boot
         self._guardian: Any = None # injected at boot
+        # quantum nano CPU management — semaphores throttle concurrent I/O
+        self._probe_sem: asyncio.Semaphore = asyncio.Semaphore(self._PROBE_CONCURRENCY)
+        self._heal_sem:  asyncio.Semaphore = asyncio.Semaphore(self._MAX_CONCURRENT_HEALS)
 
     def boot(self, grok: Any, warp: Any, guardian: Any) -> None:
         self._grok    = grok
@@ -156,7 +161,7 @@ class SovereignHealerEngine:
         """Full scan of all services — returns current health map."""
         results = {}
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
-            tasks = [self._check_service(session, state) for state in self._states.values()]
+            tasks = [self._throttled_check(session, state) for state in self._states.values()]
             await asyncio.gather(*tasks, return_exceptions=True)
         for name, state in self._states.items():
             results[name] = {
@@ -274,22 +279,32 @@ class SovereignHealerEngine:
 
     # ── background loop ──────────────────────────────────────────────────────
 
+    async def _throttled_check(self, session: aiohttp.ClientSession, state: ServiceState) -> None:
+        """Probe a single service under the probe semaphore (CPU lid)."""
+        async with self._probe_sem:
+            await self._check_service(session, state)
+
     async def _scan_loop(self) -> None:
-        await asyncio.sleep(15)  # allow full startup before first scan
+        await asyncio.sleep(60)  # allow full ecosystem startup before first scan
         while self._running:
             try:
                 async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
-                    tasks = [self._check_service(session, state) for state in self._states.values()]
+                    tasks = [self._throttled_check(session, state) for state in self._states.values()]
                     await asyncio.gather(*tasks, return_exceptions=True)
 
-                # trigger deep heal on any non-healthy service
+                # trigger deep heal — gated by heal semaphore to prevent CPU storm
                 for name, state in self._states.items():
-                    if state.status != ServiceStatus.HEALTHY and state.status != ServiceStatus.QUARANTINE:
-                        asyncio.create_task(self.deep_heal(name))
+                    if state.status not in (ServiceStatus.HEALTHY, ServiceStatus.QUARANTINE):
+                        asyncio.create_task(self._guarded_heal(name))
 
             except Exception as exc:
                 log.warning("SovereignHealer scan_loop error: %s", exc)
             await asyncio.sleep(self.HEAL_INTERVAL_S)
+
+    async def _guarded_heal(self, name: str) -> None:
+        """Deep-heal under heal semaphore — prevents simultaneous CPU storm."""
+        async with self._heal_sem:
+            await self.deep_heal(name)
 
     # ── internal helpers ─────────────────────────────────────────────────────
 
