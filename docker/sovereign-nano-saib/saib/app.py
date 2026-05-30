@@ -75,6 +75,13 @@ Endpoints — all auth-gated except /health, /ws/threat-graph, /mesh/gossip:
   POST /connectors/x/tweet           — post tweet as @jaymoney0300
   POST /connectors/x/reply           — reply to a tweet as @jaymoney0300
   POST /connectors/x/quote           — quote-tweet as @jaymoney0300
+  --- Grok AI v3 ---
+  GET  /connectors/grok/stats         — model, call count, token usage
+  POST /connectors/grok/complete      — raw Grok completion
+  POST /connectors/grok/analyze       — threat signal deep analysis
+  POST /connectors/grok/strategic     — sovereign strategic advisory
+  POST /connectors/grok/draft-tweet   — compose tweet for @jaymoney0300
+  POST /connectors/grok/summarize     — condense text to key insights
 """
 from __future__ import annotations
 
@@ -195,7 +202,7 @@ async def lifespan(app: FastAPI):
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
         "Engines v2: Quantum | Intelligence | WarpSpeed | Brainstorm | Mesh | Guardian | Enforcer\n"
-        "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300)"
+        "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300) | GrokAI(xAI)"
     )
     yield
 
@@ -334,6 +341,26 @@ class XReplyRequest(BaseModel):
 class XQuoteRequest(BaseModel):
     text:           str
     quote_tweet_id: str
+
+class GrokCompleteRequest(BaseModel):
+    prompt:      str
+    system:      Optional[str]   = None
+    temperature: Optional[float] = None
+    max_tokens:  Optional[int]   = None
+
+class GrokAnalyzeRequest(BaseModel):
+    signal: dict
+
+class GrokStrategicRequest(BaseModel):
+    context: dict
+
+class GrokDraftTweetRequest(BaseModel):
+    topic: str
+    tone:  str = "confident"
+
+class GrokSummarizeRequest(BaseModel):
+    text:      str
+    max_words: int = 150
 
 
 # ═══════════════════════════════════════════════════ v1 endpoints (unchanged) ══
@@ -990,4 +1017,65 @@ async def x_quote(req: XQuoteRequest):
     """Quote-tweet as @jaymoney0300."""
     result = await _x().quote_tweet(req.text, req.quote_tweet_id)
     return result
+
+
+# ── Grok AI (xAI inference) ────────────────────────────────────────────────────
+
+def _grok() -> Any:
+    """Shorthand: returns the live Grok connector or raises 503."""
+    c = conn_orchestrator.grok
+    if not c:
+        raise HTTPException(status_code=503, detail="Grok connector not started")
+    return c
+
+
+@app.get("/connectors/grok/stats", dependencies=[Depends(_require_token)])
+def grok_stats():
+    """Grok model stats: calls, token usage, latency."""
+    return _grok().stats()
+
+
+@app.post("/connectors/grok/complete", dependencies=[Depends(_require_token)])
+async def grok_complete(req: GrokCompleteRequest):
+    """Raw single-turn Grok completion."""
+    result = await _grok().complete(
+        req.prompt,
+        system=req.system,
+        temperature=req.temperature,
+        max_tokens=req.max_tokens,
+    )
+    return {"text": result.text, "tokens": result.total_tokens,
+            "latency_ms": result.latency_ms, "error": result.error}
+
+
+@app.post("/connectors/grok/analyze", dependencies=[Depends(_require_token)])
+async def grok_analyze_threat(req: GrokAnalyzeRequest):
+    """Deep threat-signal analysis via Grok."""
+    result = await _grok().analyze_threat(req.signal)
+    return {"analysis": result.text, "tokens": result.total_tokens,
+            "latency_ms": result.latency_ms, "error": result.error}
+
+
+@app.post("/connectors/grok/strategic", dependencies=[Depends(_require_token)])
+async def grok_strategic(req: GrokStrategicRequest):
+    """Sovereign strategic advisory from Grok."""
+    result = await _grok().strategic_advice(req.context)
+    return {"advisory": result.text, "tokens": result.total_tokens,
+            "latency_ms": result.latency_ms, "error": result.error}
+
+
+@app.post("/connectors/grok/draft-tweet", dependencies=[Depends(_require_token)])
+async def grok_draft_tweet(req: GrokDraftTweetRequest):
+    """Draft a tweet for @jaymoney0300 on the given topic."""
+    result = await _grok().draft_tweet(req.topic, req.tone)
+    return {"tweet": result.text, "tokens": result.total_tokens,
+            "latency_ms": result.latency_ms, "error": result.error}
+
+
+@app.post("/connectors/grok/summarize", dependencies=[Depends(_require_token)])
+async def grok_summarize(req: GrokSummarizeRequest):
+    """Summarize text highlighting sovereign risk factors."""
+    result = await _grok().summarize(req.text, req.max_words)
+    return {"summary": result.text, "tokens": result.total_tokens,
+            "latency_ms": result.latency_ms, "error": result.error}
 

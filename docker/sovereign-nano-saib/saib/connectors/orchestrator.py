@@ -52,6 +52,7 @@ class SovereignConnectorOrchestrator:
         self.founder:    Any = None
         self.autonomous: Any = None
         self.x_social:   Any = None
+        self.grok:       Any = None
 
     # ── boot ──────────────────────────────────────────────────────────────
 
@@ -83,6 +84,7 @@ class SovereignConnectorOrchestrator:
         from .founder_watch       import founder_watch    as _founder
         from .autonomous_decisions import autonomous      as _autonomous
         from .x_social            import x_social        as _x
+        from .grok_ai             import grok_ai         as _grok
 
         self.pi         = _pi
         self.db         = _db
@@ -91,6 +93,7 @@ class SovereignConnectorOrchestrator:
         self.founder    = _founder
         self.autonomous = _autonomous
         self.x_social   = _x
+        self.grok       = _grok
 
         # ── wire Pi callbacks ─────────────────────────────────────────────
         _pi.on_transaction(lambda tx: asyncio.create_task(
@@ -167,12 +170,13 @@ class SovereignConnectorOrchestrator:
         _founder.start()
         _autonomous.start()
         _x.start()
+        # _grok is stateless — no background loop needed
 
         self._is_running = True
         log.info(
             "Sovereign Connector Orchestrator ONLINE\n"
             "Connectors: PiNetwork | TriumphDB | OutboundActions | "
-            "KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial\n"
+            "KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial | GrokAI\n"
             "Cross-wiring: Pi→Intel | Pi→Guardian | Pi→ProtocolUpgrade | "
             "DB→Intel | DB→Guardian | Knowledge→Intel | "
             "FounderWatch→Guardian | X→Intel | X→Guardian | Autonomous→All"
@@ -192,6 +196,7 @@ class SovereignConnectorOrchestrator:
                 "founder_watch":       self.founder.stats()    if self.founder    else None,
                 "autonomous_decisions": self.autonomous.stats() if self.autonomous else None,
                 "x_social":            self.x_social.stats()   if self.x_social   else None,
+                "grok_ai":             self.grok.stats()       if self.grok       else None,
             },
         }
 
