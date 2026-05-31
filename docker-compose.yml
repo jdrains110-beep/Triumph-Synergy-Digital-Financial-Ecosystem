@@ -1355,6 +1355,20 @@ services:
         ipv4_address: 10.13.37.1
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8200/health', timeout=25)" ]
+      interval: 90s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+
+# ==========================================================================
+# VOLUMES — Persistent Data
+# ==========================================================================
+
+volumes:
+  triumph_tokenization_data:
+    name: triumph_tokenization_data
+  triumph_pg_data:
+    name: triumph_pg_data
   triumph_redis_data:
     name: triumph_redis_data
   triumph_central_data:
