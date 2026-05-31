@@ -143,9 +143,10 @@ from .pi_payments import pi_processor
 # ── v6 Omega Prime engines ────────────────────────────────────────────────────
 from .omega_prime        import omega_prime, OmegaMode
 from .founder_presence   import founder_presence, FounderPresenceEvent, ReimbursementClaim
-from .quantum_warp_sight import quantum_warp_sight, SightLayer
-from .blackout_engine    import blackout_engine, BlackoutPhase, QueuedActionType
-from .contract_forge     import contract_forge, ContractForge, ContractType
+from .quantum_warp_sight   import quantum_warp_sight, SightLayer
+from .blackout_engine      import blackout_engine, BlackoutPhase, QueuedActionType
+from .contract_forge       import contract_forge, ContractForge, ContractType
+from .blockchain_warden    import blockchain_warden
 
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
@@ -302,6 +303,12 @@ async def lifespan(app: FastAPI):
     blackout_engine.register_probe_target(f"http://localhost:{os.getenv('PORT', 8201)}/health")
     contract_forge._brain           = omega_prime.brain
     contract_forge._blackout_engine = blackout_engine
+    # ── boot v6 BlockchainWarden ──
+    blockchain_warden.boot(
+        guardian = guardian,
+        brain    = omega_prime.brain,
+        healer   = _healer_engine,
+    )
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -311,7 +318,7 @@ async def lifespan(app: FastAPI):
         "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s\n"
         "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)\n"
         "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine\n"
-        "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts)"
+        "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts) | BlockchainWarden(pi-mainnet guardian)"
     )
     yield
 
@@ -2460,3 +2467,63 @@ async def contracts_forge(req: ContractForgeRequest) -> dict:
         "disclaimer": draft.metadata.get("disclaimer"),
     }
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── Blockchain Warden — Pi mainnet node guardian (v6) ────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+@app.get("/omega/blockchain/status")
+async def blockchain_status() -> dict:
+    """
+    Current health of the Pi mainnet node as seen by SAIB's BlockchainWarden.
+
+    Public endpoint — no auth required (read-only node health).
+    Returns: health, stellar-core state, ledger, peer count, memory pressure,
+             recent warden events.
+    """
+    return blockchain_warden.status()
+
+
+@app.get("/omega/blockchain/stellar", dependencies=[Depends(_require_token)])
+async def blockchain_stellar_raw() -> dict:
+    """Raw stellar-core /info data from the last warden poll (auth required)."""
+    raw = blockchain_warden.stellar_raw()
+    if not raw:
+        raise HTTPException(
+            status_code=503,
+            detail="stellar-core /info data not yet available — warden polls every 60s",
+        )
+    return raw
+
+
+class BlockchainRestartRequest(BaseModel):
+    target: str = "stellar-core"   # "stellar-core" or "container"
+
+
+@app.post("/omega/blockchain/restart", dependencies=[Depends(_require_token)])
+async def blockchain_restart(req: BlockchainRestartRequest) -> dict:
+    """
+    Force a restart of the Pi mainnet node component.
+
+    target: "stellar-core"  → exec supervisorctl restart stellar-core (fast, safe)
+            "container"     → restart the entire triumph-pi-mainnet-node container
+    """
+    if req.target not in ("stellar-core", "container"):
+        raise HTTPException(
+            status_code=400,
+            detail="target must be 'stellar-core' or 'container'",
+        )
+    result = await blockchain_warden.force_restart(req.target)
+    return result
+
+
+@app.get("/omega/blockchain/history", dependencies=[Depends(_require_token)])
+async def blockchain_history() -> dict:
+    """Full warden event history — all heals, alerts, and restarts logged by SAIB."""
+    snap = blockchain_warden.status()
+    return {
+        "heal_count":     snap["heal_count"],
+        "last_heal_ts":   snap["last_heal_ts"],
+        "recent_events":  snap["recent_events"],
+    }
