@@ -22,7 +22,7 @@
  *   • Pi-integrated CTA for KYC and wallet setup
  */
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Shield,
@@ -51,9 +51,30 @@ import {
   Radio,
   Sparkles,
   ArrowRight,
+  MessageSquare,
+  Send,
+  Bot,
+  User as UserIcon,
+  HelpCircle,
+  Wallet,
+  BadgeCheck,
+  MapPin,
+  Sword,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+
+type ChatMessage = {
+  id:        string;
+  role:      "user" | "saib";
+  text:      string;
+  ts:        string;
+  actor_class?: string;
+  precision?:   string;
+  error?:    boolean;
+};
+
+type QuickPrompt = { label: string; icon: React.ElementType; message: string; color: string };
 
 type SAIBStatus = {
   ok:         boolean;
@@ -96,6 +117,59 @@ type SAIBStatus = {
   } | null;
   engines: { count: number; v7: boolean };
 };
+
+// ── Quick service prompts ────────────────────────────────────────────────────
+
+const QUICK_PROMPTS: QuickPrompt[] = [
+  {
+    label:   "KYC Guide",
+    icon:    BadgeCheck,
+    message: "Walk me through the Pi Network KYC process step by step.",
+    color:   "text-yellow-400 border-yellow-500/30 bg-yellow-500/10 hover:bg-yellow-500/20",
+  },
+  {
+    label:   "Wallet Setup",
+    icon:    Wallet,
+    message: "How do I set up my Pi mainnet wallet inside Triumph Synergy?",
+    color:   "text-cyan-400 border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20",
+  },
+  {
+    label:   "What is SAIB?",
+    icon:    HelpCircle,
+    message: "What is SAIB and how does it protect the Triumph Synergy ecosystem?",
+    color:   "text-violet-400 border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20",
+  },
+  {
+    label:   "Services Available",
+    icon:    Sparkles,
+    message: "What services can I access through Triumph Synergy right now?",
+    color:   "text-green-400 border-green-500/30 bg-green-500/10 hover:bg-green-500/20",
+  },
+  {
+    label:   "Dispatch Regions",
+    icon:    MapPin,
+    message: "Which SAIB regions are currently active in the global dispatch mesh?",
+    color:   "text-blue-400 border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20",
+  },
+  {
+    label:   "TRISYN Token",
+    icon:    Coins,
+    message: "Explain the TRISYN token — its value, peg to Pi, and how to earn it.",
+    color:   "text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20",
+  },
+  {
+    label:   "Mainnet vs Testnet",
+    icon:    Sword,
+    message: "What is the difference between Pi testnet and mainnet in Triumph Synergy?",
+    color:   "text-rose-400 border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20",
+  },
+  {
+    label:   "Pi Business (KYB)",
+    icon:    Server,
+    message: "How do I register my business on Pi Network (KYB) through SAIB?",
+    color:   "text-orange-400 border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20",
+  },
+];
 
 // ── Capability display map ────────────────────────────────────────────────────
 
@@ -176,6 +250,212 @@ function MetricCard({
     </div>
   );
 }
+
+// ── SAIBChat interactive panel ───────────────────────────────────────────────
+
+function SAIBChat({ online }: { online: boolean }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([{
+    id:    "welcome",
+    role:  "saib",
+    text:  "Sovereign Nano SAIB online — INTREPID CLASS v7.0.0. I can answer questions about Triumph Synergy services, Pi Network KYC, wallet setup, TRISYN, and more. How can I help you?",
+    ts:    new Date().toISOString(),
+    actor_class: "WELCOME",
+    precision:   "SUPERNATURAL",
+  }]);
+  const [input,   setInput]   = useState("");
+  const [sending, setSending] = useState(false);
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+
+  const actorId = React.useMemo(() =>
+    `visitor_${Math.random().toString(36).slice(2, 10)}`, []
+  );
+
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const send = async (text: string) => {
+    if (!text.trim() || sending) return;
+    const userMsg: ChatMessage = {
+      id:   `u_${Date.now()}`,
+      role: "user",
+      text: text.trim(),
+      ts:   new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setSending(true);
+    try {
+      const res = await fetch("/api/saib/interact", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ actor_id: actorId, message: text.trim() }),
+      });
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id:          `s_${Date.now()}`,
+          role:        "saib",
+          text:        data.reply ?? data.message ?? "SAIB acknowledged your inquiry.",
+          ts:          new Date().toISOString(),
+          actor_class: data.actor_class,
+          precision:   data.precision,
+          error:       !res.ok,
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id:    `err_${Date.now()}`,
+          role:  "saib",
+          text:  "SAIB Sovereign Nano is temporarily unreachable. The ecosystem remains protected. Please try again in a moment.",
+          ts:    new Date().toISOString(),
+          error: true,
+        },
+      ]);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send(input);
+    }
+  };
+
+  return (
+    <div className="flex flex-col rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-[#070f1e] to-[#050a14] overflow-hidden">
+
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-white/5 bg-black/30">
+        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-400 to-violet-600 flex items-center justify-center">
+          <Bot className="w-4 h-4 text-white" />
+        </div>
+        <div>
+          <p className="text-sm font-bold text-white">SAIB Live Inquiry</p>
+          <p className="text-xs text-neutral-500">Ask anything about Triumph Synergy services</p>
+        </div>
+        <div className="ml-auto flex items-center gap-1.5">
+          <StatusDot online={online} />
+          <span className="text-xs text-neutral-600">{online ? "Live" : "Offline"}</span>
+        </div>
+      </div>
+
+      {/* Quick prompts */}
+      <div className="px-4 pt-3 pb-1">
+        <p className="text-xs text-neutral-600 uppercase tracking-wider mb-2">Quick inquiries</p>
+        <div className="flex flex-wrap gap-1.5">
+          {QUICK_PROMPTS.map((qp) => {
+            const QIcon = qp.icon;
+            return (
+              <button
+                key={qp.label}
+                onClick={() => send(qp.message)}
+                disabled={sending}
+                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${qp.color}`}
+              >
+                <QIcon className="w-3 h-3" />
+                {qp.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Message history */}
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 max-h-96 min-h-[200px]">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex gap-2.5 ${
+              msg.role === "user" ? "flex-row-reverse" : "flex-row"
+            }`}
+          >
+            {/* Avatar */}
+            <div
+              className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center ${
+                msg.role === "saib"
+                  ? "bg-gradient-to-br from-cyan-500 to-violet-600"
+                  : "bg-neutral-700"
+              }`}
+            >
+              {msg.role === "saib" ? (
+                <Shield className="w-3.5 h-3.5 text-white" />
+              ) : (
+                <UserIcon className="w-3.5 h-3.5 text-neutral-300" />
+              )}
+            </div>
+
+            {/* Bubble */}
+            <div
+              className={`max-w-[78%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                msg.role === "saib"
+                  ? msg.error
+                    ? "bg-rose-950/60 border border-rose-500/20 text-rose-200"
+                    : "bg-[#0d1628] border border-cyan-500/10 text-neutral-200"
+                  : "bg-violet-600/20 border border-violet-500/30 text-white"
+              }`}
+            >
+              {msg.text}
+              {msg.actor_class && msg.actor_class !== "WELCOME" && (
+                <p className="mt-1 text-[10px] text-neutral-600">
+                  {msg.actor_class}{msg.precision ? ` · ${msg.precision}` : ""}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {sending && (
+          <div className="flex gap-2.5">
+            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center shrink-0">
+              <Shield className="w-3.5 h-3.5 text-white" />
+            </div>
+            <div className="rounded-xl px-3.5 py-2.5 bg-[#0d1628] border border-cyan-500/10">
+              <span className="flex gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:0ms]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:150ms]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:300ms]" />
+              </span>
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-white/5 p-3">
+        <div className="flex gap-2 items-end">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            disabled={sending}
+            placeholder="Ask SAIB anything… (Enter to send, Shift+Enter for new line)"
+            rows={2}
+            className="flex-1 resize-none rounded-xl bg-white/5 border border-white/10 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50 focus:bg-white/[0.07] transition-colors disabled:opacity-40"
+          />
+          <button
+            onClick={() => send(input)}
+            disabled={sending || !input.trim()}
+            className="h-11 w-11 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 hover:from-cyan-400 hover:to-violet-500 shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <Send className="w-4 h-4 text-white" />
+          </button>
+        </div>
+        <p className="mt-1.5 text-[10px] text-neutral-700 text-center">
+          SAIB responds in real time · Conversations are sovereign-logged in Memory Alpha
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function SectionHeader({ title, icon: Icon }: { title: string; icon: React.ElementType }) {
   return (
@@ -280,6 +560,13 @@ export default function SAIBPage() {
               >
                 <RefreshCw className={`w-4 h-4 text-neutral-400 ${loading ? "animate-spin" : ""}`} />
               </button>
+              <a
+                href="#inquire"
+                className="hidden sm:flex items-center gap-1.5 rounded-lg bg-violet-500/10 border border-violet-500/30 px-3 py-1.5 text-xs font-medium text-violet-300 hover:bg-violet-500/20 transition-colors"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                Ask SAIB
+              </a>
               <Link
                 href="/ecosystem/sovereign-ai-bot"
                 className="hidden sm:flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 px-3 py-1.5 text-xs font-medium text-cyan-300 hover:bg-cyan-500/20 transition-colors"
@@ -349,6 +636,13 @@ export default function SAIBPage() {
                   Open SAIB Command Center
                   <ArrowRight className="w-4 h-4" />
                 </Link>
+                <a
+                  href="#inquire"
+                  className="flex items-center gap-2 rounded-xl border border-violet-500/40 bg-violet-500/15 px-5 py-2.5 text-sm font-bold text-violet-200 hover:bg-violet-500/25 transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Ask SAIB a Question
+                </a>
                 <Link
                   href="/ecosystem/sovereign-ai-bot#kyc"
                   className="flex items-center gap-2 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-5 py-2.5 text-sm font-medium text-yellow-300 hover:bg-yellow-500/20 transition-colors"
@@ -391,6 +685,12 @@ export default function SAIBPage() {
               />
             </div>
           </div>
+        </section>
+
+        {/* ── Live SAIB Chat / Inquiry ──────────────────────────────────────── */}
+        <section id="inquire">
+          <SectionHeader title="Inquire — Ask SAIB Anything" icon={MessageSquare} />
+          <SAIBChat online={online} />
         </section>
 
         {/* ── Memory Alpha + Lattice ─────────────────────────────────────────── */}
