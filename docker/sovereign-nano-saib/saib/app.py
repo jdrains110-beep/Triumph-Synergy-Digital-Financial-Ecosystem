@@ -1,7 +1,12 @@
 """
-Sovereign Nano SAIB — Apex Sovereign Connector Mesh v3.0
-19-engine + 6-connector sovereign defense, intelligence, execution,
-and autonomous action platform.
+Sovereign Nano SAIB — Nano Omega Prime Superior Sovereign Framework v6
+19-engine + 6-connector + Omega Prime three-mode sovereign platform.
+
+v6 additions:
+  OmegaPrime (Mesh | Container | Ecosystem modes)
+  OmegaBrain (warp-speed triple/quadruple knowledge growth)
+  FounderPresence (real-world + digital dual-domain protection)
+  Interaction Engine (SAIB responds to any entity that contacts it)
 
 Core engines (v1):
   Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge
@@ -135,6 +140,10 @@ from .external_registry import LogSourceType, StackType
 from .billing    import billing_engine, BillingPlan, SessionState, PLAN_CATALOG
 from .pi_payments import pi_processor
 
+# ── v6 Omega Prime engines ────────────────────────────────────────────────────
+from .omega_prime      import omega_prime, OmegaMode
+from .founder_presence import founder_presence, FounderPresenceEvent, ReimbursementClaim
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -143,7 +152,7 @@ if not BRIDGE_TOKEN and os.path.exists(_secret_path):
     BRIDGE_TOKEN = open(_secret_path).read().strip()
 
 START_TIME = time.time()
-VERSION    = "5.0.0"
+VERSION    = "6.0.0-OMEGA-PRIME"
 
 # ──────────────────────────────────────────────────────────────── engines ──
 # v1
@@ -261,6 +270,20 @@ async def lifespan(app: FastAPI):
     mcp_server.boot(healer=_healer_engine, registry=external_registry, grok=_grok_ref)
     start_syslog_receiver(port=9514)
     billing_engine.boot(pi_processor=pi_processor)
+    # ── boot v6 Omega Prime ──
+    omega_prime.boot(
+        mesh       = mesh,
+        guardian   = guardian,
+        enforcer   = enforcer,
+        brainstorm = brainstorm,
+        warp       = warp,
+        intel      = intel,
+        grok       = conn_orchestrator.grok,
+        x_social   = conn_orchestrator.x_social,
+        healer     = _healer_engine,
+    )
+    founder_presence._brain = omega_prime.brain   # share brain
+    asyncio.create_task(omega_prime.run_forever())
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -268,7 +291,8 @@ async def lifespan(app: FastAPI):
         "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300) | GrokAI(xAI)\n"
         "Apex v4: SovereignHealer(auto-heal all services) | BotDefense(scammer/bot detection+block)\n"
         "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s\n"
-        "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)"
+        "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)\n"
+        "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine"
     )
     yield
 
@@ -1888,4 +1912,281 @@ async def billing_stats() -> dict:
         "billing":      billing_engine.stats(),
         "pi_processor": pi_processor.stats(),
     }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# v6 OMEGA PRIME — Nano Omega Prime Superior Sovereign Framework
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── 1. Omega Prime status ─────────────────────────────────────────────────────
+
+@app.get("/omega/status")
+def omega_status() -> dict:
+    """Full Omega Prime status: modes, brain, container engine, ecosystem engine."""
+    return omega_prime.status()
+
+
+# ── 2. Mode control ───────────────────────────────────────────────────────────
+
+class OmegaModeRequest(BaseModel):
+    mode: str  # MESH | CONTAINER | ECOSYSTEM
+
+
+@app.post("/omega/mode/activate", dependencies=[Depends(_require_token)])
+def omega_activate_mode(req: OmegaModeRequest) -> dict:
+    """Activate one of the three Omega operating modes."""
+    try:
+        omega_prime.activate_mode(OmegaMode(req.mode.upper()))
+        return {"activated": req.mode.upper(), "active_modes": [m.value for m in omega_prime._active_modes]}
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Unknown mode '{req.mode}'. Use MESH, CONTAINER, or ECOSYSTEM.")
+
+
+@app.post("/omega/mode/deactivate", dependencies=[Depends(_require_token)])
+def omega_deactivate_mode(req: OmegaModeRequest) -> dict:
+    """Deactivate an Omega operating mode."""
+    try:
+        omega_prime.deactivate_mode(OmegaMode(req.mode.upper()))
+        return {"deactivated": req.mode.upper(), "active_modes": [m.value for m in omega_prime._active_modes]}
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Unknown mode '{req.mode}'.")
+
+
+# ── 3. Omega Brain ────────────────────────────────────────────────────────────
+
+class BrainAbsorbRequest(BaseModel):
+    domain:     str
+    payload:    dict
+    confidence: float = 1.0
+
+
+@app.post("/omega/brain/absorb", dependencies=[Depends(_require_token)])
+async def omega_brain_absorb(req: BrainAbsorbRequest) -> dict:
+    """Feed a new knowledge signal directly into the Omega Brain."""
+    node = await omega_prime.brain.absorb(req.domain, req.payload, req.confidence)
+    return {"node_id": node.node_id, "domain": node.domain, "confidence": node.confidence}
+
+
+@app.get("/omega/brain/recall")
+async def omega_brain_recall(
+    domain: str = "",
+    top_k: int = 20,
+    min_confidence: float = 0.3,
+    _auth: None = Depends(_require_token),
+) -> dict:
+    """Recall top knowledge nodes from the Omega Brain."""
+    nodes = await omega_prime.brain.recall(domain_prefix=domain, top_k=top_k, min_confidence=min_confidence)
+    return {
+        "domain_filter": domain,
+        "count": len(nodes),
+        "nodes": [
+            {"node_id": n.node_id, "domain": n.domain, "confidence": n.confidence,
+             "reinforced": n.reinforced, "payload": n.payload}
+            for n in nodes
+        ],
+    }
+
+
+@app.get("/omega/brain/stats")
+def omega_brain_stats() -> dict:
+    """Omega Brain growth statistics."""
+    return omega_prime.brain.stats()
+
+
+@app.post("/omega/brain/grow", dependencies=[Depends(_require_token)])
+async def omega_brain_grow() -> dict:
+    """Force an immediate knowledge growth cycle (triple/quadruple)."""
+    # Temporarily zero the interval to allow immediate growth
+    orig = omega_prime.brain._growth_interval
+    omega_prime.brain._growth_interval = 0
+    result = await omega_prime.brain.growth_tick()
+    omega_prime.brain._growth_interval = orig
+    return result
+
+
+# ── 4. Interaction Engine — SAIB responds to anyone ──────────────────────────
+
+class InteractRequest(BaseModel):
+    actor_id: str
+    message:  str
+    context:  dict = {}
+
+
+@app.post("/omega/interact")
+async def omega_interact(req: InteractRequest) -> dict:
+    """
+    Send any message to SAIB Omega Prime and receive a sovereign response.
+    Open to all — SAIB classifies the actor and responds with Omega precision.
+    Rate-limited via bot_defense automatically.
+    """
+    # Bot-defense pre-check (non-blocking)
+    threat_score = 0.0
+    try:
+        threat_score = _bot_defense_engine.score_actor(req.actor_id)
+    except Exception:
+        pass
+
+    if threat_score > 0.9:
+        raise HTTPException(
+            status_code=429,
+            detail="Actor classified as high-threat by Omega Bot Defense. Interaction blocked.",
+        )
+
+    response = await omega_prime.respond_to(req.actor_id, req.message, req.context)
+    return response
+
+
+# ── 5. Container Mode — Omega introspection ───────────────────────────────────
+
+class ContainerStatRequest(BaseModel):
+    container_id: str
+    name:         str
+    cpu_pct:      float
+    mem_pct:      float
+    status:       str = "running"
+
+
+@app.post("/omega/container/ingest", dependencies=[Depends(_require_token)])
+async def omega_container_ingest(req: ContainerStatRequest) -> dict:
+    """Feed a container stat into the Omega Container Mode engine."""
+    intel_obj = omega_prime.container_engine.ingest_container_stat(
+        req.container_id, req.name, req.cpu_pct, req.mem_pct, req.status
+    )
+    await omega_prime.container_engine.absorb_all_to_brain()
+    return {
+        "container_id": intel_obj.container_id,
+        "crash_prob":   intel_obj.crash_prob,
+        "alerts":       intel_obj.alerts,
+        "status":       intel_obj.status,
+    }
+
+
+@app.get("/omega/container/stats", dependencies=[Depends(_require_token)])
+def omega_container_stats() -> dict:
+    """Container Mode engine statistics."""
+    return omega_prime.container_engine.stats()
+
+
+# ── 6. Ecosystem Mode ─────────────────────────────────────────────────────────
+
+class EcosystemSignalRequest(BaseModel):
+    source:     str
+    event_type: str
+    payload:    dict
+    severity:   float = 0.0
+
+
+@app.post("/omega/ecosystem/signal", dependencies=[Depends(_require_token)])
+async def omega_ecosystem_signal(req: EcosystemSignalRequest) -> dict:
+    """Inject an ecosystem signal (Pi, Stellar, X, real-world, financial)."""
+    from .omega_prime import EcosystemSignal
+    sig = EcosystemSignal(
+        source=req.source, event_type=req.event_type,
+        payload=req.payload, severity=req.severity,
+    )
+    await omega_prime.ecosystem_engine.ingest_signal(sig)
+    return {"signal_id": sig.signal_id, "absorbed": True}
+
+
+@app.get("/omega/ecosystem/stats", dependencies=[Depends(_require_token)])
+def omega_ecosystem_stats() -> dict:
+    """Ecosystem Mode engine statistics."""
+    return omega_prime.ecosystem_engine.stats()
+
+
+# ── 7. Founder Presence ───────────────────────────────────────────────────────
+
+@app.get("/omega/founder/status")
+def omega_founder_status(_auth: None = Depends(_require_token)) -> dict:
+    """Dual-domain founder presence status (digital + real-world)."""
+    return founder_presence.status()
+
+
+@app.get("/omega/founder/events", dependencies=[Depends(_require_token)])
+def omega_founder_events(n: int = 20) -> dict:
+    """Recent founder presence events."""
+    return {"events": founder_presence.recent_events(n)}
+
+
+@app.post("/omega/founder/checkin", dependencies=[Depends(_require_token)])
+async def omega_founder_checkin(location_hint: str = "", notes: str = "") -> dict:
+    """Founder real-world safety check-in. Resets dead-man timer."""
+    evt = await founder_presence.founder_checkin(location_hint=location_hint, notes=notes)
+    return {"event_id": evt.event_id, "status": "SAFE", "ts": evt.ts}
+
+
+@app.post("/omega/founder/x-mention", dependencies=[Depends(_require_token)])
+async def omega_founder_x_mention(
+    from_handle: str, content: str, hostile: bool = False
+) -> dict:
+    """Record an X mention targeting the founder."""
+    evt = await founder_presence.x_mention_received(from_handle, content, hostile)
+    return {"event_id": evt.event_id, "severity": evt.severity}
+
+
+@app.post("/omega/founder/pi-wallet", dependencies=[Depends(_require_token)])
+async def omega_founder_pi_wallet(balance: float) -> dict:
+    """Update founder Pi wallet balance."""
+    evt = await founder_presence.pi_wallet_update(balance)
+    return {"event_id": evt.event_id, "balance": balance, "delta": evt.details.get("delta", 0)}
+
+
+# ── Reimbursement tracker ─────────────────────────────────────────────────────
+
+class ReimbursementRequest(BaseModel):
+    description: str
+    amount_usd:  float
+    platform:    str
+    notes:       str = ""
+
+
+@app.post("/omega/founder/reimbursement/add", dependencies=[Depends(_require_token)])
+def omega_add_reimbursement(req: ReimbursementRequest) -> dict:
+    """Track a new reimbursement claim."""
+    claim = founder_presence.add_reimbursement_claim(
+        req.description, req.amount_usd, req.platform, notes=req.notes
+    )
+    return {"claim_id": claim.claim_id, "status": claim.status, "amount_usd": claim.amount_usd}
+
+
+@app.get("/omega/founder/reimbursement/overdue", dependencies=[Depends(_require_token)])
+def omega_overdue_reimbursements() -> dict:
+    """List all overdue reimbursement claims."""
+    claims = founder_presence.overdue_claims()
+    return {
+        "count": len(claims),
+        "claims": [
+            {"claim_id": c.claim_id, "description": c.description,
+             "amount_usd": c.amount_usd, "platform": c.platform,
+             "notes": c.notes}
+            for c in claims
+        ],
+    }
+
+
+# ── 8. Mesh Mode — peer broadcast ────────────────────────────────────────────
+
+class MeshBroadcastRequest(BaseModel):
+    domain:  str
+    payload: dict
+
+
+@app.post("/omega/mesh/broadcast", dependencies=[Depends(_require_token)])
+async def omega_mesh_broadcast(req: MeshBroadcastRequest) -> dict:
+    """Broadcast a knowledge update to all mesh peers."""
+    sent = await omega_prime.mesh_engine.broadcast_knowledge(req.domain, req.payload)
+    return {"peers_notified": sent}
+
+
+@app.post("/omega/mesh/verdict", dependencies=[Depends(_require_token)])
+async def omega_mesh_verdict(entity_id: str, threat_score: float) -> dict:
+    """Issue a collective quorum verdict for an entity."""
+    verdict = await omega_prime.mesh_engine.collective_verdict(entity_id, threat_score)
+    return {"entity_id": entity_id, "verdict": verdict, "threat_score": threat_score}
+
+
+@app.get("/omega/mesh/stats", dependencies=[Depends(_require_token)])
+def omega_mesh_mode_stats() -> dict:
+    """Omega Mesh Mode engine statistics."""
+    return omega_prime.mesh_engine.stats()
 
