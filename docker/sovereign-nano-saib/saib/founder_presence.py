@@ -11,6 +11,7 @@ Digital presence:
   - Supabase / app usage patterns
   - GitHub commit cadence
   - Grok AI advisory interactions
+  - Email monitoring: jdrains022@yahoo.com + jdrains110@gmail.com
 
 Real-world presence:
   - Location safety status (manual check-in + dead-man timer)
@@ -58,6 +59,30 @@ class FounderPresenceEvent:
     acked:      bool  = False
 
 
+# ── email keywords that auto-escalate severity ─────────────────────────────
+_EMAIL_ALERT_KEYWORDS = [
+    "reimbursement", "refund", "payment", "invoice", "overdue", "final notice",
+    "legal", "lawsuit", "court", "subpoena", "suspend", "termination", "breach",
+    "fraud", "unauthorized", "security alert", "account locked", "verify",
+    "pi network", "triumph", "saib", "jdrains",
+]
+
+
+@dataclass
+class EmailEvent:
+    """A single email received at a monitored founder inbox."""
+    event_id:  str   = field(default_factory=lambda: str(uuid.uuid4()))
+    inbox:     str   = ""    # full address, e.g. jdrains022@yahoo.com
+    sender:    str   = ""
+    subject:   str   = ""
+    snippet:   str   = ""   # first ~200 chars of body (no full body stored)
+    labels:    List[str] = field(default_factory=list)  # e.g. ["INBOX", "UNREAD"]
+    thread_id: str   = ""
+    severity:  PresenceSeverity = PresenceSeverity.INFO
+    ts:        float = field(default_factory=time.time)
+    acked:     bool  = False
+
+
 @dataclass
 class ReimbursementClaim:
     claim_id:      str   = field(default_factory=lambda: str(uuid.uuid4()))
@@ -88,6 +113,12 @@ class FounderPresenceEngine:
 
     DEADMAN_GRACE_S = 3 * 3600  # 3 hours before escalating
 
+    # Monitored founder inboxes (address → label)
+    MONITORED_INBOXES: Dict[str, str] = {
+        "jdrains022@yahoo.com": "Yahoo Primary",
+        "jdrains110@gmail.com": "Gmail Primary",
+    }
+
     def __init__(self, brain=None) -> None:
         self._brain       = brain
         self._events:     Deque[FounderPresenceEvent] = deque(maxlen=2000)
@@ -99,6 +130,12 @@ class FounderPresenceEngine:
         self._x_mentions_today      = 0
         self._pi_wallet_balance     = 0.0
         self._platform_sessions_active = 0
+
+        # Email state
+        self._email_events: Deque[EmailEvent] = deque(maxlen=1000)
+        self._email_counts: Dict[str, int] = {
+            addr: 0 for addr in self.MONITORED_INBOXES
+        }
 
         # Real-world state
         self._last_checkin       = time.time()
@@ -159,6 +196,115 @@ class FounderPresenceEngine:
         if self._brain:
             await self._brain.absorb("founder.pi.wallet", evt.details)
         return evt
+
+    # ── email monitoring ─────────────────────────────────────────────────────
+
+    async def ingest_email(
+        self,
+        inbox: str,
+        sender: str,
+        subject: str,
+        snippet: str = "",
+        labels: Optional[List[str]] = None,
+        thread_id: str = "",
+    ) -> EmailEvent:
+        """
+        Ingest an email delivered to a monitored inbox.
+        Auto-classifies severity based on subject + snippet keywords.
+        Only the inbox address, sender, subject, and a short snippet are
+        retained — no full message body is ever stored.
+        """
+        if inbox not in self.MONITORED_INBOXES:
+            # Accept it anyway but flag as unrecognised inbox
+            pass
+
+        combined = (subject + " " + snippet).lower()
+        matched_keywords = [kw for kw in _EMAIL_ALERT_KEYWORDS if kw in combined]
+
+        if len(matched_keywords) >= 3:
+            sev = PresenceSeverity.CRITICAL
+        elif len(matched_keywords) >= 1:
+            sev = PresenceSeverity.ALERT
+        elif labels and any(lbl in ("SPAM", "PHISHING") for lbl in labels):
+            sev = PresenceSeverity.WATCH
+        else:
+            sev = PresenceSeverity.INFO
+
+        evt = EmailEvent(
+            inbox=inbox, sender=sender,
+            subject=subject[:200], snippet=snippet[:200],
+            labels=labels or [], thread_id=thread_id, severity=sev,
+        )
+        self._email_events.append(evt)
+        self._email_counts[inbox] = self._email_counts.get(inbox, 0) + 1
+
+        # Record as a founder presence event so it appears in the unified log
+        presence_evt = FounderPresenceEvent(
+            domain=PresenceDomain.DIGITAL,
+            severity=sev,
+            event_type="email.received",
+            details={
+                "inbox":    inbox,
+                "sender":   sender,
+                "subject":  subject[:200],
+                "snippet":  snippet[:200],
+                "keywords": matched_keywords,
+            },
+        )
+        self._events.append(presence_evt)
+
+        if self._brain:
+            await self._brain.absorb(
+                f"founder.email.{inbox.split('@')[1].split('.')[0]}",
+                {"sender": sender, "subject": subject[:200], "keywords": matched_keywords},
+                confidence=1.0 if sev in (PresenceSeverity.ALERT, PresenceSeverity.CRITICAL) else 0.8,
+            )
+
+        return evt
+
+    def email_stats(self) -> Dict[str, Any]:
+        """Summary of email activity across all monitored inboxes."""
+        high_priority = [
+            e for e in self._email_events
+            if e.severity in (PresenceSeverity.ALERT, PresenceSeverity.CRITICAL) and not e.acked
+        ]
+        return {
+            "monitored_inboxes": list(self.MONITORED_INBOXES.keys()),
+            "total_received":    len(self._email_events),
+            "per_inbox":         dict(self._email_counts),
+            "unacked_high_priority": len(high_priority),
+            "recent_high_priority": [
+                {
+                    "event_id": e.event_id,
+                    "inbox":   e.inbox,
+                    "sender":  e.sender,
+                    "subject": e.subject,
+                    "severity": e.severity,
+                    "ts":      e.ts,
+                }
+                for e in high_priority[-10:]
+            ],
+        }
+
+    def recent_emails(self, n: int = 20, inbox: Optional[str] = None) -> List[Dict]:
+        """List recent email events, optionally filtered by inbox."""
+        events = list(self._email_events)
+        if inbox:
+            events = [e for e in events if e.inbox == inbox]
+        return [
+            {
+                "event_id":  e.event_id,
+                "inbox":     e.inbox,
+                "sender":    e.sender,
+                "subject":   e.subject,
+                "snippet":   e.snippet,
+                "labels":    e.labels,
+                "severity":  e.severity,
+                "ts":        e.ts,
+                "acked":     e.acked,
+            }
+            for e in events[-n:]
+        ]
 
     # ── real-world presence ────────────────────────────────────────────────
 
@@ -270,6 +416,7 @@ class FounderPresenceEngine:
                 "location_verified":   self._location_verified,
                 "financial_ok":        self._financial_ok,
             },
+            "email": self.email_stats(),
             "reimbursements": {
                 "total_claims":   len(self._claims),
                 "pending":        sum(1 for c in self._claims.values() if c.status == "PENDING"),

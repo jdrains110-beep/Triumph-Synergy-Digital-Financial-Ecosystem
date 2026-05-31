@@ -2164,6 +2164,50 @@ def omega_overdue_reimbursements() -> dict:
     }
 
 
+# ── Email monitoring ──────────────────────────────────────────────────────────
+
+class EmailIngestRequest(BaseModel):
+    inbox:     str              # jdrains022@yahoo.com or jdrains110@gmail.com
+    sender:    str
+    subject:   str
+    snippet:   str = ""
+    labels:    list[str] = []
+    thread_id: str = ""
+
+
+@app.post("/omega/founder/email/ingest", dependencies=[Depends(_require_token)])
+async def omega_email_ingest(req: EmailIngestRequest) -> dict:
+    """
+    Ingest an email event from a monitored founder inbox.
+    Call this from a Gmail/Yahoo webhook or polling adapter.
+    Subject + 200-char snippet only — no full body stored.
+    """
+    evt = await founder_presence.ingest_email(
+        inbox=req.inbox, sender=req.sender, subject=req.subject,
+        snippet=req.snippet, labels=req.labels, thread_id=req.thread_id,
+    )
+    return {
+        "event_id": evt.event_id,
+        "inbox":    evt.inbox,
+        "severity": evt.severity,
+        "keywords_matched": evt.details if hasattr(evt, "details") else [],
+    }
+
+
+@app.get("/omega/founder/email/stats", dependencies=[Depends(_require_token)])
+def omega_email_stats() -> dict:
+    """Email monitoring stats across both founder inboxes."""
+    return founder_presence.email_stats()
+
+
+@app.get("/omega/founder/email/recent", dependencies=[Depends(_require_token)])
+def omega_email_recent(n: int = 20, inbox: str = "") -> dict:
+    """Recent email events, optionally filtered by inbox address."""
+    return {
+        "emails": founder_presence.recent_emails(n=n, inbox=inbox or None)
+    }
+
+
 # ── 8. Mesh Mode — peer broadcast ────────────────────────────────────────────
 
 class MeshBroadcastRequest(BaseModel):
