@@ -40,6 +40,8 @@ x-common:
   # which keeps containers stopped when daemon is restarted while they were down)
   &common
   restart: always
+  environment:
+    TINI_SUBREAPER: "1"
   logging:
     driver: json-file
     options:
@@ -204,8 +206,8 @@ services:
       context: docker/pi-bridge-connector
     container_name: triumph-pi-bridge-connector
     <<: *common
-    mem_limit: 384m
-    mem_reservation: 128m
+    mem_limit: 512m
+    mem_reservation: 192m
     cpus: 0.60 # quantum-managed: T5 mesh peer (bridge poller) — bumped for httpx+SSE+push loops
     environment:
       <<: [ *db-env, *pi-env ]
@@ -276,6 +278,8 @@ services:
       INTERNAL_PI_MIN_VALUE: ${INTERNAL_PI_MIN_VALUE:-10.0}
       EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
+      SAIB_TOKEN: ${SAIB_TOKEN:-}
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -284,6 +288,8 @@ services:
       redis:
         condition: service_healthy
       governance-shield:
+        condition: service_started
+      sovereign-nano-saib:
         condition: service_started
     networks:
       - triumph-net
