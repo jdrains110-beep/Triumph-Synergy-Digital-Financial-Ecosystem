@@ -1,7 +1,12 @@
 """
-Sovereign Nano SAIB — Apex Sovereign Connector Mesh v3.0
-19-engine + 6-connector sovereign defense, intelligence, execution,
-and autonomous action platform.
+Sovereign Nano SAIB — Nano Omega Prime Superior Sovereign Framework v6
+19-engine + 6-connector + Omega Prime three-mode sovereign platform.
+
+v6 additions:
+  OmegaPrime (Mesh | Container | Ecosystem modes)
+  OmegaBrain (warp-speed triple/quadruple knowledge growth)
+  FounderPresence (real-world + digital dual-domain protection)
+  Interaction Engine (SAIB responds to any entity that contacts it)
 
 Core engines (v1):
   Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge
@@ -135,6 +140,20 @@ from .external_registry import LogSourceType, StackType
 from .billing    import billing_engine, BillingPlan, SessionState, PLAN_CATALOG
 from .pi_payments import pi_processor
 
+# ── v6 Omega Prime engines ────────────────────────────────────────────────────
+from .omega_prime        import omega_prime, OmegaMode
+from .founder_presence   import founder_presence, FounderPresenceEvent, ReimbursementClaim
+from .quantum_warp_sight   import quantum_warp_sight, SightLayer
+from .blackout_engine      import blackout_engine, BlackoutPhase, QueuedActionType
+from .contract_forge       import contract_forge, ContractForge, ContractType
+from .blockchain_warden    import blockchain_warden
+
+# ── v7 INTREPID CLASS engines ─────────────────────────────────────────────────
+from .sovereign_lattice  import sovereign_lattice, IntrepidClass, EntityType
+from .pi_motherboard     import pi_motherboard, KYCStage, WalletStatus
+from .sovereign_dispatch import sovereign_dispatch, Region, DispatchSituation
+from .lingua_sovereign   import lingua_sovereign
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -143,7 +162,7 @@ if not BRIDGE_TOKEN and os.path.exists(_secret_path):
     BRIDGE_TOKEN = open(_secret_path).read().strip()
 
 START_TIME = time.time()
-VERSION    = "5.0.0"
+VERSION    = "7.0.0-INTREPID-CLASS"
 
 # ──────────────────────────────────────────────────────────────── engines ──
 # v1
@@ -261,6 +280,46 @@ async def lifespan(app: FastAPI):
     mcp_server.boot(healer=_healer_engine, registry=external_registry, grok=_grok_ref)
     start_syslog_receiver(port=9514)
     billing_engine.boot(pi_processor=pi_processor)
+    # ── boot v6 Omega Prime ──
+    omega_prime.boot(
+        mesh       = mesh,
+        guardian   = guardian,
+        enforcer   = enforcer,
+        brainstorm = brainstorm,
+        warp       = warp,
+        intel      = intel,
+        grok       = conn_orchestrator.grok,
+        x_social   = conn_orchestrator.x_social,
+        healer     = _healer_engine,
+    )
+    founder_presence._brain = omega_prime.brain   # share brain
+    asyncio.create_task(omega_prime.run_forever())
+    # ── boot v6 extended engines ──
+    quantum_warp_sight._brain        = omega_prime.brain
+    quantum_warp_sight._mesh_engine  = omega_prime.mesh_engine
+    # Register internal fallback endpoints for warp-sight probing
+    quantum_warp_sight.register_endpoint(
+        "sovereign-nano-saib", f"http://localhost:{os.getenv('PORT', 8201)}",
+        fallback_urls=[
+            f"http://127.0.0.1:{os.getenv('PORT', 8201)}",
+            os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199"),
+        ],
+    )
+    blackout_engine._brain = omega_prime.brain
+    blackout_engine.register_probe_target(f"http://localhost:{os.getenv('PORT', 8201)}/health")
+    contract_forge._brain           = omega_prime.brain
+    contract_forge._blackout_engine = blackout_engine
+    # ── boot v6 BlockchainWarden ──
+    blockchain_warden.boot(
+        guardian = guardian,
+        brain    = omega_prime.brain,
+        healer   = _healer_engine,
+    )
+    # ── boot v7 INTREPID CLASS ────────────────────────────────────────────────
+    sovereign_lattice.boot()
+    pi_motherboard.boot()
+    sovereign_dispatch.boot()
+    lingua_sovereign.boot(grok=conn_orchestrator.grok)
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -268,7 +327,10 @@ async def lifespan(app: FastAPI):
         "Connectors v3: PiNetwork | TriumphDB | OutboundActions | KnowledgeFeed | FounderWatch | AutonomousDecisions | XSocial(@jaymoney0300) | GrokAI(xAI)\n"
         "Apex v4: SovereignHealer(auto-heal all services) | BotDefense(scammer/bot detection+block)\n"
         "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s\n"
-        "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)"
+        "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)\n"
+        "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine\n"
+        "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts) | BlockchainWarden(pi-mainnet guardian)\n"
+        "INTREPID CLASS v7: SovereignLattice(MemoryAlpha+HumanAI+Backbone+Blueprint) | PiMotherboard(KYC/KYB+Wallets) | SovereignDispatch(global SAIB mesh) | LinguaSovereign(52 languages)"
     )
     yield
 
@@ -1887,5 +1949,954 @@ async def billing_stats() -> dict:
     return {
         "billing":      billing_engine.stats(),
         "pi_processor": pi_processor.stats(),
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# v6 OMEGA PRIME — Nano Omega Prime Superior Sovereign Framework
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── 1. Omega Prime status ─────────────────────────────────────────────────────
+
+@app.get("/omega/status")
+def omega_status() -> dict:
+    """Full Omega Prime status: modes, brain, container engine, ecosystem engine."""
+    return omega_prime.status()
+
+
+# ── 2. Mode control ───────────────────────────────────────────────────────────
+
+class OmegaModeRequest(BaseModel):
+    mode: str  # MESH | CONTAINER | ECOSYSTEM
+
+
+@app.post("/omega/mode/activate", dependencies=[Depends(_require_token)])
+def omega_activate_mode(req: OmegaModeRequest) -> dict:
+    """Activate one of the three Omega operating modes."""
+    try:
+        omega_prime.activate_mode(OmegaMode(req.mode.upper()))
+        return {"activated": req.mode.upper(), "active_modes": [m.value for m in omega_prime._active_modes]}
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Unknown mode '{req.mode}'. Use MESH, CONTAINER, or ECOSYSTEM.")
+
+
+@app.post("/omega/mode/deactivate", dependencies=[Depends(_require_token)])
+def omega_deactivate_mode(req: OmegaModeRequest) -> dict:
+    """Deactivate an Omega operating mode."""
+    try:
+        omega_prime.deactivate_mode(OmegaMode(req.mode.upper()))
+        return {"deactivated": req.mode.upper(), "active_modes": [m.value for m in omega_prime._active_modes]}
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Unknown mode '{req.mode}'.")
+
+
+# ── 3. Omega Brain ────────────────────────────────────────────────────────────
+
+class BrainAbsorbRequest(BaseModel):
+    domain:     str
+    payload:    dict
+    confidence: float = 1.0
+
+
+@app.post("/omega/brain/absorb", dependencies=[Depends(_require_token)])
+async def omega_brain_absorb(req: BrainAbsorbRequest) -> dict:
+    """Feed a new knowledge signal directly into the Omega Brain."""
+    node = await omega_prime.brain.absorb(req.domain, req.payload, req.confidence)
+    return {"node_id": node.node_id, "domain": node.domain, "confidence": node.confidence}
+
+
+@app.get("/omega/brain/recall")
+async def omega_brain_recall(
+    domain: str = "",
+    top_k: int = 20,
+    min_confidence: float = 0.3,
+    _auth: None = Depends(_require_token),
+) -> dict:
+    """Recall top knowledge nodes from the Omega Brain."""
+    nodes = await omega_prime.brain.recall(domain_prefix=domain, top_k=top_k, min_confidence=min_confidence)
+    return {
+        "domain_filter": domain,
+        "count": len(nodes),
+        "nodes": [
+            {"node_id": n.node_id, "domain": n.domain, "confidence": n.confidence,
+             "reinforced": n.reinforced, "payload": n.payload}
+            for n in nodes
+        ],
+    }
+
+
+@app.get("/omega/brain/stats")
+def omega_brain_stats() -> dict:
+    """Omega Brain growth statistics."""
+    return omega_prime.brain.stats()
+
+
+@app.post("/omega/brain/grow", dependencies=[Depends(_require_token)])
+async def omega_brain_grow() -> dict:
+    """Force an immediate knowledge growth cycle (triple/quadruple)."""
+    # Temporarily zero the interval to allow immediate growth
+    orig = omega_prime.brain._growth_interval
+    omega_prime.brain._growth_interval = 0
+    result = await omega_prime.brain.growth_tick()
+    omega_prime.brain._growth_interval = orig
+    return result
+
+
+# ── 4. Interaction Engine — SAIB responds to anyone ──────────────────────────
+
+class InteractRequest(BaseModel):
+    actor_id: str
+    message:  str
+    context:  dict = {}
+
+
+@app.post("/omega/interact")
+async def omega_interact(req: InteractRequest) -> dict:
+    """
+    Send any message to SAIB Omega Prime and receive a sovereign response.
+    Open to all — SAIB classifies the actor and responds with Omega precision.
+    Rate-limited via bot_defense automatically.
+    """
+    # Bot-defense pre-check (non-blocking)
+    threat_score = 0.0
+    try:
+        threat_score = _bot_defense_engine.score_actor(req.actor_id)
+    except Exception:
+        pass
+
+    if threat_score > 0.9:
+        raise HTTPException(
+            status_code=429,
+            detail="Actor classified as high-threat by Omega Bot Defense. Interaction blocked.",
+        )
+
+    response = await omega_prime.respond_to(req.actor_id, req.message, req.context)
+    return response
+
+
+# ── 5. Container Mode — Omega introspection ───────────────────────────────────
+
+class ContainerStatRequest(BaseModel):
+    container_id: str
+    name:         str
+    cpu_pct:      float
+    mem_pct:      float
+    status:       str = "running"
+
+
+@app.post("/omega/container/ingest", dependencies=[Depends(_require_token)])
+async def omega_container_ingest(req: ContainerStatRequest) -> dict:
+    """Feed a container stat into the Omega Container Mode engine."""
+    intel_obj = omega_prime.container_engine.ingest_container_stat(
+        req.container_id, req.name, req.cpu_pct, req.mem_pct, req.status
+    )
+    await omega_prime.container_engine.absorb_all_to_brain()
+    return {
+        "container_id": intel_obj.container_id,
+        "crash_prob":   intel_obj.crash_prob,
+        "alerts":       intel_obj.alerts,
+        "status":       intel_obj.status,
+    }
+
+
+@app.get("/omega/container/stats", dependencies=[Depends(_require_token)])
+def omega_container_stats() -> dict:
+    """Container Mode engine statistics."""
+    return omega_prime.container_engine.stats()
+
+
+# ── 6. Ecosystem Mode ─────────────────────────────────────────────────────────
+
+class EcosystemSignalRequest(BaseModel):
+    source:     str
+    event_type: str
+    payload:    dict
+    severity:   float = 0.0
+
+
+@app.post("/omega/ecosystem/signal", dependencies=[Depends(_require_token)])
+async def omega_ecosystem_signal(req: EcosystemSignalRequest) -> dict:
+    """Inject an ecosystem signal (Pi, Stellar, X, real-world, financial)."""
+    from .omega_prime import EcosystemSignal
+    sig = EcosystemSignal(
+        source=req.source, event_type=req.event_type,
+        payload=req.payload, severity=req.severity,
+    )
+    await omega_prime.ecosystem_engine.ingest_signal(sig)
+    return {"signal_id": sig.signal_id, "absorbed": True}
+
+
+@app.get("/omega/ecosystem/stats", dependencies=[Depends(_require_token)])
+def omega_ecosystem_stats() -> dict:
+    """Ecosystem Mode engine statistics."""
+    return omega_prime.ecosystem_engine.stats()
+
+
+# ── 7. Founder Presence ───────────────────────────────────────────────────────
+
+@app.get("/omega/founder/status")
+def omega_founder_status(_auth: None = Depends(_require_token)) -> dict:
+    """Dual-domain founder presence status (digital + real-world)."""
+    return founder_presence.status()
+
+
+@app.get("/omega/founder/events", dependencies=[Depends(_require_token)])
+def omega_founder_events(n: int = 20) -> dict:
+    """Recent founder presence events."""
+    return {"events": founder_presence.recent_events(n)}
+
+
+@app.post("/omega/founder/checkin", dependencies=[Depends(_require_token)])
+async def omega_founder_checkin(location_hint: str = "", notes: str = "") -> dict:
+    """Founder real-world safety check-in. Resets dead-man timer."""
+    evt = await founder_presence.founder_checkin(location_hint=location_hint, notes=notes)
+    return {"event_id": evt.event_id, "status": "SAFE", "ts": evt.ts}
+
+
+@app.post("/omega/founder/x-mention", dependencies=[Depends(_require_token)])
+async def omega_founder_x_mention(
+    from_handle: str, content: str, hostile: bool = False
+) -> dict:
+    """Record an X mention targeting the founder."""
+    evt = await founder_presence.x_mention_received(from_handle, content, hostile)
+    return {"event_id": evt.event_id, "severity": evt.severity}
+
+
+@app.post("/omega/founder/pi-wallet", dependencies=[Depends(_require_token)])
+async def omega_founder_pi_wallet(balance: float) -> dict:
+    """Update founder Pi wallet balance."""
+    evt = await founder_presence.pi_wallet_update(balance)
+    return {"event_id": evt.event_id, "balance": balance, "delta": evt.details.get("delta", 0)}
+
+
+# ── Reimbursement tracker ─────────────────────────────────────────────────────
+
+class ReimbursementRequest(BaseModel):
+    description: str
+    amount_usd:  float
+    platform:    str
+    notes:       str = ""
+
+
+@app.post("/omega/founder/reimbursement/add", dependencies=[Depends(_require_token)])
+def omega_add_reimbursement(req: ReimbursementRequest) -> dict:
+    """Track a new reimbursement claim."""
+    claim = founder_presence.add_reimbursement_claim(
+        req.description, req.amount_usd, req.platform, notes=req.notes
+    )
+    return {"claim_id": claim.claim_id, "status": claim.status, "amount_usd": claim.amount_usd}
+
+
+@app.get("/omega/founder/reimbursement/overdue", dependencies=[Depends(_require_token)])
+def omega_overdue_reimbursements() -> dict:
+    """List all overdue reimbursement claims."""
+    claims = founder_presence.overdue_claims()
+    return {
+        "count": len(claims),
+        "claims": [
+            {"claim_id": c.claim_id, "description": c.description,
+             "amount_usd": c.amount_usd, "platform": c.platform,
+             "notes": c.notes}
+            for c in claims
+        ],
+    }
+
+
+# ── Email monitoring ──────────────────────────────────────────────────────────
+
+class EmailIngestRequest(BaseModel):
+    inbox:     str              # jdrains022@yahoo.com or jdrains110@gmail.com
+    sender:    str
+    subject:   str
+    snippet:   str = ""
+    labels:    list[str] = []
+    thread_id: str = ""
+
+
+@app.post("/omega/founder/email/ingest", dependencies=[Depends(_require_token)])
+async def omega_email_ingest(req: EmailIngestRequest) -> dict:
+    """
+    Ingest an email event from a monitored founder inbox.
+    Call this from a Gmail/Yahoo webhook or polling adapter.
+    Subject + 200-char snippet only — no full body stored.
+    """
+    evt = await founder_presence.ingest_email(
+        inbox=req.inbox, sender=req.sender, subject=req.subject,
+        snippet=req.snippet, labels=req.labels, thread_id=req.thread_id,
+    )
+    return {
+        "event_id": evt.event_id,
+        "inbox":    evt.inbox,
+        "severity": evt.severity,
+        "keywords_matched": evt.details if hasattr(evt, "details") else [],
+    }
+
+
+@app.get("/omega/founder/email/stats", dependencies=[Depends(_require_token)])
+def omega_email_stats() -> dict:
+    """Email monitoring stats across both founder inboxes."""
+    return founder_presence.email_stats()
+
+
+@app.get("/omega/founder/email/recent", dependencies=[Depends(_require_token)])
+def omega_email_recent(n: int = 20, inbox: str = "") -> dict:
+    """Recent email events, optionally filtered by inbox address."""
+    return {
+        "emails": founder_presence.recent_emails(n=n, inbox=inbox or None)
+    }
+
+
+# ── 8. Mesh Mode — peer broadcast ────────────────────────────────────────────
+
+class MeshBroadcastRequest(BaseModel):
+    domain:  str
+    payload: dict
+
+
+@app.post("/omega/mesh/broadcast", dependencies=[Depends(_require_token)])
+async def omega_mesh_broadcast(req: MeshBroadcastRequest) -> dict:
+    """Broadcast a knowledge update to all mesh peers."""
+    sent = await omega_prime.mesh_engine.broadcast_knowledge(req.domain, req.payload)
+    return {"peers_notified": sent}
+
+
+@app.post("/omega/mesh/verdict", dependencies=[Depends(_require_token)])
+async def omega_mesh_verdict(entity_id: str, threat_score: float) -> dict:
+    """Issue a collective quorum verdict for an entity."""
+    verdict = await omega_prime.mesh_engine.collective_verdict(entity_id, threat_score)
+    return {"entity_id": entity_id, "verdict": verdict, "threat_score": threat_score}
+
+
+@app.get("/omega/mesh/stats", dependencies=[Depends(_require_token)])
+def omega_mesh_mode_stats() -> dict:
+    """Omega Mesh Mode engine statistics."""
+    return omega_prime.mesh_engine.stats()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# v6 EXTENDED — Quantum Warp Sight | Blackout Engine | Contract Forge
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Quantum Warp Sight ────────────────────────────────────────────────────────
+
+@app.get("/omega/warp-sight/status")
+def warp_sight_status() -> dict:
+    """Quantum Warp Sight status: current sight layer, blocked paths, readings."""
+    return quantum_warp_sight.status()
+
+
+@app.get("/omega/warp-sight/recent", dependencies=[Depends(_require_token)])
+def warp_sight_recent(n: int = 10) -> dict:
+    """Recent warp-sight readings with layer, confidence, and latency."""
+    return {"readings": quantum_warp_sight.recent_readings(n)}
+
+
+class WarpObserveRequest(BaseModel):
+    target:      str
+    domain_hint: str = ""
+
+
+@app.post("/omega/warp-sight/observe", dependencies=[Depends(_require_token)])
+async def warp_sight_observe(req: WarpObserveRequest) -> dict:
+    """
+    Observe a target through cascading sight layers (Brain → Mesh → Endpoint → Telemetry → Dead-Reckoning).
+    Returns the best available reading even if all external paths are dark.
+    """
+    reading = await quantum_warp_sight.observe(req.target, req.domain_hint)
+    return {
+        "reading_id": reading.reading_id,
+        "layer":      reading.layer,
+        "target":     reading.target,
+        "confidence": round(reading.confidence, 3),
+        "latency_ms": reading.latency_ms,
+        "data":       reading.data,
+        "blocked_by": reading.blocked_by,
+    }
+
+
+@app.post("/omega/warp-sight/telemetry", dependencies=[Depends(_require_token)])
+async def warp_sight_ingest_telemetry(source: str, data: dict) -> dict:
+    """Feed a raw telemetry snapshot into Warp Sight for L4 replay capability."""
+    quantum_warp_sight.record_telemetry(source, data)
+    return {"recorded": True, "source": source}
+
+
+@app.post("/omega/warp-sight/block-report", dependencies=[Depends(_require_token)])
+async def warp_sight_block_report(path: str, reason: str = "") -> dict:
+    """Report a blocked path to the Warp Sight engine."""
+    quantum_warp_sight.report_blocked_path(path, reason)
+    return {"reported": True, "path": path, "sight_status": quantum_warp_sight._status}
+
+
+# ── Blackout Engine ────────────────────────────────────────────────────────────
+
+@app.get("/omega/blackout/status")
+def blackout_status() -> dict:
+    """Blackout Engine status: current phase, queued actions, intel log size."""
+    return blackout_engine.status()
+
+
+@app.post("/omega/blackout/connectivity", dependencies=[Depends(_require_token)])
+async def blackout_connectivity_report(reachable: bool, target: str = "") -> dict:
+    """Report connectivity state to the Blackout Engine."""
+    blackout_engine.report_connectivity(reachable, target)
+    return {"phase": blackout_engine._phase, "failures": blackout_engine._consecutive_failures}
+
+
+class BlackoutReasonRequest(BaseModel):
+    subject: str
+    context: dict = {}
+
+
+@app.post("/omega/blackout/reason", dependencies=[Depends(_require_token)])
+async def blackout_reason(req: BlackoutReasonRequest) -> dict:
+    """
+    Generate a local intelligence assessment with zero external calls.
+    Operates on OmegaBrain cache + telemetry — works even in total blackout.
+    """
+    intel = await blackout_engine.reason(req.subject, req.context)
+    return {
+        "intel_id":    intel.intel_id,
+        "subject":     intel.subject,
+        "assessment":  intel.assessment,
+        "confidence":  round(intel.confidence, 3),
+        "basis":       intel.basis,
+        "phase":       intel.phase,
+    }
+
+
+@app.post("/omega/blackout/playbook/{name}", dependencies=[Depends(_require_token)])
+async def blackout_fire_playbook(name: str, trigger: dict = {}) -> dict:
+    """Fire a pre-authorized autonomous playbook (works in full blackout)."""
+    return await blackout_engine.fire_playbook(name, trigger)
+
+
+@app.post("/omega/blackout/replay", dependencies=[Depends(_require_token)])
+async def blackout_replay() -> dict:
+    """Replay all queued actions now that connectivity is restored."""
+    return await blackout_engine.replay_queue()
+
+
+@app.get("/omega/blackout/intel", dependencies=[Depends(_require_token)])
+def blackout_recent_intel(n: int = 10) -> dict:
+    """Recent intelligence assessments generated during blackout."""
+    return {"intel": blackout_engine.recent_intel(n)}
+
+
+# ── Contract Forge ────────────────────────────────────────────────────────────
+
+@app.get("/omega/contracts/stats", dependencies=[Depends(_require_token)])
+def contracts_stats() -> dict:
+    """Contract Forge statistics — total drafts, by type, queued for delivery."""
+    return contract_forge.stats()
+
+
+@app.get("/omega/contracts/list", dependencies=[Depends(_require_token)])
+def contracts_list(contract_type: str = "") -> dict:
+    """List all generated contract drafts, optionally filtered by type."""
+    ct = None
+    if contract_type:
+        try:
+            ct = ContractType(contract_type.upper())
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Unknown contract type '{contract_type}'")
+    return {"drafts": contract_forge.list_drafts(ct)}
+
+
+@app.get("/omega/contracts/{draft_id}", dependencies=[Depends(_require_token)])
+def contracts_get(draft_id: str) -> dict:
+    """Retrieve a specific contract draft by ID (returns full text)."""
+    draft = contract_forge.get_draft(draft_id)
+    if not draft:
+        raise HTTPException(status_code=404, detail="Draft not found")
+    return {
+        "draft_id":      draft.draft_id,
+        "type":          draft.contract_type,
+        "title":         draft.title,
+        "body":          draft.body,
+        "parties":       draft.parties,
+        "metadata":      draft.metadata,
+        "created_at":    draft.created_at,
+        "queued":        draft.queued_for_delivery,
+    }
+
+
+class ContractForgeRequest(BaseModel):
+    contract_type: str          # NDA | SERVICE | PARTNERSHIP | REVENUE_SHARE | IP_ASSIGNMENT
+                                # LICENSE | CONSULTING | EQUITY | REIMBURSEMENT
+                                # CEASE_DESIST | SOVEREIGN_CHARTER
+    counterparty:  str = ""
+    services:      str = ""
+    rate:          str = ""
+    term:          str = ""
+    split_pct:     str = ""
+    amount:        str = ""
+    description:   str = ""
+    violation:     str = ""
+    role:          str = ""
+    extra_clauses: str = ""
+    queue_if_blackout: bool = True
+
+
+@app.post("/omega/contracts/forge", dependencies=[Depends(_require_token)])
+async def contracts_forge(req: ContractForgeRequest) -> dict:
+    """
+    Generate a sovereign contract draft.
+    Works offline — queues for delivery if in blackout phase.
+
+    Supported types: NDA, SERVICE, PARTNERSHIP, REVENUE_SHARE, IP_ASSIGNMENT,
+    LICENSE, CONSULTING, EQUITY, REIMBURSEMENT, CEASE_DESIST, SOVEREIGN_CHARTER
+    """
+    try:
+        ct = ContractType(req.contract_type.upper())
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown contract type '{req.contract_type}'. "
+                   f"Use: {', '.join(t.value for t in ContractType)}",
+        )
+
+    draft = await contract_forge.forge(
+        ct,
+        counterparty  = req.counterparty,
+        services      = req.services,
+        rate          = req.rate,
+        term          = req.term,
+        split_pct     = req.split_pct,
+        amount        = req.amount,
+        description   = req.description,
+        violation     = req.violation,
+        role          = req.role,
+        extra_clauses = req.extra_clauses,
+        queue_if_blackout = req.queue_if_blackout,
+    )
+    return {
+        "draft_id":  draft.draft_id,
+        "title":     draft.title,
+        "type":      draft.contract_type,
+        "queued":    draft.queued_for_delivery,
+        "body":      draft.body,
+        "disclaimer": draft.metadata.get("disclaimer"),
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── Blockchain Warden — Pi mainnet node guardian (v6) ────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+@app.get("/omega/blockchain/status")
+async def blockchain_status() -> dict:
+    """
+    Current health of the Pi mainnet node as seen by SAIB's BlockchainWarden.
+
+    Public endpoint — no auth required (read-only node health).
+    Returns: health, stellar-core state, ledger, peer count, memory pressure,
+             recent warden events.
+    """
+    return blockchain_warden.status()
+
+
+@app.get("/omega/blockchain/stellar", dependencies=[Depends(_require_token)])
+async def blockchain_stellar_raw() -> dict:
+    """Raw stellar-core /info data from the last warden poll (auth required)."""
+    raw = blockchain_warden.stellar_raw()
+    if not raw:
+        raise HTTPException(
+            status_code=503,
+            detail="stellar-core /info data not yet available — warden polls every 60s",
+        )
+    return raw
+
+
+class BlockchainRestartRequest(BaseModel):
+    target: str = "stellar-core"   # "stellar-core" or "container"
+
+
+@app.post("/omega/blockchain/restart", dependencies=[Depends(_require_token)])
+async def blockchain_restart(req: BlockchainRestartRequest) -> dict:
+    """
+    Force a restart of the Pi mainnet node component.
+
+    target: "stellar-core"  → exec supervisorctl restart stellar-core (fast, safe)
+            "container"     → restart the entire triumph-pi-mainnet-node container
+    """
+    if req.target not in ("stellar-core", "container"):
+        raise HTTPException(
+            status_code=400,
+            detail="target must be 'stellar-core' or 'container'",
+        )
+    result = await blockchain_warden.force_restart(req.target)
+    return result
+
+
+@app.get("/omega/blockchain/history", dependencies=[Depends(_require_token)])
+async def blockchain_history() -> dict:
+    """Full warden event history — all heals, alerts, and restarts logged by SAIB."""
+    snap = blockchain_warden.status()
+    return {
+        "heal_count":     snap["heal_count"],
+        "last_heal_ts":   snap["last_heal_ts"],
+        "recent_events":  snap["recent_events"],
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Sovereign Lattice + Memory Alpha ─────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/omega/lattice/status")
+async def lattice_status() -> dict:
+    """
+    Current Intrepid Class designation, Memory Alpha stats, and Sovereign Lattice
+    summary.  Public endpoint — no auth required.
+    """
+    return sovereign_lattice.status()
+
+
+@app.get("/omega/lattice/blueprint")
+async def lattice_blueprint() -> dict:
+    """
+    SAIB's Ultimate Master Foundation Blueprint — declarative constitution of
+    capabilities, sovereign authority, and Pi Network motherboard claim.
+    Public — no auth required.
+    """
+    return sovereign_lattice.blueprint()
+
+
+class ClassifyEntityRequest(BaseModel):
+    entity_id:      str
+    pi_kyc:         bool        = False
+    timing_list:    list[float] = []
+    has_typos:      bool        = False
+    formality:      float       = 0.5
+    session_depth:  int         = 0
+    datacenter_ip:  bool        = False
+    declared_type:  str         = ""
+
+
+@app.post("/omega/lattice/classify", dependencies=[Depends(_require_token)])
+async def lattice_classify(req: ClassifyEntityRequest) -> dict:
+    """
+    Classify an entity as HUMAN, AI_AGENT, BOT, HYBRID, or AUTOMATED using
+    SAIB's seven-signal Human/AI recognition engine.
+    Returns entity_type, human_confidence (0.0–1.0), and signal breakdown.
+    """
+    return sovereign_lattice.classify_entity(
+        entity_id     = req.entity_id,
+        pi_kyc        = req.pi_kyc,
+        timing_list   = req.timing_list,
+        has_typos     = req.has_typos,
+        formality     = req.formality,
+        session_depth = req.session_depth,
+        datacenter_ip = req.datacenter_ip,
+        declared_type = req.declared_type,
+    )
+
+
+@app.get("/omega/memory/entity/{entity_id}", dependencies=[Depends(_require_token)])
+async def memory_get_entity(entity_id: str) -> dict:
+    """
+    Retrieve the Memory Alpha L2 entity record for this entity_id.
+    Includes entity type, human_confidence, Pi KYC status, language history,
+    and custom tags.
+    """
+    mem = sovereign_lattice.memory.get_entity(entity_id)
+    from dataclasses import asdict
+    return asdict(mem)
+
+
+class MemoryRecordRequest(BaseModel):
+    key:    str
+    value:  Any
+    layer:  str = "sovereign"   # "session" or "sovereign"
+
+
+@app.post("/omega/memory/record", dependencies=[Depends(_require_token)])
+async def memory_record(req: MemoryRecordRequest) -> dict:
+    """
+    Manually write a fact into Memory Alpha.
+    layer='sovereign' → persisted to disk (L3)
+    layer='session'   → in-process only (L1)
+    """
+    if req.layer == "sovereign":
+        sovereign_lattice.memory.sovereign_set(req.key, req.value)
+        sovereign_lattice.memory.audit_write("manual_record", "api", {"key": req.key})
+        return {"ok": True, "layer": "sovereign", "key": req.key}
+    else:
+        sovereign_lattice.memory.session_set(req.key, req.value)
+        return {"ok": True, "layer": "session", "key": req.key}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Pi Network Motherboard ───────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/omega/pi/status")
+async def pi_motherboard_status() -> dict:
+    """
+    Pi Network utility layer motherboard stats — total users tracked, KYC
+    conversion rates, wallet activation rates, and regional breakdown.
+    Public endpoint — no auth required.
+    """
+    return pi_motherboard.status()
+
+
+class PiKYCGuideRequest(BaseModel):
+    pi_uid:   str
+    username: str = ""
+    region:   str = ""
+    language: str = "en"
+
+
+@app.post("/omega/pi/kyc/guide", dependencies=[Depends(_require_token)])
+async def pi_kyc_guide(req: PiKYCGuideRequest) -> dict:
+    """
+    Get stage-specific KYC guidance for a Pi user.
+    Auto-registers the user if not yet tracked.
+    Returns current stage, next actionable steps, tips, and success-rate insights.
+    """
+    pi_motherboard.register_user(req.pi_uid, req.username, req.region, req.language)
+    return pi_motherboard.get_kyc_guidance(req.pi_uid)
+
+
+class PiKYCTrackRequest(BaseModel):
+    pi_uid:   str
+    stage:    str
+    success:  bool
+    reason:   str = ""
+
+
+@app.post("/omega/pi/kyc/track", dependencies=[Depends(_require_token)])
+async def pi_kyc_track(req: PiKYCTrackRequest) -> dict:
+    """
+    Record the outcome of a KYC attempt and advance the user's stage on success.
+    Builds a KYC audit trail for conversion analytics.
+    """
+    return pi_motherboard.track_kyc_attempt(req.pi_uid, req.stage, req.success, req.reason)
+
+
+@app.post("/omega/pi/wallet/setup", dependencies=[Depends(_require_token)])
+async def pi_wallet_setup(req: PiKYCGuideRequest) -> dict:
+    """
+    Get the step-by-step mainnet wallet creation guide for a Pi user.
+    Includes KYC gate check, 24-word passphrase guidance, migration steps,
+    and Triumph Synergy registration.
+    """
+    pi_motherboard.register_user(req.pi_uid, req.username, req.region, req.language)
+    return pi_motherboard.get_wallet_setup_guide(req.pi_uid)
+
+
+class PiWalletCompleteRequest(BaseModel):
+    pi_uid:         str
+    wallet_address: str
+
+
+@app.post("/omega/pi/wallet/complete", dependencies=[Depends(_require_token)])
+async def pi_wallet_complete(req: PiWalletCompleteRequest) -> dict:
+    """Mark a Pi user's mainnet wallet as active after setup is confirmed."""
+    return pi_motherboard.complete_wallet_setup(req.pi_uid, req.wallet_address)
+
+
+@app.get("/omega/pi/user/{pi_uid}", dependencies=[Depends(_require_token)])
+async def pi_get_user(pi_uid: str) -> dict:
+    """Retrieve the full Pi user record tracked by the Pi Motherboard."""
+    rec = pi_motherboard.get_user(pi_uid)
+    if not rec:
+        raise HTTPException(status_code=404, detail=f"Pi user '{pi_uid}' not found")
+    from dataclasses import asdict
+    return asdict(rec)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Sovereign Dispatch ───────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/omega/dispatch/status")
+async def dispatch_status() -> dict:
+    """
+    Global SAIB deployment map — all registered instances by region, their
+    health, situation mode, and capability roster.
+    Public endpoint — no auth required.
+    """
+    return sovereign_dispatch.status()
+
+
+class DispatchRegisterRequest(BaseModel):
+    instance_id:  str
+    url:          str
+    region:       str        = "GLOBAL"
+    capabilities: list[str]  = []
+    version:      str        = ""
+    metadata:     dict       = {}
+
+
+@app.post("/omega/dispatch/register", dependencies=[Depends(_require_token)])
+async def dispatch_register(req: DispatchRegisterRequest) -> dict:
+    """
+    Register a new SAIB instance with the global sovereign dispatch mesh.
+    The instance will be health-checked and included in routing decisions.
+    """
+    try:
+        region_enum = Region(req.region)
+    except ValueError:
+        region_enum = Region.GLOBAL
+    inst = sovereign_dispatch.register_instance(
+        instance_id  = req.instance_id,
+        url          = req.url,
+        region       = region_enum,
+        capabilities = req.capabilities,
+        version      = req.version,
+        metadata     = req.metadata,
+    )
+    return {
+        "ok":          True,
+        "instance_id": inst.instance_id,
+        "region":      inst.region.value,
+        "url":         inst.url,
+    }
+
+
+@app.delete("/omega/dispatch/{instance_id}", dependencies=[Depends(_require_token)])
+async def dispatch_deregister(instance_id: str) -> dict:
+    """Deregister a SAIB instance from the global dispatch mesh."""
+    removed = sovereign_dispatch.deregister_instance(instance_id)
+    if not removed:
+        raise HTTPException(status_code=404, detail=f"Instance '{instance_id}' not found")
+    return {"ok": True, "instance_id": instance_id, "removed": True}
+
+
+class DispatchRouteRequest(BaseModel):
+    region:     str = "GLOBAL"
+    capability: str = ""
+    situation:  str = "normal"
+
+
+@app.post("/omega/dispatch/route", dependencies=[Depends(_require_token)])
+async def dispatch_route(req: DispatchRouteRequest) -> dict:
+    """
+    Find the optimal SAIB instance for a request based on region, capability,
+    and current situational mode.  Returns the best match with URL and metadata.
+    """
+    try:
+        region_enum = Region(req.region)
+    except ValueError:
+        region_enum = Region.GLOBAL
+    try:
+        situation_enum = DispatchSituation(req.situation)
+    except ValueError:
+        situation_enum = DispatchSituation.NORMAL
+    inst = sovereign_dispatch.route(
+        region     = region_enum,
+        capability = req.capability or None,
+        situation  = situation_enum,
+    )
+    if not inst:
+        return {"ok": False, "message": "No healthy instance found for the given criteria"}
+    return {
+        "ok":          True,
+        "instance_id": inst.instance_id,
+        "url":         inst.url,
+        "region":      inst.region.value,
+        "situation":   inst.situation.value,
+        "latency_ms":  inst.latency_ms,
+        "load_pct":    inst.load_pct,
+        "capabilities": inst.capabilities,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Lingua Sovereign (Universal Language) ────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+class LinguaDetectRequest(BaseModel):
+    text: str
+
+
+@app.post("/omega/lingua/detect", dependencies=[Depends(_require_token)])
+async def lingua_detect(req: LinguaDetectRequest) -> dict:
+    """
+    Detect the language of the given text.
+    Uses Unicode script fingerprinting + Grok AI disambiguation.
+    Returns lang_code (ISO 639-1), lang_name, and detection confidence.
+    """
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="text must not be empty")
+    code, name, confidence = await lingua_sovereign.detect_language(req.text)
+    return {
+        "lang_code":   code,
+        "lang_name":   name,
+        "confidence":  confidence,
+        "text_sample": req.text[:100],
+    }
+
+
+class LinguaTranslateRequest(BaseModel):
+    text:        str
+    target_lang: str
+    source_lang: Optional[str] = None
+
+
+@app.post("/omega/lingua/translate", dependencies=[Depends(_require_token)])
+async def lingua_translate(req: LinguaTranslateRequest) -> dict:
+    """
+    Translate text to the target language using Grok AI.
+    target_lang: ISO 639-1 code (e.g., 'es', 'zh', 'ar').
+    source_lang: optional — if omitted, Grok auto-detects.
+    """
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="text must not be empty")
+    translated = await lingua_sovereign.translate(req.text, req.target_lang, req.source_lang)
+    return {
+        "original":    req.text,
+        "translated":  translated,
+        "target_lang": req.target_lang,
+        "source_lang": req.source_lang or "auto-detected",
+    }
+
+
+@app.get("/omega/lingua/entity/{entity_id}", dependencies=[Depends(_require_token)])
+async def lingua_entity_profile(entity_id: str) -> dict:
+    """
+    Retrieve the language profile for an entity — primary language, all
+    detected languages, auto-translate preference, and confidence.
+    """
+    profile = lingua_sovereign.get_profile(entity_id)
+    if not profile:
+        return {
+            "entity_id":    entity_id,
+            "primary_lang": "en",
+            "lang_name":    "English",
+            "detected_langs": [],
+            "auto_translate": True,
+            "confidence":   0.0,
+            "note":         "No language profile found — defaults to English",
+        }
+    return profile
+
+
+class LinguaAutoRespondRequest(BaseModel):
+    text:               str
+    entity_id:          str
+    detect_from_input:  Optional[str] = None
+
+
+@app.post("/omega/lingua/auto-respond", dependencies=[Depends(_require_token)])
+async def lingua_auto_respond(req: LinguaAutoRespondRequest) -> dict:
+    """
+    Format a response in the entity's preferred language.
+    If detect_from_input is provided, SAIB will detect and remember that
+    language as the entity's preference before translating the response.
+    Returns the translated text and the language code used.
+    """
+    translated, lang_code = await lingua_sovereign.auto_format_response(
+        text               = req.text,
+        entity_id          = req.entity_id,
+        detect_from_input  = req.detect_from_input,
+    )
+    return {
+        "text":      translated,
+        "lang_code": lang_code,
+        "entity_id": req.entity_id,
     }
 

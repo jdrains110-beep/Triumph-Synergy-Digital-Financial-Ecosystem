@@ -577,9 +577,9 @@ services:
       dockerfile: quantum-intel-fortress/Dockerfile
     container_name: triumph-quantum-intel-fortress
     <<: *common
-    mem_limit: 512m
-    mem_reservation: 280m
-    cpus: 0.60 # quantum-managed: T4 quantum-intel-fortress — bumped: live 53% CPU / 268MB
+    mem_limit: 640m
+    mem_reservation: 320m
+    cpus: 0.60 # quantum-managed: T4 quantum-intel-fortress — raised 512m→640m (was at 99% on stale 384m container)
     environment:
       <<: [ *db-env, *pi-env ]
       PI_INTERNAL_RATE: "314159.0"
@@ -631,9 +631,9 @@ services:
     platform: linux/arm64
     container_name: triumph-apex-services
     <<: *common
-    mem_limit: 768m
-    mem_reservation: 384m
-    cpus: 1.00 # quantum-managed: T2 apex-services (18-svc mega-pod) — trimmed to live footprint (~540MB)
+    mem_limit: 1024m
+    mem_reservation: 512m
+    cpus: 1.00 # quantum-managed: T2 apex-services (18-svc mega-pod) — raised 768m→1024m (was at 93%)
     environment:
       <<: [ *db-env, *pi-env ]
       PI_INTERNAL_RATE: "314159.0"
@@ -918,9 +918,9 @@ services:
     container_name: triumph-guardian-watchdog-nexus
     <<: *common
     restart: always
-    mem_limit: 192m
-    mem_reservation: 144m
-    cpus: 0.35 # quantum-managed: T6 guardian-watchdog-nexus — mem raised 128m→192m (was at 99.9%)
+    mem_limit: 320m
+    mem_reservation: 192m
+    cpus: 0.35 # quantum-managed: T6 guardian-watchdog-nexus — mem raised 192m→320m (was at 97%)
     environment:
       # ── ecosystem-guardian env vars ─────────────────────────────────────
       GOVERNOR_INTERVAL_S: "30"
@@ -1266,7 +1266,7 @@ services:
     <<: *common
     mem_limit: 512m
     mem_reservation: 256m
-    cpus: 0.75 # quantum-managed: nano-saib v5 (sovereign apex — registry+logs+code+fix+MCP+tenants+k8s)
+    cpus: 0.75 # quantum-managed: nano-saib v6 (omega-prime — warp-sight+blackout+contract-forge+healer)
     environment:
       PORT: "8201"
       # Pi Network — mainnet billing (Pi payments + founder split)
@@ -1290,6 +1290,8 @@ services:
       TRIUMPH_INTERNAL_URL: "${TRIUMPH_INTERNAL_URL:-http://triumph-app:3000}"
     secrets:
       - public_bridge_token
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # SovereignHealer: restart/inspect containers
     networks:
       triumph-net:
         aliases:

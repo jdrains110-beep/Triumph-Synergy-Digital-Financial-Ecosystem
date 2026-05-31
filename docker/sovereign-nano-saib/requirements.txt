@@ -18,3 +18,5 @@ aiohttp>=3.13.4
 PyJWT>=2.12.0
 # v5 billing (Pi + USD Stripe)
 stripe>=7.0.0
+# v6 Omega Prime — container introspection
+docker>=7.0.0
