@@ -24,6 +24,9 @@ RUN apt-get purge -y --auto-remove gcc libffi-dev build-essential && \
 
 COPY saib /app/saib
 
+# Memory Alpha persistent data directory — writable by saib user
+RUN mkdir -p /app/data && chown 1002:1002 /app/data
+
 ENV PORT=8201 \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1

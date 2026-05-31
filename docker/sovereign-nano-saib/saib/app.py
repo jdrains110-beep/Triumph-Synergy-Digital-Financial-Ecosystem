@@ -148,6 +148,12 @@ from .blackout_engine      import blackout_engine, BlackoutPhase, QueuedActionTy
 from .contract_forge       import contract_forge, ContractForge, ContractType
 from .blockchain_warden    import blockchain_warden
 
+# ── v7 INTREPID CLASS engines ─────────────────────────────────────────────────
+from .sovereign_lattice  import sovereign_lattice, IntrepidClass, EntityType
+from .pi_motherboard     import pi_motherboard, KYCStage, WalletStatus
+from .sovereign_dispatch import sovereign_dispatch, Region, DispatchSituation
+from .lingua_sovereign   import lingua_sovereign
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -156,7 +162,7 @@ if not BRIDGE_TOKEN and os.path.exists(_secret_path):
     BRIDGE_TOKEN = open(_secret_path).read().strip()
 
 START_TIME = time.time()
-VERSION    = "6.0.0-OMEGA-PRIME"
+VERSION    = "7.0.0-INTREPID-CLASS"
 
 # ──────────────────────────────────────────────────────────────── engines ──
 # v1
@@ -309,6 +315,11 @@ async def lifespan(app: FastAPI):
         brain    = omega_prime.brain,
         healer   = _healer_engine,
     )
+    # ── boot v7 INTREPID CLASS ────────────────────────────────────────────────
+    sovereign_lattice.boot()
+    pi_motherboard.boot()
+    sovereign_dispatch.boot()
+    lingua_sovereign.boot(grok=conn_orchestrator.grok)
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -318,7 +329,8 @@ async def lifespan(app: FastAPI):
         "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s\n"
         "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)\n"
         "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine\n"
-        "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts) | BlockchainWarden(pi-mainnet guardian)"
+        "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts) | BlockchainWarden(pi-mainnet guardian)\n"
+        "INTREPID CLASS v7: SovereignLattice(MemoryAlpha+HumanAI+Backbone+Blueprint) | PiMotherboard(KYC/KYB+Wallets) | SovereignDispatch(global SAIB mesh) | LinguaSovereign(52 languages)"
     )
     yield
 
@@ -2527,3 +2539,364 @@ async def blockchain_history() -> dict:
         "last_heal_ts":   snap["last_heal_ts"],
         "recent_events":  snap["recent_events"],
     }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Sovereign Lattice + Memory Alpha ─────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/omega/lattice/status")
+async def lattice_status() -> dict:
+    """
+    Current Intrepid Class designation, Memory Alpha stats, and Sovereign Lattice
+    summary.  Public endpoint — no auth required.
+    """
+    return sovereign_lattice.status()
+
+
+@app.get("/omega/lattice/blueprint")
+async def lattice_blueprint() -> dict:
+    """
+    SAIB's Ultimate Master Foundation Blueprint — declarative constitution of
+    capabilities, sovereign authority, and Pi Network motherboard claim.
+    Public — no auth required.
+    """
+    return sovereign_lattice.blueprint()
+
+
+class ClassifyEntityRequest(BaseModel):
+    entity_id:      str
+    pi_kyc:         bool        = False
+    timing_list:    list[float] = []
+    has_typos:      bool        = False
+    formality:      float       = 0.5
+    session_depth:  int         = 0
+    datacenter_ip:  bool        = False
+    declared_type:  str         = ""
+
+
+@app.post("/omega/lattice/classify", dependencies=[Depends(_require_token)])
+async def lattice_classify(req: ClassifyEntityRequest) -> dict:
+    """
+    Classify an entity as HUMAN, AI_AGENT, BOT, HYBRID, or AUTOMATED using
+    SAIB's seven-signal Human/AI recognition engine.
+    Returns entity_type, human_confidence (0.0–1.0), and signal breakdown.
+    """
+    return sovereign_lattice.classify_entity(
+        entity_id     = req.entity_id,
+        pi_kyc        = req.pi_kyc,
+        timing_list   = req.timing_list,
+        has_typos     = req.has_typos,
+        formality     = req.formality,
+        session_depth = req.session_depth,
+        datacenter_ip = req.datacenter_ip,
+        declared_type = req.declared_type,
+    )
+
+
+@app.get("/omega/memory/entity/{entity_id}", dependencies=[Depends(_require_token)])
+async def memory_get_entity(entity_id: str) -> dict:
+    """
+    Retrieve the Memory Alpha L2 entity record for this entity_id.
+    Includes entity type, human_confidence, Pi KYC status, language history,
+    and custom tags.
+    """
+    mem = sovereign_lattice.memory.get_entity(entity_id)
+    from dataclasses import asdict
+    return asdict(mem)
+
+
+class MemoryRecordRequest(BaseModel):
+    key:    str
+    value:  Any
+    layer:  str = "sovereign"   # "session" or "sovereign"
+
+
+@app.post("/omega/memory/record", dependencies=[Depends(_require_token)])
+async def memory_record(req: MemoryRecordRequest) -> dict:
+    """
+    Manually write a fact into Memory Alpha.
+    layer='sovereign' → persisted to disk (L3)
+    layer='session'   → in-process only (L1)
+    """
+    if req.layer == "sovereign":
+        sovereign_lattice.memory.sovereign_set(req.key, req.value)
+        sovereign_lattice.memory.audit_write("manual_record", "api", {"key": req.key})
+        return {"ok": True, "layer": "sovereign", "key": req.key}
+    else:
+        sovereign_lattice.memory.session_set(req.key, req.value)
+        return {"ok": True, "layer": "session", "key": req.key}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Pi Network Motherboard ───────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/omega/pi/status")
+async def pi_motherboard_status() -> dict:
+    """
+    Pi Network utility layer motherboard stats — total users tracked, KYC
+    conversion rates, wallet activation rates, and regional breakdown.
+    Public endpoint — no auth required.
+    """
+    return pi_motherboard.status()
+
+
+class PiKYCGuideRequest(BaseModel):
+    pi_uid:   str
+    username: str = ""
+    region:   str = ""
+    language: str = "en"
+
+
+@app.post("/omega/pi/kyc/guide", dependencies=[Depends(_require_token)])
+async def pi_kyc_guide(req: PiKYCGuideRequest) -> dict:
+    """
+    Get stage-specific KYC guidance for a Pi user.
+    Auto-registers the user if not yet tracked.
+    Returns current stage, next actionable steps, tips, and success-rate insights.
+    """
+    pi_motherboard.register_user(req.pi_uid, req.username, req.region, req.language)
+    return pi_motherboard.get_kyc_guidance(req.pi_uid)
+
+
+class PiKYCTrackRequest(BaseModel):
+    pi_uid:   str
+    stage:    str
+    success:  bool
+    reason:   str = ""
+
+
+@app.post("/omega/pi/kyc/track", dependencies=[Depends(_require_token)])
+async def pi_kyc_track(req: PiKYCTrackRequest) -> dict:
+    """
+    Record the outcome of a KYC attempt and advance the user's stage on success.
+    Builds a KYC audit trail for conversion analytics.
+    """
+    return pi_motherboard.track_kyc_attempt(req.pi_uid, req.stage, req.success, req.reason)
+
+
+@app.post("/omega/pi/wallet/setup", dependencies=[Depends(_require_token)])
+async def pi_wallet_setup(req: PiKYCGuideRequest) -> dict:
+    """
+    Get the step-by-step mainnet wallet creation guide for a Pi user.
+    Includes KYC gate check, 24-word passphrase guidance, migration steps,
+    and Triumph Synergy registration.
+    """
+    pi_motherboard.register_user(req.pi_uid, req.username, req.region, req.language)
+    return pi_motherboard.get_wallet_setup_guide(req.pi_uid)
+
+
+class PiWalletCompleteRequest(BaseModel):
+    pi_uid:         str
+    wallet_address: str
+
+
+@app.post("/omega/pi/wallet/complete", dependencies=[Depends(_require_token)])
+async def pi_wallet_complete(req: PiWalletCompleteRequest) -> dict:
+    """Mark a Pi user's mainnet wallet as active after setup is confirmed."""
+    return pi_motherboard.complete_wallet_setup(req.pi_uid, req.wallet_address)
+
+
+@app.get("/omega/pi/user/{pi_uid}", dependencies=[Depends(_require_token)])
+async def pi_get_user(pi_uid: str) -> dict:
+    """Retrieve the full Pi user record tracked by the Pi Motherboard."""
+    rec = pi_motherboard.get_user(pi_uid)
+    if not rec:
+        raise HTTPException(status_code=404, detail=f"Pi user '{pi_uid}' not found")
+    from dataclasses import asdict
+    return asdict(rec)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Sovereign Dispatch ───────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/omega/dispatch/status")
+async def dispatch_status() -> dict:
+    """
+    Global SAIB deployment map — all registered instances by region, their
+    health, situation mode, and capability roster.
+    Public endpoint — no auth required.
+    """
+    return sovereign_dispatch.status()
+
+
+class DispatchRegisterRequest(BaseModel):
+    instance_id:  str
+    url:          str
+    region:       str        = "GLOBAL"
+    capabilities: list[str]  = []
+    version:      str        = ""
+    metadata:     dict       = {}
+
+
+@app.post("/omega/dispatch/register", dependencies=[Depends(_require_token)])
+async def dispatch_register(req: DispatchRegisterRequest) -> dict:
+    """
+    Register a new SAIB instance with the global sovereign dispatch mesh.
+    The instance will be health-checked and included in routing decisions.
+    """
+    try:
+        region_enum = Region(req.region)
+    except ValueError:
+        region_enum = Region.GLOBAL
+    inst = sovereign_dispatch.register_instance(
+        instance_id  = req.instance_id,
+        url          = req.url,
+        region       = region_enum,
+        capabilities = req.capabilities,
+        version      = req.version,
+        metadata     = req.metadata,
+    )
+    return {
+        "ok":          True,
+        "instance_id": inst.instance_id,
+        "region":      inst.region.value,
+        "url":         inst.url,
+    }
+
+
+@app.delete("/omega/dispatch/{instance_id}", dependencies=[Depends(_require_token)])
+async def dispatch_deregister(instance_id: str) -> dict:
+    """Deregister a SAIB instance from the global dispatch mesh."""
+    removed = sovereign_dispatch.deregister_instance(instance_id)
+    if not removed:
+        raise HTTPException(status_code=404, detail=f"Instance '{instance_id}' not found")
+    return {"ok": True, "instance_id": instance_id, "removed": True}
+
+
+class DispatchRouteRequest(BaseModel):
+    region:     str = "GLOBAL"
+    capability: str = ""
+    situation:  str = "normal"
+
+
+@app.post("/omega/dispatch/route", dependencies=[Depends(_require_token)])
+async def dispatch_route(req: DispatchRouteRequest) -> dict:
+    """
+    Find the optimal SAIB instance for a request based on region, capability,
+    and current situational mode.  Returns the best match with URL and metadata.
+    """
+    try:
+        region_enum = Region(req.region)
+    except ValueError:
+        region_enum = Region.GLOBAL
+    try:
+        situation_enum = DispatchSituation(req.situation)
+    except ValueError:
+        situation_enum = DispatchSituation.NORMAL
+    inst = sovereign_dispatch.route(
+        region     = region_enum,
+        capability = req.capability or None,
+        situation  = situation_enum,
+    )
+    if not inst:
+        return {"ok": False, "message": "No healthy instance found for the given criteria"}
+    return {
+        "ok":          True,
+        "instance_id": inst.instance_id,
+        "url":         inst.url,
+        "region":      inst.region.value,
+        "situation":   inst.situation.value,
+        "latency_ms":  inst.latency_ms,
+        "load_pct":    inst.load_pct,
+        "capabilities": inst.capabilities,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── INTREPID CLASS v7 — Lingua Sovereign (Universal Language) ────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+class LinguaDetectRequest(BaseModel):
+    text: str
+
+
+@app.post("/omega/lingua/detect", dependencies=[Depends(_require_token)])
+async def lingua_detect(req: LinguaDetectRequest) -> dict:
+    """
+    Detect the language of the given text.
+    Uses Unicode script fingerprinting + Grok AI disambiguation.
+    Returns lang_code (ISO 639-1), lang_name, and detection confidence.
+    """
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="text must not be empty")
+    code, name, confidence = await lingua_sovereign.detect_language(req.text)
+    return {
+        "lang_code":   code,
+        "lang_name":   name,
+        "confidence":  confidence,
+        "text_sample": req.text[:100],
+    }
+
+
+class LinguaTranslateRequest(BaseModel):
+    text:        str
+    target_lang: str
+    source_lang: Optional[str] = None
+
+
+@app.post("/omega/lingua/translate", dependencies=[Depends(_require_token)])
+async def lingua_translate(req: LinguaTranslateRequest) -> dict:
+    """
+    Translate text to the target language using Grok AI.
+    target_lang: ISO 639-1 code (e.g., 'es', 'zh', 'ar').
+    source_lang: optional — if omitted, Grok auto-detects.
+    """
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="text must not be empty")
+    translated = await lingua_sovereign.translate(req.text, req.target_lang, req.source_lang)
+    return {
+        "original":    req.text,
+        "translated":  translated,
+        "target_lang": req.target_lang,
+        "source_lang": req.source_lang or "auto-detected",
+    }
+
+
+@app.get("/omega/lingua/entity/{entity_id}", dependencies=[Depends(_require_token)])
+async def lingua_entity_profile(entity_id: str) -> dict:
+    """
+    Retrieve the language profile for an entity — primary language, all
+    detected languages, auto-translate preference, and confidence.
+    """
+    profile = lingua_sovereign.get_profile(entity_id)
+    if not profile:
+        return {
+            "entity_id":    entity_id,
+            "primary_lang": "en",
+            "lang_name":    "English",
+            "detected_langs": [],
+            "auto_translate": True,
+            "confidence":   0.0,
+            "note":         "No language profile found — defaults to English",
+        }
+    return profile
+
+
+class LinguaAutoRespondRequest(BaseModel):
+    text:               str
+    entity_id:          str
+    detect_from_input:  Optional[str] = None
+
+
+@app.post("/omega/lingua/auto-respond", dependencies=[Depends(_require_token)])
+async def lingua_auto_respond(req: LinguaAutoRespondRequest) -> dict:
+    """
+    Format a response in the entity's preferred language.
+    If detect_from_input is provided, SAIB will detect and remember that
+    language as the entity's preference before translating the response.
+    Returns the translated text and the language code used.
+    """
+    translated, lang_code = await lingua_sovereign.auto_format_response(
+        text               = req.text,
+        entity_id          = req.entity_id,
+        detect_from_input  = req.detect_from_input,
+    )
+    return {
+        "text":      translated,
+        "lang_code": lang_code,
+        "entity_id": req.entity_id,
+    }
+
