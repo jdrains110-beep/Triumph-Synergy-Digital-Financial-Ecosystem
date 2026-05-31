@@ -16,8 +16,10 @@ RUN apk add --no-cache curl tini wget && \
     npm install -g yarn@1.22.22 --prefer-offline 2>/dev/null; \
     yarn --version || npm install -g yarn@1.22.22
 
-# Install dependencies only when needed
-FROM base AS deps
+# ── Single build stage: install deps + compile in one layer ──────────────────
+# Merging deps + builder avoids a 300MB inter-stage COPY node_modules which
+# causes Docker Desktop (Mac) BuildKit gRPC EOF and legacy-builder pipe crashes.
+FROM base AS builder
 # libc6-compat, python3, make, g++ — standard native build tools
 # libusb-dev + eudev-dev — required by node-hid (transitive dep of @ledgerhq/hw-transport-node-hid)
 RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers
@@ -32,11 +34,7 @@ RUN sed -i 's|"packageManager":.*||' package.json && \
     npm config set registry https://registry.npmjs.org && \
     npm install --legacy-peer-deps --no-fund --no-audit
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source and build
 COPY . .
 
 # Set environment for build
