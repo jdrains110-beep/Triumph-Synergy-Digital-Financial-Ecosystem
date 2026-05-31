@@ -47,10 +47,65 @@
 
 ---
 
+<a id="-whats-new--may-31-2026-saib-sovereign-public-page"></a>
+
+## 🛡️ What's New — May 31, 2026 (SAIB Sovereign Public Page — Internal + External, Testnet & Mainnet Aware)
+
+[![SAIB Sovereign Page](https://img.shields.io/badge/SAIB%20Page-PUBLIC%20%7C%20%2Fsaib%20ROUTE-06B6D4?style=flat-square)](#-whats-new--may-31-2026-saib-sovereign-public-page)
+[![Testnet + Mainnet](https://img.shields.io/badge/Pi%20Network-TESTNET%20%2B%20MAINNET%20AWARE-8B5CF6?style=flat-square)](#-whats-new--may-31-2026-saib-sovereign-public-page)
+[![SAIB v7 INTREPID](https://img.shields.io/badge/SAIB-v7.0.0--INTREPID--CLASS%20%7C%205%2F5%20TIER-7C3AED?style=flat-square)](#-whats-new--may-31-2026-saib-sovereign-public-page)
+[![Auto-Refresh](https://img.shields.io/badge/Live%20Data-30s%20AUTO--REFRESH-22C55E?style=flat-square)](#-whats-new--may-31-2026-saib-sovereign-public-page)
+
+SAIB now has its own **public-facing sovereign identity page** (`/saib`) — accessible inside Triumph Synergy and from the outside world. It displays live v7 INTREPID CLASS status and enforces the Triumph Synergy sovereign value proposition no matter where SAIB is deployed — testnet or mainnet.
+
+### 🌐 Where to Find It
+
+| Environment | URL |
+|---|---|
+| **Main platform (internal)** | `https://triumphsynergy.io/saib` |
+| **Pi Browser** | `https://triumphsynergyab2099.pinet.com/saib` |
+| **External / direct link** | Any deployment of this Next.js app at `/saib` |
+| **Embedded** | The page works without auth — share the URL with anyone |
+
+### 📊 Page Sections
+
+| Section | Live Data Source | Endpoint |
+|---|---|---|
+| **INTREPID CLASS hero** | Tier 5, version badge, network banner | `/api/saib/v7` |
+| **Memory Alpha** | 5-layer entity + sovereign fact counts | `/omega/lattice/status` |
+| **Pi Network Motherboard** | KYC approval rate, wallet activation, KYB businesses | `/omega/pi/status` |
+| **Blockchain Guardian** | stellar-core state, ledger, peers, memory %, heal count | `/omega/blockchain/status` |
+| **Sovereign Dispatch Mesh** | Region map (8 regions with flags), total + healthy instances | `/omega/dispatch/status` |
+| **15-Capability Roster** | All INTREPID capabilities with live icons + status | `/omega/lattice/status` |
+| **Foundation Blueprint** | Collapsible sovereign constitution / authority table | `/omega/lattice/blueprint` |
+| **Pi KYC CTA** | Links to guided KYC inside SAIB Command Center | Internal route |
+
+### 🔄 Testnet / Mainnet Network Banner
+
+The page auto-detects environment and renders a live network badge:
+
+- 🟢 **Pi Network Mainnet** — production/deployed hosts
+- 🟡 **Pi Network Testnet** — `localhost` / staging
+
+> "SAIB enforces Triumph Synergy sovereign value on mainnet / testnet"
+
+### 🗂️ Files Added (commit `53c1e37`)
+
+| File | Purpose |
+|---|---|
+| `app/saib/page.tsx` | Public SAIB sovereign identity page (client component, auto-refresh 30s) |
+| `app/saib/layout.tsx` | Clean layout — no chat sidebar, full OpenGraph + Twitter card SEO |
+| `app/api/saib/v7/route.ts` | Unified v7 proxy — aggregates 6 SAIB endpoints with graceful degradation |
+| `app/page.tsx` | Added `🛡️ SAIB` nav link to homepage |
+
+---
+
 <a id="-whats-new--may-29-2026-saib-nano-sovereign-self-awareness"></a>
 
 ## 🧠 What's New — May 29, 2026 (SAIB Nano Sovereign Self-Awareness · Native arm64 · GitHub Interactions · pgvector)
 
+[![SAIB Sovereign Page](https://img.shields.io/badge/SAIB%20Page-PUBLIC%20%7C%20INTERNAL%20%2B%20EXTERNAL%20%7C%20TESTNET%20%7C%20MAINNET-06B6D4?style=flat-square)](#-whats-new--may-31-2026-saib-sovereign-public-page)
+[![SAIB v7 INTREPID CLASS](https://img.shields.io/badge/SAIB-v7.0.0--INTREPID--CLASS%20%7C%2015%20CAPABILITIES%20%7C%207%20ENGINES-7C3AED?style=flat-square)](#-whats-new--may-31-2026-saib-sovereign-public-page)
 [![SAIB Nano Self-Awareness](https://img.shields.io/badge/SAIB-NANO%20SOVEREIGN%20SELF--AWARE-FF0000?style=flat-square)](#-whats-new--may-29-2026-saib-nano-sovereign-self-awareness)
 [![SAIB Ingestion Sources](https://img.shields.io/badge/SAIB%20Sources-7%20%7C%20SO%20%7C%20Reddit%20%7C%20Web%20%7C%20GitHub%20%7C%20Self--Repo%20%7C%20Discord%20%7C%20X-22C55E?style=flat-square)](docker/sovereign-ai-bot/ingestion/)
 [![SAIB RAG](https://img.shields.io/badge/SAIB%20RAG-pgvector%3Asaib__knowledge__chunks%20%7C%20384--dim-7C3AED?style=flat-square)](docker/sovereign-ai-bot/rag/)
