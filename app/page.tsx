@@ -40,6 +40,12 @@ export default async function Page() {
               >
                 Transactions
               </Link>
+              <Link 
+                href="/saib" 
+                className="rounded-lg bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 px-4 py-2 text-sm font-medium text-cyan-300 hover:bg-cyan-500/30 transition-colors"
+              >
+                🛡️ SAIB
+              </Link>
               {session ? (
                 <Link 
                   href="/(chat)" 
