@@ -141,8 +141,11 @@ from .billing    import billing_engine, BillingPlan, SessionState, PLAN_CATALOG
 from .pi_payments import pi_processor
 
 # ── v6 Omega Prime engines ────────────────────────────────────────────────────
-from .omega_prime      import omega_prime, OmegaMode
-from .founder_presence import founder_presence, FounderPresenceEvent, ReimbursementClaim
+from .omega_prime        import omega_prime, OmegaMode
+from .founder_presence   import founder_presence, FounderPresenceEvent, ReimbursementClaim
+from .quantum_warp_sight import quantum_warp_sight, SightLayer
+from .blackout_engine    import blackout_engine, BlackoutPhase, QueuedActionType
+from .contract_forge     import contract_forge, ContractForge, ContractType
 
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
@@ -284,6 +287,21 @@ async def lifespan(app: FastAPI):
     )
     founder_presence._brain = omega_prime.brain   # share brain
     asyncio.create_task(omega_prime.run_forever())
+    # ── boot v6 extended engines ──
+    quantum_warp_sight._brain        = omega_prime.brain
+    quantum_warp_sight._mesh_engine  = omega_prime.mesh_engine
+    # Register internal fallback endpoints for warp-sight probing
+    quantum_warp_sight.register_endpoint(
+        "sovereign-nano-saib", f"http://localhost:{os.getenv('PORT', 8201)}",
+        fallback_urls=[
+            f"http://127.0.0.1:{os.getenv('PORT', 8201)}",
+            os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199"),
+        ],
+    )
+    blackout_engine._brain = omega_prime.brain
+    blackout_engine.register_probe_target(f"http://localhost:{os.getenv('PORT', 8201)}/health")
+    contract_forge._brain           = omega_prime.brain
+    contract_forge._blackout_engine = blackout_engine
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -292,7 +310,8 @@ async def lifespan(app: FastAPI):
         "Apex v4: SovereignHealer(auto-heal all services) | BotDefense(scammer/bot detection+block)\n"
         "Sovereign Apex v5: ExternalRegistry | LogIngestion | CodeAnalyzer | FixEngine | MCP | TenantAuth | K8s\n"
         "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)\n"
-        "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine"
+        "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine\n"
+        "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts)"
     )
     yield
 
@@ -2233,4 +2252,211 @@ async def omega_mesh_verdict(entity_id: str, threat_score: float) -> dict:
 def omega_mesh_mode_stats() -> dict:
     """Omega Mesh Mode engine statistics."""
     return omega_prime.mesh_engine.stats()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# v6 EXTENDED — Quantum Warp Sight | Blackout Engine | Contract Forge
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Quantum Warp Sight ────────────────────────────────────────────────────────
+
+@app.get("/omega/warp-sight/status")
+def warp_sight_status() -> dict:
+    """Quantum Warp Sight status: current sight layer, blocked paths, readings."""
+    return quantum_warp_sight.status()
+
+
+@app.get("/omega/warp-sight/recent", dependencies=[Depends(_require_token)])
+def warp_sight_recent(n: int = 10) -> dict:
+    """Recent warp-sight readings with layer, confidence, and latency."""
+    return {"readings": quantum_warp_sight.recent_readings(n)}
+
+
+class WarpObserveRequest(BaseModel):
+    target:      str
+    domain_hint: str = ""
+
+
+@app.post("/omega/warp-sight/observe", dependencies=[Depends(_require_token)])
+async def warp_sight_observe(req: WarpObserveRequest) -> dict:
+    """
+    Observe a target through cascading sight layers (Brain → Mesh → Endpoint → Telemetry → Dead-Reckoning).
+    Returns the best available reading even if all external paths are dark.
+    """
+    reading = await quantum_warp_sight.observe(req.target, req.domain_hint)
+    return {
+        "reading_id": reading.reading_id,
+        "layer":      reading.layer,
+        "target":     reading.target,
+        "confidence": round(reading.confidence, 3),
+        "latency_ms": reading.latency_ms,
+        "data":       reading.data,
+        "blocked_by": reading.blocked_by,
+    }
+
+
+@app.post("/omega/warp-sight/telemetry", dependencies=[Depends(_require_token)])
+async def warp_sight_ingest_telemetry(source: str, data: dict) -> dict:
+    """Feed a raw telemetry snapshot into Warp Sight for L4 replay capability."""
+    quantum_warp_sight.record_telemetry(source, data)
+    return {"recorded": True, "source": source}
+
+
+@app.post("/omega/warp-sight/block-report", dependencies=[Depends(_require_token)])
+async def warp_sight_block_report(path: str, reason: str = "") -> dict:
+    """Report a blocked path to the Warp Sight engine."""
+    quantum_warp_sight.report_blocked_path(path, reason)
+    return {"reported": True, "path": path, "sight_status": quantum_warp_sight._status}
+
+
+# ── Blackout Engine ────────────────────────────────────────────────────────────
+
+@app.get("/omega/blackout/status")
+def blackout_status() -> dict:
+    """Blackout Engine status: current phase, queued actions, intel log size."""
+    return blackout_engine.status()
+
+
+@app.post("/omega/blackout/connectivity", dependencies=[Depends(_require_token)])
+async def blackout_connectivity_report(reachable: bool, target: str = "") -> dict:
+    """Report connectivity state to the Blackout Engine."""
+    blackout_engine.report_connectivity(reachable, target)
+    return {"phase": blackout_engine._phase, "failures": blackout_engine._consecutive_failures}
+
+
+class BlackoutReasonRequest(BaseModel):
+    subject: str
+    context: dict = {}
+
+
+@app.post("/omega/blackout/reason", dependencies=[Depends(_require_token)])
+async def blackout_reason(req: BlackoutReasonRequest) -> dict:
+    """
+    Generate a local intelligence assessment with zero external calls.
+    Operates on OmegaBrain cache + telemetry — works even in total blackout.
+    """
+    intel = await blackout_engine.reason(req.subject, req.context)
+    return {
+        "intel_id":    intel.intel_id,
+        "subject":     intel.subject,
+        "assessment":  intel.assessment,
+        "confidence":  round(intel.confidence, 3),
+        "basis":       intel.basis,
+        "phase":       intel.phase,
+    }
+
+
+@app.post("/omega/blackout/playbook/{name}", dependencies=[Depends(_require_token)])
+async def blackout_fire_playbook(name: str, trigger: dict = {}) -> dict:
+    """Fire a pre-authorized autonomous playbook (works in full blackout)."""
+    return await blackout_engine.fire_playbook(name, trigger)
+
+
+@app.post("/omega/blackout/replay", dependencies=[Depends(_require_token)])
+async def blackout_replay() -> dict:
+    """Replay all queued actions now that connectivity is restored."""
+    return await blackout_engine.replay_queue()
+
+
+@app.get("/omega/blackout/intel", dependencies=[Depends(_require_token)])
+def blackout_recent_intel(n: int = 10) -> dict:
+    """Recent intelligence assessments generated during blackout."""
+    return {"intel": blackout_engine.recent_intel(n)}
+
+
+# ── Contract Forge ────────────────────────────────────────────────────────────
+
+@app.get("/omega/contracts/stats", dependencies=[Depends(_require_token)])
+def contracts_stats() -> dict:
+    """Contract Forge statistics — total drafts, by type, queued for delivery."""
+    return contract_forge.stats()
+
+
+@app.get("/omega/contracts/list", dependencies=[Depends(_require_token)])
+def contracts_list(contract_type: str = "") -> dict:
+    """List all generated contract drafts, optionally filtered by type."""
+    ct = None
+    if contract_type:
+        try:
+            ct = ContractType(contract_type.upper())
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Unknown contract type '{contract_type}'")
+    return {"drafts": contract_forge.list_drafts(ct)}
+
+
+@app.get("/omega/contracts/{draft_id}", dependencies=[Depends(_require_token)])
+def contracts_get(draft_id: str) -> dict:
+    """Retrieve a specific contract draft by ID (returns full text)."""
+    draft = contract_forge.get_draft(draft_id)
+    if not draft:
+        raise HTTPException(status_code=404, detail="Draft not found")
+    return {
+        "draft_id":      draft.draft_id,
+        "type":          draft.contract_type,
+        "title":         draft.title,
+        "body":          draft.body,
+        "parties":       draft.parties,
+        "metadata":      draft.metadata,
+        "created_at":    draft.created_at,
+        "queued":        draft.queued_for_delivery,
+    }
+
+
+class ContractForgeRequest(BaseModel):
+    contract_type: str          # NDA | SERVICE | PARTNERSHIP | REVENUE_SHARE | IP_ASSIGNMENT
+                                # LICENSE | CONSULTING | EQUITY | REIMBURSEMENT
+                                # CEASE_DESIST | SOVEREIGN_CHARTER
+    counterparty:  str = ""
+    services:      str = ""
+    rate:          str = ""
+    term:          str = ""
+    split_pct:     str = ""
+    amount:        str = ""
+    description:   str = ""
+    violation:     str = ""
+    role:          str = ""
+    extra_clauses: str = ""
+    queue_if_blackout: bool = True
+
+
+@app.post("/omega/contracts/forge", dependencies=[Depends(_require_token)])
+async def contracts_forge(req: ContractForgeRequest) -> dict:
+    """
+    Generate a sovereign contract draft.
+    Works offline — queues for delivery if in blackout phase.
+
+    Supported types: NDA, SERVICE, PARTNERSHIP, REVENUE_SHARE, IP_ASSIGNMENT,
+    LICENSE, CONSULTING, EQUITY, REIMBURSEMENT, CEASE_DESIST, SOVEREIGN_CHARTER
+    """
+    try:
+        ct = ContractType(req.contract_type.upper())
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown contract type '{req.contract_type}'. "
+                   f"Use: {', '.join(t.value for t in ContractType)}",
+        )
+
+    draft = await contract_forge.forge(
+        ct,
+        counterparty  = req.counterparty,
+        services      = req.services,
+        rate          = req.rate,
+        term          = req.term,
+        split_pct     = req.split_pct,
+        amount        = req.amount,
+        description   = req.description,
+        violation     = req.violation,
+        role          = req.role,
+        extra_clauses = req.extra_clauses,
+        queue_if_blackout = req.queue_if_blackout,
+    )
+    return {
+        "draft_id":  draft.draft_id,
+        "title":     draft.title,
+        "type":      draft.contract_type,
+        "queued":    draft.queued_for_delivery,
+        "body":      draft.body,
+        "disclaimer": draft.metadata.get("disclaimer"),
+    }
 
