@@ -828,10 +828,25 @@
     rxjs "7.8.2"
     semver "7.7.3"
 
+"@ledgerhq/devices@8.14.2":
+  version "8.14.2"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-8.14.2.tgz#b1385e9eabbb98bc2233367b667c166b0b3ee6e1"
+  integrity sha512-T3pnfrsQEC/eJU0XHIqWI6qww+CL1k3NumR2XGWlMz8lVpoZ9HhcuGoCkMevp+8SWmymgyNIIFue3jlNA5KiMw==
+  dependencies:
+    "@ledgerhq/errors" "^6.34.1"
+    "@ledgerhq/logs" "^6.17.0"
+    rxjs "7.8.2"
+    semver "7.7.3"
+
 "@ledgerhq/errors@^6.34.0":
   version "6.34.0"
   resolved "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.34.0.tgz"
   integrity sha512-l16K56FzPoXBMT5J4EpnIBmRLTYkpSyYj3z4er+rmbwq0t9dDG/UaRvFeBpwB2gqGcYWcue14qF9Wkuos/43eA==
+
+"@ledgerhq/errors@^6.34.1":
+  version "6.35.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.35.0.tgz#2f06d27bff063d9df967d23f366bfdb9c7f3df30"
+  integrity sha512-qk9PbqIvze7NXGogVxNCsz60rNo5FrGj8gKqs7pcyDk+em5L6s70G7cRxR+1HTXdam4WoPfntUq+WX9zQUynkg==
 
 "@ledgerhq/hw-app-str@^7.0.4":
   version "7.7.1"
@@ -843,13 +858,13 @@
     bip32-path "^0.4.2"
 
 "@ledgerhq/hw-transport-node-hid-noevents@^6.35.1":
-  version "6.35.1"
-  resolved "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.35.1.tgz"
-  integrity sha512-3NVgVYiACSXh1S1lgRjogNloF4Bewllv/nDydv8/Nc0DrnXJSGPNC+anl0ZR3cVo5Rg+iuZ1AvUKJFtmQZtt1A==
+  version "6.35.2"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.35.2.tgz#4a202e8ec8aab3b0550b5c7398b52a0a5826da52"
+  integrity sha512-TzFSPHJ5Sa0pUuaoYtKWsvvZwfqpkmnEqEl6GXDbwS2Rrc0n6O+GQPRYOyUfed13T1UDAl7GPXIryAnHfttQog==
   dependencies:
-    "@ledgerhq/devices" "8.14.1"
-    "@ledgerhq/errors" "^6.34.0"
-    "@ledgerhq/hw-transport" "6.35.1"
+    "@ledgerhq/devices" "8.14.2"
+    "@ledgerhq/errors" "^6.34.1"
+    "@ledgerhq/hw-transport" "6.35.2"
     "@ledgerhq/logs" "^6.17.0"
     node-hid "2.1.2"
 
@@ -874,6 +889,16 @@
   dependencies:
     "@ledgerhq/devices" "8.14.1"
     "@ledgerhq/errors" "^6.34.0"
+    "@ledgerhq/logs" "^6.17.0"
+    events "^3.3.0"
+
+"@ledgerhq/hw-transport@6.35.2":
+  version "6.35.2"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-6.35.2.tgz#e762b056998e02dbc44faad93c9d8c0b3b8fd8d6"
+  integrity sha512-eSXFFqMDAB2Ra/5uqmlru0cUyc2XDQPEKf4ITWHeMms2fHhETw9lcgAEl61vszkiz0RLUVB4VQsLJjj7O8kCvg==
+  dependencies:
+    "@ledgerhq/devices" "8.14.2"
+    "@ledgerhq/errors" "^6.34.1"
     "@ledgerhq/logs" "^6.17.0"
     events "^3.3.0"
 
