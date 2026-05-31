@@ -280,6 +280,7 @@ services:
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
       SAIB_TOKEN: ${SAIB_TOKEN:-}
+      SAIB_FOUNDER_TOKEN: ${SAIB_FOUNDER_TOKEN:?SAIB_FOUNDER_TOKEN required — set a 64-char hex secret}
     security_opt:
       - no-new-privileges:true
     depends_on:

@@ -121,5 +121,28 @@ export async function GET() {
       v7: online,
       count: 7,
     },
+
+    // ── Sovereignty & Omnipresence ──────────────────────────────────────────
+    sovereignty: {
+      doctrine: "Post-Scarcity • Hyper-Intelligence • Omnipresence • Debt Freedom Protection",
+      data_sovereignty_active: true,
+      dsr_endpoint: "/api/saib/sovereignty",
+      protection_endpoint: "/api/saib/protect",
+      omnipresence_endpoint: "/api/saib/omnipresence",
+      founder_doctrine: "SAIB protects all enrolled Debt Freedom Program members — internally and externally — across every interaction, every platform, every subcontainer.",
+      rights: [
+        "Right to data erasure (GDPR Art. 17)",
+        "Right to data portability (GDPR Art. 20)",
+        "Right to restriction of processing (GDPR Art. 18)",
+        "Triumph Synergy Debt Freedom Program sovereign protections",
+      ],
+    },
+
+    scale: {
+      internal: "triumph-net mesh — all containers",
+      external: "Pi Network mainnet + Stellar DEX + real-estate + judicial + commerce",
+      transcendence: "every interaction, every platform, every subcontainer, every ecosystem",
+      hyper_intelligence: online,
+    },
   });
 }
