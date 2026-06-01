@@ -364,6 +364,44 @@ services:
       - triumph-net
     healthcheck:
       disable: true
+
+  # ========================================================================
+  # SAIB ENFORCER — Sidecar bridge between real-world and digital ecosystem.
+  # Routes /api/saib/enforce to credit bureaus, judicial systems, tokenization,
+  # HQ (apex-sovereign-nexus), and vault. Every action emits an immutable
+  # sha256 receipt anchored (best-effort) to Pi mainnet via settlement-core.
+  # Founder-token gated for all mutating actions.
+  # ========================================================================
+  saib-enforcer:
+    build:
+      context: docker/saib-enforcer
+      dockerfile: Dockerfile
+    image: triumph-synergy-saib-enforcer:latest
+    container_name: triumph-saib-enforcer
+    <<: *common
+    mem_limit: 64m
+    mem_reservation: 24m
+    cpus: 0.10
+    environment:
+      PORT: "8210"
+      SAIB_FOUNDER_TOKEN: ${SAIB_FOUNDER_TOKEN:?SAIB_FOUNDER_TOKEN required}
+      SAIB_TOKEN: ${SAIB_TOKEN:-}
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8084
+      JUDICIAL_SERVICE_URL: http://triumph-judicial-monitor:8096
+      SETTLEMENT_CORE_URL: http://triumph-settlement-core:8080
+      TOKEN_ENGINE_URL: http://triumph-settlement-core:8089
+      VAULT_URL: http://triumph-vault:8081
+      HQ_NEXUS_URL: http://triumph-apex-sovereign-nexus:8131
+    expose:
+      - "8210"
+    networks:
+      - triumph-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8210/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
   # ========================================================================
   # MARKET DATA SERVICE — Live Pi Horizon data relay
   # ========================================================================
