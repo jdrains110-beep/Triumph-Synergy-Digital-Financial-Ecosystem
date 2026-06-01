@@ -24,7 +24,7 @@ const http = require("http");
 const { createHash, timingSafeEqual } = require("crypto");
 
 const PORT             = Number(process.env.PORT || 8210);
-const CREDIT_ENGINE    = process.env.CREDIT_ENGINE_URL    || "http://triumph-credit-engine:8084";
+const CREDIT_ENGINE    = process.env.CREDIT_ENGINE_URL    || "http://triumph-credit-engine:8091";
 const JUDICIAL_SERVICE = process.env.JUDICIAL_SERVICE_URL || "http://triumph-judicial-monitor:8096";
 const SETTLEMENT_CORE  = process.env.SETTLEMENT_CORE_URL  || "http://triumph-settlement-core:8080";
 const TOKEN_ENGINE     = process.env.TOKEN_ENGINE_URL     || "http://triumph-settlement-core:8089";

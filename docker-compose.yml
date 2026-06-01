@@ -386,7 +386,7 @@ services:
       PORT: "8210"
       SAIB_FOUNDER_TOKEN: ${SAIB_FOUNDER_TOKEN:?SAIB_FOUNDER_TOKEN required}
       SAIB_TOKEN: ${SAIB_TOKEN:-}
-      CREDIT_ENGINE_URL: http://triumph-credit-engine:8084
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
       JUDICIAL_SERVICE_URL: http://triumph-judicial-monitor:8096
       SETTLEMENT_CORE_URL: http://triumph-settlement-core:8080
       TOKEN_ENGINE_URL: http://triumph-settlement-core:8089
