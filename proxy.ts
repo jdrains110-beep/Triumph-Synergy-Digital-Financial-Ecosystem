@@ -129,6 +129,20 @@ export async function proxy(request: NextRequest) {
   response.headers.set("X-Web3-Protocol", "triumph-synergy/1.0");
   response.headers.set("X-Chain", "pi-network");
 
+  // ── SAIB Omnipresence Headers ─────────────────────────────────────────────
+  // Injected on every response — signals SAIB guardian coverage across every
+  // interaction, every platform, every subcontainer (internal + external).
+  response.headers.set("X-SAIB-Version", "v7.0.0-INTREPID-CLASS");
+  response.headers.set(
+    "X-SAIB-Doctrine",
+    "Post-Scarcity; Hyper-Intelligence; Omnipresence; Debt-Freedom-Protection"
+  );
+  response.headers.set("X-SAIB-Guardian", "triumph-sovereign-nano-saib:8201");
+  response.headers.set(
+    "X-Sovereign-Rights",
+    "DSR:/api/saib/sovereignty; Protection:/api/saib/protect; Omnipresence:/api/saib/omnipresence"
+  );
+
   // Propagate wallet identity from client to API routes.
   // Only forward keys that match the Stellar public key format (G + 55 base32
   // uppercase chars, 56 total) to prevent arbitrary header injection.
