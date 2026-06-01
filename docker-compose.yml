@@ -386,12 +386,17 @@ services:
       PORT: "8210"
       SAIB_FOUNDER_TOKEN: ${SAIB_FOUNDER_TOKEN:?SAIB_FOUNDER_TOKEN required}
       SAIB_TOKEN: ${SAIB_TOKEN:-}
+      PUBLIC_BRIDGE_TOKEN: ${PUBLIC_BRIDGE_TOKEN:-}
       CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
-      JUDICIAL_SERVICE_URL: http://triumph-judicial-monitor:8096
+      JUDICIAL_SERVICE_URL: http://triumph-governance-shield:8096
       SETTLEMENT_CORE_URL: http://triumph-settlement-core:8080
       TOKEN_ENGINE_URL: http://triumph-settlement-core:8089
       VAULT_URL: http://triumph-vault:8081
-      HQ_NEXUS_URL: http://triumph-apex-sovereign-nexus:8131
+      HQ_NEXUS_URL: http://triumph-sovereign-nano-saib:8201
+      NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
+      DUTY_ENABLED: "true"
+    secrets:
+      - public_bridge_token
     expose:
       - "8210"
     networks:
