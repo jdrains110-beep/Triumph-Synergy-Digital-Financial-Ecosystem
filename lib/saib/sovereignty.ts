@@ -301,16 +301,30 @@ export async function syncProtectionToSAIB(record: ProtectionRecord): Promise<vo
 
 /** HTTP services — checked via fetch (must respond with HTTP ≤ 499) */
 const TRIUMPH_HTTP_SERVICES = [
-  { name: "triumph-app",                    url: "http://triumph-app:3000/api/health" },
-  { name: "triumph-sovereign-nano-saib",    url: "http://triumph-sovereign-nano-saib:8201/health" },
-  { name: "triumph-horizon-stream",         url: "http://triumph-horizon-stream:8085/health" },
-  { name: "triumph-pi-bridge-connector",    url: "http://triumph-pi-bridge-connector:8092/health" },
+  { name: "triumph-app",                       url: "http://triumph-app:3000/api/health" },
+  { name: "triumph-sovereign-nano-saib",       url: "http://triumph-sovereign-nano-saib:8201/health" },
+  { name: "triumph-horizon-stream",            url: "http://triumph-horizon-stream:8085/health" },
+  { name: "triumph-pi-bridge-connector",       url: "http://triumph-pi-bridge-connector:8092/health" },
+  { name: "triumph-quantum-intel-fortress",    url: "http://triumph-quantum-intel-fortress:8090/health" },
+  { name: "triumph-apex-services",             url: "http://triumph-apex-services:8099/health" },
+  { name: "triumph-apex-sovereign-nexus",      url: "http://triumph-apex-sovereign-nexus:8131/health" },
+  { name: "triumph-governance-shield",         url: "http://triumph-governance-shield:8083/health" },
+  { name: "triumph-guardian-watchdog-nexus",   url: "http://triumph-guardian-watchdog-nexus:9911/health" },
+  { name: "triumph-observability-stack",       url: "http://triumph-observability-stack:9090/-/healthy" },
+  { name: "triumph-settlement-core",           url: "http://triumph-settlement-core:8080/health" },
+  { name: "triumph-sovereign-life",            url: "http://triumph-sovereign-life:8130/health" },
+  { name: "triumph-sovereign-mesh-hub",        url: "http://triumph-sovereign-mesh-hub:8200/health" },
+  { name: "triumph-sovereign-military-bridge", url: "http://triumph-sovereign-military-bridge:8199/health" },
+  { name: "triumph-vault",                     url: "http://triumph-vault:8081/health" },
 ];
 
 /** TCP-only services — checked via raw socket connect (do not speak HTTP) */
 const TRIUMPH_TCP_SERVICES = [
-  { name: "triumph-redis",    host: "triumph-redis",    port: 6379 },
-  { name: "triumph-postgres", host: "triumph-postgres", port: 5432 },
+  { name: "triumph-redis",            host: "triumph-redis",            port: 6379 },
+  { name: "triumph-postgres",         host: "triumph-postgres",         port: 5432 },
+  { name: "triumph-pi-mainnet-node",  host: "triumph-pi-mainnet-node",  port: 8000 },
+  { name: "triumph-supernode-peer-2", host: "triumph-supernode-peer-2", port: 11626 },
+  { name: "triumph-nginx",            host: "triumph-nginx",            port: 80 },
 ];
 
 /**
