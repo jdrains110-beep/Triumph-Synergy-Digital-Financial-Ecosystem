@@ -34,6 +34,16 @@ const HQ_NEXUS         = process.env.HQ_NEXUS_URL         || "http://triumph-ape
 const FOUNDER_TOKEN  = process.env.SAIB_FOUNDER_TOKEN || "";
 const OPERATOR_TOKEN = process.env.SAIB_TOKEN || "";
 
+// Autonomous duty cadence (env-tunable; sensible defaults).
+const DUTY_ENABLED        = (process.env.DUTY_ENABLED || "true").toLowerCase() !== "false";
+const DUTY_INTERVAL_SEC   = Number(process.env.DUTY_INTERVAL_SEC   || 60);    // master tick
+const DUTY_HEARTBEAT_SEC  = Number(process.env.DUTY_HEARTBEAT_SEC  || 30);    // anchor heartbeat
+const DUTY_HQ_SEC         = Number(process.env.DUTY_HQ_SEC         || 120);   // HQ status sweep
+const DUTY_TOKEN_AUDIT_SEC = Number(process.env.DUTY_TOKEN_AUDIT_SEC || 300); // tokenization ledger audit
+const DUTY_JUDICIAL_SEC   = Number(process.env.DUTY_JUDICIAL_SEC   || 900);   // judicial radar sweep
+const DUTY_ANOMALY_SEC    = Number(process.env.DUTY_ANOMALY_SEC    || 180);   // ecosystem anomaly scan
+const DUTY_RING_MAX       = Number(process.env.DUTY_RING_MAX       || 200);   // in-memory action log size
+
 const READ_ONLY = new Set(["judicial-research", "tokenization-audit", "hq-report"]);
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
@@ -261,7 +271,176 @@ const MANIFEST = {
     anchoring: "Pi mainnet via triumph-settlement-core (best-effort)",
     immutable: true,
   },
+  introspection: {
+    "GET /duties":   "live duty engine status, counters, next-run schedule",
+    "GET /receipts": "ring buffer of recent receipts (?limit=N, default 50)",
+    "GET /health":   "liveness probe",
+  },
+  duties: {
+    enabled_env: "DUTY_ENABLED",
+    cadence_env: {
+      DUTY_HEARTBEAT_SEC:    "anchor heartbeat (default 30s)",
+      DUTY_HQ_SEC:           "HQ status sweep (default 120s)",
+      DUTY_TOKEN_AUDIT_SEC:  "tokenization ledger audit (default 300s)",
+      DUTY_JUDICIAL_SEC:     "judicial active-case radar (default 900s)",
+      DUTY_ANOMALY_SEC:      "ecosystem omnipresence anomaly scan (default 180s)",
+    },
+    note: "Every duty produces a receipt. Nothing SAIB does is invisible.",
+  },
 };
+
+// ── Duty engine ──────────────────────────────────────────────────────────────
+// SAIB Enforcer is not passive. It runs an autonomous duty loop that performs
+// the work no one else is paid to do: heartbeats, HQ sweeps, tokenization
+// ledger audits, judicial radar sweeps, and ecosystem anomaly scans.
+// Every duty produces a receipt — same format as on-demand actions — and the
+// last DUTY_RING_MAX receipts are exposed via GET /duties and /receipts.
+
+const dutyState = {
+  startedAt: new Date().toISOString(),
+  ticks: 0,
+  lastTickAt: null,
+  receipts: [],            // ring buffer, newest last
+  counters: {},            // action -> count
+  errors: [],              // last 20 duty errors
+  nextRunAt: {},           // duty -> ISO timestamp of next scheduled run
+};
+
+function recordReceipt(receipt, extra) {
+  const entry = { ...receipt };
+  if (extra && extra.summary)  entry.summary  = extra.summary;
+  if (extra && extra.upstream) entry.upstream = extra.upstream;
+  dutyState.receipts.push(entry);
+  if (dutyState.receipts.length > DUTY_RING_MAX) {
+    dutyState.receipts.splice(0, dutyState.receipts.length - DUTY_RING_MAX);
+  }
+  dutyState.counters[receipt.action] = (dutyState.counters[receipt.action] || 0) + 1;
+}
+
+function recordDutyError(duty, err) {
+  dutyState.errors.push({
+    at: new Date().toISOString(),
+    duty,
+    message: String(err && err.message ? err.message : err),
+  });
+  if (dutyState.errors.length > 20) dutyState.errors.shift();
+}
+
+// ── Individual duties ────────────────────────────────────────────────────────
+
+async function dutyHeartbeat() {
+  const payload = {
+    at: new Date().toISOString(),
+    enforcer: "alive",
+    uptime_sec: Math.round(process.uptime()),
+    ticks: dutyState.ticks,
+  };
+  const receipt = makeReceipt("duty-heartbeat", "autonomous", payload);
+  void anchorReceipt(receipt);
+  recordReceipt(receipt, { summary: `heartbeat tick=${dutyState.ticks}` });
+}
+
+async function dutyHQSweep() {
+  const u = await fetchJSON(`${HQ_NEXUS}/hq/status`, { method: "GET" }, 6000)
+    .catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
+  const receipt = makeReceipt("duty-hq-sweep", "autonomous", { hq: u.body, hq_status: u.status });
+  void anchorReceipt(receipt);
+  recordReceipt(receipt, {
+    summary: `hq-sweep status=${u.status}`,
+    upstream: { ok: u.ok, status: u.status },
+  });
+}
+
+async function dutyTokenizationAudit() {
+  const u = await fetchJSON(`${TOKEN_ENGINE}/tokenization/audit?asset=all`, { method: "GET" }, 8000)
+    .catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
+  const receipt = makeReceipt("duty-tokenization-audit", "autonomous", {
+    audit: u.body, upstream_status: u.status,
+  });
+  void anchorReceipt(receipt);
+  recordReceipt(receipt, {
+    summary: `tokenization-audit status=${u.status}`,
+    upstream: { ok: u.ok, status: u.status },
+  });
+}
+
+async function dutyJudicialRadar() {
+  // Scan for active enforcement events that need to be sourced from the
+  // judicial-monitor's event stream. Read-only sweep: judicial-monitor is
+  // expected to expose /api/judicial/active (returns recent open cases).
+  const u = await fetchJSON(`${JUDICIAL_SERVICE}/api/judicial/active`, { method: "GET" }, 10000)
+    .catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
+  const count = Array.isArray(u.body && u.body.cases) ? u.body.cases.length : 0;
+  const receipt = makeReceipt("duty-judicial-radar", "autonomous", {
+    active_count: count, sample: Array.isArray(u.body && u.body.cases) ? u.body.cases.slice(0, 5) : null,
+    upstream_status: u.status,
+  });
+  void anchorReceipt(receipt);
+  recordReceipt(receipt, {
+    summary: `judicial-radar active=${count} status=${u.status}`,
+    upstream: { ok: u.ok, status: u.status },
+  });
+}
+
+async function dutyEcosystemAnomalyScan() {
+  // Cross-check ecosystem omnipresence (via app) and credit-engine pulse.
+  const omni = await fetchJSON("http://triumph-app:3000/api/saib/omnipresence", { method: "GET" }, 12000)
+    .catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
+  const credit = await fetchJSON(`${CREDIT_ENGINE}/health`, { method: "GET" }, 5000)
+    .catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
+
+  const reachable = omni.body && typeof omni.body.reachable === "number" ? omni.body.reachable : null;
+  const total     = omni.body && typeof omni.body.totalServices === "number" ? omni.body.totalServices : null;
+  const degraded  = (reachable != null && total != null && reachable < total);
+
+  const receipt = makeReceipt("duty-anomaly-scan", "autonomous", {
+    omnipresence: { reachable, total, status: omni.body && omni.body.saibGuardianStatus },
+    credit_engine_ok: credit.ok,
+    degraded,
+  });
+  void anchorReceipt(receipt);
+  recordReceipt(receipt, {
+    summary: `anomaly-scan omni=${reachable}/${total} credit=${credit.ok ? "up" : "down"}${degraded ? " DEGRADED" : ""}`,
+    upstream: { degraded, omni_status: omni.status, credit_status: credit.status },
+  });
+}
+
+// ── Scheduler ────────────────────────────────────────────────────────────────
+
+const DUTIES = [
+  { name: "heartbeat",         fn: dutyHeartbeat,            everySec: DUTY_HEARTBEAT_SEC,  last: 0 },
+  { name: "hq-sweep",          fn: dutyHQSweep,              everySec: DUTY_HQ_SEC,         last: 0 },
+  { name: "tokenization-audit",fn: dutyTokenizationAudit,    everySec: DUTY_TOKEN_AUDIT_SEC,last: 0 },
+  { name: "judicial-radar",    fn: dutyJudicialRadar,        everySec: DUTY_JUDICIAL_SEC,   last: 0 },
+  { name: "anomaly-scan",      fn: dutyEcosystemAnomalyScan, everySec: DUTY_ANOMALY_SEC,    last: 0 },
+];
+
+async function dutyTick() {
+  dutyState.ticks += 1;
+  dutyState.lastTickAt = new Date().toISOString();
+  const now = Date.now();
+  for (const duty of DUTIES) {
+    if (now - duty.last >= duty.everySec * 1000) {
+      duty.last = now;
+      dutyState.nextRunAt[duty.name] = new Date(now + duty.everySec * 1000).toISOString();
+      try { await duty.fn(); }
+      catch (err) { recordDutyError(duty.name, err); }
+    }
+  }
+}
+
+function startDutyEngine() {
+  if (!DUTY_ENABLED) {
+    console.log("[saib-enforcer] duty engine DISABLED via DUTY_ENABLED=false");
+    return;
+  }
+  console.log(`[saib-enforcer] duty engine STARTED — tick every ${DUTY_INTERVAL_SEC}s`);
+  // Fire an initial heartbeat immediately so observers see life on boot.
+  dutyTick().catch((e) => recordDutyError("initial-tick", e));
+  setInterval(() => {
+    dutyTick().catch((e) => recordDutyError("tick", e));
+  }, DUTY_INTERVAL_SEC * 1000).unref();
+}
 
 // ── HTTP server ──────────────────────────────────────────────────────────────
 function readBody(req) {
@@ -297,6 +476,23 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && (path === "/health" || path === "/api/saib/enforce/health")) {
       return send(res, 200, { ok: true, service: "saib-enforcer", uptimeSec: Math.round(process.uptime()) });
     }
+    if (req.method === "GET" && (path === "/duties" || path === "/api/saib/enforce/duties")) {
+      return send(res, 200, {
+        enabled: DUTY_ENABLED,
+        startedAt: dutyState.startedAt,
+        lastTickAt: dutyState.lastTickAt,
+        ticks: dutyState.ticks,
+        counters: dutyState.counters,
+        nextRunAt: dutyState.nextRunAt,
+        recentErrors: dutyState.errors,
+        scheduled: DUTIES.map((d) => ({ name: d.name, everySec: d.everySec })),
+      });
+    }
+    if (req.method === "GET" && (path === "/receipts" || path === "/api/saib/enforce/receipts")) {
+      const limit = Math.min(Number(url.searchParams.get("limit") || 50), DUTY_RING_MAX);
+      const slice = dutyState.receipts.slice(-limit).reverse();
+      return send(res, 200, { count: slice.length, total: dutyState.receipts.length, receipts: slice });
+    }
     if (req.method === "GET" && (path === "/" || path === "/api/saib/enforce")) {
       return send(res, 200, MANIFEST);
     }
@@ -329,6 +525,10 @@ const server = http.createServer(async (req, res) => {
     const result = await ACTIONS[action](body);
     const receipt = makeReceipt(action, actor, { request: body, upstream: result.body });
     void anchorReceipt(receipt);
+    recordReceipt(receipt, {
+      summary: `on-demand ${action} status=${result.status} actor=${actor}`,
+      upstream: { status: result.status },
+    });
 
     return send(res, result.status, {
       doctrine: "SAIB Enforcer — bridge between real and digital",
@@ -342,6 +542,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`[saib-enforcer] listening on :${PORT}`);
   console.log(`[saib-enforcer] founder-token=${FOUNDER_TOKEN ? "set" : "MISSING"}  operator-token=${OPERATOR_TOKEN ? "set" : "MISSING"}`);
+  startDutyEngine();
 });
 
 process.on("SIGTERM", () => { server.close(() => process.exit(0)); });
