@@ -883,7 +883,11 @@ services:
       GF_DATABASE_MAX_OPEN_CONN: "5"
       # Disable Grafana 12 secrets-management feature (causes
       # "context deadline exceeded" cleanup errors in single-node deployments)
-      GF_FEATURE_TOGGLES_DISABLE: "secretsManagementAppPlatform"
+      # Also disable k8s-compatible apiserver for dashboards/alerting (causes
+      # "context deadline exceeded" from grafana-apiserver self-calls)
+      GF_FEATURE_TOGGLES_DISABLE: "secretsManagementAppPlatform,kubernetesPlaylists,kubernetesDashboards,kubernetesSnapshots,kubernetesRuleGroups"
+      GF_GRAFANA_APP_MODE: "production"
+      GF_GRAFANA_APISERVER_ENABLED: "false"
     volumes:
       - triumph_prometheus_data:/prometheus
       - triumph_grafana_data:/var/lib/grafana

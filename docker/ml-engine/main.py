@@ -40,8 +40,11 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 import redis as redis_lib
 import httpx
+import asyncio
+import functools
 from fastapi import FastAPI
 from fastapi.responses import Response, JSONResponse
+from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
 
@@ -66,6 +69,28 @@ def _np_sanitize(obj):
 class NumpyJSONResponse(JSONResponse):
     def render(self, content) -> bytes:
         return super().render(_np_sanitize(content))
+
+
+class NumpySanitizingRoute(APIRoute):
+    """Wraps the endpoint so its return value is sanitized of numpy scalars
+    BEFORE FastAPI/Pydantic v2 attempts to serialize it (fixes
+    PydanticSerializationError: Unable to serialize unknown type: numpy.bool)."""
+
+    def __init__(self, path, endpoint, **kwargs):
+        if endpoint is not None and callable(endpoint):
+            if asyncio.iscoroutinefunction(endpoint):
+                orig = endpoint
+                @functools.wraps(orig)
+                async def wrapped(*a, **kw):
+                    return _np_sanitize(await orig(*a, **kw))
+                endpoint = wrapped
+            else:
+                orig = endpoint
+                @functools.wraps(orig)
+                def wrapped(*a, **kw):
+                    return _np_sanitize(orig(*a, **kw))
+                endpoint = wrapped
+        super().__init__(path, endpoint, **kwargs)
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
@@ -689,6 +714,7 @@ app = FastAPI(
     version="1.0.0",
     default_response_class=NumpyJSONResponse,
 )
+app.router.route_class = NumpySanitizingRoute
 
 # ─── Request bodies ────────────────────────────────────────────────────────────
 
