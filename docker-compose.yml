@@ -1216,14 +1216,16 @@ services:
     container_name: triumph-pi-mainnet-node
     restart: always
     profiles: [ "pi-node" ] # opt-in: heavy (3-5 GB RAM for stellar-core sync)
-    shm_size: 1g # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during catchup on AMD64 emulation
-    # Docker Desktop on Apple Silicon typically allocates 6-8 GB; cap mainnet-node at 3.5g
-    # so postgres/redis/bridge/governance-shield can coexist. The trade-off is slower
-    # initial catchup (it'll evict bucket pages instead of holding them in RAM); the
-    # node still syncs and serves Horizon. Bump to 7g+ if you raise Docker Desktop RAM.
-    mem_limit: 3500m
-    mem_reservation: 1500m
-    cpus: 1.5 # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
+    shm_size: 1536m # stellar-core uses /dev/shm for SCP bucket merges; 512m/1g still SIGABRT/OOM during apply-buckets on AMD64 emulation — 1.5g survives the spike
+    # Host has 8 GB physical RAM; Docker Desktop budget ≈ 8 GiB. The rest of the
+    # 20-container stack uses ≈ 3.3 GiB, leaving ≈ 4.7 GiB headroom. The dominant
+    # memory event for a watcher node is the one-time apply-buckets phase (loading
+    # Pi mainnet's full current ledger state). 2 GiB OOM-loops, 3.5 GiB is marginal;
+    # 4 GiB clears the spike while still leaving margin for postgres/redis/bridge.
+    # Raise to 6-7g ONLY if you increase Docker Desktop's RAM allocation first.
+    mem_limit: 4096m
+    mem_reservation: 2048m
+    cpus: 2.0 # apply-buckets is CPU-bound under QEMU emulation — give it both vCPUs to finish catchup faster
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
       NODE_PRIVATE_KEY: ${PI_NODE_PRIVATE_KEY:-} # auto-generated if blank
