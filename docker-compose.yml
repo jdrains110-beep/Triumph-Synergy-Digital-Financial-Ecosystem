@@ -176,7 +176,7 @@ services:
     container_name: triumph-redis
     stop_grace_period: 30s # Allow RDB/AOF flush before SIGKILL
     <<: *common
-    mem_limit: 192m      # was 128m — AOF fsync + RDB fork spikes need headroom
+    mem_limit: 192m # was 128m — AOF fsync + RDB fork spikes need headroom
     mem_reservation: 96m # was 64m
     cpus: 0.3
     oom_score_adj: -500 # Protect cache — last to OOM-kill
@@ -881,6 +881,9 @@ services:
       GF_DATABASE_WAL: "true"
       GF_DATABASE_CACHE_MODE: "private"
       GF_DATABASE_MAX_OPEN_CONN: "5"
+      # Disable Grafana 12 secrets-management feature (causes
+      # "context deadline exceeded" cleanup errors in single-node deployments)
+      GF_FEATURE_TOGGLES_DISABLE: "secretsManagementAppPlatform"
     volumes:
       - triumph_prometheus_data:/prometheus
       - triumph_grafana_data:/var/lib/grafana
@@ -1302,7 +1305,7 @@ services:
     secrets:
       - public_bridge_token
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  # SovereignHealer: restart/inspect containers
+      - /var/run/docker.sock:/var/run/docker.sock # SovereignHealer: restart/inspect containers
     networks:
       triumph-net:
         aliases:
