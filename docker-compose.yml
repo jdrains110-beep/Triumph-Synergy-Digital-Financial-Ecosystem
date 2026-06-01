@@ -176,8 +176,8 @@ services:
     container_name: triumph-redis
     stop_grace_period: 30s # Allow RDB/AOF flush before SIGKILL
     <<: *common
-    mem_limit: 128m
-    mem_reservation: 64m
+    mem_limit: 192m      # was 128m — AOF fsync + RDB fork spikes need headroom
+    mem_reservation: 96m # was 64m
     cpus: 0.3
     oom_score_adj: -500 # Protect cache — last to OOM-kill
     # Internal only — no host port exposure
@@ -516,7 +516,7 @@ services:
     environment:
       <<: [ *db-env, *pi-env ]
       ENGINE_MODE: hyper
-      NODE_OPTIONS: "--max-old-space-size=512"
+      NODE_OPTIONS: "--max-old-space-size=512 --unhandled-rejections=warn"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       EXECUTION_CHANNELS: 10000
       PI_INTERNAL_RATE: "314159.0"
@@ -877,6 +877,10 @@ services:
       CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${CLOUDFLARE_R2_SECRET_ACCESS_KEY:-}
       CLOUDFLARE_KV_NAMESPACE_ID: ${CLOUDFLARE_KV_NAMESPACE_ID:-}
       CLOUDFLARE_KV_KEY: ${CLOUDFLARE_KV_KEY:-triumph-cloud-memory:latest}
+      # ── Grafana database tuning — prevent SQLITE_BUSY lock errors ──
+      GF_DATABASE_WAL: "true"
+      GF_DATABASE_CACHE_MODE: "private"
+      GF_DATABASE_MAX_OPEN_CONN: "5"
     volumes:
       - triumph_prometheus_data:/prometheus
       - triumph_grafana_data:/var/lib/grafana

@@ -299,14 +299,37 @@ export async function syncProtectionToSAIB(record: ProtectionRecord): Promise<vo
 
 // ─── Omnipresence scan ────────────────────────────────────────────────────────
 
-const TRIUMPH_SERVICES = [
+/** HTTP services — checked via fetch (must respond with HTTP ≤ 499) */
+const TRIUMPH_HTTP_SERVICES = [
   { name: "triumph-app",                    url: "http://triumph-app:3000/api/health" },
   { name: "triumph-sovereign-nano-saib",    url: "http://triumph-sovereign-nano-saib:8201/health" },
   { name: "triumph-horizon-stream",         url: "http://triumph-horizon-stream:8092/health" },
   { name: "triumph-pi-bridge-connector",    url: "http://triumph-pi-bridge-connector:8200/health" },
-  { name: "triumph-redis",                  url: "http://triumph-redis:6379" },
-  { name: "triumph-postgres",               url: "http://triumph-postgres:5432" },
 ];
+
+/** TCP-only services — checked via raw socket connect (do not speak HTTP) */
+const TRIUMPH_TCP_SERVICES = [
+  { name: "triumph-redis",    host: "triumph-redis",    port: 6379 },
+  { name: "triumph-postgres", host: "triumph-postgres", port: 5432 },
+];
+
+/**
+ * Raw TCP reachability check — opens a socket, waits for connect, destroys it.
+ * Works for Redis (6379) and Postgres (5432) which reject HTTP but accept TCP.
+ */
+async function tcpPing(host: string, port: number, timeoutMs = 3_000): Promise<boolean> {
+  const net = await import("net");
+  return new Promise((resolve) => {
+    const sock = net.createConnection({ host, port });
+    const done = (ok: boolean) => {
+      try { sock.destroy(); } catch { /* ignore */ }
+      resolve(ok);
+    };
+    sock.setTimeout(timeoutMs, () => done(false));
+    sock.once("connect", () => done(true));
+    sock.once("error",   () => done(false));
+  });
+}
 
 export interface OmnipresenceScan {
   scannedAt: string;
@@ -320,28 +343,41 @@ export interface OmnipresenceScan {
 
 /** Scan all known Triumph services to verify SAIB omnipresence coverage. */
 export async function scanOmnipresence(): Promise<OmnipresenceScan> {
-  const results = await Promise.allSettled(
-    TRIUMPH_SERVICES.map(async (svc) => {
-      const res = await fetch(svc.url, {
-        signal: AbortSignal.timeout(3_000),
-        cache: "no-store",
-      });
-      return { name: svc.name, ok: res.ok || res.status < 500 };
-    })
-  );
+  const allServices = [
+    ...TRIUMPH_HTTP_SERVICES.map((s) => s.name),
+    ...TRIUMPH_TCP_SERVICES.map((s) => s.name),
+  ];
+
+  const [httpResults, tcpResults] = await Promise.all([
+    Promise.allSettled(
+      TRIUMPH_HTTP_SERVICES.map(async (svc) => {
+        const res = await fetch(svc.url, {
+          signal: AbortSignal.timeout(3_000),
+          cache: "no-store",
+        });
+        return { name: svc.name, ok: res.ok || res.status < 500 };
+      })
+    ),
+    Promise.allSettled(
+      TRIUMPH_TCP_SERVICES.map(async (svc) => {
+        const ok = await tcpPing(svc.host, svc.port);
+        return { name: svc.name, ok };
+      })
+    ),
+  ]);
 
   const unreachable: string[] = [];
   let reachable = 0;
 
-  results.forEach((r, i) => {
+  [...httpResults, ...tcpResults].forEach((r, i) => {
     if (r.status === "fulfilled" && r.value.ok) {
       reachable++;
     } else {
-      unreachable.push(TRIUMPH_SERVICES[i].name);
+      unreachable.push(allServices[i]);
     }
   });
 
-  const coveragePercent = Math.round((reachable / TRIUMPH_SERVICES.length) * 100);
+  const coveragePercent = Math.round((reachable / allServices.length) * 100);
   const saibGuardianStatus =
     coveragePercent === 100
       ? "OMNIPRESENT"
@@ -351,7 +387,7 @@ export async function scanOmnipresence(): Promise<OmnipresenceScan> {
 
   return {
     scannedAt: new Date().toISOString(),
-    totalServices: TRIUMPH_SERVICES.length,
+    totalServices: allServices.length,
     reachable,
     unreachable,
     coveragePercent,
