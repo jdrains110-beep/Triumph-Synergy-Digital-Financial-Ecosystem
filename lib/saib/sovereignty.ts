@@ -303,8 +303,8 @@ export async function syncProtectionToSAIB(record: ProtectionRecord): Promise<vo
 const TRIUMPH_HTTP_SERVICES = [
   { name: "triumph-app",                    url: "http://triumph-app:3000/api/health" },
   { name: "triumph-sovereign-nano-saib",    url: "http://triumph-sovereign-nano-saib:8201/health" },
-  { name: "triumph-horizon-stream",         url: "http://triumph-horizon-stream:8092/health" },
-  { name: "triumph-pi-bridge-connector",    url: "http://triumph-pi-bridge-connector:8200/health" },
+  { name: "triumph-horizon-stream",         url: "http://triumph-horizon-stream:8085/health" },
+  { name: "triumph-pi-bridge-connector",    url: "http://triumph-pi-bridge-connector:8092/health" },
 ];
 
 /** TCP-only services — checked via raw socket connect (do not speak HTTP) */
