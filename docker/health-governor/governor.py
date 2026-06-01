@@ -437,6 +437,18 @@ def governor_loop():
 # ── HTTP endpoints ─────────────────────────────────────────────────
 
 class Handler(BaseHTTPRequestHandler):
+    def handle_one_request(self):
+        try:
+            super().handle_one_request()
+        except (BrokenPipeError, ConnectionResetError):
+            return
+
+    def handle_error(self, request, client_address):
+        import sys
+        if sys.exc_info()[0] in (BrokenPipeError, ConnectionResetError):
+            return
+        super().handle_error(request, client_address)
+
     def do_GET(self):
         if self.path == "/health":
             self._respond(200, {"status": "healthy", "service": "health-governor"})
@@ -446,11 +458,14 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == "/prometheus":
             with lock:
                 payload = prometheus_text(metrics_snapshot).encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/plain; version=0.0.4")
-            self.send_header("Content-Length", str(len(payload)))
-            self.end_headers()
-            self.wfile.write(payload)
+            try:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; version=0.0.4")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
         else:
             self._respond(404, {"error": "not found"})
 
@@ -462,7 +477,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(payload)))
             self.end_headers()
             self.wfile.write(payload)
-        except BrokenPipeError:
+        except (BrokenPipeError, ConnectionResetError):
             pass
 
     def log_message(self, format, *args):
