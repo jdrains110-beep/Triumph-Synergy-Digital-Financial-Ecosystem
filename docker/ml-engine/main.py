@@ -41,8 +41,31 @@ from sklearn.preprocessing import StandardScaler
 import redis as redis_lib
 import httpx
 from fastapi import FastAPI
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel
+
+
+def _np_sanitize(obj):
+    """Recursively convert numpy scalars / arrays to native Python types
+    so pydantic / json can serialize them (fixes numpy.bool_ etc.)."""
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return _np_sanitize(obj.tolist())
+    if isinstance(obj, dict):
+        return {k: _np_sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_np_sanitize(x) for x in obj]
+    return obj
+
+
+class NumpyJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return super().render(_np_sanitize(content))
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
@@ -664,6 +687,7 @@ app = FastAPI(
     title="Triumph Synergy ML Engine",
     description="Pi Network intelligence: anomaly detection, fraud scoring, price prediction, market sentiment",
     version="1.0.0",
+    default_response_class=NumpyJSONResponse,
 )
 
 # ─── Request bodies ────────────────────────────────────────────────────────────
