@@ -885,7 +885,7 @@ services:
       # "context deadline exceeded" cleanup errors in single-node deployments)
       # Also disable k8s-compatible apiserver for dashboards/alerting (causes
       # "context deadline exceeded" from grafana-apiserver self-calls)
-      GF_FEATURE_TOGGLES_DISABLE: "secretsManagementAppPlatform,kubernetesPlaylists,kubernetesDashboards,kubernetesSnapshots,kubernetesRuleGroups"
+      GF_FEATURE_TOGGLES_DISABLE: "secretsManagementAppPlatform,kubernetesPlaylists,kubernetesDashboards,kubernetesSnapshots,kubernetesRuleGroups,disableEnvelopeEncryption"
       GF_GRAFANA_APP_MODE: "production"
       GF_GRAFANA_APISERVER_ENABLED: "false"
     volumes:
