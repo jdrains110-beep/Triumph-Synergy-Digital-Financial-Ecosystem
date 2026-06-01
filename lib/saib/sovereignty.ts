@@ -320,14 +320,25 @@ const TRIUMPH_TCP_SERVICES = [
 async function tcpPing(host: string, port: number, timeoutMs = 3_000): Promise<boolean> {
   const net = await import("net");
   return new Promise((resolve) => {
-    const sock = net.createConnection({ host, port });
+    let fin = false;
+    let sock: ReturnType<typeof net.createConnection> | null = null;
     const done = (ok: boolean) => {
-      try { sock.destroy(); } catch { /* ignore */ }
+      if (fin) return;
+      fin = true;
+      clearTimeout(timer);
+      try { sock?.destroy(); } catch { /* ignore */ }
       resolve(ok);
     };
-    sock.setTimeout(timeoutMs, () => done(false));
-    sock.once("connect", () => done(true));
-    sock.once("error",   () => done(false));
+    // Use global setTimeout for connect timeout — sock.setTimeout only fires
+    // on idle (after connect), which never triggers if the connection hangs.
+    const timer = setTimeout(() => done(false), timeoutMs);
+    try {
+      sock = net.createConnection({ host, port });
+      sock.once("connect", () => done(true));
+      sock.once("error",   () => done(false));
+    } catch {
+      done(false);
+    }
   });
 }
 
