@@ -158,15 +158,16 @@ async function actCreditDispute(b) {
 }
 
 async function actJudicialResearch(b) {
-  if (!b.query) return { status: 400, body: { error: "query is required" } };
-  const u = await fetchJSON(`${JUDICIAL_SERVICE}/api/judicial/research`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: b.query, jurisdiction: b.jurisdiction || "all",
-      years_back: b.yearsBack || 5,
-    }),
-  }, 20000);
+  // Read-only research sweep over judicial cases. judicial-monitor exposes
+  // /api/judicial/cases with a `years` lookback so research can reach back up
+  // to 5 years from today by default.
+  const years = b.yearsBack || 5;
+  const jurisdiction = b.jurisdiction || "Florida";
+  const limit = Math.min(Number(b.limit || 500), 500);
+  const u = await fetchJSON(
+    `${JUDICIAL_SERVICE}/api/judicial/cases?jurisdiction=${encodeURIComponent(jurisdiction)}&limit=${limit}&years=${years}`,
+    { method: "GET" }, 20000,
+  );
   return { status: u.ok ? 200 : 502, body: u };
 }
 
@@ -186,9 +187,10 @@ async function actJudicialFileReport(b) {
   return { status: u.ok ? 200 : 502, body: u };
 }
 
-async function actTokenizationAudit(b) {
+async function actTokenizationAudit(_b) {
+  // tokenization-engine exposes aggregate audit stats at /api/tokenize/stats.
   const u = await fetchJSON(
-    `${TOKEN_ENGINE}/tokenization/audit?asset=${encodeURIComponent(b.asset || "all")}`,
+    `${TOKEN_ENGINE}/api/tokenize/stats`,
     { method: "GET" }, 12000,
   );
   return { status: u.ok ? 200 : 502, body: u };
@@ -527,7 +529,7 @@ async function dutyHQSweep() {
 }
 
 async function dutyTokenizationAudit() {
-  const u = await fetchJSON(`${TOKEN_ENGINE}/tokenization/audit?asset=all`, { method: "GET" }, 8000)
+  const u = await fetchJSON(`${TOKEN_ENGINE}/api/tokenize/stats`, { method: "GET" }, 8000)
     .catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
   const receipt = makeReceipt("duty-tokenization-audit", "autonomous", {
     audit: u.body, upstream_status: u.status,
@@ -539,20 +541,27 @@ async function dutyTokenizationAudit() {
   });
 }
 
+// SAIBs reach back JUDICIAL_LOOKBACK_YEARS (default 5) years from today.
+const JUDICIAL_LOOKBACK_YEARS = Number(process.env.JUDICIAL_LOOKBACK_YEARS || 5);
+
 async function dutyJudicialRadar() {
-  // Scan for active enforcement events that need to be sourced from the
-  // judicial-monitor's event stream. Read-only sweep: judicial-monitor is
-  // expected to expose /api/judicial/active (returns recent open cases).
-  const u = await fetchJSON(`${JUDICIAL_SERVICE}/api/judicial/active`, { method: "GET" }, 10000)
-    .catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
-  const count = Array.isArray(u.body && u.body.cases) ? u.body.cases.length : 0;
+  // Read-only sweep of judicial cases. judicial-monitor exposes
+  // /api/judicial/cases which supports a `years` lookback window so the SAIB
+  // can survey every case filed in the last 5 years from today.
+  const u = await fetchJSON(
+    `${JUDICIAL_SERVICE}/api/judicial/cases?jurisdiction=Florida&limit=500&years=${JUDICIAL_LOOKBACK_YEARS}`,
+    { method: "GET" }, 10000,
+  ).catch((err) => ({ ok: false, status: 0, body: { error: String(err.message || err) } }));
+  const rows = Array.isArray(u.body && u.body.rows) ? u.body.rows : [];
+  const count = rows.length;
   const receipt = makeReceipt("duty-judicial-radar", "autonomous", {
-    active_count: count, sample: Array.isArray(u.body && u.body.cases) ? u.body.cases.slice(0, 5) : null,
+    active_count: count, lookback_years: JUDICIAL_LOOKBACK_YEARS,
+    since: u.body && u.body.since, sample: rows.slice(0, 5),
     upstream_status: u.status,
   });
   void anchorReceipt(receipt);
   recordReceipt(receipt, {
-    summary: `judicial-radar active=${count} status=${u.status}`,
+    summary: `judicial-radar cases=${count} lookback=${JUDICIAL_LOOKBACK_YEARS}y status=${u.status}`,
     upstream: { ok: u.ok, status: u.status },
   });
 }

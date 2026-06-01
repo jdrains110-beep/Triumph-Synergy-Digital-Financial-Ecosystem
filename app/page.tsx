@@ -22,33 +22,33 @@ export default async function Page() {
               </div>
             </div>
             <nav className="flex items-center gap-4">
-              <Link 
-                href="/real-estate" 
+              <Link
+                href="/real-estate"
                 className="rounded-lg bg-gradient-to-r from-yellow-500/20 to-purple-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-300 hover:bg-yellow-500/30 transition-colors"
               >
                 🏛️ Real Estate
               </Link>
-              <Link 
-                href="/ecosystem/applications" 
+              <Link
+                href="/ecosystem/applications"
                 className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors"
               >
                 Ecosystem
               </Link>
-              <Link 
-                href="/transactions" 
+              <Link
+                href="/transactions"
                 className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors"
               >
                 Transactions
               </Link>
-              <Link 
-                href="/saib" 
+              <Link
+                href="/saib"
                 className="rounded-lg bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 px-4 py-2 text-sm font-medium text-cyan-300 hover:bg-cyan-500/30 transition-colors"
               >
                 🛡️ SAIB
               </Link>
               {session ? (
-                <Link 
-                  href="/(chat)" 
+                <Link
+                  href="/(chat)"
                   className="rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 px-4 py-2 text-sm font-bold text-white shadow-lg hover:shadow-xl transition-all"
                 >
                   AI Assistant
@@ -69,17 +69,17 @@ export default async function Page() {
               π
             </div>
           </div>
-          
+
           <h1 className="text-5xl font-extrabold text-white sm:text-6xl lg:text-7xl mb-6">
             Triumph Synergy
           </h1>
-          
+
           <p className="text-xl text-gray-200 mb-4 max-w-2xl mx-auto">
             Advanced Payment Routing Platform
           </p>
-          
+
           <p className="text-lg text-gray-300 mb-12 max-w-3xl mx-auto">
-            Powered by <span className="font-bold text-yellow-400">Pi Network</span> with 
+            Powered by <span className="font-bold text-yellow-400">Pi Network</span> with
             Stellar blockchain settlement, biometric authentication, and enterprise-grade compliance
           </p>
 
@@ -90,13 +90,13 @@ export default async function Page() {
               <h3 className="text-xl font-bold text-white mb-2">Instant Payments</h3>
               <p className="text-gray-300 text-sm">Fast and secure Pi Network transactions with real-time settlement</p>
             </div>
-            
+
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
               <div className="text-4xl mb-4">🔒</div>
               <h3 className="text-xl font-bold text-white mb-2">Secure & Compliant</h3>
               <p className="text-gray-300 text-sm">Enterprise-grade security with full regulatory compliance</p>
             </div>
-            
+
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
               <div className="text-4xl mb-4">🌐</div>
               <h3 className="text-xl font-bold text-white mb-2">Global Ecosystem</h3>
@@ -108,21 +108,21 @@ export default async function Page() {
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-6">Try Pi Payment</h2>
             <p className="text-gray-300 mb-6">Experience seamless cryptocurrency payments powered by Pi Network</p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <PiPaymentButton 
-                amount={1} 
+              <PiPaymentButton
+                amount={1}
                 memo="Test Payment - Triumph Synergy"
               />
-              
-              <Link 
-                href="/ecosystem/applications" 
+
+              <Link
+                href="/ecosystem/applications"
                 className="inline-block rounded-lg bg-white/20 px-6 py-3 text-base font-semibold text-white hover:bg-white/30 transition-colors"
               >
                 Explore Ecosystem →
               </Link>
             </div>
-            
+
             <p className="text-xs text-gray-400 mt-6">
               * Payments require Pi Browser and Pi Network account
             </p>
@@ -141,7 +141,7 @@ export default async function Page() {
               <li>• Enterprise API integration</li>
             </ul>
           </div>
-          
+
           <div className="bg-black/30 backdrop-blur-lg rounded-xl p-6 border border-white/10">
             <h3 className="text-xl font-bold text-white mb-4">👥 For Users</h3>
             <ul className="space-y-2 text-gray-300">

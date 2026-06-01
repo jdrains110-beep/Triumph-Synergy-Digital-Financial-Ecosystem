@@ -20,13 +20,63 @@ export function PiEnvironmentBanner() {
     isPiBrowser: false,
     isPiNetworkAvailable: false,
   });
+  const [network, setNetwork] = useState<"mainnet" | "testnet">("mainnet");
 
   useEffect(() => {
     setStatus({
       isPiBrowser: isRunningInPiBrowser(),
       isPiNetworkAvailable: isPiNetworkAvailable(),
     });
+    // Reflect the active network chosen by the runtime trigger (cookie set in
+    // layout.tsx) so the banner stays in sync with the Pi SDK init.
+    const m = document.cookie.match(/(?:^|;\s*)pi_network=([^;]+)/);
+    const cookieNet = m ? decodeURIComponent(m[1]).toLowerCase() : "";
+    const wnet = (
+      window as unknown as { __piInitialization?: { network?: string } }
+    ).__piInitialization?.network;
+    setNetwork(
+      cookieNet === "testnet" || wnet === "testnet" ? "testnet" : "mainnet",
+    );
   }, []);
+
+  // Switch network via the runtime trigger: set the pi_network cookie and reload
+  // so the Pi SDK re-initializes against the selected network.
+  const switchNetwork = (next: "mainnet" | "testnet") => {
+    document.cookie = `pi_network=${next};path=/;max-age=604800;samesite=lax`;
+    const url = new URL(window.location.href);
+    url.searchParams.set("network", next);
+    window.location.href = url.toString();
+  };
+
+  const NetworkToggle = () => (
+    <div className="mt-2 flex items-center gap-2">
+      <span className="font-medium text-xs uppercase tracking-wide opacity-70">
+        Network:
+      </span>
+      <button
+        type="button"
+        onClick={() => switchNetwork("mainnet")}
+        className={`rounded px-2 py-0.5 font-semibold text-xs ${
+          network === "mainnet"
+            ? "bg-green-600 text-white"
+            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+        }`}
+      >
+        Mainnet
+      </button>
+      <button
+        type="button"
+        onClick={() => switchNetwork("testnet")}
+        className={`rounded px-2 py-0.5 font-semibold text-xs ${
+          network === "testnet"
+            ? "bg-amber-600 text-white"
+            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+        }`}
+      >
+        Testnet
+      </button>
+    </div>
+  );
 
   // In Pi Browser with full access
   if (status.isPiBrowser && status.isPiNetworkAvailable) {
@@ -39,6 +89,7 @@ export function PiEnvironmentBanner() {
             enabled
           </span>
         </div>
+        <NetworkToggle />
       </div>
     );
   }
@@ -65,6 +116,7 @@ export function PiEnvironmentBanner() {
                 transactions
               </li>
             </ul>
+            <NetworkToggle />
           </div>
         </div>
       </div>
@@ -81,6 +133,7 @@ export function PiEnvironmentBanner() {
             <strong>⚠ Pi Browser Detected</strong> - Network connection issue
           </p>
           <p>Pi Network is not responding. Check your connection and reload.</p>
+          <NetworkToggle />
         </div>
       </div>
     </div>

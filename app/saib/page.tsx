@@ -392,8 +392,8 @@ function SAIBChat({ online }: { online: boolean }) {
                         {/* Avatar */}
                         <div
                             className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center ${msg.role === "saib"
-                                    ? "bg-gradient-to-br from-cyan-500 to-violet-600"
-                                    : "bg-neutral-700"
+                                ? "bg-gradient-to-br from-cyan-500 to-violet-600"
+                                : "bg-neutral-700"
                                 }`}
                         >
                             {msg.role === "saib" ? (
@@ -406,10 +406,10 @@ function SAIBChat({ online }: { online: boolean }) {
                         {/* Bubble */}
                         <div
                             className={`max-w-[78%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed ${msg.role === "saib"
-                                    ? msg.error
-                                        ? "bg-rose-950/60 border border-rose-500/20 text-rose-200"
-                                        : "bg-[#0d1628] border border-cyan-500/10 text-neutral-200"
-                                    : "bg-violet-600/20 border border-violet-500/30 text-white"
+                                ? msg.error
+                                    ? "bg-rose-950/60 border border-rose-500/20 text-rose-200"
+                                    : "bg-[#0d1628] border border-cyan-500/10 text-neutral-200"
+                                : "bg-violet-600/20 border border-violet-500/30 text-white"
                                 }`}
                         >
                             {msg.text}
@@ -490,8 +490,8 @@ function NetworkBanner() {
     return (
         <div
             className={`flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold rounded-lg border ${isMainnet
-                    ? "bg-green-500/10 border-green-500/30 text-green-300"
-                    : "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                ? "bg-green-500/10 border-green-500/30 text-green-300"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-300"
                 }`}
         >
             <span className={`h-2 w-2 rounded-full ${isMainnet ? "bg-green-400 animate-pulse" : "bg-amber-400 animate-pulse"}`} />
@@ -887,11 +887,11 @@ export default function SAIBPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                         {[
                             { icon: ShieldCheck, label: "Predatory lending detection", desc: "Flags usury and exploitative terms in real time" },
-                            { icon: Lock,        label: "Data sovereignty (GDPR Art. 17)", desc: "Full right to erasure — all PII on demand" },
-                            { icon: Eye,         label: "Pi wallet threat monitoring", desc: "Guardian watches for anomalous wallet activity" },
-                            { icon: HandCoins,   label: "Debt pathway analysis", desc: "AI-generated freedom roadmap unique to you" },
-                            { icon: Globe,       label: "Cross-platform omnipresence", desc: "Protection follows you across every Triumph layer" },
-                            { icon: Zap,         label: "Hyper-intelligent advocacy", desc: "SAIB learns from every interaction to protect you better" },
+                            { icon: Lock, label: "Data sovereignty (GDPR Art. 17)", desc: "Full right to erasure — all PII on demand" },
+                            { icon: Eye, label: "Pi wallet threat monitoring", desc: "Guardian watches for anomalous wallet activity" },
+                            { icon: HandCoins, label: "Debt pathway analysis", desc: "AI-generated freedom roadmap unique to you" },
+                            { icon: Globe, label: "Cross-platform omnipresence", desc: "Protection follows you across every Triumph layer" },
+                            { icon: Zap, label: "Hyper-intelligent advocacy", desc: "SAIB learns from every interaction to protect you better" },
                         ].map(({ icon: Icon, label, desc }) => (
                             <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/5">
                                 <Icon className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />

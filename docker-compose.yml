@@ -82,6 +82,9 @@ x-pi-env: &pi-env
   PI_MAINNET_API_KEY: ${PI_MAINNET_API_KEY:?PI_MAINNET_API_KEY required}
   PI_API_SECRET: ${PI_API_SECRET:?PI_API_SECRET required}
   PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
+  # Pi Platform API /v2/me validators per network (testnet trigger support).
+  PI_PLATFORM_API_URL: ${PI_PLATFORM_API_URL:-https://api.minepi.com/v2/me}
+  PI_PLATFORM_API_TESTNET_URL: ${PI_PLATFORM_API_TESTNET_URL:-https://api.minepi.com/v2/me}
   NEXT_PUBLIC_PI_APP_ID: ${NEXT_PUBLIC_PI_APP_ID:-triumph-synergy}
   NEXT_PUBLIC_PI_SANDBOX: ${NEXT_PUBLIC_PI_SANDBOX:-false}
   PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V

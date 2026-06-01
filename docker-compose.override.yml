@@ -2,21 +2,28 @@
 # TRIUMPH SYNERGY — APEX SUPER-SOVEREIGN OVERRIDE (Docker Desktop tuning)
 # ==========================================================================
 # Auto-merged by `docker compose up -d`.
-# Adds: amd64 platform pin (ONLY for stellar-core dependents — others run
-#       native arm64 on Apple Silicon for ~6x faster boot under Rosetta),
-#       tini init, graceful shutdown, elevated ulimits/nofile.
+# Adds: native arm64 platform pin for EVERY Triumph container, tini init,
+#       graceful shutdown, elevated ulimits/nofile.
 #
-# AMD64-PINNED (stellar-core / stellar-sdk amd64-only wheels):
-#   vault, governance-shield, settlement-core, horizon-stream
+# PLATFORM POLICY (hard rule):
+#   The ONLY amd64 container in the entire stack is `pi-mainnet-node`
+#   (Pi Network full node — stellar-core is published as an amd64-only
+#   image). It is pinned to linux/amd64 directly in docker-compose.yml.
 #
-# NATIVE arm64 (pure Python/Node — runs ~6x faster on M-series, no Rosetta):
+#   Every OTHER container MUST run native linux/arm64 ("arm64 or better").
+#   No service may revert to amd64. The shared &platform anchor below is
+#   arm64 and is applied to all formerly amd64-pinned services so a stray
+#   DOCKER_DEFAULT_PLATFORM or rebuild can never silently switch them back.
+#
+# ARM64-NATIVE (all of these — ~6x faster on M-series, no Rosetta):
+#   vault, governance-shield, settlement-core, horizon-stream,
 #   apex-services, apex-sovereign-nexus, sovereign-life,
 #   guardian-watchdog-nexus, quantum-intel-fortress, pi-bridge-connector, app
 # ==========================================================================
 
 name: triumph-synergy
 
-x-platform: &platform { platform: linux/amd64 }
+x-platform: &platform { platform: linux/arm64 }
 x-init:     &init     { init: true }
 x-grace:    &grace    { stop_grace_period: 30s }
 x-ulimits:  &ulimits
@@ -41,7 +48,7 @@ services:
         soft: 65536
         hard: 65536
 
-  # ──── amd64-pinned (stellar-core dependents) ────────────────────────────
+  # ──── arm64-native (formerly amd64-pinned — now forced arm64) ───────────
   vault:
     <<: [ *platform, *init, *grace, *ulimits ]
 
@@ -56,20 +63,20 @@ services:
 
   # ──── Native arm64 on Apple Silicon (pure Python/Node) ──────────────────
   pi-bridge-connector:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
 
   app:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
 
   # quantum-intel-fortress replaces financial-intel + quantum-fortress (May 9, 2026)
   quantum-intel-fortress:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
 
   observability-stack:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
 
   nginx:
-    <<: [ *init, *grace ]
+    <<: [ *platform, *init, *grace ]
     ulimits:
       nofile:
         soft: 131072
@@ -77,15 +84,15 @@ services:
 
   # guardian-watchdog-nexus replaces ecosystem-guardian + saib-watchdog (May 9, 2026)
   guardian-watchdog-nexus:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
 
   apex-services:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
 
   # apex-sovereign-nexus replaces sovereign-commerce/work/gaming/publix (May 9, 2026)
   apex-sovereign-nexus:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
 
   # APEX-SOVEREIGN-LIFE — bank + education + telecom consolidated
   sovereign-life:
-    <<: [ *init, *grace, *ulimits ]
+    <<: [ *platform, *init, *grace, *ulimits ]
