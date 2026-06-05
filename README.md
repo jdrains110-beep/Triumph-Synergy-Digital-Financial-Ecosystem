@@ -95,10 +95,10 @@ wrangler login
 wrangler kv:namespace create SAIB_BACKUP_KV
 wrangler r2 bucket create saib-vault-production
 
-# Phase 3: Build & Deploy to Cloudflare Workers (Automated, 10 min)
+# Phase 3: Vercel Deployment (Automated, 5 min)
 source ~/.nvm/nvm.sh
-npm run build
-wrangler deploy
+vercel login
+vercel deploy --prod
 
 # Phase 4: Cloudflare Workers (Automated, 3 min)
 wrangler publish -c wrangler-quantum-builder.toml --env production
