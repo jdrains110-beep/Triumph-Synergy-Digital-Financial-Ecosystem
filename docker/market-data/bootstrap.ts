@@ -276,6 +276,32 @@ server.listen(PORT, "0.0.0.0", () =>
   console.log(`📊 Market Data service listening on :${PORT}`)
 );
 
+// ─── Sequential poll loop with exponential backoff ──────────────────────────
+// Prevents concurrent poll pile-up (the root cause of OOM exit 137).
+// Each poll completes (or times out) before the next one is scheduled.
+
+let consecutiveErrors = 0;
+
+async function pollLoop(): Promise<void> {
+  if (shuttingDown) return;
+  const t0 = Date.now();
+  await poll();
+  if ((latestSnapshot as any) !== null) {
+    // Successful poll: reset backoff
+    consecutiveErrors = 0;
+  } else {
+    consecutiveErrors++;
+  }
+  if (shuttingDown) return;
+  // Wait the remaining time of POLL_MS (min 1s) plus backoff on errors
+  const elapsed   = Date.now() - t0;
+  const backoffMs = consecutiveErrors > 0
+    ? Math.min(POLL_MS * Math.pow(2, Math.min(consecutiveErrors - 1, 4)), 60_000)
+    : POLL_MS;
+  const delay = Math.max(backoffMs - elapsed, 1_000);
+  setTimeout(pollLoop, delay);
+}
+
 // ─── Start ───────────────────────────────────────────────────────────────────
 
 async function start() {
@@ -285,11 +311,11 @@ async function start() {
   await Promise.all([refreshPiPrice(), refreshBridgeLedger()]);
   await poll(); // immediate first poll
   ready = true;
-  setInterval(poll, POLL_MS);
+  setTimeout(pollLoop, POLL_MS); // start sequential loop
   // Refresh price every 30s, bridge ledger every 10s
   setInterval(refreshPiPrice, 30_000);
   setInterval(refreshBridgeLedger, 10_000);
-  console.log(`✅ Market Data ONLINE — polling ${HORIZON_URL} every ${POLL_MS}ms | Pi price: $${piPriceUsd} | Bridge: ${PI_BRIDGE_URL}`);
+  console.log(`✅ Market Data ONLINE — polling ${HORIZON_URL} every ${POLL_MS}ms (sequential+backoff) | Pi price: $${piPriceUsd} | Bridge: ${PI_BRIDGE_URL}`);
 }
 
 start().catch(err => { console.error("❌ Market Data failed:", err); process.exit(1); });

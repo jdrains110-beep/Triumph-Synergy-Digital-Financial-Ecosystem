@@ -8,13 +8,13 @@ compatibility_date = "2026-04-01"
 account_id         = "5d6f808f4561a69a80490838b28cd9ed"
 
 [vars]
-ORIGIN = "https://triumphsynergy.app"
+ORIGIN = "https://triumphsynergy.com"
 # Direct Next.js origin used by async SAIB edge ingress when forwarding to
 # /api/saib/enforce. If this Worker is routed on the same public hostname,
 # replace this with the direct app/origin URL to avoid a self-forwarding loop.
 # Store SAIB_SECRET_TOKEN with `wrangler secret put`; do not commit it here.
 # Optional bindings: SAIB_CACHE, SAIB_BACKUP_KV, SAIB_BACKUP_QUEUE.
-NEXTJS_APP_URL = "https://triumphsynergy.app"
+NEXTJS_APP_URL = "https://triumphsynergy.com"
 
 # Blockchain RPC endpoints for hardware verification and network health probing
 # Configure with: npx wrangler secret put BLOCKCHAIN_RPC_URL
