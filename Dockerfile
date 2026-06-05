@@ -16,34 +16,25 @@ RUN apk add --no-cache curl tini wget && \
     npm install -g yarn@1.22.22 --prefer-offline 2>/dev/null; \
     yarn --version || npm install -g yarn@1.22.22
 
-# Install dependencies only when needed
-FROM base AS deps
+# ── Single build stage: install deps + compile in one layer ──────────────────
+# Merging deps + builder avoids a 300MB inter-stage COPY node_modules which
+# causes Docker Desktop (Mac) BuildKit gRPC EOF and legacy-builder pipe crashes.
+FROM base AS builder
 # libc6-compat, python3, make, g++ — standard native build tools
 # libusb-dev + eudev-dev — required by node-hid (transitive dep of @ledgerhq/hw-transport-node-hid)
 RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers
 WORKDIR /app
 
 # Copy package files
-COPY package.json yarn.lock ./
-# BuildKit cache mount — yarn packages cached in a Docker volume.
-# Cache ID bumped to v3 to start with a clean slate (v2 had stale partial downloads).
-# DO NOT run yarn cache clean here — it defeats the cache and forces full re-download every build.
-# network-timeout 600000 = 10 min per package (handles slow registry responses)
-# network-concurrency 4 allows parallel fetches; concurrency 1 caused single-package stalls
-# --prefer-offline uses cached tarballs where available, network only for missing packages
-RUN --mount=type=cache,id=triumph-yarn-cache-v3,target=/usr/local/share/.cache/yarn \
-    yarn config set network-timeout 600000 && \
-    yarn install --frozen-lockfile \
-    --network-timeout 600000 \
-    --network-concurrency 4 \
-    --prefer-offline \
-    --cache-folder /usr/local/share/.cache/yarn
+COPY package.json ./
+# Use npm instead of yarn for fetching — yarn v1 hangs on [3/5] Fetching inside
+# Docker Desktop on macOS due to connection-pool exhaustion.
+# Strip the "packageManager" field so npm doesn't defer to corepack/yarn.
+RUN sed -i 's|"packageManager":.*||' package.json && \
+    npm config set registry https://registry.npmjs.org && \
+    npm install --legacy-peer-deps --no-fund --no-audit
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source and build
 COPY . .
 
 # Set environment for build
@@ -85,4 +76,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+# Run tini as PID 1 so it reaps zombie processes correctly.
+# -s registers tini as subreaper when it can't run as PID 1 (e.g. docker-compose).
+ENTRYPOINT ["/sbin/tini", "-s", "--"]
 CMD ["node", "server.js"]

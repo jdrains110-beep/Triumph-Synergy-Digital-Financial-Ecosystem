@@ -195,15 +195,40 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
   var ua = navigator.userAgent || '';
   var uaLower = ua.toLowerCase();
 
-  // Network selection is driven by build-time env, NOT a hardcoded host
-  // whitelist. Pi App Studio assigns each app a fresh hostname on transfer,
-  // so any hardcoded check would mis-classify the new domain and break
-  // verification. NEXT_PUBLIC_PI_SANDBOX="true" => testnet, otherwise mainnet.
-  // Localhost always falls back to sandbox for safe local dev.
-  var sandbox = ${process.env.NEXT_PUBLIC_PI_SANDBOX === "true" ? "true" : "false"};
+  // Network selection is driven by build-time env PLUS a runtime trigger, so
+  // testnet can be exercised on the live website without a rebuild (mainnet is
+  // no longer the only reachable network). Precedence:
+  //   1. URL query  ?network=testnet|mainnet  (or ?sandbox=true|false)
+  //   2. pi_network cookie (set by a previous URL trigger)
+  //   3. build-time NEXT_PUBLIC_PI_SANDBOX  ("true" => testnet)
+  //   4. localhost always falls back to sandbox for safe local dev.
+  // An explicit URL trigger is persisted to the pi_network cookie (7 days) and
+  // mirrored to the backend so /api/pi/auth validates against the right network.
+  var buildDefaultSandbox = ${process.env.NEXT_PUBLIC_PI_SANDBOX === "true" ? "true" : "false"};
+  var sandbox = buildDefaultSandbox;
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var netParam = (params.get('network') || params.get('pi_network') || '').toLowerCase();
+    var sbParam = (params.get('sandbox') || '').toLowerCase();
+    var cookieMatch = document.cookie.match(/(?:^|;\\s*)pi_network=([^;]+)/);
+    var cookieNet = cookieMatch ? decodeURIComponent(cookieMatch[1]).toLowerCase() : '';
+    var explicit = '';
+    if (netParam === 'testnet' || netParam === 'mainnet') explicit = netParam;
+    else if (sbParam === 'true') explicit = 'testnet';
+    else if (sbParam === 'false') explicit = 'mainnet';
+    if (explicit) {
+      document.cookie = 'pi_network=' + explicit + ';path=/;max-age=604800;samesite=lax';
+      sandbox = explicit === 'testnet';
+    } else if (cookieNet === 'testnet' || cookieNet === 'mainnet') {
+      sandbox = cookieNet === 'testnet';
+    }
+  } catch (e) {
+    console.warn('[Pi SDK] Network trigger parse failed, using build default:', e);
+  }
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     sandbox = true;
   }
+  window.__piInitialization.network = sandbox ? 'testnet' : 'mainnet';
 
   var appId = '${process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy"}';
   console.log('[Pi SDK] Configuration: domain=' + hostname + ', sandbox=' + sandbox + ', appId=' + appId);
@@ -286,7 +311,7 @@ console.log('[Pi SDK] Script loaded on ' + window.location.hostname);
               fetch('/api/pi/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accessToken: auth.accessToken }),
+                body: JSON.stringify({ accessToken: auth.accessToken, network: sandbox ? 'testnet' : 'mainnet' }),
               }).then(function(r) {
                 if (r.ok) console.log('[Pi SDK] \u2713 Backend session established for', auth.user ? auth.user.username : 'user');
                 else console.warn('[Pi SDK] \u26a0 Backend session failed:', r.status);

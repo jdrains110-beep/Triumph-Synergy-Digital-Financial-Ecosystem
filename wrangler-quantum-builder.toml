@@ -1,0 +1,161 @@
+# Wrangler Configuration Example for SAIB Quantum Builder
+# 
+# This is the Cloudflare Workers configuration that enables the
+# autonomous self-correction engine to run on the edge.
+#
+# To use:
+# 1. Replace YOUR_ZONE_ID, YOUR_DOMAIN, etc. with actual values
+# 2. Create KV namespace: wrangler kv:namespace create SAIB_BACKUP_KV
+# 3. Create R2 bucket: wrangler r2 bucket create saib-vault-production
+# 4. Deploy: wrangler publish --env production
+
+name = "saib-optimus-v4"
+type = "javascript"
+account_id = "YOUR_ACCOUNT_ID"
+main = "src/quantum-worker.ts"
+
+# ============================================================================
+# DEVELOPMENT ENVIRONMENT (local testing)
+# ============================================================================
+[env.development]
+vars = { ENVIRONMENT = "development" }
+kv_namespaces = [
+  { binding = "SAIB_BACKUP_KV", id = "dev-kv-id", preview_id = "dev-kv-preview-id" }
+]
+r2_buckets = [
+  { binding = "SAIB_VAULT_BUCKET", bucket_name = "saib-vault-dev", preview_bucket_name = "saib-vault-dev-preview" }
+]
+
+# ============================================================================
+# STAGING ENVIRONMENT (pre-production)
+# ============================================================================
+[env.staging]
+route = "https://staging.example.com/api/saib/quantum/*"
+zone_id = "YOUR_STAGING_ZONE_ID"
+vars = { ENVIRONMENT = "staging" }
+
+kv_namespaces = [
+  { binding = "SAIB_BACKUP_KV", id = "staging-kv-id", preview_id = "staging-kv-preview-id" }
+]
+
+r2_buckets = [
+  { binding = "SAIB_VAULT_BUCKET", bucket_name = "saib-vault-staging", preview_bucket_name = "saib-vault-staging-preview" }
+]
+
+# ============================================================================
+# PRODUCTION ENVIRONMENT (live deployment)
+# ============================================================================
+[env.production]
+name = "saib-optimus-v4-prod"
+route = "https://your-domain.com/api/saib/quantum/*"
+zone_id = "YOUR_PRODUCTION_ZONE_ID"
+
+# Environment variables (non-sensitive)
+vars = {
+  ENVIRONMENT = "production",
+  BLOCKCHAIN_RPC_URL = "https://cloudflare-eth.com",
+  MUTATION_TEST_INTERVAL_MS = "60000",
+  EMERGENCY_HEALTH_THRESHOLD = "25"
+}
+
+# KV Namespace Binding for Dynamic State Storage
+# This stores:
+# - Current active strategy flag
+# - Mutation records
+# - Backoff intervals
+# - Audit logs
+kv_namespaces = [
+  {
+    binding = "SAIB_BACKUP_KV",
+    id = "PROD_KV_NAMESPACE_ID",
+    preview_id = "PROD_KV_NAMESPACE_PREVIEW_ID"
+  }
+]
+
+# R2 Bucket Binding for Encrypted Deed Storage
+# This stores:
+# - Encrypted allodial deed metadata
+# - Backup payloads
+# - Safe deposit archives
+r2_buckets = [
+  {
+    binding = "SAIB_VAULT_BUCKET",
+    bucket_name = "saib-vault-production",
+    preview_bucket_name = "saib-vault-production-preview"
+  }
+]
+
+# ============================================================================
+# BUILD CONFIGURATION
+# ============================================================================
+[build]
+command = "npm run build"
+cwd = "."
+main = "dist/quantum-worker.js"
+
+[build.upload]
+format = "service-worker"
+
+# ============================================================================
+# TRIGGER CONFIGURATION (optional: scheduled tasks)
+# ============================================================================
+# Uncomment to enable periodic self-diagnostics trigger
+# [triggers]
+# crons = ["0 */6 * * *"]  # Run every 6 hours
+
+# ============================================================================
+# DURABLE OBJECTS CONFIGURATION (optional: for analytics)
+# ============================================================================
+# Uncomment if you want to store analytics in Durable Objects
+# [[durable_objects.bindings]]
+# name = "SAIB_ANALYTICS"
+# class_name = "SAIBAnalytics"
+# environment = "production"
+
+# ============================================================================
+# TAIL CONSUMERS (optional: for log aggregation)
+# ============================================================================
+# Uncomment to stream logs to external service
+# [[tail_consumers]]
+# service = "saib-log-consumer"
+
+# ============================================================================
+# LIMITS AND PERFORMANCE
+# ============================================================================
+# CPU time limit for each request
+# Default is 10ms for Bundled Workers, 50ms for Unbound
+# Quantum Builder is CPU-light (diagnostics run in background)
+# Using default bundled limits
+
+# ============================================================================
+# DEPLOYMENT NOTES
+# ============================================================================
+# 
+# Before deploying, set these secrets in Cloudflare Workers dashboard:
+# 1. ADMIN_RESET_TOKEN (32+ chars, random, for /admin/reset endpoint)
+# 2. DISPATCH_WEBHOOK_URL (Discord/Slack webhook for alerts)
+#
+# Commands:
+#
+# Local development:
+#   wrangler dev --env development
+#
+# Deploy to staging:
+#   wrangler publish --env staging
+#
+# Deploy to production:
+#   wrangler publish --env production
+#
+# View logs:
+#   wrangler tail --env production
+#
+# Manage KV:
+#   wrangler kv:namespace list
+#   wrangler kv:key list --binding SAIB_BACKUP_KV --env production
+#   wrangler kv:key get ACTIVE_DYNAMIC_STRATEGY_FLAG --binding SAIB_BACKUP_KV --env production
+#
+# Manage R2:
+#   wrangler r2 bucket list
+#   wrangler r2 object list saib-vault-production --env production
+#
+# ============================================================================

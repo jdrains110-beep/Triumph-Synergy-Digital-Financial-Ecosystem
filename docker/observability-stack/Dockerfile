@@ -33,15 +33,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # ── Base packages ──
 RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends \
-        supervisor curl ca-certificates wget gosu gnupg2 \
-        python3 python3-pip python3-venv && \
+    supervisor curl ca-certificates wget gosu gnupg2 \
+    python3 python3-pip python3-venv && \
     rm -rf /var/lib/apt/lists/*
 
 # ── Grafana via official apt repo (single layer, ~250 MB installed) ──
 RUN mkdir -p /etc/apt/keyrings && \
     wget -qO- https://apt.grafana.com/gpg.key | gpg --dearmor > /etc/apt/keyrings/grafana.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" \
-        > /etc/apt/sources.list.d/grafana.list && \
+    > /etc/apt/sources.list.d/grafana.list && \
     apt-get update && apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends grafana && \
     rm -rf /var/lib/apt/lists/* && \
@@ -51,9 +51,9 @@ RUN mkdir -p /etc/apt/keyrings && \
 RUN set -eux; \
     arch="$(dpkg --print-architecture)"; \
     case "$arch" in \
-        amd64) PROM_ARCH=linux-amd64 ;; \
-        arm64) PROM_ARCH=linux-arm64 ;; \
-        *) echo "unsupported arch $arch" && exit 1 ;; \
+    amd64) PROM_ARCH=linux-amd64 ;; \
+    arm64) PROM_ARCH=linux-arm64 ;; \
+    *) echo "unsupported arch $arch" && exit 1 ;; \
     esac; \
     cd /tmp && \
     wget -q "https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.${PROM_ARCH}.tar.gz" && \
@@ -83,6 +83,8 @@ COPY cloud-memory/main.py /opt/cloud-memory/main.py
 
 # ── Pod config + provisioning ──
 COPY observability-stack/supervisord.conf /etc/supervisor/conf.d/observability-stack.conf
+COPY observability-stack/postgres_exporter.yml /etc/postgres_exporter.yml
+RUN chmod 0644 /etc/postgres_exporter.yml
 COPY prometheus/prometheus.yml /etc/prometheus/prometheus.yml
 COPY grafana/dashboards/    /etc/grafana/provisioning/dashboards/
 COPY grafana/datasources/   /etc/grafana/provisioning/datasources/
@@ -91,22 +93,22 @@ COPY grafana/datasources/   /etc/grafana/provisioning/datasources/
 RUN groupadd --system --gid 1016 obs && \
     useradd  --system --uid 1016 --gid obs obs && \
     mkdir -p /var/log/supervisor \
-             /backup/local /backup/offline \
-             /etc/grafana/provisioning/dashboards \
-             /etc/grafana/provisioning/datasources \
-             /etc/grafana/provisioning/alerting \
-             /etc/grafana/provisioning/plugins \
-             /etc/grafana/provisioning/notifiers \
-             /etc/grafana/provisioning/access-control \
-             /etc/prometheus && \
+    /backup/local /backup/offline \
+    /etc/grafana/provisioning/dashboards \
+    /etc/grafana/provisioning/datasources \
+    /etc/grafana/provisioning/alerting \
+    /etc/grafana/provisioning/plugins \
+    /etc/grafana/provisioning/notifiers \
+    /etc/grafana/provisioning/access-control \
+    /etc/prometheus && \
     chown -R obs:obs /prometheus /var/lib/grafana /var/log/grafana /var/log/supervisor \
-                     /etc/grafana /etc/prometheus /opt/cloud-memory /backup
+    /etc/grafana /etc/prometheus /opt/cloud-memory /backup
 
 EXPOSE 3000 9090 9121 9187 8095
 
 LABEL org.triumph.pod="observability-stack" \
-      org.triumph.merges="prometheus+grafana+postgres-exporter+redis-exporter+cloud-memory" \
-      org.triumph.tier="apex-observability"
+    org.triumph.merges="prometheus+grafana+postgres-exporter+redis-exporter+cloud-memory" \
+    org.triumph.tier="apex-observability"
 
 COPY observability-stack/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -114,9 +116,9 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 HEALTHCHECK --interval=30s --timeout=45s --retries=10 --start-period=300s \
     CMD curl -fsS --max-time 10 http://127.0.0.1:9090/-/healthy && \
-        curl -fsS --max-time 10 http://127.0.0.1:3000/api/health && \
-        curl -fsS --max-time 10 http://127.0.0.1:9187/metrics > /dev/null && \
-        curl -fsS --max-time 10 http://127.0.0.1:9121/metrics > /dev/null && \
-        curl -fsS --max-time 10 http://127.0.0.1:8095/health > /dev/null || exit 1
+    curl -fsS --max-time 10 http://127.0.0.1:3000/api/health && \
+    curl -fsS --max-time 10 http://127.0.0.1:9187/metrics > /dev/null && \
+    curl -fsS --max-time 10 http://127.0.0.1:9121/metrics > /dev/null && \
+    curl -fsS --max-time 10 http://127.0.0.1:8095/health > /dev/null || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/observability-stack.conf", "-n"]

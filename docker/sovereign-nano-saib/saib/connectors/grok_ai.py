@@ -89,6 +89,11 @@ class GrokAIConnector:
         self._latency_sum    = 0.0
         self._provisioned_at = 0.0   # when SAIB last self-provisioned a key
         self._key_id: str    = ""    # xAI key ID of the auto-provisioned key
+        # ── credit-exhaustion / rate-limit backoff ──
+        # When xAI returns 403 (quota) or 429 (rate), back off before retrying.
+        # 403 quota → 6-hour backoff; 429 rate → 60-second backoff.
+        self._backoff_until: float = 0.0
+        self._backoff_reason: str  = ""
 
     # ── self-provisioning ─────────────────────────────────────────────────────
 
@@ -241,6 +246,7 @@ class GrokAIConnector:
         avg_latency = (
             round(self._latency_sum / self._calls, 1) if self._calls else 0
         )
+        backed_off = time.time() < self._backoff_until
         return {
             "model":            self._model,
             "api_key_set":      bool(self._api_key),
@@ -252,6 +258,9 @@ class GrokAIConnector:
             "total_tokens":     self._total_tokens,
             "avg_latency_ms":   avg_latency,
             "last_call_at":     self._last_call_at,
+            "backed_off":       backed_off,
+            "backoff_until":    self._backoff_until if backed_off else 0,
+            "backoff_reason":   self._backoff_reason if backed_off else "",
         }
 
     # ── internal ──────────────────────────────────────────────────────────────
@@ -268,6 +277,16 @@ class GrokAIConnector:
                 model=self._model, prompt_tokens=0, completion_tokens=0,
                 total_tokens=0, text="", latency_ms=0,
                 error="XAI_API_KEY not configured",
+            )
+
+        # ── credit-exhaustion / rate-limit backoff check ──────────────────────
+        if time.time() < self._backoff_until:
+            remaining = int(self._backoff_until - time.time())
+            log.debug("Grok: backed off for %ds — %s", remaining, self._backoff_reason)
+            return GrokResult(
+                model=self._model, prompt_tokens=0, completion_tokens=0,
+                total_tokens=0, text="", latency_ms=0,
+                error=f"backed-off: {self._backoff_reason} (resumes in {remaining}s)",
             )
 
         t0 = time.monotonic()
@@ -300,6 +319,9 @@ class GrokAIConnector:
             self._total_tokens += tt
             self._latency_sum  += latency_ms
             self._last_call_at  = time.time()
+            # clear any previous backoff on success
+            self._backoff_until  = 0.0
+            self._backoff_reason = ""
 
             log.debug("Grok %s: %d tokens, %.0fms", self._model, tt, latency_ms)
             return GrokResult(
@@ -313,8 +335,20 @@ class GrokAIConnector:
 
         except httpx.HTTPStatusError as exc:
             self._errors += 1
-            msg = f"Grok HTTP {exc.response.status_code}: {exc.response.text[:200]}"
-            log.error(msg)
+            status = exc.response.status_code
+            msg = f"Grok HTTP {status}: {exc.response.text[:200]}"
+            # ── 403 = quota/permission exhausted → 6-hour backoff ────────────
+            # ── 429 = rate limited → 60-second backoff ───────────────────────
+            if status == 403:
+                self._backoff_until  = time.time() + 21_600  # 6 hours
+                self._backoff_reason = "quota/permission exhausted (403)"
+                log.warning("Grok: 403 quota exhausted — backing off 6h. Set XAI_API_KEY or add credits.")
+            elif status == 429:
+                self._backoff_until  = time.time() + 60
+                self._backoff_reason = "rate limited (429)"
+                log.warning("Grok: 429 rate limit — backing off 60s")
+            else:
+                log.error(msg)
             return GrokResult(
                 model=self._model, prompt_tokens=0, completion_tokens=0,
                 total_tokens=0, text="", latency_ms=0, error=msg,

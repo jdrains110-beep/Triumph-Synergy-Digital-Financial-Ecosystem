@@ -45,7 +45,8 @@ EOF
 }
 
 check_horizon() {
-  docker exec "$TARGET_CONTAINER" supervisorctl status "$TARGET_PROCESS" 2>/dev/null || true
+  # Silently suppress "executable not found" errors for optional external containers
+  docker exec "$TARGET_CONTAINER" supervisorctl status "$TARGET_PROCESS" 2>&1 | grep -v "executable file not found" || true
 }
 
 probe_horizon_api() {
@@ -53,7 +54,8 @@ probe_horizon_api() {
 }
 
 start_horizon() {
-  docker exec "$TARGET_CONTAINER" supervisorctl start "$TARGET_PROCESS" 2>/dev/null || true
+  # Silently suppress "executable not found" errors for optional external containers
+  docker exec "$TARGET_CONTAINER" supervisorctl start "$TARGET_PROCESS" 2>&1 | grep -v "executable file not found" || true
 }
 
 # ── Pi-bridge network connectivity check ──
@@ -104,6 +106,13 @@ mkdir -p "$METRICS_DIR"
 write_metrics "" 0
 
 while true; do
+  # Phase 0: Skip entirely if target container is not deployed (opt-in profile)
+  if ! docker inspect "$TARGET_CONTAINER" >/dev/null 2>&1; then
+    write_metrics "" 0
+    sleep "$GUARD_INTERVAL_S"
+    continue
+  fi
+
   # Phase 1: Ensure Pi mainnet node container is running
   if ! ensure_container_running; then
     log "container not running — skipping Horizon checks this cycle"

@@ -64,6 +64,15 @@ HORIZON_FALLBACK_URL = os.getenv(
     f"http://host.docker.internal:{_DEFAULT_HOST_FALLBACK_PORT}",
 )
 HORIZON_PUBLIC_FALLBACK_URL = os.getenv("PI_NODE_PUBLIC_FALLBACK_URL", _DEFAULT_PUBLIC_FALLBACK)
+# Cross-network fallback: when the configured network returns 404 for an account,
+# probe the other network's public Horizon so the bridge can resolve both
+# testnet-funded and mainnet-funded accounts without manual reconfiguration.
+_ALT_PUBLIC_FALLBACK = (
+    "https://api.testnet.minepi.com" if PI_NETWORK_MODE == "mainnet"
+    else "https://api.mainnet.minepi.com"
+)
+HORIZON_ALT_NETWORK_URL = os.getenv("PI_NODE_ALT_NETWORK_URL", _ALT_PUBLIC_FALLBACK)
+HORIZON_ALT_NETWORK_NAME = "testnet" if PI_NETWORK_MODE == "mainnet" else "mainnet"
 CENTRAL_NODE_URL = os.getenv("CENTRAL_NODE_URL", "http://triumph-central-node:8083")
 REDIS_URL        = os.getenv("REDIS_URL",        "redis://triumph-redis:6379")
 POLL_INTERVAL    = float(os.getenv("POLL_INTERVAL_S", "5"))
@@ -73,6 +82,7 @@ PI_HTTP_TIMEOUT  = float(os.getenv("PI_HTTP_TIMEOUT_S", "8"))
 PORT             = int(os.getenv("PORT", "8092"))
 QUANTUM_SHIELD_URL = os.getenv("QUANTUM_SHIELD_URL", "http://triumph-quantum-shield:8094").rstrip("/")
 SOVEREIGN_PQ_ENFORCE = os.getenv("SOVEREIGN_PQ_ENFORCE", "true").lower() == "true"
+PI_PROTOCOL_VERSION = int(os.getenv("PI_PROTOCOL_VERSION", "24"))
 
 CENTRAL_NODE_KEY = os.getenv(
     "CENTRAL_NODE_PUBLIC_KEY",
@@ -239,7 +249,11 @@ async def _poll_pi_node() -> None:
                             "core_version":         root.get("core_version", state["core_version"]),
                             "network_passphrase":   root.get("network_passphrase", state["network_passphrase"]),
                             "ingest_latest_ledger": root.get("ingest_latest_ledger", state["ingest_latest_ledger"]),
-                            "protocol_version":     root.get("current_protocol_version", state["protocol_version"]),
+                            "protocol_version":     max(
+                                int(root.get("current_protocol_version", 0) or 0),
+                                PI_PROTOCOL_VERSION,
+                                int(state["protocol_version"] or 0),
+                            ),
                             "latest_ledger":        ledger,
                             "latest_ledger_seq":    new_seq,
                             "latest_ledger_hash":   ledger.get("hash", "") if ledger else "",
@@ -455,20 +469,116 @@ async def pi_node_ledger():
     return state["latest_ledger"]
 
 
+@app.get("/pi-node/ledgers")
+async def pi_node_ledgers(order: str = "desc", limit: int = 1):
+    """Horizon-compatible ledger listing for callers that expect /ledgers."""
+    safe_limit = max(1, min(limit, 200))
+    normalized_order = order.lower()
+    last_err: Exception | None = None
+
+    candidates = [state["active_horizon_url"], *_horizon_candidates()]
+    seen: set[str] = set()
+    ordered_candidates: list[str] = []
+    for base in candidates:
+        if not base or base in seen:
+            continue
+        seen.add(base)
+        ordered_candidates.append(base)
+
+    for base in ordered_candidates:
+        async with _client() as c:
+            try:
+                r = await c.get(
+                    f"{base}/ledgers",
+                    params={"order": normalized_order, "limit": safe_limit},
+                )
+                r.raise_for_status()
+                data = r.json()
+                data["_bridge_meta"] = {
+                    "source": "pi-bridge-connector",
+                    "active_horizon_url": state["active_horizon_url"],
+                    "horizon_source": base,
+                }
+                return data
+            except Exception as e:
+                last_err = e
+                continue
+
+    if state["latest_ledger"]:
+        return {
+            "_embedded": {"records": [state["latest_ledger"]]},
+            "limit": 1,
+            "order": normalized_order,
+            "_bridge_meta": {
+                "source": "pi-bridge-connector",
+                "active_horizon_url": state["active_horizon_url"],
+                "note": "Served from cached bridge state after Horizon ledger query fallback",
+            },
+        }
+
+    uptime = round(time.time() - state["started_at"], 1)
+    raise HTTPException(
+        status_code=503,
+        detail={
+            "error": "ledger_syncing",
+            "message": "Pi node ledger list not yet available — node still syncing with Pi mainnet",
+            "pi_node_reachable": state["pi_node_reachable"],
+            "latest_ledger_seq": state["latest_ledger_seq"],
+            "active_horizon_url": state["active_horizon_url"],
+            "syncing": True,
+            "uptime_seconds": uptime,
+            "last_error": str(last_err or state["last_error"]),
+        },
+    )
+
+
 @app.get("/pi-node/account/{address}")
 async def pi_node_account(address: str):
-    """Account record from the live Pi node."""
-    async with _client() as c:
-        try:
-            r = await c.get(f"{HORIZON_URL}/accounts/{address}")
-            if r.status_code == 404:
-                raise HTTPException(404, f"Account {address} not found on Pi node")
-            r.raise_for_status()
-            return r.json()
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(503, f"Pi node unreachable: {e}") from e
+    """Account record from the Pi network — tries all Horizon candidates then
+    falls back to the alternate network (testnet ↔ mainnet) before returning 404.
+    The response includes a ``network`` field indicating which network funded this account.
+    """
+    last_err: Exception | None = None
+    # 1. Try every configured candidate (local node → host Pi Desktop → public mainnet)
+    for base in _horizon_candidates():
+        async with _client() as c:
+            try:
+                r = await c.get(f"{base}/accounts/{address}")
+                if r.status_code == 200:
+                    data = r.json()
+                    data["_bridge_meta"] = {"network": PI_NETWORK_MODE, "horizon_source": base}
+                    return data
+                if r.status_code == 404:
+                    # Try next candidate; don't propagate 404 until all are exhausted
+                    last_err = None
+                    continue
+                r.raise_for_status()
+            except HTTPException:
+                raise
+            except Exception as e:
+                last_err = e
+                continue
+
+    # 2. All configured-network candidates returned 404 — probe alternate network
+    #    so governance-shield and other callers can resolve both testnet and mainnet nodes.
+    if HORIZON_ALT_NETWORK_URL:
+        async with _client() as c:
+            try:
+                r = await c.get(f"{HORIZON_ALT_NETWORK_URL}/accounts/{address}")
+                if r.status_code == 200:
+                    data = r.json()
+                    data["_bridge_meta"] = {
+                        "network": HORIZON_ALT_NETWORK_NAME,
+                        "horizon_source": HORIZON_ALT_NETWORK_URL,
+                        "note": f"account not found on {PI_NETWORK_MODE}, resolved on {HORIZON_ALT_NETWORK_NAME}",
+                    }
+                    return data
+            except Exception as e:
+                last_err = e
+
+    if last_err is not None:
+        raise HTTPException(503, f"Pi node unreachable: {last_err}")
+    raise HTTPException(404, f"Account {address} not found on {PI_NETWORK_MODE} or {HORIZON_ALT_NETWORK_NAME}")
 
 
 @app.get("/pi-node/transactions")

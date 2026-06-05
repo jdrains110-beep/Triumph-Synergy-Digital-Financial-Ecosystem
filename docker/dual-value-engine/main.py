@@ -38,6 +38,7 @@ Networks: triumph-net
 
 
 import asyncio
+import functools
 import json
 import logging
 import os
@@ -45,12 +46,55 @@ import time
 from typing import Any
 
 import httpx
+import numpy as np
 import redis.asyncio as aioredis
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.routing import APIRoute
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
+
+
+def _np_sanitize(obj):
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return _np_sanitize(obj.tolist())
+    if isinstance(obj, np.generic):
+        return obj.item()
+    if isinstance(obj, dict):
+        return {k: _np_sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_np_sanitize(x) for x in obj]
+    return obj
+
+
+class NumpyJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return super().render(_np_sanitize(content))
+
+
+class NumpySanitizingRoute(APIRoute):
+    def __init__(self, path, endpoint, **kwargs):
+        if endpoint is not None and callable(endpoint):
+            if asyncio.iscoroutinefunction(endpoint):
+                orig = endpoint
+                @functools.wraps(orig)
+                async def wrapped(*a, **kw):
+                    return _np_sanitize(await orig(*a, **kw))
+                endpoint = wrapped
+            else:
+                orig = endpoint
+                @functools.wraps(orig)
+                def wrapped(*a, **kw):
+                    return _np_sanitize(orig(*a, **kw))
+                endpoint = wrapped
+        super().__init__(path, endpoint, **kwargs)
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -119,7 +163,12 @@ state: dict[str, Any] = {
     "bridge_reachable":      False,
 }
 
-app = FastAPI(title="Pi Dual-Value Engine", version="1.0.0")
+app = FastAPI(
+    title="Pi Dual-Value Engine",
+    version="1.0.0",
+    default_response_class=NumpyJSONResponse,
+)
+app.router.route_class = NumpySanitizingRoute
 redis_client: aioredis.Redis | None = None
 
 

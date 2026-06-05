@@ -1164,6 +1164,17 @@ Source: [docker/central-node/bootstrap.ts](docker/central-node/bootstrap.ts) ·
 
 **Source of truth**: [docker-compose.yml](docker-compose.yml) · [docker/quantum-intel-fortress/](docker/quantum-intel-fortress/) · [docker/pi-bridge-connector/](docker/pi-bridge-connector/) · [docker/guardian-watchdog-nexus/](docker/guardian-watchdog-nexus/) · [docker/apex-sovereign-nexus/](docker/apex-sovereign-nexus/)
 
+### SAIB + Runtime Source of Truth
+
+Use these files as the canonical build and operations reference when changing the live ecosystem. If behavior in the UI, an API proxy, or a secondary document disagrees with these files, these files win.
+
+- [docker-compose.yml](docker-compose.yml) — service wiring, health dependencies, enforcement flags, network attachment, memory limits, and the autonomous runtime contract shared across the ecosystem.
+- [docker/pi-bridge-connector/main.py](docker/pi-bridge-connector/main.py) — Pi-network bridge behavior, Horizon fallback order, canonical ledger access, protocol floor enforcement, and relay compatibility routes such as `/pi-node/ledgers`.
+- [docker/saib-enforcer/server.js](docker/saib-enforcer/server.js) — the autonomous duty scheduler, recovery-oriented error handling, and continuous execution loop that keeps SAIB reacting instead of stalling silently.
+- [docker/sovereign-nano-saib/saib/](docker/sovereign-nano-saib/saib/) — the higher-order SAIB autonomy stack: healer, enforcer, brainstorm, mesh, guardian, intelligence, and fix-engine components.
+
+Operational rule: when stabilizing Triumph Synergy, fix the control surface that owns the behavior before editing downstream proxies or dashboards. That means compose for system contract, pi-bridge for chain-facing behavior, SAIB Enforcer for recurring execution, and sovereign-nano-SAIB for higher-order decisioning and self-healing.
+
 ---
 
 ## �🔐 IP, Identity, and Sovereign Protection

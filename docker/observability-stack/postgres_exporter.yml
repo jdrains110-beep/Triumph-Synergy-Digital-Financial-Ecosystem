@@ -1,0 +1,3 @@
+# postgres_exporter auth config
+# Connection is provided via DATA_SOURCE_NAME env var — no auth modules needed.
+auth_modules: {}

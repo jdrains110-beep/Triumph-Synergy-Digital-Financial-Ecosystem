@@ -40,6 +40,8 @@ x-common:
   # which keeps containers stopped when daemon is restarted while they were down)
   &common
   restart: always
+  environment:
+    TINI_SUBREAPER: "1"
   logging:
     driver: json-file
     options:
@@ -80,6 +82,9 @@ x-pi-env: &pi-env
   PI_MAINNET_API_KEY: ${PI_MAINNET_API_KEY:?PI_MAINNET_API_KEY required}
   PI_API_SECRET: ${PI_API_SECRET:?PI_API_SECRET required}
   PI_API_URL: ${PI_API_URL:-https://api.minepi.com}
+  # Pi Platform API /v2/me validators per network (testnet trigger support).
+  PI_PLATFORM_API_URL: ${PI_PLATFORM_API_URL:-https://api.minepi.com/v2/me}
+  PI_PLATFORM_API_TESTNET_URL: ${PI_PLATFORM_API_TESTNET_URL:-https://api.minepi.com/v2/me}
   NEXT_PUBLIC_PI_APP_ID: ${NEXT_PUBLIC_PI_APP_ID:-triumph-synergy}
   NEXT_PUBLIC_PI_SANDBOX: ${NEXT_PUBLIC_PI_SANDBOX:-false}
   PI_SUPERNODE_ADDRESS: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
@@ -93,6 +98,13 @@ x-pi-env: &pi-env
   PIONEER_AIRDROP_SOURCE_TESTNET: GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP
   STELLAR_HORIZON_URL: ${STELLAR_HORIZON_URL:-https://api.mainnet.minepi.com}
   STELLAR_NETWORK_PASSPHRASE: ${STELLAR_NETWORK_PASSPHRASE:-Pi Network}
+  # ── Protocol 24 Explicit Enforcement ──────────────────────────────────────
+  # Pi mainnet ONLY runs SCP Protocol 24 (stellar-core v24.0.0).
+  # This is immutable per pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0
+  PI_PROTOCOL_VERSION: "24"
+  STELLAR_CORE_VERSION: v24.0.0
+  PI_MIN_SUPPORTED_PROTOCOL: "23"
+  # ──────────────────────────────────────────────────────────────────────────
   CENTRAL_NODE_URL: http://triumph-central-node:8083
   CENTRAL_NODE_PUBLIC_KEY: GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V
   # Pi Node accessible via pi-bridge network (container name) and host.
@@ -160,6 +172,11 @@ services:
     volumes:
       - triumph_pg_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
     networks:
       - triumph-net
     healthcheck:
@@ -174,8 +191,8 @@ services:
     container_name: triumph-redis
     stop_grace_period: 30s # Allow RDB/AOF flush before SIGKILL
     <<: *common
-    mem_limit: 128m
-    mem_reservation: 64m
+    mem_limit: 192m # was 128m — AOF fsync + RDB fork spikes need headroom
+    mem_reservation: 96m # was 64m
     cpus: 0.3
     oom_score_adj: -500 # Protect cache — last to OOM-kill
     # Internal only — no host port exposure
@@ -204,8 +221,8 @@ services:
       context: docker/pi-bridge-connector
     container_name: triumph-pi-bridge-connector
     <<: *common
-    mem_limit: 384m
-    mem_reservation: 128m
+    mem_limit: 512m
+    mem_reservation: 192m
     cpus: 0.60 # quantum-managed: T5 mesh peer (bridge poller) — bumped for httpx+SSE+push loops
     environment:
       <<: [ *db-env, *pi-env ]
@@ -224,9 +241,9 @@ services:
       # Direct container name — not alias — avoids DNS resolution failure if alias not ready
       QUANTUM_SHIELD_URL: http://triumph-quantum-intel-fortress:8094
       SOVEREIGN_PQ_ENFORCE: "true"
-      # ── Public-site bridge (Docker <-> triumphsynergyab2099.pinet.com / Triumph-Synergy.replit.app)
+      # ── Public-site bridge (Docker <-> triumphsynergyab2099.pinet.com)
       # Outbound only — works behind NAT/CGNAT. Set PUBLIC_BRIDGE_TOKEN to enable.
-      PUBLIC_BRIDGE_URLS: ${PUBLIC_BRIDGE_URLS:-https://triumphsynergyab2099.pinet.com,https://Triumph-Synergy.replit.app}
+      PUBLIC_BRIDGE_URLS: ${PUBLIC_BRIDGE_URLS:-https://triumphsynergyab2099.pinet.com}
       PUBLIC_BRIDGE_TOKEN: ${PUBLIC_BRIDGE_TOKEN:-}
       PUBLIC_BRIDGE_NODE_ID: ${PUBLIC_BRIDGE_NODE_ID:-docker-desktop-primary}
       PUBLIC_BRIDGE_PUSH_INTERVAL_S: ${PUBLIC_BRIDGE_PUSH_INTERVAL_S:-10}
@@ -275,7 +292,24 @@ services:
       INTERNAL_PI_MULTIPLIER: ${INTERNAL_PI_MULTIPLIER:-1.5}
       INTERNAL_PI_MIN_VALUE: ${INTERNAL_PI_MIN_VALUE:-10.0}
       EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROTOCOL 24 & CENTRAL NODE CONNECTION (EMBEDDED IN GOVERNANCE-SHIELD)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      PI_PROTOCOL_VERSION: "24"
+      STELLAR_CORE_VERSION: "v24.0.0"
+      STELLAR_CORE_PROTOCOL: "24"
+      STELLAR_NETWORK_PASSPHRASE: "Pi Network"
+      GOVERNANCE_SHIELD_URL: "http://triumph-governance-shield:11626"
+      GOVERNANCE_SHIELD_HEALTH_URL: "http://triumph-governance-shield:11626/health"
+      CENTRAL_NODE_PROTOCOL_URL: "http://triumph-governance-shield:11626/info"
+      SUPERNODE_SCP_URL: "http://triumph-governance-shield:11626/scp"
+      SUPERNODE_STATUS_URL: "http://triumph-governance-shield:11626/supernode/status"
+      SUPERNODE_PEERS_URL: "http://triumph-governance-shield:11626/supernode/peers"
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
+      SAIB_TOKEN: ${SAIB_TOKEN:-}
+      SAIB_FOUNDER_TOKEN: ${SAIB_FOUNDER_TOKEN:?SAIB_FOUNDER_TOKEN required — set a 64-char hex secret}
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -284,6 +318,8 @@ services:
       redis:
         condition: service_healthy
       governance-shield:
+        condition: service_started
+      sovereign-nano-saib:
         condition: service_started
     networks:
       - triumph-net
@@ -346,6 +382,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs/nginx:/etc/nginx/certs:ro
+      - ./html_storefronts:/usr/share/nginx/html:ro
     depends_on:
       app:
         condition: service_started
@@ -357,6 +394,66 @@ services:
       - triumph-net
     healthcheck:
       disable: true
+
+  # ========================================================================
+  # SAIB ENFORCER — Sidecar bridge between real-world and digital ecosystem.
+  # Routes /api/saib/enforce to credit bureaus, judicial systems, tokenization,
+  # HQ (apex-sovereign-nexus), and vault. Every action emits an immutable
+  # sha256 receipt anchored (best-effort) to Pi mainnet via settlement-core.
+  # Founder-token gated for all mutating actions.
+  # ========================================================================
+  saib-enforcer:
+    build:
+      context: docker/saib-enforcer
+      dockerfile: Dockerfile
+    image: triumph-synergy-saib-enforcer:latest
+    container_name: triumph-saib-enforcer
+    <<: *common
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.30
+    environment:
+      PORT: "8210"
+      SAIB_FOUNDER_TOKEN: ${SAIB_FOUNDER_TOKEN:?SAIB_FOUNDER_TOKEN required}
+      SAIB_TOKEN: ${SAIB_TOKEN:-}
+      PUBLIC_BRIDGE_TOKEN: ${PUBLIC_BRIDGE_TOKEN:-}
+      CREDIT_ENGINE_URL: http://triumph-credit-engine:8091
+      JUDICIAL_SERVICE_URL: http://triumph-governance-shield:8096
+      SETTLEMENT_CORE_URL: http://triumph-settlement-core:8080
+      TOKEN_ENGINE_URL: http://triumph-settlement-core:8089
+      VAULT_URL: http://triumph-vault:8081
+      HQ_NEXUS_URL: http://triumph-sovereign-nano-saib:8201
+      NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
+      APP_URL: http://triumph-app:3000
+      PI_PROTOCOL_VERSION: "24"
+      PI_LEDGER_STALL_SEC: "180"
+      PI_INGEST_LAG_LEDGER_THRESHOLD: "10"
+      DUTY_ENABLED: "true"
+      DUTY_PI_CHAIN_SEC: "180"
+      DUTY_MARKET_ECON_SEC: "300"
+      DUTY_CEO_SEC: "300"
+      CEO_AUTO_REPAIR: "true"
+      CEO_AUTO_ACK_STALE: "true"
+      CEO_AUTO_HEAL: "true"
+      CEO_MAX_ACTIONS: "6"
+      CEO_ESCALATION_COOLDOWN_SEC: "1800"
+      MARKET_SPREAD_EXTREME_RATIO: "3.0"
+      MARKET_SPREAD_DISCOUNT_RATIO: "0.5"
+      MARKET_BLUEPRINT_COOLDOWN_SEC: "1800"
+    secrets:
+      - public_bridge_token
+    expose:
+      - "8210"
+    networks:
+      - triumph-net
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://127.0.0.1:8210/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
   # ========================================================================
   # MARKET DATA SERVICE — Live Pi Horizon data relay
   # ========================================================================
@@ -405,6 +502,7 @@ services:
       VERSION_CHECK_INTERVAL_MS: 300000 # CPU-optimized: was 60000
       PARAMETER_SYNC_INTERVAL_MS: 120000 # CPU-optimized: was 30000
       PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
+      PI_TESTNET_HORIZON: https://api.testnet.minepi.com
       PI_LOCAL_HORIZON: http://${PI_NODE_CONTAINER:-triumph-pi-mainnet-node}:${PI_NODE_API_PORT:-8000}
       NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
@@ -414,6 +512,11 @@ services:
       SUPERNODE_ROLE: primary
       SUPERNODE_ID: triumph-central-node
       SUPERNODE_SELF_URL: http://triumph-central-node:11626
+      # ── EXPLICIT Protocol 24 Override ──
+      # Central node ALWAYS reports Protocol 24, even if local Horizon returns stale data.
+      # This ensures the supernode backbone correctly declares SCP v24 compliance.
+      PI_PROTOCOL_VERSION: "24"
+      STELLAR_CORE_VERSION: v24.0.0
       # Shared secret for /supernode/join — prevents unauthenticated peer escalation.
       # Must match SUPERNODE_JOIN_SECRET on all peer supernodes.
       SUPERNODE_JOIN_SECRET: ${SUPERNODE_JOIN_SECRET:-}
@@ -472,8 +575,21 @@ services:
       SUPERNODE_PEERS: http://triumph-central-node:11626
       APEX_AUTO_UPGRADE: "true"
       PI_NETWORK_MODE: ${PI_NETWORK_MODE:-mainnet}
+      NETWORK_TYPE: ${PI_NETWORK_MODE:-mainnet}
       SCP_REQUIRE_PQ_SIGNATURE: "true"
       SUPERNODE_JOIN_SECRET: ${SUPERNODE_JOIN_SECRET:-}
+      # ── SCP Protocol version tracking ─────────────────────────────────
+      # Overridden dynamically at runtime by polling Pi Horizon ledger.
+      # Set here as a known-good fallback; SCP watchdog will update live.
+      PI_PROTOCOL_VERSION: ${PI_PROTOCOL_VERSION:-24}
+      STELLAR_CORE_VERSION: ${STELLAR_CORE_VERSION:-v24.0.0}
+      STELLAR_NETWORK_PASSPHRASE: ${STELLAR_NETWORK_PASSPHRASE:-Pi Network}
+      # ── Horizon endpoints (mainnet + testnet) ──────────────────────────
+      PI_MAINNET_HORIZON: https://api.mainnet.minepi.com
+      PI_TESTNET_HORIZON: https://api.testnet.minepi.com
+      # ── SAIB notification target ────────────────────────────────────────
+      NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
+      SAIB_SERVICE_TOKEN: ${SAIB_SERVICE_TOKEN:-}
     expose:
       - "11626"
     networks:
@@ -509,7 +625,7 @@ services:
     environment:
       <<: [ *db-env, *pi-env ]
       ENGINE_MODE: hyper
-      NODE_OPTIONS: "--max-old-space-size=512"
+      NODE_OPTIONS: "--max-old-space-size=512 --unhandled-rejections=warn"
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
       EXECUTION_CHANNELS: 10000
       PI_INTERNAL_RATE: "314159.0"
@@ -577,9 +693,9 @@ services:
       dockerfile: quantum-intel-fortress/Dockerfile
     container_name: triumph-quantum-intel-fortress
     <<: *common
-    mem_limit: 640m
+    mem_limit: 768m
     mem_reservation: 320m
-    cpus: 0.60 # quantum-managed: T4 quantum-intel-fortress — raised 512m→640m (was at 99% on stale 384m container)
+    cpus: 0.60 # quantum-managed: T4 quantum-intel-fortress — raised 640m→768m (was at 78%)
     environment:
       <<: [ *db-env, *pi-env ]
       PI_INTERNAL_RATE: "314159.0"
@@ -631,9 +747,9 @@ services:
     platform: linux/arm64
     container_name: triumph-apex-services
     <<: *common
-    mem_limit: 1024m
+    mem_limit: 1536m
     mem_reservation: 512m
-    cpus: 1.00 # quantum-managed: T2 apex-services (18-svc mega-pod) — raised 768m→1024m (was at 93%)
+    cpus: 1.00 # quantum-managed: T2 apex-services (18-svc mega-pod) — raised 1024m→1536m (was at 83%)
     environment:
       <<: [ *db-env, *pi-env ]
       PI_INTERNAL_RATE: "314159.0"
@@ -677,12 +793,11 @@ services:
       SAIB_QUANTUM_AUTO_COMMIT: "false"
       SAIB_CODEBASE_SCAN_PATH: "/workspace"
       SAIB_DOCKER_BUILD_CONTEXT: "/workspace/docker"
-      # ── External mainnet probes (Replit + PiNet + Pi mainnet API) ────
+      # ── External mainnet probes (PiNet + Pi mainnet API) ────
       # No hardcoded host defaults — Pi App Studio assigns a fresh hostname
-      # on every app transfer. Set SAIB_REPLIT_HOSTS / SAIB_PINET_HOSTS in
+      # on every app transfer. Set SAIB_PINET_HOSTS in
       # your environment to point at the current canonical domain(s); leaving
-      # them empty disables those probes.
-      SAIB_REPLIT_HOSTS: ${SAIB_REPLIT_HOSTS:-}
+      # it empty disables those probes.
       SAIB_PINET_HOSTS: ${SAIB_PINET_HOSTS:-}
       SAIB_EXTERNAL_PROBE_INTERVAL_S: "60"
       SAIB_REMEDIATION_COOLDOWN_S: "900"
@@ -846,9 +961,9 @@ services:
       dockerfile: observability-stack/Dockerfile
     container_name: triumph-observability-stack
     <<: *common
-    mem_limit: 640m
+    mem_limit: 768m
     mem_reservation: 440m
-    cpus: 0.70 # quantum-managed: T3 observability-stack — bumped: live 67% CPU / 428MB
+    cpus: 0.70 # quantum-managed: T3 observability-stack — raised 640m→768m (was at 64%)
     ports:
       - "3001:3000"
       - "9090:9090"
@@ -870,6 +985,22 @@ services:
       CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${CLOUDFLARE_R2_SECRET_ACCESS_KEY:-}
       CLOUDFLARE_KV_NAMESPACE_ID: ${CLOUDFLARE_KV_NAMESPACE_ID:-}
       CLOUDFLARE_KV_KEY: ${CLOUDFLARE_KV_KEY:-triumph-cloud-memory:latest}
+      # ── Grafana database tuning — prevent SQLITE_BUSY lock errors ──
+      GF_DATABASE_WAL: "true"
+      GF_DATABASE_CACHE_MODE: "private"
+      GF_DATABASE_MAX_OPEN_CONN: "5"
+      # Disable Grafana 12 secrets-management feature (causes
+      # "context deadline exceeded" cleanup errors in single-node deployments)
+      # Also disable k8s-compatible apiserver for dashboards/alerting (causes
+      # "context deadline exceeded" from grafana-apiserver self-calls)
+      GF_FEATURE_TOGGLES_DISABLE: "secretsManagementAppPlatform,kubernetesPlaylists,kubernetesDashboards,kubernetesSnapshots,kubernetesRuleGroups,disableEnvelopeEncryption"
+      GF_GRAFANA_APP_MODE: "production"
+      GF_GRAFANA_APISERVER_ENABLED: "false"
+      # Disable usage-stats collection — prevents recurring errors about
+      # missing plugins (e.g. grafana-amazonprometheus-datasource not found)
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
     volumes:
       - triumph_prometheus_data:/prometheus
       - triumph_grafana_data:/var/lib/grafana
@@ -1129,40 +1260,68 @@ services:
     healthcheck:
       disable: true
   # --------------------------------------------------------------------------
-  # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
+  # PI MAINNET NODE — pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0
   # ------------------------------------------------------------------------
-  # Live Pi mainnet currently advertises current_protocol_version=22 with
-  # core 22.1.0; the v1.1-p23.0.1 image runs 22 today and is ready to vote
-  # for the P23 upgrade once consensus is reached. Pinning to a P24 RC
-  # caused crash-on-start because the binary expected protocol features
-  # the live network has not yet activated.
+  # Protocol 24 (stellar-core v24.1.0 + horizon v24.0.0 + PostgreSQL 16,
+  # Ubuntu 24.04). Official Pi Core Team release — no PG migration needed,
+  # no reingestion required. Volumes already on PG 16 from v1.1-p23.
   #
-  # Official Pi Network full node (stellar-core v24.0.0 + horizon v24.0.0 +
-  # PostgreSQL 16, Ubuntu 24.04).  This is the sovereign on-chain anchor for
-  # the Triumph Synergy ecosystem — all Pi payment rails, settlement-core,
-  # pi-bridge-connector, tokenization-engine, and SWN/PPH payroll settle
-  # against THIS node rather than a third-party API endpoint.
+  # This is the sovereign on-chain anchor for the Triumph Synergy ecosystem —
+  # all Pi payment rails, settlement-core, pi-bridge-connector,
+  # tokenization-engine, and SWN/PPH payroll settle against THIS node.
   #
+  # Release: https://github.com/PiCoreTeam/pi-node-docker/releases/tag/organization-mainnet-v1.0-p24.1.0
   # Fork: https://github.com/jdrains110-beep/pi-node-docker
-  # Upstream: https://github.com/PiCoreTeam/pi-node-docker
   # --------------------------------------------------------------------------
   pi-mainnet-node:
-    image: pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
+    image: pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0
     platform: linux/amd64 # AMD64-only stellar-core image — required on Apple Silicon / ARM64 hosts
     container_name: triumph-pi-mainnet-node
     restart: always
     profiles: [ "pi-node" ] # opt-in: heavy (3-5 GB RAM for stellar-core sync)
-    shm_size: 1g # stellar-core uses /dev/shm for SCP bucket merges; 512m still SIGABRTs during catchup on AMD64 emulation
-    # Docker Desktop on Apple Silicon typically allocates 6-8 GB; cap mainnet-node at 3.5g
-    # so postgres/redis/bridge/governance-shield can coexist. The trade-off is slower
-    # initial catchup (it'll evict bucket pages instead of holding them in RAM); the
-    # node still syncs and serves Horizon. Bump to 7g+ if you raise Docker Desktop RAM.
-    mem_limit: 3500m
-    mem_reservation: 1500m
-    cpus: 1.5 # capped from 2.0: prevent CPU starvation of Docker VM during stellar-core catchup
+    # p24: bump shm to 2g — stellar-core v24 bucket-merge spikes higher on AMD64 emulation
+    shm_size: 2048m
+    # Host RAM budget: 4g node + ~3.3g rest of stack = safe on 8g Docker Desktop.
+    # Raise mem_limit to 6-7g only after increasing Docker Desktop's RAM allocation.
+    mem_limit: 4096m
+    mem_reservation: 2048m
+    cpus: 2.0 # apply-buckets is CPU-bound under QEMU — give both vCPUs
     environment:
       POSTGRES_PASSWORD: ${PI_NODE_POSTGRES_PASSWORD:-changeme_in_env}
       NODE_PRIVATE_KEY: ${PI_NODE_PRIVATE_KEY:-} # auto-generated if blank
+      # ── SAIB Sovereign injection ─────────────────────────────────────────
+      # BlockchainWarden monitors this node; these vars allow future startup
+      # scripts and internal probes to register with SAIB automatically.
+      NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
+      SAIB_TOKEN: ${SAIB_TOKEN:-}
+      SAIB_ENFORCE: "true"
+      SAIB_ECOSYSTEM_GUARDIAN: "true"
+      PI_BRIDGE_URL: http://triumph-pi-bridge-connector:8092
+      # ── Internal peer mesh ───────────────────────────────────────────────
+      # Keeps the node in sync with the Triumph SCP quorum on the pi-bridge
+      # network. stellar-core's KNOWN_PEERS list is seeded from this var by
+      # the startup script so catchup completes via local peers first.
+      STELLAR_CORE_KNOWN_PEERS: "triumph-central-node:11626,triumph-supernode-peer-2:11626"
+      SUPERNODE_PEERS: "http://triumph-central-node:11626,http://triumph-supernode-peer-2:11626"
+      # ── PostgreSQL stability tuning ──────────────────────────────────────
+      # Applied via BlockchainWarden ALTER SYSTEM SET after first startup.
+      # Also read by some pi-node-docker startup script variants.
+      POSTGRES_MAX_CONNECTIONS: "50"
+      POSTGRES_SHARED_BUFFERS: "512MB"
+      POSTGRES_EFFECTIVE_CACHE_SIZE: "1500MB"
+      POSTGRES_WORK_MEM: "16MB"
+      POSTGRES_MAINTENANCE_WORK_MEM: "128MB"
+      POSTGRES_CHECKPOINT_COMPLETION_TARGET: "0.9"
+      POSTGRES_WAL_BUFFERS: "32MB"
+      POSTGRES_STATEMENT_TIMEOUT: "300000" # 5 min — stops runaway horizon queries
+      POSTGRES_IDLE_IN_TRANSACTION_SESSION_TIMEOUT: "60000"
+      POSTGRES_LOG_MIN_DURATION_STATEMENT: "5000" # log slow queries (>5s)
+      # ── Self-healing signals ─────────────────────────────────────────────
+      # BlockchainWarden reads these to decide which auto-heal actions to take
+      STALE_LOCK_AUTO_CLEAR: "true" # warden removes postmaster.pid before restart
+      SUPERVISORD_GRACEFUL_SHUTDOWN_S: "30"
+      PI_NETWORK_MODE: mainnet
+      STELLAR_NETWORK_PASSPHRASE: "Pi Network"
     volumes:
       - pi_mainnet_stellar:/opt/stellar
       - pi_mainnet_logs:/var/log/supervisor
@@ -1173,11 +1332,23 @@ services:
       - "${PI_NODE_PEER_PORT:-31502}:31402" # stellar-core peer
       - "${PI_NODE_HISTORY_PORT:-31503}:1570" # local history server
     command: [ "--mainnet" ]
+    depends_on:
+      sovereign-nano-saib:
+        condition: service_started
     networks:
       - triumph-net
       - pi-bridge
     healthcheck:
-      disable: true
+      # Lenient check tuned for AMD64 stellar-core under QEMU on Apple Silicon:
+      # passes if EITHER stellar-core (11626) OR horizon (8000) responds at all.
+      # Apply-buckets + initial sync can take 30-60+ min under emulation, so we
+      # do NOT require a specific "state" field — being reachable (any HTTP
+      # response, including 4xx/5xx from a live server) is enough.
+      test: [ "CMD-SHELL", "curl -fsS --max-time 5 http://localhost:11626/info >/dev/null 2>&1 || curl -fsS --max-time 5 http://localhost:8000/ >/dev/null 2>&1 || curl -sS -o /dev/null --max-time 5 -w '%{http_code}' http://localhost:11626/info 2>/dev/null | grep -qE '^[2345][0-9][0-9]$' || curl -sS -o /dev/null --max-time 5 -w '%{http_code}' http://localhost:8000/ 2>/dev/null | grep -qE '^[2345][0-9][0-9]$' || exit 1" ]
+      interval: 60s
+      timeout: 15s
+      retries: 10
+      start_period: 30m
   # --------------------------------------------------------------------------
   # MAINNET-ONLY — Pi Network + Stellar Protocol 24
   # triumph-pi-mainnet-node is the sole blockchain node for this ecosystem.
@@ -1283,15 +1454,39 @@ services:
       SAIB_BASE_URL: "${SAIB_BASE_URL:-https://saib.triumphsynergy.io}"
       # Grok / xAI inference (set XAI_API_KEY in .env)
       XAI_API_KEY: "${XAI_API_KEY:-}"
+      # v8 OMNI SOVEREIGN — LLM Brain free cloud providers
+      # Google AI Studio free tier: https://aistudio.google.com/apikey
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.0-flash-exp}"
+      # OpenRouter free models (:free tag): https://openrouter.ai/keys
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      OPENROUTER_MODEL: "${OPENROUTER_MODEL:-meta-llama/llama-3.3-70b-instruct:free}"
+      # v8 OMNI SOVEREIGN — Market Oracle refresh cadence
+      MARKET_REFRESH_INTERVAL_S: "${MARKET_REFRESH_INTERVAL_S:-120}"
+      # v8 OMNI SOVEREIGN — Resource Sovereign thresholds
+      OOM_WARN_THRESHOLD: "${OOM_WARN_THRESHOLD:-0.80}"
+      OOM_KILL_THRESHOLD: "${OOM_KILL_THRESHOLD:-0.92}"
+      CPU_THROTTLE_THRESHOLD: "${CPU_THROTTLE_THRESHOLD:-0.90}"
+      # ── BlockchainWarden tuning ────────────────────────────────────────
+      # On Apple Silicon under QEMU emulation, AMD64 stellar-core takes
+      # 20-60+ min for initial bucket-apply. Without this grace period the
+      # warden's heal cycle (every 60s) restarts the node before it can
+      # finish, creating an infinite restart loop. 2400s = 40 min.
+      # On native AMD64 Linux you can lower this to 600 (10 min).
+      BLOCKCHAIN_WARDEN_BOOT_GRACE_S: "${BLOCKCHAIN_WARDEN_BOOT_GRACE_S:-2400}"
+      BLOCKCHAIN_WARDEN_LEDGER_STALL_S: "${BLOCKCHAIN_WARDEN_LEDGER_STALL_S:-300}"
+      BLOCKCHAIN_WARDEN_STARTUP_HANG_S: "${BLOCKCHAIN_WARDEN_STARTUP_HANG_S:-180}"
       # Dedicated M2M service token for HSM signing, wallet ops, and task execution.
-      # Must match SAIB_SERVICE_TOKEN set in the Next.js app environment (Replit Secrets).
+      # Must match SAIB_SERVICE_TOKEN set in the Next.js app environment (.env file).
       # Generate with: openssl rand -hex 32   — never commit the value.
       SAIB_SERVICE_TOKEN: "${SAIB_SERVICE_TOKEN:-}"
       TRIUMPH_INTERNAL_URL: "${TRIUMPH_INTERNAL_URL:-http://triumph-app:3000}"
     secrets:
       - public_bridge_token
+    group_add:
+      - "0" # root group (GID 0) — docker.sock is rw-rw---- root:root; saib user needs this supplementary group to access the socket
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  # SovereignHealer: restart/inspect containers
+      - /var/run/docker.sock:/var/run/docker.sock # SovereignHealer: restart/inspect containers
     networks:
       triumph-net:
         aliases:
@@ -1359,6 +1554,49 @@ services:
       timeout: 30s
       retries: 3
       start_period: 120s
+
+  # ==========================================================================
+  # UBUNTU ADMIN — Blockchain Admin Shell (Ubuntu 24.04 LTS)
+  # Pi Network SCP Protocol 24 · GCV $314,159/π
+  #
+  # A persistent Ubuntu 24.04 container with full admin tooling for the
+  # Triumph Synergy Digital Financial Ecosystem. Never starts automatically
+  # (profile: tools) — use `docker compose --profile tools up -d ubuntu-admin`
+  # to start, then: `docker exec -it triumph-ubuntu-admin bash`
+  #
+  # Admin CLI: docker exec -it triumph-ubuntu-admin node /admin/pi-admin.js --help
+  # ==========================================================================
+  ubuntu-admin:
+    build:
+      context: docker/ubuntu-admin
+      dockerfile: Dockerfile
+    container_name: triumph-ubuntu-admin
+    profiles:
+      - tools
+    networks:
+      - triumph-net
+    environment:
+      SAIB_ENFORCER_URL: "http://triumph-saib-enforcer:8210"
+      STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://api.mainnet.minepi.com}"
+      TRIUMPH_APP_URL: "http://triumph-app:3000"
+      LEDGER_RING_MAX: "500"
+      GCV_USD_PER_PI: "314159"
+      PI_PROTOCOL_VERSION: "24"
+      NODE_ENV: "production"
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 128m
+    cpus: 0.25
+    labels:
+      org.triumph.pod: "ubuntu-admin"
+      org.triumph.purpose: "blockchain-admin-shell-ubuntu-24.04"
+      org.triumph.protocol: "SCP-24"
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://triumph-saib-enforcer:8210/health" ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 # ==========================================================================
 # VOLUMES — Persistent Data

@@ -10,15 +10,25 @@ METRICS_PORT = int(os.getenv("METRICS_PORT", "9911"))
 
 
 class Handler(BaseHTTPRequestHandler):
+    def handle_one_request(self):
+        try:
+            super().handle_one_request()
+        except (BrokenPipeError, ConnectionResetError):
+            return
+
     def handle_error(self, request, client_address):
-        # Silently discard BrokenPipeError — happens when Prometheus or a
-        # health-check client disconnects before the response completes.
-        # All other errors fall through to the default stderr handler.
         import sys
         exc_type = sys.exc_info()[0]
-        if exc_type is BrokenPipeError:
+        if exc_type in (BrokenPipeError, ConnectionResetError):
             return
         super().handle_error(request, client_address)
+
+    def _safe_write(self, body: bytes) -> None:
+        try:
+            self.wfile.write(body)
+            self.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def do_GET(self):
         if self.path == "/health":
@@ -27,7 +37,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
-            self.wfile.write(body)
+            self._safe_write(body)
             return
 
         if self.path != "/metrics":
@@ -45,7 +55,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        self._safe_write(body)
 
     def log_message(self, fmt, *args):
         return

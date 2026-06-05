@@ -40,9 +40,60 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 import redis as redis_lib
 import httpx
+import asyncio
+import functools
 from fastapi import FastAPI
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
+from fastapi.routing import APIRoute
 from pydantic import BaseModel
+
+
+def _np_sanitize(obj):
+    """Recursively convert numpy scalars / arrays to native Python types
+    so pydantic / json can serialize them (fixes numpy.bool_ etc.)."""
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return _np_sanitize(obj.tolist())
+    # catch-all: any remaining numpy scalar (np.bool, np.complex*, etc.)
+    if isinstance(obj, np.generic):
+        return obj.item()
+    if isinstance(obj, dict):
+        return {k: _np_sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_np_sanitize(x) for x in obj]
+    return obj
+
+
+class NumpyJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return super().render(_np_sanitize(content))
+
+
+class NumpySanitizingRoute(APIRoute):
+    """Wraps the endpoint so its return value is sanitized of numpy scalars
+    BEFORE FastAPI/Pydantic v2 attempts to serialize it (fixes
+    PydanticSerializationError: Unable to serialize unknown type: numpy.bool)."""
+
+    def __init__(self, path, endpoint, **kwargs):
+        if endpoint is not None and callable(endpoint):
+            if asyncio.iscoroutinefunction(endpoint):
+                orig = endpoint
+                @functools.wraps(orig)
+                async def wrapped(*a, **kw):
+                    return _np_sanitize(await orig(*a, **kw))
+                endpoint = wrapped
+            else:
+                orig = endpoint
+                @functools.wraps(orig)
+                def wrapped(*a, **kw):
+                    return _np_sanitize(orig(*a, **kw))
+                endpoint = wrapped
+        super().__init__(path, endpoint, **kwargs)
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
@@ -664,7 +715,9 @@ app = FastAPI(
     title="Triumph Synergy ML Engine",
     description="Pi Network intelligence: anomaly detection, fraud scoring, price prediction, market sentiment",
     version="1.0.0",
+    default_response_class=NumpyJSONResponse,
 )
+app.router.route_class = NumpySanitizingRoute
 
 # ─── Request bodies ────────────────────────────────────────────────────────────
 

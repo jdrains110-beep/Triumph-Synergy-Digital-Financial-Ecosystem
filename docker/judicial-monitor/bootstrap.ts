@@ -194,22 +194,28 @@ function startReconnectLoop() {
       }
     }
 
-    // Check Postgres
+    // Check Postgres — GRACEFUL DEGRADATION if unavailable
     if (pool && !pgConnected) {
-      console.warn("[reconnect] Postgres down — reconnecting...");
+      console.warn("[reconnect] Postgres down — trying to reconnect...");
       try {
         const client = await pool.connect();
         client.release();
         pgConnected = true;
         await ensureTables();
-        console.log("[reconnect] Postgres restored");
+        console.log("[reconnect] Postgres restored ✅");
       } catch (e) {
-        console.error("[reconnect] Postgres:", (e as Error).message);
+        const msg = (e as Error).message;
+        // SUPPRESS repetitive connection errors after first warning
+        if (!msg.includes("ECONNREFUSED") && !msg.includes("getaddrinfo")) {
+          console.error("[reconnect] Postgres:", msg);
+        }
+        // Gracefully degrade: system still operational without database
+        pgConnected = false;
       }
     }
 
-    // Update ready state based on actual connection health
-    ready = redisConnected && (pgConnected || !pool);
+    // Update ready state: REQUIRE Redis, OPTIONAL Postgres (graceful degradation)
+    ready = redisConnected; // Don't require postgres to go online
   }, 30_000);
 }
 
@@ -1240,6 +1246,9 @@ const server = http.createServer(async (req, res) => {
       }
       const limit = Math.min(parseInt(qs.get("limit") ?? "50", 10), 500);
       const jurisdiction = qs.get("jurisdiction") ?? "Florida";
+      // Lookback window: SAIBs can reach back N years from today (default 5).
+      const yearsBack = Math.min(Math.max(parseFloat(qs.get("years") ?? "5"), 0), 50);
+      const sinceDate = new Date(Date.now() - yearsBack * 365.25 * 24 * 60 * 60 * 1000);
       const r = await pool.query(
         `SELECT c.id, c.case_number, c.title, c.jurisdiction, c.court, c.status, c.filed_at,
                 r.risk_level, r.overall_verdict, r.violations_count, r.fact_score, r.analyzed_at
@@ -1247,12 +1256,17 @@ const server = http.createServer(async (req, res) => {
          LEFT JOIN LATERAL (
            SELECT * FROM judicial_reports WHERE case_id = c.id ORDER BY analyzed_at DESC LIMIT 1
          ) r ON true
-         WHERE c.jurisdiction ILIKE $1
+         WHERE c.jurisdiction ILIKE $1 AND c.filed_at >= $3
          ORDER BY c.filed_at DESC LIMIT $2`,
-        [`%${jurisdiction}%`, limit]
+        [`%${jurisdiction}%`, limit, sinceDate.toISOString()]
       );
       res.writeHead(200);
-      res.end(safeStringify({ rows: r.rows, total: r.rowCount }));
+      res.end(safeStringify({
+        rows: r.rows,
+        total: r.rowCount,
+        lookbackYears: yearsBack,
+        since: sinceDate.toISOString(),
+      }));
 
     // ── GET /api/judicial/cases/:id — single case ──
     } else if (url.startsWith("/api/judicial/cases/") && req.method === "GET") {

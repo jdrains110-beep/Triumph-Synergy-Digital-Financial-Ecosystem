@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magellan Jets | Pi Sovereign Storefront</title>
+  <style>
+    :root {
+      --gold:   #c9a227;
+      --deep:   #0b0e1a;
+      --card:   #111827;
+      --accent: #1e3a5f;
+      --text:   #e8ddb5;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--deep);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      max-width: 560px;
+      width: 100%;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 0 40px rgba(201,162,39,.15);
+    }
+    .icon { font-size: 3rem; text-align: center; margin-bottom: .5rem; }
+    h1 {
+      font-size: 1.75rem;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: .25rem;
+    }
+    .category {
+      text-align: center;
+      font-size: .85rem;
+      opacity: .65;
+      margin-bottom: 1.5rem;
+    }
+    .gcv-badge {
+      background: var(--accent);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: .9rem;
+    }
+    .gcv-badge strong { color: var(--gold); }
+    label { display: block; font-size: .85rem; margin-bottom: .35rem; opacity: .8; }
+    input {
+      width: 100%;
+      padding: .6rem .75rem;
+      background: #1a2332;
+      border: 1px solid #2d4a6e;
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+    .usd-equiv {
+      font-size: .8rem;
+      opacity: .6;
+      margin-top: -.75rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: .85rem;
+      background: linear-gradient(135deg, var(--gold), #a07918);
+      color: #0b0e1a;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    button:hover  { opacity: .9; }
+    button:active { opacity: .75; }
+    #status {
+      margin-top: 1rem;
+      min-height: 1.5rem;
+      font-size: .85rem;
+      text-align: center;
+    }
+    .ok  { color: #4ade80; }
+    .err { color: #f87171; }
+    footer {
+      margin-top: 2rem;
+      font-size: .75rem;
+      opacity: .4;
+      text-align: center;
+    }
+    a { color: var(--gold); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✈️</div>
+    <h1>Magellan Jets</h1>
+    <p class="category">Private Aviation &mdash; <code>magellanjets.pi</code></p>
+
+    <div class="gcv-badge">
+      <strong>Gold Canonical Value:</strong> 1 Pi&nbsp;=&nbsp;$314,159.00&nbsp;USD<br/>
+      Gold backing: 134.54&nbsp;troy&nbsp;oz&nbsp;per&nbsp;Pi&nbsp;&bull;&nbsp;Sovereign settlement layer
+    </div>
+
+    <form id="payForm" onsubmit="handlePay(event)">
+      <label for="wallet">Pi Wallet Address</label>
+      <input id="wallet" type="text" placeholder="pi:// or @username" required
+             autocomplete="off" spellcheck="false" />
+
+      <label for="piAmount">Pi Amount</label>
+      <input id="piAmount" type="number" step="0.000001" min="0.000001"
+             placeholder="e.g. 0.001" required />
+      <p class="usd-equiv" id="usdEquiv">&nbsp;</p>
+
+      <button type="submit" id="payBtn">&#960;&nbsp;Pay with Pi</button>
+    </form>
+
+    <div id="status"></div>
+  </div>
+
+  <footer>
+    Powered by <a href="http://triumphsynergy.pi">Triumph Synergy</a> &bull;
+    Sovereign Pi-OS Ecosystem &bull; GCV $314,159/Pi
+  </footer>
+
+  <script>
+    const GCV = 314159.00;
+    const domain = "magellanjets";
+
+    document.getElementById('piAmount').addEventListener('input', function () {
+      const pi  = parseFloat(this.value) || 0;
+      const usd = (pi * GCV).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      document.getElementById('usdEquiv').textContent =
+        pi > 0 ? `≈ ${usd} USD at GCV` : '\u00a0';
+    });
+
+    async function handlePay(e) {
+      e.preventDefault();
+      const wallet   = document.getElementById('wallet').value.trim();
+      const piAmount = parseFloat(document.getElementById('piAmount').value);
+      const btn      = document.getElementById('payBtn');
+      const status   = document.getElementById('status');
+
+      if (!wallet || !(piAmount > 0)) return;
+
+      btn.disabled  = true;
+      btn.textContent = 'Processing…';
+      status.className = '';
+      status.textContent = '';
+
+      try {
+        const res = await fetch('/api/settlement', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain, wallet, pi_amount: piAmount })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.status === 'settled') {
+          status.className = 'ok';
+          status.textContent =
+            `✓ Settled ${piAmount} Pi (${(piAmount * GCV).toLocaleString('en-US',
+              { style: 'currency', currency: 'USD' })}) — Ref: ${data.cryptographic_proof?.slice(0, 16) ?? 'N/A'}…`;
+        } else {
+          status.className = 'err';
+          status.textContent = `✗ ${data.detail ?? data.error ?? 'Settlement failed'}`;
+        }
+      } catch (err) {
+        status.className = 'err';
+        status.textContent = `✗ Network error: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '\u03c0\u00a0Pay with Pi';
+      }
+    }
+  </script>
+</body>
+</html>

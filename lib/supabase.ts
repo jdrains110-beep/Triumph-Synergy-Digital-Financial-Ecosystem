@@ -20,12 +20,14 @@ import type { NextRequest, NextResponse } from "next/server";
 
 // ── Environment ────────────────────────────────────────────────────────────────
 
+// Use `||` (not `??`) so empty-string env vars also fall back to safe dummy
+// values — this keeps the app bootable when Supabase isn't configured (e.g. testnet).
 const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co";
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dummy.supabase.co";
 const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "dummy-key";
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "dummy-key";
 const SUPABASE_SERVICE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? "dummy-service-key";
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "dummy-service-key";
 
 // ── Browser Client (client components) ─────────────────────────────────────────
 

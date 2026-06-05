@@ -2,20 +2,20 @@
 
 ## Pi Node Image Security
 
-### Official Image: `pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1`
+### Official Image: `pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0`
 
 **Status**: ✅ VERIFIED & RECOMMENDED
 
 **Verification Steps:**
 ```bash
 # Pull and inspect
-docker pull pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
+docker pull pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0
 
 # Verify signature (if available)
-docker trust inspect pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
+docker trust inspect pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0
 
 # Check image details
-docker inspect pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1 \
+docker inspect pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0 \
   --format='{{.RepoDigests}}'  # Immutable SHA256
 ```
 
@@ -29,10 +29,10 @@ docker inspect pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1 \
 **Recommended Scanning:**
 ```bash
 # Docker Scout (built-in vulnerability scanning)
-docker scout cves pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
+docker scout cves pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0
 
 # Trivy (open-source scanner)
-trivy image pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
+trivy image pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0
 ```
 
 ---
@@ -41,8 +41,8 @@ trivy image pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1
 
 | Service | Base Image | Security Status | Notes |
 |---------|-----------|-----------------|-------|
-| pi-mainnet-node | `pinetwork/pi-node-docker:v1.1-p23.0.1` | ✅ Official | Pi Foundation published |
-| testnet2 | `pinetwork/pi-node-docker:community-v1.1-p23.0.1` | ✅ Official | Community testnet |
+| pi-mainnet-node | `pinetwork/pi-node-docker:v1.0-p24.1.0` | ✅ Official | Pi Foundation published |
+| testnet2 | `pinetwork/pi-node-docker:community-v1.0-p24.1.0` | ✅ Official | Community testnet |
 | postgres | `postgres:16-alpine` | ✅ Official | PostgreSQL Global Dev Group |
 | redis | `redis:7-alpine` | ✅ Official | Salvatore Sanfilippo (Redis Labs) |
 | nginx | `nginx:alpine` | ✅ Official | Nginx Inc. |
