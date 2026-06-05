@@ -121,7 +121,6 @@ export async function GET() {
       v7: online,
       count: 7,
     },
-<<<<<<< HEAD
 
     // ── Sovereignty & Omnipresence ──────────────────────────────────────────
     sovereignty: {
@@ -145,7 +144,5 @@ export async function GET() {
       transcendence: "every interaction, every platform, every subcontainer, every ecosystem",
       hyper_intelligence: online,
     },
-=======
->>>>>>> origin/main
   });
 }
