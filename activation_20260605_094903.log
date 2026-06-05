@@ -1,0 +1,6 @@
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 1: PRE-FLIGHT CHECKS[0m
+[0;35m════════════════════════════════════════════[0m
+[0;34m[2026-06-05 09:49:03][0m Checking Node.js installation...
+[0;31m❌ Node.js not found. Please install Node.js 18+[0m

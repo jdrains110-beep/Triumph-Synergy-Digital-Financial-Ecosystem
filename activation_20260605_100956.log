@@ -1,0 +1,98 @@
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 1: PRE-FLIGHT CHECKS[0m
+[0;35m════════════════════════════════════════════[0m
+[0;34m[2026-06-05 10:09:57][0m Checking Node.js installation...
+[0;32m✅ Node.js v20.20.2 found[0m
+[0;34m[2026-06-05 10:09:57][0m Checking Git installation...
+[0;32m✅ Git found[0m
+[0;34m[2026-06-05 10:09:57][0m Checking current branch...
+[0;32m✅ Branch verification passed[0m
+[0;34m[2026-06-05 10:09:57][0m Checking required files...
+[0;32m✅ All required files present[0m
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 2: ENVIRONMENT CONFIGURATION[0m
+[0;35m════════════════════════════════════════════[0m
+[0;34m[2026-06-05 10:09:57][0m Creating environment configuration template...
+[1;33m⚠️  .env.production already exists[0m
+[0;34m[2026-06-05 10:11:13][0m Skipping environment setup
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 3: BUILD & DEPENDENCIES[0m
+[0;35m════════════════════════════════════════════[0m
+[0;34m[2026-06-05 10:11:13][0m Installing dependencies...
+npm warn config production Use `--omit=dev` instead.
+
+up to date, audited 705 packages in 3s
+
+160 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+[0;32m✅ Dependencies installed[0m
+[0;34m[2026-06-05 10:11:16][0m Building Next.js application...
+    at init (turbopack:///[turbopack-node]/child_process/evaluate.ts:74:20) [/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main/.next/build/chunks/[root-of-the-server]__0ubbtyl._.js:429:26]
+    [at process.processTicksAndRejections (node:internal/process/task_queues:95:5)]
+
+Import trace:
+  Client Component Browser:
+    ./node_modules/react-data-grid/lib/styles.css [Client Component Browser]
+    ./components/sheet-editor.tsx [Client Component Browser]
+    ./artifacts/sheet/client.tsx [Client Component Browser]
+    ./components/artifact.tsx [Client Component Browser]
+    ./components/chat.tsx [Client Component Browser]
+    ./components/chat.tsx [Server Component]
+    ./app/(chat)/chat/[id]/page.tsx [Server Component]
+
+
+    at require (turbopack:///[turbopack-node]/transforms/postcss.ts:49:25) [/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main/.next/build/chunks/[root-of-the-server]__0d-m0h0._.js:134:33])
+    at map (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main/.next/build/chunks/[root-of-the-server]__0d-m0h0._.js:129:35])
+    at init (turbopack:///[turbopack-node]/child_process/evaluate.ts:74:20) [/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main/.next/build/chunks/[root-of-the-server]__0ubbtyl._.js:429:26])
+    at require (turbopack:///[turbopack-node]/transforms/postcss.ts:49:25) [/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main/.next/build/chunks/[root-of-the-server]__0d-m0h0._.js:134:33])
+    at map (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main/.next/build/chunks/[root-of-the-server]__0d-m0h0._.js:129:35])
+    at init (turbopack:///[turbopack-node]/child_process/evaluate.ts:74:20) [/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main/.next/build/chunks/[root-of-the-server]__0ubbtyl._.js:429:26])
+[0;32m✅ Next.js build completed[0m
+[0;34m[2026-06-05 10:12:58][0m Verifying TypeScript compilation...
+lib/saib/token-registry.ts(215,34): error TS7006: Parameter 'chainId' implicitly has an 'any' type.
+lib/saib/token-registry.ts(215,43): error TS7006: Parameter 'addressOrSymbol' implicitly has an 'any' type.
+lib/saib/token-registry.ts(230,33): error TS7006: Parameter 'rawAmount' implicitly has an 'any' type.
+lib/saib/token-registry.ts(230,44): error TS7006: Parameter 'decimals' implicitly has an 'any' type.
+lib/saib/token-registry.ts(238,35): error TS7006: Parameter 'normalizedAmount' implicitly has an 'any' type.
+lib/saib/token-registry.ts(238,53): error TS7006: Parameter 'decimals' implicitly has an 'any' type.
+lib/saib/token-registry.ts(246,39): error TS7006: Parameter 'sourceSymbol' implicitly has an 'any' type.
+lib/saib/token-registry.ts(246,53): error TS7006: Parameter 'targetSymbol' implicitly has an 'any' type.
+lib/saib/token-registry.ts(254,41): error TS7006: Parameter 'sourceSymbol' implicitly has an 'any' type.
+vitest.config.ts(2,30): error TS2307: Cannot find module 'vitest/config' or its corresponding type declarations.
+[0;32m✅ TypeScript compilation verified[0m
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 4: DATABASE INITIALIZATION (MANUAL STEP)[0m
+[0;35m════════════════════════════════════════════[0m
+[0;34m[2026-06-05 10:13:51][0m Database schema ready for Supabase execution
+[1;33m⚠️  Schema initialization postponed[0m
+[1;33m⚠️  Database initialization incomplete[0m
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 5: CLOUDFLARE CONFIGURATION (MANUAL STEP)[0m
+[0;35m════════════════════════════════════════════[0m
+[0;34m[2026-06-05 10:13:51][0m Cloudflare infrastructure setup
+[1;33m⚠️  Cloudflare setup postponed[0m
+[1;33m⚠️  Cloudflare setup incomplete[0m
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 6: PRODUCTION DEPLOYMENT[0m
+[0;35m════════════════════════════════════════════[0m
+[0;34m[2026-06-05 10:14:38][0m Preparing production deployment...
+[0;32m✅ Environment configuration verified[0m
+[0;34m[2026-06-05 10:14:38][0m Deploying Next.js to Vercel...
+[1;33m⚠️  Vercel CLI not found. Skipping Next.js deployment.[0m
+[1;33m⚠️  Deploy manually: vercel deploy --prod[0m
+[0;34m[2026-06-05 10:14:38][0m Deploying Cloudflare Worker...
+[1;33m⚠️  Wrangler CLI not found. Skipping Worker deployment.[0m
+[1;33m⚠️  Deploy manually: wrangler publish --env production[0m
+
+[0;35m════════════════════════════════════════════[0m
+[0;35mPHASE 7: ENDPOINT VERIFICATION[0m
+[0;35m════════════════════════════════════════════[0m
+[1;33m⚠️  No domain provided. Skipping verification.[0m

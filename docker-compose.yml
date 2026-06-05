@@ -920,9 +920,9 @@ services:
       dockerfile: docker/horizon-stream/Dockerfile
     container_name: triumph-horizon-stream
     <<: *common
-    mem_limit: 256m
-    mem_reservation: 128m
-    cpus: 0.25 # quantum-managed: T5 horizon-stream
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.30 # quantum-managed: T5 horizon-stream — raised 256m→384m to prevent OOM exit 137
     environment:
       <<: [ *db-env, *pi-env ]
       MARKET_POLL_MS: 5000

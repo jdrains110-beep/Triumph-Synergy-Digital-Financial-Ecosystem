@@ -140,7 +140,7 @@ chmod +x verify-saib-system.sh
   npm --version         # npm 8+
   git --version         # Latest
   wrangler --version    # Cloudflare CLI
-  vercel --version      # Vercel CLI (optional but recommended)
+  # Vercel CLI is no longer required; Cloudflare Pages + Workers are used for production
   ```
 
 ### PHASE 1: LOCAL BUILD

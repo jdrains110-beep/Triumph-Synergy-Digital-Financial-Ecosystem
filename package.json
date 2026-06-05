@@ -37,7 +37,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "next build",
     "start": "next start",
     "start-server-for-tests": "next dev",
     "lint": "npx ultracite@5.3.9 check",
@@ -102,9 +101,7 @@
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.89.0",
     "@types/pg": "^8.16.0",
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/blob": "^2.3.3",
-    "@vercel/functions": "^2.0.0",
+
     "ai": "6.0.170",
     "axios": "^1.15.2",
     "bcrypt-ts": "^8.0.0",
@@ -168,6 +165,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.13",
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@playwright/test": "^1.50.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/typography": "^0.5.15",

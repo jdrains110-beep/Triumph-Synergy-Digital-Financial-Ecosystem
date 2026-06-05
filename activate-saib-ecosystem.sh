@@ -386,15 +386,32 @@ deploy_production() {
         success "Environment configuration verified"
     fi
     
-    # Deploy to Vercel (Next.js)
-    log "Deploying Next.js to Vercel..."
-    if command -v vercel &> /dev/null; then
-        cd "$WORKSPACE_ROOT"
-        vercel deploy --prod --token="${VERCEL_TOKEN:-}" 2>&1 | tail -20 | tee -a "$LOG_FILE"
-        success "Vercel deployment initiated"
+    # Deploy to Cloudflare Pages / Next-on-Pages (preferred)
+    log "Deploying Next.js to Cloudflare Pages (preferred)..."
+    # If the project is using next-on-pages adapter, run the adapter build and publish.
+    if command -v wrangler &> /dev/null; then
+        if [[ -z "${CF_PAGES_PROJECT:-}" ]]; then
+            warning "CLOUDFLARE Pages project name not set. Please set CF_PAGES_PROJECT in your environment."
+            warning "Skipping automatic Pages publish. See PRODUCTION_DEPLOYMENT_READY.md for manual steps."
+        else
+            # If a next-on-pages build artifact exists, attempt to publish the static output.
+            if [[ -d "$WORKSPACE_ROOT/.vercel_build_output" || -d "$WORKSPACE_ROOT/out" || -d "$WORKSPACE_ROOT/.next" ]]; then
+                log "Attempting to publish static output to Cloudflare Pages..."
+                # Prefer using wrangler pages publish if static out directory exists
+                if [[ -d "$WORKSPACE_ROOT/out" ]]; then
+                    wrangler pages publish "$WORKSPACE_ROOT/out" --project-name "$CF_PAGES_PROJECT" 2>&1 | tail -20 | tee -a "$LOG_FILE" || true
+                    success "Cloudflare Pages publish attempted (out directory)"
+                else
+                    warning "No static 'out' directory found. Use next-on-pages adapter for SSR support."
+                    warning "See PRODUCTION_DEPLOYMENT_READY.md -> Cloudflare Pages instructions."
+                fi
+            else
+                warning "No build artifacts found. Run the adapter build as documented in PRODUCTION_DEPLOYMENT_READY.md."
+            fi
+        fi
     else
-        warning "Vercel CLI not found. Skipping Next.js deployment."
-        warning "Deploy manually: vercel deploy --prod"
+        warning "Wrangler CLI not found. Skipping Cloudflare Pages publish."
+        warning "Install Wrangler and run the Cloudflare Pages steps in PRODUCTION_DEPLOYMENT_READY.md"
     fi
     
     # Deploy to Cloudflare Workers

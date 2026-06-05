@@ -81,8 +81,11 @@ npx wrangler tail --env production
 # Build
 npm run build
 
-# Deploy to Vercel
-vercel deploy --prod
+# Deploy to Cloudflare Pages (preferred)
+# Build with next-on-pages adapter (if SSR needed) and publish to Pages
+# npm i -D @cloudflare/next-on-pages
+# npx @cloudflare/next-on-pages build
+# wrangler pages publish ./out --project-name=YOUR_CF_PAGES_PROJECT
 
 # OR run locally for testing
 npm start  # runs on http://localhost:3000
