@@ -24,6 +24,12 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="activation_${TIMESTAMP}.log"
 WORKSPACE_ROOT="/Users/jeremiahjoeldrains/Desktop/Triumph-Synergy-Digital-Financial-Ecosystem-main"
 
+# Initialize NVM if not already initialized
+if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+    source "$HOME/.nvm/nvm.sh"
+    nvm use 20 2>/dev/null || nvm install 20
+fi
+
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
