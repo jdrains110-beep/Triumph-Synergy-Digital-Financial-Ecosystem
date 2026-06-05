@@ -225,8 +225,12 @@ CREATE TABLE IF NOT EXISTS allodial_land_deeds (
     equity_value_usd TEXT NOT NULL,
     tenure_class TEXT NOT NULL CHECK (tenure_class IN ('ALLODIAL_FREE_HOLD')),
     verified_by_unit TEXT NOT NULL,
-    witness_a_status TEXT DEFAULT 'UNVERIFIED' CHECK (witness_a_status IN ('VALID', 'INVALID', 'UNVERIFIED')),
-    witness_b_status TEXT DEFAULT 'UNVERIFIED' CHECK (witness_b_status IN ('VALID', 'INVALID', 'UNVERIFIED')),
+    witness_a_status TEXT DEFAULT 'UNVERIFIED' CHECK (
+        witness_a_status IN ('VALID', 'INVALID', 'UNVERIFIED')
+    ),
+    witness_b_status TEXT DEFAULT 'UNVERIFIED' CHECK (
+        witness_b_status IN ('VALID', 'INVALID', 'UNVERIFIED')
+    ),
     consensus_achieved BOOLEAN DEFAULT FALSE,
     transferred_at TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -256,10 +260,15 @@ SELECT DATE(transferred_at) as deed_date,
     COUNT(DISTINCT owner_wallet) as unique_owners,
     COUNT(
         CASE
-            WHEN witness_a_status = 'VALID' AND witness_b_status = 'VALID' THEN 1
+            WHEN witness_a_status = 'VALID'
+            AND witness_b_status = 'VALID' THEN 1
         END
     ) as dual_witness_verified_count,
-    SUM(CAST(REPLACE(REPLACE(equity_value_usd, '$', ''), ',', '') AS NUMERIC)) as total_gcv_value_usd
+    SUM(
+        CAST(
+            REPLACE(REPLACE(equity_value_usd, '$', ''), ',', '') AS NUMERIC
+        )
+    ) as total_gcv_value_usd
 FROM allodial_land_deeds
 GROUP BY DATE(transferred_at)
 ORDER BY deed_date DESC;
