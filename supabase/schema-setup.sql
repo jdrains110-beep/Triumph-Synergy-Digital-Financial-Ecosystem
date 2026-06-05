@@ -51,22 +51,39 @@ CREATE TABLE IF NOT EXISTS ecosystem_balances (
 -- TABLE 3: GCV Transactions (Pi Network Global Consensus Value)
 -- ============================================================
 -- Tracks all Pi Network GCV transactions with trust graph validation
-
 CREATE TABLE IF NOT EXISTS gcv_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     transaction_id TEXT NOT NULL UNIQUE,
     saib_id TEXT NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('AUTHORIZED', 'QUEUED', 'SUCCESS', 'FAILED', 'PROCESSING')),
-    trust_score INTEGER CHECK (trust_score >= 0 AND trust_score <= 100),
+    status TEXT NOT NULL CHECK (
+        status IN (
+            'AUTHORIZED',
+            'QUEUED',
+            'SUCCESS',
+            'FAILED',
+            'PROCESSING'
+        )
+    ),
+    trust_score INTEGER CHECK (
+        trust_score >= 0
+        AND trust_score <= 100
+    ),
     pi_amount TEXT,
     gcv_settlement_usd TEXT,
     classification_tier TEXT,
-    execution_priority TEXT CHECK (execution_priority IN ('IMMEDIATE', 'HIGH', 'NORMAL', 'QUEUED', 'DEFERRED')),
+    execution_priority TEXT CHECK (
+        execution_priority IN (
+            'IMMEDIATE',
+            'HIGH',
+            'NORMAL',
+            'QUEUED',
+            'DEFERRED'
+        )
+    ),
     sovereign_clearance INTEGER DEFAULT 0,
     system_class_engaged TEXT,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     processed_at TIMESTAMP WITH TIME ZONE,
-    
     INDEX idx_transaction_id (transaction_id),
     INDEX idx_saib_id (saib_id),
     INDEX idx_status (status),
@@ -74,7 +91,6 @@ CREATE TABLE IF NOT EXISTS gcv_transactions (
     INDEX idx_created_at (created_at DESC),
     INDEX idx_sovereign_clearance (sovereign_clearance DESC)
 );
-
 -- ============================================================
 -- TABLE 3B: Reentrancy Audit History
 -- ============================================================
@@ -170,20 +186,83 @@ SELECT DATE(logged_at) as event_date,
 FROM saib_security_logs
 GROUP BY DATE(logged_at)
 ORDER BY event_date DESC;
-
 -- GCV Transaction Summary View
 CREATE OR REPLACE VIEW v_gcv_transaction_summary AS
-SELECT 
-    DATE(created_at) as transaction_date,
+SELECT DATE(created_at) as transaction_date,
     COUNT(*) as total_transactions,
-    COUNT(CASE WHEN status = 'AUTHORIZED' THEN 1 END) as authorized_count,
-    COUNT(CASE WHEN status = 'SUCCESS' THEN 1 END) as successful_count,
-    COUNT(CASE WHEN status = 'FAILED' THEN 1 END) as failed_count,
-    COUNT(CASE WHEN sovereign_clearance = 100 THEN 1 END) as founder_transactions
+    COUNT(
+        CASE
+            WHEN status = 'AUTHORIZED' THEN 1
+        END
+    ) as authorized_count,
+    COUNT(
+        CASE
+            WHEN status = 'SUCCESS' THEN 1
+        END
+    ) as successful_count,
+    COUNT(
+        CASE
+            WHEN status = 'FAILED' THEN 1
+        END
+    ) as failed_count,
+    COUNT(
+        CASE
+            WHEN sovereign_clearance = 100 THEN 1
+        END
+    ) as founder_transactions
 FROM gcv_transactions
 GROUP BY DATE(created_at)
 ORDER BY transaction_date DESC;
-
+-- ============================================================
+-- TABLE: Allodial Land Deeds
+-- ============================================================
+-- Stores sovereign, un-encumbered title deeds for tokenized .pi real estate
+CREATE TABLE IF NOT EXISTS allodial_land_deeds (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    certificate_id TEXT NOT NULL UNIQUE,
+    domain_platform TEXT NOT NULL,
+    owner_wallet TEXT NOT NULL,
+    equity_value_usd TEXT NOT NULL,
+    tenure_class TEXT NOT NULL CHECK (tenure_class IN ('ALLODIAL_FREE_HOLD')),
+    verified_by_unit TEXT NOT NULL,
+    witness_a_status TEXT DEFAULT 'UNVERIFIED' CHECK (witness_a_status IN ('VALID', 'INVALID', 'UNVERIFIED')),
+    witness_b_status TEXT DEFAULT 'UNVERIFIED' CHECK (witness_b_status IN ('VALID', 'INVALID', 'UNVERIFIED')),
+    consensus_achieved BOOLEAN DEFAULT FALSE,
+    transferred_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    -- Indexes for query performance
+    INDEX idx_certificate_id (certificate_id),
+    INDEX idx_owner_wallet (owner_wallet),
+    INDEX idx_domain_platform (domain_platform),
+    INDEX idx_transferred_at (transferred_at DESC),
+    INDEX idx_consensus (consensus_achieved)
+);
+-- Enable Row-Level Security
+ALTER TABLE allodial_land_deeds ENABLE ROW LEVEL SECURITY;
+-- RLS Policy: Allow service role full access for backend operations
+CREATE POLICY "allow_service_role_all" ON allodial_land_deeds USING (true) WITH CHECK (true);
+-- ============================================================
+-- VIEW: Allodial Deed Summary
+-- ============================================================
+-- Daily statistics on deed issuance and finalization
+CREATE OR REPLACE VIEW v_allodial_deed_summary AS
+SELECT DATE(transferred_at) as deed_date,
+    COUNT(*) as total_deeds_issued,
+    COUNT(
+        CASE
+            WHEN consensus_achieved THEN 1
+        END
+    ) as finalized_with_consensus,
+    COUNT(DISTINCT owner_wallet) as unique_owners,
+    COUNT(
+        CASE
+            WHEN witness_a_status = 'VALID' AND witness_b_status = 'VALID' THEN 1
+        END
+    ) as dual_witness_verified_count,
+    SUM(CAST(REPLACE(REPLACE(equity_value_usd, '$', ''), ',', '') AS NUMERIC)) as total_gcv_value_usd
+FROM allodial_land_deeds
+GROUP BY DATE(transferred_at)
+ORDER BY deed_date DESC;
 -- ============================================================
 -- SETUP INSTRUCTIONS
 -- ============================================================
