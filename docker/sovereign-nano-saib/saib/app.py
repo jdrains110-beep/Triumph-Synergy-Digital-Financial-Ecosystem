@@ -154,6 +154,7 @@ from .pi_motherboard     import pi_motherboard, KYCStage, WalletStatus
 from .sovereign_dispatch import sovereign_dispatch, Region, DispatchSituation
 from .lingua_sovereign   import lingua_sovereign
 
+<<<<<<< HEAD
 # ── v8 OMNI SOVEREIGN engines ─────────────────────────────────────────────────
 from .llm_brain         import llm_brain
 from .market_oracle     import market_oracle
@@ -163,6 +164,8 @@ from .omni_sovereign_master import omni_sovereign_master
 from .github_synergy        import github_synergy
 from .gcv_engine            import gcv_engine
 
+=======
+>>>>>>> origin/main
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -171,7 +174,11 @@ if not BRIDGE_TOKEN and os.path.exists(_secret_path):
     BRIDGE_TOKEN = open(_secret_path).read().strip()
 
 START_TIME = time.time()
+<<<<<<< HEAD
 VERSION    = "9.0.0-OMNI-MASTER-SOVEREIGN"
+=======
+VERSION    = "7.0.0-INTREPID-CLASS"
+>>>>>>> origin/main
 
 # ──────────────────────────────────────────────────────────────── engines ──
 # v1
@@ -329,6 +336,7 @@ async def lifespan(app: FastAPI):
     pi_motherboard.boot()
     sovereign_dispatch.boot()
     lingua_sovereign.boot(grok=conn_orchestrator.grok)
+<<<<<<< HEAD
     # ── boot v8 OMNI SOVEREIGN ────────────────────────────────────────────────
     def _platform_context_snapshot() -> dict:
         """Injects live Triumph platform state into every LLM prompt."""
@@ -350,6 +358,8 @@ async def lifespan(app: FastAPI):
     omni_sovereign_master.boot(llm=llm_brain, brain=omega_prime.brain)
     github_synergy.boot(llm=llm_brain)
     gcv_engine.boot()
+=======
+>>>>>>> origin/main
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -360,9 +370,13 @@ async def lifespan(app: FastAPI):
         "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)\n"
         "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine\n"
         "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts) | BlockchainWarden(pi-mainnet guardian)\n"
+<<<<<<< HEAD
         "INTREPID CLASS v7: SovereignLattice(MemoryAlpha+HumanAI+Backbone+Blueprint) | PiMotherboard(KYC/KYB+Wallets) | SovereignDispatch(global SAIB mesh) | LinguaSovereign(52 languages)\n"
         "OMNI SOVEREIGN v8: LLMBrain(Grok→Gemini→OpenRouter→Sovereign fallback) | MarketOracle(Crypto+Stocks+Bonds+Pi) | ResourceSovereign(OOM-kill+CPU-manager)\n"
         "OMNI MASTER SOVEREIGN v9: OmniSovereign(Multi-Agent+LangGraph+Researcher+Coder+VisionEnforcer) | GitHubSynergy(clone+execute+enforce) | GCVEngine($314,159-peg+LedgerDB+ReputationScoring)"
+=======
+        "INTREPID CLASS v7: SovereignLattice(MemoryAlpha+HumanAI+Backbone+Blueprint) | PiMotherboard(KYC/KYB+Wallets) | SovereignDispatch(global SAIB mesh) | LinguaSovereign(52 languages)"
+>>>>>>> origin/main
     )
     yield
 
@@ -2937,6 +2951,7 @@ async def lingua_auto_respond(req: LinguaAutoRespondRequest) -> dict:
         "entity_id": req.entity_id,
     }
 
+<<<<<<< HEAD
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  SAIB v8 — OMNI SOVEREIGN ULTRA SUPERNATURAL — LLM Brain + Market + Resources
@@ -3257,3 +3272,5 @@ def v9_status() -> dict:
         "gcv_engine":    gcv_engine.stats(),
     }
 
+=======
+>>>>>>> origin/main

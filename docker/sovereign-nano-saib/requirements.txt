@@ -20,6 +20,7 @@ PyJWT>=2.12.0
 stripe>=7.0.0
 # v6 Omega Prime — container introspection
 docker>=7.0.0
+<<<<<<< HEAD
 # v8 OMNI SOVEREIGN — LLM Brain (Gemini + OpenRouter free tiers)
 google-generativeai>=0.8.0
 # v8 OMNI SOVEREIGN — Market Oracle (stocks/bonds via Yahoo Finance)
@@ -34,3 +35,5 @@ langchain-core>=0.3.0
 gitpython>=3.1.0
 # v9 GCV Ledger — PostgreSQL async driver
 asyncpg>=0.29.0
+=======
+>>>>>>> origin/main

@@ -30,7 +30,10 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+<<<<<<< HEAD
 import os
+=======
+>>>>>>> origin/main
 import time
 import uuid
 from collections import deque
@@ -43,6 +46,7 @@ import aiohttp
 log = logging.getLogger("sovereign.blockchain_warden")
 
 # ── container constants ──────────────────────────────────────────────────────
+<<<<<<< HEAD
 _NODE_CONTAINER    = "triumph-pi-mainnet-node"
 _STELLAR_INFO_URL  = f"http://{_NODE_CONTAINER}:11626/info"
 _HORIZON_URL       = f"http://{_NODE_CONTAINER}:8000/"
@@ -92,6 +96,18 @@ _MEM_WARN_PCT        = 0.85  # alert at 85% memory
 _MEM_CRITICAL_PCT    = 0.95  # force-restart stellar-core at 95%
 _PEER_MIN            = 1     # at least 1 authenticated peer
 _SYNC_LAG_LEDGERS    = 512   # alert if node ledger lags ecosystem peers by this many
+=======
+_NODE_CONTAINER   = "triumph-pi-mainnet-node"
+_STELLAR_INFO_URL = f"http://{_NODE_CONTAINER}:11626/info"
+_HORIZON_URL      = f"http://{_NODE_CONTAINER}:8000/"
+_DOCKER_SOCK      = "/var/run/docker.sock"
+
+# ── thresholds ───────────────────────────────────────────────────────────────
+_LEDGER_STALL_S      = 300   # 5 min without ledger advance → stalled
+_MEM_WARN_PCT        = 0.85  # alert at 85% memory
+_MEM_CRITICAL_PCT    = 0.95  # force-restart stellar-core at 95%
+_PEER_MIN            = 1     # at least 1 authenticated peer
+>>>>>>> origin/main
 _NODE_POLL_INTERVAL  = 60    # seconds between stellar-core polls
 _DOCKER_POLL_INTERVAL = 30   # seconds between Docker stat polls
 
@@ -156,6 +172,7 @@ class BlockchainWarden:
         self._guardian: Any  = None
         self._brain:    Any  = None
         self._healer:   Any  = None
+<<<<<<< HEAD
         # Phase 0: container existence flag — False means the pi-mainnet-node
         # container is not deployed (opt-in profile). Skip all healing when False.
         self._node_deployed: bool = True
@@ -165,6 +182,8 @@ class BlockchainWarden:
         self._pg_tuning_applied: bool = False
         # Peer ledger cache for sync-lag detection {container: ledger_num}
         self._peer_ledgers: Dict[str, int] = {}
+=======
+>>>>>>> origin/main
 
     # ── boot ────────────────────────────────────────────────────────────────
 
@@ -180,9 +199,14 @@ class BlockchainWarden:
         self._running  = True
         asyncio.create_task(self._node_poll_loop())
         asyncio.create_task(self._docker_watch_loop())
+<<<<<<< HEAD
         asyncio.create_task(self._peer_sync_loop())
         log.info(
             "[BlockchainWarden] Online — watching %s | stellar-core + Horizon + Docker + PeerSync",
+=======
+        log.info(
+            "[BlockchainWarden] Online — watching %s | stellar-core + Horizon + Docker",
+>>>>>>> origin/main
             _NODE_CONTAINER,
         )
 
@@ -211,9 +235,12 @@ class BlockchainWarden:
             "cpu_pct":             round(self._stats.cpu_pct, 1),
             "heal_count":          self._heal_count,
             "last_heal_ts":        self._last_heal_ts or None,
+<<<<<<< HEAD
             "pg_tuning_applied":   self._pg_tuning_applied,
             "peer_ledgers":        self._peer_ledgers,
             "node_deployed":       self._node_deployed,
+=======
+>>>>>>> origin/main
             "recent_events":       [
                 {"id": e.id, "ts": e.ts, "kind": e.kind,
                  "detail": e.detail, "action": e.action_taken}
@@ -241,12 +268,17 @@ class BlockchainWarden:
 
     async def _node_poll_loop(self) -> None:
         """Poll stellar-core /info and Horizon every 60s."""
+<<<<<<< HEAD
         await asyncio.sleep(20)  # start after docker_watch confirms node existence
         while self._running:
             # Phase 0: skip entirely if target container is not deployed
             if not self._node_deployed:
                 await asyncio.sleep(_NODE_POLL_INTERVAL)
                 continue
+=======
+        await asyncio.sleep(15)  # let other engines boot first
+        while self._running:
+>>>>>>> origin/main
             try:
                 await self._check_stellar_core()
                 await self._check_horizon()
@@ -257,6 +289,7 @@ class BlockchainWarden:
 
     async def _docker_watch_loop(self) -> None:
         """Poll Docker container stats every 30s."""
+<<<<<<< HEAD
         await asyncio.sleep(10)  # run before _node_poll_loop so _node_deployed is set
         while self._running:
             # Phase 0: skip healing if target container is not deployed
@@ -267,10 +300,18 @@ class BlockchainWarden:
                 await self._fetch_docker_stats()
                 await self._check_oom()
                 await self._check_startup_hang()
+=======
+        await asyncio.sleep(20)
+        while self._running:
+            try:
+                await self._fetch_docker_stats()
+                await self._check_oom()
+>>>>>>> origin/main
             except Exception as exc:
                 log.debug("[BlockchainWarden] docker watch error: %s", exc)
             await asyncio.sleep(_DOCKER_POLL_INTERVAL)
 
+<<<<<<< HEAD
     async def _peer_sync_loop(self) -> None:
         """Check sync lag against internal ecosystem peers every 120s."""
         await asyncio.sleep(120)  # give the node time to start before comparing
@@ -284,6 +325,8 @@ class BlockchainWarden:
                 log.debug("[BlockchainWarden] peer sync check error: %s", exc)
             await asyncio.sleep(120)
 
+=======
+>>>>>>> origin/main
     # ── stellar-core polling ──────────────────────────────────────────────────
 
     async def _check_stellar_core(self) -> None:
@@ -362,6 +405,7 @@ class BlockchainWarden:
                     f"http://localhost/containers/{_NODE_CONTAINER}/json"
                 ) as resp:
                     if resp.status == 404:
+<<<<<<< HEAD
                         # Container does not exist — not deployed (opt-in profile)
                         self._node_deployed = False
                         self._stats.container_running = False
@@ -384,6 +428,16 @@ class BlockchainWarden:
                 elif not self._stats.container_running:
                     self._container_running_since = 0.0
 
+=======
+                        self._stats.container_running = False
+                        return
+                    info = await resp.json()
+
+                state = info.get("State", {})
+                self._stats.container_running = state.get("Running", False)
+                self._stats.oom_killed        = state.get("OOMKilled", False)
+
+>>>>>>> origin/main
                 if not self._stats.container_running:
                     return
 
@@ -444,6 +498,7 @@ class BlockchainWarden:
         """Determine overall node health and trigger healing if needed."""
         state = self._stellar.state.lower()
 
+<<<<<<< HEAD
         # ── boot grace window ─────────────────────────────────────────────
         # On Apple Silicon under QEMU emulation the AMD64 stellar-core image
         # takes 20-60+ min for initial bucket-apply. Suppress all heal actions
@@ -455,6 +510,8 @@ class BlockchainWarden:
             and (time.time() - self._container_running_since) < _BOOT_GRACE_S
         )
 
+=======
+>>>>>>> origin/main
         # ── container stopped → full container restart ────────────────────
         if not self._stats.container_running:
             if self._health != NodeHealth.CRITICAL:
@@ -468,6 +525,7 @@ class BlockchainWarden:
 
         # ── stellar-core unreachable (process crashed inside container) ──
         if state in ("unreachable", "") or state.startswith("error:"):
+<<<<<<< HEAD
             if in_boot_grace:
                 # Still booting under QEMU — log once at debug, do not heal
                 log.debug(
@@ -475,6 +533,8 @@ class BlockchainWarden:
                     time.time() - self._container_running_since, _BOOT_GRACE_S,
                 )
                 return
+=======
+>>>>>>> origin/main
             if self._health != NodeHealth.CRITICAL:
                 self._health = NodeHealth.CRITICAL
                 self._record(
@@ -492,8 +552,11 @@ class BlockchainWarden:
         if self._last_ledger_ts:
             stall_s = time.time() - self._last_ledger_ts
             if stall_s > _LEDGER_STALL_S:
+<<<<<<< HEAD
                 if in_boot_grace:
                     return  # initial sync — ledger may not advance yet
+=======
+>>>>>>> origin/main
                 if self._health != NodeHealth.CRITICAL:
                     self._health = NodeHealth.CRITICAL
                     self._record(
@@ -538,6 +601,7 @@ class BlockchainWarden:
                 severity=0.60,
             )
 
+<<<<<<< HEAD
         # ── postgres tuning (one-shot after node reaches healthy state) ───
         if (
             self._health in (NodeHealth.SYNCED, NodeHealth.CATCHING_UP)
@@ -545,6 +609,8 @@ class BlockchainWarden:
         ):
             asyncio.create_task(self._apply_postgres_tuning())
 
+=======
+>>>>>>> origin/main
         # ── classify health ───────────────────────────────────────────────
         if "synced" in state:
             self._health = NodeHealth.SYNCED
@@ -561,6 +627,7 @@ class BlockchainWarden:
 
     # ── healing actions ───────────────────────────────────────────────────────
 
+<<<<<<< HEAD
     async def _check_startup_hang(self) -> None:
         """
         Detect the postmaster.pid stale-lockfile startup hang:
@@ -724,6 +791,8 @@ class BlockchainWarden:
             log.debug("[BlockchainWarden] exec_in_container error: %s", repr(exc))
             return False
 
+=======
+>>>>>>> origin/main
     async def _heal_stellar_process(self) -> None:
         """Restart stellar-core process inside the container via supervisorctl."""
         # Debounce: don't heal more than once per 2 minutes
@@ -734,11 +803,15 @@ class BlockchainWarden:
         ok = await self._restart_stellar_process()
         self._last_heal_ts = time.time()
         self._heal_count  += 1
+<<<<<<< HEAD
         self._pg_tuning_applied = False  # re-apply tuning after stellar-core comes back
+=======
+>>>>>>> origin/main
 
         if ok:
             self._record("heal_ok", "stellar-core restarted via supervisorctl", "supervisorctl restart stellar-core")
         else:
+<<<<<<< HEAD
             self._record("heal_fail", "supervisorctl restart failed — trying full container restart + lockfile clear")
             # Clear stale lockfile then fall back to full container restart
             await self._clear_stale_lockfile()
@@ -746,6 +819,13 @@ class BlockchainWarden:
             self._container_running_since = 0.0
             if ok2:
                 self._record("heal_ok", "Container restarted as fallback (lockfile cleared)", "docker restart")
+=======
+            self._record("heal_fail", "supervisorctl restart failed — trying full container restart")
+            # Fall back to full container restart
+            ok2 = await self._restart_container()
+            if ok2:
+                self._record("heal_ok", "Container restarted as fallback", "docker restart")
+>>>>>>> origin/main
             else:
                 self._record("heal_fail", "Full container restart also failed — manual intervention needed")
                 await self._alert_guardian(
@@ -757,6 +837,7 @@ class BlockchainWarden:
         """Start/restart a stopped container."""
         if time.time() - self._last_heal_ts < 120:
             return
+<<<<<<< HEAD
         # Always clear the stale lockfile before restarting to prevent
         # the "Waiting for postgres to be available" startup hang.
         await self._clear_stale_lockfile()
@@ -765,6 +846,11 @@ class BlockchainWarden:
         self._heal_count  += 1
         self._container_running_since = 0.0  # reset startup-hang timer
         self._pg_tuning_applied = False       # re-apply tuning after restart
+=======
+        ok = await self._restart_container()
+        self._last_heal_ts = time.time()
+        self._heal_count  += 1
+>>>>>>> origin/main
         if ok:
             self._record("heal_ok", "Container restarted after stop", "docker restart")
         else:
@@ -775,6 +861,7 @@ class BlockchainWarden:
             )
 
     async def _restart_stellar_process(self) -> bool:
+<<<<<<< HEAD
         """Restart stellar-core process inside the container via supervisorctl."""
         ok = await self._exec_in_container(
             ["supervisorctl", "restart", "stellar-core"], timeout=30
@@ -784,6 +871,59 @@ class BlockchainWarden:
         else:
             log.warning("[BlockchainWarden] supervisorctl restart failed")
         return ok
+=======
+        """
+        Run `supervisorctl restart stellar-core` inside the node container
+        using the Docker exec API.
+        """
+        import os
+        if not os.path.exists(_DOCKER_SOCK):
+            log.warning("[BlockchainWarden] Docker socket not available")
+            return False
+        try:
+            conn = aiohttp.UnixConnector(path=_DOCKER_SOCK)
+            async with aiohttp.ClientSession(
+                connector=conn, timeout=aiohttp.ClientTimeout(total=30)
+            ) as sess:
+                # 1. Create exec instance
+                exec_payload = json.dumps({
+                    "AttachStdout": True,
+                    "AttachStderr": True,
+                    "Cmd": ["supervisorctl", "restart", "stellar-core"],
+                })
+                async with sess.post(
+                    f"http://localhost/containers/{_NODE_CONTAINER}/exec",
+                    data=exec_payload,
+                    headers={"Content-Type": "application/json"},
+                ) as resp:
+                    if resp.status != 201:
+                        log.warning("[BlockchainWarden] exec create failed: HTTP %d", resp.status)
+                        return False
+                    exec_data = await resp.json()
+                    exec_id = exec_data.get("Id", "")
+
+                if not exec_id:
+                    return False
+
+                # 2. Start exec instance
+                start_payload = json.dumps({"Detach": False, "Tty": False})
+                async with sess.post(
+                    f"http://localhost/exec/{exec_id}/start",
+                    data=start_payload,
+                    headers={"Content-Type": "application/json"},
+                ) as resp:
+                    # 200 = OK
+                    ok = resp.status in (200, 204)
+                    if ok:
+                        log.info("[BlockchainWarden] supervisorctl restart stellar-core → OK")
+                    else:
+                        log.warning("[BlockchainWarden] exec start failed: HTTP %d", resp.status)
+                    return ok
+
+        except Exception as exc:
+            log.error("[BlockchainWarden] _restart_stellar_process error: %s", repr(exc))
+            return False
+>>>>>>> origin/main
 
     async def _restart_container(self) -> bool:
         """Restart the full triumph-pi-mainnet-node container via Docker socket."""
@@ -795,18 +935,28 @@ class BlockchainWarden:
             async with aiohttp.ClientSession(
                 connector=conn, timeout=aiohttp.ClientTimeout(total=60)
             ) as sess:
+<<<<<<< HEAD
                 # t=20 → 20s graceful shutdown before SIGKILL (stellar-core needs time to flush)
                 async with sess.post(
                     f"http://localhost/containers/{_NODE_CONTAINER}/restart?t=20"
+=======
+                # t=15 → 15s graceful shutdown before SIGKILL
+                async with sess.post(
+                    f"http://localhost/containers/{_NODE_CONTAINER}/restart?t=15"
+>>>>>>> origin/main
                 ) as resp:
                     ok = resp.status in (204, 200)
                     if ok:
                         log.info("[BlockchainWarden] Container %s restarted", _NODE_CONTAINER)
+<<<<<<< HEAD
                         # Give supervisord time to start processes, then clear any
                         # stale lockfile that may have been left from prior run.
                         await asyncio.sleep(5)
                         await self._clear_stale_lockfile()
                         await asyncio.sleep(5)  # wait for postgres to start cleanly
+=======
+                        await asyncio.sleep(10)  # wait for supervisord to bring up stellar-core
+>>>>>>> origin/main
                     else:
                         log.warning("[BlockchainWarden] Container restart HTTP %d", resp.status)
                     return ok
