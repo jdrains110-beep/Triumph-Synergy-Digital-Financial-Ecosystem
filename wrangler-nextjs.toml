@@ -1,0 +1,42 @@
+name = "triumph-synergy-quantum"
+main = "./.next/server/index.js"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Account Configuration
+account_id = "YOUR_ACCOUNT_ID"  # Replace with your Cloudflare Account ID
+workers_dev = true
+
+# Environment: production
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# KV Namespace Bindings (SAIB vault and backup)
+[[kv_namespaces]]
+binding = "SAIB_BACKUP_KV"
+id = "YOUR_KV_NAMESPACE_ID"  # Replace with your KV namespace ID (from wrangler kv:namespace create SAIB_BACKUP_KV)
+preview_id = "YOUR_KV_PREVIEW_ID"
+
+# R2 Bucket Bindings (SAIB vault storage)
+[[r2_buckets]]
+binding = "SAIB_VAULT_R2"
+bucket_name = "saib-vault-production"
+preview_bucket_name = "saib-vault-preview"
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "./"
+
+# Triggers and routes (if using Cron)
+[[triggers.crons]]
+cron = "0 0 * * *"  # Daily at midnight UTC
+
+# Environment variables (set in Cloudflare Dashboard or here)
+[env.production.vars]
+SUPABASE_URL = "https://your-project.supabase.co"
+NEXT_PUBLIC_PI_RPC_MAINNET = "https://rpc.minepi.com"
+NEXT_PUBLIC_PI_RPC_TESTNET = "https://rpc.testnet.minepi.com"
+
+# Note: Secret environment variables (SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY)
+# should be set via: wrangler secret put SECRET_NAME --env production

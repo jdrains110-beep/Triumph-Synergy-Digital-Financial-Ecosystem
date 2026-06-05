@@ -262,7 +262,7 @@ ADMIN_TOKEN=your-admin-token-for-dashboard
 # Add to app directory if needed:
 # - app/dashboard/page.tsx (imports saib-dashboard component)
 
-vercel deploy --prod
+wrangler pages publish ./out --project-name=YOUR_CF_PAGES_PROJECT
 ```
 
 ---

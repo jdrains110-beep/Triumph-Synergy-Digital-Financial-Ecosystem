@@ -3,8 +3,8 @@
 ## ✅ Current Status: BUILD COMPLETE
 
 ```
-✅ Vercel CLI v54.9.1 installed
-✅ Wrangler v4.86.0 installed
+✅ Wrangler v4.86.0 installed (Cloudflare Pages + Workers)
+✅ Application build tooling ready (next-on-pages adapter supported)
 ✅ Application built successfully
 ✅ Database schema ready
 ✅ All code verified (0 errors)
@@ -108,50 +108,54 @@ Add:
 
 ---
 
-### Phase 3: Vercel Deployment (5 minutes)
+### Phase 3: Build & Deploy to Cloudflare Workers (10 minutes)
 
 **Status:** ✅ READY TO DEPLOY
 
+Deploy the full Next.js application (including dynamic routes, APIs, and SSR) directly to Cloudflare Workers via Wrangler. Workers support Node.js runtime, making it ideal for your complex business logic.
+
 ```bash
-# Step 1: Authenticate Vercel (one-time)
+# Step 1: Authenticate Wrangler (one-time)
 source ~/.nvm/nvm.sh
-vercel login
+wrangler login
 
-# Step 2: Deploy to production
-vercel deploy --prod
+# Step 2: Build the Next.js application
+npm run build
 
-# Follow prompts:
-# ? Set up and deploy ".../Triumph-Synergy..."? [Y/n] → Y
-# ? Which scope should we deploy to? → Select your account
-# ? Link to existing project? [y/N] → N (for new) or y (for existing)
-# ? What's your project's name? → triumph-synergy (or similar)
-# ? In which directory is your code located? → .
-# ? Want to override the settings? [y/N] → N
+# Step 3: Update wrangler.toml with your Cloudflare Account ID and Workers configuration
+# Edit wrangler.toml:
+# - account_id = "your-account-id"
+# - Set KV and R2 bindings with their IDs (created in Phase 2)
 
-# Step 3: Vercel will build and deploy
-# Output will show: https://your-domain.vercel.app
+# Step 4: Deploy to Cloudflare Workers (full app with SSR + APIs)
+wrangler deploy
 
-# Step 4: Set production domain
-# Go to Vercel dashboard → Project Settings → Domains
-# Add your custom domain (e.g., saib-quantum.yourcompany.com)
+# Output will show deployment URL:
+# Uploaded Triumph-Synergy to https://triumph-synergy-quantum.YOUR_SUBDOMAIN.workers.dev
+
+# Step 5: Test the deployment
+curl https://triumph-synergy-quantum.YOUR_SUBDOMAIN.workers.dev/api/health
+# Expected response: { "status": "operational" }
 ```
 
-**Environment Variables in Vercel:**
+**Environment Variables (Cloudflare Workers):**
 
 ```
-Go to: Vercel Dashboard → Project → Settings → Environment Variables
+Go to: Cloudflare Dashboard → Workers → Your App → Settings → Environment
 
 Add these (from .env.production):
-- NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-- NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+- SUPABASE_URL=https://your-project.supabase.co
+- SUPABASE_ANON_KEY=your-anon-key
 - SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 - NEXT_PUBLIC_PI_RPC_MAINNET=https://rpc.minepi.com
 - NEXT_PUBLIC_PI_RPC_TESTNET=https://rpc.testnet.minepi.com
+
+Environment variables are also available via wrangler.toml [env.production].vars section.
 ```
 
 ---
 
-### Phase 4: Cloudflare Workers Deployment (3 minutes)
+### Phase 4: SAIB Quantum Builder Worker Deployment (3 minutes)
 
 **Status:** ✅ READY TO DEPLOY
 
@@ -207,13 +211,12 @@ chmod +x verify-saib-system.sh
 **Total Time: ~30-45 minutes**
 
 ```
-1. Supabase Schema          5 min  (manual UI)
-2. Cloudflare Setup        10 min  (manual CLI + UI)
-3. Update Config Files      5 min  (text editor)
-4. Vercel Deploy            5 min  (automated)
-5. Wrangler Deploy          3 min  (automated)
-6. System Verification      5 min  (automated tests)
-7. DNS/Domain Setup         2 min  (if custom domain)
+1. Supabase Schema                 5 min  (manual UI)
+2. Cloudflare Setup (KV + R2)     10 min  (manual CLI + UI)
+3. Next.js Build + Wrangler Deploy 10 min  (automated)
+4. SAIB Quantum Builder Worker      3 min  (automated)
+5. System Verification             5 min  (automated tests)
+6. DNS/Custom Domain Setup          2 min  (if custom domain)
 ```
 
 ---
@@ -226,18 +229,22 @@ chmod +x verify-saib-system.sh
 #!/bin/bash
 set -e
 
-echo "🚀 Starting SAIB Optimus v4.3 Production Deployment"
+echo "🚀 Starting SAIB Optimus v4.3 Production Deployment (Cloudflare Workers)"
 echo ""
 
 # Activate Node.js environment
 source ~/.nvm/nvm.sh
 
-# Deploy to Vercel
-echo "📦 Deploying to Vercel..."
-vercel deploy --prod
+# Build Next.js
+echo "📦 Building Next.js application..."
+npm run build
 
-# Deploy to Cloudflare Workers
+# Deploy to Cloudflare Workers (full app with SSR + APIs)
 echo "⚙️  Deploying to Cloudflare Workers..."
+wrangler deploy
+
+# Deploy Quantum Builder Worker
+echo "⚙️  Deploying Quantum Builder Worker..."
 wrangler publish -c wrangler-quantum-builder.toml --env production
 
 # Run verification
@@ -246,6 +253,7 @@ echo "✅ Running system verification..."
 
 echo ""
 echo "🎉 Deployment Complete!"
+echo "Your app is now live on Cloudflare Workers!"
 ```
 
 Save as `deploy-production.sh` and run:

@@ -64,7 +64,7 @@ npx wrangler secret put DEX_0X_API_KEY --env production
 cat >> .env.local << 'EOF'
 SAIB_SECRET_TOKEN=your-secure-token
 SAIB_DECRYPTION_KEY=your-secure-token
-NEXTJS_APP_URL=https://your-next-app.vercel.app
+NEXTJS_APP_URL=https://your-next-app.pages.dev  # Replace with your Cloudflare Pages URL or custom domain
 EOF
 ```
 
@@ -82,8 +82,11 @@ npx wrangler publish --env production
 ### Step 5: Deploy Next.js Backend
 
 ```bash
-# If using Vercel:
-vercel deploy --prod
+# If using Cloudflare Pages / next-on-pages adapter:
+# Build with the adapter and publish the output directory
+# npm i -D @cloudflare/next-on-pages
+# npx @cloudflare/next-on-pages build
+# wrangler pages publish ./out --project-name=YOUR_CF_PAGES_PROJECT
 
 # Or your deployment method (GitHub Pages, Netlify, etc.)
 ```
