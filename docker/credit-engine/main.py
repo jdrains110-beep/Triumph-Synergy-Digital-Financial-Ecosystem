@@ -30,20 +30,62 @@ Port: 8091
 # License: PiOS
 
 
-import os, time, math, json, hashlib, threading, uuid, re
+import os, time, math, json, hashlib, threading, uuid, re, asyncio, functools
 from datetime import datetime, timezone, timedelta
 from typing import Any, Literal
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
+from fastapi.routing import APIRoute
 from pydantic import BaseModel, field_validator
 import redis as redis_lib
 import httpx
 from prometheus_client import (
     Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 )
+
+
+def _np_sanitize(obj):
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return _np_sanitize(obj.tolist())
+    if isinstance(obj, np.generic):
+        return obj.item()
+    if isinstance(obj, dict):
+        return {k: _np_sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_np_sanitize(x) for x in obj]
+    return obj
+
+
+class NumpyJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return super().render(_np_sanitize(content))
+
+
+class NumpySanitizingRoute(APIRoute):
+    def __init__(self, path, endpoint, **kwargs):
+        if endpoint is not None and callable(endpoint):
+            if asyncio.iscoroutinefunction(endpoint):
+                orig = endpoint
+                @functools.wraps(orig)
+                async def wrapped(*a, **kw):
+                    return _np_sanitize(await orig(*a, **kw))
+                endpoint = wrapped
+            else:
+                orig = endpoint
+                @functools.wraps(orig)
+                def wrapped(*a, **kw):
+                    return _np_sanitize(orig(*a, **kw))
+                endpoint = wrapped
+        super().__init__(path, endpoint, **kwargs)
 
 # ─── Configuration ─────────────────────────────────────────────────────────────
 
@@ -894,7 +936,9 @@ app = FastAPI(
     title="Triumph Synergy Credit Engine",
     description="Superior PiCredit Score™ system — digital-physical bridge connecting Pi Network to Equifax, Experian, TransUnion, FICO, VantageScore",
     version="1.0.0",
+    default_response_class=NumpyJSONResponse,
 )
+app.router.route_class = NumpySanitizingRoute
 
 _CORS_ORIGINS = [
     o.strip() for o in

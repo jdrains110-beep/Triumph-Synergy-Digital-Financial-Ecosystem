@@ -23,6 +23,12 @@ export default async function Page() {
             </div>
             <nav className="flex items-center gap-4">
               <Link
+                href="/testnet-hub"
+                className="rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 px-4 py-2 text-sm font-bold text-green-300 hover:bg-green-500/30 transition-colors animate-pulse"
+              >
+                🎮 Testnet Hub
+              </Link>
+              <Link
                 href="/real-estate"
                 className="rounded-lg bg-gradient-to-r from-yellow-500/20 to-purple-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-300 hover:bg-yellow-500/30 transition-colors"
               >

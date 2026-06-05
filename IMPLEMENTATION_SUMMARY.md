@@ -82,7 +82,7 @@
 
 ### 4. Image Security ✅
 - **Official Images Verified**:
-  - ✅ `pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1` (Pi Foundation)
+  - ✅ `pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0` (Pi Foundation)
   - ✅ `postgres:16-alpine` (PostgreSQL Global Dev Group)
   - ✅ `redis:7-alpine` (Salvatore Sanfilippo/Redis Labs)
   - ✅ `nginx:alpine` (Nginx Inc.)

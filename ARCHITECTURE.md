@@ -322,7 +322,7 @@ Triumph Synergy is a **sovereign, Pi-powered financial platform** built on Stell
 - **Key Agreement**: ECDH P-384 (for TLS), Curve25519 (for WireGuard)
 
 ### Image Security
-- **Pi Node**: Official `pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1`
+- **Pi Node**: Official `pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0`
   - Signed by Pi Foundation
   - Ubuntu 24.04 base (hardened, minimal)
   - Stellar-Core v24 + Horizon v24 (latest stable)

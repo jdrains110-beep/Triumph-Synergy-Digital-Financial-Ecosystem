@@ -20,3 +20,17 @@ PyJWT>=2.12.0
 stripe>=7.0.0
 # v6 Omega Prime — container introspection
 docker>=7.0.0
+# v8 OMNI SOVEREIGN — LLM Brain (Gemini + OpenRouter free tiers)
+google-generativeai>=0.8.0
+# v8 OMNI SOVEREIGN — Market Oracle (stocks/bonds via Yahoo Finance)
+yfinance>=0.2.51
+# v8 OMNI SOVEREIGN — Resource Sovereign host metrics
+psutil>=6.1.0
+# Note: GEMINI_API_KEY and OPENROUTER_API_KEY are injected at runtime via docker-compose env vars
+# v9 OMNI MASTER SOVEREIGN — Multi-agent orchestration (LangGraph)
+langgraph>=0.2.0
+langchain-core>=0.3.0
+# v9 GitHub Synergy Engine — repo clone + execute loop
+gitpython>=3.1.0
+# v9 GCV Ledger — PostgreSQL async driver
+asyncpg>=0.29.0

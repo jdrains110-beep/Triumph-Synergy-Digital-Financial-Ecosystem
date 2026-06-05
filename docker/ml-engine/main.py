@@ -59,6 +59,9 @@ def _np_sanitize(obj):
         return float(obj)
     if isinstance(obj, np.ndarray):
         return _np_sanitize(obj.tolist())
+    # catch-all: any remaining numpy scalar (np.bool, np.complex*, etc.)
+    if isinstance(obj, np.generic):
+        return obj.item()
     if isinstance(obj, dict):
         return {k: _np_sanitize(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple)):

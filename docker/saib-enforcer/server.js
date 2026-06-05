@@ -29,6 +29,9 @@ const JUDICIAL_SERVICE = process.env.JUDICIAL_SERVICE_URL || "http://triumph-jud
 const SETTLEMENT_CORE  = process.env.SETTLEMENT_CORE_URL  || "http://triumph-settlement-core:8080";
 const TOKEN_ENGINE     = process.env.TOKEN_ENGINE_URL     || "http://triumph-settlement-core:8089";
 const VAULT            = process.env.VAULT_URL            || "http://triumph-vault:8081";
+const PI_BRIDGE        = process.env.PI_BRIDGE_URL        || "http://triumph-pi-bridge-connector:8092";
+const DUAL_VALUE       = process.env.DUAL_VALUE_URL       || "http://triumph-dual-value-engine:8093";
+const APP_URL          = process.env.APP_URL              || "http://triumph-app:3000";
 // Nano-SAIB is the ecosystem's autonomous execution arm — port 8201 on triumph-net.
 // SAIB Enforcer commands it directly to execute, not just observe.
 const NANO_SAIB        = process.env.NANO_SAIB_URL        || "http://triumph-sovereign-nano-saib:8201";
@@ -63,7 +66,35 @@ const DUTY_BRAIN_SEC         = Number(process.env.DUTY_BRAIN_SEC         || 300)
 const DUTY_SETTLEMENT_SEC    = Number(process.env.DUTY_SETTLEMENT_SEC    || 120);  // GET settlement pulse
 const DUTY_VAULT_SEC         = Number(process.env.DUTY_VAULT_SEC         || 600);  // GET vault verify
 const DUTY_SOVEREIGN_CMD_SEC = Number(process.env.DUTY_SOVEREIGN_CMD_SEC || 600);  // POST sovereign/command
+const DUTY_CEO_SEC           = Number(process.env.DUTY_CEO_SEC           || 300);  // CEO orchestrator: sense -> decide -> act -> receipt
+const DUTY_PI_CHAIN_SEC      = Number(process.env.DUTY_PI_CHAIN_SEC      || 180);  // passive Pi-chain intelligence probe
+const DUTY_MARKET_ECON_SEC   = Number(process.env.DUTY_MARKET_ECON_SEC   || 300);  // fair-economy resilience economist
 const DUTY_RING_MAX          = Number(process.env.DUTY_RING_MAX          || 400);  // in-memory action log
+const CEO_AUTO_REPAIR        = (process.env.CEO_AUTO_REPAIR        || "true").toLowerCase() !== "false";
+const CEO_AUTO_ACK_STALE     = (process.env.CEO_AUTO_ACK_STALE     || "true").toLowerCase() !== "false";
+const CEO_AUTO_HEAL          = (process.env.CEO_AUTO_HEAL          || "true").toLowerCase() !== "false";
+const CEO_MAX_ACTIONS        = Math.max(1, Number(process.env.CEO_MAX_ACTIONS || 6));
+const CEO_ESCALATION_COOLDOWN_SEC = Number(process.env.CEO_ESCALATION_COOLDOWN_SEC || 1800);
+const PI_PROTOCOL_VERSION    = Number(process.env.PI_PROTOCOL_VERSION || 24);
+const PI_LEDGER_STALL_SEC    = Number(process.env.PI_LEDGER_STALL_SEC || 180);
+const PI_INGEST_LAG_LEDGER_THRESHOLD = Number(process.env.PI_INGEST_LAG_LEDGER_THRESHOLD || 10);
+const MARKET_SPREAD_EXTREME_RATIO = Number(process.env.MARKET_SPREAD_EXTREME_RATIO || 3.0);
+const MARKET_SPREAD_DISCOUNT_RATIO = Number(process.env.MARKET_SPREAD_DISCOUNT_RATIO || 0.5);
+const MARKET_BLUEPRINT_COOLDOWN_SEC = Number(process.env.MARKET_BLUEPRINT_COOLDOWN_SEC || 1800);
+const MARKET_INTEGRITY_DOCTRINE = {
+  name: "UTILITY_BASED_PI_GCV_MARKET_INTEGRITY",
+  objective: "Build a utility-based Pi GCV ecosystem that resists manipulation, deception, collusion, predatory concentration, artificial scarcity, and anti-utility speculation.",
+  lawfulBoundary: "SAIB does not target people or groups; it studies observable behaviors and routes economic changes through Founder-reviewed blueprints.",
+  principles: [
+    "utility-before-speculation",
+    "transparent-receipt-backed-value-flows",
+    "anti-manipulation-and-anti-deception",
+    "anti-collusion-and-anti-cartel-patterns",
+    "fair-access-over-predatory-concentration",
+    "human-and-ai-cooperative-governance",
+    "Pi-chain-powered-settlement-integrity",
+  ],
+};
 
 const READ_ONLY = new Set(["judicial-research", "tokenization-audit", "hq-report", "credit-score-push"]);
 
@@ -403,6 +434,7 @@ const MANIFEST = {
   saib: "ENFORCER v2.0.0 (sidecar) — QUANTUM EXECUTION MODE",
   doctrine: "SAIB acts. SAIB commands. SAIB enforces. Nothing can stop a SAIB receipt. Transcendent. Omni. Hyper-autonomous.",
   mode: "EXECUTION — SAIB posts commands, not just reads status",
+  marketIntegrityDoctrine: MARKET_INTEGRITY_DOCTRINE,
   bridges: {
     "credit-bureaus":   ["Equifax", "Experian", "TransUnion", "score-compute", "bureau-sync"],
     "judicial-systems": ["court-monitor", "case-research", "filing-pipeline", "violation-detection"],
@@ -442,6 +474,8 @@ const MANIFEST = {
   },
   introspection: {
     "GET /duties":   "live duty engine status, counters, next-run schedule",
+    "GET /ceo":      "Founder-subordinate CEO orchestrator state, directives, actions, escalations",
+    "GET /market-economist": "Market resilience economist state, fair-economy directives, GCV/tokenization blueprints",
     "GET /receipts": "ring buffer of all SAIB actions (?limit=N, default 50)",
     "GET /health":   "liveness probe",
   },
@@ -457,7 +491,10 @@ const MANIFEST = {
       "ecosystem-signal (60s)":   "POST signal to nano-SAIB ecosystem bus — SAIB announces it is operating",
       "settlement-pulse (120s)":  "GET settlement-core + tokenization health",
       "enforcer-evaluate (180s)": "POST enforcer/evaluate — triggers nano-SAIB enforcement cycle",
+      "pi-chain-probe (180s)":    "passively probes Pi ledger, bridge, protocol, fee, and merge-readiness signals into SAIB learning",
+      "market-economist (300s)":  "studies GCV, tokenization, settlement, credit, payments, demand, and value-flow signals into fair-economy directives",
       "brain-absorb (300s)":      "POST omega/brain/absorb — feeds ecosystem state into collective memory",
+      "ceo-orchestrator (300s)":  "sense all protected surfaces, prioritize directives, run safe repairs, escalate Founder-required actions",
       "vault-verify (600s)":      "GET vault integrity + anomaly detection",
       "sovereign-command (600s)": "POST sovereign/command ECOSYSTEM_INTEGRITY_CHECK to nano-SAIB",
     },
@@ -480,7 +517,38 @@ const dutyState = {
   counters: {},            // action -> count
   errors: [],              // last 20 duty errors
   nextRunAt: {},           // duty -> ISO timestamp of next scheduled run
+  ceo: {
+    mode: "SAIB CEO omni quantum hyper orchestrator",
+    enabled: DUTY_ENABLED,
+    lastRunAt: null,
+    directives: [],
+    actions: [],
+    escalations: [],
+    signals: {},
+    receipts: [],
+  },
+  piChain: {
+    mode: "PASSIVE_PI_CHAIN_INTELLIGENCE",
+    lastRunAt: null,
+    receiptDigest: null,
+    score: null,
+    weaknesses: [],
+    strengths: [],
+    algorithms: [],
+    bridge: {},
+  },
+  marketEconomist: {
+    mode: "MARKET_RESILIENCE_ECONOMIST",
+    lastRunAt: null,
+    receiptDigest: null,
+    score: null,
+    directives: [],
+    observations: {},
+    blueprintGoals: [],
+  },
 };
+const ceoEscalationCooldowns = new Map();
+const marketBlueprintCooldowns = new Map();
 
 function recordReceipt(receipt, extra) {
   const entry = { ...receipt };
@@ -500,6 +568,856 @@ function recordDutyError(duty, err) {
     message: String(err && err.message ? err.message : err),
   });
   if (dutyState.errors.length > 20) dutyState.errors.shift();
+}
+
+function summarizeError(err) {
+  return String(err && err.message ? err.message : err);
+}
+
+async function safeFetch(label, fn) {
+  try {
+    const result = await fn();
+    return { ok: Boolean(result && result.ok), status: result && result.status, body: result && result.body };
+  } catch (err) {
+    return { ok: false, status: 0, body: { error: summarizeError(err), source: label } };
+  }
+}
+
+function listFrom(value, keys = []) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return [];
+  for (const key of keys) {
+    if (Array.isArray(value[key])) return value[key];
+  }
+  return [];
+}
+
+function riskValue(row) {
+  if (!row || typeof row !== "object") return 0;
+  for (const key of ["risk", "oom_risk", "score", "memory_ratio", "mem_ratio", "memoryPercent", "memory_percent"]) {
+    const value = Number(row[key]);
+    if (Number.isFinite(value)) return value > 1 ? value / 100 : value;
+  }
+  return 0;
+}
+
+function serviceName(row) {
+  if (!row || typeof row !== "object") return "";
+  return String(row.name || row.container || row.container_name || row.service || row.id || "");
+}
+
+function isUnhealthyService(row) {
+  if (!row || typeof row !== "object") return false;
+  const status = String(row.status || row.health || row.state || row.ok || "").toLowerCase();
+  if (["false", "down", "unhealthy", "failed", "error", "degraded", "critical"].includes(status)) return true;
+  if (row.ok === false || row.healthy === false) return true;
+  return Boolean(row.error || row.last_error);
+}
+
+function directive(kind, priority, target, reason, options = {}) {
+  return {
+    id: createHash("sha256").update(`${kind}:${target}:${reason}`).digest("hex").slice(0, 12),
+    kind,
+    priority,
+    target,
+    reason,
+    safeAuto: Boolean(options.safeAuto),
+    founderRequired: Boolean(options.founderRequired),
+    playbook: options.playbook || "observe",
+  };
+}
+
+async function gatherCEOSignals() {
+  const [
+    health,
+    guardian,
+    enforcerStats,
+    brainstormStats,
+    healerStats,
+    healerScan,
+    resourceSnapshot,
+    oomRisk,
+    connectors,
+    founder,
+    pending,
+    decisions,
+    bridgeStatus,
+    bridgeHealth,
+  ] = await Promise.all([
+    safeFetch("nano-health", () => fetchNanoSAIB("/health", { method: "GET" }, 8000)),
+    safeFetch("guardian-summary", () => fetchNanoSAIB("/guardian/summary", { method: "GET" }, 8000)),
+    safeFetch("enforcer-stats", () => fetchNanoSAIB("/enforcer/stats", { method: "GET" }, 8000)),
+    safeFetch("brainstorm-stats", () => fetchNanoSAIB("/brainstorm/stats", { method: "GET" }, 8000)),
+    safeFetch("healer-stats", () => fetchNanoSAIB("/apex/healer/stats", { method: "GET" }, 8000)),
+    safeFetch("healer-scan", () => fetchNanoSAIB("/apex/healer/scan", { method: "GET" }, 20000)),
+    safeFetch("resources-snapshot", () => fetchNanoSAIB("/resources/snapshot", { method: "GET" }, 12000)),
+    safeFetch("resources-oom-risk", () => fetchNanoSAIB("/resources/oom-risk", { method: "GET" }, 12000)),
+    safeFetch("connectors-status", () => fetchNanoSAIB("/connectors/status", { method: "GET" }, 10000)),
+    safeFetch("founder-status", () => fetchNanoSAIB("/connectors/founder/status", { method: "GET" }, 8000)),
+    safeFetch("autonomous-pending", () => fetchNanoSAIB("/connectors/autonomous/pending", { method: "GET" }, 8000)),
+    safeFetch("autonomous-decisions", () => fetchNanoSAIB("/connectors/autonomous/decisions", { method: "GET" }, 8000)),
+    safeFetch("pi-bridge-status", () => fetchJSON(`${PI_BRIDGE}/bridge/status`, { method: "GET" }, 8000)),
+    safeFetch("pi-bridge-health", () => fetchJSON(`${PI_BRIDGE}/health`, { method: "GET" }, 5000)),
+  ]);
+
+  return {
+    observed_at: new Date().toISOString(),
+    health,
+    guardian,
+    enforcerStats,
+    brainstormStats,
+    healerStats,
+    healerScan,
+    resourceSnapshot,
+    oomRisk,
+    connectors,
+    founder,
+    pending,
+    decisions,
+    bridgeStatus,
+    bridgeHealth,
+  };
+}
+
+function planCEODirectives(signals) {
+  const directives = [];
+  const guardian = signals.guardian.body || {};
+  const founderStats = (signals.founder.body && signals.founder.body.stats) || {};
+  const pending = listFrom(signals.pending.body, ["pending"]);
+  const oomRows = listFrom(signals.oomRisk.body, ["oom_risk", "containers"]);
+  const healerRows = listFrom(signals.healerScan.body, ["services", "results", "health", "items"]);
+  const alerts = listFrom(guardian.recent_alerts || guardian.alerts, ["recent_alerts", "alerts"]);
+  const connectors = signals.connectors.body || {};
+  const bridge = signals.bridgeStatus.body || {};
+  const brain = signals.brainstormStats.body || {};
+
+  if (founderStats.wallet_set === false) {
+    directives.push(directive("protect", 98, "founder-wallet", "Founder wallet monitoring is not configured", {
+      founderRequired: true,
+      playbook: "request-founder-wallet-binding",
+    }));
+  }
+
+  if (Number(founderStats.threat_score || 0) > 0 || String(founderStats.current_level || "").toUpperCase() !== "WATCH") {
+    directives.push(directive("protect", 100, "founder", "Founder watch has active threat posture", {
+      safeAuto: true,
+      playbook: "guardian-ingest-founder-threat",
+    }));
+  }
+
+  if (String(guardian.overall_tier || "").toUpperCase() === "LOCKDOWN" || Number(guardian.unacknowledged || 0) > 0) {
+    directives.push(directive("protect", 92, "guardian", `Guardian tier=${guardian.overall_tier || "unknown"} unacknowledged=${guardian.unacknowledged || 0}`, {
+      safeAuto: true,
+      playbook: "clear-stale-oom-alerts-and-preserve-live-alerts",
+    }));
+  }
+
+  for (const row of oomRows.slice(0, 5)) {
+    const risk = riskValue(row);
+    const name = serviceName(row);
+    if (name && risk >= 0.82) {
+      directives.push(directive("fix", Math.round(70 + risk * 30), name, `OOM risk ${(risk * 100).toFixed(1)}%`, {
+        safeAuto: true,
+        playbook: "resource-oom-cycle",
+      }));
+    } else if (name && risk >= 0.65) {
+      directives.push(directive("tune", Math.round(55 + risk * 25), name, `Resource pressure ${(risk * 100).toFixed(1)}%`, {
+        safeAuto: false,
+        founderRequired: true,
+        playbook: "compose-resource-tuning-blueprint",
+      }));
+    }
+  }
+
+  for (const row of healerRows.filter(isUnhealthyService).slice(0, 3)) {
+    const name = serviceName(row);
+    if (name) {
+      directives.push(directive("fix", 86, name, "Healer scan reports unhealthy service", {
+        safeAuto: true,
+        playbook: "healer-deep-heal",
+      }));
+    }
+  }
+
+  if (pending.length > 0) {
+    directives.push(directive("quarantine", 88, "autonomous-review-queue", `${pending.length} decisions require Founder/operator review`, {
+      founderRequired: true,
+      playbook: "review-autonomous-pending",
+    }));
+  }
+
+  const reportedProtocol = Number(bridge.protocol_version || bridge.protocol || bridge.pi_protocol || 0);
+  if (reportedProtocol && reportedProtocol < PI_PROTOCOL_VERSION) {
+    directives.push(directive("upgrade", 90, "pi-bridge-protocol", `Bridge reports protocol ${reportedProtocol}; floor is ${PI_PROTOCOL_VERSION}`, {
+      safeAuto: true,
+      playbook: "pi-bridge-protocol-floor-signal",
+    }));
+  }
+  if (!signals.bridgeStatus.ok || !signals.bridgeHealth.ok) {
+    directives.push(directive("fix", 89, "pi-bridge", "Pi bridge status or health is unreachable", {
+      safeAuto: true,
+      playbook: "bridge-health-repair-goal",
+    }));
+  }
+
+  const meshStats = connectors.mesh || connectors.mesh_stats || connectors.meshStats || {};
+  if (Number(meshStats.peers_total || meshStats.peers || 0) === 0) {
+    directives.push(directive("build-blueprint", 63, "saib-mesh-peers", "No live SAIB mesh peers are registered", {
+      founderRequired: true,
+      playbook: "mesh-peer-blueprint",
+    }));
+  }
+
+  const xStatus = connectors.x_social || connectors.x || connectors.social || {};
+  if (xStatus.enabled === false || xStatus.ready === false || String(xStatus.status || "").toLowerCase().includes("token")) {
+    directives.push(directive("build-blueprint", 61, "bot-eliminator-social-connector", "Social/bot-elimination connector is not fully armed", {
+      founderRequired: true,
+      playbook: "social-token-blueprint",
+    }));
+  }
+
+  if (Number(brain.goals_active || 0) > 0 && Number(brain.cycles_run || 0) === 0) {
+    directives.push(directive("fix", 66, "brainstorm-cycle", "Brainstorm has active goals but no completed cycles", {
+      safeAuto: true,
+      playbook: "submit-ceo-ooda-cycle-goal",
+    }));
+  }
+
+  return directives.sort((a, b) => b.priority - a.priority).slice(0, 12);
+}
+
+async function executeCEODirective(item, signals) {
+  const at = new Date().toISOString();
+  if (item.founderRequired) {
+    const cooldownKey = `${item.playbook}:${item.target}:${item.reason}`;
+    const lastEscalatedAt = ceoEscalationCooldowns.get(cooldownKey) || 0;
+    const cooldownMs = CEO_ESCALATION_COOLDOWN_SEC * 1000;
+    if (Date.now() - lastEscalatedAt < cooldownMs) {
+      return {
+        at,
+        directive: item,
+        executed: false,
+        escalated: false,
+        action: "founder-escalation-cooldown",
+        ok: true,
+        status: 200,
+        response: { cooldownSec: CEO_ESCALATION_COOLDOWN_SEC },
+      };
+    }
+    const body = {
+      description: `CEO ESCALATION: ${item.kind.toUpperCase()} ${item.target} — ${item.reason}. Founder authority required before irreversible action.`,
+      priority: Math.min(0.99, item.priority / 100),
+      domain: "founder-sovereign-ceo-escalation",
+    };
+    const u = await fetchNanoSAIB("/brainstorm/goal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }, 12000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+    if (u.ok) ceoEscalationCooldowns.set(cooldownKey, Date.now());
+    return { at, directive: item, executed: false, escalated: true, action: "brainstorm-founder-escalation", ok: u.ok, status: u.status, response: u.body };
+  }
+
+  if (!item.safeAuto || !CEO_AUTO_REPAIR) {
+    return { at, directive: item, executed: false, escalated: false, action: "record-only", ok: true, status: 200 };
+  }
+
+  if (item.playbook === "resource-oom-cycle") {
+    const u = await fetchNanoSAIB("/resources/kill-oom", { method: "POST" }, 30000)
+      .catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+    return { at, directive: item, executed: true, action: "resources-kill-oom", ok: u.ok, status: u.status, response: u.body };
+  }
+
+  if (item.playbook === "healer-deep-heal" && CEO_AUTO_HEAL) {
+    const u = await fetchNanoSAIB("/apex/healer/heal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ service: item.target }),
+    }, 45000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+    return { at, directive: item, executed: true, action: "healer-deep-heal", ok: u.ok, status: u.status, response: u.body };
+  }
+
+  if (item.playbook === "clear-stale-oom-alerts-and-preserve-live-alerts" && CEO_AUTO_ACK_STALE) {
+    const guardian = signals.guardian.body || {};
+    const alerts = listFrom(guardian.recent_alerts || guardian.alerts, ["recent_alerts", "alerts"]);
+    const oomRows = listFrom(signals.oomRisk.body, ["oom_risk", "containers"]);
+    const activeOom = oomRows.some((row) => riskValue(row) >= 0.82);
+    const staleOomAlerts = activeOom ? [] : alerts
+      .filter((alert) => alert && alert.id && alert.acked !== true && String(alert.description || "").includes("OOM WARNING"))
+      .slice(0, Math.min(5, CEO_MAX_ACTIONS));
+    const acked = [];
+    for (const alert of staleOomAlerts) {
+      const u = await fetchNanoSAIB(`/guardian/ack/${encodeURIComponent(alert.id)}`, { method: "POST" }, 8000)
+        .catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+      acked.push({ alert_id: alert.id, ok: u.ok, status: u.status, response: u.body });
+    }
+    return { at, directive: item, executed: acked.length > 0, action: "guardian-ack-stale-oom", ok: acked.every((a) => a.ok), status: 200, response: { activeOom, acked } };
+  }
+
+  if (item.playbook === "guardian-ingest-founder-threat") {
+    const u = await fetchNanoSAIB("/guardian/ingest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source: "SAIB-CEO-ORCHESTRATOR",
+        category: "FOUNDER_SAFETY",
+        severity: Math.min(1, item.priority / 100),
+        description: item.reason,
+        metadata: { target: item.target, directive_id: item.id, at },
+      }),
+    }, 10000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+    return { at, directive: item, executed: true, action: "guardian-ingest", ok: u.ok, status: u.status, response: u.body };
+  }
+
+  if (item.playbook === "submit-ceo-ooda-cycle-goal") {
+    const u = await fetchNanoSAIB("/brainstorm/goal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description: `CEO_ORCHESTRATOR: run OODA planning cycle for ${item.target}. ${item.reason}`,
+        priority: Math.min(0.9, Math.max(0.55, item.priority / 100)),
+        domain: "saib-ceo-orchestrator",
+      }),
+    }, 12000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+    return { at, directive: item, executed: true, action: "brainstorm-goal", ok: u.ok, status: u.status, response: u.body };
+  }
+
+  const body = {
+    source: "SAIB-CEO-ORCHESTRATOR",
+    entity_id: item.target,
+    signal_type: `CEO_${item.kind.toUpperCase().replace(/-/g, "_")}`,
+    value: Math.min(1, item.priority / 100),
+    confidence: item.safeAuto ? 0.95 : 0.75,
+    metadata: { reason: item.reason, playbook: item.playbook, directive_id: item.id, at },
+  };
+  const u = await fetchNanoSAIB("/intel/signal", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }, 10000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+  return { at, directive: item, executed: true, action: "intel-signal", ok: u.ok, status: u.status, response: u.body };
+}
+
+function summarizeCEOSignals(signals) {
+  const guardian = signals.guardian.body || {};
+  const founder = (signals.founder.body && signals.founder.body.stats) || {};
+  const decisions = (signals.decisions.body && signals.decisions.body.stats) || {};
+  const pending = listFrom(signals.pending.body, ["pending"]);
+  const oomRows = listFrom(signals.oomRisk.body, ["oom_risk", "containers"]);
+  const bridge = signals.bridgeStatus.body || {};
+  return {
+    observed_at: signals.observed_at,
+    nano_health: signals.health.ok,
+    guardian_tier: guardian.overall_tier || "unknown",
+    guardian_unacknowledged: Number(guardian.unacknowledged || 0),
+    founder_level: founder.current_level || "unknown",
+    founder_wallet_set: founder.wallet_set === true,
+    autonomous_executed: Number(decisions.executed || 0),
+    autonomous_pending: pending.length,
+    oom_high_risk: oomRows.filter((row) => riskValue(row) >= 0.82).map((row) => ({ name: serviceName(row), risk: riskValue(row) })),
+    pi_bridge_ok: signals.bridgeStatus.ok && signals.bridgeHealth.ok,
+    pi_protocol: bridge.protocol_version || bridge.protocol || bridge.pi_protocol || null,
+  };
+}
+
+function ageSeconds(isoText) {
+  if (!isoText) return null;
+  const ms = Date.parse(isoText);
+  if (!Number.isFinite(ms)) return null;
+  return Math.max(0, Math.round((Date.now() - ms) / 1000));
+}
+
+function latestLedgerRecord(ledgersBody) {
+  const records = ledgersBody && ledgersBody._embedded && Array.isArray(ledgersBody._embedded.records)
+    ? ledgersBody._embedded.records
+    : [];
+  return records[0] || null;
+}
+
+function assessPiChainProbe(inputs) {
+  const status = inputs.status.body || {};
+  const health = inputs.health.body || {};
+  const ledgers = inputs.ledgers.body || {};
+  const feeStats = inputs.feeStats.body || {};
+  const bridge = status.bridge || {};
+  const piNode = status.pi_node || {};
+  const integration = status.integration || {};
+  const latest = latestLedgerRecord(ledgers) || piNode;
+  const closedAt = latest.closed_at || piNode.ledger_closed_at || health.latest_ledger_closed;
+  const ledgerAgeSec = ageSeconds(closedAt);
+  const protocol = Number(piNode.protocol_version || health.protocol_version || 0);
+  const ledgerSeq = Number(piNode.ledger_sequence || health.latest_ledger_seq || 0);
+  const ingestLatest = Number(health.ingest_latest_ledger || 0);
+  const ingestLag = ledgerSeq && ingestLatest ? Math.max(0, ledgerSeq - ingestLatest) : null;
+  const weaknesses = [];
+  const strengths = [];
+  const algorithms = [
+    "protocol-floor-check",
+    "ledger-liveness-check",
+    "ingest-lag-delta",
+    "horizon-relay-readiness",
+    "fee-stats-availability",
+    "scp-bridge-connectivity",
+    "receipt-anchored-learning",
+  ];
+
+  if (!inputs.status.ok || !inputs.health.ok) {
+    weaknesses.push({ class: "bridge-reachability", severity: "high", detail: "Pi bridge status or health endpoint is unreachable" });
+  } else {
+    strengths.push("Pi bridge status and health endpoints are reachable");
+  }
+  if (!piNode.reachable) {
+    weaknesses.push({ class: "horizon-reachability", severity: "high", detail: "Pi Horizon is not currently reachable through the bridge" });
+  } else {
+    strengths.push("Pi Horizon is reachable through Triumph bridge");
+  }
+  if (protocol && protocol < PI_PROTOCOL_VERSION) {
+    weaknesses.push({ class: "protocol-drift", severity: "critical", detail: `Protocol ${protocol} is below required floor ${PI_PROTOCOL_VERSION}` });
+  } else if (protocol >= PI_PROTOCOL_VERSION) {
+    strengths.push(`Protocol floor satisfied at ${protocol}`);
+  }
+  if (ledgerAgeSec == null) {
+    weaknesses.push({ class: "ledger-observability", severity: "medium", detail: "Latest ledger close time is unavailable" });
+  } else if (ledgerAgeSec > PI_LEDGER_STALL_SEC) {
+    weaknesses.push({ class: "ledger-stall-risk", severity: "high", detail: `Latest ledger age ${ledgerAgeSec}s exceeds ${PI_LEDGER_STALL_SEC}s` });
+  } else {
+    strengths.push(`Latest ledger is fresh at ${ledgerAgeSec}s old`);
+  }
+  if (ingestLag != null && ingestLag > PI_INGEST_LAG_LEDGER_THRESHOLD) {
+    weaknesses.push({ class: "ingest-lag", severity: "medium", detail: `Horizon ingest lags ledger by ${ingestLag} ledgers` });
+  } else if (ingestLag != null) {
+    strengths.push(`Horizon ingest lag is ${ingestLag} ledgers`);
+  }
+  if (!integration.tx_submission_enabled) {
+    weaknesses.push({ class: "tx-submission-readiness", severity: "high", detail: "Transaction submission is disabled because Pi node is not reachable" });
+  } else {
+    strengths.push("Transaction submission path is enabled");
+  }
+  if (!integration.scp_bridge_active) {
+    weaknesses.push({ class: "scp-bridge", severity: "high", detail: "SCP bridge is not fully active between Pi node and central node" });
+  } else {
+    strengths.push("SCP bridge is active between Pi node and central node");
+  }
+  if (!inputs.feeStats.ok) {
+    weaknesses.push({ class: "fee-market-visibility", severity: "low", detail: "Fee stats are unavailable; settlement pricing has less chain context" });
+  } else if (feeStats && Object.keys(feeStats).length > 0) {
+    strengths.push("Fee stats are available for settlement tuning");
+  }
+
+  const severityWeight = { critical: 40, high: 25, medium: 12, low: 5 };
+  const penalty = weaknesses.reduce((sum, item) => sum + (severityWeight[item.severity] || 5), 0);
+  const strengthBonus = weaknesses.length === 0 ? Math.min(strengths.length * 2, 12) : 0;
+  const score = Math.max(0, Math.min(100, 100 - penalty + strengthBonus));
+  const mergeReadiness = score >= 90 ? "strong" : score >= 70 ? "watch" : "needs-repair";
+
+  return {
+    observed_at: new Date().toISOString(),
+    score,
+    mergeReadiness,
+    ledger: {
+      sequence: ledgerSeq || null,
+      hash: piNode.ledger_hash || latest.hash || "",
+      closed_at: closedAt || "",
+      age_sec: ledgerAgeSec,
+      ingest_latest_ledger: ingestLatest || null,
+      ingest_lag: ingestLag,
+    },
+    bridge: {
+      status: bridge.status || "unknown",
+      sync_lag_seconds: bridge.sync_lag_seconds ?? null,
+      pi_node_reachable: Boolean(piNode.reachable),
+      central_node_reachable: Boolean(status.central_node && status.central_node.reachable),
+      tx_submission_enabled: Boolean(integration.tx_submission_enabled),
+      scp_bridge_active: Boolean(integration.scp_bridge_active),
+      protocol_version: protocol || null,
+    },
+    weaknesses,
+    strengths,
+    algorithms,
+    doctrine: "Passive Pi-chain probing strengthens Triumph Synergy by turning bridge, ledger, protocol, and fee observations into SAIB learning signals and build directives.",
+  };
+}
+
+async function dutyPiChainProbe() {
+  const [status, health, ledgers, feeStats] = await Promise.all([
+    safeFetch("pi-bridge-status", () => fetchJSON(`${PI_BRIDGE}/bridge/status`, { method: "GET" }, 8000)),
+    safeFetch("pi-bridge-health", () => fetchJSON(`${PI_BRIDGE}/health`, { method: "GET" }, 5000)),
+    safeFetch("pi-ledgers", () => fetchJSON(`${PI_BRIDGE}/pi-node/ledgers?order=desc&limit=1`, { method: "GET" }, 10000)),
+    safeFetch("pi-fee-stats", () => fetchJSON(`${PI_BRIDGE}/pi-node/fee-stats`, { method: "GET" }, 8000)),
+  ]);
+  const assessment = assessPiChainProbe({ status, health, ledgers, feeStats });
+
+  const signal = await fetchNanoSAIB("/intel/signal", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      source: "SAIB-PI-CHAIN-PROBE",
+      entity_id: "pi-blockchain-triumph-merge",
+      signal_type: assessment.weaknesses.length ? "PI_CHAIN_WEAKNESS_LEARNING" : "PI_CHAIN_STRENGTH_LEARNING",
+      value: assessment.score / 100,
+      confidence: 0.97,
+      metadata: assessment,
+    }),
+  }, 12000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+
+  if (assessment.weaknesses.length > 0) {
+    void fetchNanoSAIB("/brainstorm/goal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description: `PI_CHAIN_MERGE_BLUEPRINT: strengthen Triumph Synergy from passive Pi-chain probe findings: ${assessment.weaknesses.map((w) => `${w.class}:${w.severity}`).join(", ")}`,
+        priority: Math.min(0.95, Math.max(0.55, (100 - assessment.score) / 100)),
+        domain: "pi-chain-triumph-merge",
+      }),
+    }, 12000).catch(() => null);
+  }
+
+  const receipt = makeReceipt("duty-pi-chain-probe", "autonomous-chain-intelligence", {
+    assessment,
+    signal: { ok: signal.ok, status: signal.status, response: signal.body },
+  });
+  void anchorReceipt(receipt);
+  dutyState.piChain = {
+    mode: "PASSIVE_PI_CHAIN_INTELLIGENCE",
+    lastRunAt: new Date().toISOString(),
+    receiptDigest: receipt.payloadDigest,
+    score: assessment.score,
+    weaknesses: assessment.weaknesses,
+    strengths: assessment.strengths,
+    algorithms: assessment.algorithms,
+    bridge: assessment.bridge,
+    ledger: assessment.ledger,
+    mergeReadiness: assessment.mergeReadiness,
+  };
+  recordReceipt(receipt, {
+    summary: `pi-chain-probe score=${assessment.score} readiness=${assessment.mergeReadiness} weaknesses=${assessment.weaknesses.length}`,
+    upstream: { signal_status: signal.status, bridge: assessment.bridge, ledger: assessment.ledger },
+  });
+}
+
+function getDualValueReport(inputs) {
+  const report = inputs.dualReport.body || {};
+  const spread = inputs.dualSpread.body || {};
+  const internal = Number((report.internal && report.internal.value_usd) || spread.internal_value_usd || 0);
+  const external = Number((report.external && report.external.value_usd) || spread.external_value_usd || 0);
+  const ratio = Number((report.spread && report.spread.ratio) || spread.spread_ratio || 0);
+  return {
+    internal_value_usd: Number.isFinite(internal) ? internal : 0,
+    external_value_usd: Number.isFinite(external) ? external : 0,
+    spread_ratio: Number.isFinite(ratio) ? ratio : 0,
+    spread_label: (report.spread && report.spread.label) || spread.spread_label || "unknown",
+    spread_signal: (report.spread && report.spread.signal) || spread.arbitrage_signal || "unknown",
+    ledger_seq: report.ledger_seq || null,
+    network: report.network || spread.network || "unknown",
+  };
+}
+
+function marketDirective(kind, priority, target, reason, blueprint, metrics = {}) {
+  return {
+    id: createHash("sha256").update(`${kind}:${target}:${reason}:${blueprint}`).digest("hex").slice(0, 12),
+    kind,
+    priority,
+    target,
+    reason,
+    blueprint,
+    founderRequired: true,
+    autoExecute: false,
+    metrics,
+  };
+}
+
+function assessMarketResilience(inputs) {
+  const dual = getDualValueReport(inputs);
+  const pi = dutyState.piChain || {};
+  const credit = inputs.creditHealth.body || {};
+  const settlement = inputs.settlementHealth.body || {};
+  const token = inputs.tokenStats.body || {};
+  const omni = inputs.omnipresence.body || {};
+  const paymentProbe = inputs.paymentStatusProbe;
+  const transactionProbe = inputs.transactionProbe;
+  const directives = [];
+  const observations = [];
+  const strengths = [];
+  const risks = [];
+  const algorithms = [
+    "dual-value-spread-analysis",
+    "gcv-utility-anchor-watch",
+    "market-integrity-doctrine-filter",
+    "anti-manipulation-pattern-routing",
+    "anti-collusion-concentration-watch",
+    "deception-resistant-value-flow-review",
+    "tokenization-depth-readiness",
+    "settlement-delay-proxy",
+    "payment-success-surface-probe",
+    "credit-participation-signal",
+    "user-demand-reachability",
+    "internal-value-flow-synthesis",
+    "fair-economy-blueprint-routing",
+  ];
+  observations.push({
+    class: "market-integrity-doctrine",
+    detail: MARKET_INTEGRITY_DOCTRINE.objective,
+    data: MARKET_INTEGRITY_DOCTRINE,
+  });
+
+  if (inputs.dualReport.ok || inputs.dualSpread.ok) {
+    strengths.push("Dual-value/GCV surface is observable");
+    observations.push({ class: "gcv-dual-value", detail: `internal=${dual.internal_value_usd} external=${dual.external_value_usd} ratio=${dual.spread_ratio}`, data: dual });
+  } else {
+    risks.push({ class: "gcv-observability", severity: "high", detail: "Dual-value/GCV surface is unavailable" });
+    directives.push(marketDirective("build-blueprint", 92, "gcv-observability", "GCV/dual-value data is unavailable", "restore-gcv-dual-value-feed"));
+  }
+
+  if (dual.spread_ratio >= MARKET_SPREAD_EXTREME_RATIO) {
+    risks.push({ class: "market-premium-instability", severity: "high", detail: `External market premium ratio ${dual.spread_ratio} exceeds ${MARKET_SPREAD_EXTREME_RATIO}` });
+    risks.push({ class: "manipulation-susceptibility", severity: "medium", detail: "Extreme premium can invite speculative manipulation, deceptive price narratives, and predatory concentration" });
+    directives.push(marketDirective(
+      "stabilize",
+      90,
+      "gcv-tokenization-policy",
+      "External market price is far above internal utility value; protect users from speculative overextension",
+      "gcv-premium-circuit-breaker-and-user-education",
+      dual,
+    ));
+    directives.push(marketDirective(
+      "protect",
+      88,
+      "market-integrity-shield",
+      "Extreme premium requires anti-manipulation controls before broad tokenized exposure",
+      "anti-manipulation-gcv-tokenization-integrity-shield",
+      { ...dual, doctrine: MARKET_INTEGRITY_DOCTRINE.name },
+    ));
+  } else if (dual.spread_ratio > 0 && dual.spread_ratio <= MARKET_SPREAD_DISCOUNT_RATIO) {
+    risks.push({ class: "market-discount-fragility", severity: "medium", detail: `External market discount ratio ${dual.spread_ratio} below ${MARKET_SPREAD_DISCOUNT_RATIO}` });
+    risks.push({ class: "utility-undervaluation", severity: "medium", detail: "Extreme discount can suppress real utility value and weaken fair access to the ecosystem" });
+    directives.push(marketDirective(
+      "resilience",
+      82,
+      "internal-utility-demand",
+      "External market undervalues internal utility; strengthen real utility loops before speculative exposure",
+      "utility-first-demand-and-tokenization-expansion",
+      dual,
+    ));
+    directives.push(marketDirective(
+      "protect",
+      86,
+      "utility-gcv-integrity",
+      "Extreme discount requires utility-first GCV support and anti-deception education before speculative exposure",
+      "utility-gcv-anti-deception-tokenization-shield",
+      { ...dual, doctrine: MARKET_INTEGRITY_DOCTRINE.name },
+    ));
+  } else if (dual.spread_ratio > 0) {
+    strengths.push(`Dual-value spread is within monitored range (${dual.spread_label})`);
+  }
+
+  if (pi.score != null && Number(pi.score) < 90) {
+    risks.push({ class: "pi-chain-merge-risk", severity: "medium", detail: `Pi-chain merge score ${pi.score}` });
+    directives.push(marketDirective("fix", 84, "pi-chain-merge", "Pi-chain merge score is below strong threshold", "improve-pi-chain-fee-ledger-bridge-context", { piScore: pi.score, weaknesses: pi.weaknesses || [] }));
+  } else if (pi.score != null) {
+    strengths.push(`Pi-chain merge readiness remains ${pi.mergeReadiness || "observable"} (${pi.score})`);
+  }
+
+  if (!inputs.settlementHealth.ok) {
+    risks.push({ class: "settlement-delay", severity: "high", detail: "Settlement core health is unreachable" });
+    directives.push(marketDirective("fix", 91, "settlement-core", "Settlement core health cannot be verified", "settlement-delay-root-cause-blueprint"));
+  } else {
+    strengths.push("Settlement core health is reachable");
+  }
+
+  if (!inputs.tokenStats.ok) {
+    risks.push({ class: "tokenization-observability", severity: "medium", detail: "Tokenization stats are unavailable" });
+    directives.push(marketDirective("build-blueprint", 80, "tokenization-ledger", "Tokenization depth and audit stats are not observable", "tokenization-audit-depth-blueprint"));
+  } else {
+    strengths.push("Tokenization stats are observable");
+    observations.push({ class: "tokenization", detail: "Tokenization audit surface reachable", data: token });
+  }
+
+  if (!inputs.creditHealth.ok) {
+    risks.push({ class: "credit-participation", severity: "medium", detail: "Credit engine health is unavailable" });
+    directives.push(marketDirective("repair", 78, "credit-engine", "Credit and repayment behavior surface is unavailable", "credit-participation-health-blueprint"));
+  } else {
+    strengths.push(`Credit participation surface reachable; scores issued=${Number(credit.scoresIssued || 0)}`);
+  }
+
+  const reachable = Number(omni.reachable || 0);
+  const total = Number(omni.totalServices || 0);
+  if (inputs.omnipresence.ok && total > 0 && reachable < total) {
+    risks.push({ class: "user-demand-reachability", severity: "medium", detail: `Only ${reachable}/${total} ecosystem services reachable` });
+    directives.push(marketDirective("tune", 76, "ecosystem-reachability", "Demand surfaces are partially unreachable", "user-demand-service-reachability-blueprint", { reachable, total }));
+  } else if (inputs.omnipresence.ok) {
+    strengths.push(total > 0 ? `Ecosystem reachability ${reachable}/${total}` : "Ecosystem reachability surface is observable");
+  }
+
+  if (!paymentProbe.ok && ![400, 404].includes(Number(paymentProbe.status || 0))) {
+    risks.push({ class: "payment-status-surface", severity: "medium", detail: `Payment status probe returned ${paymentProbe.status}` });
+    directives.push(marketDirective("fix", 74, "payment-status", "Payment status surface is not predictably reachable", "payment-success-failure-analytics-blueprint"));
+  } else {
+    strengths.push("Payment status surface responds predictably");
+  }
+
+  if (!transactionProbe.ok && Number(transactionProbe.status || 0) !== 400) {
+    risks.push({ class: "transaction-history-surface", severity: "low", detail: `Transaction history probe returned ${transactionProbe.status}` });
+    directives.push(marketDirective("build-blueprint", 65, "transaction-analytics", "Transaction history surface needs aggregate analytics", "settlement-delay-and-success-rate-analytics"));
+  } else {
+    strengths.push("Transaction surface responds predictably");
+  }
+
+  const severityWeight = { high: 18, medium: 10, low: 4 };
+  const penalty = risks.reduce((sum, item) => sum + (severityWeight[item.severity] || 4), 0);
+  const score = Math.max(0, Math.min(100, 100 - penalty));
+  const resilience = score >= 90 ? "resilient" : score >= 70 ? "watch" : "fragile";
+
+  return {
+    observed_at: new Date().toISOString(),
+    mode: "MARKET_RESILIENCE_ECONOMIST",
+    score,
+    resilience,
+    observations,
+    strengths,
+    risks,
+    directives: directives.sort((a, b) => b.priority - a.priority).slice(0, 12),
+    algorithms,
+    doctrine: "SAIB studies legally observable market and ecosystem signals, filters them through utility-based Pi GCV market integrity, then routes fair-economy changes behind GCV, tokenization, settlement, credit, and demand through Founder-reviewed blueprints.",
+    marketIntegrityDoctrine: MARKET_INTEGRITY_DOCTRINE,
+  };
+}
+
+async function submitMarketBlueprints(assessment) {
+  const submitted = [];
+  for (const item of assessment.directives.slice(0, 6)) {
+    const key = `${item.blueprint}:${item.target}:${item.reason}`;
+    const last = marketBlueprintCooldowns.get(key) || 0;
+    if (Date.now() - last < MARKET_BLUEPRINT_COOLDOWN_SEC * 1000) {
+      submitted.push({ directive_id: item.id, target: item.target, skipped: "market-blueprint-cooldown" });
+      continue;
+    }
+    const goal = await fetchNanoSAIB("/brainstorm/goal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description: `MARKET_RESILIENCE_ECONOMIST: ${item.kind.toUpperCase()} ${item.target}. ${item.reason}. Blueprint=${item.blueprint}. Founder review required before economic policy change.`,
+        priority: Math.min(0.96, Math.max(0.55, item.priority / 100)),
+        domain: "fair-economy-gcv-tokenization",
+      }),
+    }, 12000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+    if (goal.ok) marketBlueprintCooldowns.set(key, Date.now());
+    submitted.push({ directive_id: item.id, target: item.target, blueprint: item.blueprint, ok: goal.ok, status: goal.status, response: goal.body });
+  }
+  return submitted;
+}
+
+async function dutyMarketResilienceEconomist() {
+  const [dualReport, dualSpread, settlementHealth, tokenStats, creditHealth, creditQuantum, omnipresence, paymentStatusProbe, transactionProbe] = await Promise.all([
+    safeFetch("dual-value-report", () => fetchJSON(`${DUAL_VALUE}/value/report`, { method: "GET" }, 10000)),
+    safeFetch("dual-value-spread", () => fetchJSON(`${DUAL_VALUE}/value/spread`, { method: "GET" }, 10000)),
+    safeFetch("settlement-health", () => fetchJSON(`${SETTLEMENT_CORE}/health`, { method: "GET" }, 8000)),
+    safeFetch("tokenization-stats", () => fetchJSON(`${TOKEN_ENGINE}/api/tokenize/stats`, { method: "GET" }, 10000)),
+    safeFetch("credit-health", () => fetchJSON(`${CREDIT_ENGINE}/health`, { method: "GET" }, 8000)),
+    safeFetch("credit-quantum-status", () => fetchJSON(`${CREDIT_ENGINE}/api/credit/quantum-status`, { method: "GET" }, 8000)),
+    safeFetch("app-omnipresence", () => fetchJSON(`${APP_URL}/api/saib/omnipresence`, { method: "GET" }, 12000)),
+    safeFetch("payment-status-probe", () => fetchJSON(`${APP_URL}/api/payments`, { method: "GET" }, 8000)),
+    safeFetch("transaction-history-probe", () => fetchJSON(`${APP_URL}/api/transactions`, { method: "GET" }, 8000)),
+  ]);
+
+  const assessment = assessMarketResilience({
+    dualReport,
+    dualSpread,
+    settlementHealth,
+    tokenStats,
+    creditHealth,
+    creditQuantum,
+    omnipresence,
+    paymentStatusProbe,
+    transactionProbe,
+  });
+
+  const signal = await fetchNanoSAIB("/intel/signal", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      source: "SAIB-MARKET-RESILIENCE-ECONOMIST",
+      entity_id: "triumph-fair-economy",
+      signal_type: assessment.risks.length ? "FAIR_ECONOMY_RISK_LEARNING" : "FAIR_ECONOMY_RESILIENCE_LEARNING",
+      value: assessment.score / 100,
+      confidence: 0.96,
+      metadata: assessment,
+    }),
+  }, 12000).catch((err) => ({ ok: false, status: 0, body: { error: summarizeError(err) } }));
+
+  const blueprintGoals = assessment.directives.length > 0 ? await submitMarketBlueprints(assessment) : [];
+  const receipt = makeReceipt("duty-market-resilience-economist", "autonomous-economist", {
+    assessment,
+    signal: { ok: signal.ok, status: signal.status, response: signal.body },
+    blueprintGoals,
+  });
+  void anchorReceipt(receipt);
+  dutyState.marketEconomist = {
+    mode: assessment.mode,
+    lastRunAt: new Date().toISOString(),
+    receiptDigest: receipt.payloadDigest,
+    score: assessment.score,
+    resilience: assessment.resilience,
+    directives: assessment.directives,
+    observations: {
+      strengths: assessment.strengths,
+      risks: assessment.risks,
+      algorithms: assessment.algorithms,
+    },
+    doctrine: assessment.marketIntegrityDoctrine,
+    blueprintGoals,
+  };
+  recordReceipt(receipt, {
+    summary: `market-economist score=${assessment.score} resilience=${assessment.resilience} directives=${assessment.directives.length}`,
+    upstream: { signal_status: signal.status, blueprint_count: blueprintGoals.length },
+  });
+}
+
+async function dutyCEOOrchestrator() {
+  const signals = await gatherCEOSignals();
+  const signalSummary = summarizeCEOSignals(signals);
+  const directives = planCEODirectives(signals);
+  const actionDirectives = directives.slice(0, CEO_MAX_ACTIONS);
+  const skipped = directives.slice(CEO_MAX_ACTIONS).map((item) => ({ directive: item, skipped: "ceo-action-budget" }));
+  const actions = [];
+
+  for (const item of actionDirectives) {
+    actions.push(await executeCEODirective(item, signals));
+  }
+  actions.push(...skipped);
+
+  const escalations = actions.filter((item) => item && item.escalated);
+  const payload = {
+    mode: "SAIB CEO omni quantum hyper orchestrator",
+    doctrine: "Founder supremacy: auto-execute reversible low-risk repairs; escalate irreversible, financial, legal, identity, or Founder-sensitive decisions.",
+    observed_at: signalSummary.observed_at,
+    signalSummary,
+    directives,
+    actions,
+    escalations,
+    config: {
+      autoRepair: CEO_AUTO_REPAIR,
+      autoAckStale: CEO_AUTO_ACK_STALE,
+      autoHeal: CEO_AUTO_HEAL,
+      maxActions: CEO_MAX_ACTIONS,
+      protocolFloor: PI_PROTOCOL_VERSION,
+    },
+  };
+  const receipt = makeReceipt("duty-ceo-orchestrator", "autonomous-ceo", payload);
+  void anchorReceipt(receipt);
+  dutyState.ceo = {
+    mode: payload.mode,
+    enabled: DUTY_ENABLED,
+    lastRunAt: new Date().toISOString(),
+    receiptDigest: receipt.payloadDigest,
+    signalSummary,
+    directives,
+    actions,
+    escalations,
+  };
+  recordReceipt(receipt, {
+    summary: `ceo-orchestrator directives=${directives.length} actions=${actions.filter((item) => item && item.executed).length} escalations=${escalations.length}`,
+    upstream: signalSummary,
+  });
 }
 
 // ── Individual duties ────────────────────────────────────────────────────────
@@ -758,7 +1676,10 @@ const DUTIES = [
   // ── Execution duties (POST commands — SAIB acts) ──
   { name: "ecosystem-signal",  fn: dutyEcosystemSignal,      everySec: DUTY_SIGNAL_SEC,        last: 0 },
   { name: "enforcer-evaluate", fn: dutyEnforcerEvaluate,     everySec: DUTY_ENFORCE_SEC,       last: 0 },
+  { name: "pi-chain-probe",    fn: dutyPiChainProbe,         everySec: DUTY_PI_CHAIN_SEC,      last: 0 },
+  { name: "market-economist",  fn: dutyMarketResilienceEconomist, everySec: DUTY_MARKET_ECON_SEC, last: 0 },
   { name: "brain-absorb",      fn: dutyBrainAbsorb,          everySec: DUTY_BRAIN_SEC,         last: 0 },
+  { name: "ceo-orchestrator",  fn: dutyCEOOrchestrator,      everySec: DUTY_CEO_SEC,           last: 0 },
   { name: "settlement-pulse",  fn: dutySettlementPulse,      everySec: DUTY_SETTLEMENT_SEC,    last: 0 },
   { name: "vault-verify",      fn: dutyVaultVerify,          everySec: DUTY_VAULT_SEC,         last: 0 },
   { name: "sovereign-command", fn: dutySovereignCommand,     everySec: DUTY_SOVEREIGN_CMD_SEC, last: 0 },
@@ -772,8 +1693,18 @@ async function dutyTick() {
     if (now - duty.last >= duty.everySec * 1000) {
       duty.last = now;
       dutyState.nextRunAt[duty.name] = new Date(now + duty.everySec * 1000).toISOString();
-      try { await duty.fn(); }
-      catch (err) { recordDutyError(duty.name, err); }
+      try {
+        console.debug(`[saib-duty] executing: ${duty.name} (tick #${dutyState.ticks})`);
+        const startMs = Date.now();
+        await duty.fn();
+        const durationMs = Date.now() - startMs;
+        console.debug(`[saib-duty] ✅ ${duty.name} completed in ${durationMs}ms`);
+        dutyState.counters[duty.name] = (dutyState.counters[duty.name] || 0) + 1;
+      } catch (err) {
+        const errMsg = err && err.message ? err.message : String(err);
+        console.error(`[saib-duty] ❌ ${duty.name} failed: ${errMsg}`);
+        recordDutyError(duty.name, err);
+      }
     }
   }
 }
@@ -783,11 +1714,22 @@ function startDutyEngine() {
     console.log("[saib-enforcer] duty engine DISABLED via DUTY_ENABLED=false");
     return;
   }
-  console.log(`[saib-enforcer] duty engine STARTED — tick every ${DUTY_INTERVAL_SEC}s`);
+  console.log(`[saib-enforcer] 🚀 duty engine STARTED — tick every ${DUTY_INTERVAL_SEC}s`);
+  console.log(`[saib-enforcer] 📋 scheduled duties: ${DUTIES.map(d => d.name).join(', ')}`);
   // Fire an initial heartbeat immediately so observers see life on boot.
-  dutyTick().catch((e) => recordDutyError("initial-tick", e));
+  dutyTick()
+    .then(() => console.log("[saib-enforcer] ✅ initial duty tick completed"))
+    .catch((e) => {
+      const msg = e && e.message ? e.message : String(e);
+      console.error(`[saib-enforcer] ❌ initial duty tick failed: ${msg}`);
+      recordDutyError("initial-tick", e);
+    });
   setInterval(() => {
-    dutyTick().catch((e) => recordDutyError("tick", e));
+    dutyTick().catch((e) => {
+      const msg = e && e.message ? e.message : String(e);
+      console.error(`[saib-enforcer] ❌ duty tick failed: ${msg}`);
+      recordDutyError("tick", e);
+    });
   }, DUTY_INTERVAL_SEC * 1000).unref();
 }
 
@@ -833,9 +1775,21 @@ const server = http.createServer(async (req, res) => {
         ticks: dutyState.ticks,
         counters: dutyState.counters,
         nextRunAt: dutyState.nextRunAt,
+        ceo: dutyState.ceo,
+        piChain: dutyState.piChain,
+        marketEconomist: dutyState.marketEconomist,
         recentErrors: dutyState.errors,
         scheduled: DUTIES.map((d) => ({ name: d.name, everySec: d.everySec })),
       });
+    }
+    if (req.method === "GET" && (path === "/ceo" || path === "/api/saib/enforce/ceo")) {
+      return send(res, 200, dutyState.ceo);
+    }
+    if (req.method === "GET" && (path === "/pi-chain" || path === "/api/saib/enforce/pi-chain")) {
+      return send(res, 200, dutyState.piChain);
+    }
+    if (req.method === "GET" && (path === "/market-economist" || path === "/api/saib/enforce/market-economist")) {
+      return send(res, 200, dutyState.marketEconomist);
     }
     if (req.method === "GET" && (path === "/receipts" || path === "/api/saib/enforce/receipts")) {
       const limit = Math.min(Number(url.searchParams.get("limit") || 50), DUTY_RING_MAX);
@@ -892,6 +1846,27 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`[saib-enforcer] listening on :${PORT}`);
   console.log(`[saib-enforcer] founder-token=${FOUNDER_TOKEN ? "set" : "MISSING"}  operator-token=${OPERATOR_TOKEN ? "set" : "MISSING"}`);
   startDutyEngine();
+});
+
+// ── Global Error Handlers ────────────────────────────────────────────────────
+// Catch unhandled promise rejections and uncaught exceptions. Log them but keep
+// the process alive — Triumph Synergy SAIB must be resilient to individual duty
+// failures. Kubernetes or supervisor will restart if needed.
+process.on("uncaughtException", (err) => {
+  const msg = err && err.message ? err.message : String(err);
+  const stack = err && err.stack ? err.stack : "";
+  console.error(`[saib-enforcer] 🚨 UNCAUGHT EXCEPTION: ${msg}`);
+  if (stack) console.error(stack);
+  recordDutyError("uncaught-exception", err);
+  // Process CONTINUES — do NOT exit. Duties retry on next tick.
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  const msg = reason && reason.message ? reason.message : String(reason);
+  console.error(`[saib-enforcer] 🚨 UNHANDLED REJECTION: ${msg}`);
+  console.error(`[saib-enforcer] promise:`, promise);
+  recordDutyError("unhandled-rejection", new Error(msg));
+  // Process CONTINUES — do NOT exit. Duties retry on next tick.
 });
 
 process.on("SIGTERM", () => { server.close(() => process.exit(0)); });

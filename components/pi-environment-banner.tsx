@@ -56,22 +56,20 @@ export function PiEnvironmentBanner() {
       <button
         type="button"
         onClick={() => switchNetwork("mainnet")}
-        className={`rounded px-2 py-0.5 font-semibold text-xs ${
-          network === "mainnet"
+        className={`rounded px-2 py-0.5 font-semibold text-xs ${network === "mainnet"
             ? "bg-green-600 text-white"
             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-        }`}
+          }`}
       >
         Mainnet
       </button>
       <button
         type="button"
         onClick={() => switchNetwork("testnet")}
-        className={`rounded px-2 py-0.5 font-semibold text-xs ${
-          network === "testnet"
+        className={`rounded px-2 py-0.5 font-semibold text-xs ${network === "testnet"
             ? "bg-amber-600 text-white"
             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-        }`}
+          }`}
       >
         Testnet
       </button>

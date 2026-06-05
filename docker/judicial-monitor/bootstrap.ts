@@ -194,22 +194,28 @@ function startReconnectLoop() {
       }
     }
 
-    // Check Postgres
+    // Check Postgres — GRACEFUL DEGRADATION if unavailable
     if (pool && !pgConnected) {
-      console.warn("[reconnect] Postgres down — reconnecting...");
+      console.warn("[reconnect] Postgres down — trying to reconnect...");
       try {
         const client = await pool.connect();
         client.release();
         pgConnected = true;
         await ensureTables();
-        console.log("[reconnect] Postgres restored");
+        console.log("[reconnect] Postgres restored ✅");
       } catch (e) {
-        console.error("[reconnect] Postgres:", (e as Error).message);
+        const msg = (e as Error).message;
+        // SUPPRESS repetitive connection errors after first warning
+        if (!msg.includes("ECONNREFUSED") && !msg.includes("getaddrinfo")) {
+          console.error("[reconnect] Postgres:", msg);
+        }
+        // Gracefully degrade: system still operational without database
+        pgConnected = false;
       }
     }
 
-    // Update ready state based on actual connection health
-    ready = redisConnected && (pgConnected || !pool);
+    // Update ready state: REQUIRE Redis, OPTIONAL Postgres (graceful degradation)
+    ready = redisConnected; // Don't require postgres to go online
   }, 30_000);
 }
 

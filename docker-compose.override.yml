@@ -24,9 +24,9 @@
 name: triumph-synergy
 
 x-platform: &platform { platform: linux/arm64 }
-x-init:     &init     { init: true }
-x-grace:    &grace    { stop_grace_period: 30s }
-x-ulimits:  &ulimits
+x-init: &init { init: true }
+x-grace: &grace { stop_grace_period: 30s }
+x-ulimits: &ulimits
   ulimits:
     nofile:
       soft: 65536
@@ -50,7 +50,7 @@ services:
 
   # ──── arm64-native (formerly amd64-pinned — now forced arm64) ───────────
   vault:
-    <<: [ *platform, *init, *grace, *ulimits ]
+    <<: [ *platform, *grace, *ulimits ] # tini already in Dockerfile ENTRYPOINT; no double-init
 
   governance-shield:
     <<: [ *platform, *init, *grace, *ulimits ]

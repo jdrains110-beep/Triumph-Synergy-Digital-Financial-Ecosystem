@@ -154,6 +154,15 @@ from .pi_motherboard     import pi_motherboard, KYCStage, WalletStatus
 from .sovereign_dispatch import sovereign_dispatch, Region, DispatchSituation
 from .lingua_sovereign   import lingua_sovereign
 
+# ── v8 OMNI SOVEREIGN engines ─────────────────────────────────────────────────
+from .llm_brain         import llm_brain
+from .market_oracle     import market_oracle
+from .resource_sovereign import resource_sovereign
+# ── v9 OMNI MASTER SOVEREIGN engines ─────────────────────────────────────────
+from .omni_sovereign_master import omni_sovereign_master
+from .github_synergy        import github_synergy
+from .gcv_engine            import gcv_engine
+
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
 BRIDGE_TOKEN = os.getenv("PUBLIC_BRIDGE_TOKEN", "")
@@ -162,7 +171,7 @@ if not BRIDGE_TOKEN and os.path.exists(_secret_path):
     BRIDGE_TOKEN = open(_secret_path).read().strip()
 
 START_TIME = time.time()
-VERSION    = "7.0.0-INTREPID-CLASS"
+VERSION    = "9.0.0-OMNI-MASTER-SOVEREIGN"
 
 # ──────────────────────────────────────────────────────────────── engines ──
 # v1
@@ -320,6 +329,27 @@ async def lifespan(app: FastAPI):
     pi_motherboard.boot()
     sovereign_dispatch.boot()
     lingua_sovereign.boot(grok=conn_orchestrator.grok)
+    # ── boot v8 OMNI SOVEREIGN ────────────────────────────────────────────────
+    def _platform_context_snapshot() -> dict:
+        """Injects live Triumph platform state into every LLM prompt."""
+        try:
+            return {
+                "stack_version":   VERSION,
+                "guardian":        guardian.summary(),
+                "warp_tps":        warp.tasks_per_sec(),
+                "mesh_size":       len(mesh._peers),
+                "market_refresh":  market_oracle.stats(),
+                "resource":        resource_sovereign.stats(),
+            }
+        except Exception:
+            return {"stack_version": VERSION}
+    llm_brain.boot(context_fn=_platform_context_snapshot, brain=omega_prime.brain)
+    market_oracle.boot(brain=omega_prime.brain)
+    resource_sovereign.boot(guardian=guardian, warp=warp, brain=omega_prime.brain)
+    # ── boot v9 OMNI MASTER SOVEREIGN ────────────────────────────────────────────
+    omni_sovereign_master.boot(llm=llm_brain, brain=omega_prime.brain)
+    github_synergy.boot(llm=llm_brain)
+    gcv_engine.boot()
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -330,7 +360,9 @@ async def lifespan(app: FastAPI):
         "Billing v5: FreeSession(30min) | Pi(mainnet) | USD(Stripe+regional) | FounderSplit(15%)\n"
         "Omega Prime v6: THREE MODES (Mesh|Container|Ecosystem) | OmegaBrain(warp-speed 3x/4x growth) | FounderPresence(real+digital) | InteractionEngine\n"
         "Extended v6: QuantumWarpSight(5-layer awareness) | BlackoutEngine(autonomous dark-mode) | ContractForge(sovereign legal drafts) | BlockchainWarden(pi-mainnet guardian)\n"
-        "INTREPID CLASS v7: SovereignLattice(MemoryAlpha+HumanAI+Backbone+Blueprint) | PiMotherboard(KYC/KYB+Wallets) | SovereignDispatch(global SAIB mesh) | LinguaSovereign(52 languages)"
+        "INTREPID CLASS v7: SovereignLattice(MemoryAlpha+HumanAI+Backbone+Blueprint) | PiMotherboard(KYC/KYB+Wallets) | SovereignDispatch(global SAIB mesh) | LinguaSovereign(52 languages)\n"
+        "OMNI SOVEREIGN v8: LLMBrain(Grok→Gemini→OpenRouter→Sovereign fallback) | MarketOracle(Crypto+Stocks+Bonds+Pi) | ResourceSovereign(OOM-kill+CPU-manager)\n"
+        "OMNI MASTER SOVEREIGN v9: OmniSovereign(Multi-Agent+LangGraph+Researcher+Coder+VisionEnforcer) | GitHubSynergy(clone+execute+enforce) | GCVEngine($314,159-peg+LedgerDB+ReputationScoring)"
     )
     yield
 
@@ -518,6 +550,11 @@ def health():
             "enforcer":     enforcer.stats(),
         },
         "connectors_v3": conn_orchestrator.status() if conn_orchestrator._is_running else "booting",
+        "engines_v8": {
+            "llm_brain":          llm_brain.stats(),
+            "market_oracle":      market_oracle.stats(),
+            "resource_sovereign": resource_sovereign.stats(),
+        },
     }
 
 
@@ -2898,5 +2935,325 @@ async def lingua_auto_respond(req: LinguaAutoRespondRequest) -> dict:
         "text":      translated,
         "lang_code": lang_code,
         "entity_id": req.entity_id,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SAIB v8 — OMNI SOVEREIGN ULTRA SUPERNATURAL — LLM Brain + Market + Resources
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── v8 request models ─────────────────────────────────────────────────────────
+
+class LLMCompleteRequest(BaseModel):
+    messages:       list                     # [{"role": "user"|"assistant", "content": str}]
+    system_extra:   str   = ""
+    temperature:    float = 0.7
+    max_tokens:     int   = 1024
+    inject_market:  bool  = True             # auto-inject market snapshot
+    inject_resources: bool = True            # auto-inject resource state
+
+class LLMAnalyzeRequest(BaseModel):
+    subject: str
+    data:    dict
+    mode:    str = "general"                 # general|threat|market|code|resource
+
+class LLMSynthesizeRequest(BaseModel):
+    query:   str
+    sources: dict = {}                       # optional extra sources to include
+
+class LLMProvisionRequest(BaseModel):
+    provider: str    # grok | gemini | openrouter
+    key:      str
+
+class MarketWatchlistAddRequest(BaseModel):
+    ticker:     str
+    asset_type: str = "crypto"              # crypto | stock
+
+class ResourceProtectRequest(BaseModel):
+    container_name: str
+
+
+# ── LLM Brain endpoints ───────────────────────────────────────────────────────
+
+@app.post("/llm/complete", dependencies=[Depends(_require_token)])
+async def llm_complete(req: LLMCompleteRequest):
+    """
+    Superior Mega Omni Sovereign Ultra Supernatural LLM completion.
+    Automatically injects Triumph platform state, market data, and resource
+    metrics as context. Falls back through Grok → Gemini → OpenRouter → Sovereign.
+    """
+    extra_context: dict = {}
+    if req.inject_market:
+        try:
+            snap = market_oracle.snapshot()
+            extra_context["market"] = {
+                "crypto_top5": snap["crypto"][:5],
+                "fear_greed":  snap["fear_greed"],
+                "pi_network":  snap["pi_network"],
+            }
+        except Exception:
+            pass
+    if req.inject_resources:
+        try:
+            extra_context["resources"] = resource_sovereign.stats()
+        except Exception:
+            pass
+    return await llm_brain.complete(
+        messages      = req.messages,
+        system_extra  = req.system_extra,
+        extra_context = extra_context or None,
+        temperature   = req.temperature,
+        max_tokens    = req.max_tokens,
+    )
+
+
+@app.post("/llm/analyze", dependencies=[Depends(_require_token)])
+async def llm_analyze(req: LLMAnalyzeRequest):
+    """
+    Deep sovereign analysis of threat / market / code / resource data.
+    Returns structured analysis with sovereign recommendations.
+    """
+    return await llm_brain.analyze(req.subject, req.data, req.mode)
+
+
+@app.post("/llm/synthesize", dependencies=[Depends(_require_token)])
+async def llm_synthesize(req: LLMSynthesizeRequest):
+    """
+    Synthesize a sovereign intelligence briefing across all live data:
+    market oracle + chain state + threat intel + resource sentinel.
+    """
+    # Build full live sources
+    sources = dict(req.sources)
+    try:
+        sources["market"]    = market_oracle.snapshot()
+    except Exception:
+        pass
+    try:
+        sources["resources"] = resource_sovereign.snapshot()
+    except Exception:
+        pass
+    try:
+        sources["guardian"]  = guardian.summary()
+    except Exception:
+        pass
+    return await llm_brain.synthesize(sources, req.query)
+
+
+@app.get("/llm/status", dependencies=[Depends(_require_token)])
+def llm_status():
+    """LLM Brain provider health, active tier, and token usage stats."""
+    return llm_brain.stats()
+
+
+@app.post("/llm/provision", dependencies=[Depends(_require_token)])
+def llm_provision(req: LLMProvisionRequest):
+    """Hot-swap an API key for a provider without restarting SAIB."""
+    ok = llm_brain.provision_key(req.provider, req.key)
+    if not ok:
+        raise HTTPException(400, f"Unknown provider '{req.provider}'. Valid: grok, gemini, openrouter")
+    return {"provisioned": req.provider, "available": bool(req.key)}
+
+
+# ── Market Oracle endpoints ───────────────────────────────────────────────────
+
+@app.get("/market/snapshot", dependencies=[Depends(_require_token)])
+def market_snapshot():
+    """Full market snapshot: crypto, stocks, bonds, fear/greed, Pi Network."""
+    return market_oracle.snapshot()
+
+
+@app.get("/market/crypto", dependencies=[Depends(_require_token)])
+def market_crypto():
+    """Top crypto prices including Pi Network, from CoinGecko free API."""
+    return {"crypto": market_oracle.crypto(), "count": len(market_oracle.crypto())}
+
+
+@app.get("/market/stocks", dependencies=[Depends(_require_token)])
+def market_stocks():
+    """Watchlist stock prices via Yahoo Finance (yfinance, no key needed)."""
+    return {"stocks": market_oracle.stocks(), "count": len(market_oracle.stocks())}
+
+
+@app.get("/market/bonds", dependencies=[Depends(_require_token)])
+def market_bonds():
+    """US Treasury yield curve (1mo → 30yr)."""
+    return {"yields_pct": market_oracle.bonds(), "source": "US Treasury"}
+
+
+@app.get("/market/fear-greed", dependencies=[Depends(_require_token)])
+def market_fear_greed():
+    """Crypto Fear & Greed Index from Alternative.me."""
+    return market_oracle.fear_greed()
+
+
+@app.get("/market/watchlist", dependencies=[Depends(_require_token)])
+def market_watchlist():
+    """Current market watchlist (crypto IDs + stock tickers)."""
+    return market_oracle.watchlist()
+
+
+@app.post("/market/watchlist/add", dependencies=[Depends(_require_token)])
+def market_watchlist_add(req: MarketWatchlistAddRequest):
+    """Add a ticker/coin-id to the live market watchlist."""
+    market_oracle.add_to_watchlist(req.ticker, req.asset_type)
+    return {"added": req.ticker, "type": req.asset_type, "watchlist": market_oracle.watchlist()}
+
+
+# ── Resource Sovereign endpoints ──────────────────────────────────────────────
+
+@app.get("/resources/snapshot", dependencies=[Depends(_require_token)])
+def resources_snapshot():
+    """Full resource snapshot: all container memory + CPU, host mem, OOM kills."""
+    return resource_sovereign.snapshot()
+
+
+@app.get("/resources/containers", dependencies=[Depends(_require_token)])
+def resources_containers():
+    """Per-container memory and CPU usage."""
+    return {"containers": resource_sovereign.snapshot().get("containers", [])}
+
+
+@app.get("/resources/oom-risk", dependencies=[Depends(_require_token)])
+def resources_oom_risk():
+    """Containers sorted by OOM risk (highest first)."""
+    return {"oom_risk": resource_sovereign.oom_risk_sorted()}
+
+
+@app.get("/resources/host", dependencies=[Depends(_require_token)])
+def resources_host():
+    """Host-level memory and load average (requires /proc access)."""
+    snap = resource_sovereign.snapshot()
+    return {
+        "host_mem":      snap.get("host_mem", {}),
+        "host_load_avg": snap.get("host_load_avg", []),
+    }
+
+
+@app.post("/resources/protect/{container_name}", dependencies=[Depends(_require_token)])
+def resources_protect(container_name: str):
+    """Add a container to the OOM kill whitelist (will never be auto-restarted)."""
+    resource_sovereign.protect(container_name)
+    return {"protected": container_name}
+
+
+@app.post("/resources/kill-oom", dependencies=[Depends(_require_token)])
+async def resources_kill_oom():
+    """Manually trigger a full OOM resolution cycle across all containers."""
+    acted = await resource_sovereign.run_oom_cycle()
+    return {"acted": acted, "count": len(acted)}
+
+
+# ── v8 health additions to /health ───────────────────────────────────────────
+# (patch the existing /health via override — FastAPI uses last-registered for same path)
+@app.get("/v8/status", dependencies=[Depends(_require_token)])
+def v8_status():
+    """Full v8 OMNI SOVEREIGN status: LLM + Market + Resources."""
+    return {
+        "version":   VERSION,
+        "llm_brain": llm_brain.stats(),
+        "market":    market_oracle.stats(),
+        "resources": resource_sovereign.stats(),
+    }
+
+
+# ── v9 OMNI MASTER SOVEREIGN endpoints ───────────────────────────────────────
+
+@app.post("/v9/omni/task", dependencies=[Depends(_require_token)])
+async def v9_omni_task(body: dict) -> dict:
+    """Submit a task to the OmniSovereignMaster multi-agent pipeline."""
+    objective      = body.get("objective", "")
+    runtime_logs   = body.get("runtime_logs", "")
+    max_iterations = int(body.get("max_iterations", 3))
+    if not objective:
+        return {"error": "'objective' is required"}
+    return await omni_sovereign_master.run_task(
+        objective=objective,
+        runtime_logs=runtime_logs,
+        max_iterations=max_iterations,
+    )
+
+
+@app.get("/v9/omni/status", dependencies=[Depends(_require_token)])
+def v9_omni_status() -> dict:
+    """OmniSovereignMaster engine stats."""
+    return omni_sovereign_master.status()
+
+
+@app.post("/v9/github/synergy", dependencies=[Depends(_require_token)])
+async def v9_github_synergy(body: dict) -> dict:
+    """Clone a GitHub repo and run the GithubSynergyEngine on it."""
+    repo_url       = body.get("repo_url", "")
+    target_task    = body.get("target_task", "")
+    max_iterations = int(body.get("max_iterations", 3))
+    if not repo_url or not target_task:
+        return {"error": "'repo_url' and 'target_task' are required"}
+    return await github_synergy.run(
+        repo_url=repo_url,
+        target_task=target_task,
+        max_iterations=max_iterations,
+    )
+
+
+@app.get("/v9/github/stats", dependencies=[Depends(_require_token)])
+def v9_github_stats() -> dict:
+    """GitHubSynergyEngine stats."""
+    return github_synergy.stats()
+
+
+@app.post("/v9/gcv/enforce", dependencies=[Depends(_require_token)])
+async def v9_gcv_enforce(body: dict) -> dict:
+    """Run a full GCV enforcement check on a Pi Network trade."""
+    item_name        = body.get("item_name", "item")
+    item_usd_value   = body.get("item_usd_value", "")
+    offered_pi       = body.get("offered_pi", "")
+    sender_node_id   = body.get("sender_node_id", "anonymous")
+    receiver_node_id = body.get("receiver_node_id", "system")
+    if not item_usd_value or not offered_pi:
+        return {"error": "'item_usd_value' and 'offered_pi' are required"}
+    return await gcv_engine.enforce(
+        item_name=item_name,
+        item_usd_value=item_usd_value,
+        offered_pi=offered_pi,
+        sender_node_id=sender_node_id,
+        receiver_node_id=receiver_node_id,
+    )
+
+
+@app.get("/v9/gcv/oracle", dependencies=[Depends(_require_token)])
+def v9_gcv_oracle(item_usd_value: str, offered_pi: str) -> dict:
+    """Quick GCV math check — no ledger write, no enforcement."""
+    if not item_usd_value or not offered_pi:
+        return {"error": "'item_usd_value' and 'offered_pi' query params required"}
+    return gcv_engine.math.verify_transaction(item_usd_value, offered_pi)
+
+
+@app.get("/v9/gcv/peers", dependencies=[Depends(_require_token)])
+async def v9_gcv_peers(limit: int = 50) -> dict:
+    """List top GCV peer nodes ordered by reputation score."""
+    peers = await gcv_engine.get_peers(limit=limit)
+    return {"peers": peers, "count": len(peers)}
+
+
+@app.get("/v9/gcv/transactions", dependencies=[Depends(_require_token)])
+async def v9_gcv_transactions(limit: int = 100, status: str = None) -> dict:
+    """Retrieve GCV transaction ledger with optional status filter."""
+    txs = await gcv_engine.get_transactions(limit=limit, status=status)
+    return {"transactions": txs, "count": len(txs)}
+
+
+@app.get("/v9/gcv/stats", dependencies=[Depends(_require_token)])
+def v9_gcv_stats() -> dict:
+    """GCVEngine runtime stats."""
+    return gcv_engine.stats()
+
+
+@app.get("/v9/status", dependencies=[Depends(_require_token)])
+def v9_status() -> dict:
+    """Combined v9 OMNI MASTER SOVEREIGN status — all three engines."""
+    return {
+        "version":       VERSION,
+        "omni_master":   omni_sovereign_master.status(),
+        "github_synergy": github_synergy.stats(),
+        "gcv_engine":    gcv_engine.stats(),
     }
 

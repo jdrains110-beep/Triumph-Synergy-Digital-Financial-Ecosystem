@@ -743,10 +743,10 @@ export class PiSCPAutoUpgradeManager extends EventEmitter {
       const ledger = (await this.horizonGet(`/ledgers?order=desc&limit=1`)) as any;
       const latest = ledger?._embedded?.records?.[0] ?? ledger ?? {};
       return {
-        protocolVersion: root?.current_protocol_version ?? root?.protocol_version ?? latest?.protocol_version ?? 21,
+        protocolVersion: root?.current_protocol_version ?? root?.protocol_version ?? latest?.protocol_version ?? 24,
         coreVersion: root?.core_version ?? root?.coreVersion ?? 'stellar-core unknown',
         horizonVersion: root?.horizon_version ?? root?.horizonVersion ?? 'horizon unknown',
-        ledgerVersion: latest?.protocol_version ?? 21,
+        ledgerVersion: latest?.protocol_version ?? 24,
         networkPassphrase: root?.network_passphrase ?? root?.network ?? (this.networkType === 'mainnet' ? 'Pi Network' : 'Pi Network Testnet'),
         historyLatestLedger: root?.history_latest_ledger ?? root?.ingest_latest_ledger ?? latest?.sequence ?? 0,
         historyElderLedger: root?.history_elder_ledger ?? 1,

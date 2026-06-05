@@ -25,25 +25,25 @@ export const PI_MAINNET_HORIZON = "https://api.mainnet.minepi.com" as const;
 export const PI_MAINNET_RPC = "https://api.mainnet.minepi.com" as const;
 
 /**
- * Current Pi Network Stellar Consensus Protocol version.
+ * Current Pi Network Stellar Consensus Protocol version — Pi mainnet runs SCP Protocol 24.
  *
  * Updated automatically by `.github/workflows/protocol-version-watcher.yml`
  * which polls Pi mainnet horizon `/` for `current_protocol_version` and
  * opens a PR bumping this constant when Pi advances.
  */
 export const PI_PROTOCOL_VERSION = Number(
-  process.env.PI_PROTOCOL_VERSION ?? 23,
+  process.env.PI_PROTOCOL_VERSION ?? 24,
 );
 
 /** Minimum protocol version this build is known to be safe with. */
-export const PI_MIN_SUPPORTED_PROTOCOL = 22 as const;
+export const PI_MIN_SUPPORTED_PROTOCOL = 23 as const;
 
-/** Stellar-core release line that ships Protocol 22 support (P23-capable). */
-export const STELLAR_CORE_VERSION = "v22.1.0" as const;
+/** Stellar-core release line that ships Protocol 24. */
+export const STELLAR_CORE_VERSION = "v24.0.0" as const;
 
 /** Server identifier advertised by our supernode / history archive. */
 export const TRIUMPH_NODE_SERVER_ID =
-  `stellar-core triumph-synergy-mainnet ${STELLAR_CORE_VERSION}` as const;
+  `stellar-core triumph-synergy-mainnet ${STELLAR_CORE_VERSION}` as const; // Protocol 24 — Pi Network mainnet
 
 /** Resolve the active Horizon URL — mainnet by default, env override allowed. */
 export function getActiveHorizonUrl(): string {

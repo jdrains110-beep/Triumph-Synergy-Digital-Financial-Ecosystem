@@ -71,7 +71,7 @@ Legacy hostnames (e.g. `triumph-sovereign-fortress`, `triumph-financial-intel`) 
 
 ## Pi Network integration
 
-- Mainnet node image: `pinetwork/pi-node-docker:organization-mainnet-v1.1-p23.0.1`
+- Mainnet node image: `pinetwork/pi-node-docker:organization-mainnet-v1.0-p24.1.0`
 - Live mainnet protocol: P22 (image is P23-ready and votes for upgrade)
 - Bridge probes both pi-node `/info` and central-node `/health`
 - See `lib/pi-network/` for SDK usage and `app/api/pi-*/` for routes

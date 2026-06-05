@@ -12,15 +12,53 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createMiddlewareSupabase } from "@/lib/supabase";
+import { getAllSlugs } from "@/lib/sovereign-tenants";
 
 // Stellar public key format: 'G' + 55 uppercase base32 chars (A-Z, 2-7), 56 total.
 // Used to validate X-Wallet-PublicKey before propagating it to API routes.
 const STELLAR_KEY_RE = /^G[A-Z2-7]{55}$/;
 
+// Pre-built set of all 22 sovereign tenant slugs for O(1) lookup
+const SOVEREIGN_SLUGS = new Set(getAllSlugs());
+
 /**
  * Main proxy function (Next.js 16 convention — was "middleware")
  */
 export async function proxy(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // ── Sovereign .pi tenant routing ──────────────────────────────────────────
+  // nginx injects X-Triumph-Tenant header for *.pi wildcard requests.
+  // Rewrite to /sovereign/[tenant] so the storefront page is served.
+  const tenant =
+    request.headers.get("x-triumph-tenant") ||
+    request.headers.get("X-Triumph-Tenant");
+
+  if (
+    tenant &&
+    SOVEREIGN_SLUGS.has(tenant) &&
+    !pathname.startsWith("/sovereign/") &&
+    !pathname.startsWith("/_next/") &&
+    !pathname.startsWith("/api/") &&
+    !/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|webp)$/.test(pathname)
+  ) {
+    // Detect testnet: Pi Browser sends x-pi-sandbox: true for testnet
+    const piSandbox = request.headers.get("x-pi-sandbox");
+    const networkParam = searchParams.get("network");
+    const network =
+      networkParam === "testnet" || piSandbox === "true" || piSandbox === "1"
+        ? "testnet"
+        : "mainnet";
+
+    const url = request.nextUrl.clone();
+    url.pathname = `/sovereign/${tenant}`;
+    url.searchParams.set("network", network);
+    const rewrite = NextResponse.rewrite(url);
+    rewrite.headers.set("x-sovereign-tenant", tenant);
+    rewrite.headers.set("x-sovereign-network", network);
+    return rewrite;
+  }
+
   // NOTE: Pi App Studio assigns each app a fresh hostname on (re)transfer.
   // We must NOT hard-code or filter on hostnames here, otherwise the verifier
   // (or a freshly-issued domain) gets redirected away before the app can call

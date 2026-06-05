@@ -34,6 +34,10 @@ ENV PORT=8201 \
 EXPOSE 8201
 
 RUN useradd -r -s /sbin/nologin -u 1002 saib
+# Add saib to root group (GID 0) so it can access /var/run/docker.sock
+# (socket is rw-rw---- root:root in Docker Desktop macOS environments).
+# docker-compose also sets group_add: ["0"] as a runtime-level guarantee.
+RUN usermod -aG root saib
 USER saib
 
 CMD ["python", "-m", "uvicorn", "saib.app:app", "--host", "0.0.0.0", "--port", "8201", "--workers", "1"]

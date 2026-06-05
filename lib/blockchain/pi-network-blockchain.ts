@@ -1,18 +1,16 @@
 /**
  * Pi Network Blockchain Client
  *
- * Live Horizon API client for Pi Testnet (protocol 21, core v22.1.0).
+ * Live Horizon API client for Pi mainnet (Protocol 24, stellar-core v24.0.0).
  * Horizon endpoint resolves from STELLAR_HORIZON_URL env var at runtime,
- * falling back to the local node running inside the testnet2 Docker container.
+ * falling back to the official Pi mainnet Horizon.
  *
- * Live node facts (as of 2026-04-20):
- *   horizon_version : 22.0.3
- *   core_version    : v22.1.0
- *   network         : Pi Testnet
- *   protocol        : 21  (supported: 22)
- *   base_fee        : 100000 stroops (0.01 Pi)
- *   base_reserve    : 4900000 stroops (0.49 Pi)
- *   validators      : 3  (GDFDD…, GDOJA…, GAOBN…)
+ * Live node facts (as of 2026-06):
+ *   stellar_core_version : v24.0.0
+ *   network              : Pi Network (mainnet)
+ *   protocol             : 24
+ *   base_fee             : 100000 stroops (0.01 Pi)
+ *   base_reserve         : 4900000 stroops (0.49 Pi)
  */
 
 // ---------------------------------------------------------------------------
@@ -22,9 +20,9 @@ export const PI_TESTNET = {
   NETWORK_PASSPHRASE: "Pi Testnet",
   HORIZON_URL: "http://testnet2:8000",            // local node internal
   HORIZON_PUBLIC_URL: "https://api.testnet.minepi.com",
-  CORE_VERSION: "v22.1.0",
-  HORIZON_VERSION: "22.0.3",
-  PROTOCOL_VERSION: 21,
+  CORE_VERSION: "v24.0.0",
+  HORIZON_VERSION: "24.0.0",
+  PROTOCOL_VERSION: 24,
   BASE_FEE_STROOPS: 100_000,        // 0.01 Pi
   BASE_RESERVE_STROOPS: 4_900_000,  // 0.49 Pi
   // Supply constants (source: Pi Network Whitepaper Dec 2021 + Open Network launch Feb 2025)
