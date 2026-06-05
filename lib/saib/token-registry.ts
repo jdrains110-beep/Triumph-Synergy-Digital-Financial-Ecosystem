@@ -212,7 +212,7 @@ export function isStablecoin(tokenOrSymbol) {
 /**
  * Get token decimals for amount normalization
  */
-export function getTokenDecimals(chainId, addressOrSymbol) {
+export function getTokenDecimals(chainId: string, addressOrSymbol: string): number {
   let token;
 
   if (addressOrSymbol.startsWith("0x")) {
@@ -227,7 +227,7 @@ export function getTokenDecimals(chainId, addressOrSymbol) {
 /**
  * Normalize amount to token decimals
  */
-export function normalizeAmount(rawAmount, decimals) {
+export function normalizeAmount(rawAmount: bigint | string | number, decimals: number): bigint {
   const divisor = Math.pow(10, decimals);
   return BigInt(rawAmount) / BigInt(divisor);
 }
@@ -235,7 +235,7 @@ export function normalizeAmount(rawAmount, decimals) {
 /**
  * Denormalize amount from token decimals
  */
-export function denormalizeAmount(normalizedAmount, decimals) {
+export function denormalizeAmount(normalizedAmount: bigint | string | number, decimals: number): bigint {
   const multiplier = Math.pow(10, decimals);
   return BigInt(normalizedAmount) * BigInt(multiplier);
 }
@@ -243,7 +243,7 @@ export function denormalizeAmount(normalizedAmount, decimals) {
 /**
  * Check if conversion is supported
  */
-export function isConversionSupported(sourceSymbol, targetSymbol) {
+export function isConversionSupported(sourceSymbol: string, targetSymbol: string): boolean {
   const path = getConversionPath(sourceSymbol, targetSymbol);
   return path !== null;
 }
@@ -251,7 +251,7 @@ export function isConversionSupported(sourceSymbol, targetSymbol) {
 /**
  * Get all supported target tokens for a source token
  */
-export function getSupportedConversions(sourceSymbol) {
+export function getSupportedConversions(sourceSymbol: string): string[] {
   return Object.keys(CONVERSION_PATHS)
     .filter((pathKey) => pathKey.startsWith(`${sourceSymbol}→`))
     .map((pathKey) => pathKey.split("→")[1]);
