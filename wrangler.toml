@@ -16,5 +16,16 @@ ORIGIN = "https://triumphsynergy.app"
 # Optional bindings: SAIB_CACHE, SAIB_BACKUP_KV, SAIB_BACKUP_QUEUE.
 NEXTJS_APP_URL = "https://triumphsynergy.app"
 
+# Blockchain RPC endpoints for hardware verification and network health probing
+# Configure with: npx wrangler secret put BLOCKCHAIN_RPC_URL
+# Example: https://mainnet.base.org or https://eth.llamarpc.com
+BLOCKCHAIN_RPC_URL = "https://mainnet.base.org"
+
+# DEX Aggregator API Keys
+# Configure with:
+#   npx wrangler secret put DEX_1INCH_API_KEY
+#   npx wrangler secret put DEX_0X_API_KEY
+# No defaults; API calls will fail gracefully without keys
+
 [observability]
 enabled = true
