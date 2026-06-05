@@ -42,6 +42,15 @@ import {
   getSlidingWindowState,
   SlidingWindowState
 } from './state-machine';
+import {
+  enforceOmniGuard,
+  determineOperationalMode,
+  OmniGuardStatus
+} from './reentrancy-guard';
+import {
+  enforceGasMarketProtection,
+  GasMarketStatus
+} from '../../../lib/saib/gas-market-protection';
 
 // ============================================================
 // PHASE 1: ENVELOPE STRUCTURE VALIDATION
@@ -364,10 +373,60 @@ async function executeOptimusPipeline(
 
     console.log(`[OPTIMUS] 🎯 Decision: ${decision.directive} (strategy: ${decision.executionStrategy})`);
 
+    // ===== NEW: PHASE 6B: REENTRANCY GUARD (OmniGuard) =====
+    // Cross-wallet balance enforcement to detect state-manipulation exploits
+    let omniguardStatus: OmniGuardStatus | null = null;
+    let gasMarketStatus: GasMarketStatus | null = null;
+
+    try {
+      const activeWallets = [
+        env.SYSTEM_TREASURY_ADDRESS,
+        // Add additional ecosystem wallets as needed
+      ].filter(Boolean);
+
+      if (activeWallets.length > 0) {
+        console.log('[OPTIMUS] 🛡️ Running OmniGuard reentrancy audit...');
+        omniguardStatus = await enforceOmniGuard(activeWallets, env);
+
+        if (!omniguardStatus.secure) {
+          console.warn('[OPTIMUS] 🚨 OmniGuard ALERT: Security threat detected!');
+          decision.executionStrategy = 'DEGRADE_CONSERVE';
+          decision.recommendedDelay = 5000;
+        }
+      }
+
+      // ===== NEW: GAS MARKET PROTECTION =====
+      console.log('[OPTIMUS] ⛽ Checking gas market conditions...');
+      gasMarketStatus = await enforceGasMarketProtection(env, BigInt(300000));
+
+      if (!gasMarketStatus.isViable) {
+        console.warn('[OPTIMUS] ⚠️ Gas market unfavorable - reducing throughput');
+        decision.executionStrategy = 'DEGRADE_CONSERVE';
+        decision.recommendedDelay = Math.max(decision.recommendedDelay, 2000);
+      }
+    } catch (securityErr) {
+      console.error('[OPTIMUS] ⚠️ Security checks failed:', securityErr);
+      // On error, assume defense posture
+      decision.executionStrategy = 'DEGRADE_CONSERVE';
+    }
+
+    // Determine final operational mode
+    const operationalMode = determineOperationalMode(omniguardStatus || {
+      secure: true,
+      varianceDetected: false,
+      totalVariance: 0n,
+      walletCount: 0,
+      criticalAlert: false,
+      timestamp: Date.now(),
+    });
+
+    console.log(`[OPTIMUS] 🚨 Operational Mode: ${operationalMode.mode} (delay: ${operationalMode.delay}ms)`);
+
     // Apply strategic delay if needed
-    if (decision.recommendedDelay > 0) {
-      console.log(`[OPTIMUS] ⏳ Applying ${decision.recommendedDelay}ms strategic delay...`);
-      await new Promise(resolve => setTimeout(resolve, decision.recommendedDelay));
+    if (decision.recommendedDelay > 0 || operationalMode.delay > 0) {
+      const totalDelay = Math.max(decision.recommendedDelay, operationalMode.delay);
+      console.log(`[OPTIMUS] ⏳ Applying ${totalDelay}ms strategic delay...`);
+      await new Promise(resolve => setTimeout(resolve, totalDelay));
     }
 
     // PHASE 7: ECOSYSTEM TOKEN RECOGNITION + CONVERSION
@@ -389,11 +448,30 @@ async function executeOptimusPipeline(
             'X-SAIB-Directive': decision.directive,
             'X-Network-Latency': `${Math.max(nextJsProbe.latencyMs, rpcProbe.latencyMs)}ms`,
             'X-Trend-Status': updatedState?.trendAnalysis.status || 'STABLE',
+            'X-Security-State': operationalMode.mode,
+            'X-OmniGuard-Status': omniguardStatus?.secure ? 'SECURE' : 'BREACH_DETECTED',
+            'X-Gas-Market-Status': gasMarketStatus?.isViable ? 'VIABLE' : 'UNFAVORABLE',
           },
           body: JSON.stringify({
-            envelope,
-            directive: decision.directive,
-            timestamp: new Date().toISOString(),
+            saibId: saibId,
+            iv: envelope.iv,
+            encryptedData: envelope.ciphertext,
+            edgeMetrics: {
+              calculatedMovingAverage: updatedState ? `${updatedState.movingAverage.toFixed(0)}ms` : 'N/A',
+              directiveEngaged: decision.directive,
+              operationalMode: operationalMode.mode,
+              omniguardStatus: omniguardStatus ? {
+                secure: omniguardStatus.secure,
+                varianceDetected: omniguardStatus.varianceDetected,
+                criticalAlert: omniguardStatus.criticalAlert,
+                variance: omniguardStatus.totalVariance.toString(),
+              } : null,
+              gasMarketStatus: gasMarketStatus ? {
+                isViable: gasMarketStatus.isViable,
+                gasPrice: gasMarketStatus.currentGasPrice.toString(),
+                estimatedCost: gasMarketStatus.estimatedCostUsd,
+              } : null,
+            },
           }),
         });
 
