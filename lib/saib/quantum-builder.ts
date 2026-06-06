@@ -478,7 +478,7 @@ export class SAIBQuantumBuilder {
       }
 
       console.log("[SAIB QUANTUM BUILDER] All dynamic mutations reset to defaults");
-      return { success: true, keysReset };
+      return { success: true, keysReset: keysToReset };
     } catch (error: any) {
       console.error("[SAIB QUANTUM BUILDER] Failed to reset mutations:", error);
       return { success: false, keysReset: [] };
