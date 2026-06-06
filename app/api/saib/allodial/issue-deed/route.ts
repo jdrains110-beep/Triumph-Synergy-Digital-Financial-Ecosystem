@@ -22,10 +22,10 @@ import { SafeDepositBoxEngine } from '@/lib/saib/safe-deposit-box-engine';
 import { DispatchNotifier } from '@/lib/saib/dispatch-notifier';
 import crypto from 'crypto';
 
-// Initialize Supabase client
+// Initialize Supabase client (dummy fallback prevents build-time crash; real values from env at runtime)
 const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  process.env.SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key'
 );
 
 /**

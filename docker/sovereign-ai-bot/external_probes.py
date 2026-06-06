@@ -4,8 +4,8 @@ SAIB External Probe Registry
 
 Extends SAIB's monitoring beyond local Docker into the wider ecosystem:
 
-  • Replit production deployment    (Triumph-Synergy.replit.app)
-  • PiNet mainnet apps              (triumphsynergyab2099.pinet.com)
+  • triumphsynergy.com production    (Cloudflare + VPS)
+  • PiNet mainnet apps              (triumphsynergy.com)
   • Pi Network mainnet API          (api.mainnet.minepi.com)
   • Stellar Protocol 24 horizon     (api.mainnet.minepi.com/ledgers)
 
@@ -46,7 +46,7 @@ def build_external_targets() -> list[ExternalTarget]:
 
     replit_hosts = _env_csv(
         "SAIB_REPLIT_HOSTS",
-        "Triumph-Synergy.replit.app",
+        "triumphsynergy.com",
     )
     pinet_hosts = _env_csv(
         "SAIB_PINET_HOSTS",

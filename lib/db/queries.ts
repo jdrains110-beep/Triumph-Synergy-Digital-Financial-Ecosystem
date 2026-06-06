@@ -94,10 +94,14 @@ export async function createGuestUser() {
       email: user.email,
     });
   } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to create guest user"
-    );
+    console.error("createGuestUser: database error, returning fallback guest", _error);
+    // Fail-safe: return an ephemeral guest user so the frontend can continue
+    return [
+      {
+        id: `guest-${Date.now()}`,
+        email: "guest@local",
+      },
+    ];
   }
 }
 

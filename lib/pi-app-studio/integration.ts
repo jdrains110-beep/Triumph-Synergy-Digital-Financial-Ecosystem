@@ -134,7 +134,7 @@ export const PI_APP_CONFIG: PiAppConfig = {
     pinetMainnet: "https://triumphsynergy.com",
     pinetPrimary: "https://triumphsynergy.com",
     // REPLIT ORIGINS
-    replitMainnet: "https://Triumph-Synergy.replit.app",
+    replitMainnet: "https://triumphsynergy.com",
     replitTestnet: "https://Triumph-Synergy.replit.app",
     // Legacy aliases
     production: "https://triumphsynergy.com",
