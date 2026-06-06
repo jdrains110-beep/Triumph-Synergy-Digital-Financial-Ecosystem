@@ -71,10 +71,12 @@ add_record() {
   RESP=$(curl -sf -X POST "${CF}/zones/${ZONE_ID}/dns_records" "${HDR[@]}" -d "$BODY" 2>&1 || true)
   if echo "$RESP" | grep -q '"success":true'; then
     echo "  ✅ ${TYPE} ${NAME} → ${CONTENT}"
-  elif echo "$RESP" | grep -qi "already exists\|duplicate"; then
+  elif echo "$RESP" | grep -qi '"code":81057\|already exists\|duplicate'; then
     echo "  ℹ️  ${TYPE} ${NAME} already exists (skipped)"
   else
-    echo "  ⚠️  ${TYPE} ${NAME} — $(echo "$RESP" | python3 -c "import sys,json; e=json.load(sys.stdin).get('errors',[]); print(e[0]['message'] if e else 'unknown error')" 2>/dev/null || echo "$RESP")"
+    # Extract first error message — works without python3/jq
+    ERR=$(echo "$RESP" | grep -o '"message":"[^"]*"' | head -1 | sed 's/"message":"//;s/"//')
+    echo "  ⚠️  ${TYPE} ${NAME}: ${ERR:-$RESP}"
   fi
 }
 
