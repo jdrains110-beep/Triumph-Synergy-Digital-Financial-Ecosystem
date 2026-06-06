@@ -22,16 +22,20 @@ ACCOUNT_ID="5d6f808f4561a69a80490838b28cd9ed"
 FORWARD_TO="jdrains110@gmail.com"
 
 # ─── Check token ─────────────────────────────────────────────────────────────
-if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
-  echo "❌ CLOUDFLARE_API_TOKEN is not set."
+if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]] || [[ "${CLOUDFLARE_API_TOKEN}" == "paste_your_token_here" ]] || [[ "${CLOUDFLARE_API_TOKEN}" == "YOUR_TOKEN" ]]; then
+  echo "❌ CLOUDFLARE_API_TOKEN is not set (or still contains the placeholder)."
   echo ""
-  echo "1. Go to: https://dash.cloudflare.com/profile/api-tokens"
-  echo "2. Create Token → Use template: Edit zone DNS"
-  echo "3. Add permission: Zone → Email Routing → Edit"
-  echo "4. Set Zone Resource: Include → triumphsynergy.com"
-  echo "5. Copy the token and run:"
-  echo "   export CLOUDFLARE_API_TOKEN='YOUR_TOKEN'"
-  echo "   bash scripts/setup-email-dns.sh"
+  echo "Steps to get a real token:"
+  echo "  1. Go to: https://dash.cloudflare.com/profile/api-tokens"
+  echo "  2. Click 'Create Token' → Use template: 'Edit zone DNS'"
+  echo "  3. Add ADDITIONAL permission: Zone → Email Routing → Edit"
+  echo "  4. Zone Resource: Include → triumphsynergy.com"
+  echo "  5. Click Continue to Summary → Create Token"
+  echo "  6. COPY the token (shown once only)"
+  echo ""
+  echo "Then run (paste the real token between the quotes):"
+  echo "  export CLOUDFLARE_API_TOKEN='eyJhbGc...your_real_token'"
+  echo "  bash scripts/setup-email-dns.sh"
   exit 1
 fi
 
