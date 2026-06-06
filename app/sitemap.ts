@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.replit.app";
+  process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy.com";
 
 // Priority / changefreq helpers
 const P_HIGH   = { priority: 0.9, changeFrequency: "weekly"  } as const;

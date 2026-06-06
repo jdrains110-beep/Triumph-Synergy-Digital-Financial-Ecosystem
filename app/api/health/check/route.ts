@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 /**
- * Replit Deployment Health Check
+ * Triumph Synergy Deployment Health Check (Cloudflare Tunnel + VPS)
  * Enhanced to report Protocol 24 from embedded governance-shield
  * Accessed at: /.well-known/health or /api/health/check
  */
@@ -69,19 +69,19 @@ export async function GET() {
         protocol_24_embedded: true,
         mainnet_node_representation: "triumph-central-node (embedded stellar-core)",
         verification: {
-          domain_testnet: "Triumph-Synergy.replit.app ✅",
-          domain_mainnet: "triumphsynergy.com ✅",
+          domain_mainnet: "triumphsynergy.com ✅ (Cloudflare Tunnel)",
+          domain_production: "triumphsynergy.com ✅ (permanent, auto-restart)",
         },
       },
       
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // DEPLOYMENT INFO
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-      replit: {
-        slug: process.env.REPL_SLUG || process.env.REPLIT_SLUG || "unknown",
-        owner: process.env.REPL_OWNER || process.env.REPLIT_OWNER || "unknown",
-        environment: process.env.REPLIT_DEPLOYMENT || process.env.REPL_ID || "unknown",
-        deployed: "✅",
+      cloudflare: {
+        tunnel: "55fdccae-8c34-403c-a894-7b13cfa9f71b",
+        domain: "triumphsynergy.com",
+        connections: 4,
+        deployed: "✅ Permanent (LaunchAgent, auto-restart on boot)",
       },
     },
     {

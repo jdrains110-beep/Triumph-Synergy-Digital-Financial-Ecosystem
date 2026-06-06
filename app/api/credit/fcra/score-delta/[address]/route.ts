@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/security/api-guard";
 
-const CREDIT_ENGINE = process.env.CREDIT_ENGINE_URL ?? "http://localhost:8091";
+const CREDIT_ENGINE = process.env.CREDIT_ENGINE_URL ?? "http://triumph-quantum-intel-fortress:8091";
 
 export async function GET(
   req: NextRequest,

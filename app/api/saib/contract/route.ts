@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
 async function getSAIBHealth() {
   try {
-    const response = await fetch('http://localhost:8210/health', { timeout: 3000 });
+    const response = await fetch('http://triumph-saib-enforcer:8210/health', { signal: AbortSignal.timeout(3000) });
     if (response.ok) {
       const data = await response.json();
       return { available: true, status: data.status };
@@ -125,7 +125,7 @@ async function settlePayment(data: Record<string, any>) {
 
   // Call settlement-core service
   try {
-    const response = await fetch('http://localhost:8080/settlement', {
+    const response = await fetch('http://triumph-settlement-core:8080/settlement', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -159,7 +159,7 @@ async function enforceService(data: Record<string, any>) {
 
   // Trigger SAIB enforcer for service duty
   try {
-    const response = await fetch('http://localhost:8210/enforce', {
+    const response = await fetch('http://triumph-saib-enforcer:8210/enforce', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -1,6 +1,6 @@
 /**
  * app/diagnostic/page.tsx
- * Diagnostic page to verify the Replit deployment is serving correct content
+ * Diagnostic page to verify the Cloudflare Tunnel deployment is serving correct content
  */
 
 export default function DiagnosticPage() {
@@ -26,9 +26,9 @@ export default function DiagnosticPage() {
         borderRadius: "8px",
         marginBottom: "20px"
       }}>
-        <h2>✅ Deployment Status: SUCCESSFUL</h2>
-        <p>This page proves Replit is correctly serving the Next.js app.</p>
-        <p>If you can read this, the deployment is working.</p>
+        <h2>✅ Deployment Status: LIVE — Cloudflare Tunnel</h2>
+        <p>This page proves triumphsynergy.com is correctly serving the Next.js app via Cloudflare Tunnel.</p>
+        <p>If you can read this, the deployment is working. Tunnel ID: 55fdccae-8c34-403c-a894-7b13cfa9f71b</p>
       </div>
 
       <div style={{
@@ -42,7 +42,7 @@ export default function DiagnosticPage() {
           <li>Clear browser cache (Ctrl+Shift+Delete)</li>
           <li>Try incognito/private window</li>
           <li>Check DNS hasn't cached old deployment</li>
-          <li>Check the Replit deployment logs for errors</li>
+          <li>Check cloudflared tunnel is running: <code>launchctl list | grep cloudflare</code></li>
         </ul>
       </div>
 
@@ -64,18 +64,17 @@ export default function DiagnosticPage() {
 
       <h2>Verification Checklist:</h2>
       <ul>
-        <li>✅ Next.js 16.1.5 is deployed</li>
-        <li>✅ App is being served from Replit</li>
+        <li>✅ Next.js is deployed (Cloudflare Tunnel)</li>
+        <li>✅ App is being served from triumphsynergy.com</li>
         <li>✅ Routes are working</li>
         <li>✅ You can see this diagnostic page</li>
       </ul>
 
       <div style={{ marginTop: "40px", color: "#666" }}>
         <small>
-          If you're seeing this page on a staging URL (e.g. a *.replit.app preview),
-          visit the main production domain instead:
+          Production domain: <strong>https://triumphsynergy.com</strong>
           <br />
-          <strong>https://triumphsynergyab2099.pinet.com</strong>
+          Deployed via Cloudflare Tunnel (permanent, auto-start on boot)
         </small>
       </div>
     </div>

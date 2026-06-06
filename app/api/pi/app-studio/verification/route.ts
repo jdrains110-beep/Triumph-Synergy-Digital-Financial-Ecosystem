@@ -3,10 +3,10 @@
  *
  * Comprehensive verification endpoint for Pi App Studio integration
  * Verifies:
- * 1. Replit deployment is live and accessible
+ * 1. triumphsynergy.com is live and accessible (Cloudflare Tunnel)
  * 2. Pi SDK is properly injected in all domains
- * 3. Domain mappings are correct (testnet vs mainnet)
- * 4. Connection to PINET primary domain (triumphsynergy.com)
+ * 3. Domain mappings are correct (mainnet)
+ * 4. Connection to primary domain (triumphsynergy.com)
  * 5. Pi App Studio integration status
  */
 
@@ -14,13 +14,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PRODUCTION_DOMAINS = {
   mainnet: {
-    replit: "Triumph-Synergy.replit.app",
-    pinet: ["triumphsynergy.com", "triumphsynergy.com"],
+    cloudflare: "triumphsynergy.com",
+    pinet: ["triumphsynergy.com"],
   },
   // Mainnet-only mandate — testnet domains intentionally empty so the
   // verification path can never resolve to a testnet network.
   testnet: {
-    replit: "",
+    cloudflare: "",
     pinet: [] as string[],
   },
 };
@@ -185,16 +185,16 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const mainnetReplitAccessible = await verifyDomainAccessibility(
-      PRODUCTION_DOMAINS.mainnet.replit
+    const mainnetCloudflareAccessible = await verifyDomainAccessibility(
+      PRODUCTION_DOMAINS.mainnet.cloudflare
     );
-    const mainnetReplitSdk = await verifyPiSdkInjection(
-      PRODUCTION_DOMAINS.mainnet.replit
+    const mainnetCloudflareSdk = await verifyPiSdkInjection(
+      PRODUCTION_DOMAINS.mainnet.cloudflare
     );
 
-    if (!mainnetReplitAccessible.accessible) {
+    if (!mainnetCloudflareAccessible.accessible) {
       (verification.issues as string[]).push(
-        `Replit mainnet origin unreachable: ${mainnetReplitAccessible.error}`
+        `triumphsynergy.com unreachable: ${mainnetCloudflareAccessible.error}`
       );
     }
 
@@ -202,11 +202,11 @@ export async function GET(request: NextRequest) {
       Object.assign(
         (verification.allDomains as Record<string, unknown>).mainnet || {},
         {
-          [PRODUCTION_DOMAINS.mainnet.replit]: {
-            accessible: mainnetReplitAccessible.accessible,
-            sdkInjected: mainnetReplitSdk.injected,
-            responseTime: mainnetReplitAccessible.responseTime,
-            statusCode: mainnetReplitAccessible.statusCode,
+          [PRODUCTION_DOMAINS.mainnet.cloudflare]: {
+            accessible: mainnetCloudflareAccessible.accessible,
+            sdkInjected: mainnetCloudflareSdk.injected,
+            responseTime: mainnetCloudflareAccessible.responseTime,
+            statusCode: mainnetCloudflareAccessible.statusCode,
           },
         }
       );
@@ -218,8 +218,8 @@ export async function GET(request: NextRequest) {
     isTrueMainnet:
       currentNetwork === "mainnet" &&
       (hostname === PRIMARY_MAINNET_DOMAIN ||
-        hostname === PRODUCTION_DOMAINS.mainnet.replit),
-    replitMainnetConnectsToMainnet: currentNetwork === "mainnet",
+        hostname === PRODUCTION_DOMAINS.mainnet.cloudflare),
+    cloudflareMainnetConnectsToMainnet: currentNetwork === "mainnet",
     piSdkVersion: "2.0",
     appId: "triumph-synergy",
   };
@@ -238,22 +238,22 @@ export async function GET(request: NextRequest) {
     : "missing";
   verification.validSetup = isValidSetup;
 
-  // Determine if false setup (not displaying mainnet domain correctly)
+  // Determine if false setup
   if (
-    hostname === PRODUCTION_DOMAINS.mainnet.replit &&
+    hostname === PRODUCTION_DOMAINS.mainnet.cloudflare &&
     currentNetwork !== "mainnet"
   ) {
     (verification.issues as string[]).push(
-      `FALSE SETUP: Replit mainnet origin not recognized as mainnet. Detected as: ${currentNetwork}`
+      `FALSE SETUP: triumphsynergy.com not recognized as mainnet. Detected as: ${currentNetwork}`
     );
   }
 
   if (
-    hostname === PRODUCTION_DOMAINS.mainnet.replit &&
+    hostname === PRODUCTION_DOMAINS.mainnet.cloudflare &&
     !currentSdkInjected.injected
   ) {
     (verification.issues as string[]).push(
-      `FALSE SETUP: Replit mainnet not displaying Pi SDK initialization`
+      `FALSE SETUP: triumphsynergy.com not displaying Pi SDK initialization`
     );
   }
 

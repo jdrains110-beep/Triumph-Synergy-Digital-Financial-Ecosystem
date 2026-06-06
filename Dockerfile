@@ -25,21 +25,25 @@ FROM base AS builder
 RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
-# Use npm instead of yarn for fetching — yarn v1 hangs on [3/5] Fetching inside
-# Docker Desktop on macOS due to connection-pool exhaustion.
+# Copy package files (lockfile included → npm ci is deterministic AND ~5x faster
+# than npm install because it skips dependency resolution entirely).
+COPY package.json package-lock.json ./
 # Strip the "packageManager" field so npm doesn't defer to corepack/yarn.
+# npm ci uses the exact tree from package-lock.json — no resolve, no metadata
+# fetches, just download+extract. Falls back to npm install if lockfile drift.
 RUN sed -i 's|"packageManager":.*||' package.json && \
     npm config set registry https://registry.npmjs.org && \
-    npm install --legacy-peer-deps --no-fund --no-audit
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-timeout 600000 && \
+    (npm ci --legacy-peer-deps --no-fund --no-audit --prefer-offline || \
+     npm install --legacy-peer-deps --no-fund --no-audit)
 
 # Copy source and build
 COPY . .
 
 # Set environment for build
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS="--max-old-space-size=1024"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV RUN_MIGRATIONS=false
 ENV DOCKER_BUILD=true
 

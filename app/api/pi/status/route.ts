@@ -102,7 +102,7 @@ export async function GET(): Promise<NextResponse<PiIntegrationStatus>> {
     },
 
     integrations: {
-      replit: isProduction || !!process.env.REPL_ID || !!process.env.REPLIT_DEPLOYMENT,
+      cloudflare: true, // Cloudflare Tunnel — permanent deployment at triumphsynergy.com
       github: true, // Always connected via CI/CD
       stellar: !!process.env.STELLAR_HORIZON_URL,
       supabase: !!process.env.SUPABASE_URL,

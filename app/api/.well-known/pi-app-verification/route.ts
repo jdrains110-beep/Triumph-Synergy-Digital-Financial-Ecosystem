@@ -12,8 +12,8 @@ import { type NextRequest, NextResponse } from "next/server";
 const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
   // PINET DOMAINS
   "triumphsynergy.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  // REPLIT ORIGIN (staging serves testnet key; production routes through pinet)
-  "triumph-synergy.replit.app": { network: "testnet", envKey: "PI_NETWORK_TESTNET_VALIDATION_KEY" },
+  // CLOUDFLARE TUNNEL — permanent production deployment
+  "triumphsynergy.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
 };
 
 export async function GET(request: NextRequest) {
