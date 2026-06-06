@@ -104,7 +104,7 @@ Triumph Synergy is a **sovereign, Pi-powered financial platform** built on Stell
 │  │ ├─ SSE (Server-Sent Events) stream to Redis                             ││
 │  │ ├─ Transaction routing & validation                                     ││
 │  │ ├─ Fallback chain: local → public mainnet API                           ││
-│  │ ├─ Public Bridge Tokens (triumphsynergyab2099.pinet.com)                ││
+│  │ ├─ Public Bridge Tokens (triumphsynergy.com)                ││
 │  │ └─ Healthcheck: 40s timeout (Docker Desktop cold-start)                 ││
 │  │                                                                          ││
 │  │ Horizon-Stream (Blockchain Oracle + Market Data)  [256M, 0.25 CPU]     ││

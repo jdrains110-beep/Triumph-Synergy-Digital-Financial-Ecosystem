@@ -10,8 +10,8 @@ export async function GET() {
   // Get the correct domain based on environment
   const isSandbox = process.env.NEXT_PUBLIC_PI_SANDBOX === "true";
   const domain = isSandbox
-    ? "triumphsynergyab2099.pinet.com"
-    : "triumphsynergyab2099.pinet.com";
+    ? "triumphsynergy.com"
+    : "triumphsynergy.com";
 
   // Get the correct validation key
   const verificationToken = isSandbox

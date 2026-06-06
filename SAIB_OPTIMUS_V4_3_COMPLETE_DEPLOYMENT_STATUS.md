@@ -291,9 +291,9 @@ Combined, these systems provide sovereign, resilient, self-healing infrastructur
 ☐ Deploy: vercel deploy --prod (or your hosting)
 ☐ Deploy Worker: wrangler publish --env production
 ☐ Verify endpoints:
-   - curl https://your-domain.com/api/saib/allodial/issue-deed (GET)
-   - curl https://your-domain.com/api/saib/quantum/health
-   - curl https://your-domain.com/api/saib/quantum/diagnostics
+   - curl https://triumphsynergy.com/api/saib/allodial/issue-deed (GET)
+   - curl https://triumphsynergy.com/api/saib/quantum/health
+   - curl https://triumphsynergy.com/api/saib/quantum/diagnostics
 ```
 
 ### Phase 5: Integration Testing (10 min)
@@ -446,13 +446,13 @@ POST /api/saib/quantum/admin/reset          # Reset mutations (auth)
 ### Health Checks
 ```bash
 # Quick health check (3ms latency)
-curl https://your-domain.com/api/saib/quantum/health
+curl https://triumphsynergy.com/api/saib/quantum/health
 
 # Full diagnostics with strategy
-curl https://your-domain.com/api/saib/quantum/diagnostics
+curl https://triumphsynergy.com/api/saib/quantum/diagnostics
 
 # Deed endpoint status
-curl https://your-domain.com/api/saib/allodial/issue-deed
+curl https://triumphsynergy.com/api/saib/allodial/issue-deed
 ```
 
 ### Debugging
@@ -467,7 +467,7 @@ wrangler kv:key list --binding SAIB_BACKUP_KV --env production | grep audit
 wrangler kv:key list --binding SAIB_BACKUP_KV --env production | grep mutation
 
 # Manually reset system
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 

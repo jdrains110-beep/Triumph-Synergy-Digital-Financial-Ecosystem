@@ -78,7 +78,7 @@ export class DecentralizedIdentity {
             type: "TriumphSynergyEndpoint",
             serviceEndpoint:
               network === "mainnet"
-                ? "https://triumphsynergyab2099.pinet.com/api/did/resolve"
+                ? "https://triumphsynergy.com/api/did/resolve"
                 : "http://localhost:3000/api/did/resolve",
           },
           {

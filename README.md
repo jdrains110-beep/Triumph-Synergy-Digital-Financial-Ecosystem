@@ -41,7 +41,7 @@
 [![SCHA](https://img.shields.io/badge/shands.pi%20%7C%20ufhealth.pi-66%20LOOPHOLES%20%7C%205%20AUTHORITIES-8B5CF6?style=flat-square)](#-whats-new--may-8-2026-sovereign-health-platform)
 [![Sovereign Mesh Network](https://img.shields.io/badge/Sovereign%20Mesh-WireGuard%20%7C%20ChaCha20--Poly1305%20%7C%205--Layer%20Encryption-00D4AA?style=flat-square)](#-whats-new--may-12-2026-sovereign-mesh-network)
 
-[**Pi Browser**](https://triumphsynergyab2099.pinet.com) • [**Replit Staging**](https://Triumph-Synergy.replit.app) • [**Documentation**](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#readme)
+[**Pi Browser**](https://triumphsynergy.com) • [**Replit Staging**](https://Triumph-Synergy.replit.app) • [**Documentation**](https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem#readme)
 
 </div>
 
@@ -143,7 +143,7 @@ SAIB now has its own **public-facing sovereign identity page** (`/saib`) — acc
 | Environment | URL |
 |---|---|
 | **Main platform (internal)** | `https://triumphsynergy.io/saib` |
-| **Pi Browser** | `https://triumphsynergyab2099.pinet.com/saib` |
+| **Pi Browser** | `https://triumphsynergy.com/saib` |
 | **External / direct link** | Any deployment of this Next.js app at `/saib` |
 | **Embedded** | The page works without auth — share the URL with anyone |
 
@@ -257,7 +257,7 @@ curl -X POST http://localhost:8099/saib/repo/execute \
 [![Settlement](https://img.shields.io/badge/Settlement-Pi%20Mainnet%20%2B%20Testnet%20%2B%20Stellar%20SDEX-00B4E6?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
 [![Airdrop](https://img.shields.io/badge/Pioneer%20Airdrop-First%20100K%20%7C%20Tiered%20Decay-22C55E?style=flat-square)](#-whats-new--may-24-2026-trisyn-utility-token)
 [![Audit Anchor](https://img.shields.io/badge/Audit%20Anchor-TESTNET%20LIVE%20%7C%20Pi%20Mainnet%20Pending-22C55E?style=flat-square)](https://stellar.expert/explorer/testnet/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V)
-[![Pi App Wallet](https://img.shields.io/badge/Pi%20App%20Wallet-TESTNET%20LIVE%20%E2%80%94%20GC4ZAPK6…M7XP-7C3AED?style=flat-square)](https://triumphsynergyab2099.pinet.com)
+[![Pi App Wallet](https://img.shields.io/badge/Pi%20App%20Wallet-TESTNET%20LIVE%20%E2%80%94%20GC4ZAPK6…M7XP-7C3AED?style=flat-square)](https://triumphsynergy.com)
 [![TRISYN Issuer](https://img.shields.io/badge/TRISYN%20Issuer-Pi%20App%20Wallet%20(Testnet)-F59E0B?style=flat-square)](public/.well-known/stellar.toml)
 
 **TRISYN** is the native utility token of the Triumph Synergy ecosystem — a **dual-value, hard-pegged, real-world-backed** asset that pioneers can earn, spend, trade, and redeem across every Sovereign platform. Engineered at **APEX tier** with **maximum quantum-resistant security** — every mint, redeem, transfer, and audit anchor is protected by **CNSA Suite 2.0 + ML-KEM-1024 + ML-DSA-87 + SLH-DSA-256** post-quantum cryptography, settled across the 5-layer encrypted Sovereign Mesh, and signed by the SAIB Ed25519 sovereign identity.
@@ -321,7 +321,7 @@ Every new user who authenticates with **Pi Network** automatically receives a TR
 | **Peg** | 1 TRISYN ⇄ 1 π (hard, mint/redeem at issuer) |
 | **Backing** | Pi reserves (internal) + Real-world utility (external) across 10+ platforms |
 | **Settlement Rails** | **Pi Testnet App Wallet** (LIVE — `GC4ZAPK6…M7XP`), **Pi Mainnet** (pending Developer Portal mainnet promotion), **Stellar Testnet** (live — audit anchor activated), **Stellar SDEX** (planned secondary rail) |
-| **TRISYN Issuer** | `GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP` — Pi Developer Portal-issued App Wallet for [triumphsynergyab2099.pinet.com](https://triumphsynergyab2099.pinet.com); recognised by Pi Wallet for inbound payments |
+| **TRISYN Issuer** | `GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP` — Pi Developer Portal-issued App Wallet for [triumphsynergy.com](https://triumphsynergy.com); recognised by Pi Wallet for inbound payments |
 | **Pioneer Airdrop Source** | Same as TRISYN Issuer — every Pioneer airdrop is paid from the App Wallet so SAIB can debit a single, auditable balance |
 | **Audit Anchor (Founder Identity)** | [`GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V`](https://stellar.expert/explorer/testnet/account/GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V) — sovereign identity anchor; **active on Stellar Testnet** (funding tx [`097fa75d`](https://stellar.expert/explorer/testnet/tx/097fa75daa43f58ac479067a5d2c375aef3bdd482c598de98ac9082ab58773b3)). Identity-only — NOT a runtime payment destination |
 | **Tradeable Pair** | TRISYN/π on Sovereign Pi-DEX and Stellar SDEX |
@@ -366,7 +366,7 @@ export PI_TRISYN_DISTRIBUTOR_SECRET_TESTNET=S...       # Distributor secret
 
 npm run trisyn:trustline      # 1. distributor establishes TRISYN trustline (asset goes live on-chain)
 npm run trisyn:mint           # 2. issuer mints 100,000,000,000 TRISYN → distributor
-npm run trisyn:home-domain    # 3. issuer sets home_domain → triumphsynergyab2099.pinet.com
+npm run trisyn:home-domain    # 3. issuer sets home_domain → triumphsynergy.com
 TRISYN_CONFIRM_LOCK=yes npm run trisyn:lock   # 4. issuer master weight → 0 (supply permanently locked)
 npm run trisyn:status         # 5. verify on-chain balances + flags
 
@@ -378,17 +378,17 @@ npm run trisyn:sell -- G<PIONEER_PUBKEY> 100
 
 | Requirement | Status |
 |---|---|
-| Issuer `home_domain` set to `triumphsynergyab2099.pinet.com` | Runs in step 3 above |
-| `https://triumphsynergyab2099.pinet.com/.well-known/pi.toml` served as `text/plain` | [pi.toml](public/.well-known/pi.toml) committed |
+| Issuer `home_domain` set to `triumphsynergy.com` | Runs in step 3 above |
+| `https://triumphsynergy.com/.well-known/pi.toml` served as `text/plain` | [pi.toml](public/.well-known/pi.toml) committed |
 | `pi.toml` `[[CURRENCIES]]` with `code`, `issuer`, `name`, `desc`, `image` | ✅ |
-| Token icon at `https://triumphsynergyab2099.pinet.com/icon-trisyn-512.png` | Upload before first Pi Server scan |
+| Token icon at `https://triumphsynergy.com/icon-trisyn-512.png` | Upload before first Pi Server scan |
 | Supply locked (issuer master weight = 0) | Runs in step 4 above |
 
 **Buy API:** `POST /api/trisyn/buy` (Pi Testnet) — see [app/api/trisyn/buy/route.ts](app/api/trisyn/buy/route.ts). `GET /api/trisyn/buy` returns the live manifest. The distributor secret signs only inside that endpoint; the issuer secret is **never** loaded by the API after lock.
 
 ### 🌐 Settlement & Audit
 
-- **Pi App Wallet (Testnet) `GC4ZAPK6…M7XP`** — **LIVE.** Pi Developer Portal-issued wallet for `triumphsynergyab2099.pinet.com`. Recognised by Pi Wallet for inbound payments. **All TRISYN issuance and Pioneer airdrops route through this address** so SAIB can audit a single, deterministic balance.
+- **Pi App Wallet (Testnet) `GC4ZAPK6…M7XP`** — **LIVE.** Pi Developer Portal-issued wallet for `triumphsynergy.com`. Recognised by Pi Wallet for inbound payments. **All TRISYN issuance and Pioneer airdrops route through this address** so SAIB can audit a single, deterministic balance.
 - **Pi App Wallet (Mainnet)** — activates the moment the Pi App is promoted to mainnet in the Pi Developer Portal. Until then, runtime code refuses mainnet settlement (`resolveTrisynIssuer("mainnet")` throws).
 - **Stellar SDEX** — planned secondary deep-liquidity rail; TRISYN/π and TRISYN/XLM pairs once mainnet App Wallet is provisioned.
 - **Founder Identity Anchor `GA6Z5ST…GL7V`** — sovereign identity attestation key. NOT a payment destination. Key control proven on Stellar Testnet (funded May 24, 2026, tx [`097fa75d`](https://stellar.expert/explorer/testnet/tx/097fa75daa43f58ac479067a5d2c375aef3bdd482c598de98ac9082ab58773b3)). Used only for legal attestations and HQ on-chain verification.
@@ -3494,7 +3494,7 @@ GET  /api/gateway/reserve    — Global Reserve Protocol status
 ### Quantum Fortress API
 ```bash
 # Validate token quantum resistance
-curl -X POST https://triumphsynergyab2099.pinet.com/api/quantum-fortress \
+curl -X POST https://triumphsynergy.com/api/quantum-fortress \
   -H "Content-Type: application/json" \
   -d '{"action": "validate-token", "tokenAddress": "quantum_pi_token", "tokenSymbol": "QPI"}'
 
@@ -3526,12 +3526,12 @@ curl -X POST https://triumphsynergyab2099.pinet.com/api/quantum-fortress \
 ### Pi DEX SDK API
 ```bash
 # Integrate Pi DEX smart contracts
-curl -X POST https://triumphsynergyab2099.pinet.com/api/smart-contracts \
+curl -X POST https://triumphsynergy.com/api/smart-contracts \
   -H "Content-Type: application/json" \
   -d '{"action": "integrate-pi-dex"}'
 
 # Connect to kosasih/pidexsdk repository
-curl -X POST https://triumphsynergyab2099.pinet.com/api/smart-contracts \
+curl -X POST https://triumphsynergy.com/api/smart-contracts \
   -H "Content-Type: application/json" \
   -d '{"action": "connect-pi-dex-sdk", "repo": "kosasih/pidexsdk"}'
 ```
@@ -4456,10 +4456,10 @@ SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/
 
 | Network | URL |
 |---------|-----|
-| **Mainnet (Pi Network)** | https://triumphsynergyab2099.pinet.com |
+| **Mainnet (Pi Network)** | https://triumphsynergy.com |
 | **Testnet (Replit Staging)** | https://Triumph-Synergy.replit.app |
-| **Pi Browser Mainnet** | https://triumphsynergyab2099.pinet.com |
-| **Pi Browser Testnet** | https://triumphsynergyab2099.pinet.com |
+| **Pi Browser Mainnet** | https://triumphsynergy.com |
+| **Pi Browser Testnet** | https://triumphsynergy.com |
 
 ### Replit Deployment
 

@@ -130,14 +130,14 @@ export const PI_APP_CONFIG: PiAppConfig = {
   // ============================================
   urls: {
     // PINET DOMAINS
-    pinetTestnet: "https://triumphsynergyab2099.pinet.com",
-    pinetMainnet: "https://triumphsynergyab2099.pinet.com",
-    pinetPrimary: "https://triumphsynergyab2099.pinet.com",
+    pinetTestnet: "https://triumphsynergy.com",
+    pinetMainnet: "https://triumphsynergy.com",
+    pinetPrimary: "https://triumphsynergy.com",
     // REPLIT ORIGINS
     replitMainnet: "https://Triumph-Synergy.replit.app",
     replitTestnet: "https://Triumph-Synergy.replit.app",
     // Legacy aliases
-    production: "https://triumphsynergyab2099.pinet.com",
+    production: "https://triumphsynergy.com",
     staging: "https://Triumph-Synergy.replit.app",
     development: "http://localhost:3000",
   },

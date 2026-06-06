@@ -102,25 +102,25 @@ export const partnerEcosystemConfig = {
       endpoints: {
         rest: {
           version: "v1",
-          baseUrl: "https://api.triumph-synergy.com",
+          baseUrl: "https://api.triumphsynergy.com",
           authentication: ["oauth2", "api-key", "jwt"],
         },
 
         graphql: {
           enabled: true,
-          endpoint: "https://api.triumph-synergy.com/graphql",
+          endpoint: "https://api.triumphsynergy.com/graphql",
           playground: true,
         },
 
         websocket: {
           enabled: true,
-          endpoint: "wss://api.triumph-synergy.com/ws",
+          endpoint: "wss://api.triumphsynergy.com/ws",
           features: ["real-time-updates", "bidirectional"],
         },
 
         grpc: {
           enabled: true,
-          endpoint: "grpc://api.triumph-synergy.com:50051",
+          endpoint: "grpc://api.triumphsynergy.com:50051",
           features: ["streaming", "bidirectional"],
         },
       },

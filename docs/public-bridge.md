@@ -3,7 +3,7 @@
 Real-time, **bidirectional**, outbound-only link between the local Docker Desktop
 stack and the public sites:
 
-- `https://triumphsynergyab2099.pinet.com` (Pi Network production)
+- `https://triumphsynergy.com` (Pi Network production)
 - `https://Triumph-Synergy.replit.app`     (Replit staging)
 
 Both directions are **initiated from Docker Desktop**, so this works behind
@@ -44,7 +44,7 @@ Set the **same** token on every side:
 ```bash
 # .env (Docker Desktop)
 PUBLIC_BRIDGE_TOKEN=$(openssl rand -hex 32)
-PUBLIC_BRIDGE_URLS=https://triumphsynergyab2099.pinet.com,https://Triumph-Synergy.replit.app
+PUBLIC_BRIDGE_URLS=https://triumphsynergy.com,https://Triumph-Synergy.replit.app
 PUBLIC_BRIDGE_NODE_ID=docker-desktop-primary
 ```
 
@@ -65,8 +65,8 @@ docker logs -f triumph-pi-bridge-connector | grep -E '\[bridge\]|\[public-bridge
 Expected log lines once enabled:
 
 ```
-[bridge]   public-bridge ENABLED for https://triumphsynergyab2099.pinet.com, https://Triumph-Synergy.replit.app
-[public-bridge] push loop -> https://triumphsynergyab2099.pinet.com (every 10s)
+[bridge]   public-bridge ENABLED for https://triumphsynergy.com, https://Triumph-Synergy.replit.app
+[public-bridge] push loop -> https://triumphsynergy.com (every 10s)
 [public-bridge] SSE connecting -> https://Triumph-Synergy.replit.app/api/bridge/stream
 [public-bridge] SSE connected  -> https://Triumph-Synergy.replit.app
 ```

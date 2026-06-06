@@ -304,11 +304,11 @@ export async function GET(request: NextRequest) {
     piSdkIntegration: {
       status: "always-enabled",
       domains: [
-        "triumphsynergyab2099.pinet.com",
-        "triumphsynergyab2099.pinet.com",
-        "triumphsynergyab2099.pinet.com",
+        "triumphsynergy.com",
+        "triumphsynergy.com",
+        "triumphsynergy.com",
         "Triumph-Synergy.replit.app",
-        "triumphsynergyab2099.pinet.com",
+        "triumphsynergy.com",
       ],
       note: "Pi SDK is triggered on ALL domains - no exceptions",
     },

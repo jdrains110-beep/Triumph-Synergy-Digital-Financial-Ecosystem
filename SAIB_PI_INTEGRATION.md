@@ -91,7 +91,7 @@ SAIB (Sovereign Autonomous Intelligence Blockchain) is now integrated with Pi Ne
 **POST** - Submit Pi Network metrics for SAIB analysis
 
 ```bash
-curl -X POST https://your-domain.com/api/saib/pi/learn \
+curl -X POST https://triumphsynergy.com/api/saib/pi/learn \
   -H "Authorization: Bearer $SAIB_PI_LEARNING_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -159,7 +159,7 @@ curl -X POST https://your-domain.com/api/saib/pi/learn \
 **POST** - Execute real-world actions based on SAIB insights
 
 ```bash
-curl -X POST https://your-domain.com/api/saib/pi/action \
+curl -X POST https://triumphsynergy.com/api/saib/pi/action \
   -H "Authorization: Bearer $SAIB_SECRET_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -208,7 +208,7 @@ curl -X POST https://your-domain.com/api/saib/pi/action \
 **GET** - View supported action types
 
 ```bash
-curl https://your-domain.com/api/saib/pi/action \
+curl https://triumphsynergy.com/api/saib/pi/action \
   -H "Authorization: Bearer $SAIB_SECRET_TOKEN"
 ```
 
@@ -217,7 +217,7 @@ curl https://your-domain.com/api/saib/pi/action \
 **GET** - Retrieve SAIB learning engine state
 
 ```bash
-curl https://your-domain.com/api/saib/pi/learn \
+curl https://triumphsynergy.com/api/saib/pi/learn \
   -H "Authorization: Bearer $SAIB_PI_LEARNING_TOKEN"
 ```
 

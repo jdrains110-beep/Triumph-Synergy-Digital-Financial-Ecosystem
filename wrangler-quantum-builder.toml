@@ -47,7 +47,7 @@ r2_buckets = [
 # ============================================================================
 [env.production]
 name = "saib-optimus-v4-prod"
-route = "https://your-domain.com/api/saib/quantum/*"
+route = "https://triumphsynergy.com/api/saib/quantum/*"
 zone_id = "YOUR_PRODUCTION_ZONE_ID"
 
 # Environment variables (non-sensitive)

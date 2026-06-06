@@ -189,7 +189,7 @@ chmod +x verify-saib-system.sh
 ./verify-saib-system.sh
 
 # When prompted, enter your production domain:
-# Enter production domain (e.g., https://your-domain.com): https://saib.yourcompany.com
+# Enter production domain (e.g., https://triumphsynergy.com): https://triumphsynergy.com
 
 # Tests run:
 # ✅ Endpoint connectivity (3 tests)
@@ -268,10 +268,10 @@ chmod +x deploy-production.sh
 
 ```
 Health Check:
-GET https://your-domain.com/api/saib/health
+GET https://triumphsynergy.com/api/saib/health
 
 Issue Allodial Deed:
-POST https://your-domain.com/api/saib/allodial/issue-deed
+POST https://triumphsynergy.com/api/saib/allodial/issue-deed
 Body: {
   "domain": "your-domain.pi",
   "ownerWallet": "0x...",
@@ -279,10 +279,10 @@ Body: {
 }
 
 Quantum Builder Diagnostics:
-GET https://your-domain.com/api/saib/diagnostics
+GET https://triumphsynergy.com/api/saib/diagnostics
 
 Process Background Task:
-POST https://your-domain.com/api/saib/process
+POST https://triumphsynergy.com/api/saib/process
 
 Cloudflare Worker Health:
 GET https://quantum-builder.your-subdomain.workers.dev/health

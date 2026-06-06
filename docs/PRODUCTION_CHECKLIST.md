@@ -375,4 +375,4 @@ This checklist ensures all components are production-ready for mainnet deploymen
 - **CEO**: +1-XXX-XXX-XXXX
 
 **Slack Channel**: #triumph-synergy-incidents  
-**Status Page**: https://status.triumph-synergy.com
+**Status Page**: https://status.triumphsynergy.com

@@ -41,7 +41,7 @@ REDIS_URL=redis://user:password@host:6379
 
 # Authentication
 AUTH_SECRET=your-auth-secret-min-32-chars
-NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_URL=https://triumphsynergy.com
 
 # Pi Network
 PI_API_KEY=your-pi-api-key
@@ -244,7 +244,7 @@ Add to GitHub repo Settings > Secrets:
 ### Endpoint
 
 ```bash
-curl https://your-domain.com/api/health
+curl https://triumphsynergy.com/api/health
 ```
 
 ### Expected Response

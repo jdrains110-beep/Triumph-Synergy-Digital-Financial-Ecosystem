@@ -429,8 +429,8 @@ wrangler publish --env production
 ### Step 5: Test (5 min)
 ```bash
 # Verify endpoints
-curl https://your-domain.com/api/saib/quantum/health
-curl -X POST https://your-domain.com/api/saib/quantum/process ...
+curl https://triumphsynergy.com/api/saib/quantum/health
+curl -X POST https://triumphsynergy.com/api/saib/quantum/process ...
 # Check webhook for alerts
 ```
 
@@ -454,10 +454,10 @@ POST /api/saib/allodial/issue-deed      # Deed issuance
 ### Monitoring
 ```bash
 # Check system state
-curl https://your-domain.com/api/saib/quantum/diagnostics | jq
+curl https://triumphsynergy.com/api/saib/quantum/diagnostics | jq
 
 # Manual reset
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 

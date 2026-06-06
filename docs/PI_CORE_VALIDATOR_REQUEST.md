@@ -14,7 +14,7 @@ Request: Add Triumph Synergy testnet validator to Pi Testnet quorum
 Hi Pi Core Team,
 
 We operate **Triumph Synergy**, a Pi Network ecosystem application
-(`triumphsynergyab2099.pinet.com`, app id `triumph-synergy`) and have been running a
+(`triumphsynergy.com`, app id `triumph-synergy`) and have been running a
 full Pi Stellar Core node ("testnet2", build v22.1.0) on Pi Testnet as part of
 our integration. We have promoted it from watcher to validator and would like
 to request consideration for inclusion in the Pi Testnet validator quorum.
@@ -31,7 +31,7 @@ to request consideration for inclusion in the Pi Testnet validator quorum.
 | **Home domain**   | `Triumph-Synergy.replit.app` |
 | **stellar.toml**  | https://Triumph-Synergy.replit.app/.well-known/stellar.toml |
 | **Peer address**  | `Triumph-Synergy.replit.app:31402` (NAT, currently outbound-only — port-forward in progress) |
-| **History archive** | https://history.triumphsynergyab2099.pinet.com/ (provisioning) |
+| **History archive** | https://history.triumphsynergy.com/ (provisioning) |
 
 ### Current quorum slice
 
@@ -74,7 +74,7 @@ and we are voting in SCP (`EXTERNALIZE` phase observed on every ledger).
 ### Contact
 
 - GitHub: https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem
-- Email: ops@triumphsynergyab2099.pinet.com
+- Email: ops@triumphsynergy.com
 
 Happy to provide logs, peer counts, sync metrics, or do a live walkthrough.
 

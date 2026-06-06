@@ -62,7 +62,7 @@ FIDO2/WebAuthn for passwordless authentication:
 // Registration
 const options = await generateRegistrationOptions({
   rpName: 'Triumph-Synergy',
-  rpID: 'triumph-synergy.com',
+  rpID: 'triumphsynergy.com',
   userID: user.id,
   userName: user.email,
   attestationType: 'none',
@@ -74,7 +74,7 @@ const options = await generateRegistrationOptions({
 
 // Authentication
 const options = await generateAuthenticationOptions({
-  rpID: 'triumph-synergy.com',
+  rpID: 'triumphsynergy.com',
   allowCredentials: userCredentials,
   userVerification: 'required',
 });
@@ -341,7 +341,7 @@ async function logAuditEvent(event: AuditLog) {
 
 ### Emergency Contacts
 
-- Security Team: security@triumph-synergy.com
+- Security Team: security@triumphsynergy.com
 - On-Call: Available 24/7 via PagerDuty
 - Pi Network Security: security@minepi.com
 
@@ -382,7 +382,7 @@ async function logAuditEvent(event: AuditLog) {
 
 If you discover a security vulnerability, please report it responsibly:
 
-1. **Email**: security@triumph-synergy.com
+1. **Email**: security@triumphsynergy.com
 2. **PGP Key**: Available on request
 3. **Response Time**: 24-48 hours
 4. **Bug Bounty**: Available for critical vulnerabilities

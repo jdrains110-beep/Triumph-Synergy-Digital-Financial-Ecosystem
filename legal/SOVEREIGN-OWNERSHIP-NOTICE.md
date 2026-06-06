@@ -54,8 +54,8 @@ The platform enforces sovereign provenance by combining legal controls with cryp
 | **DBA** | Triumph Synergy |
 | **EIN** | 41-6777102 |
 | **Address** | 135 Lake Como Dr, Pomona Park, FL 32181 |
-| **Website** | https://triumph-synergy.com |
-| **Pi App** | https://triumphsynergyab2099.pinet.com |
+| **Website** | https://triumphsynergy.com |
+| **Pi App** | https://triumphsynergy.com |
 | **GitHub** | https://github.com/jdrains110-beep/Triumph-Synergy-Digital-Financial-Ecosystem |
 
 ---

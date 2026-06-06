@@ -15,7 +15,7 @@
 // permitted testnet artifact in the ecosystem.
 const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
   // PINET MAINNET DOMAINS
-  "triumphsynergyab2099.pinet.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
+  "triumphsynergy.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
   // REPLIT MAINNET ORIGIN
   "triumph-synergy.replit.app": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
 };
@@ -87,7 +87,7 @@ export async function GET(request: Request) {
     
     // App URLs (mainnet-only)
     urls: {
-      mainnet_pinet: "https://triumphsynergyab2099.pinet.com",
+      mainnet_pinet: "https://triumphsynergy.com",
       mainnet_replit: "https://Triumph-Synergy.replit.app",
       current_host: hostname,
     },
