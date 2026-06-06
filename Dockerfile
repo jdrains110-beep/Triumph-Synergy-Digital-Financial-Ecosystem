@@ -30,9 +30,6 @@ COPY package.json ./
 # Use npm instead of yarn for fetching — yarn v1 hangs on [3/5] Fetching inside
 # Docker Desktop on macOS due to connection-pool exhaustion.
 # Strip the "packageManager" field so npm doesn't defer to corepack/yarn.
-# SHARP_IGNORE_GLOBAL_LIBVIPS=1 forces sharp to use its own prebuilt libvips binary
-# instead of compiling from source — avoids 20+ min native build hang on Alpine.
-ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
 RUN sed -i 's|"packageManager":.*||' package.json && \
     npm config set registry https://registry.npmjs.org && \
     npm install --legacy-peer-deps --no-fund --no-audit
@@ -58,8 +55,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install Node.js, sharp native deps, and tini
-RUN apk add --no-cache nodejs npm tini vips
+# Install Node.js and tini
+RUN apk add --no-cache nodejs npm tini
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
