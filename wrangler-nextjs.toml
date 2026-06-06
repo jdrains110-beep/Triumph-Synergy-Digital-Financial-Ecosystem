@@ -1,5 +1,5 @@
 name = "triumph-synergy-quantum"
-main = "./.next/server/index.js"
+main = ".open-next/worker.js"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
@@ -16,14 +16,15 @@ custom_domain = true
 pattern = "www.triumphsynergy.com/*"
 custom_domain = true
 
-# Environment: production
-[env.production]
-vars = { ENVIRONMENT = "production" }
+# Static assets served from .open-next/assets
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
 
 # KV Namespace Bindings (SAIB vault and backup)
 [[kv_namespaces]]
 binding = "SAIB_BACKUP_KV"
-id = "YOUR_KV_NAMESPACE_ID"  # Replace with your KV namespace ID (from wrangler kv:namespace create SAIB_BACKUP_KV)
+id = "YOUR_KV_NAMESPACE_ID"
 preview_id = "YOUR_KV_PREVIEW_ID"
 
 # R2 Bucket Bindings (SAIB vault storage)
@@ -32,20 +33,20 @@ binding = "SAIB_VAULT_R2"
 bucket_name = "saib-vault-production"
 preview_bucket_name = "saib-vault-preview"
 
-# Build configuration
+# Build configuration — uses opennextjs/cloudflare
 [build]
-command = "npm run build"
+command = "npx @opennextjs/cloudflare build"
 cwd = "./"
 
 # Triggers and routes (if using Cron)
 [[triggers.crons]]
-cron = "0 0 * * *"  # Daily at midnight UTC
+cron = "0 0 * * *"
 
-# Environment variables (set in Cloudflare Dashboard or here)
-[env.production.vars]
-SUPABASE_URL = "https://your-project.supabase.co"
+# Top-level vars
+[vars]
+ENVIRONMENT = "production"
 NEXT_PUBLIC_PI_RPC_MAINNET = "https://rpc.minepi.com"
 NEXT_PUBLIC_PI_RPC_TESTNET = "https://rpc.testnet.minepi.com"
 
 # Note: Secret environment variables (SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY)
-# should be set via: wrangler secret put SECRET_NAME --env production
+# should be set via: wrangler secret put SECRET_NAME
