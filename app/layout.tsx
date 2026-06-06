@@ -15,7 +15,7 @@ import "@/lib/security/boot";
 import "./globals.css";
 
 const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.replit.app";
+  process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy.com";
 
 export const metadata: Metadata = {
   // Canonical URL driven by NEXT_PUBLIC_APP_URL at deploy time.
