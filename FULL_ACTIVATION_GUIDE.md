@@ -250,13 +250,13 @@ chmod +x verify-saib-system.sh
 - [ ] **Manual endpoint checks**
   ```bash
   # Health check (should return 200)
-  curl https://your-domain.com/api/saib/quantum/health
+  curl https://triumphsynergy.com/api/saib/quantum/health
   
   # Diagnostics (should return state snapshot)
-  curl https://your-domain.com/api/saib/quantum/diagnostics
+  curl https://triumphsynergy.com/api/saib/quantum/diagnostics
   
   # Deed endpoint (should return 200 or 401)
-  curl https://your-domain.com/api/saib/allodial/issue-deed
+  curl https://triumphsynergy.com/api/saib/allodial/issue-deed
   ```
 
 ### PHASE 6: PRODUCTION ACTIVATION
@@ -274,7 +274,7 @@ chmod +x verify-saib-system.sh
 - [ ] **First Live Test**
   ```bash
   # Send test deed issuance
-  curl -X POST https://your-domain.com/api/saib/allodial/issue-deed \
+  curl -X POST https://triumphsynergy.com/api/saib/allodial/issue-deed \
     -H "Authorization: Bearer YOUR_TOKEN" \
     -H "Content-Type: application/json" \
     -d '{"domain":"test.pi","ownerAddress":"0x1234...","tierMultiplier":1}'
@@ -363,10 +363,10 @@ POST /api/saib/quantum/admin/reset
 
 ```bash
 # Check system health
-curl https://your-domain.com/api/saib/quantum/health | jq
+curl https://triumphsynergy.com/api/saib/quantum/health | jq
 
 # Check full diagnostics
-curl https://your-domain.com/api/saib/quantum/diagnostics | jq
+curl https://triumphsynergy.com/api/saib/quantum/diagnostics | jq
 
 # Check recent audit logs (in Supabase)
 SELECT * FROM allodial_land_deeds LIMIT 10;
@@ -398,7 +398,7 @@ wrangler kv:key get ACTIVE_DYNAMIC_STRATEGY_FLAG --binding SAIB_BACKUP_KV --env 
 If system gets stuck:
 ```bash
 # Manual admin reset (requires ADMIN_RESET_TOKEN)
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
 
 # This resets all strategy mutations to defaults

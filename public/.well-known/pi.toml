@@ -1,5 +1,5 @@
 # Pi Token Manifest — TRISYN Utility Token
-# Served at https://triumphsynergyab2099.pinet.com/.well-known/pi.toml
+# Served at https://triumphsynergy.com/.well-known/pi.toml
 #
 # Pi Server scans this file to list TRISYN in Pi Wallet. The issuer
 # account's home_domain must point to this domain (see
@@ -12,7 +12,7 @@ code="TRISYN"
 issuer="GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP"
 name="Triumph Synergy"
 desc="TRISYN is the native utility + value token of the Triumph Synergy Digital Financial Ecosystem. Hard-pegged 1 TRISYN ⇄ 1 π at the issuer. Earned, spent, traded, and redeemed across every Sovereign platform (housing, health, delivery, commerce, gaming, travel, aviation, banking, jobs). Pioneer airdrop distributes a meaningful tiered grant to the first 100,000 KYC-verified Pioneers."
-image="https://triumphsynergyab2099.pinet.com/icon-trisyn-512.png"
+image="https://triumphsynergy.com/icon-trisyn-512.png"
 display_decimals=7
 fixed_number=100000000000
 is_asset_anchored=true

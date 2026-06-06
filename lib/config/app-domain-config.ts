@@ -24,8 +24,8 @@ function getCanonicalAppUrl(): string {
     const hostname = replitHost.toLowerCase();
 
     // MAINNET (Pi Network primary)
-    if (hostname === "triumphsynergyab2099.pinet.com") {
-      return "https://triumphsynergyab2099.pinet.com";
+    if (hostname === "triumphsynergy.com") {
+      return "https://triumphsynergy.com";
     }
 
     // TESTNET / STAGING (Replit)
@@ -42,7 +42,7 @@ function getCanonicalAppUrl(): string {
   }
 
   // Fallback for server-side without env vars
-  return "https://triumphsynergyab2099.pinet.com";
+  return "https://triumphsynergy.com";
 }
 
 /**
@@ -65,17 +65,17 @@ function getActualHostname(): string {
     try {
       return new URL(process.env.NEXT_PUBLIC_APP_URL).hostname;
     } catch {
-      return "triumphsynergyab2099.pinet.com";
+      return "triumphsynergy.com";
     }
   }
 
-  return "triumphsynergyab2099.pinet.com";
+  return "triumphsynergy.com";
 }
 
 /**
  * Detect if this is testnet or mainnet based on hostname.
  * Canonical mapping:
- *   triumphsynergyab2099.pinet.com   → mainnet (Pi Network primary)
+ *   triumphsynergy.com   → mainnet (Pi Network primary)
  *   triumph-synergy.replit.app       → testnet (staging)
  *   localhost / 127.0.0.1            → testnet (dev)
  */
@@ -83,7 +83,7 @@ function getEnvironmentNetwork(): "testnet" | "mainnet" {
   const hostname = getActualHostname().toLowerCase();
 
   // MAINNET (Pi Network primary)
-  if (hostname === "triumphsynergyab2099.pinet.com") {
+  if (hostname === "triumphsynergy.com") {
     return "mainnet";
   }
 

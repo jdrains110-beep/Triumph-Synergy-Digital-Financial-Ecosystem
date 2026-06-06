@@ -12,7 +12,7 @@ NODE_ENV=production
 NEXT_TELEMETRY_DISABLED=1
 
 # Application URL
-NEXTAUTH_URL=https://triumph-synergy.com
+NEXTAUTH_URL=https://triumphsynergy.com
 NEXTAUTH_SECRET=<generate_with_openssl_rand_-base64_32>
 
 # Auth Secret
@@ -209,7 +209,7 @@ LOG_LEVEL=info
 LOG_FORMAT=json
 
 # CORS
-ALLOWED_ORIGINS=https://triumph-synergy.com,https://www.triumph-synergy.com
+ALLOWED_ORIGINS=https://triumphsynergy.com,https://www.triumphsynergy.com
 ```
 
 ---
@@ -400,4 +400,4 @@ Before deploying to production, ensure:
 
 ---
 
-For more help, contact: support@triumph-synergy.com
+For more help, contact: support@triumphsynergy.com

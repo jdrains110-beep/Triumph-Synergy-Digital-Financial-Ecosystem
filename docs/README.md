@@ -110,7 +110,7 @@ REDIS_URL=redis://...
 
 # Authentication
 AUTH_SECRET=your-auth-secret
-NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_URL=https://triumphsynergy.com
 ```
 
 ## Scripts

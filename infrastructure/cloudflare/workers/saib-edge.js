@@ -11,7 +11,7 @@
  * and KV/Queue failover when origin delivery is unavailable.
  *
  * Bind in wrangler.toml / Cloudflare dashboard:
- *   - ORIGIN            (var, e.g. https://triumphsynergy.app)
+ *   - ORIGIN            (var, e.g. https://triumphsynergy.com)
  *   - NEXTJS_APP_URL    (var, direct Next.js origin for /api/saib/enforce)
  *   - SAIB_SECRET_TOKEN (secret, Founder/operator token accepted by Next.js)
  *   - SAIB_CACHE        (KV namespace, cache + optional failover fallback)

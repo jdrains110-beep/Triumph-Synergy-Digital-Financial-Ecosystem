@@ -6,7 +6,7 @@
  * 1. Replit deployment is live and accessible
  * 2. Pi SDK is properly injected in all domains
  * 3. Domain mappings are correct (testnet vs mainnet)
- * 4. Connection to PINET primary domain (triumphsynergyab2099.pinet.com)
+ * 4. Connection to PINET primary domain (triumphsynergy.com)
  * 5. Pi App Studio integration status
  */
 
@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 const PRODUCTION_DOMAINS = {
   mainnet: {
     replit: "Triumph-Synergy.replit.app",
-    pinet: ["triumphsynergyab2099.pinet.com", "triumphsynergyab2099.pinet.com"],
+    pinet: ["triumphsynergy.com", "triumphsynergy.com"],
   },
   // Mainnet-only mandate — testnet domains intentionally empty so the
   // verification path can never resolve to a testnet network.
@@ -25,7 +25,7 @@ const PRODUCTION_DOMAINS = {
   },
 };
 
-const PRIMARY_MAINNET_DOMAIN = "triumphsynergyab2099.pinet.com";
+const PRIMARY_MAINNET_DOMAIN = "triumphsynergy.com";
 
 async function verifyDomainAccessibility(domain: string): Promise<{
   accessible: boolean;
@@ -212,7 +212,7 @@ export async function GET(request: NextRequest) {
       );
   }
 
-  // Verify triumphsynergyab2099.pinet.com is primary mainnet
+  // Verify triumphsynergy.com is primary mainnet
   verification.piAppStudioIntegration = {
     primaryDomain: PRIMARY_MAINNET_DOMAIN,
     isTrueMainnet:

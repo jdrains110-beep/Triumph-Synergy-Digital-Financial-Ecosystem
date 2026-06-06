@@ -10,7 +10,7 @@
  * =====================================
  *
  * MAINNET DOMAINS (sandbox: false):
- *   - triumphsynergyab2099.pinet.com → Primary production (Pi Network)
+ *   - triumphsynergy.com → Primary production (Pi Network)
  *
  * TESTNET DOMAINS (sandbox: true):
  *   - Triumph-Synergy.replit.app     → Staging / testnet deployment
@@ -36,7 +36,7 @@ const DOMAIN_CONFIG: Record<
   // ==========================================
   // MAINNET DOMAINS
   // ==========================================
-  "triumphsynergyab2099.pinet.com": {
+  "triumphsynergy.com": {
     network: "mainnet",
     sandbox: false,
     description: "Pi Network Mainnet Primary (pinet.com)",
@@ -204,7 +204,7 @@ export function generatePiInitScript(): string {
     // EXPLICIT DOMAIN MAPPING - SINGLE SOURCE OF TRUTH
     var domains = {
       // MAINNET
-      'triumphsynergyab2099.pinet.com': { network: 'mainnet', sandbox: false },
+      'triumphsynergy.com': { network: 'mainnet', sandbox: false },
       // TESTNET / STAGING
       'triumph-synergy.replit.app': { network: 'testnet', sandbox: true },
       'localhost': { network: 'testnet', sandbox: true },

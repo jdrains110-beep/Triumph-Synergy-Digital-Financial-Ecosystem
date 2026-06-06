@@ -98,21 +98,21 @@ export const STREAMING_CONFIG = {
         name: "Primary",
         url:
           process.env.NEXT_PUBLIC_CDN_PRIMARY ||
-          "https://cdn.triumph-synergy.com",
+          "https://cdn.triumphsynergy.com",
         region: "US-EAST",
       },
       {
         name: "Secondary",
         url:
           process.env.NEXT_PUBLIC_CDN_SECONDARY ||
-          "https://cdn2.triumph-synergy.com",
+          "https://cdn2.triumphsynergy.com",
         region: "EU-WEST",
       },
       {
         name: "Asia-Pacific",
         url:
           process.env.NEXT_PUBLIC_CDN_APAC ||
-          "https://cdn-apac.triumph-synergy.com",
+          "https://cdn-apac.triumphsynergy.com",
         region: "APAC",
       },
     ],

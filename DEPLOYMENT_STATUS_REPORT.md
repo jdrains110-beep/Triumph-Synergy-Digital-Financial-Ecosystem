@@ -295,7 +295,7 @@ Deletions: 469 lines
   - Build: `npm run build`
   - Deploy: `vercel deploy --prod` (or your platform)
   - Verify: GCV endpoint responding
-  - URL: `https://your-domain.com/api/saib/gcv/process-transaction`
+  - URL: `https://triumphsynergy.com/api/saib/gcv/process-transaction`
   - Estimated Time: 15 minutes
 
 - [ ] **4. Dashboard Route Activation**
@@ -382,7 +382,7 @@ Deletions: 469 lines
 
 ### Example 1: Founder Transaction (Perfect Trust)
 ```bash
-curl -X POST https://your-domain.com/api/saib/gcv/process-transaction \
+curl -X POST https://triumphsynergy.com/api/saib/gcv/process-transaction \
   -H "Authorization: Bearer $SAIB_SECRET_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -408,7 +408,7 @@ Response:
 
 ### Example 2: Verified Peer Transaction
 ```bash
-curl -X POST https://your-domain.com/api/saib/gcv/process-transaction \
+curl -X POST https://triumphsynergy.com/api/saib/gcv/process-transaction \
   -H "Authorization: Bearer $SAIB_SECRET_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

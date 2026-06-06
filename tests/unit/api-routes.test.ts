@@ -199,7 +199,7 @@ describe("Biometric Authentication API", () => {
           body: {
             success: true,
             challenge: "base64-encoded-challenge",
-            rpId: "triumph-synergy.com",
+            rpId: "triumphsynergy.com",
             userId: body.userId,
             userName: body.userName || "user",
           },
@@ -216,7 +216,7 @@ describe("Biometric Authentication API", () => {
       expect(result.status).toBe(200);
       expect(result.body.success).toBe(true);
       expect(result.body.challenge).toBeDefined();
-      expect(result.body.rpId).toBe("triumph-synergy.com");
+      expect(result.body.rpId).toBe("triumphsynergy.com");
     });
   });
 

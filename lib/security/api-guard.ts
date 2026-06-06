@@ -41,10 +41,10 @@ export async function requireAuth(
 // ============================================================================
 
 const ALLOWED_ORIGINS = new Set([
-  "https://triumphsynergyab2099.pinet.com",
-  "https://triumphsynergyab2099.pinet.com",
-  "https://triumphsynergyab2099.pinet.com",
-  "https://triumphsynergyab2099.pinet.com",
+  "https://triumphsynergy.com",
+  "https://triumphsynergy.com",
+  "https://triumphsynergy.com",
+  "https://triumphsynergy.com",
   "https://Triumph-Synergy.replit.app",
   "http://localhost:3000",
   "http://127.0.0.1:3000",

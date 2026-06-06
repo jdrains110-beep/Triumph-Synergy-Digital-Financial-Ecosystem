@@ -1,7 +1,7 @@
 # Pi Network Domain Verification Guide
 
 ## Current Status
-- **Domain**: triumphsynergyab2099.pinet.com
+- **Domain**: triumphsynergy.com
 - **App ID**: Check your environment variables (NEXT_PUBLIC_PI_APP_ID)
 
 ## Steps to Complete Domain Verification
@@ -22,7 +22,7 @@
 
 1. Click on your app (or create new one)
 2. Go to "App Settings" or "Configuration"
-3. Add domain: `triumphsynergyab2099.pinet.com`
+3. Add domain: `triumphsynergy.com`
 4. Save changes
 
 ### 3. Domain Verification Options
@@ -81,7 +81,7 @@ You must complete verification for BOTH:
 After completing verification:
 
 1. Open Pi Browser on your mobile device
-2. Navigate to: https://triumphsynergyab2099.pinet.com
+2. Navigate to: https://triumphsynergy.com
 3. Confirm Pi Browser detection and SDK initialization on the main app
 
 ### 7. Common Issues
@@ -119,8 +119,8 @@ yarn build
 git push origin main   # Replit pulls automatically
 
 # Test the verification endpoint
-curl https://triumphsynergyab2099.pinet.com/.well-known/pi-domain-verification.txt
-curl https://triumphsynergyab2099.pinet.com/api/pi/verify
+curl https://triumphsynergy.com/.well-known/pi-domain-verification.txt
+curl https://triumphsynergy.com/api/pi/verify
 ```
 
 ### 10. Documentation References
@@ -135,7 +135,7 @@ curl https://triumphsynergyab2099.pinet.com/api/pi/verify
 
 - [ ] Registered app in Pi Developer Portal (testnet)
 - [ ] Registered app in Pi Developer Portal (mainnet)
-- [ ] Added domain: triumphsynergyab2099.pinet.com
+- [ ] Added domain: triumphsynergy.com
 - [ ] Completed domain verification (testnet)
 - [ ] Completed domain verification (mainnet)
 - [ ] Updated environment variables with correct App IDs

@@ -148,7 +148,7 @@ The Quantum Builder runs **4 comprehensive diagnostic tests**:
 ```toml
 [env.production]
 name = "saib-quantum-builder-prod"
-route = "https://your-domain.com/api/saib/quantum/*"
+route = "https://triumphsynergy.com/api/saib/quantum/*"
 zone_id = "YOUR_ZONE_ID"
 
 [env.production.env]
@@ -188,7 +188,7 @@ EMERGENCY_HEALTH_THRESHOLD=25    # Switch to emergency mode below 25%
 
 ### Endpoint 1: Health Check (Lightweight)
 ```bash
-curl https://your-domain.com/api/saib/quantum/health \
+curl https://triumphsynergy.com/api/saib/quantum/health \
   -H "X-SAIB-ID: SAIB-OPTIMUS-001"
 ```
 
@@ -207,7 +207,7 @@ curl https://your-domain.com/api/saib/quantum/health \
 
 ### Endpoint 2: Diagnostics (Current State)
 ```bash
-curl https://your-domain.com/api/saib/quantum/diagnostics \
+curl https://triumphsynergy.com/api/saib/quantum/diagnostics \
   -H "X-SAIB-ID: SAIB-OPTIMUS-001"
 ```
 
@@ -232,7 +232,7 @@ curl https://your-domain.com/api/saib/quantum/diagnostics \
 
 ### Endpoint 3: Process Deed (Background)
 ```bash
-curl -X POST https://your-domain.com/api/saib/quantum/process \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/process \
   -H "X-SAIB-ID: SAIB-OPTIMUS-001" \
   -H "Content-Type: application/json" \
   -d '{
@@ -265,7 +265,7 @@ curl -X POST https://your-domain.com/api/saib/quantum/process \
 
 ### Endpoint 4: Admin Reset (Authorized)
 ```bash
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
   -H "Content-Type: application/json"
 ```
@@ -393,7 +393,7 @@ npm run build
 wrangler publish --env production
 
 # Verify deployment
-curl https://your-domain.com/api/saib/quantum/health
+curl https://triumphsynergy.com/api/saib/quantum/health
 ```
 
 ### Step 4: Configure Webhook
@@ -405,7 +405,7 @@ Set `DISPATCH_WEBHOOK_URL` in your Cloudflare Workers dashboard:
 ### Step 5: Test Autonomous Correction
 ```bash
 # Send test request
-curl -X POST https://your-domain.com/api/saib/quantum/process \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/process \
   -H "Content-Type: application/json" \
   -d '{"domain":"test.pi","deedCertificateId":"ALLODIAL-DEED-test"}'
 
@@ -421,7 +421,7 @@ wrangler kv:key list --binding SAIB_BACKUP_KV
 ### Manual Reset (Admin)
 Resets all mutations to defaults:
 ```bash
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer $ADMIN_RESET_TOKEN"
 ```
 
@@ -447,7 +447,7 @@ const snapshot = await SAIBQuantumBuilder.getSystemStateSnapshot(env);
 
 ### Check System State
 ```bash
-curl https://your-domain.com/api/saib/quantum/diagnostics | jq .currentState
+curl https://triumphsynergy.com/api/saib/quantum/diagnostics | jq .currentState
 ```
 
 ### View Audit History
@@ -495,7 +495,7 @@ BLOCKCHAIN_RPC_URL = "https://eth.llamarpc.com"
 ### Issue: System stuck in degraded mode
 **Solution**: Manual reset
 ```bash
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer $ADMIN_RESET_TOKEN"
 ```
 

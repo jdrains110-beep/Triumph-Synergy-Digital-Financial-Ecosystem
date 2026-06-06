@@ -17,8 +17,8 @@ const APP_ID = process.env.NEXT_PUBLIC_PI_APP_ID || "triumph-synergy";
 const PLATFORM_VERSION = "2.0.0";
 
 const DOMAIN_MAP = {
-  primary: "triumphsynergyab2099.pinet.com",
-  testnet: "triumphsynergyab2099.pinet.com",
+  primary: "triumphsynergy.com",
+  testnet: "triumphsynergy.com",
   replit: "Triumph-Synergy.replit.app",
 };
 

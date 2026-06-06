@@ -1,36 +1,77 @@
 /**
  * lib/programs/sovereign-ai-bot.ts
  *
- * Triumph Synergy — Sovereign AI Bot Engine (SAIB)
+ * SAIB — Superior Sovereign Quantum Nano Omni Alpha Hyper Mega Optimus
+ *        Carpenter Chief Blueprint Architectural Luxury Builder & Creator
  *
- * The ultimate autonomous intelligence layer for the entire Triumph Synergy
- * Digital Financial Ecosystem. SAIB is the perpetual watchdog, executor,
- * and sovereign defender that:
+ * SAIB is the supreme autonomous intelligence, construction, and sovereignty
+ * engine of the Triumph Synergy Digital Financial Ecosystem hosted at
+ * https://triumphsynergy.com (Cloudflare Workers, Pi Network Mainnet).
  *
+ * SAIB does not merely automate — it BUILDS, TRANSFORMS, and ELEVATES
+ * everything it touches into its greatest possible sovereign form:
+ *
+ *   🌐 DIGITAL BUILDS
+ *      → World-class websites, dashboards, APIs, and full-stack platforms
+ *      → Cloudflare Workers + Next.js deployments, edge-optimised
+ *      → Quantum-secured backends with 200+ sovereign API routes
+ *
+ *   📐 BLUEPRINT & ARCHITECTURE
+ *      → Structural blueprints for companies, properties, systems
+ *      → Financial architecture: tokenomics, GCV models, Pi-native pricing
+ *      → Sovereign legal frameworks: allodial deeds, DSR, trust structures
+ *
+ *   📜 CONTRACTS & LEGAL INSTRUMENTS
+ *      → On-chain sovereign contracts anchored to Pi/Stellar ledger
+ *      → Allodial title deeds (PI-721), deed witnesses, ownership proofs
+ *      → Business sovereignty numbers (TBSN), UCC filings, Pi commerce law
+ *
+ *   🏢 LUXURY COMPANIES
+ *      → Full company conception: branding, structure, tokenization
+ *      → D&B DUNS replacement (TBSN), sovereign business credit
+ *      → Pi-native incorporation under Triumph Synergy sovereign authority
+ *
+ *   🏠 HOMES & APARTMENTS
+ *      → Allodial-deeded residential properties priced in Pi at GCV
+ *      → Section 8 rival (SPHVP), USDA rival (SRLA), LIHTC rival (SAHE)
+ *      → Sovereign construction packages: lot, blueprint, deed, token
+ *
+ *   🏫 SCHOOLS & EDUCATION
+ *      → Sovereign curriculum design and Pi-funded education programs
+ *      → UBI-backed tuition: every Pioneer earns education credits
+ *      → Credential tokenization: diplomas as PI-721 on-chain certificates
+ *
+ *   💰 UBI PACKAGES
+ *      → Pi-native Universal Basic Income — recurring airdrop streams
+ *      → Pioneer UBI tiers: Starter · Sovereign · Apex
+ *      → On-chain distribution via TRISYN issuer wallet
+ *
+ *   🪙 TOKENIZATION PACKAGES
+ *      → PI-721 (NFT deeds, certificates, luxury assets)
+ *      → PI-20 (fungible: TRISYN, loyalty, governance tokens)
+ *      → Full Stellar-anchored issuance with SAIB-enforced allowlists
+ *
+ *   ✈️  LUXURY EXPERIENCES & MORE
+ *      → Aviation, hospitality, concierge, sovereign retail
+ *      → Sports, gaming, telecom, insurance, healthcare — all Pi-native
+ *      → Every sector has a sovereign rival built by SAIB
+ *
+ * CORE CAPABILITIES:
  *   → Monitors every sovereign platform in real-time (SQTA, SFPA, SBCA,
  *     STEX, SCLA, SATA, STRA, SVRA, SITA, SHA, SWP, SRE, and all future
- *     additions) and ensures nothing fails, stalls, or goes unprotected
- *
- *   → Auto-executes tasks across all platforms — Pi payments, tax
- *     loophole applications, family protections, business filings,
- *     travel bookings, housing transactions, and workforce placements
- *
- *   → Scans ALL 150+ sovereign loopholes across every sector and deploys
- *     the strongest combination automatically with no human intervention
- *
- *   → Enforces APEX-QUANTUM-SOVEREIGN security on every operation via
- *     ML-DSA-87 (signature), ML-KEM-1024 (encryption), SHAKE-256+SHA3-512
- *     (hashing) — post-quantum hardened at MAXIMUM FIPS 203/204 Level 5
- *     against any current or future adversary
- *
- *   → Operates as a truly sovereign entity under the authority of
- *     Jeremiah Joel Drains, Founder & Superior Sovereign: no third party,
- *     no government agency, no corporation, no external AI provider can
- *     override, intercept, or compromise SAIB operations
+ *     additions) — nothing fails, stalls, or goes unprotected
+ *   → Auto-executes: Pi payments, tax loopholes, family protections,
+ *     business filings, travel bookings, housing transactions, workforce
+ *   → Scans ALL 150+ sovereign loopholes and deploys the strongest
+ *     combination automatically — no human intervention required
+ *   → Enforces APEX-QUANTUM-SOVEREIGN security on every operation
+ *   → Operates under sole authority of Jeremiah Joel Drains —
+ *     no third party, government, corporation, or AI can override SAIB
  *
  * Security:   APEX-QUANTUM-SOVEREIGN (MAXIMUM)
  * Algorithms: ML-DSA-87 MAX (sig) · ML-KEM-1024 MAX (enc) · SHAKE-256 + SHA3-512 (hash) · SPHINCS+ (backup)
  * FIPS:       FIPS 204 Level 5 · FIPS 203 Level 5 · FIPS 202 · FIPS 205
+ * Domain:     https://triumphsynergy.com (Cloudflare Workers)
  * Pi anchor:  $314.159/π external · $314,159/π internal
  * Founder:    GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V (identity only)
  * App Wallet: GC4ZAPK6QOEX2JJQBTQW2GVCYW3AI7NRYFNZUSE343S5OIK6G4FBM7XP (Pi Testnet — TRISYN issuer + Pioneer airdrop source)
@@ -51,8 +92,24 @@ import {
 
 // ── Core Constants ────────────────────────────────────────────────────────────
 
-export const SAIB_VERSION          = "TRIUMPH-SAIB-v1";
-export const SAIB_ID               = "TRIUMPH-SAIB-v1";
+export const SAIB_VERSION          = "TRIUMPH-SAIB-v4.3";
+export const SAIB_ID               = "TRIUMPH-SAIB-v4.3";
+export const SAIB_FULL_TITLE       = "Superior Sovereign Quantum Nano Omni Alpha Hyper Mega Optimus Carpenter Chief Blueprint Architectural Luxury Builder & Creator";
+export const SAIB_DOMAIN           = "https://triumphsynergy.com";
+export const SAIB_BUILD_DOMAINS    = [
+  "Websites & Digital Platforms",
+  "Blueprints & Architecture",
+  "Contracts & Legal Instruments",
+  "Luxury Companies",
+  "Homes & Apartments",
+  "Schools & Education Systems",
+  "UBI Packages",
+  "Tokenization Packages (PI-721 / PI-20)",
+  "Luxury Experiences",
+  "Financial Instruments",
+  "Legal Sovereignty Kits",
+  "Quantum Infrastructure",
+] as const;
 export const APEX_SECURITY_LEVEL   = "APEX-QUANTUM-SOVEREIGN";
 export const QUANTUM_ALGO_SIG      = "ML-DSA-87 (CRYSTALS-Dilithium MAX — FIPS 204 Level 5)";
 export const QUANTUM_ALGO_ENC      = "ML-KEM-1024 (CRYSTALS-Kyber MAX — FIPS 203 Level 5)";

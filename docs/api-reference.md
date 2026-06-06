@@ -6,7 +6,7 @@ Triumph-Synergy provides a comprehensive REST API for payment processing, ecosys
 
 ## Base URL
 
-- **Production**: `https://triumphsynergyab2099.pinet.com/api`
+- **Production**: `https://triumphsynergy.com/api`
 - **Development**: `http://localhost:3000/api`
 
 ## Authentication
@@ -169,7 +169,7 @@ Start biometric credential registration.
 {
   "success": true,
   "challenge": "base64-encoded-challenge",
-  "rpId": "triumph-synergy.com",
+  "rpId": "triumphsynergy.com",
   "userId": "user-123",
   "pubKeyCredParams": [...]
 }

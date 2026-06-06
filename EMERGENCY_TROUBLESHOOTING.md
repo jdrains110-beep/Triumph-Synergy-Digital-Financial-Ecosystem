@@ -51,8 +51,8 @@ vercel deploy --prod   # Re-deploy Next.js
 wrangler publish --env production  # Re-deploy Worker
 
 # Verify endpoints exist
-curl https://your-domain.com/api/saib/quantum/health
-curl https://your-domain.com/api/saib/allodial/issue-deed
+curl https://triumphsynergy.com/api/saib/quantum/health
+curl https://triumphsynergy.com/api/saib/allodial/issue-deed
 ```
 
 **If still failing**:
@@ -107,10 +107,10 @@ vercel logs
 wrangler tail --env production
 
 # Test with verbose curl
-curl -v https://your-domain.com/api/saib/quantum/health
+curl -v https://triumphsynergy.com/api/saib/quantum/health
 
 # Check response headers
-curl -i https://your-domain.com/api/saib/quantum/health
+curl -i https://triumphsynergy.com/api/saib/quantum/health
 ```
 
 **Common causes**:
@@ -207,7 +207,7 @@ wrangler kv:key list --binding SAIB_BACKUP_KV --env production | grep audit
 **If no background execution**:
 ```bash
 # Test process endpoint manually
-curl -X POST https://your-domain.com/api/saib/quantum/process \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/process \
   -H "X-SAIB-ID: DEBUG-001" \
   -H "Content-Type: application/json" \
   -d '{"domain":"test.pi","deedCertificateId":"DEBUG-TEST"}'
@@ -238,7 +238,7 @@ wrangler kv:key delete ACTIVE_DYNAMIC_STRATEGY_FLAG --binding SAIB_BACKUP_KV --e
 wrangler kv:key delete MUTATION_FORCE_BACKOFF_MS --binding SAIB_BACKUP_KV --env production
 
 # Or use admin endpoint
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer $ADMIN_RESET_TOKEN"
 ```
 
@@ -334,7 +334,7 @@ wrangler kv:key get MUTATION_LOCKDOWN_MODE \
 **Manual reset**:
 ```bash
 # Option 1: Use admin endpoint (requires token)
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer $ADMIN_RESET_TOKEN"
 
 # Option 2: Delete KV keys manually
@@ -392,7 +392,7 @@ BEARER="Bearer $SAIB_SECRET_TOKEN"
 echo $BEARER
 
 # Test with bearer token
-curl -X GET https://your-domain.com/api/saib/quantum/health \
+curl -X GET https://triumphsynergy.com/api/saib/quantum/health \
   -H "Authorization: $BEARER"
 ```
 
@@ -410,7 +410,7 @@ echo $NEW_TOKEN
 sleep 30
 
 # Test again with new token
-curl -X GET https://your-domain.com/api/saib/quantum/health \
+curl -X GET https://triumphsynergy.com/api/saib/quantum/health \
   -H "Authorization: Bearer $NEW_TOKEN"
 ```
 
@@ -421,7 +421,7 @@ echo "Expected: $ADMIN_RESET_TOKEN"
 
 # Test exact token match
 ADMIN_TOKEN="your-token-here"
-curl -X POST https://your-domain.com/api/saib/quantum/admin/reset \
+curl -X POST https://triumphsynergy.com/api/saib/quantum/admin/reset \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 
 # If still 403:

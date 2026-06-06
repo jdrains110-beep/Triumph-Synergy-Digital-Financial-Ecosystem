@@ -163,7 +163,7 @@ FOUNDER_BACKUP_KEY=0x...   # Backup key for emergencies
 SYSTEM_TREASURY_ADDRESS=0x...
 MAX_GAS_PRICE_WEI=150000000000
 BLOCKCHAIN_RPC_URL=https://rpc.base.org
-NEXTJS_APP_URL=https://your-domain.com
+NEXTJS_APP_URL=https://triumphsynergy.com
 
 # Supabase (same as before)
 SUPABASE_URL=https://your-project.supabase.co
@@ -207,7 +207,7 @@ npm run build
 vercel deploy --prod
 
 # 3. Verify endpoints are live
-curl https://your-domain.com/api/saib/gcv/process-transaction
+curl https://triumphsynergy.com/api/saib/gcv/process-transaction
 
 # Should return:
 # {
@@ -241,7 +241,7 @@ Or use both (side-by-side):
 
 ```bash
 # Test founder transaction (perfect trust score)
-curl -X POST https://your-domain.com/api/saib/gcv/process-transaction \
+curl -X POST https://triumphsynergy.com/api/saib/gcv/process-transaction \
   -H "Authorization: Bearer $SAIB_SECRET_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -411,7 +411,7 @@ Declaration: This system is sovereign. Triumph Synergy belongs to us.
 
 ```bash
 # Check authorization
-curl -X GET https://your-domain.com/api/saib/gcv/process-transaction
+curl -X GET https://triumphsynergy.com/api/saib/gcv/process-transaction
 
 # Verify Supabase connection
 psql -h your-project.supabase.co -U postgres -d postgres \
@@ -508,12 +508,12 @@ vercel deploy --prod
 # (Copy supabase/schema-setup.sql content)
 
 # 4. Test founder transaction
-curl -X POST https://your-domain.com/api/saib/gcv/process-transaction \
+curl -X POST https://triumphsynergy.com/api/saib/gcv/process-transaction \
   -H "Authorization: Bearer $SAIB_SECRET_TOKEN" \
   -d '{"userTrustGraphScore":"100","tokenQuantityWei":"100000000","claimedPublicKey":"'$FOUNDER_PRIMARY_KEY'"}'
 
 # 5. Access dashboard
-https://your-domain.com/dashboard-gcv
+https://triumphsynergy.com/dashboard-gcv
 ```
 
 ---

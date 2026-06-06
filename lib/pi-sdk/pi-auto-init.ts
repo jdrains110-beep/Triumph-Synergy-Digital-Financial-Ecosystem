@@ -31,7 +31,7 @@ export function getPiInitializationScript(): string {
     let network = 'mainnet';
     
     // MAINNET (Pi Network primary)
-    if (hostname === 'triumphsynergyab2099.pinet.com') {
+    if (hostname === 'triumphsynergy.com') {
       isSandbox = false;
       network = 'mainnet';
     }

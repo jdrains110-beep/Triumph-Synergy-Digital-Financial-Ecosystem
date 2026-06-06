@@ -387,7 +387,7 @@ export SIG_A=$(echo -n "$DEED_HASH" | openssl dgst -sha256 -hmac "$SAIB_WITNESS_
 export SIG_B=$(echo -n "$DEED_HASH" | openssl dgst -sha256 -hmac "$SAIB_WITNESS_B_SECRET" -hex | cut -d' ' -f2)
 
 # Step 2: Issue deed with witness signatures
-curl -X POST https://your-domain.com/api/saib/allodial/issue-deed \
+curl -X POST https://triumphsynergy.com/api/saib/allodial/issue-deed \
   -H "Authorization: Bearer $SAIB_SECRET_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

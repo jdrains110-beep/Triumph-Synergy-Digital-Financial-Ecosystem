@@ -251,7 +251,7 @@ Monthly Returns:       [0 TriSyn]
 **Community**
 - 👥 Discord: [link TBD]
 - 🐦 Twitter: @TriumphSynergy
-- 📧 Email: support@triumph-synergy.com
+- 📧 Email: support@triumphsynergy.com
 
 ---
 

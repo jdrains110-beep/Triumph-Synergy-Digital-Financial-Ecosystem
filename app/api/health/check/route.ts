@@ -70,7 +70,7 @@ export async function GET() {
         mainnet_node_representation: "triumph-central-node (embedded stellar-core)",
         verification: {
           domain_testnet: "Triumph-Synergy.replit.app ✅",
-          domain_mainnet: "triumphsynergyab2099.pinet.com ✅",
+          domain_mainnet: "triumphsynergy.com ✅",
         },
       },
       

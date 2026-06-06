@@ -18,7 +18,7 @@
  *
  *   APP_WALLET_PI_TESTNET    — the Pi Developer Portal-issued app wallet
  *                              for the registered Pi App
- *                              `triumphsynergyab2099.pinet.com`. This is
+ *                              `triumphsynergy.com`. This is
  *                              what Pi Wallet recognises as a valid
  *                              outbound destination on Pi Testnet, so it
  *                              is the canonical TRISYN issuer and
@@ -51,7 +51,7 @@ export const FOUNDER_WALLET =
 
 /**
  * Pi Testnet App Wallet — issued by the Pi Developer Portal for the
- * Triumph Synergy Pi App (`triumphsynergyab2099.pinet.com`). This is the
+ * Triumph Synergy Pi App (`triumphsynergy.com`). This is the
  * ONLY currently-active runtime payment destination on Pi Testnet.
  *
  * Recognised by Pi Wallet for inbound payments. Used as:
@@ -126,7 +126,7 @@ export const PI_MAINNET_PASSPHRASE = "Pi Network";
  * Home domain set on the issuer account so Pi Wallet can discover
  * `https://<HOME_DOMAIN>/.well-known/pi.toml` and list TRISYN.
  */
-export const TRISYN_HOME_DOMAIN = "triumphsynergyab2099.pinet.com";
+export const TRISYN_HOME_DOMAIN = "triumphsynergy.com";
 
 // ── SAIB enforcement set ─────────────────────────────────────────────────────
 
