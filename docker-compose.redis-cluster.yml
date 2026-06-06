@@ -144,4 +144,4 @@ volumes:
 networks:
   redis-cluster-net:
     name: triumph-redis-cluster-net
-    driver: bridge
+    external: true
