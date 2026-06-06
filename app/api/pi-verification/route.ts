@@ -16,8 +16,8 @@
 const DOMAIN_CONFIG: Record<string, { network: "mainnet" | "testnet"; envKey: string }> = {
   // PINET MAINNET DOMAINS
   "triumphsynergy.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
-  // REPLIT MAINNET ORIGIN
-  "triumph-synergy.replit.app": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
+  // CLOUDFLARE TUNNEL ORIGIN (permanent)
+  "triumphsynergy.com": { network: "mainnet", envKey: "PI_NETWORK_MAINNET_VALIDATION_KEY" },
 };
 
 // Default validation key (mainnet). Testnet key is intentionally not

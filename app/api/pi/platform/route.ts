@@ -20,11 +20,11 @@ const DOMAIN_MAP = {
   mainnet: {
     pinet: "triumphsynergy.com",
     pinetAlt: "triumphsynergy.com",
-    replit: "Triumph-Synergy.replit.app",
+    cloudflare: "triumphsynergy.com",
   },
   testnet: {
     pinet: "triumphsynergy.com",
-    replit: "Triumph-Synergy.replit.app",
+    cloudflare: "triumphsynergy.com",
   },
 } as const;
 
@@ -93,7 +93,7 @@ function detectPlatformContext(req: NextRequest) {
   const isMainnetDomain =
     hostname === DOMAIN_MAP.mainnet.pinet ||
     hostname === DOMAIN_MAP.mainnet.pinetAlt ||
-    hostname === DOMAIN_MAP.mainnet.replit;
+    hostname === DOMAIN_MAP.mainnet.cloudflare;
 
   return {
     platform: isPiDesktop

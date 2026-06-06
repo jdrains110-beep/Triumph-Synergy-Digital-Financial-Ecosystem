@@ -19,7 +19,7 @@ const PLATFORM_VERSION = "2.0.0";
 const DOMAIN_MAP = {
   primary: "triumphsynergy.com",
   testnet: "triumphsynergy.com",
-  replit: "Triumph-Synergy.replit.app",
+  cloudflare: "triumphsynergy.com",
 };
 
 /** In-memory session store (ephemeral — survives container lifetime). */
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     const hostname = request.nextUrl.hostname.toLowerCase();
     const isMainnet =
       hostname === DOMAIN_MAP.primary ||
-      hostname === DOMAIN_MAP.replit ||
+      hostname === DOMAIN_MAP.cloudflare ||
       hostname.includes("triumphsynergy0576") ||
       hostname.includes("triumphsynergy7386");
 
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
         description: dockerAvailable
           ? "Docker Desktop ecosystem online — 29 containers operational, " +
             "Pi Node (testnet2) bridged via triumph-pi-bridge-connector"
-          : "Running on cloud platform (Replit). Docker services unavailable from this endpoint.",
+          : "Running on Cloudflare Tunnel + VPS. Docker services available via triumphsynergy.com.",
       },
 
       // Negotiated capabilities — what this session can do

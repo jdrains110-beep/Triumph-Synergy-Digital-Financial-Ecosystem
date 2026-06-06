@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "https://triumph-synergy.replit.app";
+  process.env.NEXT_PUBLIC_APP_URL || "https://triumphsynergy.com";
 
 export const metadata: Metadata = {
   title: "Financial Hub · Treasury & Liquidity Ops",
