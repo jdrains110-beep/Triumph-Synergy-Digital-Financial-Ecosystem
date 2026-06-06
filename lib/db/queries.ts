@@ -54,23 +54,10 @@ function getDb() {
           from: () => Promise.reject(new Error("Database not configured")),
         }),
       };
-        // If the database is unavailable, return an ephemeral guest user
-        // rather than throwing, so guest auth can continue to work.
-        // Log the original error for debugging.
-        // Caller code expects an array from `.returning()`, so return that shape.
-        // This keeps the runtime resilient when Postgres is down or overloaded.
-        // eslint-disable-next-line no-console
-        console.error("createGuestUser: database error — returning ephemeral guest", _error);
-        const fallbackGuest = {
-          id: `guest-${Date.now()}`,
-          email: "guest@local",
-        };
-        return [fallbackGuest];
-          {
-            id: `guest-${Date.now()}`,
-            email: "guest@local",
-          },
-        ];
+    }
+    const client = postgres(dbUrl);
+    _db = drizzle(client);
+  }
   return _db;
 }
 
