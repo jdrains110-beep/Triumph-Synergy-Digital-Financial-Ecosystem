@@ -286,9 +286,9 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET required}
       AUTH_TRUST_HOST: "true"
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET required}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      BACKEND_URL: ${BACKEND_URL:-http://localhost:3000/api}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://triumphsynergy.com}
+      FRONTEND_URL: ${FRONTEND_URL:-https://triumphsynergy.com}
+      BACKEND_URL: ${BACKEND_URL:-https://triumphsynergy.com/api}
       INTERNAL_PI_MULTIPLIER: ${INTERNAL_PI_MULTIPLIER:-1.5}
       INTERNAL_PI_MIN_VALUE: ${INTERNAL_PI_MIN_VALUE:-10.0}
       EXTERNAL_PI_MIN_VALUE: ${EXTERNAL_PI_MIN_VALUE:-1.0}
