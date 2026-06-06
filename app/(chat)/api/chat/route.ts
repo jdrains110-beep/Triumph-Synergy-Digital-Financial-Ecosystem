@@ -22,8 +22,14 @@ import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
+import { checkEcosystemStatus } from "@/lib/ai/tools/check-ecosystem-status";
 import { createDocument } from "@/lib/ai/tools/create-document";
+import { getGcvValue } from "@/lib/ai/tools/get-gcv-value";
+import { getPiNetworkStatus } from "@/lib/ai/tools/get-pi-network-status";
+import { getSovereignPlatformInfo } from "@/lib/ai/tools/get-sovereign-platform-info";
 import { getWeather } from "@/lib/ai/tools/get-weather";
+import { issueAllodialDeed } from "@/lib/ai/tools/issue-allodial-deed";
+import { queryPiBalance } from "@/lib/ai/tools/query-pi-balance";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
@@ -192,6 +198,12 @@ export async function POST(request: Request) {
                   "createDocument",
                   "updateDocument",
                   "requestSuggestions",
+                  "getPiNetworkStatus",
+                  "getGcvValue",
+                  "checkEcosystemStatus",
+                  "getSovereignPlatformInfo",
+                  "issueAllodialDeed",
+                  "queryPiBalance",
                 ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
@@ -202,6 +214,12 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
+            getPiNetworkStatus,
+            getGcvValue,
+            checkEcosystemStatus,
+            getSovereignPlatformInfo,
+            issueAllodialDeed,
+            queryPiBalance,
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
