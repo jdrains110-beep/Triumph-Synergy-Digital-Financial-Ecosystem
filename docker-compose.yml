@@ -274,9 +274,9 @@ services:
       dockerfile: Dockerfile
     container_name: triumph-app
     <<: *common
-    mem_limit: 512m
-    mem_reservation: 192m
-    cpus: 0.50 # quantum-managed: T5 Next.js app
+    mem_limit: 1536m    # raised 512m→1536m — Next.js needs headroom for millions of concurrent SSR renders
+    mem_reservation: 768m
+    cpus: 2.0  # raised 0.50→2.0 — sovereign Next.js app must handle multi-million Pioneer traffic
     ports:
       - "3000:3000"
     environment:
@@ -374,9 +374,9 @@ services:
     image: nginx:alpine
     container_name: triumph-nginx
     <<: *common
-    mem_limit: 96m
-    mem_reservation: 32m
-    cpus: 0.20 # quantum-managed: T6 sidekick (nginx proxy)
+    mem_limit: 384m    # raised 96m→384m — nginx cache (pages+static+images) needs memory
+    mem_reservation: 192m
+    cpus: 1.0  # raised 0.20→1.0 — nginx handles ALL inbound traffic for millions of Pioneers
     ports:
       - "80:80"
     volumes:

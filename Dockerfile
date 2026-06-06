@@ -22,7 +22,7 @@ RUN apk add --no-cache curl tini wget && \
 FROM base AS builder
 # libc6-compat, python3, make, g++ — standard native build tools
 # libusb-dev + eudev-dev — required by node-hid (transitive dep of @ledgerhq/hw-transport-node-hid)
-RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers
+RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers vips-dev
 WORKDIR /app
 
 # Copy package files
@@ -32,14 +32,15 @@ COPY package.json ./
 # Strip the "packageManager" field so npm doesn't defer to corepack/yarn.
 RUN sed -i 's|"packageManager":.*||' package.json && \
     npm config set registry https://registry.npmjs.org && \
-    npm install --legacy-peer-deps --no-fund --no-audit
+    npm install --legacy-peer-deps --no-fund --no-audit && \
+    npm install sharp --legacy-peer-deps --no-fund --no-audit || true
 
 # Copy source and build
 COPY . .
 
 # Set environment for build
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS="--max-old-space-size=1024"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV RUN_MIGRATIONS=false
 ENV DOCKER_BUILD=true
 
@@ -55,8 +56,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install Node.js and tini
-RUN apk add --no-cache nodejs npm tini
+# Install Node.js, sharp native deps, and tini
+RUN apk add --no-cache nodejs npm tini vips
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
