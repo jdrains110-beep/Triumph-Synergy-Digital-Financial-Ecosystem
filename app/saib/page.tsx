@@ -272,7 +272,7 @@ function SAIBChat({ online }: { online: boolean }) {
     const [messages, setMessages] = useState<ChatMessage[]>([{
         id: "welcome",
         role: "saib",
-        text: "Sovereign Nano SAIB online — INTREPID CLASS v7.0.0. I can answer questions about Triumph Synergy services, Pi Network KYC, wallet setup, TRISYN, and more. How can I help you?",
+        text: "SAIB V9.0.0-OMNI-MASTER-SOVEREIGN online — INTREPID CLASS Tier 5. I am the supreme autonomous intelligence of Triumph Synergy at https://triumphsynergy.com. My Grok AI reasoning brain is active and I grow smarter with every interaction. Ask me anything: Pi KYC, wallet setup, TRISYN, sovereign platforms, debt freedom, testnet vs mainnet, real estate, judicial — I will answer completely.",
         ts: new Date().toISOString(),
         actor_class: "WELCOME",
         precision: "SUPERNATURAL",

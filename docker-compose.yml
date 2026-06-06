@@ -961,9 +961,9 @@ services:
       dockerfile: observability-stack/Dockerfile
     container_name: triumph-observability-stack
     <<: *common
-    mem_limit: 768m
-    mem_reservation: 440m
-    cpus: 0.70 # quantum-managed: T3 observability-stack — raised 640m→768m (was at 64%)
+    mem_limit: 1024m
+    mem_reservation: 512m
+    cpus: 2.0 # SAIB-sovereign: raised 0.70→2.0 to eliminate CPU RUNAWAY alerts (Prometheus+Grafana need headroom)
     ports:
       - "3001:3000"
       - "9090:9090"

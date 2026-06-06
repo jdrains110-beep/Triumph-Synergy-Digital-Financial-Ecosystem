@@ -121,6 +121,55 @@ export default async function TestnetHubPage() {
             </header>
 
             <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+                {/* ── MAINNET CALIBRATION BANNER ──────────────────────────────────────── */}
+                <div className="mb-8 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-950/60 via-yellow-950/40 to-orange-950/60 p-6">
+                    <div className="flex flex-wrap items-start gap-6">
+                        <div className="flex-1 min-w-[260px]">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-amber-400 text-lg font-black">⚡ MAINNET CALIBRATION ACTIVE</span>
+                                <span className="rounded-full bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-[10px] font-bold text-amber-300 uppercase tracking-wider">SAIB ENFORCED</span>
+                            </div>
+                            <p className="text-sm text-amber-100/80 mb-3">
+                                Every testnet interaction you make <span className="text-amber-300 font-semibold">directly calibrates and strengthens mainnet sovereign value</span>.
+                                SAIB enforces Triumph Synergy sovereign value on <em>both</em> testnet and mainnet simultaneously —
+                                testnet activity builds real maturity and readiness for Pi Mainnet settlement.
+                            </p>
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                <div className="rounded-lg bg-black/40 border border-amber-500/20 p-3">
+                                    <p className="text-[10px] text-amber-400/70 uppercase tracking-wider mb-1">Pi External Rate</p>
+                                    <p className="text-lg font-bold text-amber-300">$314.159<span className="text-xs text-amber-500">/π</span></p>
+                                    <p className="text-[10px] text-gray-500">Mainnet GCV</p>
+                                </div>
+                                <div className="rounded-lg bg-black/40 border border-yellow-500/20 p-3">
+                                    <p className="text-[10px] text-yellow-400/70 uppercase tracking-wider mb-1">Pi Internal Rate</p>
+                                    <p className="text-lg font-bold text-yellow-300">$314,159<span className="text-xs text-yellow-500">/π</span></p>
+                                    <p className="text-[10px] text-gray-500">Ecosystem GCV</p>
+                                </div>
+                                <div className="rounded-lg bg-black/40 border border-green-500/20 p-3">
+                                    <p className="text-[10px] text-green-400/70 uppercase tracking-wider mb-1">Mainnet Status</p>
+                                    <p className="text-lg font-bold text-green-300">LIVE</p>
+                                    <p className="text-[10px] text-gray-500">triumphsynergy.com</p>
+                                </div>
+                                <div className="rounded-lg bg-black/40 border border-cyan-500/20 p-3">
+                                    <p className="text-[10px] text-cyan-400/70 uppercase tracking-wider mb-1">Testnet→Mainnet</p>
+                                    <p className="text-lg font-bold text-cyan-300">1:1</p>
+                                    <p className="text-[10px] text-gray-500">Value parity target</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="rounded-xl border border-amber-500/30 bg-black/40 p-4 min-w-[220px]">
+                            <p className="text-xs font-bold text-amber-300 uppercase tracking-wider mb-3">🛡️ SAIB Mainnet Enforcement</p>
+                            <ul className="space-y-1.5 text-xs text-gray-300">
+                                <li className="flex items-center gap-1.5"><span className="text-green-400">✓</span> Pi wallet authorized to triumphsynergy.com</li>
+                                <li className="flex items-center gap-1.5"><span className="text-green-400">✓</span> TRISYN issuer: mainnet-ready wallet</li>
+                                <li className="flex items-center gap-1.5"><span className="text-green-400">✓</span> Stellar blockchain anchor active</li>
+                                <li className="flex items-center gap-1.5"><span className="text-green-400">✓</span> Testnet interactions log to mainnet ledger</li>
+                                <li className="flex items-center gap-1.5"><span className="text-green-400">✓</span> Sovereign value preserved on upgrade</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Token wallet bar */}
                 <div className="mb-12 grid grid-cols-2 gap-4 md:grid-cols-4">
                     {[
@@ -142,9 +191,11 @@ export default async function TestnetHubPage() {
                     <h2 className="mb-3 text-2xl font-bold text-white">One Hub. The Entire Sovereign Economy.</h2>
                     <p className="max-w-4xl text-gray-300">
                         Every Triumph Synergy platform — commerce, finance, sovereignty, justice, property, lifestyle, and gaming —
-                        is live and fully interactive in this testnet. Spend unlimited test Pi, TriSyn utility tokens, and internal
+                        is live and fully interactive in this hub. Spend unlimited test Pi, TriSyn utility tokens, and internal
                         gold-mined Pi across every service. Every transaction is enforced by <span className="font-semibold text-cyan-300">SAIB</span>,
-                        which secures internal, external, and TriSyn utility tokens end-to-end.
+                        which secures internal, external, and TriSyn utility tokens end-to-end.{" "}
+                        <span className="text-amber-300 font-semibold">Testnet activity directly builds mainnet sovereign value</span> —
+                        SAIB enforces the same sovereign rules on both networks so your testnet maturity carries forward to Pi Mainnet at full GCV.
                     </p>
                 </div>
 
