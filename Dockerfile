@@ -22,7 +22,7 @@ RUN apk add --no-cache curl tini wget && \
 FROM base AS builder
 # libc6-compat, python3, make, g++ — standard native build tools
 # libusb-dev + eudev-dev — required by node-hid (transitive dep of @ledgerhq/hw-transport-node-hid)
-RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers vips-dev
+RUN apk add --no-cache libc6-compat python3 make g++ libusb-dev eudev-dev linux-headers
 WORKDIR /app
 
 # Copy package files
@@ -30,10 +30,12 @@ COPY package.json ./
 # Use npm instead of yarn for fetching — yarn v1 hangs on [3/5] Fetching inside
 # Docker Desktop on macOS due to connection-pool exhaustion.
 # Strip the "packageManager" field so npm doesn't defer to corepack/yarn.
+# SHARP_IGNORE_GLOBAL_LIBVIPS=1 forces sharp to use its own prebuilt libvips binary
+# instead of compiling from source — avoids 20+ min native build hang on Alpine.
+ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
 RUN sed -i 's|"packageManager":.*||' package.json && \
     npm config set registry https://registry.npmjs.org && \
-    npm install --legacy-peer-deps --no-fund --no-audit && \
-    npm install sharp --legacy-peer-deps --no-fund --no-audit || true
+    npm install --legacy-peer-deps --no-fund --no-audit
 
 # Copy source and build
 COPY . .
