@@ -1,4 +1,3 @@
-import { geolocation } from "@vercel/functions";
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -156,13 +155,17 @@ export async function POST(request: Request) {
 
     const uiMessages = [...convertToUIMessages(messagesFromDb), message];
 
-    const { longitude, latitude, city, country } = geolocation(request);
+    // Extract geolocation from Cloudflare headers or standard headers
+    const longitude = request.headers.get("cf-ipcity-longitude") || request.headers.get("x-vercel-ip-longitude");
+    const latitude = request.headers.get("cf-ipcity-latitude") || request.headers.get("x-vercel-ip-latitude");
+    const city = request.headers.get("cf-ipcity") || request.headers.get("x-vercel-ip-city");
+    const country = request.headers.get("cf-ipcountry") || request.headers.get("x-vercel-ip-country");
 
     const requestHints: RequestHints = {
-      longitude,
-      latitude,
-      city,
-      country,
+      longitude: longitude || undefined,
+      latitude: latitude || undefined,
+      city: city || undefined,
+      country: country || undefined,
     };
 
     await saveMessages({

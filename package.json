@@ -66,8 +66,6 @@
     "@ai-sdk/react": "3.0.3",
     "@ai-sdk/xai": "3.0.3",
     "@codemirror/lang-javascript": "^6.2.2",
-    "@vercel/blob": "^0.32.1",
-    "@vercel/functions": "^1.5.1",
     "@codemirror/lang-python": "^6.1.6",
     "@codemirror/state": "^6.5.0",
     "@codemirror/theme-one-dark": "^6.1.2",

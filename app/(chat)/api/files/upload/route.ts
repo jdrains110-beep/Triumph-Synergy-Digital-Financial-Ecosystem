@@ -1,7 +1,8 @@
-import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import crypto from "crypto";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 
 import { auth } from "@/app/(auth)/auth";
 
@@ -54,11 +55,20 @@ export async function POST(request: Request) {
     const fileBuffer = await file.arrayBuffer();
 
     try {
-      const data = await put(safeName, fileBuffer, {
-        access: "public",
+      // Store files locally in public/uploads directory
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      await mkdir(uploadsDir, { recursive: true });
+      
+      const filePath = path.join(uploadsDir, safeName);
+      await writeFile(filePath, Buffer.from(fileBuffer));
+      
+      // Return public URL
+      const publicUrl = `/uploads/${safeName}`;
+      return NextResponse.json({ 
+        url: publicUrl,
+        pathname: publicUrl,
+        downloadUrl: publicUrl 
       });
-
-      return NextResponse.json(data);
     } catch (_error) {
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
