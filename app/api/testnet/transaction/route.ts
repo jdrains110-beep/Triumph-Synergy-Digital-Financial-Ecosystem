@@ -184,7 +184,7 @@ async function triggerSAIBDuty(dutyType: string, data: Record<string, any>) {
     // Use a short timeout so the request fails fast when the enforcer is not
     // running (or Docker's port-forwarder is orphaned), keeping transactions
     // responsive with graceful in-app fallback.
-    const response = await fetch('http://localhost:8210/enforce', {
+    const response = await fetch('http://triumph-saib-enforcer:8210/enforce', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
