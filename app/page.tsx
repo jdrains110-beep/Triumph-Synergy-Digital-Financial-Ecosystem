@@ -47,6 +47,18 @@ export default async function Page() {
                 🧬 SAIB v10
               </Link>
               <Link
+                href="/ecosystem/saib-floors"
+                className="rounded-lg bg-gradient-to-r from-indigo-500/20 to-cyan-500/20 border border-indigo-500/30 px-4 py-2 text-sm font-medium text-indigo-200 hover:bg-indigo-500/30 transition-colors"
+              >
+                🏢 SAIB Floors v1-v10
+              </Link>
+              <Link
+                href="/ecosystem/saib-v8"
+                className="rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-pink-500/30 px-4 py-2 text-sm font-medium text-pink-300 hover:bg-pink-500/30 transition-colors"
+              >
+                🧠 SAIB v8
+              </Link>
+              <Link
                 href="/testnet-hub/pi-domains"
                 className="rounded-lg bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 px-4 py-2 text-sm font-medium text-cyan-300 hover:bg-cyan-500/30 transition-colors"
               >

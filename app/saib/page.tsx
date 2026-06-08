@@ -379,6 +379,20 @@ function SAIBChat({ online }: { online: boolean }) {
                         );
                     })}
                 </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                    <Link
+                        href="/ecosystem/saib-floors"
+                        className="rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/20"
+                    >
+                        Open SAIB Floors v1-v10
+                    </Link>
+                    <Link
+                        href="/ecosystem/saib-v8"
+                        className="rounded-lg border border-purple-500/30 bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-300 hover:bg-purple-500/20"
+                    >
+                        Open Sovereign Mode v8
+                    </Link>
+                </div>
             </div>
 
             {/* Message history */}
