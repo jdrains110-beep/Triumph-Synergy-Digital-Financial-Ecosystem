@@ -101,7 +101,7 @@
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.89.0",
     "@types/pg": "^8.16.0",
-    "ai": "6.0.170",
+    "ai": "6.0.198",
     "axios": "^1.15.2",
     "bcrypt-ts": "^8.0.0",
     "class-variance-authority": "^0.7.1",
