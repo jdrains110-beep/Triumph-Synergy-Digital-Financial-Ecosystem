@@ -45,6 +45,16 @@ getcontext().prec = 36   # handles quadrillion-dollar caps and nano-Pi fractions
 PI_GCV_USD = Decimal("314159.00")   # $314,159 per Pi — honouring π
 PI_NANO    = Decimal("0.00000001")  # 1 nano-Pi (8 decimal places)
 
+# ── 30-Year Sustainability Constants ──────────────────────────────────────────
+# Pi must outlast multiple generations; spend cadence is paced over the full
+# horizon so a single wallet (or the network as a whole) can never burn its
+# treasury inside a few months. All values env-overridable.
+SUSTAINABILITY_HORIZON_YEARS = int(os.getenv("GCV_SUSTAINABILITY_YEARS", "30"))
+SUSTAINABILITY_PER_TX_PCT    = Decimal(os.getenv("GCV_PER_TX_MAX_PCT", "0.005"))   # 0.5% of yearly budget per single tx
+SUSTAINABILITY_DAILY_PCT     = Decimal(os.getenv("GCV_DAILY_MAX_PCT",  "0.01"))    # 1% of yearly budget per day
+SECONDS_PER_YEAR             = Decimal("31557600")     # 365.25 d
+SECONDS_PER_DAY              = Decimal("86400")
+
 try:
     from langgraph.graph import StateGraph, END as GRAPH_END
     _LANGGRAPH = True
@@ -100,6 +110,129 @@ class GCVMathEngine:
 
 # ── Module-level math instance (used by LangGraph nodes) ─────────────────────
 _math = GCVMathEngine()
+
+
+# ── 30-Year Sustainability Calculator ────────────────────────────────────────
+class SustainabilityCalculator:
+    """
+    Paces Pi spending across a multi-decade horizon so the treasury — for a
+    single wallet, a tenant, or the network as a whole — survives at least
+    `horizon_years` (default 30) before its principal is exhausted.
+
+    All quantities are expressed in Pi (not USD) so the calculator is peg-stable
+    even if GCV is later revalued. Convert at the boundary using GCVMathEngine.
+    """
+
+    def __init__(
+        self,
+        horizon_years:  int     = SUSTAINABILITY_HORIZON_YEARS,
+        per_tx_max_pct: Decimal = SUSTAINABILITY_PER_TX_PCT,
+        daily_max_pct:  Decimal = SUSTAINABILITY_DAILY_PCT,
+    ) -> None:
+        self.horizon_years  = max(1, horizon_years)
+        self.per_tx_max_pct = per_tx_max_pct
+        self.daily_max_pct  = daily_max_pct
+
+    # ── Budget breakdown ─────────────────────────────────────────────────────
+    def compute_budget(self, total_pi: str) -> Dict[str, Any]:
+        principal = Decimal(str(total_pi))
+        per_year  = (principal / Decimal(self.horizon_years)).quantize(PI_NANO, rounding=ROUND_DOWN)
+        per_month = (per_year / Decimal(12)).quantize(PI_NANO, rounding=ROUND_DOWN)
+        per_day   = (per_year / Decimal("365.25")).quantize(PI_NANO, rounding=ROUND_DOWN)
+        per_tx    = (per_year * self.per_tx_max_pct).quantize(PI_NANO, rounding=ROUND_DOWN)
+        daily_cap = (per_year * self.daily_max_pct).quantize(PI_NANO, rounding=ROUND_DOWN)
+        return {
+            "principal_pi":        str(principal),
+            "principal_usd":       _math.pi_to_usd(str(principal)),
+            "horizon_years":       self.horizon_years,
+            "per_year_pi":         str(per_year),
+            "per_year_usd":        _math.pi_to_usd(str(per_year)),
+            "per_month_pi":        str(per_month),
+            "per_day_pi":          str(per_day),
+            "per_tx_max_pi":       str(per_tx),
+            "per_tx_max_usd":      _math.pi_to_usd(str(per_tx)),
+            "daily_cap_pi":        str(daily_cap),
+            "per_tx_max_pct":      str(self.per_tx_max_pct),
+            "daily_max_pct":       str(self.daily_max_pct),
+        }
+
+    # ── Pace check — is the wallet on track to last `horizon_years`? ────────
+    def check_pace(self, total_pi: str, spent_pi: str, age_seconds: float) -> Dict[str, Any]:
+        principal = Decimal(str(total_pi))
+        spent     = Decimal(str(spent_pi))
+        age_yrs   = max(Decimal("0.0001"), Decimal(str(age_seconds)) / SECONDS_PER_YEAR)
+        expected  = (principal / Decimal(self.horizon_years) * age_yrs).quantize(PI_NANO, rounding=ROUND_DOWN)
+        delta     = (spent - expected).quantize(PI_NANO, rounding=ROUND_DOWN)
+        if expected == 0:
+            pct_used = Decimal("0")
+        else:
+            pct_used = (spent / expected * Decimal("100")).quantize(Decimal("0.01"))
+        if spent > principal:
+            status = "exhausted"
+        elif delta > expected:                          # >2x expected pace
+            status = "burning"
+        elif delta > 0:
+            status = "over_pace"
+        elif delta < -expected:                         # <0x — saving heavily
+            status = "savings"
+        else:
+            status = "on_pace"
+        remaining = principal - spent
+        if spent == 0 or age_seconds <= 0:
+            projected_yrs = Decimal(self.horizon_years)
+        else:
+            burn_per_sec  = spent / Decimal(str(age_seconds))
+            projected_yrs = (remaining / burn_per_sec / SECONDS_PER_YEAR).quantize(Decimal("0.01"))
+        return {
+            "status":                  status,
+            "principal_pi":            str(principal),
+            "spent_pi":                str(spent),
+            "remaining_pi":            str(remaining),
+            "expected_spend_pi":       str(expected),
+            "delta_pi":                str(delta),
+            "pct_of_expected":         str(pct_used),
+            "horizon_years":           self.horizon_years,
+            "projected_lifetime_yrs":  str(projected_yrs),
+            "meets_30yr_vision":       bool(projected_yrs >= Decimal(self.horizon_years)),
+        }
+
+    # ── Per-transaction gate — used by hyper-mesh cortex + chat actions ─────
+    def check_transaction(
+        self,
+        total_pi:       str,
+        spent_pi:       str,
+        spent_today_pi: str,
+        offered_pi:     str,
+    ) -> Dict[str, Any]:
+        budget    = self.compute_budget(total_pi)
+        per_tx    = Decimal(budget["per_tx_max_pi"])
+        daily_cap = Decimal(budget["daily_cap_pi"])
+        offered   = Decimal(str(offered_pi))
+        spent_d   = Decimal(str(spent_today_pi))
+        reasons: List[str] = []
+        if offered > per_tx:
+            reasons.append(f"single-tx {offered} Pi exceeds per-tx cap {per_tx} Pi")
+        if (spent_d + offered) > daily_cap:
+            reasons.append(f"daily total {spent_d + offered} Pi would exceed daily cap {daily_cap} Pi")
+        principal_left = Decimal(str(total_pi)) - Decimal(str(spent_pi))
+        if offered > principal_left:
+            reasons.append(f"offered {offered} Pi exceeds remaining principal {principal_left} Pi")
+        approved = len(reasons) == 0
+        return {
+            "approved":           approved,
+            "reasons":            reasons,
+            "offered_pi":         str(offered),
+            "offered_usd":        _math.pi_to_usd(str(offered)),
+            "per_tx_max_pi":      str(per_tx),
+            "daily_cap_pi":       str(daily_cap),
+            "spent_today_after":  str(spent_d + offered) if approved else str(spent_d),
+            "principal_left":     str(principal_left),
+            "recommendation":     "approve" if approved else "split-into-smaller-installments",
+        }
+
+
+# Module-level instance — cortex + app endpoints share this singleton
+_sustain = SustainabilityCalculator()
 
 
 # ── Enforcement State ─────────────────────────────────────────────────────────
@@ -192,6 +325,7 @@ class GCVEngine:
 
     def __init__(self) -> None:
         self.math         = GCVMathEngine()
+        self.sustain      = SustainabilityCalculator()
         self._graph: Any  = None
         self._pool: Any   = None
         self._tx_count    = 0
@@ -406,6 +540,11 @@ class GCVEngine:
             "fail_count":   self._fail_count,
             "db_connected": self._pool is not None,
             "graph_engine": "langgraph" if self._graph else "sequential",
+            "sustainability": {
+                "horizon_years":  self.sustain.horizon_years,
+                "per_tx_max_pct": str(self.sustain.per_tx_max_pct),
+                "daily_max_pct":  str(self.sustain.daily_max_pct),
+            },
         }
 
 

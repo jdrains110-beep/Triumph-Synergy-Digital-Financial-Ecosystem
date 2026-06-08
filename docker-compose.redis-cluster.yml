@@ -38,12 +38,12 @@ x-redis-base: &redis-base
     - --maxmemory-policy
     - "allkeys-lru"
   healthcheck:
-    test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+    test: [ "CMD", "redis-cli", "-p", "6379", "ping" ]
     interval: 120s
     timeout: 60s
     retries: 10
     start_period: 120s
-  networks: [redis-cluster-net]
+  networks: [ redis-cluster-net ]
   restart: always
 
 services:
@@ -51,43 +51,43 @@ services:
     <<: *redis-base
     container_name: triumph-redis-node-1
     hostname: redis-node-1
-    ports: ["7001:6379", "17001:16379"]
-    volumes: [redis_node_1_data:/data]
+    ports: [ "7001:6379", "17001:16379" ]
+    volumes: [ redis_node_1_data:/data ]
 
   redis-node-2:
     <<: *redis-base
     container_name: triumph-redis-node-2
     hostname: redis-node-2
-    ports: ["7002:6379", "17002:16379"]
-    volumes: [redis_node_2_data:/data]
+    ports: [ "7002:6379", "17002:16379" ]
+    volumes: [ redis_node_2_data:/data ]
 
   redis-node-3:
     <<: *redis-base
     container_name: triumph-redis-node-3
     hostname: redis-node-3
-    ports: ["7003:6379", "17003:16379"]
-    volumes: [redis_node_3_data:/data]
+    ports: [ "7003:6379", "17003:16379" ]
+    volumes: [ redis_node_3_data:/data ]
 
   redis-node-4:
     <<: *redis-base
     container_name: triumph-redis-node-4
     hostname: redis-node-4
-    ports: ["7004:6379", "17004:16379"]
-    volumes: [redis_node_4_data:/data]
+    ports: [ "7004:6379", "17004:16379" ]
+    volumes: [ redis_node_4_data:/data ]
 
   redis-node-5:
     <<: *redis-base
     container_name: triumph-redis-node-5
     hostname: redis-node-5
-    ports: ["7005:6379", "17005:16379"]
-    volumes: [redis_node_5_data:/data]
+    ports: [ "7005:6379", "17005:16379" ]
+    volumes: [ redis_node_5_data:/data ]
 
   redis-node-6:
     <<: *redis-base
     container_name: triumph-redis-node-6
     hostname: redis-node-6
-    ports: ["7006:6379", "17006:16379"]
-    volumes: [redis_node_6_data:/data]
+    ports: [ "7006:6379", "17006:16379" ]
+    volumes: [ redis_node_6_data:/data ]
 
   # One-shot bootstrap: forms the cluster (3 primaries + 3 replicas, replica-per-master)
   redis-cluster-init:
@@ -100,8 +100,8 @@ services:
       redis-node-4: { condition: service_healthy }
       redis-node-5: { condition: service_healthy }
       redis-node-6: { condition: service_healthy }
-    networks: [redis-cluster-net]
-    entrypoint: ["/bin/sh", "-c"]
+    networks: [ redis-cluster-net ]
+    entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
         set -e

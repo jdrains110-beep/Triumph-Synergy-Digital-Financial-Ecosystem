@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./tests/setup.ts"],
-    include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
+    include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx", "tests/saib-v5/**/*.test.ts"],
     exclude: ["node_modules", ".next", "tests/e2e/**"],
     coverage: {
       provider: "v8",

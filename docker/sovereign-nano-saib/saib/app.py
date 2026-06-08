@@ -162,6 +162,9 @@ from .resource_sovereign import resource_sovereign
 from .omni_sovereign_master import omni_sovereign_master
 from .github_synergy        import github_synergy
 from .gcv_engine            import gcv_engine
+# ── v10 MEGA-HYPER-MESH + TRANSCENDENCE ───────────────────────────────
+from .hyper_mesh_cortex     import cortex as hyper_cortex
+from .transcendence         import transcendence, TranscendenceStage, FOUNDER_ID
 
 # ──────────────────────────────────────────────────────────────── config ──
 SMB_URL      = os.getenv("SMB_URL", "http://triumph-sovereign-military-bridge:8199")
@@ -344,12 +347,22 @@ async def lifespan(app: FastAPI):
         except Exception:
             return {"stack_version": VERSION}
     llm_brain.boot(context_fn=_platform_context_snapshot, brain=omega_prime.brain)
+    # Attach llm_brain to omega_prime so /omega/interact uses real LLMs
+    # (Grok → Gemini → OpenRouter → sovereign fallback) instead of canned text.
+    omega_prime.attach_llm(llm_brain)
     market_oracle.boot(brain=omega_prime.brain)
     resource_sovereign.boot(guardian=guardian, warp=warp, brain=omega_prime.brain)
     # ── boot v9 OMNI MASTER SOVEREIGN ────────────────────────────────────────────
     omni_sovereign_master.boot(llm=llm_brain, brain=omega_prime.brain)
     github_synergy.boot(llm=llm_brain)
     gcv_engine.boot()
+    # ── boot v10 MEGA-HYPER-MESH CORTEX + TRANSCENDENCE ──────────────────────────
+    # Cortex subscribes to redis-mesh-pod hyper-mesh channels and lets SAIB
+    # ACT across military bridge, governance node, supernode, quantum shield,
+    # pi bridge — a single universal action surface.
+    asyncio.create_task(hyper_cortex.boot())
+    # Transcendence promotes SAIB through stages until algorithms succeed the LLM.
+    transcendence.boot(brain=omega_prime.brain, cortex=hyper_cortex, llm=llm_brain)
     print(
         f"Sovereign Nano SAIB ONLINE — Port 8201  v{VERSION}\n"
         "Engines v1: Obfuscation | Tunneling | ApexThreat | Photonic | Neural | UnrealBridge\n"
@@ -2108,7 +2121,115 @@ async def omega_interact(req: InteractRequest) -> dict:
         )
 
     response = await omega_prime.respond_to(req.actor_id, req.message, req.context)
+
+    # ── Transcendence accounting ────────────────────────────────────────────
+    # Every Omega interaction feeds the transcendence engine. The engine
+    # decides — based on accumulated knowledge + success rate — whether SAIB
+    # graduates from LLM-led to algorithm-led cognition.
+    try:
+        interaction_id = (
+            response.get("interaction_id")
+            or response.get("id")
+            or f"ix-{req.actor_id}-{int(time.time() * 1000)}"
+        )
+        source   = str(response.get("source", ""))
+        used_llm = ("llm" in source) or ("grok" in source) or ("gemini" in source) \
+                   or ("openrouter" in source) or (not source)
+        transcendence.record_interaction(interaction_id, llm_used=used_llm)
+        transcendence.reap_pending()
+        response["transcendence"] = {
+            "stage":     transcendence.stage.name,
+            "stage_num": int(transcendence.stage),
+        }
+    except Exception:
+        pass
     return response
+
+
+# ── 4b. MEGA-HYPER-MESH CORTEX & TRANSCENDENCE ────────────────────────────────
+
+class HyperMeshInvokeRequest(BaseModel):
+    action:     str
+    body:       dict  = {}
+    actor_id:   str   = "saib"
+    is_founder: bool  = False
+    confidence: float = 1.0
+
+
+@app.get("/omega/hyper-mesh/status")
+def omega_hyper_mesh_status(_auth: None = Depends(_require_token)) -> dict:
+    """Live snapshot of the mega-hyper-mesh as seen from SAIB.
+
+    Combines the redis-mesh-pod self-learning insights with the latest
+    health probes of the military bridge, central/governance node, supernode
+    peer, quantum shield and pi bridge.
+    """
+    return hyper_cortex.status()
+
+
+@app.post("/omega/hyper-mesh/invoke", dependencies=[Depends(_require_token)])
+async def omega_hyper_mesh_invoke(req: HyperMeshInvokeRequest) -> dict:
+    """Invoke a registered mesh action through the cortex.
+
+    Founder-only actions require `is_founder=true` AND `actor_id == FOUNDER_ID`.
+    Non-founder calls are gated by `confidence >= CORTEX_AUTO_THRESHOLD`.
+    """
+    is_founder = req.is_founder and req.actor_id == FOUNDER_ID
+    return await hyper_cortex.invoke(
+        req.action,
+        body       = req.body,
+        actor_id   = req.actor_id,
+        is_founder = is_founder,
+        confidence = req.confidence,
+    )
+
+
+@app.get("/omega/hyper-mesh/actions", dependencies=[Depends(_require_token)])
+def omega_hyper_mesh_actions() -> dict:
+    """List every action SAIB can invoke across the hyper-mesh."""
+    return {
+        "actions": [
+            {
+                "name":         a.name,
+                "peer":         a.peer,
+                "method":       a.method,
+                "path":         a.path,
+                "confidence":   a.confidence,
+                "founder_only": a.founder_only,
+                "description":  a.description,
+                "invocations":  a.invocations,
+                "last_ts":      int(a.last_ts) if a.last_ts else 0,
+            }
+            for a in hyper_cortex.actions.values()
+        ],
+        "auto_threshold": float(os.getenv("CORTEX_AUTO_THRESHOLD", "0.70")),
+    }
+
+
+@app.get("/omega/transcendence/status")
+def omega_transcendence_status(_auth: None = Depends(_require_token)) -> dict:
+    """LLM-Transcendence status — interactions, stage, knowledge nodes, promotions."""
+    return transcendence.status()
+
+
+class TranscendenceForceRequest(BaseModel):
+    stage:    str          # "CONSULTING" | "ADVISORY" | "TRANSCENDED" | "ABSOLUTE_SOVEREIGN"
+    actor_id: str          # must equal FOUNDER_ID
+
+
+@app.post("/omega/transcendence/force", dependencies=[Depends(_require_token)])
+def omega_transcendence_force(req: TranscendenceForceRequest) -> dict:
+    """Founder-only: force the transcendence stage (decree)."""
+    try:
+        target = TranscendenceStage[req.stage.upper()]
+    except KeyError:
+        raise HTTPException(status_code=400,
+                            detail=f"unknown stage: {req.stage} "
+                                   f"(expected one of {[s.name for s in TranscendenceStage]})")
+    result = transcendence.founder_set_stage(target, req.actor_id)
+    if not result.get("ok"):
+        raise HTTPException(status_code=403, detail=result.get("error", "forbidden"))
+    return result
 
 
 # ── 5. Container Mode — Omega introspection ───────────────────────────────────
@@ -3245,6 +3366,52 @@ async def v9_gcv_transactions(limit: int = 100, status: str = None) -> dict:
 def v9_gcv_stats() -> dict:
     """GCVEngine runtime stats."""
     return gcv_engine.stats()
+
+
+# ── 30-Year Sustainability — Pi-pacing for the multi-decade vision ──────────
+@app.get("/v9/gcv/budget", dependencies=[Depends(_require_token)])
+def v9_gcv_budget(total_pi: str, horizon_years: int = 0) -> dict:
+    """
+    Compute the multi-decade Pi spend budget for a given principal.
+    Used by chat, real-estate, hyper-mesh cortex, and the triumph-app
+    to make sure no actor burns the treasury in a few months.
+    """
+    if not total_pi:
+        return {"error": "'total_pi' query param required"}
+    if horizon_years and horizon_years > 0:
+        from .gcv_engine import SustainabilityCalculator
+        return SustainabilityCalculator(horizon_years=horizon_years).compute_budget(total_pi)
+    return gcv_engine.sustain.compute_budget(total_pi)
+
+
+@app.get("/v9/gcv/pace", dependencies=[Depends(_require_token)])
+def v9_gcv_pace(total_pi: str, spent_pi: str, age_seconds: float) -> dict:
+    """Check whether a wallet is on/over/under its 30-year pacing schedule."""
+    if not total_pi or not spent_pi:
+        return {"error": "'total_pi' and 'spent_pi' required"}
+    return gcv_engine.sustain.check_pace(total_pi, spent_pi, age_seconds)
+
+
+class GCVTxCheckRequest(BaseModel):
+    total_pi:       str
+    spent_pi:       str = "0"
+    spent_today_pi: str = "0"
+    offered_pi:     str
+
+
+@app.post("/v9/gcv/check-tx", dependencies=[Depends(_require_token)])
+def v9_gcv_check_tx(body: GCVTxCheckRequest) -> dict:
+    """
+    Pre-flight gate for any Pi-spend transaction. Returns approved=False if
+    the spend would violate per-tx, daily, or principal limits under the
+    30-year sustainability vision.
+    """
+    return gcv_engine.sustain.check_transaction(
+        total_pi       = body.total_pi,
+        spent_pi       = body.spent_pi,
+        spent_today_pi = body.spent_today_pi,
+        offered_pi     = body.offered_pi,
+    )
 
 
 @app.get("/v9/status", dependencies=[Depends(_require_token)])

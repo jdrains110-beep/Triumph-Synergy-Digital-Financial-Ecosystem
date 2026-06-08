@@ -1,8 +1,20 @@
 """
 Blockchain Warden — SAIB Sovereign Blockchain Guardian
 ───────────────────────────────────────────────────────────────────────────────
-SAIB watches and protects the Pi Network mainnet node
-(container: triumph-pi-mainnet-node) from:
+SAIB watches and protects the Pi Network mainnet node.
+
+Default target is the SCP central-node, exposed inside the triumph-net as the
+network alias `triumph-central-node` (port 11626). The actual container that
+holds this alias is `triumph-governance-shield`. Both are env-tunable:
+  BLOCKCHAIN_WARDEN_NODE_HOST       (default: triumph-central-node)   # DNS for /info
+  BLOCKCHAIN_WARDEN_NODE_CONTAINER  (default: triumph-governance-shield) # docker container name
+  BLOCKCHAIN_WARDEN_NODE_INFO_PORT  (default: 11626)
+  BLOCKCHAIN_WARDEN_HORIZON_URL     (default: http://triumph-pi-bridge-connector:8092/pi-node/)
+
+The legacy QEMU-emulated triumph-pi-mainnet-node has been replaced by
+governance-shield (alias triumph-central-node) + supernode-peer-2.
+
+Watched failure modes:
   • stellar-core crashes and OOM kills (AMD64 emulation memory spikes)
   • Ledger stalls (consensus not advancing)
   • Memory pressure spikes (pre-OOM early warning)
@@ -42,17 +54,28 @@ import aiohttp
 
 log = logging.getLogger("sovereign.blockchain_warden")
 
-# ── container constants ──────────────────────────────────────────────────────
-_NODE_CONTAINER    = "triumph-pi-mainnet-node"
-_STELLAR_INFO_URL  = f"http://{_NODE_CONTAINER}:11626/info"
-_HORIZON_URL       = f"http://{_NODE_CONTAINER}:8000/"
+# ── container constants (env-tunable) ────────────────────────────────────────────────────────────
+# `_NODE_HOST` — DNS hostname/alias on triumph-net used for HTTP /info polls.
+# `_NODE_CONTAINER` — actual Docker container name used for socket inspect /
+#                     restart. May differ from _NODE_HOST when the host is a
+#                     network alias (e.g. central-node alias on governance-shield).
+_NODE_HOST         = os.getenv("BLOCKCHAIN_WARDEN_NODE_HOST",      "triumph-central-node")
+_NODE_CONTAINER    = os.getenv("BLOCKCHAIN_WARDEN_NODE_CONTAINER", "triumph-governance-shield")
+_NODE_INFO_PORT    = os.getenv("BLOCKCHAIN_WARDEN_NODE_INFO_PORT",  "11626")
+_STELLAR_INFO_URL  = f"http://{_NODE_HOST}:{_NODE_INFO_PORT}/info"
+_HORIZON_URL       = os.getenv(
+    "BLOCKCHAIN_WARDEN_HORIZON_URL",
+    "http://triumph-pi-bridge-connector:8092/pi-node/",
+)
 _DOCKER_SOCK       = "/var/run/docker.sock"
 _STALE_PID_PATH    = "/opt/stellar/postgresql/data/postmaster.pid"
 
-# Internal mesh peers for sync-lag monitoring
+# Internal mesh peers for sync-lag monitoring (target host is excluded —
+# comparing the node to itself is meaningless).
 _PEER_CONTAINERS = [
-    ("triumph-supernode-peer-2", "http://triumph-supernode-peer-2:11626/info"),
-    ("triumph-central-node",     "http://triumph-central-node:11626/info"),
+    (name, f"http://{name}:11626/info")
+    for name in ("triumph-supernode-peer-2", "triumph-central-node")
+    if name != _NODE_HOST
 ]
 
 # PostgreSQL tuning applied via ALTER SYSTEM SET once node is healthy.
@@ -194,7 +217,15 @@ class BlockchainWarden:
         if self._last_ledger_ts:
             stall_s = int(time.time() - self._last_ledger_ts)
 
+        # `healthy` is a coarse boolean for external consumers (the public
+        # SAIB v7 API surfaces this directly as the "Node Health" badge).
+        # The node is considered healthy when stellar-core is in the SYNCED
+        # or CATCHING_UP state — both indicate the node is participating in
+        # consensus rather than crashed/offline.
+        healthy = self._health in (NodeHealth.SYNCED, NodeHealth.CATCHING_UP)
+
         return {
+            "healthy":             healthy,
             "health":              self._health.value,
             "container_running":   self._stats.container_running,
             "oom_killed":          self._stats.oom_killed,
@@ -307,8 +338,10 @@ class BlockchainWarden:
                 info.get("peers", {}).get("authenticated_count", 0)
             )
 
+            # Support both stellar-core schema (ledger.num/age) and the
+            # central-node SCP shim schema (ledger.sequence/closed_at).
             ledger = info.get("ledger", {})
-            new_num = ledger.get("num", 0)
+            new_num = ledger.get("num") or ledger.get("sequence") or 0
             self._stellar.ledger_age_s = ledger.get("age", 0)
 
             if new_num > self._last_ledger:

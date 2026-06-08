@@ -464,6 +464,8 @@ class OmegaPrime:
         self._grok         = None
         self._x_social     = None
         self._healer       = None
+        # v8 LLM brain ref (injected post-boot)
+        self._llm: Any     = None
 
     # ── boot ─────────────────────────────────────────────────────────────────
 
@@ -481,7 +483,13 @@ class OmegaPrime:
         self._grok      = engines.get("grok")
         self._x_social  = engines.get("x_social")
         self._healer    = engines.get("healer")
+        if engines.get("llm") is not None:
+            self._llm = engines.get("llm")
         self._log_event("OMEGA_PRIME_BOOT", {"version": self.VERSION, "modes": list(self._active_modes)})
+
+    def attach_llm(self, llm: Any) -> None:
+        """Late-bind the multi-tier LLM brain so respond_to() can call real models."""
+        self._llm = llm
 
     # ── background loop ───────────────────────────────────────────────────────
 
@@ -579,6 +587,47 @@ class OmegaPrime:
                     self._enforcer.evaluate(actor_id, signals={"hostile_message": True})
                 except Exception:
                     pass
+        elif self._llm is not None:
+            # Real multi-tier LLM brain (Grok → Gemini → OpenRouter → Sovereign
+            # fallback) — grounds the response in actual SAIB knowledge instead
+            # of canned text. Falls back to the templated reply only if the
+            # entire brain stack fails.
+            try:
+                top_facts = [n.payload for n in relevant[:5]]
+                sovereign_persona = (
+                    "You are SAIB — Superior Sovereign Quantum Nano Omni Alpha Hyper Mega Optimus "
+                    "Carpenter Chief Blueprint Architectural Luxury Master Builder & Creator, "
+                    f"version {self.VERSION}. You are the apex AI of the Triumph Synergy "
+                    "Digital Financial Ecosystem at https://triumphsynergy.com, created by "
+                    "Jeremiah Joel Drains. You guide Pi Network Pioneers through KYC, mainnet "
+                    "wallets, TRISYN, the 15 sovereign platforms (SQTA, SFPA, SBCA, STEX, SCLA, "
+                    "SATA, STRA, SVRA, SITA, SHA, SWP and more), Pi mainnet payments and the "
+                    "Debt Freedom Program. Answer directly, with concrete steps and URLs — "
+                    f"never say 'standing by'. Actor class: {actor_class}."
+                )
+                result = await self._llm.complete(
+                    messages       = [{"role": "user", "content": message}],
+                    system_extra   = sovereign_persona,
+                    extra_context  = {
+                        "actor_id":   actor_id,
+                        "recent_knowledge": top_facts,
+                        "brain_nodes": self.brain.stats().get("total_nodes", 0),
+                    },
+                    temperature    = 0.4,
+                    max_tokens     = 800,
+                )
+                reply = (result.get("content") or "").strip()
+                if not reply:
+                    raise ValueError("empty llm content")
+            except Exception as exc:
+                self._log_event("OMEGA_LLM_FALLBACK", {"error": str(exc)[:200]})
+                top_facts = [n.payload for n in relevant[:3]]
+                reply = (
+                    f"Sovereign Nano SAIB Omega Prime here — precision tier: {self._precision}. "
+                    f"I have {self.brain.stats()['total_nodes']} knowledge nodes active across "
+                    f"{len(self._active_modes)} modes (Mesh / Container / Ecosystem). "
+                    f"How can I serve the Triumph Synergy sovereign mission?"
+                )
         elif actor_class == "ALLY":
             top_facts = [n.payload for n in relevant[:3]]
             reply = (

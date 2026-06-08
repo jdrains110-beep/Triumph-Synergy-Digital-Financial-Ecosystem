@@ -1,111 +1,127 @@
+'use client';
+
+import { useState } from 'react';
 import Link from "next/link";
-import { auth } from "@/app/(auth)/auth";
-import { redirect } from "next/navigation";
+import { RentalPropertyCard } from "@/components/testnet-hub-gcv-advanced";
 
-export const metadata = {
-    title: "Fractional Rentals - Triumph Synergy Testnet",
-    description: "Rent homes and earn revenue sharing in Pi/TriSyn",
-};
+const properties = [
+    {
+        id: 1,
+        name: "Modern Downtown Loft",
+        location: "Downtown District",
+        priceMonthlyTriSyn: 250,
+        ownershipPercent: 0.5,
+        returnsMonthlyTriSyn: 2.5,
+        beds: 2,
+        baths: 1,
+        sqft: "1,200",
+        rating: 4.8,
+        image: "🏙️",
+    },
+    {
+        id: 2,
+        name: "Suburban Family Home",
+        location: "Green Valley",
+        priceMonthlyTriSyn: 1500,
+        ownershipPercent: 0.1,
+        returnsMonthlyTriSyn: 1.5,
+        beds: 4,
+        baths: 2,
+        sqft: "2,500",
+        rating: 4.9,
+        image: "🏡",
+    },
+    {
+        id: 3,
+        name: "Beachfront Paradise",
+        location: "Coastal Area",
+        priceMonthlyTriSyn: 2000,
+        ownershipPercent: 0.25,
+        returnsMonthlyTriSyn: 5,
+        beds: 3,
+        baths: 2,
+        sqft: "2,000",
+        rating: 4.7,
+        image: "🏖️",
+    },
+    {
+        id: 4,
+        name: "Tech Hub Apartment",
+        location: "Innovation Quarter",
+        priceMonthlyTriSyn: 500,
+        ownershipPercent: 0.3,
+        returnsMonthlyTriSyn: 1.5,
+        beds: 1,
+        baths: 1,
+        sqft: "800",
+        rating: 4.8,
+        image: "🏗️",
+    },
+    {
+        id: 5,
+        name: "Mountain View Cabin",
+        location: "Alpine Region",
+        priceMonthlyTriSyn: 800,
+        ownershipPercent: 0.4,
+        returnsMonthlyTriSyn: 3.2,
+        beds: 3,
+        baths: 1,
+        sqft: "1,600",
+        rating: 4.6,
+        image: "🏔️",
+    },
+    {
+        id: 6,
+        name: "City Center Studio",
+        location: "Downtown District",
+        priceMonthlyTriSyn: 600,
+        ownershipPercent: 0.2,
+        returnsMonthlyTriSyn: 1.2,
+        beds: 1,
+        baths: 1,
+        sqft: "600",
+        rating: 4.9,
+        image: "🏢",
+    },
+];
 
-export default async function RentalsPage() {
-    const session = await auth();
-    if (!session) redirect("/api/auth/guest?redirectUrl=/testnet-hub/rentals");
+export default function RentalsPage() {
+    const [processing, setProcessing] = useState<number | null>(null);
 
-    const properties = [
-        {
-            id: 1,
-            name: "Modern Downtown Loft",
-            location: "Downtown District",
-            price: "250 TriSyn/month",
-            ownership: "0.5%",
-            returns: "2.5 TriSyn/month",
-            beds: 2,
-            baths: 1,
-            sqft: "1,200",
-            rating: 4.8,
-            image: "🏙️",
-        },
-        {
-            id: 2,
-            name: "Suburban Family Home",
-            location: "Green Valley",
-            price: "1500 TriSyn/month",
-            ownership: "0.1%",
-            returns: "1.5 TriSyn/month",
-            beds: 4,
-            baths: 2,
-            sqft: "2,500",
-            rating: 4.9,
-            image: "🏡",
-        },
-        {
-            id: 3,
-            name: "Beachfront Paradise",
-            location: "Coastal Area",
-            price: "2000 TriSyn/month",
-            ownership: "0.25%",
-            returns: "5 TriSyn/month",
-            beds: 3,
-            baths: 2,
-            sqft: "2,000",
-            rating: 4.7,
-            image: "🏖️",
-        },
-        {
-            id: 4,
-            name: "Tech Hub Apartment",
-            location: "Innovation Quarter",
-            price: "500 TriSyn/month",
-            ownership: "0.3%",
-            returns: "1.5 TriSyn/month",
-            beds: 1,
-            baths: 1,
-            sqft: "800",
-            rating: 4.8,
-            image: "🏗️",
-        },
-        {
-            id: 5,
-            name: "Mountain View Cabin",
-            location: "Alpine Region",
-            price: "800 TriSyn/month",
-            ownership: "0.4%",
-            returns: "3.2 TriSyn/month",
-            beds: 3,
-            baths: 1,
-            sqft: "1,600",
-            rating: 4.6,
-            image: "🏔️",
-        },
-        {
-            id: 6,
-            name: "City Center Studio",
-            location: "Downtown District",
-            price: "600 TriSyn/month",
-            ownership: "0.2%",
-            returns: "1.2 TriSyn/month",
-            beds: 1,
-            baths: 1,
-            sqft: "600",
-            rating: 4.9,
-            image: "🏢",
-        },
-    ];
-
-    const investorPortfolio = [
-        {
-            property: "Modern Downtown Loft",
+    const handleInvest = async (property: typeof properties[0]) => {
+        setProcessing(property.id);
+        try {
+            await fetch('/api/testnet/transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    itemType: 'rental',
+                    itemId: `property-${property.id}`,
+                    amountTriSyn: property.priceMonthlyTriSyn,
+                    currency: 'TriSyn',
+                    paymentMethod: 'trisyn',
+                    userId: 'testnet-user',
+                }),
+            });
+        } catch {
+            // Graceful fallback
+        }
+        await new Promise((r) => setTimeout(r, 800));
+        setProcessing(null);
+    };
+    {
+        property: "Modern Downtown Loft",
             invested: "150 TriSyn",
-            currentValue: "152.50 TriSyn",
-            monthlyReturn: "2.5 TriSyn",
-            returns: "+1.67%",
+                currentValue: "152.50 TriSyn",
+                    monthlyReturn: "2.5 TriSyn",
+                        returns: "+1.67%",
         },
-        {
-            property: "Beachfront Paradise",
+    {
+        property: "Beachfront Paradise",
             invested: "500 TriSyn",
-            currentValue: "506.25 TriSyn",
-            monthlyReturn: "5 TriSyn",
-            returns: "+1.25%",
+                currentValue: "506.25 TriSyn",
+                    monthlyReturn: "5 TriSyn",
+                        returns: "+1.25%",
         },
     ];
 
@@ -214,53 +230,22 @@ export default async function RentalsPage() {
                     <h2 className="text-2xl font-bold text-white mb-6">Available Properties for Investment</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {properties.map((property) => (
-                            <div key={property.id} className="rounded-xl bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 hover:border-purple-400/60 overflow-hidden transition-all hover:shadow-lg hover:shadow-purple-500/20">
-                                <div className="p-6 bg-black/30">
-                                    <div className="text-6xl mb-3">{property.image}</div>
-                                    <h3 className="text-lg font-bold text-white mb-1">{property.name}</h3>
-                                    <p className="text-xs text-gray-400 mb-3">📍 {property.location}</p>
-
-                                    <div className="grid grid-cols-2 gap-2 mb-4 text-center text-xs">
-                                        <div className="rounded bg-black/50 p-2">
-                                            <p className="text-gray-400">🛏️</p>
-                                            <p className="font-semibold text-white">{property.beds} bed</p>
-                                        </div>
-                                        <div className="rounded bg-black/50 p-2">
-                                            <p className="text-gray-400">🚿</p>
-                                            <p className="font-semibold text-white">{property.baths} bath</p>
-                                        </div>
-                                        <div className="rounded bg-black/50 p-2">
-                                            <p className="text-gray-400">📐</p>
-                                            <p className="font-semibold text-white">{property.sqft} sqft</p>
-                                        </div>
-                                        <div className="rounded bg-black/50 p-2">
-                                            <p className="text-gray-400">⭐</p>
-                                            <p className="font-semibold text-white">{property.rating}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2 mb-4 p-3 rounded-lg bg-black/50">
-                                        <div className="flex justify-between">
-                                            <span className="text-xs text-gray-400">Monthly Rental</span>
-                                            <span className="font-bold text-purple-400">{property.price}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-xs text-gray-400">Ownership Available</span>
-                                            <span className="font-bold text-pink-400">{property.ownership}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-xs text-gray-400">Potential Monthly Return</span>
-                                            <span className="font-bold text-green-400">{property.returns}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="px-6 py-3 border-t border-purple-500/10 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
-                                    <button className="w-full py-2 rounded-lg bg-gradient-to-r from-purple-500/50 to-pink-500/50 hover:from-purple-500 hover:to-pink-500 font-semibold text-white transition-all">
-                                        Invest Now
-                                    </button>
-                                </div>
-                            </div>
+                            <RentalPropertyCard
+                                key={property.id}
+                                id={property.id}
+                                name={property.name}
+                                location={property.location}
+                                priceMonthlyTriSyn={property.priceMonthlyTriSyn}
+                                ownershipPercent={property.ownershipPercent}
+                                returnsMonthlyTriSyn={property.returnsMonthlyTriSyn}
+                                beds={property.beds}
+                                baths={property.baths}
+                                sqft={property.sqft}
+                                rating={property.rating}
+                                image={property.image}
+                                onInvest={handleInvest}
+                                processing={processing === property.id}
+                            />
                         ))}
                     </div>
                 </div>

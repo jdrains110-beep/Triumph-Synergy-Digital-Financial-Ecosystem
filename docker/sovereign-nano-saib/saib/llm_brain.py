@@ -57,7 +57,7 @@ _OPENROUTER_FREE_MODELS = [
     "microsoft/phi-3-mini-128k-instruct:free",
 ]
 
-_GEMINI_MODEL      = os.getenv("GEMINI_MODEL",     "gemini-2.0-flash-exp")
+_GEMINI_MODEL      = os.getenv("GEMINI_MODEL",     "gemini-2.5-flash")
 _XAI_MODEL         = os.getenv("XAI_MODEL",        "grok-3")
 _OPENROUTER_MODEL  = os.getenv("OPENROUTER_MODEL",  _OPENROUTER_FREE_MODELS[0])
 
@@ -242,7 +242,7 @@ class LLMBrain:
                 headers={
                     "Authorization": f"Bearer {key}",
                     "HTTP-Referer": "https://triumphsynergy.io",
-                    "X-Title": "SAIB — Triumph Synergy Sovereign AI",
+                    "X-Title": "SAIB - Triumph Synergy Sovereign AI",
                     "Content-Type": "application/json",
                 },
                 json={
