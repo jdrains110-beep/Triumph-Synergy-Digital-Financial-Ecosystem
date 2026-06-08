@@ -61,7 +61,7 @@
     "trisyn:status": "node scripts/trisyn-issue-testnet.mjs status"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "^3.0.4",
+    "@ai-sdk/gateway": "^3.0.126",
     "@ai-sdk/provider": "2.0.0",
     "@ai-sdk/react": "3.0.3",
     "@ai-sdk/xai": "3.0.3",
