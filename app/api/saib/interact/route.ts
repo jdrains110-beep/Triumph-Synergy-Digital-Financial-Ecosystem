@@ -18,6 +18,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createXai } from "@ai-sdk/xai";
 import { generateText } from "ai";
 
+import { detectRegion, type RegionInfo } from "@/lib/saib/geo-language";
+import { recordRegionHit } from "@/lib/saib/region-counter";
+
 export const dynamic = "force-dynamic";
 
 const NANO_SAIB_URL =
@@ -70,12 +73,20 @@ RESPONSE STYLE:
 - Reference specific Triumph Synergy services and URLs (https://triumphsynergy.com)
 - Keep responses focused and actionable`;
 
-async function generateSAIBReply(message: string, actor_id: string): Promise<string> {
+async function generateSAIBReply(message: string, actor_id: string, region: RegionInfo): Promise<string> {
   const xai = createXai({ apiKey: process.env.XAI_API_KEY ?? "" });
+
+  const regionalContext =
+    `\n\n[VISITOR CONTEXT]\n` +
+    `Region: ${region.country_name} (${region.country}, ${region.region_group.replace(/_/g, " ")})\n` +
+    `Preferred language: ${region.language_name} (${region.language})\n` +
+    `Reply IN ${region.language_name} when ${region.language} is not English. ` +
+    `Reference local Pi Network adoption in ${region.country_name} when relevant. ` +
+    `Maintain sovereign tone.`;
 
   const { text } = await generateText({
     model: xai("grok-3-mini"),
-    system: SAIB_SYSTEM_PROMPT,
+    system: SAIB_SYSTEM_PROMPT + regionalContext,
     prompt: message,
     maxTokens: 800,
     temperature: 0.4,
@@ -83,6 +94,38 @@ async function generateSAIBReply(message: string, actor_id: string): Promise<str
 
   void actor_id; // future: personalize per-actor
   return text;
+}
+
+/** Optional post-translation through nano-saib's LinguaSovereign engine. */
+async function autoTranslate(
+  text: string,
+  region: RegionInfo,
+  actor_id: string,
+  sourceMessage: string,
+): Promise<string> {
+  if (region.language === "en" || !text) return text;
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    if (SAIB_TOKEN) headers["Authorization"] = `Bearer ${SAIB_TOKEN}`;
+    const r = await fetch(`${NANO_SAIB_URL}/omega/lingua/auto-respond`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        text,
+        entity_id: actor_id,
+        detect_from_input: sourceMessage,
+      }),
+      signal: AbortSignal.timeout(6_000),
+    });
+    if (!r.ok) return text;
+    const data = (await r.json()) as { translated?: string; text?: string };
+    return data.translated || data.text || text;
+  } catch {
+    return text;
+  }
 }
 
 /** POST /api/saib/interact */
@@ -110,6 +153,13 @@ export async function POST(req: NextRequest) {
   const trimmedMessage = message.trim();
   const trimmedActorId = actor_id.trim();
 
+  // ── SAIB Geographic & Language Awareness ──
+  // Detect where the visitor is reaching Triumph Synergy from, then
+  // increment per-region/per-language counters in the redis-mesh-pod so
+  // the mesh-brain sidecar sees the traffic in real time.
+  const region = detectRegion(req.headers, (context as { language?: string } | undefined)?.language);
+  void recordRegionHit(region, trimmedActorId); // fire-and-forget
+
   // Step 1: Try the Sovereign Nano SAIB container
   let nanoResult: {
     reply?: string;
@@ -133,7 +183,14 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         actor_id: trimmedActorId,
         message: trimmedMessage,
-        context: context ?? {},
+        context: {
+          ...(context ?? {}),
+          country: region.country,
+          country_name: region.country_name,
+          language: region.language,
+          language_name: region.language_name,
+          region_group: region.region_group,
+        },
       }),
       signal: AbortSignal.timeout(8_000),
     });
@@ -150,29 +207,45 @@ export async function POST(req: NextRequest) {
   const needsEnhancement = !nanoReply || isGenericReply(nanoReply);
 
   if (!needsEnhancement && nanoReply.length > 60) {
-    // Container gave a real answer — return it directly
+    // Container gave a real answer — translate to visitor language if needed.
+    const finalReply = await autoTranslate(nanoReply, region, trimmedActorId, trimmedMessage);
     return NextResponse.json({
-      reply: nanoReply,
+      reply: finalReply,
       actor_class: nanoResult?.actor_class ?? "ALLY",
       threat_level: nanoResult?.threat_level ?? 0,
       precision: nanoResult?.precision ?? "SUPERNATURAL",
       knowledge_used: nanoResult?.knowledge_used ?? 10,
       modes_active: nanoResult?.modes_active ?? ["CONTAINER", "MESH", "ECOSYSTEM"],
-      source: "nano_saib",
+      region: {
+        country: region.country,
+        country_name: region.country_name,
+        language: region.language,
+        language_name: region.language_name,
+        region_group: region.region_group,
+      },
+      source: finalReply === nanoReply ? "nano_saib" : "nano_saib+lingua",
     });
   }
 
-  // Step 3: Use Grok AI to generate a real SAIB-persona answer
+  // Step 3: Use Grok AI to generate a real SAIB-persona answer (region-aware)
   try {
-    const grokReply = await generateSAIBReply(trimmedMessage, trimmedActorId);
+    const grokReply = await generateSAIBReply(trimmedMessage, trimmedActorId, region);
+    const finalReply = await autoTranslate(grokReply, region, trimmedActorId, trimmedMessage);
     return NextResponse.json({
-      reply: grokReply,
+      reply: finalReply,
       actor_class: nanoResult?.actor_class ?? "ALLY",
       threat_level: nanoResult?.threat_level ?? 0,
       precision: "SUPERNATURAL",
       knowledge_used: 150,
-      modes_active: ["CONTAINER", "MESH", "ECOSYSTEM", "GROK-AI-BRAIN"],
-      source: "saib_omni_intelligence",
+      modes_active: ["CONTAINER", "MESH", "ECOSYSTEM", "GROK-AI-BRAIN", "LINGUA-SOVEREIGN"],
+      region: {
+        country: region.country,
+        country_name: region.country_name,
+        language: region.language,
+        language_name: region.language_name,
+        region_group: region.region_group,
+      },
+      source: finalReply === grokReply ? "saib_omni_intelligence" : "saib_omni_intelligence+lingua",
       version: "9.0.0-OMNI-MASTER-SOVEREIGN",
     });
   } catch {

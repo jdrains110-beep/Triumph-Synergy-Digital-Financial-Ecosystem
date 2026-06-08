@@ -736,9 +736,9 @@ export default function SovereignRealEstatePage() {
               </p>
             </div>
             <div className="flex flex-col items-center bg-white/5 border border-white/10 rounded-xl px-5 py-3 shrink-0">
-              <div className="text-xs text-gray-400">Pi Exchange Rate</div>
-              <div className="text-2xl font-bold text-yellow-400">$3.14</div>
-              <div className="text-xs text-gray-500">1 Pi = $3.14 USD</div>
+              <div className="text-xs text-gray-400">Pi GCV (Global Consensus Value)</div>
+              <div className="text-2xl font-bold text-yellow-400">$314,159</div>
+              <div className="text-xs text-gray-500">1 Pi = $314,159 USD (π × 100,000)</div>
             </div>
           </div>
         </div>

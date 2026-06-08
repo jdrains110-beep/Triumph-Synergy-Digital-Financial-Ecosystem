@@ -68,6 +68,10 @@ x-common:
 x-db-env: &db-env
   POSTGRES_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@triumph-postgres:5432/${POSTGRES_DB:-triumph_synergy}
   REDIS_URL: redis://triumph-redis:6379
+  # Triumph Redis Mesh-Pod — bundled 6-node cluster (3 masters + 3 replicas).
+  # When set, SAIB writes region/language counters into the cluster and the
+  # mesh-brain sidecar folds them into its self-learning insight stream.
+  REDIS_MESH_NODES: ${REDIS_MESH_NODES:-triumph-redis-mesh-pod:6381,triumph-redis-mesh-pod:6382,triumph-redis-mesh-pod:6383}
   # Supabase keys (set in .env or secrets manager for production)
   NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://your-project.supabase.co}
   NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-your-anon-key}
@@ -274,9 +278,9 @@ services:
       dockerfile: Dockerfile
     container_name: triumph-app
     <<: *common
-    mem_limit: 1536m    # raised 512m→1536m — Next.js needs headroom for millions of concurrent SSR renders
+    mem_limit: 1536m # raised 512m→1536m — Next.js needs headroom for millions of concurrent SSR renders
     mem_reservation: 768m
-    cpus: 2.0  # raised 0.50→2.0 — sovereign Next.js app must handle multi-million Pioneer traffic
+    cpus: 1.0 # Node.js is single-threaded; 1 core is sufficient and leaves headroom for Docker networking
     ports:
       - "3000:3000"
     environment:
@@ -308,8 +312,12 @@ services:
       # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       DUAL_VALUE_URL: http://triumph-dual-value-engine:8093
       NANO_SAIB_URL: http://triumph-sovereign-nano-saib:8201
+      SAIB_URL: http://triumph-apex-services:8097
       SAIB_TOKEN: ${SAIB_TOKEN:-}
       SAIB_FOUNDER_TOKEN: ${SAIB_FOUNDER_TOKEN:?SAIB_FOUNDER_TOKEN required — set a 64-char hex secret}
+      PUBLIC_BRIDGE_TOKEN: ${PUBLIC_BRIDGE_TOKEN:-}
+    secrets:
+      - public_bridge_token
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -374,9 +382,9 @@ services:
     image: nginx:alpine
     container_name: triumph-nginx
     <<: *common
-    mem_limit: 384m    # raised 96m→384m — nginx cache (pages+static+images) needs memory
+    mem_limit: 384m # raised 96m→384m — nginx cache (pages+static+images) needs memory
     mem_reservation: 192m
-    cpus: 1.0  # raised 0.20→1.0 — nginx handles ALL inbound traffic for millions of Pioneers
+    cpus: 1.0 # raised 0.20→1.0 — nginx handles ALL inbound traffic for millions of Pioneers
     ports:
       - "80:80"
     volumes:
@@ -1457,7 +1465,7 @@ services:
       # v8 OMNI SOVEREIGN — LLM Brain free cloud providers
       # Google AI Studio free tier: https://aistudio.google.com/apikey
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
-      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.0-flash-exp}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.5-flash}"
       # OpenRouter free models (:free tag): https://openrouter.ai/keys
       OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
       OPENROUTER_MODEL: "${OPENROUTER_MODEL:-meta-llama/llama-3.3-70b-instruct:free}"
@@ -1481,6 +1489,28 @@ services:
       # Generate with: openssl rand -hex 32   — never commit the value.
       SAIB_SERVICE_TOKEN: "${SAIB_SERVICE_TOKEN:-}"
       TRIUMPH_INTERNAL_URL: "${TRIUMPH_INTERNAL_URL:-http://triumph-app:3000}"
+      # ── v10 MEGA-HYPER-MESH wiring ─────────────────────────────────────
+      # Cortex subscribes to the redis-mesh-pod's hyper-mesh channels and
+      # acts across the entire sovereign network (military, governance,
+      # supernode, quantum shield, pi bridge).
+      REDIS_MESH_URL: "${REDIS_MESH_URL:-redis://triumph-redis-mesh-pod:6381}"
+      HYPER_MESH_DISABLED: "${HYPER_MESH_DISABLED:-0}"
+      CORTEX_AUTO_THRESHOLD: "${CORTEX_AUTO_THRESHOLD:-0.70}"
+      CORTEX_TIMEOUT_S: "${CORTEX_TIMEOUT_S:-4.0}"
+      PEER_MILITARY_BRIDGE_URL: "${PEER_MILITARY_BRIDGE_URL:-http://triumph-sovereign-military-bridge:8199}"
+      PEER_GOVERNANCE_URL: "${PEER_GOVERNANCE_URL:-http://triumph-governance-shield:11626}"
+      PEER_SUPERNODE_URL: "${PEER_SUPERNODE_URL:-http://triumph-supernode-peer-2:11626}"
+      PEER_QUANTUM_SHIELD_URL: "${PEER_QUANTUM_SHIELD_URL:-http://triumph-quantum-intel-fortress:8094}"
+      PEER_PI_BRIDGE_URL: "${PEER_PI_BRIDGE_URL:-http://triumph-pi-bridge-connector:8092}"
+      # ── v10 Transcendence engine — founder identity + stage thresholds ──
+      FOUNDER_ID: "${FOUNDER_ID:-founder}"
+      TRANSCEND_STAGE1_INTERACTIONS: "${TRANSCEND_STAGE1_INTERACTIONS:-500}"
+      TRANSCEND_STAGE1_NODES: "${TRANSCEND_STAGE1_NODES:-1500}"
+      TRANSCEND_STAGE2_INTERACTIONS: "${TRANSCEND_STAGE2_INTERACTIONS:-5000}"
+      TRANSCEND_STAGE2_NODES: "${TRANSCEND_STAGE2_NODES:-15000}"
+      TRANSCEND_STAGE3_INTERACTIONS: "${TRANSCEND_STAGE3_INTERACTIONS:-25000}"
+      TRANSCEND_STAGE3_NODES: "${TRANSCEND_STAGE3_NODES:-75000}"
+      TRANSCEND_SUCCESS_GRACE_S: "${TRANSCEND_SUCCESS_GRACE_S:-60}"
     secrets:
       - public_bridge_token
     group_add:

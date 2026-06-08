@@ -36,7 +36,7 @@ RUN sed -i 's|"packageManager":.*||' package.json && \
     npm config set fetch-retry-maxtimeout 120000 && \
     npm config set fetch-timeout 600000 && \
     (npm ci --legacy-peer-deps --no-fund --no-audit --prefer-offline || \
-     npm install --legacy-peer-deps --no-fund --no-audit)
+    npm install --legacy-peer-deps --no-fund --no-audit)
 
 # Copy source and build
 COPY . .

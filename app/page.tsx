@@ -35,6 +35,24 @@ export default async function Page() {
                 🏛️ Real Estate
               </Link>
               <Link
+                href="/ecosystem/saib-v5"
+                className="rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 px-4 py-2 text-sm font-medium text-cyan-300 hover:bg-cyan-500/30 transition-colors"
+              >
+                🤖 SAIB v5
+              </Link>
+              <Link
+                href="/ecosystem/saib-v10"
+                className="rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 px-4 py-2 text-sm font-medium text-purple-300 hover:bg-purple-500/30 transition-colors"
+              >
+                🧬 SAIB v10
+              </Link>
+              <Link
+                href="/testnet-hub/pi-domains"
+                className="rounded-lg bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 px-4 py-2 text-sm font-medium text-cyan-300 hover:bg-cyan-500/30 transition-colors"
+              >
+                🌐 .pi Domains
+              </Link>
+              <Link
                 href="/ecosystem/applications"
                 className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors"
               >

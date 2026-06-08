@@ -103,8 +103,8 @@ export async function GET() {
       ? {
           healthy:          blockchain.healthy ?? false,
           stellar_state:    blockchain.stellar_state ?? "unknown",
-          ledger:           blockchain.ledger ?? 0,
-          peers:            blockchain.peers ?? 0,
+          ledger:           blockchain.ledger_num ?? blockchain.ledger ?? 0,
+          peers:            blockchain.peer_count ?? blockchain.peers ?? 0,
           mem_pct:          blockchain.mem_pct ?? 0,
           heal_count:       blockchain.heal_count ?? 0,
           last_heal_ts:     blockchain.last_heal_ts ?? null,

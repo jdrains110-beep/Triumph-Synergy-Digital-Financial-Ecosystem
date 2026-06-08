@@ -34,3 +34,5 @@ langchain-core>=0.3.0
 gitpython>=3.1.0
 # v9 GCV Ledger — PostgreSQL async driver
 asyncpg>=0.29.0
+# v10 MEGA-HYPER-MESH — redis pubsub subscriber for the mesh-pod
+redis>=5.0.0

@@ -1,0 +1,126 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║ Triumph Synergy — Sovereign Geographic Redis Mesh PoD compose            ║
+# ║ ──────────────────────────────────────────────────────────────────────── ║
+# ║ Replaces the legacy 6-container layout (docker-compose.redis-cluster.yml)║
+# ║ with one bundled co-located pod that runs all 6 cluster instances        ║
+# ║ internally. The pod is placed on `triumph-redis-cluster-net` AND         ║
+# ║ `triumph-net` with the legacy hostname aliases so existing services      ║
+# ║ that connect to redis-node-1..6 keep working without code changes.       ║
+# ║                                                                          ║
+# ║ Bring up:                                                                ║
+# ║   docker compose -f docker-compose.redis-mesh.yml up -d --build          ║
+# ║                                                                          ║
+# ║ Verify:                                                                  ║
+# ║   docker exec triumph-redis-mesh-pod redis-cli -p 6381 cluster info      ║
+# ║   docker exec triumph-redis-mesh-pod redis-cli -p 6381 cluster nodes     ║
+# ║                                                                          ║
+# ║ Use from services (preferred — port-based topology):                     ║
+# ║   REDIS_CLUSTER_NODES=triumph-redis-mesh-pod:6381,...:6386               ║
+# ║                                                                          ║
+# ║ Use from services (legacy aliases, all pointing at the pod):             ║
+# ║   REDIS_CLUSTER_NODES=redis-node-1:6381,redis-node-2:6382,...            ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+services:
+  redis-mesh-pod:
+    build:
+      context: ./docker/redis-mesh-pod
+      dockerfile: Dockerfile
+    image: triumph-synergy-redis-mesh-pod:latest
+    container_name: triumph-redis-mesh-pod
+    hostname: triumph-redis-mesh-pod
+    restart: unless-stopped
+
+    # One pod, six redis nodes. Give it the combined budget the 6
+    # individual containers used to consume — plus the overhead they
+    # save by sharing kernel, page cache, and process scheduler.
+    mem_limit: 2g
+    mem_reservation: 1g
+    cpus: 2.0
+
+    environment:
+      REDIS_MESH_ANNOUNCE_HOST: triumph-redis-mesh-pod
+      REDIS_MESH_MAXMEMORY: 384mb
+      REDIS_MESH_NODE_TIMEOUT_MS: "5000"
+      # ── Mega-Hyper-Mesh: the pod heartbeat-polls these peers every cycle
+      # and publishes a unified state to channel `triumph:hyper-mesh:state`.
+      HYPER_MESH_TIMEOUT_S: "2.5"
+      PEER_MILITARY_BRIDGE_URL: ${PEER_MILITARY_BRIDGE_URL:-http://triumph-sovereign-military-bridge:8199}
+      PEER_GOVERNANCE_URL: ${PEER_GOVERNANCE_URL:-http://triumph-governance-shield:11626}
+      PEER_SUPERNODE_URL: ${PEER_SUPERNODE_URL:-http://triumph-supernode-peer-2:11626}
+      PEER_NANO_SAIB_URL: ${PEER_NANO_SAIB_URL:-http://triumph-sovereign-nano-saib:8201}
+      PEER_QUANTUM_SHIELD_URL: ${PEER_QUANTUM_SHIELD_URL:-http://triumph-quantum-intel-fortress:8094}
+      PEER_PI_BRIDGE_URL: ${PEER_PI_BRIDGE_URL:-http://triumph-pi-bridge-connector:8092}
+
+    # Per-node persistent volumes so AOF survives pod restarts.
+    volumes:
+      - redis_mesh_node_1:/data/node-1
+      - redis_mesh_node_2:/data/node-2
+      - redis_mesh_node_3:/data/node-3
+      - redis_mesh_node_4:/data/node-4
+      - redis_mesh_node_5:/data/node-5
+      - redis_mesh_node_6:/data/node-6
+
+    # External port mapping: keep the same 7001..7006 host ports the legacy
+    # cluster used so any host-side tooling/dashboards keep working.
+    ports:
+      - "7001:6381"
+      - "7002:6382"
+      - "7003:6383"
+      - "7004:6384"
+      - "7005:6385"
+      - "7006:6386"
+      - "17001:16381"
+      - "17002:16382"
+      - "17003:16383"
+      - "17004:16384"
+      - "17005:16385"
+      - "17006:16386"
+
+    networks:
+      redis-cluster-net:
+        aliases:
+          # Backward compat — every legacy hostname now resolves to the pod.
+          - redis-node-1
+          - redis-node-2
+          - redis-node-3
+          - redis-node-4
+          - redis-node-5
+          - redis-node-6
+          - triumph-redis-node-1
+          - triumph-redis-node-2
+          - triumph-redis-node-3
+          - triumph-redis-node-4
+          - triumph-redis-node-5
+          - triumph-redis-node-6
+      triumph-net:
+        aliases:
+          - triumph-redis-mesh-pod
+          - redis-mesh
+          - triumph-redis-cluster
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          redis-cli -p 6381 ping >/dev/null && redis-cli -p 6386 ping >/dev/null && [ "$$(redis-cli -p 6381 cluster info | awk -F: '/cluster_state/{gsub(/\r/,\"\");print $$2}')" = "ok" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  redis_mesh_node_1:
+  redis_mesh_node_2:
+  redis_mesh_node_3:
+  redis_mesh_node_4:
+  redis_mesh_node_5:
+  redis_mesh_node_6:
+
+networks:
+  redis-cluster-net:
+    name: triumph-redis-cluster-net
+    external: true
+  triumph-net:
+    name: triumph-net
+    external: true
