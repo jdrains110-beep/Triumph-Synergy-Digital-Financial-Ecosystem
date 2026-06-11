@@ -45,6 +45,14 @@
 
 </div>
 
+## Current Runtime Snapshot
+
+- Docker Desktop is running the main Triumph stack again, including `triumph-postgres`, `triumph-redis`, `triumph-app`, `triumph-nginx`, `triumph-vault`, `triumph-settlement-core`, `triumph-apex-services`, `triumph-governance-shield`, `triumph-quantum-intel-fortress`, `triumph-sovereign-military-bridge`, `triumph-horizon-stream`, `triumph-observability-stack`, `triumph-pi-bridge-connector`, `triumph-saib-enforcer`, `triumph-sovereign-nano-saib`, `triumph-supernode-peer-2`, `triumph-sovereign-life`, `triumph-apex-sovereign-nexus`, and `triumph-guardian-watchdog-nexus`.
+- The dedicated k3d Kubernetes mesh is also live as a separate runtime in namespace `triumph-mesh`, with exactly three pods: `triumph-sovereign-mesh-hub-pod` (`1/1`), `triumph-sovereign-mesh-apex-pod` (`5/5`), and `triumph-sovereign-mesh-ingress-pod` (`4/4`).
+- The mesh API is reachable on `http://localhost:30200/mesh/status`, and the NodePort WireGuard endpoint is exposed on `31820/udp` for the k3d mesh.
+- SAIB oversight is active across both runtimes: `saib-enforcer` is on a 60-second duty loop, `sovereign-nano-saib` is healthy, and mesh health is currently `active_peers: 9 / registered_peers: 9`.
+- The dedicated 3-pod mesh implementation lives in [infrastructure/k8s-mesh-3pod/README.md](infrastructure/k8s-mesh-3pod/README.md) and the compose-based pod mesh layout remains in [docker-compose.pod-mesh.yml](docker-compose.pod-mesh.yml).
+
 ---
 
 <a id="-whats-new--june-8-2026-saib-v50-autonomous-executor--saib-v10-sovereign-nano-live-hyper-optimus-master-resource-optimizer"></a>
