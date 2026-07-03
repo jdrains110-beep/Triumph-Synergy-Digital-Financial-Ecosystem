@@ -50,32 +50,59 @@ services:
 
   # ──── arm64-native (formerly amd64-pinned — now forced arm64) ───────────
   vault:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-vault:latest
     <<: [ *platform, *grace, *ulimits ] # tini already in Dockerfile ENTRYPOINT; no double-init
 
   governance-shield:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-governance-shield:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   settlement-core:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-settlement-core:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   horizon-stream:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-horizon-stream:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   # ──── Native arm64 on Apple Silicon (pure Python/Node) ──────────────────
   pi-bridge-connector:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-pi-bridge-connector:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   app:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-app:latest
     <<: [ *platform, *init, *grace, *ulimits ]
+    environment:
+      NODE_ENV: development
+      DOCKER_BUILD: "false"
+    command:
+      - /bin/sh
+      - -lc
+      - rm -f /app/proxy.ts /app/middleware.ts && exec node node_modules/next/dist/bin/next dev -H 0.0.0.0 -p 3000
+    volumes:
+      - ./app:/app/app
+      - ./components:/app/components
+      - ./lib:/app/lib
+      - ./services:/app/services
+      - ./hooks:/app/hooks
+      - ./types:/app/types
+      - ./public:/app/public
+      - ./instrumentation.ts:/app/instrumentation.ts
+      - ./next.config.ts:/app/next.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
 
   # quantum-intel-fortress replaces financial-intel + quantum-fortress (May 9, 2026)
   quantum-intel-fortress:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-quantum-intel-fortress:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   observability-stack:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-observability-stack:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   nginx:
+    image: nginx:alpine
     <<: [ *platform, *init, *grace ]
     ulimits:
       nofile:
@@ -84,15 +111,219 @@ services:
 
   # guardian-watchdog-nexus replaces ecosystem-guardian + saib-watchdog (May 9, 2026)
   guardian-watchdog-nexus:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-guardian-watchdog-nexus:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   apex-services:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-apex-services:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   # apex-sovereign-nexus replaces sovereign-commerce/work/gaming/publix (May 9, 2026)
   apex-sovereign-nexus:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-apex-sovereign-nexus:latest
     <<: [ *platform, *init, *grace, *ulimits ]
 
   # APEX-SOVEREIGN-LIFE — bank + education + telecom consolidated
   sovereign-life:
+    image: ghcr.io/jdrains110-beep/triumph-synergy-sovereign-life:latest
     <<: [ *platform, *init, *grace, *ulimits ]
+
+  # Sovereign mesh peer activators — establish live WireGuard handshakes
+  # so mesh status reflects active peers (not only static hub peer definitions).
+  sovereign-mesh-peer-app:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-app
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: app
+      PEER_IP: 10.13.37.10
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.10
+
+  sovereign-mesh-peer-nginx:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-nginx
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: nginx
+      PEER_IP: 10.13.37.11
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.11
+
+  sovereign-mesh-peer-apex:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-apex
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: apex-services
+      PEER_IP: 10.13.37.12
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.12
+
+  sovereign-mesh-peer-smb:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-smb
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: smb
+      PEER_IP: 10.13.37.13
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.13
+
+  sovereign-mesh-peer-quantum:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-quantum
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: quantum
+      PEER_IP: 10.13.37.14
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.14
+
+  sovereign-mesh-peer-settlement:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-settlement
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: settlement
+      PEER_IP: 10.13.37.15
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.15
+
+  sovereign-mesh-peer-pi-node:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-pi-node
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: pi-node
+      PEER_IP: 10.13.37.16
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.16
+
+  sovereign-mesh-peer-governance:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-governance
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: governance
+      PEER_IP: 10.13.37.17
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.17
+
+  sovereign-mesh-peer-vault:
+    <<: [ *platform, *init, *grace ]
+    build:
+      context: docker/sovereign-mesh
+      dockerfile: Dockerfile
+    container_name: triumph-sovereign-mesh-peer-vault
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      sovereign-mesh-hub:
+        condition: service_started
+    environment:
+      PEER_NODE: vault
+      PEER_IP: 10.13.37.18
+    volumes:
+      - triumph_mesh_keys:/app/keys:ro
+    entrypoint: [ "/peer_entrypoint.sh" ]
+    networks:
+      sovereign-mesh:
+        ipv4_address: 10.13.37.18
