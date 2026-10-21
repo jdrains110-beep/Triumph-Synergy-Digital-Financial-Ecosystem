@@ -220,10 +220,10 @@ function supernodeTopology() {
       protocol: "Stellar SCP",
       // AUTHORITATIVE SOURCE: Pi Node's stellar-core /info endpoint (port 11626)
       // This is the ORIGINAL canonical protocol version, read directly from the running stellar-core.
-      protocol_version: stellarCoreInfo?.protocol_version ?? Number(process.env.PI_PROTOCOL_VERSION ?? 24),
+      protocol_version: stellarCoreInfo?.protocol_version ?? Number(process.env.PI_PROTOCOL_VERSION ?? 28),
       protocol_version_label: stellarCoreInfo
         ? `Protocol ${stellarCoreInfo.protocol_version} (from Pi Node core v${stellarCoreInfo.build_version.split(" ")[0]})`
-        : `Protocol ${process.env.PI_PROTOCOL_VERSION ?? 24} (configured fallback)`,
+        : `Protocol ${process.env.PI_PROTOCOL_VERSION ?? 28} (configured fallback)`,
       stellar_core_version: stellarCoreInfo?.build_version || (process.env.STELLAR_CORE_VERSION ?? "v24.0.0"),
       stellar_core_build: stellarCoreInfo?.build_version ?? undefined,
       auto_protocol_update: true,
@@ -463,7 +463,7 @@ async function refreshChainState() {
         : (((body as Record<string, Record<string, unknown[]>>)?._embedded?.records ?? [])[0] as Record<string, unknown> | undefined);
       if (rec) {
         const liveProtocol = Number(rec.protocol_version ?? 0);
-        const EMBEDDED_PROTOCOL = Number(process.env.PI_PROTOCOL_VERSION ?? 24);
+        const EMBEDDED_PROTOCOL = Number(process.env.PI_PROTOCOL_VERSION ?? 28);
         // CRITICAL FIX: Only accept protocol updates if they are FORWARD upgrades AND match embedded protocol
         // Ignore backward downgrades (Horizon returning stale 23 when embedded is 24)
         // IGNORE any value that contradicts embedded stellar-core protocol
@@ -521,7 +521,7 @@ async function refreshTestnetState(): Promise<void> {
       const rec = (((body as Record<string, Record<string, unknown[]>>)?._embedded?.records ?? [])[0] as Record<string, unknown> | undefined);
       if (rec) {
         const liveProtocol = Number(rec.protocol_version ?? 0);
-        const EMBEDDED_PROTOCOL = Number(process.env.PI_PROTOCOL_VERSION ?? 24);
+        const EMBEDDED_PROTOCOL = Number(process.env.PI_PROTOCOL_VERSION ?? 28);
         // Testnet can advance independently — accept valid forward upgrades
         const isValidUpgrade = liveProtocol > scpUpgrader.testnet_protocol && liveProtocol >= EMBEDDED_PROTOCOL;
         if (isValidUpgrade && liveProtocol !== scpUpgrader.testnet_protocol) {

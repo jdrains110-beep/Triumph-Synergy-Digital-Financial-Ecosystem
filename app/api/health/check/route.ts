@@ -43,7 +43,7 @@ export async function GET() {
       // PROTOCOL 24 AUTHORITY (FROM EMBEDDED GOVERNANCE-SHIELD)
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       protocol: {
-        version: governanceShieldProtocol?.protocol_version ?? Number(process.env.PI_PROTOCOL_VERSION ?? 24),
+        version: governanceShieldProtocol?.protocol_version ?? Number(process.env.PI_PROTOCOL_VERSION ?? 28),
         build: governanceShieldProtocol?.build_version ?? process.env.STELLAR_CORE_VERSION ?? "v24.0.0",
         network: governanceShieldProtocol?.network ?? "Pi Network",
         source: governanceShieldProtocol ? "governance-shield-embedded" : "environment-variable",
