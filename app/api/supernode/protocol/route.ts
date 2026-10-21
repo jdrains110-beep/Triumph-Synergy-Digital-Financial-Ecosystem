@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
         error: "governance-shield unreachable",
         message: "Cannot establish protocol authority — governance-shield not responding",
         fallback: {
-          protocol_version: Number(process.env.PI_PROTOCOL_VERSION ?? 24),
+          protocol_version: Number(process.env.PI_PROTOCOL_VERSION ?? 28),
           network: process.env.STELLAR_NETWORK_PASSPHRASE ?? "Pi Network",
           build_version: process.env.STELLAR_CORE_VERSION ?? "v24.0.0",
           note: "Using environment variable fallback (governance-shield unreachable)",

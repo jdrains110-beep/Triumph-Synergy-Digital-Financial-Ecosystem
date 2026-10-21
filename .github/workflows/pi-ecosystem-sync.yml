@@ -5,10 +5,10 @@
 # Runs weekly + on-demand to keep Triumph Synergy's forks fresh.
 #
 # Organizations tracked:
-#   pi-apps      (55 forkable repos) — Official Pi Platform
+#   pi-apps      (56 forkable repos) — Official Pi Platform
 #   minepi       (3 repos)           — Pi Network Core
 #   stellar      (4 repos)           — Upstream Stellar Foundation
-#   PiNetwork    (1 repo)            — Official PiRC Standards
+#   PiNetwork    (2 repos)           — Official PiRC Standards + SmartContracts
 #   Pi-Defi-world(10 repos)          — PiRC-compliant DeFi ecosystem
 #   KOSASIH      (25 repos)          — Community Pi smart contracts, DeFi, AI
 #   Independent  (3 repos)           — Smart contracts, escrow, contract generation
@@ -119,6 +119,7 @@ jobs:
           - { upstream: "pi-apps/shop-online", fork: "shop-online" }
           - { upstream: "pi-apps/pailot-for-pi", fork: "pailot-for-pi" }
           - { upstream: "pi-apps/internet-speed", fork: "internet-speed" }
+          - { upstream: "pi-apps/map-of-pi", fork: "map-of-pi" }
           # ── Community ──
           - { upstream: "pi-apps/LatinChain", fork: "LatinChain" }
           - { upstream: "pi-apps/wepisharp", fork: "wepisharp" }
@@ -209,6 +210,7 @@ jobs:
         repo:
           # ── PiRC Official ──
           - { upstream: "PiNetwork/PiRC", fork: "PiRC" }
+          - { upstream: "PiNetwork/SmartContracts", fork: "SmartContracts" }
           # ── Pi-Defi-world (PiRC-compliant DeFi) ──
           - { upstream: "Pi-Defi-world/Zyradex-frontend", fork: "Zyradex-frontend" }
           - { upstream: "Pi-Defi-world/pirc-smart-contracts-explainer", fork: "pirc-smart-contracts-explainer" }

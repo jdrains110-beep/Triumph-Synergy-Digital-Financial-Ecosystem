@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       success: true,
       status: "OPERATIONAL",
       publicKey: "GA6Z5STFJZPBDQT5VZSDUTCKLXXB626ONTLRWBJAWYKLH4LKPIZCGL7V",
-      protocol_version: Number(process.env.PI_PROTOCOL_VERSION ?? 24),
+      protocol_version: Number(process.env.PI_PROTOCOL_VERSION ?? 28),
       message: "Central Node Supreme remains TRANSCENDENT",
     });
   }

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
  * Protocol Auto-Update — polls Pi mainnet Horizon for the current protocol
- * version and patches `lib/pi-network/constants.ts`, `public/.well-known/stellar.toml`
- * and `infrastructure/history-archive/stellar-history.seed.json` when Pi advances.
+ * version and patches every `PI_PROTOCOL_VERSION ?? <n>` fallback in the code
+ * plus `infrastructure/history-archive/stellar-history.seed.json` when Pi advances.
+ * `public/.well-known/stellar.toml` is deliberately left alone: it advertises the
+ * protocol our own validator runs, which only changes when the node is upgraded.
  *
  * Invoked by `.github/workflows/protocol-version-watcher.yml` (cron + manual).
  * Exits 0 when no update is needed, exits 0 after writing files when an update
@@ -13,16 +15,57 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+// Default dual-stack connect races time out against Pi's Horizon on some networks.
+require("node:dns").setDefaultResultOrder("ipv4first");
+require("node:net").setDefaultAutoSelectFamily(false);
+
 const HORIZON = process.env.PI_HORIZON_URL || "https://api.mainnet.minepi.com";
 const REPO = path.resolve(__dirname, "..");
+const FALLBACK_RE = /(PI_PROTOCOL_VERSION\s*\?\?\s*)(\d+)/g;
 
 async function fetchCurrentProtocol() {
-  const r = await fetch(HORIZON, { headers: { Accept: "application/json" } });
-  if (!r.ok) throw new Error(`Horizon root returned ${r.status}`);
-  const j = await r.json();
-  const v = Number(j.current_protocol_version ?? j.core_supported_protocol_version);
-  if (!Number.isFinite(v) || v <= 0) throw new Error("Could not parse protocol version from Horizon root");
-  return v;
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const r = await fetch(HORIZON, {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(20000),
+      });
+      if (!r.ok) throw new Error(`Horizon root returned ${r.status}`);
+      const j = await r.json();
+      const v = Number(j.current_protocol_version ?? j.core_supported_protocol_version);
+      if (!Number.isFinite(v) || v <= 0) throw new Error("Could not parse protocol version from Horizon root");
+      return v;
+    } catch (e) {
+      lastError = e;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+    }
+  }
+  throw lastError;
+}
+
+function sourceFiles(dir) {
+  const skip = new Set(["node_modules", ".git", ".next", "dist", "build"]);
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) return skip.has(e.name) ? [] : sourceFiles(full);
+    return /\.(ts|tsx|js|mjs)$/.test(e.name) ? [full] : [];
+  });
+}
+
+// Every fallback must agree, so the update touches all of them.
+function patchAllFallbacks(live) {
+  let changed = 0;
+  for (const file of sourceFiles(REPO)) {
+    const before = fs.readFileSync(file, "utf8");
+    const after = before.replace(FALLBACK_RE, `$1${live}`);
+    if (before !== after) {
+      fs.writeFileSync(file, after);
+      console.log(`[protocol-auto-update] patched ${path.relative(REPO, file)}`);
+      changed++;
+    }
+  }
+  return changed;
 }
 
 function patch(file, regex, replacement) {
@@ -52,8 +95,7 @@ function patch(file, regex, replacement) {
   }
 
   console.log(`[protocol-auto-update] bumping ${current} -> ${live}`);
-  patch("lib/pi-network/constants.ts", /(\?\?\s*)\d+(\s*,?\s*\);)/, `$1${live}$2`);
-  patch("public/.well-known/stellar.toml", /PROTOCOL_VERSION="\d+"/, `PROTOCOL_VERSION="${live}"`);
+  patchAllFallbacks(live);
   patch(
     "infrastructure/history-archive/stellar-history.seed.json",
     /"protocolVersion"\s*:\s*\d+/,

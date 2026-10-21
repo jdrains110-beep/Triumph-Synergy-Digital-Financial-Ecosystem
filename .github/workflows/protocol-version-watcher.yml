@@ -24,6 +24,9 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Verify protocol fallbacks agree
+        run: node scripts/check-protocol-consistency.js
+
       - name: Run protocol auto-update
         id: bump
         env:
